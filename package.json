@@ -1,0 +1,43 @@
+{
+  "name": "openupm-cli",
+  "version": "1.0.0",
+  "preferGlobal": true,
+  "description": "openupm command line interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "bin": {
+    "openupm": "bin/openupm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openupm/openupm-cli.git"
+  },
+  "keywords": [
+    "openupm",
+    "cli"
+  ],
+  "author": "Favo Yang",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/openupm/openupm-cli/issues"
+  },
+  "homepage": "https://openupm.com",
+  "devDependencies": {
+    "babel-eslint": "^10.0.3",
+    "cross-env": "^6.0.3",
+    "eslint": "^6.7.1",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-vue": "^6.0.1",
+    "mocha": "^6.2.2",
+    "prettier": "^1.19.1",
+    "should": "^13.2.3"
+  },
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "commander": "^4.0.1",
+    "superagent": "^5.1.1"
+  }
+}
