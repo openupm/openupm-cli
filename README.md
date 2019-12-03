@@ -58,3 +58,9 @@ openupm --registry <registry-url>
 i.e.
 openupm --registry http://127.0.0.1:4873
 ```
+
+Turn on debug logging
+
+```
+openupm --verbose ...
+```
