@@ -18,7 +18,9 @@ const {
   getWorkDir,
   createWorkDir,
   removeWorkDir,
-  captureStream
+  captureStream,
+  nockUp,
+  nockDown
 } = require("./utils");
 
 describe("cmd-core.js", function() {
@@ -259,18 +261,13 @@ describe("cmd-core.js", function() {
   describe("getPackageInfo", function() {
     let stdout;
     let stderr;
-    let nockScope;
     beforeEach(function() {
+      nockUp();
       stdout = captureStream(process.stdout);
       stderr = captureStream(process.stderr);
     });
     afterEach(function() {
-      if (nockScope) {
-        nockScope.done();
-        nockScope = null;
-      }
-      nock.cleanAll();
-      nock.enableNetConnect();
+      nockDown();
       stdout = captureStream(process.stdout);
       stderr = captureStream(process.stderr);
     });
@@ -280,7 +277,7 @@ describe("cmd-core.js", function() {
         { checkPath: false }
       ).should.be.ok();
       let pkgInfoRemote = { name: "com.littlebigfun.addressable-importer" };
-      nockScope = nock("http://example.com")
+      nock("http://example.com")
         .get("/package-a")
         .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });
       const info = await getPackageInfo("package-a");
@@ -292,7 +289,7 @@ describe("cmd-core.js", function() {
         { checkPath: false }
       ).should.be.ok();
       let pkgInfoRemote = { name: "com.littlebigfun.addressable-importer" };
-      nockScope = nock("http://example.com")
+      nock("http://example.com")
         .get("/package-a")
         .reply(404);
       const info = await getPackageInfo("package-a");

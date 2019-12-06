@@ -1,4 +1,5 @@
 const fse = require("fs-extra");
+const nock = require("nock");
 const path = require("path");
 const os = require("os");
 
@@ -39,4 +40,21 @@ function captureStream(stream) {
     }
   };
 }
-module.exports = { getWorkDir, createWorkDir, removeWorkDir, captureStream };
+
+const nockUp = function() {
+  if (!nock.isActive()) nock.activate();
+};
+
+const nockDown = function() {
+  nock.restore();
+  nock.cleanAll();
+};
+
+module.exports = {
+  getWorkDir,
+  createWorkDir,
+  removeWorkDir,
+  captureStream,
+  nockUp,
+  nockDown
+};
