@@ -32,12 +32,14 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-vue": "^6.0.1",
     "mocha": "^6.2.2",
+    "nock": "^11.7.0",
     "prettier": "^1.19.1",
     "should": "^13.2.3"
   },
   "dependencies": {
     "cli-table": "^0.3.1",
     "commander": "^4.0.1",
+    "is-ip": "^3.1.0",
     "key-file-storage": "^2.2.6",
     "loglevel": "^1.6.6",
     "superagent": "^5.1.1"
