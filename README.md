@@ -1,14 +1,23 @@
 # openupm-cli
 
-The command line interface to maintain Unity manifest file for 3rd-party upm registries.
+The command line interface to maintain unity manifest file for 3rd-party upm registries.
+
+- [openupm-cli](#openupm-cli)
+  - [How it works](#how-it-works)
+  - [Installation](#installation)
+    - [Windows platform troubleshooting](#windows-platform-troubleshooting)
+  - [Commands](#commands)
+    - [Available commands](#available-commands)
+    - [Command options](#command-options)
+    - [Work with unity upstream registry](#work-with-unity-upstream-registry)
 
 ## How it works
 
-The cli adds the 3rd-party registry as a scoped registry, and maintain the scopes and dependencies fields when adding/removing packages. If manifest file is modified, Unity package manager will detect it and try to resolve the changes.
+The cli adds the 3rd-party registry as a scoped registry, and maintain the scopes and dependencies fields when adding/removing packages. If manifest file is modified, unity package manager will detect it and try to resolve the changes.
 
-Notice that the cli does not directly resolve dependencies and install/uninstall packages, at least not for now.
+Notice that the cli does not directly resolve dependencies or install/uninstall package tarballs, at least not for now.
 
-## Install openupm-cli
+## Installation
 
 Required [nodejs 12](https://nodejs.org/en/download/), then
 
@@ -21,7 +30,7 @@ If you prefer [yarn](https://yarnpkg.com/), then
 yarn global add openupm-cli
 ```
 
-### Windows troubleshooting
+### Windows platform troubleshooting
 
 If npm is not available in your cmd/powershell/git-bash, please configure your [environment variables](https://stackoverflow.com/questions/27864040/fixing-npm-path-in-windows-8-and-10).
 
@@ -33,16 +42,30 @@ c:\Program Files\nodejs
 C:\Users\{yourName}\AppData\Roaming\npm
 ```
 
-## Command list
+## Commands
 
+### Available commands
+
+Add packages
 ```
-openupm add <pkg>
+openupm add <pkg> [otherPkgs..]
 openupm add <pkg>@<version>
-openupm remove <pkg>
+openupm add <pkg>@git@github.com:...
+openupm add <pkg>@https://github.com/...
+openupm add <pkg>@file:...
+```
+
+Remove packages
+```
+openupm remove <pkg> [otherPkgs...]
+```
+
+Search packages
+```
 openupm search <keyword>
 ```
 
-### Options
+### Command options
 
 The cli assumes current working directory (cwd) is the root of an Unity project (the parent of `Assets` folder). However you can specify the cwd.
 
@@ -50,7 +73,7 @@ The cli assumes current working directory (cwd) is the root of an Unity project 
 openupm --chdir <unity-project-path>
 ```
 
-Specify other 3rd-party registry (defaults to openupm registry).
+Specify other 3rd-party registry (defaults to openupm registry)
 
 ```
 openupm --registry <registry-url>
@@ -59,8 +82,25 @@ i.e.
 openupm --registry http://127.0.0.1:4873
 ```
 
+Turn off unity upstream registry
+
+```
+openupm --no-upstream ...
+```
+
 Turn on debug logging
 
 ```
 openupm --verbose ...
+```
+
+### Work with unity upstream registry
+
+Most commands can fallback to unity upstream registry if necessary, to make it easier to mix official registry with 3rd-party registry. i.e.
+
+```
+$ openupm add com.unity.addressables com.littlebigfun.addressable-importer
+added: com.unity.addressables@1.4.0
+added: com.littlebigfun.addressable-importer@0.4.1
+...
 ```
