@@ -306,10 +306,6 @@ describe("cmd-core.js", function() {
         .reply(404);
       const info = await getPackageInfo("package-a");
       (info === undefined).should.be.ok();
-      stderr
-        .captured()
-        .includes("package not found")
-        .should.be.ok();
     });
   });
   describe("getLatestVersion", function() {
