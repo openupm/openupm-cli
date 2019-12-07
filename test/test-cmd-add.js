@@ -18,7 +18,7 @@ describe("cmd-add.js", function() {
   describe("add", function() {
     let stdout;
     let stderr;
-    const pkgInfoRemote = {
+    const remotePkgInfoA = {
       name: "com.example.package-a",
       versions: {
         "1.0.0": {
@@ -64,10 +64,56 @@ describe("cmd-add.js", function() {
       readme: "A demo package",
       _attachments: {}
     };
+    const remotePkgInfoB = {
+      name: "com.example.package-b",
+      versions: {
+        "1.0.0": {
+          name: "com.example.package-b",
+          displayName: "Package A",
+          author: {
+            name: "batman"
+          },
+          version: "1.0.0",
+          unity: "2018.4",
+          description: "A demo package",
+          keywords: [""],
+          category: "Unity",
+          dependencies: {
+            "com.example.package-b": "^1.0.0"
+          },
+          gitHead: "5c141ecfac59c389090a07540f44c8ac5d07a729",
+          readmeFilename: "README.md",
+          _id: "com.example.package-b@1.0.0",
+          _nodeVersion: "12.13.1",
+          _npmVersion: "6.12.1",
+          dist: {
+            integrity:
+              "sha512-MAh44bur7HGyfbCXH9WKfaUNS67aRMfO0VAbLkr+jwseb1hJue/I1pKsC7PKksuBYh4oqoo9Jov1cBcvjVgjmA==",
+            shasum: "516957cac4249f95cafab0290335def7d9703db7",
+            tarball:
+              "https://cdn.example.com/com.example.package-b/com.example.package-b-1.0.0.tgz"
+          },
+          contributors: []
+        }
+      },
+      time: {
+        modified: "2019-11-28T18:51:58.123Z",
+        created: "2019-11-28T18:51:58.123Z",
+        "1.0.0": "2019-11-28T18:51:58.123Z"
+      },
+      users: {},
+      "dist-tags": {
+        latest: "1.0.0"
+      },
+      _rev: "3-418f950115c32bd0",
+      _id: "com.example.package-b",
+      readme: "A demo package",
+      _attachments: {}
+    };
     const defaultManifest = {
       dependencies: {}
     };
-    const expectedManifest = {
+    const expectedManifestA = {
       dependencies: {
         "com.example.package-a": "1.0.0"
       },
@@ -79,13 +125,33 @@ describe("cmd-add.js", function() {
         }
       ]
     };
+    const expectedManifestAB = {
+      dependencies: {
+        "com.example.package-a": "1.0.0",
+        "com.example.package-b": "1.0.0"
+      },
+      scopedRegistries: [
+        {
+          name: "example.com",
+          scopes: [
+            "com.example",
+            "com.example.package-a",
+            "com.example.package-b"
+          ],
+          url: "http://example.com"
+        }
+      ]
+    };
     beforeEach(function() {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
       nockUp();
       nock("http://example.com")
         .get("/com.example.package-a")
-        .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });
+        .reply(200, remotePkgInfoA, { "Content-Type": "application/json" });
+      nock("http://example.com")
+        .get("/com.example.package-b")
+        .reply(200, remotePkgInfoB, { "Content-Type": "application/json" });
       nock("http://example.com")
         .get("/pkg-not-exist")
         .reply(404);
@@ -108,7 +174,7 @@ describe("cmd-add.js", function() {
       const retCode = await add("com.example.package-a", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
-      manifest.should.be.deepEqual(expectedManifest);
+      manifest.should.be.deepEqual(expectedManifestA);
       stdout
         .captured()
         .includes("added: ")
@@ -128,7 +194,7 @@ describe("cmd-add.js", function() {
       const retCode = await add("com.example.package-a@1.0.0", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
-      manifest.should.be.deepEqual(expectedManifest);
+      manifest.should.be.deepEqual(expectedManifestA);
       stdout
         .captured()
         .includes("added: ")
@@ -148,7 +214,7 @@ describe("cmd-add.js", function() {
       const retCode = await add("com.example.package-a@latest", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
-      manifest.should.be.deepEqual(expectedManifest);
+      manifest.should.be.deepEqual(expectedManifestA);
       stdout
         .captured()
         .includes("added: ")
@@ -255,6 +321,33 @@ describe("cmd-add.js", function() {
       stderr
         .captured()
         .includes("package not found")
+        .should.be.ok();
+    });
+    it("add more than one pkgs", async function() {
+      const options = {
+        parent: {
+          registry: "http://example.com",
+          chdir: getWorkDir("test-openupm-cli")
+        }
+      };
+      const retCode = await add(
+        ["com.example.package-a", "com.example.package-b"],
+        options
+      );
+      retCode.should.equal(0);
+      const manifest = await loadManifest();
+      manifest.should.be.deepEqual(expectedManifestAB);
+      stdout
+        .captured()
+        .includes("added: com.example.package-a")
+        .should.be.ok();
+      stdout
+        .captured()
+        .includes("added: com.example.package-b")
+        .should.be.ok();
+      stdout
+        .captured()
+        .includes("manifest updated")
         .should.be.ok();
     });
   });
