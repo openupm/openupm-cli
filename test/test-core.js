@@ -88,6 +88,10 @@ describe("cmd-core.js", function() {
     it("defaults", function() {
       parseEnv({ parent: {} }, { checkPath: false }).should.be.ok();
       env.registry.should.equal("https://package.openupm.com");
+      env.upstream.should.be.ok();
+      env.upstreamRegistry.should.equal(
+        "https://api.bintray.com/npm/unity/unity"
+      );
       env.namespace.should.equal("com.openupm");
       env.cwd.should.equal("");
       env.manifestPath.should.equal("");
@@ -177,6 +181,13 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
       env.namespace.should.be.equal("1:2:3:4:5:6:7:8");
+    });
+    it("upstream", function() {
+      parseEnv(
+        { parent: { upstream: false } },
+        { checkPath: false }
+      ).should.be.ok();
+      env.upstream.should.not.be.ok();
     });
   });
 
