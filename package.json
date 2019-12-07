@@ -5,7 +5,7 @@
   "description": "openupm command line interface",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "cross-env NODE_ENV=test mocha"
   },
   "bin": {
     "openupm": "bin/openupm"
