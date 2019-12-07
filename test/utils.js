@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const fse = require("fs-extra");
 const nock = require("nock");
 const path = require("path");
@@ -7,13 +8,14 @@ const getWorkDir = function(pathToTmp) {
   return path.join(os.tmpdir(), pathToTmp);
 };
 
-const createWorkDir = function(pathToTmp, { withManifest }) {
+const createWorkDir = function(pathToTmp, { manifest }) {
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
-  if (withManifest) {
+  if (manifest) {
+    if (!_.isObjectLike(manifest)) manifest = { dependencies: {} };
     const manifestDir = path.join(workDir, "Packages");
     fse.mkdirpSync(manifestDir);
-    const data = JSON.stringify({ dependencies: {} });
+    const data = JSON.stringify(manifest);
     fse.writeFileSync(path.join(manifestDir, "manifest.json"), data);
   }
 };

@@ -69,8 +69,8 @@ describe("cmd-core.js", function() {
     before(function() {
       removeWorkDir("test-openupm-cli");
       removeWorkDir("test-openupm-cli-no-manifest");
-      createWorkDir("test-openupm-cli", { withManifest: true });
-      createWorkDir("test-openupm-cli-no-manifest", { withManifest: false });
+      createWorkDir("test-openupm-cli", { manifest: true });
+      createWorkDir("test-openupm-cli-no-manifest", { manifest: false });
     });
     after(function() {
       removeWorkDir("test-openupm-cli");
@@ -184,9 +184,9 @@ describe("cmd-core.js", function() {
     let stderr;
     beforeEach(function() {
       removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", { withManifest: true });
+      createWorkDir("test-openupm-cli", { manifest: true });
       createWorkDir("test-openupm-cli-wrong-json", {
-        withManifest: true
+        manifest: true
       });
       fs.writeFileSync(
         path.join(

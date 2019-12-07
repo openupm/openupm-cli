@@ -81,7 +81,7 @@ describe("cmd-add.js", function() {
     };
     beforeEach(function() {
       removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", { withManifest: true });
+      createWorkDir("test-openupm-cli", { manifest: true });
       nockUp();
       nock("http://example.com")
         .get("/com.example.package-a")
@@ -93,7 +93,7 @@ describe("cmd-add.js", function() {
       stderr = captureStream(process.stderr);
     });
     afterEach(function() {
-      // removeWorkDir("test-openupm-cli");
+      removeWorkDir("test-openupm-cli");
       nockDown();
       stdout.unhook();
       stderr.unhook();
