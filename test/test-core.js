@@ -12,7 +12,8 @@ const {
   parseName,
   loadManifest,
   saveManifest,
-  getPackageInfo
+  getPackageInfo,
+  getLatestVersion
 } = require("../lib/core");
 const {
   getWorkDir,
@@ -298,6 +299,24 @@ describe("cmd-core.js", function() {
         .captured()
         .includes("package not found")
         .should.be.ok();
+    });
+  });
+  describe("getLatestVersion", function() {
+    it("from dist-tags", async function() {
+      getLatestVersion({ "dist-tags": { latest: "1.0.0" } }).should.equal(
+        "1.0.0"
+      );
+    });
+    it("from versions", async function() {
+      getLatestVersion({ versions: { "1.0.0": "latest" } }).should.equal(
+        "1.0.0"
+      );
+    });
+    it("not found", async function() {
+      (
+        getLatestVersion({ versions: { "1.0.0": "patch" } }) === undefined
+      ).should.be.ok();
+      (getLatestVersion({}) === undefined).should.be.ok();
     });
   });
 });
