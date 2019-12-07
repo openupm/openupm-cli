@@ -25,15 +25,18 @@ const removeWorkDir = function(pathToTmp) {
   fse.removeSync(cwd);
 };
 
-// capture stream
+// capture stream, modified based on
 // https://stackoverflow.com/questions/18543047/mocha-monitor-application-output
 function captureStream(stream) {
   var oldWrite = stream.write;
   var buf = "";
   // eslint-disable-next-line no-unused-vars
   stream.write = function(chunk, encoding, callback) {
-    buf += chunk.toString(); // chunk is a String or Buffer
-    oldWrite.apply(stream, arguments);
+    let content = chunk.toString();
+    const isTest = content.startsWith("[test] ");
+    if (isTest) content = content.slice(7, content.length);
+    buf += content; // chunk is a String or Buffer
+    if (!isTest) oldWrite.apply(stream, arguments);
   };
 
   return {
