@@ -65,6 +65,11 @@ Search packages
 openupm search <keyword>
 ```
 
+View package information
+```
+openupm view <pkg>
+```
+
 ### Command options
 
 The cli assumes current working directory (cwd) is the root of an Unity project (the parent of `Assets` folder). However you can specify the cwd.

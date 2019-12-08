@@ -84,7 +84,7 @@ describe("cmd-remove.js", function() {
       manifest.should.be.deepEqual(defaultManifest);
       stderr
         .captured()
-        .includes("remove command doesn't support name@version")
+        .includes("doesn't support name@version, using name instead")
         .should.be.ok();
     });
     it("remove pkg-not-exist", async function() {
