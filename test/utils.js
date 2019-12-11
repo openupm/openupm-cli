@@ -33,7 +33,7 @@ function captureStream(stream) {
   // eslint-disable-next-line no-unused-vars
   stream.write = function(chunk, encoding, callback) {
     let content = chunk.toString();
-    const isTest = content.startsWith("[test] ");
+    const isTest = content.startsWith("[test]");
     if (isTest) content = content.slice(7, content.length);
     buf += content; // chunk is a String or Buffer
     if (!isTest) oldWrite.apply(stream, arguments);
