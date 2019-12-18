@@ -7,7 +7,10 @@ The command line interface to maintain unity manifest file for 3rd-party upm reg
   - [Installation](#installation)
     - [Windows platform troubleshooting](#windows-platform-troubleshooting)
   - [Commands](#commands)
-    - [Available commands](#available-commands)
+    - [Add packages](#add-packages)
+    - [Remove packages](#remove-packages)
+    - [Search packages](#search-packages)
+    - [View package information](#view-package-information)
     - [Command options](#command-options)
     - [Work with unity upstream registry](#work-with-unity-upstream-registry)
 
@@ -44,9 +47,7 @@ C:\Users\{yourName}\AppData\Roaming\npm
 
 ## Commands
 
-### Available commands
-
-Add packages
+### Add packages
 ```
 openupm add <pkg> [otherPkgs..]
 openupm add <pkg>@<version>
@@ -54,18 +55,23 @@ openupm add <pkg>@git@github.com:...
 openupm add <pkg>@https://github.com/...
 openupm add <pkg>@file:...
 ```
+Notice: openupm will not verify package name for git, https and file protocol.
 
-Remove packages
+### Remove packages
 ```
 openupm remove <pkg> [otherPkgs...]
 ```
 
-Search packages
+### Search packages
 ```
 openupm search <keyword>
 ```
 
-View package information
+If the registry doesn't support the new search endpoint, it will fall back to old `/-/all` endpoint. If no package was found, it will search unity official registry instead.
+
+However the search behavior may still performance various for different registries. As of December 2019, unity official registry won't return any results unless the full package name was provided. Make it useless.
+
+### View package information
 ```
 openupm view <pkg>
 ```
