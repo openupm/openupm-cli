@@ -1,6 +1,6 @@
 # openupm-cli
 
-The command line interface to maintain unity manifest file for 3rd-party upm registries.
+The command line interface to maintain unity manifest file for 3rd-party upm registries, to get a similar but lighter experience like *npm* or *yarn* for NodeJs. The command line tool is designed to work with [OpenUPM registry](https://openupm.com), but can also work with any upm registries, included official unity registry.
 
 - [openupm-cli](#openupm-cli)
   - [How it works](#how-it-works)
@@ -93,7 +93,7 @@ i.e.
 openupm --registry http://127.0.0.1:4873
 ```
 
-Turn off unity upstream registry
+Turn off unity official (upstream) registry
 
 ```
 openupm --no-upstream ...
@@ -105,13 +105,13 @@ Turn on debug logging
 openupm --verbose ...
 ```
 
-### Work with unity upstream registry
+### Work with unity official (upstream) registry
 
 Most commands can fallback to unity upstream registry if necessary, to make it easier to mix official registry with 3rd-party registry. i.e.
 
 ```
 $ openupm add com.unity.addressables com.littlebigfun.addressable-importer
-added: com.unity.addressables@1.4.0
-added: com.littlebigfun.addressable-importer@0.4.1
+added: com.unity.addressables@1.4.0                # from unity registry
+added: com.littlebigfun.addressable-importer@0.4.1 # from openupm registry
 ...
 ```
