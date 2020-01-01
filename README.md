@@ -1,6 +1,10 @@
 # openupm-cli
 
-The command line interface to maintain unity manifest file for 3rd-party upm registries, to get a similar but lighter experience like *npm* or *yarn* for NodeJs. The command line tool is designed to work with [OpenUPM registry](https://openupm.com), but can also work with any upm registries, included official unity registry.
+![npm](https://img.shields.io/npm/v/openupm-cli) ![NPM](https://img.shields.io/npm/l/openupm-cli) ![npm](https://img.shields.io/npm/dm/openupm-cli)
+
+The command line tool to maintain the Unity manifest file for 3rd-party upm registries, offering a similar but lighter experience like *npm* or *yarn* for NodeJS.
+
+The tool is designed to work with [the OpenUPM registry](https://openupm.com), but can also work with any upm registries, including the official unity registry.
 
 - [openupm-cli](#openupm-cli)
   - [How it works](#how-it-works)
@@ -12,7 +16,7 @@ The command line interface to maintain unity manifest file for 3rd-party upm reg
     - [Search packages](#search-packages)
     - [View package information](#view-package-information)
     - [Command options](#command-options)
-    - [Work with unity upstream registry](#work-with-unity-upstream-registry)
+    - [Work with unity official (upstream) registry](#work-with-unity-official-upstream-registry)
 
 ## How it works
 
