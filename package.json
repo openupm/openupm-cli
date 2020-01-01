@@ -19,7 +19,7 @@
     "cli"
   ],
   "author": "Favo Yang",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/openupm/openupm-cli/issues"
   },
