@@ -5,14 +5,15 @@
   "description": "openupm command line interface",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha"
+    "test": "cross-env NODE_ENV=test mocha",
+    "semantic-release": "semantic-release"
   },
   "bin": {
     "openupm": "bin/openupm"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openupm/openupm-cli.git"
+    "url": "https://github.com/openupm/openupm-cli.git"
   },
   "keywords": [
     "openupm",
@@ -25,6 +26,8 @@
   },
   "homepage": "https://openupm.com",
   "devDependencies": {
+    "@semantic-release/changelog": "^3.0.6",
+    "@semantic-release/git": "^7.0.18",
     "babel-eslint": "^10.0.3",
     "cross-env": "^6.0.3",
     "eslint": "^6.7.1",
@@ -35,6 +38,7 @@
     "mocha": "^6.2.2",
     "nock": "^11.7.0",
     "prettier": "^1.19.1",
+    "semantic-release": "^15.14.0",
     "should": "^13.2.3"
   },
   "dependencies": {
