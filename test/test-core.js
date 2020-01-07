@@ -12,7 +12,7 @@ const {
   parseName,
   loadManifest,
   saveManifest,
-  getPackageInfo,
+  fetchPackageInfo,
   getLatestVersion
 } = require("../lib/core");
 const {
@@ -270,7 +270,7 @@ describe("cmd-core.js", function() {
     });
   });
 
-  describe("getPackageInfo", function() {
+  describe("fetchPackageInfo", function() {
     let stdout;
     let stderr;
     beforeEach(function() {
@@ -292,7 +292,7 @@ describe("cmd-core.js", function() {
       nock("http://example.com")
         .get("/package-a")
         .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });
-      const info = await getPackageInfo("package-a");
+      const info = await fetchPackageInfo("package-a");
       info.should.deepEqual(pkgInfoRemote);
     });
     it("404", async function() {
@@ -304,7 +304,7 @@ describe("cmd-core.js", function() {
       nock("http://example.com")
         .get("/package-a")
         .reply(404);
-      const info = await getPackageInfo("package-a");
+      const info = await fetchPackageInfo("package-a");
       (info === undefined).should.be.ok();
     });
   });
