@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/openupm/openupm-cli/compare/1.4.2...1.4.3) (2020-01-08)
+
+
+### Bug Fixes
+
+* [#1](https://github.com/openupm/openupm-cli/issues/1) command add resolves all dependencies to add to scope registry ([3b603be](https://github.com/openupm/openupm-cli/commit/3b603be3621bb4fa61249e50786d62a6eb120fe5))
+
 ## [1.4.2](https://github.com/openupm/openupm-cli/compare/1.4.1...1.4.2) (2020-01-08)
 
 
