@@ -90,7 +90,7 @@ describe("cmd-core.js", function() {
       env.registry.should.equal("https://package.openupm.com");
       env.upstream.should.be.ok();
       env.upstreamRegistry.should.equal(
-        "https://api.bintray.com/npm/unity/unity"
+        "https://packages.unity.com"
       );
       env.namespace.should.equal("com.openupm");
       env.cwd.should.equal("");

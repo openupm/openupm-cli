@@ -75,35 +75,6 @@ describe("cmd-search.js", function() {
       total: 1,
       time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)"
     };
-    const searchEndpointUpstreamResult = {
-      objects: [
-        {
-          package: {
-            name: "com.example.package-up",
-            scope: "unscoped",
-            version: "1.0.0",
-            description: "A demo package",
-            date: "2019-10-02T04:02:38.335Z",
-            links: {},
-            author: { name: "yo", url: "https://github.com/yo" },
-            publisher: { username: "yo", email: "yo@example.com" },
-            maintainers: [{ username: "yo", email: "yo@example.com" }]
-          },
-          flags: { unstable: true },
-          score: {
-            final: 0.31065598947261,
-            detail: {
-              quality: 0.64303646684878,
-              popularity: 0.0034858628087645178,
-              maintenance: 0.3329285640997383
-            }
-          },
-          searchScore: 0.000005798558
-        }
-      ],
-      total: 1,
-      time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)"
-    };
     const searchEndpointEmptyResult = {
       objects: [],
       total: 0,
@@ -119,11 +90,6 @@ describe("cmd-search.js", function() {
       nock("http://example.com")
         .get(/-\/v1\/search\?text=pkg-not-exist/)
         .reply(200, searchEndpointEmptyResult, {
-          "Content-Type": "application/json"
-        });
-      nock("https://api.bintray.com")
-        .get(/npm\/unity\/unity\/-\/v1\/search/)
-        .reply(200, searchEndpointUpstreamResult, {
           "Content-Type": "application/json"
         });
     });
@@ -156,26 +122,6 @@ describe("cmd-search.js", function() {
       stdout
         .captured()
         .includes("No matches found")
-        .should.be.ok();
-    });
-    it("upstream", async function() {
-      const retCode = await search("package-a", upstreamOptions);
-      retCode.should.equal(0);
-      stdout
-        .captured()
-        .includes("package-up")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
         .should.be.ok();
     });
   });

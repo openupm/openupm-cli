@@ -74,7 +74,7 @@ openupm search <keyword>
 
 If the registry doesn't support the new search endpoint, it will fall back to old `/-/all` endpoint. If no package was found, it will search unity official registry instead.
 
-However the search behavior may still performance various for different registries. As of December 2019, unity official registry won't return any results unless the full package name was provided. Make it useless.
+Due to the fact that upstream unity registry doesn't support search endpoint as of December 2019, the search command will only query the current registry.
 
 ### View package information
 ```

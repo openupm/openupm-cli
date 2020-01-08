@@ -222,13 +222,13 @@ describe("cmd-add.js", function() {
       nock("http://example.com")
         .get("/com.example.package-up")
         .reply(404);
-      nock("https://api.bintray.com")
-        .get("/npm/unity/unity/com.example.package-up")
+      nock("https://packages.unity.com")
+        .get("/com.example.package-up")
         .reply(200, remotePkgInfoUp, {
           "Content-Type": "application/json"
         });
-      nock("https://api.bintray.com")
-        .get("/npm/unity/unity/pkg-not-exist")
+      nock("https://packages.unity.com")
+        .get("/pkg-not-exist")
         .reply(404);
       stdout = captureStream(process.stdout);
       stderr = captureStream(process.stderr);
