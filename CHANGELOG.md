@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/openupm/openupm-cli/compare/1.3.0...1.4.0) (2020-01-08)
+
+
+### Features
+
+* command deps to view dependencies ([4c866d0](https://github.com/openupm/openupm-cli/commit/4c866d077aa8e4d9593819c0733d762e059786d5))
+
 # [1.3.0](https://github.com/openupm/openupm-cli/compare/1.2.0...1.3.0) (2020-01-05)
 
 
