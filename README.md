@@ -15,6 +15,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [Remove packages](#remove-packages)
     - [Search packages](#search-packages)
     - [View package information](#view-package-information)
+    - [View package dependencies](#view-package-dependencies)
     - [Command options](#command-options)
     - [Work with unity official (upstream) registry](#work-with-unity-official-upstream-registry)
 
@@ -78,6 +79,17 @@ However the search behavior may still performance various for different registri
 ### View package information
 ```
 openupm view <pkg>
+```
+
+### View package dependencies
+```
+open deps <pkg>
+```
+
+Using option `--deep` to view dependencies recursively
+
+```
+open deps <pkg> --deep
 ```
 
 ### Command options
