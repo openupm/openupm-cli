@@ -21,9 +21,9 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
 
 ## How it works
 
-The cli adds the 3rd-party registry as a scoped registry, and maintain the scopes and dependencies fields when adding/removing packages. If manifest file is modified, unity package manager will detect it and try to resolve the changes.
+The command line tool installs the 3rd-party registry as a scoped registry, and maintains the `Packages/manifest.json` file when adding/removing packages. If the manifest file is modified, the *Unity Package Manager* will detect the changes and try to resolve the package dependencies.
 
-Notice that the cli does not directly resolve dependencies or install/uninstall package tarballs, at least not for now.
+> Notice: the command line tool does not directly install/uninstall package tarballs, at least for now.
 
 ## Installation
 
@@ -60,7 +60,9 @@ openupm add <pkg>@git@github.com:...
 openupm add <pkg>@https://github.com/...
 openupm add <pkg>@file:...
 ```
-Notice: openupm will not verify package name for git, https and file protocol.
+The package itself and all dependencies that exist in the registry will be served by the scope registry.
+
+> Notice: openupm will not verify package or resolve dependencies for git, https and file protocol.
 
 ### Remove packages
 ```

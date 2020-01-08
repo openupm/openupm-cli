@@ -32,178 +32,118 @@ describe("cmd-add.js", function() {
     let stdout;
     let stderr;
     const remotePkgInfoA = {
-      name: "com.example.package-a",
+      name: "com.base.package-a",
       versions: {
         "1.0.0": {
-          name: "com.example.package-a",
-          displayName: "Package A",
-          author: {
-            name: "batman"
-          },
+          name: "com.base.package-a",
           version: "1.0.0",
-          unity: "2018.4",
-          description: "A demo package",
-          keywords: [""],
-          category: "Unity",
-          dependencies: {
-            "com.example.package-a": "^1.0.0"
-          },
-          gitHead: "5c141ecfac59c389090a07540f44c8ac5d07a729",
-          readmeFilename: "README.md",
-          _id: "com.example.package-a@1.0.0",
-          _nodeVersion: "12.13.1",
-          _npmVersion: "6.12.1",
-          dist: {
-            integrity:
-              "sha512-MAh44bur7HGyfbCXH9WKfaUNS67aRMfO0VAbLkr+jwseb1hJue/I1pKsC7PKksuBYh4oqoo9Jov1cBcvjVgjmA==",
-            shasum: "516957cac4249f95cafab0290335def7d9703db7",
-            tarball:
-              "https://cdn.example.com/com.example.package-a/com.example.package-a-1.0.0.tgz"
-          },
-          contributors: []
+          dependencies: {}
         }
       },
-      time: {
-        modified: "2019-11-28T18:51:58.123Z",
-        created: "2019-11-28T18:51:58.123Z",
-        "1.0.0": "2019-11-28T18:51:58.123Z"
-      },
-      users: {},
       "dist-tags": {
         latest: "1.0.0"
-      },
-      _rev: "3-418f950115c32bd0",
-      _id: "com.example.package-a",
-      readme: "A demo package",
-      _attachments: {}
+      }
     };
     const remotePkgInfoB = {
-      name: "com.example.package-b",
+      name: "com.base.package-b",
       versions: {
         "1.0.0": {
-          name: "com.example.package-b",
-          displayName: "Package A",
-          author: {
-            name: "batman"
-          },
+          name: "com.base.package-b",
           version: "1.0.0",
-          unity: "2018.4",
-          description: "A demo package",
-          keywords: [""],
-          category: "Unity",
-          dependencies: {
-            "com.example.package-b": "^1.0.0"
-          },
-          gitHead: "5c141ecfac59c389090a07540f44c8ac5d07a729",
-          readmeFilename: "README.md",
-          _id: "com.example.package-b@1.0.0",
-          _nodeVersion: "12.13.1",
-          _npmVersion: "6.12.1",
-          dist: {
-            integrity:
-              "sha512-MAh44bur7HGyfbCXH9WKfaUNS67aRMfO0VAbLkr+jwseb1hJue/I1pKsC7PKksuBYh4oqoo9Jov1cBcvjVgjmA==",
-            shasum: "516957cac4249f95cafab0290335def7d9703db7",
-            tarball:
-              "https://cdn.example.com/com.example.package-b/com.example.package-b-1.0.0.tgz"
-          },
-          contributors: []
+          dependencies: {}
         }
       },
-      time: {
-        modified: "2019-11-28T18:51:58.123Z",
-        created: "2019-11-28T18:51:58.123Z",
-        "1.0.0": "2019-11-28T18:51:58.123Z"
-      },
-      users: {},
       "dist-tags": {
         latest: "1.0.0"
+      }
+    };
+    const remotePkgInfoC = {
+      name: "com.base.package-c",
+      versions: {
+        "1.0.0": {
+          name: "com.base.package-c",
+          version: "1.0.0",
+          dependencies: {
+            "com.base.package-d": "1.0.0",
+            "com.unity.module.x": "1.0.0"
+          }
+        }
       },
-      _rev: "3-418f950115c32bd0",
-      _id: "com.example.package-b",
-      readme: "A demo package",
-      _attachments: {}
+      "dist-tags": {
+        latest: "1.0.0"
+      }
+    };
+    const remotePkgInfoD = {
+      name: "com.base.package-d",
+      versions: {
+        "1.0.0": {
+          name: "com.base.package-d",
+          version: "1.0.0",
+          dependencies: {
+            "com.upstream.package-up": "1.0.0"
+          }
+        }
+      },
+      "dist-tags": {
+        latest: "1.0.0"
+      }
     };
     const remotePkgInfoUp = {
-      name: "com.example.package-up",
+      name: "com.upstream.package-up",
       versions: {
         "1.0.0": {
-          name: "com.example.package-up",
-          displayName: "Package A",
-          author: {
-            name: "batman"
-          },
+          name: "com.upstream.package-up",
           version: "1.0.0",
-          unity: "2018.4",
-          description: "A demo package",
-          keywords: [""],
-          category: "Unity",
-          dependencies: {
-            "com.example.package-up": "^1.0.0"
-          },
-          gitHead: "5c141ecfac59c389090a07540f44c8ac5d07a729",
-          readmeFilename: "README.md",
-          _id: "com.example.package-up@1.0.0",
-          _nodeVersion: "12.13.1",
-          _npmVersion: "6.12.1",
-          dist: {
-            integrity:
-              "sha512-MAh44bur7HGyfbCXH9WKfaUNS67aRMfO0VAbLkr+jwseb1hJue/I1pKsC7PKksuBYh4oqoo9Jov1cBcvjVgjmA==",
-            shasum: "516957cac4249f95cafab0290335def7d9703db7",
-            tarball:
-              "https://cdn.example.com/com.example.package-up/com.example.package-up-1.0.0.tgz"
-          },
-          contributors: []
+          dependencies: {}
         }
       },
-      time: {
-        modified: "2019-11-28T18:51:58.123Z",
-        created: "2019-11-28T18:51:58.123Z",
-        "1.0.0": "2019-11-28T18:51:58.123Z"
-      },
-      users: {},
       "dist-tags": {
         latest: "1.0.0"
-      },
-      _rev: "3-418f950115c32bd0",
-      _id: "com.example.package-up",
-      readme: "A demo package",
-      _attachments: {}
+      }
     };
     const defaultManifest = {
       dependencies: {}
     };
     const expectedManifestA = {
       dependencies: {
-        "com.example.package-a": "1.0.0"
+        "com.base.package-a": "1.0.0"
       },
       scopedRegistries: [
         {
           name: "example.com",
-          scopes: ["com.example", "com.example.package-a"],
+          scopes: ["com.base.package-a", "com.example"],
           url: "http://example.com"
         }
       ]
     };
     const expectedManifestAB = {
       dependencies: {
-        "com.example.package-a": "1.0.0",
-        "com.example.package-b": "1.0.0"
+        "com.base.package-a": "1.0.0",
+        "com.base.package-b": "1.0.0"
       },
       scopedRegistries: [
         {
           name: "example.com",
-          scopes: [
-            "com.example",
-            "com.example.package-a",
-            "com.example.package-b"
-          ],
+          scopes: ["com.base.package-a", "com.base.package-b", "com.example"],
+          url: "http://example.com"
+        }
+      ]
+    };
+    const expectedManifestC = {
+      dependencies: {
+        "com.base.package-c": "1.0.0"
+      },
+      scopedRegistries: [
+        {
+          name: "example.com",
+          scopes: ["com.base.package-c", "com.base.package-d", "com.example"],
           url: "http://example.com"
         }
       ]
     };
     const expectedManifestUpstream = {
       dependencies: {
-        "com.example.package-up": "1.0.0"
+        "com.upstream.package-up": "1.0.0"
       }
     };
     beforeEach(function() {
@@ -211,23 +151,37 @@ describe("cmd-add.js", function() {
       createWorkDir("test-openupm-cli", { manifest: true });
       nockUp();
       nock("http://example.com")
-        .get("/com.example.package-a")
+        .persist()
+        .get("/com.base.package-a")
         .reply(200, remotePkgInfoA, { "Content-Type": "application/json" });
       nock("http://example.com")
-        .get("/com.example.package-b")
+        .persist()
+        .get("/com.base.package-b")
         .reply(200, remotePkgInfoB, { "Content-Type": "application/json" });
       nock("http://example.com")
+        .persist()
+        .get("/com.base.package-c")
+        .reply(200, remotePkgInfoC, { "Content-Type": "application/json" });
+      nock("http://example.com")
+        .persist()
+        .get("/com.base.package-d")
+        .reply(200, remotePkgInfoD, { "Content-Type": "application/json" });
+      nock("http://example.com")
+        .persist()
         .get("/pkg-not-exist")
         .reply(404);
       nock("http://example.com")
-        .get("/com.example.package-up")
+        .persist()
+        .get("/com.upstream.package-up")
         .reply(404);
       nock("https://packages.unity.com")
-        .get("/com.example.package-up")
+        .persist()
+        .get("/com.upstream.package-up")
         .reply(200, remotePkgInfoUp, {
           "Content-Type": "application/json"
         });
       nock("https://packages.unity.com")
+        .persist()
         .get("/pkg-not-exist")
         .reply(404);
       stdout = captureStream(process.stdout);
@@ -240,7 +194,7 @@ describe("cmd-add.js", function() {
       stderr.unhook();
     });
     it("add pkg", async function() {
-      const retCode = await add("com.example.package-a", options);
+      const retCode = await add("com.base.package-a", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
@@ -254,7 +208,7 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg@1.0.0", async function() {
-      const retCode = await add("com.example.package-a@1.0.0", options);
+      const retCode = await add("com.base.package-a@1.0.0", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
@@ -268,7 +222,7 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg@latest", async function() {
-      const retCode = await add("com.example.package-a@latest", options);
+      const retCode = await add("com.base.package-a@latest", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
@@ -282,7 +236,7 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg@not-exist-version", async function() {
-      const retCode = await add("com.example.package-a@2.0.0", options);
+      const retCode = await add("com.base.package-a@2.0.0", options);
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
@@ -296,11 +250,11 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg@http", async function() {
-      const gitUrl = "https://github.com/yo/com.example.package-a";
-      const retCode = await add("com.example.package-a@" + gitUrl, options);
+      const gitUrl = "https://github.com/yo/com.base.package-a";
+      const retCode = await add("com.base.package-a@" + gitUrl, options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
-      manifest.dependencies["com.example.package-a"].should.be.equal(gitUrl);
+      manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
       stdout
         .captured()
         .includes("added: ")
@@ -311,11 +265,11 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg@git", async function() {
-      const gitUrl = "git@github.com:yo/com.example.package-a";
-      const retCode = await add("com.example.package-a@" + gitUrl, options);
+      const gitUrl = "git@github.com:yo/com.base.package-a";
+      const retCode = await add("com.base.package-a@" + gitUrl, options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
-      manifest.dependencies["com.example.package-a"].should.be.equal(gitUrl);
+      manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
       stdout
         .captured()
         .includes("added: ")
@@ -326,11 +280,11 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg@file", async function() {
-      const fileUrl = "file../yo/com.example.package-a";
-      const retCode = await add("com.example.package-a@" + fileUrl, options);
+      const fileUrl = "file../yo/com.base.package-a";
+      const retCode = await add("com.base.package-a@" + fileUrl, options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
-      manifest.dependencies["com.example.package-a"].should.be.equal(fileUrl);
+      manifest.dependencies["com.base.package-a"].should.be.equal(fileUrl);
       stdout
         .captured()
         .includes("added: ")
@@ -352,7 +306,7 @@ describe("cmd-add.js", function() {
     });
     it("add more than one pkgs", async function() {
       const retCode = await add(
-        ["com.example.package-a", "com.example.package-b"],
+        ["com.base.package-a", "com.base.package-b"],
         options
       );
       retCode.should.equal(0);
@@ -360,11 +314,11 @@ describe("cmd-add.js", function() {
       manifest.should.be.deepEqual(expectedManifestAB);
       stdout
         .captured()
-        .includes("added: com.example.package-a")
+        .includes("added: com.base.package-a")
         .should.be.ok();
       stdout
         .captured()
-        .includes("added: com.example.package-b")
+        .includes("added: com.base.package-b")
         .should.be.ok();
       stdout
         .captured()
@@ -372,13 +326,13 @@ describe("cmd-add.js", function() {
         .should.be.ok();
     });
     it("add pkg from upstream", async function() {
-      const retCode = await add("com.example.package-up", upstreamOptions);
+      const retCode = await add("com.upstream.package-up", upstreamOptions);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestUpstream);
       stdout
         .captured()
-        .includes("added: com.example.package-up")
+        .includes("added: com.upstream.package-up")
         .should.be.ok();
       stdout
         .captured()
@@ -393,6 +347,20 @@ describe("cmd-add.js", function() {
       stderr
         .captured()
         .includes("package not found")
+        .should.be.ok();
+    });
+    it("add pkg-not-exist from upstream", async function() {
+      const retCode = await add("com.base.package-c@latest", upstreamOptions);
+      retCode.should.equal(0);
+      const manifest = await loadManifest();
+      manifest.should.be.deepEqual(expectedManifestC);
+      stdout
+        .captured()
+        .includes("added: ")
+        .should.be.ok();
+      stdout
+        .captured()
+        .includes("manifest updated")
         .should.be.ok();
     });
   });
