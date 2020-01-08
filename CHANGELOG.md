@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/openupm/openupm-cli/compare/1.4.1...1.4.2) (2020-01-08)
+
+
+### Bug Fixes
+
+* search command no longer query upstream Unity registry ([8be69d4](https://github.com/openupm/openupm-cli/commit/8be69d41f5244c58b41ac7259a4d24665987f953))
+
 ## [1.4.1](https://github.com/openupm/openupm-cli/compare/1.4.0...1.4.1) (2020-01-08)
 
 
