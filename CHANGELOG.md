@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/openupm/openupm-cli/compare/1.4.0...1.4.1) (2020-01-08)
+
+
+### Bug Fixes
+
+* add missing lodash lib ([a11a219](https://github.com/openupm/openupm-cli/commit/a11a21908222d15e4b9ace07767705b3e632a696))
+
 # [1.4.0](https://github.com/openupm/openupm-cli/compare/1.3.0...1.4.0) (2020-01-08)
 
 
