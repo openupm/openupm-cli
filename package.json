@@ -49,6 +49,7 @@
     "loglevel": "^1.6.6",
     "loglevel-plugin-prefix": "^0.8.4",
     "pkginfo": "^0.4.1",
-    "superagent": "^5.1.1"
+    "superagent": "^5.1.1",
+    "update-notifier": "^4.0.0"
   }
 }
