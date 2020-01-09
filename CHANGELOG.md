@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/openupm/openupm-cli/compare/1.4.3...1.5.0) (2020-01-09)
+
+
+### Features
+
+* update notifications the CLI app ([d1e43e0](https://github.com/openupm/openupm-cli/commit/d1e43e0251ab9efb81f00c0837e2087b80e3065a))
+
 ## [1.4.3](https://github.com/openupm/openupm-cli/compare/1.4.2...1.4.3) (2020-01-08)
 
 
