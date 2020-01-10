@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/openupm/openupm-cli/compare/1.5.0...1.5.1) (2020-01-10)
+
+
+### Bug Fixes
+
+* **ci:** ci should commit changes of package.json ([442f383](https://github.com/openupm/openupm-cli/commit/442f383e04d2489332d04789610bdbd4cc68cfd6))
+* **ci:** limit @semantic-release/git version ([bf47af0](https://github.com/openupm/openupm-cli/commit/bf47af0952e8dae2c4e9406906de44a2a430222c))
+
 # [1.5.0](https://github.com/openupm/openupm-cli/compare/1.4.3...1.5.0) (2020-01-09)
 
 
