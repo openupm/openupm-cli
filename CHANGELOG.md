@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/openupm/openupm-cli/compare/1.5.1...1.5.2) (2020-01-12)
+
+
+### Bug Fixes
+
+* refs [#2](https://github.com/openupm/openupm-cli/issues/2) openupm search broken on CMD ([50eb8cb](https://github.com/openupm/openupm-cli/commit/50eb8cb2fb3d77e87d6fb84d3fa36e51b812411a))
+
 ## [1.5.1](https://github.com/openupm/openupm-cli/compare/1.5.0...1.5.1) (2020-01-10)
 
 
