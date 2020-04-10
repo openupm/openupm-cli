@@ -34,6 +34,11 @@ describe("cmd-add.js", function() {
     const remotePkgInfoA = {
       name: "com.base.package-a",
       versions: {
+        "0.1.0": {
+          name: "com.base.package-a",
+          version: "0.1.0",
+          dependencies: {}
+        },
         "1.0.0": {
           name: "com.base.package-a",
           version: "1.0.0",
@@ -229,6 +234,38 @@ describe("cmd-add.js", function() {
       stdout
         .captured()
         .includes("added: ")
+        .should.be.ok();
+      stdout
+        .captured()
+        .includes("manifest updated")
+        .should.be.ok();
+    });
+    it("add pkg@0.1.0 then pkg@1.0.0", async function() {
+      const retCode1 = await add("com.base.package-a@0.1.0", options);
+      retCode1.should.equal(0);
+      const retCode2 = await add("com.base.package-a@1.0.0", options);
+      retCode2.should.equal(0);
+      const manifest = await loadManifest();
+      manifest.should.be.deepEqual(expectedManifestA);
+      stdout
+        .captured()
+        .includes("modified: ")
+        .should.be.ok();
+      stdout
+        .captured()
+        .includes("manifest updated")
+        .should.be.ok();
+    });
+    it("add exited pkg version", async function() {
+      const retCode1 = await add("com.base.package-a@1.0.0", options);
+      retCode1.should.equal(0);
+      const retCode2 = await add("com.base.package-a@1.0.0", options);
+      retCode2.should.equal(0);
+      const manifest = await loadManifest();
+      manifest.should.be.deepEqual(expectedManifestA);
+      stdout
+        .captured()
+        .includes("existed: ")
         .should.be.ok();
       stdout
         .captured()
