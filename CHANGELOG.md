@@ -1,3 +1,11 @@
+## [1.5.3](https://github.com/openupm/openupm-cli/compare/1.5.2...1.5.3) (2020-04-10)
+
+
+### Bug Fixes
+
+* scoped registries shouldn't include upstream packages (close: [#8](https://github.com/openupm/openupm-cli/issues/8)) ([940438a](https://github.com/openupm/openupm-cli/commit/940438a637d065458bfea36ef6bebf162280aa56))
+* show existed message if package version existed ([df6ec50](https://github.com/openupm/openupm-cli/commit/df6ec50d02e1ddb7e61461119a4d717a03d85ca1))
+
 ## [1.5.2](https://github.com/openupm/openupm-cli/compare/1.5.1...1.5.2) (2020-01-12)
 
 
