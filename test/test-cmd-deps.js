@@ -142,7 +142,7 @@ describe("cmd-deps.js", function() {
       retCode.should.equal(0);
       stderr
         .captured()
-        .includes("package not found")
+        .includes("invalid dep")
         .should.be.ok();
     });
     it("deps pkg upstream", async function() {
