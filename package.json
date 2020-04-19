@@ -50,6 +50,7 @@
     "loglevel-plugin-prefix": "^0.8.4",
     "pkginfo": "^0.4.1",
     "superagent": "^5.2.2",
+    "superagent-proxy": "^2.0.0",
     "update-notifier": "^4.1.0"
   }
 }
