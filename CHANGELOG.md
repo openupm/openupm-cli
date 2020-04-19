@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/openupm/openupm-cli/compare/1.5.3...1.6.0) (2020-04-19)
+
+
+### Features
+
+* support http_proxy ([4afde73](https://github.com/openupm/openupm-cli/commit/4afde7393cebda4c9125ddfdd4ba3bd5a5f1be5d))
+
 ## [1.5.3](https://github.com/openupm/openupm-cli/compare/1.5.2...1.5.3) (2020-04-10)
 
 
