@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/openupm/openupm-cli/compare/1.6.0...1.7.0) (2020-04-25)
+
+
+### Features
+
+* support multiple aliases ([43311bc](https://github.com/openupm/openupm-cli/commit/43311bc84b5abda5d96b0ff238bb9ea86c943096))
+
 # [1.6.0](https://github.com/openupm/openupm-cli/compare/1.5.3...1.6.0) (2020-04-19)
 
 
