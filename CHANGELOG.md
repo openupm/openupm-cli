@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/openupm/openupm-cli/compare/1.7.0...1.7.1) (2020-05-13)
+
+
+### Bug Fixes
+
+* make warning and error level output prefix consistent ([5e8bbbb](https://github.com/openupm/openupm-cli/commit/5e8bbbbabeae8b255713efc8ea66b5f83ac86eed))
+
 # [1.7.0](https://github.com/openupm/openupm-cli/compare/1.6.0...1.7.0) (2020-04-25)
 
 
