@@ -124,6 +124,12 @@ Turn on debug logging
 openupm --verbose ...
 ```
 
+Add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing
+
+```
+openupm --test ...
+```
+
 ## Work with Unity official (upstream) registry
 
 Most commands can fallback to Unity upstream registry if necessary, to make it easier to mix the official registry with a 3rd-party registry. i.e.
