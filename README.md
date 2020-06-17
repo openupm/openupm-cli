@@ -65,6 +65,11 @@ The package itself and all dependencies that exist in the registry will be serve
 
 > Notice: openupm will not verify package or resolve dependencies for git, https and file protocol.
 
+You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
+```
+openupm --test <pkg>
+```
+
 ### Remove packages
 ```
 openupm remove <pkg> [otherPkgs...]
@@ -122,12 +127,6 @@ Turn on debug logging
 
 ```
 openupm --verbose ...
-```
-
-Add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing
-
-```
-openupm --test ...
 ```
 
 ## Work with Unity official (upstream) registry
