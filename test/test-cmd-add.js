@@ -33,8 +33,8 @@ describe("cmd-add.js", function() {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
-      test: true
-    }
+    },
+    test: true
   };
   describe("add", function() {
     let stdout;
