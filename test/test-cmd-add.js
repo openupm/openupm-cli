@@ -28,6 +28,14 @@ describe("cmd-add.js", function() {
       chdir: getWorkDir("test-openupm-cli")
     }
   };
+  const testableOptions = {
+    parent: {
+      registry: "http://example.com",
+      upstream: false,
+      chdir: getWorkDir("test-openupm-cli"),
+    },
+    test: true
+  };
   describe("add", function() {
     let stdout;
     let stderr;
@@ -150,6 +158,19 @@ describe("cmd-add.js", function() {
       dependencies: {
         "com.upstream.package-up": "1.0.0"
       }
+    };
+    const expectedManifestTestable = {
+      dependencies: {
+        "com.base.package-a": "1.0.0"
+      },
+      scopedRegistries: [
+        {
+          name: "example.com",
+          scopes: ["com.base.package-a", "com.example"],
+          url: "http://example.com"
+        }
+      ],
+      testables: ["com.base.package-a"]
     };
     beforeEach(function() {
       removeWorkDir("test-openupm-cli");
@@ -391,6 +412,20 @@ describe("cmd-add.js", function() {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestC);
+      stdout
+        .captured()
+        .includes("added: ")
+        .should.be.ok();
+      stdout
+        .captured()
+        .includes("manifest updated")
+        .should.be.ok();
+    });
+    it("add pkg with tests", async function() {
+      const retCode = await add("com.base.package-a", testableOptions);
+      retCode.should.equal(0);
+      const manifest = await loadManifest();
+      manifest.should.be.deepEqual(expectedManifestTestable);
       stdout
         .captured()
         .includes("added: ")
