@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/openupm/openupm-cli/compare/1.7.1...1.8.0) (2020-06-18)
+
+
+### Features
+
+* add test option to the add command ([#9](https://github.com/openupm/openupm-cli/issues/9)) ([9f976bd](https://github.com/openupm/openupm-cli/commit/9f976bd0ab113ec98294a4c90c3e41874d877680))
+
 ## [1.7.1](https://github.com/openupm/openupm-cli/compare/1.7.0...1.7.1) (2020-05-13)
 
 
