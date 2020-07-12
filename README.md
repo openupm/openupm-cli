@@ -63,7 +63,7 @@ openupm add <pkg>@file:...
 ```
 The package itself and all dependencies that exist in the registry will be served by the scope registry.
 
-> Notice: openupm will not verify package or resolve dependencies for git, https and file protocol.
+> openupm will not verify package or resolve dependencies for git, https and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of version string.
 
 You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
 ```
