@@ -52,9 +52,14 @@ describe("cmd-search.js", function() {
           package: {
             name: "com.example.package-a",
             scope: "unscoped",
-            version: "1.0.0",
+            "dist-tags": { latest: "1.0.0" },
+            versions: {
+              "1.0.0": "latest"
+            },
             description: "A demo package",
-            date: "2019-10-02T04:02:38.335Z",
+            time: {
+              modified: "2019-10-02T04:02:38.335Z"
+            },
             links: {},
             author: { name: "yo", url: "https://github.com/yo" },
             publisher: { username: "yo", email: "yo@example.com" },
