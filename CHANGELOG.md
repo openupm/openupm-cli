@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/openupm/openupm-cli/compare/1.8.0...1.8.1) (2020-07-26)
+
+
+### Bug Fixes
+
+* search command (close [#13](https://github.com/openupm/openupm-cli/issues/13)) ([5093423](https://github.com/openupm/openupm-cli/commit/50934239fa216df0267cddc56d661f0289b53ba9))
+
 # [1.8.0](https://github.com/openupm/openupm-cli/compare/1.7.1...1.8.0) (2020-06-18)
 
 
