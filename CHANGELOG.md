@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/openupm/openupm-cli/compare/1.8.1...1.8.2) (2020-07-26)
+
+
+### Bug Fixes
+
+* only fallback to old search when new search endpoint is unavailable ([d71e61a](https://github.com/openupm/openupm-cli/commit/d71e61afa8da6b718e6bce6188dc631d3c1cf055))
+
 ## [1.8.1](https://github.com/openupm/openupm-cli/compare/1.8.0...1.8.1) (2020-07-26)
 
 
