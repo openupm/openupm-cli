@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/openupm/openupm-cli/compare/1.8.2...1.8.3) (2020-07-27)
+
+
+### Bug Fixes
+
+* remove unexpected leading space of CLI output ([fbc7f69](https://github.com/openupm/openupm-cli/commit/fbc7f69f0050143e838f47c4a596aad64efa374a))
+
 ## [1.8.2](https://github.com/openupm/openupm-cli/compare/1.8.1...1.8.2) (2020-07-26)
 
 
