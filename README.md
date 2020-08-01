@@ -21,7 +21,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
       - [Using basic authentication](#using-basic-authentication)
       - [Windows Subsystem for Linux (WSL)](#windows-subsystem-for-linux-wsl)
       - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
-      - [Trouble shooting](#trouble-shooting)
+      - [Troubleshooting](#troubleshooting)
     - [Command options](#command-options)
   - [Work with Unity official (upstream) registry](#work-with-unity-official-upstream-registry)
   - [Work with proxy](#work-with-proxy)
@@ -151,7 +151,7 @@ By default, the command treats the Windows Subsystem for Linux (WSL) as a Linux 
 
 Make sure you have the right permission, then add `--system-user` option to authenticate for the Windows system user.
 
-#### Trouble shooting
+#### Troubleshooting
 
 You can verify the authentication in `.upmconfig.toml` file:
 
