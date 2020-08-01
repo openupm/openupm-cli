@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/openupm/openupm-cli/compare/1.8.3...1.9.0) (2020-08-01)
+
+
+### Features
+
+* login command to authenticate with npm server ([f7fc503](https://github.com/openupm/openupm-cli/commit/f7fc503c17318deb114127ee6c69819e6ec93d3c))
+
 ## [1.8.3](https://github.com/openupm/openupm-cli/compare/1.8.2...1.8.3) (2020-07-27)
 
 
