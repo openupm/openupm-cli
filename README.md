@@ -16,6 +16,12 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [Search packages](#search-packages)
     - [View package information](#view-package-information)
     - [View package dependencies](#view-package-dependencies)
+    - [Authenticate with a scoped registry](#authenticate-with-a-scoped-registry)
+      - [Using token](#using-token)
+      - [Using basic authentication](#using-basic-authentication)
+      - [Windows Subsystem for Linux (WSL)](#windows-subsystem-for-linux-wsl)
+      - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
+      - [Trouble shooting](#trouble-shooting)
     - [Command options](#command-options)
   - [Work with Unity official (upstream) registry](#work-with-unity-official-upstream-registry)
   - [Work with proxy](#work-with-proxy)
@@ -63,7 +69,7 @@ openupm add <pkg>@file:...
 ```
 The package itself and all dependencies that exist in the registry will be served by the scope registry.
 
-> openupm will not verify package or resolve dependencies for git, https and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of version string.
+> openupm will not verify package or resolve dependencies for git, https, and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of the version string.
 
 You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
 ```
@@ -100,6 +106,80 @@ Using option `--deep` to view dependencies recursively
 open deps <pkg> --deep
 ```
 
+### Authenticate with a scoped registry
+
+Starting from Unity 2019.3.4f1, you can configure `.upmconfig.toml` file to authenticate with a scoped registry. The `openupm login` command helps you authenticate with an npm server and store the info to the UPM config file.
+
+There are two ways to authenticate with an npm server:
+- using token (recommended): a server-generated string for the grant of access and publishing rights.
+- using basic authentication: the `username:password` pair (base64 encoded) is stored to authenticate with the server on each request.
+
+#### Using token
+
+```
+openupm login -u <username> -e <email> -r <registry> -p <password>
+
+i.e.
+openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873
+```
+
+If you don't provide a username, email, or password, it will prompt you to input the value. If your npm server doesn't require an email field, you can provide a dummy one like `yourname@example.com`. Notice that requesting a new token is not meant to invalidate old ones for most NPM servers.
+
+The token is also stored to the `.npmrc` file for convenience.
+
+#### Using basic authentication
+
+Adding `--always-auth` option to use basic authentication.
+
+```
+openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
+
+i.e.
+openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
+```
+
+The `.npmrc` is not updated for the basic authentication.
+
+#### Windows Subsystem for Linux (WSL)
+
+By default, the command treats the Windows Subsystem for Linux (WSL) as a Linux system. But if you want to authenticate for the Windows (probably where your Unity installed on), add `--wsl` option.
+
+
+> Known issue: run with `--wsl` option may clear the terminal screen during the process.
+
+#### Authenticate for the Windows system user
+
+Make sure you have the right permission, then add `--system-user` option to authenticate for the Windows system user.
+
+#### Trouble shooting
+
+You can verify the authentication in `.upmconfig.toml` file:
+
+- Windows: `%USERPROFILE%/.upmconfig.toml`
+- Windows (System user) : `%ALLUSERSPROFILE%Unity/config/ServiceAccounts/.upmconfig.toml`
+- MacOS and Linux: `~/.upmconfig.toml`
+
+For token, it will look like:
+
+```
+[npmAuth."http://127.0.0.1:4873"]
+email = "email address"
+alwaysAuth = false
+token = "token string"
+```
+
+For basic authentication, it will look like:
+```
+[npmAuth."http://127.0.0.1:4873"]
+email = "email address"
+alwaysAuth = true
+_auth = "base64 string"
+```
+
+Notice that the registry address should match exactly with your `manifest.json`. The last slash is always trimmed. i.e. `http://127.0.0.1:4873` instead of `http://127.0.0.1:4873/`.
+
+Learn more about authentication at https://forum.unity.com/threads/npm-registry-authentication.836308/
+
 ### Command options
 
 The cli assumes the current working directory (CWD) is the root of a Unity project (the parent of the `Assets` folder). However, you can specify the CWD.
@@ -108,7 +188,7 @@ The cli assumes the current working directory (CWD) is the root of a Unity proje
 openupm --chdir <unity-project-path>
 ```
 
-Specify another 3rd-party registry (defaults to openupm registry)
+Specify another 3rd-party registry (defaults to the openupm registry)
 
 ```
 openupm --registry <registry-url>
@@ -123,7 +203,7 @@ Turn off Unity official (upstream) registry
 openupm --no-upstream ...
 ```
 
-Turn on debug logging
+Show verbose logging
 
 ```
 openupm --verbose ...
@@ -148,4 +228,4 @@ OpenUPM-CLI supports HTTP, HTTPS, or SOCKS proxy specified by the http_proxy env
 http_proxy="http://127.0.0.1:8080" openupm ...
 ```
 
-You may need set both http_proxy and https_proxy environment variables in system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).
+You may need to set both http_proxy and https_proxy environment variables in system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).
