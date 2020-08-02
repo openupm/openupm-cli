@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/openupm/openupm-cli/compare/1.9.0...1.9.1) (2020-08-02)
+
+
+### Bug Fixes
+
+* unauthorized access error handling ([51fcf9d](https://github.com/openupm/openupm-cli/commit/51fcf9d340916829bb51e7e2e4b78282d19ccfd3))
+
 # [1.9.0](https://github.com/openupm/openupm-cli/compare/1.8.3...1.9.0) (2020-08-01)
 
 
