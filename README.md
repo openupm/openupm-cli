@@ -125,6 +125,8 @@ openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873
 
 If you don't provide a username, email, or password, it will prompt you to input the value. If your npm server doesn't require an email field, you can provide a dummy one like `yourname@example.com`. Notice that requesting a new token is not meant to invalidate old ones for most NPM servers.
 
+For the npm server allows user creation via CLI, providing a new username will create a new user with the information you just provided.
+
 The token is also stored to the `.npmrc` file for convenience.
 
 #### Using basic authentication
@@ -137,6 +139,8 @@ openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
 i.e.
 openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
 ```
+
+Notice that your username and password is not verified during the login command, but simply stored to the .upmconfig.toml file. Because verify the password against your npm server will generate a token, which is not what you want here. Basically, type your password carefully.
 
 The `.npmrc` is not updated for the basic authentication.
 
