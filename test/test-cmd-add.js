@@ -25,6 +25,7 @@ describe("cmd-add.js", function() {
   const upstreamOptions = {
     parent: {
       registry: "http://example.com",
+      upstream: true,
       chdir: getWorkDir("test-openupm-cli")
     }
   };
@@ -32,7 +33,7 @@ describe("cmd-add.js", function() {
     parent: {
       registry: "http://example.com",
       upstream: false,
-      chdir: getWorkDir("test-openupm-cli"),
+      chdir: getWorkDir("test-openupm-cli")
     },
     test: true
   };
@@ -78,7 +79,7 @@ describe("cmd-add.js", function() {
           version: "1.0.0",
           dependencies: {
             "com.base.package-d": "1.0.0",
-            "com.unity.module.x": "1.0.0"
+            "com.unity.modules.x": "1.0.0"
           }
         }
       },
@@ -407,7 +408,7 @@ describe("cmd-add.js", function() {
         .includes("package not found")
         .should.be.ok();
     });
-    it("add pkg-not-exist from upstream", async function() {
+    it("add pkg with nested dependencies", async function() {
       const retCode = await add("com.base.package-c@latest", upstreamOptions);
       retCode.should.equal(0);
       const manifest = await loadManifest();
