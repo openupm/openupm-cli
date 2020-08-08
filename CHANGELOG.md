@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/openupm/openupm-cli/compare/1.9.1...1.10.0) (2020-08-08)
+
+
+### Features
+
+* color output ([aac4ce9](https://github.com/openupm/openupm-cli/commit/aac4ce9d72cc90bfb41fa6d0a3f0a99649bffa91))
+
 ## [1.9.1](https://github.com/openupm/openupm-cli/compare/1.9.0...1.9.1) (2020-08-02)
 
 
