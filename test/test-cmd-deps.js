@@ -3,13 +3,15 @@
 const assert = require("assert");
 const nock = require("nock");
 const should = require("should");
+
 const { parseEnv, loadManifest } = require("../lib/core");
 const deps = require("../lib/cmd-deps");
 const {
   getWorkDir,
   createWorkDir,
   removeWorkDir,
-  captureStream,
+  getInspects,
+  getOutputs,
   nockUp,
   nockDown
 } = require("./utils");
@@ -22,8 +24,8 @@ describe("cmd-deps.js", function() {
     }
   };
   describe("deps", function() {
-    let stdout;
-    let stderr;
+    let stdoutInspect = null;
+    let stderrInspect = null;
     const remotePkgInfoA = {
       name: "com.example.package-a",
       versions: {
@@ -91,20 +93,19 @@ describe("cmd-deps.js", function() {
       nock("https://packages.unity.com")
         .get("/pkg-not-exist")
         .reply(404);
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
+      [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function() {
       removeWorkDir("test-openupm-cli");
       nockDown();
-      stdout.unhook();
-      stderr.unhook();
+      stdoutInspect.restore();
+      stderrInspect.restore();
     });
     it("deps pkg", async function() {
       const retCode = await deps("com.example.package-a", options);
       retCode.should.equal(0);
-      const stdoutContent = stdout.captured();
-      stdoutContent.includes("com.example.package-b").should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("com.example.package-b").should.be.ok();
     });
     it("deps pkg --deep", async function() {
       const retCode = await deps("com.example.package-a", {
@@ -112,42 +113,38 @@ describe("cmd-deps.js", function() {
         deep: true
       });
       retCode.should.equal(0);
-      const stdoutContent = stdout.captured();
-      stdoutContent.includes("com.example.package-b").should.be.ok();
-      stdoutContent.includes("com.example.package-up").should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("com.example.package-b").should.be.ok();
+      stdout.includes("com.example.package-up").should.be.ok();
     });
     it("deps pkg@latest", async function() {
       const retCode = await deps("com.example.package-a@latest", options);
       retCode.should.equal(0);
-      const stdoutContent = stdout.captured();
-      stdoutContent.includes("com.example.package-b").should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("com.example.package-b").should.be.ok();
     });
     it("deps pkg@1.0.0", async function() {
       const retCode = await deps("com.example.package-a@1.0.0", options);
       retCode.should.equal(0);
-      const stdoutContent = stdout.captured();
-      stdoutContent.includes("com.example.package-b").should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("com.example.package-b").should.be.ok();
     });
     it("deps pkg@not-exist-version", async function() {
       const retCode = await deps("com.example.package-a@2.0.0", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("is not a valid choice")
-        .should.be.ok();
-      console.log(stdout.captured());
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("is not a valid choice").should.be.ok();
     });
     it("deps pkg-not-exist", async function() {
       const retCode = await deps("pkg-not-exist", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("invalid dep")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("not found").should.be.ok();
     });
     it("deps pkg upstream", async function() {
       const retCode = await deps("com.example.package-up", options);
       retCode.should.equal(0);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
 });

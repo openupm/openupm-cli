@@ -9,7 +9,8 @@ const {
   getWorkDir,
   createWorkDir,
   removeWorkDir,
-  captureStream,
+  getInspects,
+  getOutputs,
   nockUp,
   nockDown
 } = require("./utils");
@@ -29,8 +30,8 @@ describe("cmd-view.js", function() {
     }
   };
   describe("view", function() {
-    let stdout;
-    let stderr;
+    let stdoutInspect = null;
+    let stderrInspect = null;
     const remotePkgInfoA = {
       name: "com.example.package-a",
       versions: {
@@ -144,54 +145,43 @@ describe("cmd-view.js", function() {
       nock("https://packages.unity.com")
         .get("/pkg-not-exist")
         .reply(404);
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
+      [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function() {
       removeWorkDir("test-openupm-cli");
       nockDown();
-      stdout.unhook();
-      stderr.unhook();
+      stdoutInspect.restore();
+      stderrInspect.restore();
     });
     it("view pkg", async function() {
       const retCode = await view("com.example.package-a", options);
       retCode.should.equal(0);
-      stdout
-        .captured()
-        .includes("com.example.package-a@1.0.0")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("com.example.package-a@1.0.0").should.be.ok();
     });
     it("view pkg@1.0.0", async function() {
       const retCode = await view("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      stderr
-        .captured()
-        .includes("doesn't support name@version, using name instead")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("please replace").should.be.ok();
     });
     it("view pkg-not-exist", async function() {
       const retCode = await view("pkg-not-exist", options);
       retCode.should.equal(1);
-      stderr
-        .captured()
-        .includes("package not found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("package not found").should.be.ok();
     });
     it("view pkg from upstream", async function() {
       const retCode = await view("com.example.package-up", upstreamOptions);
       retCode.should.equal(0);
-      stdout
-        .captured()
-        .includes("com.example.package-up@1.0.0")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("com.example.package-up@1.0.0").should.be.ok();
     });
     it("view pkg-not-exist from upstream", async function() {
       const retCode = await view("pkg-not-exist", upstreamOptions);
       retCode.should.equal(1);
-      stderr
-        .captured()
-        .includes("package not found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("package not found").should.be.ok();
     });
   });
 });

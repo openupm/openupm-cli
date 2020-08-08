@@ -8,7 +8,6 @@ const {
   generateNpmrcLines,
   getNpmrcPath
 } = require("../lib/cmd-login");
-const { captureStream, nockUp, nockDown } = require("./utils");
 
 describe("cmd-login.js", function() {
   describe("validateRegistry", function() {

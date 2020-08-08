@@ -2,19 +2,21 @@
 /* eslint-disable no-undef */
 const assert = require("assert");
 const should = require("should");
+
 const { parseEnv, loadManifest } = require("../lib/core");
 const remove = require("../lib/cmd-remove");
 const {
+  getInspects,
+  getOutputs,
   getWorkDir,
   createWorkDir,
-  removeWorkDir,
-  captureStream
+  removeWorkDir
 } = require("./utils");
 
 describe("cmd-remove.js", function() {
   describe("remove", function() {
-    let stdout;
-    let stderr;
+    let stdoutInspect = null;
+    let stderrInspect = null;
     const defaultManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",
@@ -37,13 +39,12 @@ describe("cmd-remove.js", function() {
       createWorkDir("test-openupm-cli", {
         manifest: defaultManifest
       });
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
+      [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function() {
       removeWorkDir("test-openupm-cli");
-      stdout.unhook();
-      stderr.unhook();
+      stdoutInspect.restore();
+      stderrInspect.restore();
     });
     it("remove pkg", async function() {
       const options = {
@@ -62,14 +63,9 @@ describe("cmd-remove.js", function() {
         "com.example",
         "com.example.package-b"
       ]);
-      stdout
-        .captured()
-        .includes("removed: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("removed ").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("remove pkg@1.0.0", async function() {
       const options = {
@@ -82,10 +78,8 @@ describe("cmd-remove.js", function() {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
-      stderr
-        .captured()
-        .includes("doesn't support name@version, using name instead")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("please replace").should.be.ok();
     });
     it("remove pkg-not-exist", async function() {
       const options = {
@@ -98,10 +92,8 @@ describe("cmd-remove.js", function() {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
-      stderr
-        .captured()
-        .includes("package not found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("package not found").should.be.ok();
     });
     it("remove more than one pkgs", async function() {
       const options = {
@@ -123,18 +115,10 @@ describe("cmd-remove.js", function() {
         manifest.dependencies["com.example.package-b"] == undefined
       ).should.be.ok();
       manifest.scopedRegistries[0].scopes.should.be.deepEqual(["com.example"]);
-      stdout
-        .captured()
-        .includes("removed: com.example.package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("removed: com.example.package-b")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("removed com.example.package-a").should.be.ok();
+      stdout.includes("removed com.example.package-b").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
   });
 });

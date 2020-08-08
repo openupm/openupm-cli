@@ -3,13 +3,15 @@
 const assert = require("assert");
 const nock = require("nock");
 const should = require("should");
+
 const { parseEnv, loadManifest } = require("../lib/core");
 const add = require("../lib/cmd-add");
 const {
   getWorkDir,
   createWorkDir,
   removeWorkDir,
-  captureStream,
+  getInspects,
+  getOutputs,
   nockUp,
   nockDown
 } = require("./utils");
@@ -38,8 +40,8 @@ describe("cmd-add.js", function() {
     test: true
   };
   describe("add", function() {
-    let stdout;
-    let stderr;
+    let stdoutInspect = null;
+    let stderrInspect = null;
     const remotePkgInfoA = {
       name: "com.base.package-a",
       versions: {
@@ -211,56 +213,40 @@ describe("cmd-add.js", function() {
         .persist()
         .get("/pkg-not-exist")
         .reply(404);
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
+      [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function() {
       removeWorkDir("test-openupm-cli");
       nockDown();
-      stdout.unhook();
-      stderr.unhook();
+      stdoutInspect.restore();
+      stderrInspect.restore();
     });
     it("add pkg", async function() {
       const retCode = await add("com.base.package-a", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg@1.0.0", async function() {
       const retCode = await add("com.base.package-a@1.0.0", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg@latest", async function() {
       const retCode = await add("com.base.package-a@latest", options);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function() {
       const retCode1 = await add("com.base.package-a@0.1.0", options);
@@ -269,14 +255,9 @@ describe("cmd-add.js", function() {
       retCode2.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      stdout
-        .captured()
-        .includes("modified: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("modified ").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add exited pkg version", async function() {
       const retCode1 = await add("com.base.package-a@1.0.0", options);
@@ -285,28 +266,18 @@ describe("cmd-add.js", function() {
       retCode2.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      stdout
-        .captured()
-        .includes("existed: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("existed ").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg@not-exist-version", async function() {
       const retCode = await add("com.base.package-a@2.0.0", options);
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
-      stdout
-        .captured()
-        .includes("version 2.0.0 is not a valid choice")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("version 2.0.0 is not a valid choice").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
     });
     it("add pkg@http", async function() {
       const gitUrl = "https://github.com/yo/com.base.package-a";
@@ -314,14 +285,9 @@ describe("cmd-add.js", function() {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg@git", async function() {
       const gitUrl = "git@github.com:yo/com.base.package-a";
@@ -329,14 +295,9 @@ describe("cmd-add.js", function() {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg@file", async function() {
       const fileUrl = "file../yo/com.base.package-a";
@@ -344,24 +305,17 @@ describe("cmd-add.js", function() {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.dependencies["com.base.package-a"].should.be.equal(fileUrl);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg-not-exist", async function() {
       const retCode = await add("pkg-not-exist", options);
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.deepEqual(defaultManifest);
-      stderr
-        .captured()
-        .includes("package not found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("package not found").should.be.ok();
     });
     it("add more than one pkgs", async function() {
       const retCode = await add(
@@ -371,70 +325,45 @@ describe("cmd-add.js", function() {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestAB);
-      stdout
-        .captured()
-        .includes("added: com.base.package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("added: com.base.package-b")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added com.base.package-a").should.be.ok();
+      stdout.includes("added com.base.package-b").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg from upstream", async function() {
       const retCode = await add("com.upstream.package-up", upstreamOptions);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestUpstream);
-      stdout
-        .captured()
-        .includes("added: com.upstream.package-up")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added com.upstream.package-up").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg-not-exist from upstream", async function() {
       const retCode = await add("pkg-not-exist", upstreamOptions);
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.deepEqual(defaultManifest);
-      stderr
-        .captured()
-        .includes("package not found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("package not found").should.be.ok();
     });
     it("add pkg with nested dependencies", async function() {
       const retCode = await add("com.base.package-c@latest", upstreamOptions);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestC);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
     it("add pkg with tests", async function() {
       const retCode = await add("com.base.package-a", testableOptions);
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestTestable);
-      stdout
-        .captured()
-        .includes("added: ")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("manifest updated")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
     });
   });
 });

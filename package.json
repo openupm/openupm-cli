@@ -38,7 +38,8 @@
     "nock": "^11.9.1",
     "prettier": "^1.19.1",
     "semantic-release": "^15.14.0",
-    "should": "^13.2.3"
+    "should": "^13.2.3",
+    "test-console": "^1.1.0"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -48,10 +49,9 @@
     "is-wsl": "^2.2.0",
     "key-file-storage": "^2.2.8",
     "lodash": "^4.17.15",
-    "loglevel": "^1.6.7",
-    "loglevel-plugin-prefix": "^0.8.4",
     "mkdirp": "^1.0.4",
     "npm-registry-client": "^8.6.0",
+    "npmlog": "^4.1.2",
     "pkginfo": "^0.4.1",
     "promptly": "^3.0.3",
     "superagent": "^5.2.2",

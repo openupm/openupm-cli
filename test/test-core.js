@@ -19,7 +19,8 @@ const {
   getWorkDir,
   createWorkDir,
   removeWorkDir,
-  captureStream,
+  getInspects,
+  getOutputs,
   nockUp,
   nockDown
 } = require("./utils");
@@ -65,8 +66,8 @@ describe("cmd-core.js", function() {
   });
 
   describe("parseEnv", function() {
-    let stdout;
-    let stderr;
+    let stdoutInspect = null;
+    let stderrInspect = null;
     before(function() {
       removeWorkDir("test-openupm-cli");
       removeWorkDir("test-openupm-cli-no-manifest");
@@ -78,23 +79,21 @@ describe("cmd-core.js", function() {
       removeWorkDir("test-openupm-cli-no-manifest");
     });
     beforeEach(function() {
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
+      [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function() {
-      stdout.unhook();
-      stderr.unhook();
+      stdoutInspect.restore();
+      stderrInspect.restore();
     });
     it("defaults", function() {
       parseEnv({ parent: {} }, { checkPath: false }).should.be.ok();
       env.registry.should.equal("https://package.openupm.com");
       env.upstream.should.be.ok();
-      env.upstreamRegistry.should.equal(
-        "https://packages.unity.com"
-      );
+      env.upstreamRegistry.should.equal("https://packages.unity.com");
       env.namespace.should.equal("com.openupm");
       env.cwd.should.equal("");
       env.manifestPath.should.equal("");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("check path", function() {
       parseEnv(
@@ -105,26 +104,23 @@ describe("cmd-core.js", function() {
       env.manifestPath.should.be.equal(
         path.join(getWorkDir("test-openupm-cli"), "Packages/manifest.json")
       );
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("can not resolve path", function() {
       parseEnv(
         { parent: { chdir: getWorkDir("path-not-exist") } },
         { checkPath: true }
       ).should.not.be.ok();
-      stderr
-        .captured()
-        .includes("can not resolve path")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("can not resolve path").should.be.ok();
     });
     it("can not locate manifest.json", function() {
       parseEnv(
         { parent: { chdir: getWorkDir("test-openupm-cli-no-manifest") } },
         { checkPath: true }
       ).should.not.be.ok();
-      stderr
-        .captured()
-        .includes("can not locate manifest.json")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("can not locate manifest.json").should.be.ok();
     });
     it("custom registry", function() {
       parseEnv(
@@ -133,6 +129,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with splash", function() {
       parseEnv(
@@ -141,6 +138,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with extra path", function() {
       parseEnv(
@@ -149,6 +147,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org/some");
       env.namespace.should.be.equal("org.npmjs");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with extra path and splash", function() {
       parseEnv(
@@ -157,6 +156,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org/some");
       env.namespace.should.be.equal("org.npmjs");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry without http", function() {
       parseEnv(
@@ -165,6 +165,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("http://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with ipv4+port", function() {
       parseEnv(
@@ -173,6 +174,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("http://127.0.0.1:4873");
       env.namespace.should.be.equal("127.0.0.1");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with ipv6+port", function() {
       parseEnv(
@@ -181,6 +183,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       env.registry.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
       env.namespace.should.be.equal("1:2:3:4:5:6:7:8");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("upstream", function() {
       parseEnv(
@@ -188,12 +191,13 @@ describe("cmd-core.js", function() {
         { checkPath: false }
       ).should.be.ok();
       env.upstream.should.not.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
 
   describe("loadManifest/SaveManifest", function() {
-    let stdout;
-    let stderr;
+    let stdoutInspect = null;
+    let stderrInspect = null;
     beforeEach(function() {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
@@ -207,14 +211,13 @@ describe("cmd-core.js", function() {
         ),
         "wrong-json"
       );
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
+      [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function() {
       removeWorkDir("test-openupm-cli");
       removeWorkDir("test-openupm-cli-wrong-json");
-      stdout.unhook();
-      stderr.unhook();
+      stdoutInspect.restore();
+      stderrInspect.restore();
     });
     it("loadManifest", function() {
       parseEnv(
@@ -223,6 +226,7 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       const manifest = loadManifest();
       manifest.should.be.deepEqual({ dependencies: {} });
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("no manifest file", function() {
       parseEnv(
@@ -231,10 +235,8 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       const manifest = loadManifest();
       (manifest === null).should.be.ok();
-      stderr
-        .captured()
-        .includes("does not exist")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("does not exist").should.be.ok();
     });
     it("wrong json content", function() {
       parseEnv(
@@ -243,10 +245,8 @@ describe("cmd-core.js", function() {
       ).should.be.ok();
       const manifest = loadManifest();
       (manifest === null).should.be.ok();
-      stderr
-        .captured()
-        .includes("failed to parse")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("failed to parse").should.be.ok();
     });
     it("saveManifest", function() {
       parseEnv(
@@ -259,6 +259,7 @@ describe("cmd-core.js", function() {
       saveManifest(manifest).should.be.ok();
       const manifest2 = loadManifest();
       manifest2.should.be.deepEqual(manifest);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
 
@@ -271,17 +272,11 @@ describe("cmd-core.js", function() {
   });
 
   describe("fetchPackageInfo", function() {
-    let stdout;
-    let stderr;
     beforeEach(function() {
       nockUp();
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
     });
     afterEach(function() {
       nockDown();
-      stdout = captureStream(process.stdout);
-      stderr = captureStream(process.stderr);
     });
     it("simple", async function() {
       parseEnv(

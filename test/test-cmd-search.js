@@ -3,20 +3,22 @@
 const assert = require("assert");
 const nock = require("nock");
 const should = require("should");
+
 const search = require("../lib/cmd-search");
 const { cleanCache } = require("../lib/core");
 const {
   getWorkDir,
   createWorkDir,
   removeWorkDir,
-  captureStream,
+  getInspects,
+  getOutputs,
   nockUp,
   nockDown
 } = require("./utils");
 
 describe("cmd-search.js", function() {
-  let stdout;
-  let stderr;
+  let stdoutInspect = null;
+  let stderrInspect = null;
   const options = {
     parent: {
       registry: "http://example.com",
@@ -36,14 +38,13 @@ describe("cmd-search.js", function() {
     createWorkDir("test-openupm-cli", { manifest: true });
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
-    stdout = captureStream(process.stdout);
-    stderr = captureStream(process.stderr);
+    [stdoutInspect, stderrInspect] = getInspects();
   });
   afterEach(function() {
     cleanCache();
     removeWorkDir("test-openupm-cli");
-    stdout.unhook();
-    stderr.unhook();
+    stdoutInspect.restore();
+    stderrInspect.restore();
   });
   describe("search endpoint", function() {
     const searchEndpointResult = {
@@ -104,30 +105,17 @@ describe("cmd-search.js", function() {
     it("simple", async function() {
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      stdout
-        .captured()
-        .includes("package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("package-a").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
+      stdout.includes("yo").should.be.ok();
+      stdout.includes("2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function() {
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      stdout
-        .captured()
-        .includes("No matches found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("No matches found").should.be.ok();
     });
   });
 
@@ -196,26 +184,12 @@ describe("cmd-search.js", function() {
         });
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("fast search endpoint is not available")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("fast search endpoint is not available").should.be.ok();
+      stdout.includes("package-a").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
+      stdout.includes("yo").should.be.ok();
+      stdout.includes("2019-10-02").should.be.ok();
     });
     it("from cache", async function() {
       nock("http://example.com")
@@ -225,26 +199,13 @@ describe("cmd-search.js", function() {
         });
       let retCode = await search("package-a", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("fast search endpoint is not available")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
-        .should.be.ok();
+      var [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("fast search endpoint is not available").should.be.ok();
+      stdout.includes("package-a").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
+      stdout.includes("yo").should.be.ok();
+      stdout.includes("2019-10-02").should.be.ok();
+      [stdoutInspect, stderrInspect] = getInspects();
       nock("http://example.com")
         .get(/\/-\/all\/since/)
         .reply(200, [], {
@@ -252,26 +213,12 @@ describe("cmd-search.js", function() {
         });
       retCode = await search("package-a", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("fast search endpoint is not available")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
-        .should.be.ok();
+      [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("fast search endpoint is not available").should.be.ok();
+      stdout.includes("package-a").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
+      stdout.includes("yo").should.be.ok();
+      stdout.includes("2019-10-02").should.be.ok();
     });
     it("from cache and remote", async function() {
       nock("http://example.com")
@@ -281,26 +228,13 @@ describe("cmd-search.js", function() {
         });
       let retCode = await search("package-a", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("fast search endpoint is not available")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
-        .should.be.ok();
+      var [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("fast search endpoint is not available").should.be.ok();
+      stdout.includes("package-a").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
+      stdout.includes("yo").should.be.ok();
+      stdout.includes("2019-10-02").should.be.ok();
+      [stdoutInspect, stderrInspect] = getInspects();
       nock("http://example.com")
         .get(/\/-\/all\/since/)
         .reply(200, allResultSince, {
@@ -308,42 +242,16 @@ describe("cmd-search.js", function() {
         });
       retCode = await search("package", options);
       retCode.should.equal(0);
-      stderr
-        .captured()
-        .includes("fast search endpoint is not available")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("package-a")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("1.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-02")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("package-b")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2.0.0")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("yo1")
-        .should.be.ok();
-      stdout
-        .captured()
-        .includes("2019-10-03")
-        .should.be.ok();
+      [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("fast search endpoint is not available").should.be.ok();
+      stdout.includes("package-a").should.be.ok();
+      stdout.includes("1.0.0").should.be.ok();
+      stdout.includes("yo").should.be.ok();
+      stdout.includes("2019-10-02").should.be.ok();
+      stdout.includes("package-b").should.be.ok();
+      stdout.includes("2.0.0").should.be.ok();
+      stdout.includes("yo1").should.be.ok();
+      stdout.includes("2019-10-03").should.be.ok();
     });
     it("pkg not exist", async function() {
       nock("http://example.com")
@@ -353,10 +261,8 @@ describe("cmd-search.js", function() {
         });
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      stdout
-        .captured()
-        .includes("No matches found")
-        .should.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("No matches found").should.be.ok();
     });
   });
 });
