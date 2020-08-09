@@ -19,6 +19,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [Authenticate with a scoped registry](#authenticate-with-a-scoped-registry)
       - [Using token](#using-token)
       - [Using basic authentication](#using-basic-authentication)
+      - [Always auth](#always-auth)
       - [Windows Subsystem for Linux (WSL)](#windows-subsystem-for-linux-wsl)
       - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
       - [Troubleshooting](#troubleshooting)
@@ -131,7 +132,22 @@ The token is also stored to the `.npmrc` file for convenience.
 
 #### Using basic authentication
 
-Adding `--always-auth` option to use basic authentication.
+Adding `--basic-auth` option to use basic authentication.
+
+```
+openupm login -u <username> -e <email> -r <registry> -p <password> --basic-auth
+
+i.e.
+openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --basic-auth
+```
+
+Notice that your username and password is not verified during the login command, but simply stored to the .upmconfig.toml file. Because verify the password against your npm server will generate a token, which is not what you want here. Basically, type your password carefully.
+
+Unlike using the token, `.npmrc` lacks syntax to support multiple registries for basic authentication. Hence, the `.npmrc` is not updated for the basic authentication.
+
+#### Always auth
+
+Adding `--always-auth` option if tarball files hosted on a different domain other than the registry domain.
 
 ```
 openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
@@ -139,10 +155,6 @@ openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
 i.e.
 openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
 ```
-
-Notice that your username and password is not verified during the login command, but simply stored to the .upmconfig.toml file. Because verify the password against your npm server will generate a token, which is not what you want here. Basically, type your password carefully.
-
-The `.npmrc` is not updated for the basic authentication.
 
 #### Windows Subsystem for Linux (WSL)
 
