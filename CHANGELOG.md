@@ -1,3 +1,17 @@
+# [1.11.0](https://github.com/openupm/openupm-cli/compare/1.10.0...1.11.0) (2020-08-09)
+
+
+### Bug Fixes
+
+* move --wsl and --system-user as parent options ([0184fa4](https://github.com/openupm/openupm-cli/commit/0184fa485926f9bc45f48e16e94b1d649dbc8d4d))
+* use --basic-auth option for basic authentication ([ceddcca](https://github.com/openupm/openupm-cli/commit/ceddcca21bafe6cc60d1c6426e48b4c894b5553c))
+
+
+### Features
+
+* support auth for add, deps, remove, and view commands ([b41725f](https://github.com/openupm/openupm-cli/commit/b41725f2ed82f3f73bf43f44d763c3c564aca095))
+* support auth for the search command ([a96708e](https://github.com/openupm/openupm-cli/commit/a96708e4f2caef5f5bfb636371f1f8f4b86a7dfb))
+
 # [1.10.0](https://github.com/openupm/openupm-cli/compare/1.9.1...1.10.0) (2020-08-08)
 
 
