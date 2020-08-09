@@ -108,7 +108,6 @@ describe("cmd-search.js", function() {
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("yo").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function() {
@@ -188,7 +187,6 @@ describe("cmd-search.js", function() {
       stdout.includes("fast search endpoint is not available").should.be.ok();
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("yo").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
     });
     it("from cache", async function() {
@@ -203,7 +201,6 @@ describe("cmd-search.js", function() {
       stdout.includes("fast search endpoint is not available").should.be.ok();
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("yo").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
       [stdoutInspect, stderrInspect] = getInspects();
       nock("http://example.com")
@@ -217,7 +214,6 @@ describe("cmd-search.js", function() {
       stdout.includes("fast search endpoint is not available").should.be.ok();
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("yo").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
     });
     it("from cache and remote", async function() {
@@ -232,7 +228,6 @@ describe("cmd-search.js", function() {
       stdout.includes("fast search endpoint is not available").should.be.ok();
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("yo").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
       [stdoutInspect, stderrInspect] = getInspects();
       nock("http://example.com")
@@ -246,11 +241,9 @@ describe("cmd-search.js", function() {
       stdout.includes("fast search endpoint is not available").should.be.ok();
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("yo").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
       stdout.includes("package-b").should.be.ok();
       stdout.includes("2.0.0").should.be.ok();
-      stdout.includes("yo1").should.be.ok();
       stdout.includes("2019-10-03").should.be.ok();
     });
     it("pkg not exist", async function() {
