@@ -115,6 +115,8 @@ There are two ways to authenticate with an npm server:
 - using token (recommended): a server-generated string for the grant of access and publishing rights.
 - using basic authentication: the `username:password` pair (base64 encoded) is stored to authenticate with the server on each request.
 
+After login, all openupm-cli commands will use `.upmconfig.toml` configuration to authenticate with your private scoped registry.
+
 #### Using token
 
 ```
