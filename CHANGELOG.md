@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/openupm/openupm-cli/compare/1.11.0...1.12.0) (2020-11-13)
+
+
+### Features
+
+* add versions info to the view command ([c76b21d](https://github.com/openupm/openupm-cli/commit/c76b21d0b5c361a592e2721cdf5aad72d7329960))
+
 # [1.11.0](https://github.com/openupm/openupm-cli/compare/1.10.0...1.11.0) (2020-08-09)
 
 
