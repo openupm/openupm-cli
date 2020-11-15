@@ -57,6 +57,7 @@
     "npmlog": "^4.1.2",
     "pkginfo": "^0.4.1",
     "promptly": "^3.0.3",
-    "update-notifier": "^4.1.0"
+    "update-notifier": "^4.1.0",
+    "yaml": "^1.10.0"
   }
 }

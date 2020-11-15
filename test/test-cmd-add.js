@@ -104,6 +104,46 @@ describe("cmd-add.js", function() {
         latest: "1.0.0"
       }
     };
+    const remotePkgInfoWithLowerEditorVersion = {
+      name: "com.base.package-with-lower-editor-version",
+      versions: {
+        "1.0.0": {
+          name: "com.base.package-with-lower-editor-version",
+          version: "1.0.0",
+          unity: "2019.1",
+          unityRelease: "0b1"
+        }
+      },
+      "dist-tags": {
+        latest: "1.0.0"
+      }
+    };
+    const remotePkgInfoWithHigherEditorVersion = {
+      name: "com.base.package-with-higher-editor-version",
+      versions: {
+        "1.0.0": {
+          name: "com.base.package-with-higher-editor-version",
+          version: "1.0.0",
+          unity: "2020.2"
+        }
+      },
+      "dist-tags": {
+        latest: "1.0.0"
+      }
+    };
+    const remotePkgInfoWithWrongEditorVersion = {
+      name: "com.base.package-with-wrong-editor-version",
+      versions: {
+        "1.0.0": {
+          name: "com.base.package-with-wrong-editor-version",
+          version: "1.0.0",
+          unity: "2020"
+        }
+      },
+      "dist-tags": {
+        latest: "1.0.0"
+      }
+    };
     const remotePkgInfoUp = {
       name: "com.upstream.package-up",
       versions: {
@@ -177,7 +217,10 @@ describe("cmd-add.js", function() {
     };
     beforeEach(function() {
       removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", { manifest: true });
+      createWorkDir("test-openupm-cli", {
+        manifest: true,
+        editorVersion: "2019.2.13f1"
+      });
       nockUp();
       nock("http://example.com")
         .persist()
@@ -195,6 +238,24 @@ describe("cmd-add.js", function() {
         .persist()
         .get("/com.base.package-d")
         .reply(200, remotePkgInfoD, { "Content-Type": "application/json" });
+      nock("http://example.com")
+        .persist()
+        .get("/com.base.package-with-lower-editor-version")
+        .reply(200, remotePkgInfoWithLowerEditorVersion, {
+          "Content-Type": "application/json"
+        });
+      nock("http://example.com")
+        .persist()
+        .get("/com.base.package-with-higher-editor-version")
+        .reply(200, remotePkgInfoWithHigherEditorVersion, {
+          "Content-Type": "application/json"
+        });
+      nock("http://example.com")
+        .persist()
+        .get("/com.base.package-with-wrong-editor-version")
+        .reply(200, remotePkgInfoWithWrongEditorVersion, {
+          "Content-Type": "application/json"
+        });
       nock("http://example.com")
         .persist()
         .get("/pkg-not-exist")
@@ -364,6 +425,35 @@ describe("cmd-add.js", function() {
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
+    });
+    it("add pkg with lower editor version", async function() {
+      const retCode = await add(
+        "com.base.package-with-lower-editor-version",
+        testableOptions
+      );
+      retCode.should.equal(0);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("added").should.be.ok();
+      stdout.includes("open Unity").should.be.ok();
+    });
+    it("add pkg with higher editor version", async function() {
+      const retCode = await add(
+        "com.base.package-with-higher-editor-version",
+        testableOptions
+      );
+      retCode.should.equal(1);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
+    });
+    it("add pkg with wrong editor version", async function() {
+      const retCode = await add(
+        "com.base.package-with-wrong-editor-version",
+        testableOptions
+      );
+      retCode.should.equal(1);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("2020 is not valid").should.be.ok();
+      console.log(stdout);
     });
   });
 });

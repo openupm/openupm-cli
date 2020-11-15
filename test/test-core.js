@@ -6,14 +6,16 @@ const nock = require("nock");
 const path = require("path");
 const should = require("should");
 const {
+  compareEditorVersion,
   env,
+  fetchPackageInfo,
   getCache,
+  getLatestVersion,
+  loadManifest,
+  parseEditorVersion,
   parseEnv,
   parseName,
-  loadManifest,
-  saveManifest,
-  fetchPackageInfo,
-  getLatestVersion
+  saveManifest
 } = require("../lib/core");
 const {
   getWorkDir,
@@ -71,8 +73,14 @@ describe("cmd-core.js", function() {
     before(function() {
       removeWorkDir("test-openupm-cli");
       removeWorkDir("test-openupm-cli-no-manifest");
-      createWorkDir("test-openupm-cli", { manifest: true });
-      createWorkDir("test-openupm-cli-no-manifest", { manifest: false });
+      createWorkDir("test-openupm-cli", {
+        manifest: true,
+        editorVersion: " 2019.2.13f1"
+      });
+      createWorkDir("test-openupm-cli-no-manifest", {
+        manifest: false,
+        editorVersion: " 2019.2.13f1"
+      });
     });
     after(function() {
       removeWorkDir("test-openupm-cli");
@@ -93,6 +101,7 @@ describe("cmd-core.js", function() {
       env.namespace.should.equal("com.openupm");
       env.cwd.should.equal("");
       env.manifestPath.should.equal("");
+      (env.editorVersion === null).should.be.ok();
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("check path", async function() {
@@ -210,6 +219,16 @@ describe("cmd-core.js", function() {
         await parseEnv({ parent: { upstream: false } }, { checkPath: false })
       ).should.be.ok();
       env.upstream.should.not.be.ok();
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+    });
+    it("editorVersion", async function() {
+      (
+        await parseEnv(
+          { parent: { chdir: getWorkDir("test-openupm-cli") } },
+          { checkPath: true }
+        )
+      ).should.be.ok();
+      env.editorVersion.should.be.equal("2019.2.13f1");
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
@@ -350,6 +369,97 @@ describe("cmd-core.js", function() {
         getLatestVersion({ versions: { "1.0.0": "patch" } }) === undefined
       ).should.be.ok();
       (getLatestVersion({}) === undefined).should.be.ok();
+    });
+  });
+  describe("parseEditorVersion", function() {
+    it("test null", function() {
+      (parseEditorVersion(null) === null).should.be.ok();
+    });
+    it("test x.y", function() {
+      parseEditorVersion("2019.2").should.deepEqual({ major: 2019, minor: 2 });
+    });
+    it("test x.y.z", function() {
+      parseEditorVersion("2019.2.1").should.deepEqual({
+        major: 2019,
+        minor: 2,
+        patch: 1
+      });
+    });
+    it("test x.y.zan", function() {
+      parseEditorVersion("2019.2.1a5").should.deepEqual({
+        major: 2019,
+        minor: 2,
+        patch: 1,
+        flag: "a",
+        flagValue: 0,
+        build: 5
+      });
+    });
+    it("test x.y.zbn", function() {
+      parseEditorVersion("2019.2.1b5").should.deepEqual({
+        major: 2019,
+        minor: 2,
+        patch: 1,
+        flag: "b",
+        flagValue: 1,
+        build: 5
+      });
+    });
+    it("test x.y.zfn", function() {
+      parseEditorVersion("2019.2.1f5").should.deepEqual({
+        major: 2019,
+        minor: 2,
+        patch: 1,
+        flag: "f",
+        flagValue: 2,
+        build: 5
+      });
+    });
+    it("test x.y.zcn", function() {
+      parseEditorVersion("2019.2.1c5").should.deepEqual({
+        major: 2019,
+        minor: 2,
+        patch: 1,
+        flag: "c",
+        flagValue: 3,
+        build: 5
+      });
+    });
+    it("test invalid version", function() {
+      (parseEditorVersion("2019") === null).should.be.ok();
+    });
+  });
+  describe("compareEditorVersion", function() {
+    it("test x1.y1 == x2.y2", function() {
+      compareEditorVersion("2019.1", "2019.1").should.equal(0);
+    });
+    it("test x1.y1 > x2.y2 equals", function() {
+      compareEditorVersion("2019.2", "2019.1").should.equal(1);
+      compareEditorVersion("2020.1", "2019.1").should.equal(1);
+    });
+    it("test x1.y1 < x2.y2 equals", function() {
+      compareEditorVersion("2019.1", "2019.2").should.equal(-1);
+      compareEditorVersion("2019.1", "2020.1").should.equal(-1);
+    });
+    it("test x1.y1.z1[flag1]n1 == x2.y2.z2[flag1]n2", function() {
+      compareEditorVersion("2019.1.1a1", "2019.1.1a1").should.equal(0);
+      compareEditorVersion("2019.1.1b1", "2019.1.1b1").should.equal(0);
+      compareEditorVersion("2019.1.1f1", "2019.1.1f1").should.equal(0);
+      compareEditorVersion("2019.1.1c1", "2019.1.1c1").should.equal(0);
+    });
+    it("test x1.y1.z1[flag1]n1 > x2.y2.z2[flag1]n21", function() {
+      compareEditorVersion("2019.1.1a2", "2019.1.1a1").should.equal(1);
+      compareEditorVersion("2019.1.2a1", "2019.1.1a1").should.equal(1);
+      compareEditorVersion("2019.1.1f1", "2019.1.1b1").should.equal(1);
+      compareEditorVersion("2019.1.1b1", "2019.1.1a1").should.equal(1);
+      compareEditorVersion("2019.1.1c1", "2019.1.1f1").should.equal(1);
+    });
+    it("test x1.y1.z1[flag1]n1 < x2.y2.z2[flag1]n21", function() {
+      compareEditorVersion("2019.1.1a1", "2019.1.1a2").should.equal(-1);
+      compareEditorVersion("2019.1.1a1", "2019.1.2a1").should.equal(-1);
+      compareEditorVersion("2019.1.1b1", "2019.1.1f1").should.equal(-1);
+      compareEditorVersion("2019.1.1a1", "2019.1.1b1").should.equal(-1);
+      compareEditorVersion("2019.1.1f1", "2019.1.1c1").should.equal(-1);
     });
   });
 });

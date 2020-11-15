@@ -9,7 +9,7 @@ const getWorkDir = function(pathToTmp) {
   return path.join(os.tmpdir(), pathToTmp);
 };
 
-const createWorkDir = function(pathToTmp, { manifest }) {
+const createWorkDir = function(pathToTmp, { manifest, editorVersion }) {
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
@@ -18,6 +18,15 @@ const createWorkDir = function(pathToTmp, { manifest }) {
     fse.mkdirpSync(manifestDir);
     const data = JSON.stringify(manifest);
     fse.writeFileSync(path.join(manifestDir, "manifest.json"), data);
+  }
+  if (editorVersion) {
+    const projectSettingsDir = path.join(workDir, "ProjectSettings");
+    fse.mkdirpSync(projectSettingsDir);
+    const data = `m_EditorVersion: ${editorVersion}`;
+    fse.writeFileSync(
+      path.join(projectSettingsDir, "ProjectVersion.txt"),
+      data
+    );
   }
 };
 
