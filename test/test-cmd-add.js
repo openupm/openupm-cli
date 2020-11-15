@@ -39,6 +39,14 @@ describe("cmd-add.js", function() {
     },
     test: true
   };
+  const forceOptions = {
+    parent: {
+      registry: "http://example.com",
+      upstream: false,
+      chdir: getWorkDir("test-openupm-cli")
+    },
+    force: true
+  };
   describe("add", function() {
     let stdoutInspect = null;
     let stderrInspect = null;
@@ -445,12 +453,31 @@ describe("cmd-add.js", function() {
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
     });
+    it("force add pkg with higher editor version", async function() {
+      const retCode = await add(
+        "com.base.package-with-higher-editor-version",
+        forceOptions
+      );
+      retCode.should.equal(0);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
+    });
     it("add pkg with wrong editor version", async function() {
       const retCode = await add(
         "com.base.package-with-wrong-editor-version",
         testableOptions
       );
       retCode.should.equal(1);
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      stdout.includes("2020 is not valid").should.be.ok();
+      console.log(stdout);
+    });
+    it("force add pkg with wrong editor version", async function() {
+      const retCode = await add(
+        "com.base.package-with-wrong-editor-version",
+        forceOptions
+      );
+      retCode.should.equal(0);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("2020 is not valid").should.be.ok();
       console.log(stdout);
