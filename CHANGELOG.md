@@ -1,3 +1,16 @@
+# [1.13.0](https://github.com/openupm/openupm-cli/compare/1.12.0...1.13.0) (2020-11-15)
+
+
+### Bug Fixes
+
+* reject package installation if current editor version is not qualified (refs: [#16](https://github.com/openupm/openupm-cli/issues/16)) ([d4b15ac](https://github.com/openupm/openupm-cli/commit/d4b15acb0c945a5d509c0e9a62bb14fb3777925c))
+* treat com.unity.ugui as a module ([5c2129c](https://github.com/openupm/openupm-cli/commit/5c2129cefee7221fc8a1a978012fcfaca84cd4e8))
+
+
+### Features
+
+* fail if missing dependencies for command add, unless add option -f ([920d7a4](https://github.com/openupm/openupm-cli/commit/920d7a4523ac085fdfecd0e46ef9f1f0cce162d0))
+
 # [1.12.0](https://github.com/openupm/openupm-cli/compare/1.11.0...1.12.0) (2020-11-13)
 
 
