@@ -72,6 +72,13 @@ The package itself and all dependencies that exist in the registry will be serve
 
 > openupm will not verify package or resolve dependencies for git, https, and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of the version string.
 
+The add command fail if the package is not qualified:
+
+- the package has a missing dependency
+- the package requires a higher editor version
+
+You shall either resolve these issues manually or add option `-f` to continue.
+
 You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
 ```
 openupm --test <pkg>
