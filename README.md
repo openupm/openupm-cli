@@ -1,5 +1,7 @@
 # openupm-cli
 
+*Read this in other languages: [English](README.md), [简体中文](README.zh-cn.md).*
+
 ![npm](https://img.shields.io/npm/v/openupm-cli) ![NPM](https://img.shields.io/npm/l/openupm-cli) ![npm](https://img.shields.io/npm/dm/openupm-cli)
 
 The command-line tool to maintain the Unity manifest file for 3rd-party upm registries, offering a similar but lighter experience like *npm* or *yarn* for NodeJS.
