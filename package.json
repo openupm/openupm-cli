@@ -1,6 +1,6 @@
 {
   "name": "openupm-cli",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "preferGlobal": true,
   "description": "openupm command line interface",
   "main": "index.js",

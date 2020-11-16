@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/openupm/openupm-cli/compare/1.13.0...1.14.0) (2020-11-16)
+
+
+### Features
+
+* support region CN ([45ed253](https://github.com/openupm/openupm-cli/commit/45ed2535dcaee453e2ba9b4917beab17e4435487))
+
 # [1.13.0](https://github.com/openupm/openupm-cli/compare/1.12.0...1.13.0) (2020-11-15)
 
 
