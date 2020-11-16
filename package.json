@@ -9,7 +9,8 @@
     "semantic-release": "semantic-release"
   },
   "bin": {
-    "openupm": "bin/openupm"
+    "openupm": "bin/openupm",
+    "openupm-cn": "bin/openupm-cn"
   },
   "repository": {
     "type": "git",

@@ -10,6 +10,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
   - [How it works](#how-it-works)
   - [Installation](#installation)
     - [Windows platform troubleshooting](#windows-platform-troubleshooting)
+  - [China region](#china-region)
   - [Commands](#commands)
     - [Add packages](#add-packages)
     - [Remove packages](#remove-packages)
@@ -35,16 +36,18 @@ The command-line tool installs the 3rd-party registry as a scoped registry and m
 
 ## Installation
 
-Required [nodejs 12](https://nodejs.org/en/download/), then
+- Requires [nodejs 12](https://nodejs.org/en/download/).
+- Install via npm:
 
-```
-npm install -g openupm-cli
-```
+  ```
+  npm install -g openupm-cli
+  ```
 
-If you prefer [yarn](https://yarnpkg.com/), then
-```
-yarn global add openupm-cli
-```
+- Or install via [yarn](https://yarnpkg.com/):
+
+  ```
+  yarn global add openupm-cli
+  ```
 
 ### Windows platform troubleshooting
 
@@ -58,9 +61,23 @@ c:\Program Files\nodejs
 C:\Users\{yourName}\AppData\Roaming\npm
 ```
 
+## China region
+
+To use the region CN, replace the command `openupm` with `openupm-cn` or add the option `--cn`. Then the CLI will query both the Unity China region registry (`https://packages.unity.cn`) and the OpenUPM China region registry (`https://package.openupm.cn`).
+
+```
+# Region us
+openupm view com.littlebigfun.addressable-importer
+
+# Region cn
+openupm view com.littlebigfun.addressable-importer --cn
+openupm-cn view com.littlebigfun.addressable-importer
+```
+
 ## Commands
 
 ### Add packages
+
 ```
 openupm add <pkg> [otherPkgs..]
 openupm add <pkg>@<version>
@@ -68,18 +85,21 @@ openupm add <pkg>@git@github.com:...
 openupm add <pkg>@https://github.com/...
 openupm add <pkg>@file:...
 ```
-The package itself and all dependencies that exist in the registry will be served by the scope registry.
 
-> openupm will not verify package or resolve dependencies for git, https, and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of the version string.
+The add command adds the package to the `manifest.json` and configures the scope registry by adding scopes for the package and its dependencies that available on the registry.
 
-The add command fail if the package is not qualified:
+The add command doesn't verify package or resolve dependencies for Git, HTTPS, and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of the version string.
+
+The add command fails if the package is not qualified:
 
 - the package has a missing dependency
+- the package requires a non-existed dependency version
 - the package requires a higher editor version
 
-You shall either resolve these issues manually or add option `-f` to continue.
+You shall either resolve these issues manually or add the option `-f` to continue.
 
 You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
+
 ```
 openupm --test <pkg>
 ```
@@ -94,7 +114,7 @@ openupm remove <pkg> [otherPkgs...]
 openupm search <keyword>
 ```
 
-If the registry doesn't support the new search endpoint, it will fall back to old `/-/all` endpoint. If no package was found, it will search the Unity official registry instead.
+If the registry doesn't support the new search endpoint, it will fall back to the old `/-/all` endpoint. If no package was found, it will search the Unity official registry instead.
 
 Because the upstream Unity registry doesn't support the search endpoint as of December 2019, the search command will only query the current registry.
 
@@ -116,7 +136,7 @@ open deps <pkg> --deep
 
 ### Authenticate with a scoped registry
 
-Starting from Unity 2019.3.4f1, you can configure `.upmconfig.toml` file to authenticate with a scoped registry. The `openupm login` command helps you authenticate with an npm server and store the info to the UPM config file.
+Starting from Unity 2019.3.4f1, you can configure the`.upmconfig.toml` file to authenticate with a scoped registry. The `openupm login` command helps you authenticate with an npm server and store the info to the UPM config file.
 
 There are two ways to authenticate with an npm server:
 - using token (recommended): a server-generated string for the grant of access and publishing rights.
@@ -135,9 +155,9 @@ openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873
 
 If you don't provide a username, email, or password, it will prompt you to input the value. If your npm server doesn't require an email field, you can provide a dummy one like `yourname@example.com`. Notice that requesting a new token is not meant to invalidate old ones for most NPM servers.
 
-For the npm server allows user creation via CLI, providing a new username will create a new user with the information you just provided.
+For the npm server to allow user creation via CLI, providing a new username will create a new user with the information you just provided.
 
-The token is also stored to the `.npmrc` file for convenience.
+The token is also stored in the `.npmrc` file for convenience.
 
 #### Using basic authentication
 
@@ -150,13 +170,13 @@ i.e.
 openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --basic-auth
 ```
 
-Notice that your username and password is not verified during the login command, but simply stored to the .upmconfig.toml file. Because verify the password against your npm server will generate a token, which is not what you want here. Basically, type your password carefully.
+Notice that your username and password is not verified during the login command, but simply stored in the .upmconfig.toml file. Because verify the password against your npm server will generate a token, which is not what you want here. Please type your password carefully.
 
 Unlike using the token, `.npmrc` lacks syntax to support multiple registries for basic authentication. Hence, the `.npmrc` is not updated for the basic authentication.
 
 #### Always auth
 
-Adding `--always-auth` option if tarball files hosted on a different domain other than the registry domain.
+Adding `--always-auth` option if tarball files are hosted on a different domain other than the registry domain.
 
 ```
 openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
@@ -222,12 +242,6 @@ i.e.
 openupm --registry http://127.0.0.1:4873
 ```
 
-Turn off Unity official (upstream) registry
-
-```
-openupm --no-upstream ...
-```
-
 Show verbose logging
 
 ```
@@ -245,6 +259,12 @@ added: com.littlebigfun.addressable-importer@0.4.1 # from openupm registry
 ...
 ```
 
+Turn off Unity official (upstream) registry
+
+```
+openupm --no-upstream ...
+```
+
 ## Work with proxy
 
 OpenUPM-CLI supports HTTP, HTTPS, or SOCKS proxy specified by the http_proxy environment variable.
@@ -253,4 +273,4 @@ OpenUPM-CLI supports HTTP, HTTPS, or SOCKS proxy specified by the http_proxy env
 http_proxy="http://127.0.0.1:8080" openupm ...
 ```
 
-You may need to set both http_proxy and https_proxy environment variables in system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).
+You may need to set both http_proxy and https_proxy environment variables at the system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).

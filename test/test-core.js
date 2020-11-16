@@ -231,6 +231,27 @@ describe("cmd-core.js", function() {
       env.editorVersion.should.be.equal("2019.2.13f1");
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
+    it("region cn", async function() {
+      (
+        await parseEnv({ parent: { cn: true } }, { checkPath: false })
+      ).should.be.ok();
+      env.registry.should.be.equal("https://package.openupm.cn");
+      env.upstreamRegistry.should.be.equal("https://packages.unity.cn");
+      env.region.should.be.equal("cn");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+    });
+    it("region cn with a custom registry", async function() {
+      (
+        await parseEnv(
+          { parent: { cn: true, registry: "https://reg.custom-package.com" } },
+          { checkPath: false }
+        )
+      ).should.be.ok();
+      env.registry.should.be.equal("https://reg.custom-package.com");
+      env.upstreamRegistry.should.be.equal("https://packages.unity.cn");
+      env.region.should.be.equal("cn");
+      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+    });
   });
 
   describe("loadManifest/SaveManifest", function() {
