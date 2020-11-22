@@ -65,16 +65,18 @@ C:\Users\{yourName}\AppData\Roaming\npm
 
 ## 中国区
 
-要使用中国区，请使用`openupm-cn`，或为`openupm`添加`--cn`选项。指定中国区后，该命令行将查询Unity中国区域软件仓库（https://packages.unity.cn）和OpenUPM中国区软件仓库（https://package.openupm.cn）。
+若使用中国区，请使用`openupm-cn`，或为`openupm`添加`--cn`选项。指定中国区后，该命令行将查询Unity中国区域软件仓库（https://packages.unity.cn）和OpenUPM中国区软件仓库（https://package.openupm.cn）。
+
+若使用美股区，请直接使用`openupm`。
 
 ```
-# 例子：查看美国区软件包
-openupm view com.littlebigfun.addressable-importer
-
 # 例子：查看中国区软件包
 openupm view com.littlebigfun.addressable-importer --cn
 # 或
 openupm-cn view com.littlebigfun.addressable-importer
+
+# 例子：查看美国区软件包
+openupm view com.littlebigfun.addressable-importer
 ```
 
 ## 指令
@@ -82,11 +84,11 @@ openupm-cn view com.littlebigfun.addressable-importer
 ### 添加软件包
 
 ```
-openupm add <pkg> [otherPkgs..]
-openupm add <pkg>@<version>
-openupm add <pkg>@git@github.com:...
-openupm add <pkg>@https://github.com/...
-openupm add <pkg>@file:...
+openupm-cn add <pkg> [otherPkgs..]
+openupm-cn add <pkg>@<version>
+openupm-cn add <pkg>@git@github.com:...
+openupm-cn add <pkg>@https://github.com/...
+openupm-cn add <pkg>@file:...
 ```
 
 add指令将软件包添加到`manifest.json`，并同时维护好作用域（scope）字段。
@@ -104,38 +106,38 @@ add指令不会安装检验失败的软件包：
 安装软件包时，您还可以添加将其添加到[testables](https://docs.unity3d.com/Manual/cus-tests.html)字段：
 
 ```
-openupm --test <pkg>
+openupm-cn --test <pkg>
 ```
 
 ### 删除软件包
 ```
-openupm remove <pkg> [otherPkgs...]
+openupm-cn remove <pkg> [otherPkgs...]
 ```
 
 ### 搜索软件包
 ```
-openupm search <keyword>
+openupm-cn search <keyword>
 ```
 
 ### 查看软件包信息
 ```
-openupm view <pkg>
+openupm-cn view <pkg>
 ```
 
 ### 查看软件包的依赖关系
 ```
-open deps <pkg>
+openupm-cn deps <pkg>
 ```
 
 使用选项`--deep`查看深度依赖关系
 
 ```
-open deps <pkg> --deep
+openupm-cn deps <pkg> --deep
 ```
 
 ### 身份验证
 
-从Unity 2019.3.4f1开始，您可以配置`.upmconfig.toml`文件以使用私有的软件包仓库。`openupm login`指令可帮助您通过npm服务器进行身份验证并将信息存储到配置文件中。
+从Unity 2019.3.4f1开始，您可以配置`.upmconfig.toml`文件以使用私有的软件包仓库。`openupm-cn login`指令可帮助您通过npm服务器进行身份验证并将信息存储到配置文件中。
 
 使用npm服务器进行身份验证有两种方法：
 - 使用令牌验证（推荐的）。
@@ -146,10 +148,10 @@ open deps <pkg> --deep
 #### 使用令牌验证
 
 ```
-openupm login -u <username> -e <email> -r <registry> -p <password>
+openupm-cn login -u <username> -e <email> -r <registry> -p <password>
 
 # 例如
-openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873
+openupm-cn login -u user1 -e user1@example.com -r http://127.0.0.1:4873
 ```
 
 如果缺少所需字段，该指令将提示您输入字段值。如果您的npm服务器不需要电子邮件字段，则可以提供一个虚拟的地址，例如`yourname@example.com`。请注意，对于大多数npm服务器来说，请求新的令牌并不意味着旧令牌会自动失效。
@@ -163,10 +165,10 @@ openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873
 添加`--basic-auth`选项以使用基本验证。
 
 ```
-openupm login -u <username> -e <email> -r <registry> -p <password> --basic-auth
+openupm-cn login -u <username> -e <email> -r <registry> -p <password> --basic-auth
 
 # 例如
-openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --basic-auth
+openupm-cn login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --basic-auth
 ```
 
 请注意，使用该指令进行基本验证时，您的用户名和密码的base64编码只是简单的存储在了`.upmconfig.toml`文件中。我们不会主动的去和npm服务器校验您的密码。因为那样做会导致生成一个验证令牌，这不是您想要的。所以，请务必仔细输入密码。
@@ -178,10 +180,10 @@ openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --basic-aut
 如果您的软件包仓库的tarball文件位于不同服务器上，则需要添加`--always-auth`选项。
 
 ```
-openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
+openupm-cn login -u <username> -e <email> -r <registry> -p <password> --always-auth
 
 # 例如
-openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
+openupm-cn login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
 ```
 
 #### Windows Linux子系统（WSL）
@@ -229,22 +231,22 @@ _auth = "base64 string"
 命令行工具假定当前工作目录（CWD）是Unity项目的根目录（包含`Assets`文件夹的目录）。但您可以更改当前工作目录。
 
 ```
-openupm --chdir <unity-project-path>
+openupm-cn --chdir <unity-project-path>
 ```
 
 指定另一个软件放库（默认为openupm软件仓库）
 
 ```
-openupm --registry <registry-url>
+openupm-cn --registry <registry-url>
 
 # 例如
-openupm --registry http://127.0.0.1:4873
+openupm-cn --registry http://127.0.0.1:4873
 ```
 
 显示详细的日志记录
 
 ```
-openupm --verbose ...
+openupm-cn --verbose ...
 ```
 
 ## 使用Unity官方软件仓库
@@ -252,7 +254,7 @@ openupm --verbose ...
 如有必要，大多数指令可以访问Unity官方软件仓库，以搜索更多的信息。
 
 ```
-$ openupm add com.unity.addressables com.littlebigfun.addressable-importer
+$ openupm-cn add com.unity.addressables com.littlebigfun.addressable-importer
 added: com.unity.addressables@1.4.0                # 来自Unity软件放库
 added: com.littlebigfun.addressable-importer@0.4.1 # 来自OpenUPM软件放库
 ...
@@ -261,7 +263,7 @@ added: com.littlebigfun.addressable-importer@0.4.1 # 来自OpenUPM软件放库
 但您也可以关闭这种行为。
 
 ```
-openupm --no-upstream ...
+openupm-cn --no-upstream ...
 ```
 
 ## 使用代理
@@ -269,7 +271,7 @@ openupm --no-upstream ...
 OpenUPM-CLI支持标准的`http_proxy`环境变量来指定HTTP，HTTPS或SOCKS代理。
 
 ```
-http_proxy="http://127.0.0.1:8080" openupm ...
+http_proxy="http://127.0.0.1:8080" openupm-cn ...
 ```
 
 您可能需要在系统级设置`http_proxy`和`https_proxy`环境变量，以保证[Unity编辑器可以访问您的代理服务器](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896)。
