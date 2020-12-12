@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/openupm/openupm-cli/compare/1.14.0...1.14.1) (2020-12-12)
+
+
+### Bug Fixes
+
+* recognize more Unity internal packages ([377de56](https://github.com/openupm/openupm-cli/commit/377de5663d2af2bf9f00346cc1ab2622585cbf47))
+
 # [1.14.0](https://github.com/openupm/openupm-cli/compare/1.13.0...1.14.0) (2020-11-16)
 
 
