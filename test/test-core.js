@@ -15,7 +15,8 @@ const {
   parseEditorVersion,
   parseEnv,
   parseName,
-  saveManifest
+  saveManifest,
+  isInternalPackage
 } = require("../lib/core");
 const {
   getWorkDir,
@@ -374,6 +375,7 @@ describe("cmd-core.js", function() {
       (info === undefined).should.be.ok();
     });
   });
+
   describe("getLatestVersion", function() {
     it("from dist-tags", async function() {
       getLatestVersion({ "dist-tags": { latest: "1.0.0" } }).should.equal(
@@ -450,6 +452,7 @@ describe("cmd-core.js", function() {
       (parseEditorVersion("2019") === null).should.be.ok();
     });
   });
+
   describe("compareEditorVersion", function() {
     it("test x1.y1 == x2.y2", function() {
       compareEditorVersion("2019.1", "2019.1").should.equal(0);
@@ -481,6 +484,18 @@ describe("cmd-core.js", function() {
       compareEditorVersion("2019.1.1b1", "2019.1.1f1").should.equal(-1);
       compareEditorVersion("2019.1.1a1", "2019.1.1b1").should.equal(-1);
       compareEditorVersion("2019.1.1f1", "2019.1.1c1").should.equal(-1);
+    });
+  });
+
+  describe("isInternalPackage", function() {
+    it("test com.otherorg.software", function() {
+      isInternalPackage("com.otherorg.software").should.not.be.ok();
+    });
+    it("test com.unity.ugui", function() {
+      isInternalPackage("com.unity.ugui").should.be.ok();
+    });
+    it("test com.unity.modules.tilemap", function() {
+      isInternalPackage("com.unity.modules.tilemap").should.be.ok();
     });
   });
 });
