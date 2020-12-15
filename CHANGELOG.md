@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/openupm/openupm-cli/compare/1.14.1...1.14.2) (2020-12-15)
+
+
+### Bug Fixes
+
+* handle editor version with a location build (2020.1.1f1c1) ([fc3e5de](https://github.com/openupm/openupm-cli/commit/fc3e5def5147f3a637d3d16e4430fcdf916af0aa))
+
 ## [1.14.1](https://github.com/openupm/openupm-cli/compare/1.14.0...1.14.1) (2020-12-12)
 
 
