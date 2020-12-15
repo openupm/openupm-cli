@@ -439,13 +439,16 @@ describe("cmd-core.js", function() {
       });
     });
     it("test x.y.zcn", function() {
-      parseEditorVersion("2019.2.1c5").should.deepEqual({
+      parseEditorVersion("2019.2.1f1c5").should.deepEqual({
         major: 2019,
         minor: 2,
         patch: 1,
-        flag: "c",
-        flagValue: 3,
-        build: 5
+        flag: "f",
+        flagValue: 2,
+        build: 1,
+        loc: "c",
+        locValue: 1,
+        locBuild: 5
       });
     });
     it("test invalid version", function() {
@@ -454,36 +457,44 @@ describe("cmd-core.js", function() {
   });
 
   describe("compareEditorVersion", function() {
-    it("test x1.y1 == x2.y2", function() {
+    it("test 2019.1 == 2019.1", function() {
       compareEditorVersion("2019.1", "2019.1").should.equal(0);
     });
-    it("test x1.y1 > x2.y2 equals", function() {
+    it("test 2019.1.1 == 2019.1.1", function() {
+      compareEditorVersion("2019.1.1", "2019.1.1").should.equal(0);
+    });
+    it("test 2019.1.1f1 == 2019.1.1f1", function() {
+      compareEditorVersion("2019.1.1f1", "2019.1.1f1").should.equal(0);
+    });
+    it("test 2019.1.1f1c1 == 2019.1.1f1c1", function() {
+      compareEditorVersion("2019.1.1f1c1", "2019.1.1f1c1").should.equal(0);
+    });
+    it("test 2019.2 > 2019.1", function() {
       compareEditorVersion("2019.2", "2019.1").should.equal(1);
+    });
+    it("test 2020.2 > 2019.1", function() {
       compareEditorVersion("2020.1", "2019.1").should.equal(1);
     });
-    it("test x1.y1 < x2.y2 equals", function() {
+    it("test 2019.1 < 2019.2", function() {
       compareEditorVersion("2019.1", "2019.2").should.equal(-1);
+    });
+    it("test 2019.1 < 2020.1", function() {
       compareEditorVersion("2019.1", "2020.1").should.equal(-1);
     });
-    it("test x1.y1.z1[flag1]n1 == x2.y2.z2[flag1]n2", function() {
-      compareEditorVersion("2019.1.1a1", "2019.1.1a1").should.equal(0);
-      compareEditorVersion("2019.1.1b1", "2019.1.1b1").should.equal(0);
-      compareEditorVersion("2019.1.1f1", "2019.1.1f1").should.equal(0);
-      compareEditorVersion("2019.1.1c1", "2019.1.1c1").should.equal(0);
+    it("test 2019.1 < 2019.1.1", function() {
+      compareEditorVersion("2019.1", "2019.1.1").should.equal(-1);
     });
-    it("test x1.y1.z1[flag1]n1 > x2.y2.z2[flag1]n21", function() {
-      compareEditorVersion("2019.1.1a2", "2019.1.1a1").should.equal(1);
-      compareEditorVersion("2019.1.2a1", "2019.1.1a1").should.equal(1);
-      compareEditorVersion("2019.1.1f1", "2019.1.1b1").should.equal(1);
-      compareEditorVersion("2019.1.1b1", "2019.1.1a1").should.equal(1);
-      compareEditorVersion("2019.1.1c1", "2019.1.1f1").should.equal(1);
+    it("test 2019.1.1 < 2019.1.1f1", function() {
+      compareEditorVersion("2019.1.1", "2019.1.1f1").should.equal(-1);
     });
-    it("test x1.y1.z1[flag1]n1 < x2.y2.z2[flag1]n21", function() {
-      compareEditorVersion("2019.1.1a1", "2019.1.1a2").should.equal(-1);
-      compareEditorVersion("2019.1.1a1", "2019.1.2a1").should.equal(-1);
-      compareEditorVersion("2019.1.1b1", "2019.1.1f1").should.equal(-1);
-      compareEditorVersion("2019.1.1a1", "2019.1.1b1").should.equal(-1);
-      compareEditorVersion("2019.1.1f1", "2019.1.1c1").should.equal(-1);
+    it("test 2019.1.1a1 < 2020.1.1b1", function() {
+      compareEditorVersion("2019.1.1a1", "2020.1.1b1").should.equal(-1);
+    });
+    it("test 2019.1.1b1 < 2020.1.1f1", function() {
+      compareEditorVersion("2019.1.1b1", "2020.1.1f1").should.equal(-1);
+    });
+    it("test 2019.1.1f1 < 2020.1.1f1c1", function() {
+      compareEditorVersion("2019.1.1f1", "2020.1.1f1c1").should.equal(-1);
     });
   });
 
