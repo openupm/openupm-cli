@@ -10,6 +10,7 @@
   },
   "bin": {
     "openupm": "bin/openupm",
+    "openupm-cli": "bin/openupm",
     "openupm-cn": "bin/openupm-cn"
   },
   "repository": {
