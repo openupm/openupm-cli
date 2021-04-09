@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/openupm/openupm-cli/compare/1.14.2...1.14.3) (2021-04-09)
+
+
+### Bug Fixes
+
+* allow running cli with npx v7 ([cda0df3](https://github.com/openupm/openupm-cli/commit/cda0df35d7d252d61b4d15f5ba1c8f1b145d83e1))
+
 ## [1.14.2](https://github.com/openupm/openupm-cli/compare/1.14.1...1.14.2) (2020-12-15)
 
 
