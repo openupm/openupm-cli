@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/openupm/openupm-cli/compare/1.15.0...1.15.1) (2022-05-08)
+
+
+### Bug Fixes
+
+* **deps:** update another-npm-registry-client to 8.7.0 ([1f0f013](https://github.com/openupm/openupm-cli/commit/1f0f013cc35bfbc2d6f0e35a93e88e160c0b47bb))
+
 # [1.15.0](https://github.com/openupm/openupm-cli/compare/1.14.3...1.15.0) (2022-05-08)
 
 
