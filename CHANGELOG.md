@@ -1,3 +1,11 @@
+# [1.15.0](https://github.com/openupm/openupm-cli/compare/1.14.3...1.15.0) (2022-05-08)
+
+
+### Features
+
+* cli requires node 14 ([c51dfb5](https://github.com/openupm/openupm-cli/commit/c51dfb5e620d8ac1c5dc4deaf4f506c72e683182))
+* **cli:** remove the '--clean-cache' parameter from the search command ([7cf2cf0](https://github.com/openupm/openupm-cli/commit/7cf2cf0d268ec8a9a971ab373759bbeef14abbcd))
+
 ## [1.14.3](https://github.com/openupm/openupm-cli/compare/1.14.2...1.14.3) (2021-04-09)
 
 
