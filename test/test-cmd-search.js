@@ -5,7 +5,6 @@ const nock = require("nock");
 const should = require("should");
 
 const search = require("../lib/cmd-search");
-const { cleanCache } = require("../lib/core");
 const {
   getWorkDir,
   createWorkDir,
@@ -33,7 +32,6 @@ describe("cmd-search.js", function() {
     }
   };
   beforeEach(function() {
-    cleanCache();
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
     removeWorkDir("test-openupm-cli");
@@ -41,7 +39,6 @@ describe("cmd-search.js", function() {
     [stdoutInspect, stderrInspect] = getInspects();
   });
   afterEach(function() {
-    cleanCache();
     removeWorkDir("test-openupm-cli");
     stdoutInspect.restore();
     stderrInspect.restore();
@@ -141,30 +138,6 @@ describe("cmd-search.js", function() {
         versions: { "1.0.0": "latest" }
       }
     };
-    const allResultSince = [
-      {
-        name: "com.example.package-b",
-        description: "A demo package",
-        "dist-tags": { latest: "2.0.0" },
-        maintainers: [{ name: "yo1", email: "yo1@example.com" }],
-        author: { name: "yo1", url: "https://github.com/yo1" },
-        repository: {
-          type: "git",
-          url: "git+https://github.com/yo/com.example.package-b.git"
-        },
-        readmeFilename: "README.md",
-        homepage: "https://github.com/yo/com.example.package-b#readme",
-        bugs: {
-          url: "https://github.com/yo/com.example.package-b/issues"
-        },
-        license: "MIT",
-        time: { modified: "2019-10-03T18:22:51.000Z" },
-        versions: { "2.0.0": "latest" }
-      }
-    ];
-    const allEmptyResult = {
-      _updated: 99999
-    };
     beforeEach(function() {
       nockUp();
       nock("http://example.com")
@@ -188,63 +161,6 @@ describe("cmd-search.js", function() {
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
-    });
-    it("from cache", async function() {
-      nock("http://example.com")
-        .get("/-/all")
-        .reply(200, allResult, {
-          "Content-Type": "application/json"
-        });
-      let retCode = await search("package-a", options);
-      retCode.should.equal(0);
-      var [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("fast search endpoint is not available").should.be.ok();
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
-      [stdoutInspect, stderrInspect] = getInspects();
-      nock("http://example.com")
-        .get(/\/-\/all\/since/)
-        .reply(200, [], {
-          "Content-Type": "application/json"
-        });
-      retCode = await search("package-a", options);
-      retCode.should.equal(0);
-      [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("fast search endpoint is not available").should.be.ok();
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
-    });
-    it("from cache and remote", async function() {
-      nock("http://example.com")
-        .get("/-/all")
-        .reply(200, allResult, {
-          "Content-Type": "application/json"
-        });
-      let retCode = await search("package-a", options);
-      retCode.should.equal(0);
-      var [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("fast search endpoint is not available").should.be.ok();
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
-      [stdoutInspect, stderrInspect] = getInspects();
-      nock("http://example.com")
-        .get(/\/-\/all\/since/)
-        .reply(200, allResultSince, {
-          "Content-Type": "application/json"
-        });
-      retCode = await search("package", options);
-      retCode.should.equal(0);
-      [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("fast search endpoint is not available").should.be.ok();
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
-      stdout.includes("package-b").should.be.ok();
-      stdout.includes("2.0.0").should.be.ok();
-      stdout.includes("2019-10-03").should.be.ok();
     });
     it("pkg not exist", async function() {
       nock("http://example.com")

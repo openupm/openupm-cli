@@ -50,7 +50,6 @@
     "cli-table": "^0.3.11",
     "commander": "^9.2.0",
     "is-wsl": "^2.2.0",
-    "key-file-storage": "^2.2.10",
     "libnpmsearch": "^5.0.3",
     "lodash": "^4.17.21",
     "mkdirp": "^1.0.4",

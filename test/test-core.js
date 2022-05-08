@@ -9,7 +9,6 @@ const {
   compareEditorVersion,
   env,
   fetchPackageInfo,
-  getCache,
   getLatestVersion,
   loadManifest,
   parseEditorVersion,
@@ -328,14 +327,6 @@ describe("cmd-core.js", function() {
       const manifest2 = loadManifest();
       manifest2.should.be.deepEqual(manifest);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
-    });
-  });
-
-  describe("getCache", function() {
-    it("simple", function() {
-      const cache = getCache();
-      (cache === null).should.be.false();
-      (cache === undefined).should.be.false();
     });
   });
 
