@@ -1,3 +1,10 @@
+## [1.15.2](https://github.com/openupm/openupm-cli/compare/1.15.1...1.15.2) (2022-05-09)
+
+
+### Bug Fixes
+
+* **cli:** adopt cli for commander 9.x ([3696d3c](https://github.com/openupm/openupm-cli/commit/3696d3c9e0841f299dbcf95e1d35fa55f4a077a0))
+
 ## [1.15.1](https://github.com/openupm/openupm-cli/compare/1.15.0...1.15.1) (2022-05-08)
 
 
