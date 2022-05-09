@@ -17,14 +17,14 @@ const {
 
 describe("cmd-view.js", function() {
   const options = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli")
     }
   };
   const upstreamOptions = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       chdir: getWorkDir("test-openupm-cli")
     }

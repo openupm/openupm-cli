@@ -18,21 +18,21 @@ const {
 
 describe("cmd-add.js", function() {
   const options = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli")
     }
   };
   const upstreamOptions = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       upstream: true,
       chdir: getWorkDir("test-openupm-cli")
     }
   };
   const testableOptions = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli")
@@ -40,7 +40,7 @@ describe("cmd-add.js", function() {
     test: true
   };
   const forceOptions = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli")

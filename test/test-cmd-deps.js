@@ -18,7 +18,7 @@ const {
 
 describe("cmd-deps.js", function() {
   const options = {
-    parent: {
+    _global: {
       registry: "http://example.com",
       chdir: getWorkDir("test-openupm-cli")
     }

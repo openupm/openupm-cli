@@ -48,7 +48,7 @@ describe("cmd-remove.js", function() {
     });
     it("remove pkg", async function() {
       const options = {
-        parent: {
+        _global: {
           registry: "http://example.com",
           chdir: getWorkDir("test-openupm-cli")
         }
@@ -69,7 +69,7 @@ describe("cmd-remove.js", function() {
     });
     it("remove pkg@1.0.0", async function() {
       const options = {
-        parent: {
+        _global: {
           registry: "http://example.com",
           chdir: getWorkDir("test-openupm-cli")
         }
@@ -83,7 +83,7 @@ describe("cmd-remove.js", function() {
     });
     it("remove pkg-not-exist", async function() {
       const options = {
-        parent: {
+        _global: {
           registry: "http://example.com",
           chdir: getWorkDir("test-openupm-cli")
         }
@@ -97,7 +97,7 @@ describe("cmd-remove.js", function() {
     });
     it("remove more than one pkgs", async function() {
       const options = {
-        parent: {
+        _global: {
           registry: "http://example.com",
           chdir: getWorkDir("test-openupm-cli")
         }

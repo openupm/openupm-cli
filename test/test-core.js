@@ -94,7 +94,7 @@ describe("cmd-core.js", function() {
       stderrInspect.restore();
     });
     it("defaults", async function() {
-      (await parseEnv({ parent: {} }, { checkPath: false })).should.be.ok();
+      (await parseEnv({ _global: {} }, { checkPath: false })).should.be.ok();
       env.registry.should.equal("https://package.openupm.com");
       env.upstream.should.be.ok();
       env.upstreamRegistry.should.equal("https://packages.unity.com");
@@ -107,7 +107,7 @@ describe("cmd-core.js", function() {
     it("check path", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("test-openupm-cli") } },
+          { _global: { chdir: getWorkDir("test-openupm-cli") } },
           { checkPath: true }
         )
       ).should.be.ok();
@@ -120,7 +120,7 @@ describe("cmd-core.js", function() {
     it("can not resolve path", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("path-not-exist") } },
+          { _global: { chdir: getWorkDir("path-not-exist") } },
           { checkPath: true }
         )
       ).should.not.be.ok();
@@ -130,7 +130,7 @@ describe("cmd-core.js", function() {
     it("can not locate manifest.json", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("test-openupm-cli-no-manifest") } },
+          { _global: { chdir: getWorkDir("test-openupm-cli-no-manifest") } },
           { checkPath: true }
         )
       ).should.not.be.ok();
@@ -140,7 +140,7 @@ describe("cmd-core.js", function() {
     it("custom registry", async function() {
       (
         await parseEnv(
-          { parent: { registry: "https://registry.npmjs.org" } },
+          { _global: { registry: "https://registry.npmjs.org" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -151,7 +151,7 @@ describe("cmd-core.js", function() {
     it("custom registry with splash", async function() {
       (
         await parseEnv(
-          { parent: { registry: "https://registry.npmjs.org/" } },
+          { _global: { registry: "https://registry.npmjs.org/" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -162,7 +162,7 @@ describe("cmd-core.js", function() {
     it("custom registry with extra path", async function() {
       (
         await parseEnv(
-          { parent: { registry: "https://registry.npmjs.org/some" } },
+          { _global: { registry: "https://registry.npmjs.org/some" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -173,7 +173,7 @@ describe("cmd-core.js", function() {
     it("custom registry with extra path and splash", async function() {
       (
         await parseEnv(
-          { parent: { registry: "https://registry.npmjs.org/some/" } },
+          { _global: { registry: "https://registry.npmjs.org/some/" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -184,7 +184,7 @@ describe("cmd-core.js", function() {
     it("custom registry without http", async function() {
       (
         await parseEnv(
-          { parent: { registry: "registry.npmjs.org" } },
+          { _global: { registry: "registry.npmjs.org" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -195,7 +195,7 @@ describe("cmd-core.js", function() {
     it("custom registry with ipv4+port", async function() {
       (
         await parseEnv(
-          { parent: { registry: "http://127.0.0.1:4873" } },
+          { _global: { registry: "http://127.0.0.1:4873" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -206,7 +206,7 @@ describe("cmd-core.js", function() {
     it("custom registry with ipv6+port", async function() {
       (
         await parseEnv(
-          { parent: { registry: "http://[1:2:3:4:5:6:7:8]:4873" } },
+          { _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -216,7 +216,7 @@ describe("cmd-core.js", function() {
     });
     it("upstream", async function() {
       (
-        await parseEnv({ parent: { upstream: false } }, { checkPath: false })
+        await parseEnv({ _global: { upstream: false } }, { checkPath: false })
       ).should.be.ok();
       env.upstream.should.not.be.ok();
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
@@ -224,7 +224,7 @@ describe("cmd-core.js", function() {
     it("editorVersion", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("test-openupm-cli") } },
+          { _global: { chdir: getWorkDir("test-openupm-cli") } },
           { checkPath: true }
         )
       ).should.be.ok();
@@ -233,7 +233,7 @@ describe("cmd-core.js", function() {
     });
     it("region cn", async function() {
       (
-        await parseEnv({ parent: { cn: true } }, { checkPath: false })
+        await parseEnv({ _global: { cn: true } }, { checkPath: false })
       ).should.be.ok();
       env.registry.should.be.equal("https://package.openupm.cn");
       env.upstreamRegistry.should.be.equal("https://packages.unity.cn");
@@ -243,7 +243,7 @@ describe("cmd-core.js", function() {
     it("region cn with a custom registry", async function() {
       (
         await parseEnv(
-          { parent: { cn: true, registry: "https://reg.custom-package.com" } },
+          { _global: { cn: true, registry: "https://reg.custom-package.com" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -281,7 +281,7 @@ describe("cmd-core.js", function() {
     it("loadManifest", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("test-openupm-cli") } },
+          { _global: { chdir: getWorkDir("test-openupm-cli") } },
           { checkPath: true }
         )
       ).should.be.ok();
@@ -292,7 +292,7 @@ describe("cmd-core.js", function() {
     it("no manifest file", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("path-not-exist") } },
+          { _global: { chdir: getWorkDir("path-not-exist") } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -304,7 +304,7 @@ describe("cmd-core.js", function() {
     it("wrong json content", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("test-openupm-cli-wrong-json") } },
+          { _global: { chdir: getWorkDir("test-openupm-cli-wrong-json") } },
           { checkPath: true }
         )
       ).should.be.ok();
@@ -316,7 +316,7 @@ describe("cmd-core.js", function() {
     it("saveManifest", async function() {
       (
         await parseEnv(
-          { parent: { chdir: getWorkDir("test-openupm-cli") } },
+          { _global: { chdir: getWorkDir("test-openupm-cli") } },
           { checkPath: true }
         )
       ).should.be.ok();
@@ -340,7 +340,7 @@ describe("cmd-core.js", function() {
     it("simple", async function() {
       (
         await parseEnv(
-          { parent: { registry: "http://example.com" } },
+          { _global: { registry: "http://example.com" } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -354,7 +354,7 @@ describe("cmd-core.js", function() {
     it("404", async function() {
       (
         await parseEnv(
-          { parent: { registry: "http://example.com" } },
+          { _global: { registry: "http://example.com" } },
           { checkPath: false }
         )
       ).should.be.ok();
