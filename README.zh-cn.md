@@ -12,6 +12,7 @@ openupm-cli是用于维护Unity的`manifest.json`的命令行工具。可便捷�
   - [工作原理](#工作原理)
   - [安装](#安装)
     - [Windows平台故障排除](#windows平台故障排除)
+    - [Cannot find module 'node:net' 错误](#cannot-find-module-nodenet-错误)
   - [中国区](#中国区)
   - [指令](#指令)
     - [添加软件包](#添加软件包)
@@ -62,6 +63,19 @@ c:\Program Files\nodejs
 # npm全局可执行文件路径
 C:\Users\{yourName}\AppData\Roaming\npm
 ```
+
+### Cannot find module 'node:net' 错误
+
+```
+internal/modules/cjs/loader.js:818
+  throw err;
+  ^
+
+Error: Cannot find module 'node:net'
+```
+
+请安装[nodejs 14或以上版本](https://nodejs.org/en/download/)。
+
 
 ## 中国区
 

@@ -12,6 +12,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
   - [How it works](#how-it-works)
   - [Installation](#installation)
     - [Windows platform troubleshooting](#windows-platform-troubleshooting)
+    - [Cannot find module 'node:net'](#cannot-find-module-nodenet)
   - [China region](#china-region)
   - [Commands](#commands)
     - [Add packages](#add-packages)
@@ -62,6 +63,18 @@ c:\Program Files\nodejs
 # for npm global bin
 C:\Users\{yourName}\AppData\Roaming\npm
 ```
+
+### Cannot find module 'node:net'
+
+```
+internal/modules/cjs/loader.js:818
+  throw err;
+  ^
+
+Error: Cannot find module 'node:net'
+```
+
+Please install [nodejs 14 or above](https://nodejs.org/en/download/).
 
 ## China region
 
