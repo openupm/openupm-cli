@@ -1,3 +1,10 @@
+## [1.15.3](https://github.com/openupm/openupm-cli/compare/1.15.2...1.15.3) (2022-05-10)
+
+
+### Bug Fixes
+
+* **cli:** require node 14 explicitly ([9882ef9](https://github.com/openupm/openupm-cli/commit/9882ef94458e63cda97aa2437ae0dad3c9aed831))
+
 ## [1.15.2](https://github.com/openupm/openupm-cli/compare/1.15.1...1.15.2) (2022-05-09)
 
 
