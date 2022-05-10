@@ -3,6 +3,9 @@
   "version": "1.15.2",
   "preferGlobal": true,
   "description": "openupm command line interface",
+  "engines": {
+    "node": ">=14"
+  },
   "main": "index.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha",
