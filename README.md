@@ -39,7 +39,7 @@ The command-line tool installs the 3rd-party registry as a scoped registry and m
 
 ## Installation
 
-- Requires [nodejs 14 or above](https://nodejs.org/en/download/).
+- Requires [nodejs 14.18 or above](https://nodejs.org/en/download/).
 - Install via npm:
 
   ```
