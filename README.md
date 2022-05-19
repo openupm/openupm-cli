@@ -74,7 +74,7 @@ internal/modules/cjs/loader.js:818
 Error: Cannot find module 'node:net'
 ```
 
-Please install [nodejs 14 or above](https://nodejs.org/en/download/).
+Please install [nodejs 14.18 or above](https://nodejs.org/en/download/).
 
 ## China region
 
