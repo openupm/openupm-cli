@@ -1,3 +1,10 @@
+## [1.15.4](https://github.com/openupm/openupm-cli/compare/1.15.3...1.15.4) (2022-05-19)
+
+
+### Bug Fixes
+
+* **cli:** openupm-cli requires nodejs 14.18 or above ([b38a9b0](https://github.com/openupm/openupm-cli/commit/b38a9b0556100875db30860c0ea8394c89ece4aa))
+
 ## [1.15.3](https://github.com/openupm/openupm-cli/compare/1.15.2...1.15.3) (2022-05-10)
 
 
