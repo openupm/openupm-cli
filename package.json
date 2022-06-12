@@ -43,7 +43,7 @@
     "mocha": "^10.0.0",
     "nock": "^13.2.4",
     "prettier": "^2.6.2",
-    "semantic-release": "^19.0.2",
+    "semantic-release": "^19.0.3",
     "should": "^13.2.3",
     "test-console": "^2.0.0"
   },
