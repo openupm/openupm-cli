@@ -1,3 +1,10 @@
+## [1.15.5](https://github.com/openupm/openupm-cli/compare/1.15.4...1.15.5) (2022-10-25)
+
+
+### Bug Fixes
+
+* parse version and date from different search result formats ([4acb09a](https://github.com/openupm/openupm-cli/commit/4acb09a291f5659eef1273f2c73354dcbc14ef37))
+
 ## [1.15.4](https://github.com/openupm/openupm-cli/compare/1.15.3...1.15.4) (2022-05-19)
 
 
