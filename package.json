@@ -8,7 +8,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha",
+    "test": "tsc && cross-env NODE_ENV=test mocha",
     "semantic-release": "semantic-release"
   },
   "bin": {
@@ -35,7 +35,14 @@
     "@babel/eslint-parser": "^7.17.0",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
+    "@types/cli-table": "^0.3.2",
+    "@types/libnpmsearch": "^2.0.4",
+    "@types/lodash": "^4.14.199",
     "@types/node": "^20.8.6",
+    "@types/npmlog": "^4.1.4",
+    "@types/pkginfo": "^0.4.1",
+    "@types/promptly": "^3.0.3",
+    "@types/update-notifier": "^6.0.5",
     "cross-env": "^7.0.3",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",

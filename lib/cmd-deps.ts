@@ -1,7 +1,13 @@
-const { log } = require("./logger");
-const { fetchPackageDependencies, parseEnv, parseName } = require("./core");
+import log from "./logger";
+import { fetchPackageDependencies, parseEnv, parseName } from "./core";
+import { GlobalOptions, Pkg, PkgName, PkgVersionName } from "./types";
 
-const deps = async function(pkg, options) {
+export type DepsOptions = {
+  deep: boolean;
+  _global: GlobalOptions;
+};
+
+export const deps = async function (pkg: Pkg, options: DepsOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
@@ -12,24 +18,30 @@ const deps = async function(pkg, options) {
   return 0;
 };
 
-const _deps = async function({ name, version, deep }) {
+const _deps = async function ({
+  name,
+  version,
+  deep,
+}: {
+  name: PkgName;
+  version: PkgVersionName;
+  deep: boolean;
+}) {
   // eslint-disable-next-line no-unused-vars
   const [depsValid, depsInvalid] = await fetchPackageDependencies({
     name,
     version,
-    deep
+    deep,
   });
   depsValid
-    .filter(x => !x.self)
-    .forEach(x => log.notice("dependency", `${x.name}@${x.version}`));
+    .filter((x) => !x.self)
+    .forEach((x) => log.notice("dependency", `${x.name}@${x.version}`));
   depsInvalid
-    .filter(x => !x.self)
-    .forEach(x => {
+    .filter((x) => !x.self)
+    .forEach((x) => {
       let reason = "unknown";
       if (x.reason == "package404") reason = "missing dependency";
       else if (x.reason == "version404") reason = "missing dependency version";
       log.warn(reason, `${x.name}@${x.version}`);
     });
 };
-
-module.exports = deps;

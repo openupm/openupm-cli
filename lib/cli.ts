@@ -1,16 +1,20 @@
-const program = require("commander");
-const add = require("./cmd-add");
-const remove = require("./cmd-remove");
-const search = require("./cmd-search");
-const view = require("./cmd-view");
-const deps = require("./cmd-deps");
-const { login } = require("./cmd-login");
-const { log } = require("./logger");
-require("pkginfo")(module);
+import { program } from "commander";
+import pkginfo from "pkginfo";
+import updateNotifier from "update-notifier";
+import { add } from "./cmd-add";
+import { remove } from "./cmd-remove";
+import { search } from "./cmd-search";
+import { view } from "./cmd-view";
+import { deps } from "./cmd-deps";
+import { login } from "./cmd-login";
+
+import log from "./logger";
 
 // update-notifier
-const updateNotifier = require("update-notifier");
-const pkg = require("../package.json");
+
+import pkg from "../package.json";
+
+pkginfo(module);
 const notifier = updateNotifier({ pkg });
 notifier.notify();
 
@@ -39,7 +43,7 @@ openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
-    options._global = program.opts()
+    options._global = program.opts();
     const pkgs = [pkg].concat(otherPkgs);
     const retCode = await add(pkgs, options);
     if (retCode) process.exit(retCode);
@@ -49,8 +53,8 @@ program
   .command("remove <pkg> [otherPkgs...]")
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
-  .action(async function(pkg, otherPkgs, options) {
-    options._global = program.opts()
+  .action(async function (pkg, otherPkgs, options) {
+    options._global = program.opts();
     const pkgs = [pkg].concat(otherPkgs);
     const retCode = await remove(pkgs, options);
     if (retCode) process.exit(retCode);
@@ -60,8 +64,8 @@ program
   .command("search <keyword>")
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
-  .action(async function(keyword, options) {
-    options._global = program.opts()
+  .action(async function (keyword, options) {
+    options._global = program.opts();
     const retCode = await search(keyword, options);
     if (retCode) process.exit(retCode);
   });
@@ -70,8 +74,8 @@ program
   .command("view <pkg>")
   .aliases(["v", "info", "show"])
   .description("view package information")
-  .action(async function(pkg, options) {
-    options._global = program.opts()
+  .action(async function (pkg, options) {
+    options._global = program.opts();
     const retCode = await view(pkg, options);
     if (retCode) process.exit(retCode);
   });
@@ -85,8 +89,8 @@ program
 openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
-  .action(async function(pkg, options) {
-    options._global = program.opts()
+  .action(async function (pkg, options) {
+    options._global = program.opts();
     const retCode = await deps(pkg, options);
     if (retCode) process.exit(retCode);
   });
@@ -104,19 +108,20 @@ program
     "always auth for tarball hosted on a different domain"
   )
   .description("authenticate with a scoped registry")
-  .action(async function(options) {
-    options._global = program.opts()
+  .action(async function (options) {
+    options._global = program.opts();
     try {
       const retCode = await login(options);
       if (retCode) process.exit(retCode);
     } catch (err) {
+      // @ts-ignore
       log.error("", err.message);
       process.exit(1);
     }
   });
 
 // prompt for invalid command
-program.on("command:*", function() {
+program.on("command:*", function () {
   log.warn("", `unknown command: ${program.args.join(" ")}`);
   log.warn("", "see --help for a list of available commands");
   process.exit(1);
