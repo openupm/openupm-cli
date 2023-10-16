@@ -3,24 +3,24 @@
 const assert = require("assert");
 const should = require("should");
 
-const { parseEnv, loadManifest } = require("../lib/core");
-const remove = require("../lib/cmd-remove");
+const { parseEnv, loadManifest } = require("../build/lib/core");
+const { remove } = require("../build/lib/cmd-remove");
 const {
   getInspects,
   getOutputs,
   getWorkDir,
   createWorkDir,
-  removeWorkDir
+  removeWorkDir,
 } = require("./utils");
 
-describe("cmd-remove.js", function() {
-  describe("remove", function() {
+describe("cmd-remove.ts", function () {
+  describe("remove", function () {
     let stdoutInspect = null;
     let stderrInspect = null;
     const defaultManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",
-        "com.example.package-b": "1.0.0"
+        "com.example.package-b": "1.0.0",
       },
       scopedRegistries: [
         {
@@ -28,30 +28,30 @@ describe("cmd-remove.js", function() {
           scopes: [
             "com.example",
             "com.example.package-a",
-            "com.example.package-b"
+            "com.example.package-b",
           ],
-          url: "http://example.com"
-        }
-      ]
+          url: "http://example.com",
+        },
+      ],
     };
-    beforeEach(function() {
+    beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", {
-        manifest: defaultManifest
+        manifest: defaultManifest,
       });
       [stdoutInspect, stderrInspect] = getInspects();
     });
-    afterEach(function() {
+    afterEach(function () {
       removeWorkDir("test-openupm-cli");
       stdoutInspect.restore();
       stderrInspect.restore();
     });
-    it("remove pkg", async function() {
+    it("remove pkg", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove("com.example.package-a", options);
       retCode.should.equal(0);
@@ -61,18 +61,18 @@ describe("cmd-remove.js", function() {
       ).should.be.ok();
       manifest.scopedRegistries[0].scopes.should.be.deepEqual([
         "com.example",
-        "com.example.package-b"
+        "com.example.package-b",
       ]);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("removed ").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
-    it("remove pkg@1.0.0", async function() {
+    it("remove pkg@1.0.0", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
@@ -81,12 +81,12 @@ describe("cmd-remove.js", function() {
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("please replace").should.be.ok();
     });
-    it("remove pkg-not-exist", async function() {
+    it("remove pkg-not-exist", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove("pkg-not-exist", options);
       retCode.should.equal(1);
@@ -95,12 +95,12 @@ describe("cmd-remove.js", function() {
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
-    it("remove more than one pkgs", async function() {
+    it("remove more than one pkgs", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove(
         ["com.example.package-a", "com.example.package-b"],

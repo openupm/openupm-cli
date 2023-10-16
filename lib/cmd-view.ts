@@ -1,15 +1,20 @@
-const chalk = require("chalk");
+import chalk from "chalk";
+import log from "./logger";
 
-const { log } = require("./logger");
-const {
+import {
   env,
   fetchPackageInfo,
   getLatestVersion,
   parseEnv,
-  parseName
-} = require("./core");
+  parseName,
+} from "./core";
+import { GlobalOptions, Pkg, PkgInfo } from "./types";
 
-const view = async function(pkg, options) {
+export type ViewOptions = {
+  _global: GlobalOptions;
+};
+
+export const view = async function (pkg: Pkg, options: ViewOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
@@ -32,7 +37,7 @@ const view = async function(pkg, options) {
   return 0;
 };
 
-const printInfo = function(pkg) {
+const printInfo = function (pkg: PkgInfo) {
   const versionCount = Object.keys(pkg.versions).length;
   const ver = getLatestVersion(pkg);
   const verInfo = pkg.versions[ver];
@@ -45,7 +50,7 @@ const printInfo = function(pkg) {
   const dependencies = verInfo.dependencies;
   const latest = pkg["dist-tags"].latest;
   let time = pkg.time.modified;
-  if (!time && latest in pkg.time) time = pkg.time[latest];
+  if (!time && latest && latest in pkg.time) time = pkg.time[latest];
 
   console.log();
   console.log(
@@ -78,7 +83,7 @@ const printInfo = function(pkg) {
     console.log("dependencies");
     Object.keys(dependencies)
       .sort()
-      .forEach(n => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
+      .forEach((n) => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
   }
 
   console.log();
@@ -93,5 +98,3 @@ const printInfo = function(pkg) {
     console.log("  " + chalk.greenBright(version));
   }
 };
-
-module.exports = view;

@@ -7,9 +7,9 @@ const {
   validateRegistry,
   generateNpmrcLines,
   getNpmrcPath
-} = require("../lib/cmd-login");
+} = require("../build/lib/cmd-login");
 
-describe("cmd-login.js", function() {
+describe("cmd-login.ts", function() {
   describe("validateRegistry", function() {
     it("should validate http", async function() {
       validateRegistry("http://registry.npmjs.org/").should.be.ok();

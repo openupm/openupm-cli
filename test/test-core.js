@@ -16,7 +16,7 @@ const {
   parseName,
   saveManifest,
   isInternalPackage
-} = require("../lib/core");
+} = require("../build/lib/core");
 const {
   getWorkDir,
   createWorkDir,
@@ -27,7 +27,7 @@ const {
   nockDown
 } = require("./utils");
 
-describe("cmd-core.js", function() {
+describe("cmd-core.ts", function() {
   describe("parseName", function() {
     it("pkg@version", function() {
       parseName("pkg@1.0.0").should.deepEqual({

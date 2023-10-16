@@ -1,13 +1,15 @@
-const { log } = require("./logger");
-const {
-  env,
-  loadManifest,
-  parseEnv,
-  parseName,
-  saveManifest
-} = require("./core");
+import log from "./logger";
+import { env, loadManifest, parseEnv, parseName, saveManifest } from "./core";
+import { GlobalOptions, Pkg, ScopedRegistry } from "./types";
 
-const remove = async function(pkgs, options) {
+export type RemoveOptions = {
+  _global: GlobalOptions;
+};
+
+export const remove = async function (
+  pkgs: Pkg[] | Pkg,
+  options: RemoveOptions
+) {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envOk = await parseEnv(options, { checkPath: true });
@@ -16,8 +18,8 @@ const remove = async function(pkgs, options) {
   const results = [];
   for (const pkg of pkgs) results.push(await _remove(pkg));
   const result = {
-    code: results.filter(x => x.code != 0).length > 0 ? 1 : 0,
-    dirty: results.filter(x => x.dirty).length > 0
+    code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
+    dirty: results.filter((x) => x.dirty).length > 0,
   };
   // print manifest notice
   if (result.dirty)
@@ -25,7 +27,7 @@ const remove = async function(pkgs, options) {
   return result.code;
 };
 
-const _remove = async function(pkg) {
+const _remove = async function (pkg: Pkg) {
   // dirty flag
   let dirty = false;
   // parse name
@@ -50,7 +52,7 @@ const _remove = async function(pkg) {
   }
   // remove from scopedRegistries
   if (manifest.scopedRegistries) {
-    const filterEntry = x => {
+    const filterEntry = (x: ScopedRegistry) => {
       let url = x.url || "";
       if (url.endsWith("/")) url = url.slice(0, -1);
       return url == env.registry;
@@ -78,5 +80,3 @@ const _remove = async function(pkg) {
   }
   return { code: 0, dirty };
 };
-
-module.exports = remove;

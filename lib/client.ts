@@ -1,12 +1,14 @@
-const { promisify } = require("util");
-const RegClient = require("another-npm-registry-client");
+import {promisify} from "util";
 
-const { log } = require("./logger");
+// @ts-ignore
+import RegClient from "another-npm-registry-client";
+import log from "./logger";
+
 
 /**
  * Return npm client
  */
-const getNpmClient = function() {
+export const getNpmClient = function() {
   // create client
   const client = new RegClient({ log });
   return {
@@ -16,8 +18,4 @@ const getNpmClient = function() {
     get: promisify(client.get.bind(client)),
     adduser: promisify(client.adduser.bind(client))
   };
-};
-
-module.exports = {
-  getNpmClient
 };
