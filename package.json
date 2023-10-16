@@ -35,6 +35,7 @@
     "@babel/eslint-parser": "^7.17.0",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
+    "@types/node": "^20.8.6",
     "cross-env": "^7.0.3",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
@@ -45,7 +46,8 @@
     "prettier": "^2.6.2",
     "semantic-release": "^19.0.3",
     "should": "^13.2.3",
-    "test-console": "^2.0.0"
+    "test-console": "^2.0.0",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
