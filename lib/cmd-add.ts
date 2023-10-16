@@ -1,6 +1,6 @@
-const { log } = require("./logger");
-const url = require("url");
-const {
+import log from "./logger";
+import url from "url";
+import {
   compareEditorVersion,
   env,
   fetchPackageDependencies,
@@ -10,10 +10,20 @@ const {
   parseEditorVersion,
   parseEnv,
   parseName,
-  saveManifest
-} = require("./core");
+  saveManifest,
+} from "./core";
+import { GlobalOptions, Pkg, PkgName, ScopedRegistry } from "./types";
 
-const add = async function(pkgs, options) {
+export type AddOptions = {
+  test: boolean;
+  force: boolean;
+  _global: GlobalOptions;
+};
+
+export const add = async function (
+  pkgs: Pkg | Pkg[],
+  options: AddOptions
+): Promise<number> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envOk = await parseEnv(options, { checkPath: true });
@@ -25,8 +35,8 @@ const add = async function(pkgs, options) {
       await _add({ pkg, testables: options.test, force: options.force })
     );
   const result = {
-    code: results.filter(x => x.code != 0).length > 0 ? 1 : 0,
-    dirty: results.filter(x => x.dirty).length > 0
+    code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
+    dirty: results.filter((x) => x.dirty).length > 0,
   };
   // print manifest notice
   if (result.dirty)
@@ -34,7 +44,15 @@ const add = async function(pkgs, options) {
   return result.code;
 };
 
-const _add = async function({ pkg, testables, force }) {
+const _add = async function ({
+  pkg,
+  testables,
+  force,
+}: {
+  pkg: Pkg;
+  testables: boolean;
+  force: boolean;
+}) {
   // dirty flag
   let dirty = false;
   // is upstream package flag
@@ -49,7 +67,7 @@ const _add = async function({ pkg, testables, force }) {
     manifest.dependencies = {};
   }
   // packages that added to scope registry
-  const pkgsInScope = [];
+  const pkgsInScope: PkgName[] = [];
   const isGitOrLocal =
     version &&
     (version.startsWith("git") ||
@@ -70,7 +88,7 @@ const _add = async function({ pkg, testables, force }) {
     const versions = Object.keys(pkgInfo.versions);
     // eslint-disable-next-line require-atomic-updates
     if (!version || version == "latest") version = getLatestVersion(pkgInfo);
-    if (versions.filter(x => x == version).length <= 0) {
+    if (versions.filter((x) => x == version).length <= 0) {
       log.warn(
         "404",
         `version ${version} is not a valid choice of: ${versions
@@ -79,6 +97,7 @@ const _add = async function({ pkg, testables, force }) {
       );
       return { code: 1, dirty };
     }
+
     const versionInfo = pkgInfo.versions[version];
     // verify editor version
     if (versionInfo.unity) {
@@ -130,16 +149,18 @@ const _add = async function({ pkg, testables, force }) {
       const [depsValid, depsInvalid] = await fetchPackageDependencies({
         name,
         version,
-        deep: true
+        deep: true,
       });
       // add depsValid to pkgsInScope.
       depsValid
-        .filter(x => !x.upstream && !x.internal)
-        .map(x => x.name)
-        .forEach(name => pkgsInScope.push(name));
+        .filter((x) => !x.upstream && !x.internal)
+        .map((x) => x.name)
+        .forEach((name) => pkgsInScope.push(name));
       // print suggestion for depsInvalid
-      depsInvalid.forEach(depObj => {
+      depsInvalid.forEach((depObj) => {
         if (depObj.reason == "package404" || depObj.reason == "version404") {
+          // TODO: Do null check on manifest
+          // @ts-ignore
           const resolvedVersion = manifest.dependencies[depObj.name];
           depObj.resolved = Boolean(resolvedVersion);
           if (!depObj.resolved)
@@ -149,7 +170,7 @@ const _add = async function({ pkg, testables, force }) {
             );
         }
       });
-      if (depsInvalid.filter(x => !x.resolved).length > 0) {
+      if (depsInvalid.filter((x) => !x.resolved).length > 0) {
         if (!force) {
           log.error(
             "missing dependencies",
@@ -162,6 +183,8 @@ const _add = async function({ pkg, testables, force }) {
   }
   // add to dependencies
   const oldVersion = manifest.dependencies[name];
+  // TODO: Do undefined check on version
+  // @ts-ignore
   manifest.dependencies[name] = version;
   if (!oldVersion) {
     // Log the added package
@@ -181,16 +204,18 @@ const _add = async function({ pkg, testables, force }) {
       manifest.scopedRegistries = [];
       dirty = true;
     }
-    const filterEntry = x => {
+    const filterEntry = (x: ScopedRegistry): boolean => {
       let addr = x.url || "";
       if (addr.endsWith("/")) addr = addr.slice(0, -1);
       return addr == env.registry;
     };
     if (manifest.scopedRegistries.filter(filterEntry).length <= 0) {
       manifest.scopedRegistries.push({
+        // TODO: Handle null name
+        // @ts-ignore
         name: url.parse(env.registry).hostname,
         url: env.registry,
-        scopes: []
+        scopes: [],
       });
       dirty = true;
     }
@@ -198,7 +223,7 @@ const _add = async function({ pkg, testables, force }) {
     // apply pkgsInScope
     let scopesSet = new Set(entry.scopes || []);
     pkgsInScope.push(env.namespace);
-    pkgsInScope.forEach(name => {
+    pkgsInScope.forEach((name) => {
       if (!scopesSet.has(name)) {
         scopesSet.add(name);
         dirty = true;
@@ -220,5 +245,3 @@ const _add = async function({ pkg, testables, force }) {
   }
   return { code: 0, dirty };
 };
-
-module.exports = add;

@@ -4,7 +4,7 @@ const assert = require("assert");
 const nock = require("nock");
 const should = require("should");
 
-const search = require("../lib/cmd-search");
+const { search } = require("../build/lib/cmd-search");
 const {
   getWorkDir,
   createWorkDir,
@@ -12,38 +12,38 @@ const {
   getInspects,
   getOutputs,
   nockUp,
-  nockDown
+  nockDown,
 } = require("./utils");
 
-describe("cmd-search.js", function() {
+describe("cmd-search.ts", function () {
   let stdoutInspect = null;
   let stderrInspect = null;
   const options = {
     _global: {
       registry: "http://example.com",
       upstream: false,
-      chdir: getWorkDir("test-openupm-cli")
-    }
+      chdir: getWorkDir("test-openupm-cli"),
+    },
   };
   const upstreamOptions = {
     _global: {
       registry: "http://example.com",
-      chdir: getWorkDir("test-openupm-cli")
-    }
+      chdir: getWorkDir("test-openupm-cli"),
+    },
   };
-  beforeEach(function() {
+  beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
     [stdoutInspect, stderrInspect] = getInspects();
   });
-  afterEach(function() {
+  afterEach(function () {
     removeWorkDir("test-openupm-cli");
     stdoutInspect.restore();
     stderrInspect.restore();
   });
-  describe("search endpoint", function() {
+  describe("search endpoint", function () {
     const searchEndpointResult = {
       objects: [
         {
@@ -52,16 +52,16 @@ describe("cmd-search.js", function() {
             scope: "unscoped",
             "dist-tags": { latest: "1.0.0" },
             versions: {
-              "1.0.0": "latest"
+              "1.0.0": "latest",
             },
             description: "A demo package",
             time: {
-              modified: "2019-10-02T04:02:38.335Z"
+              modified: "2019-10-02T04:02:38.335Z",
             },
             links: {},
             author: { name: "yo", url: "https://github.com/yo" },
             publisher: { username: "yo", email: "yo@example.com" },
-            maintainers: [{ username: "yo", email: "yo@example.com" }]
+            maintainers: [{ username: "yo", email: "yo@example.com" }],
           },
           flags: { unstable: true },
           score: {
@@ -69,37 +69,37 @@ describe("cmd-search.js", function() {
             detail: {
               quality: 0.64303646684878,
               popularity: 0.0034858628087645178,
-              maintenance: 0.3329285640997383
-            }
+              maintenance: 0.3329285640997383,
+            },
           },
-          searchScore: 0.000005798558
-        }
+          searchScore: 0.000005798558,
+        },
       ],
       total: 1,
-      time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)"
+      time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)",
     };
     const searchEndpointEmptyResult = {
       objects: [],
       total: 0,
-      time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)"
+      time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)",
     };
-    beforeEach(function() {
+    beforeEach(function () {
       nockUp();
       nock("http://example.com")
         .get(/-\/v1\/search\?text=package-a/)
         .reply(200, searchEndpointResult, {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         });
       nock("http://example.com")
         .get(/-\/v1\/search\?text=pkg-not-exist/)
         .reply(200, searchEndpointEmptyResult, {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         });
     });
-    afterEach(function() {
+    afterEach(function () {
       nockDown();
     });
-    it("simple", async function() {
+    it("simple", async function () {
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
@@ -107,7 +107,7 @@ describe("cmd-search.js", function() {
       stdout.includes("1.0.0").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
     });
-    it("pkg not exist", async function() {
+    it("pkg not exist", async function () {
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
@@ -115,7 +115,7 @@ describe("cmd-search.js", function() {
     });
   });
 
-  describe("old search", function() {
+  describe("old search", function () {
     const allResult = {
       _updated: 99999,
       "com.example.package-a": {
@@ -126,34 +126,32 @@ describe("cmd-search.js", function() {
         author: { name: "yo", url: "https://github.com/yo" },
         repository: {
           type: "git",
-          url: "git+https://github.com/yo/com.example.package-a.git"
+          url: "git+https://github.com/yo/com.example.package-a.git",
         },
         readmeFilename: "README.md",
         homepage: "https://github.com/yo/com.example.package-a#readme",
         bugs: {
-          url: "https://github.com/yo/com.example.package-a/issues"
+          url: "https://github.com/yo/com.example.package-a/issues",
         },
         license: "MIT",
         time: { modified: "2019-10-02T18:22:51.000Z" },
-        versions: { "1.0.0": "latest" }
-      }
+        versions: { "1.0.0": "latest" },
+      },
     };
-    beforeEach(function() {
+    beforeEach(function () {
       nockUp();
       nock("http://example.com")
         .persist()
         .get(/-\/v1\/search\?text=/)
         .reply(404);
     });
-    afterEach(function() {
+    afterEach(function () {
       nockDown();
     });
-    it("from remote", async function() {
-      nock("http://example.com")
-        .get("/-/all")
-        .reply(200, allResult, {
-          "Content-Type": "application/json"
-        });
+    it("from remote", async function () {
+      nock("http://example.com").get("/-/all").reply(200, allResult, {
+        "Content-Type": "application/json",
+      });
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
@@ -162,12 +160,10 @@ describe("cmd-search.js", function() {
       stdout.includes("1.0.0").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
     });
-    it("pkg not exist", async function() {
-      nock("http://example.com")
-        .get("/-/all")
-        .reply(200, allResult, {
-          "Content-Type": "application/json"
-        });
+    it("pkg not exist", async function () {
+      nock("http://example.com").get("/-/all").reply(200, allResult, {
+        "Content-Type": "application/json",
+      });
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
       const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
