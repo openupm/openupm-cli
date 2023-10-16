@@ -60,3 +60,7 @@ typings/
 # next.js build output
 .next
 .vscode/settings.json
+
+# builds
+
+/build
