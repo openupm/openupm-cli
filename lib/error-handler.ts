@@ -1,14 +1,14 @@
 // TODO: Use better error types
 
-export const isConnectionError = function(err: any) {
+export const isConnectionError = function (err: any) {
   return err.code == "ENOTFOUND";
 };
 
-export const is404Error = function(err: any) {
+export const is404Error = function (err: any) {
   return (err.response && err.response.notFound) || err.message.includes("404");
 };
 
-const is503Error = function(err: any) {
+const is503Error = function (err: any) {
   return err.response && err.status == 503;
 };
 

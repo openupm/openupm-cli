@@ -85,7 +85,7 @@ const searchOld = async function (
 };
 
 const getTable = function () {
-  var table = new Table({
+  const table = new Table({
     head: ["Name", "Version", "Date"],
     colWidths: [42, 20, 12],
   });
@@ -107,7 +107,7 @@ export async function search(keyword: string, options: SearchOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
-  let table = getTable();
+  const table = getTable();
   // search endpoint
   let results = await searchEndpoint(keyword);
   // search old search

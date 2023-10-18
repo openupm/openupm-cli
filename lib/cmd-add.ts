@@ -60,7 +60,7 @@ const _add = async function ({
   // parse name
   let { name, version } = parseName(pkg);
   // load manifest
-  let manifest = loadManifest();
+  const manifest = loadManifest();
   if (manifest === null) return { code: 1, dirty };
   // ensure manifest.dependencies
   if (!manifest.dependencies) {
@@ -219,9 +219,9 @@ const _add = async function ({
       });
       dirty = true;
     }
-    let entry = manifest.scopedRegistries.filter(filterEntry)[0];
+    const entry = manifest.scopedRegistries.filter(filterEntry)[0];
     // apply pkgsInScope
-    let scopesSet = new Set(entry.scopes || []);
+    const scopesSet = new Set(entry.scopes || []);
     pkgsInScope.push(env.namespace);
     pkgsInScope.forEach((name) => {
       if (!scopesSet.has(name)) {

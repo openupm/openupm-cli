@@ -44,7 +44,7 @@ export const login = async function (options: LoginOptions) {
     _auth = Buffer.from(userPass).toString("base64");
   } else {
     // npm login
-    let result = await npmLogin({
+    const result = await npmLogin({
       username: options.username,
       password: options.password,
       email: options.email,
