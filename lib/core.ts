@@ -351,7 +351,7 @@ export const getLatestVersion = function (pkgInfo: PkgInfo): PkgVersionName {
 // Load manifest json file
 export const loadManifest = function (): PkgManifest | null {
   try {
-    let text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
+    const text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
     return JSON.parse(text);
   } catch (err) {
     // TODO: Type error
@@ -372,7 +372,7 @@ export const loadManifest = function (): PkgManifest | null {
 
 // Save manifest json file
 export const saveManifest = function (data: PkgManifest) {
-  let json = JSON.stringify(data, null, 2);
+  const json = JSON.stringify(data, null, 2);
   try {
     fs.writeFileSync(env.manifestPath, json);
     return true;

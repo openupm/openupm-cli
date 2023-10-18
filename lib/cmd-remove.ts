@@ -37,10 +37,10 @@ const _remove = async function (pkg: Pkg) {
     return { code: 1, dirty };
   }
   // load manifest
-  let manifest = loadManifest();
+  const manifest = loadManifest();
   if (manifest === null) return { code: 1, dirty };
   // not found array
-  let pkgsNotFound = [];
+  const pkgsNotFound = [];
   // remove from dependencies
   if (manifest.dependencies) {
     version = manifest.dependencies[name];
@@ -57,13 +57,13 @@ const _remove = async function (pkg: Pkg) {
       if (url.endsWith("/")) url = url.slice(0, -1);
       return url == env.registry;
     };
-    let entires = manifest.scopedRegistries.filter(filterEntry);
+    const entires = manifest.scopedRegistries.filter(filterEntry);
     if (entires.length > 0) {
-      let entry = entires[0];
+      const entry = entires[0];
       const index = entry.scopes.indexOf(name);
       if (index > -1) {
         entry.scopes.splice(index, 1);
-        let scopesSet = new Set(entry.scopes);
+        const scopesSet = new Set(entry.scopes);
         scopesSet.add(env.namespace);
         entry.scopes = Array.from(scopesSet).sort();
         dirty = true;

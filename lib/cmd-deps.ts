@@ -12,7 +12,7 @@ export const deps = async function (pkg: Pkg, options: DepsOptions) {
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  let { name, version } = parseName(pkg);
+  const { name, version } = parseName(pkg);
   // deps
   await _deps({ name, version, deep: options.deep });
   return 0;

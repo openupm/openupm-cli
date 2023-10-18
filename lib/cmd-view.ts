@@ -19,7 +19,7 @@ export const view = async function (pkg: Pkg, options: ViewOptions) {
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  let { name, version } = parseName(pkg);
+  const { name, version } = parseName(pkg);
   if (version) {
     log.warn("", `please replace '${name}@${version}' with '${name}'`);
     return 1;
