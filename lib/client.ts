@@ -1,6 +1,4 @@
 import { promisify } from "util";
-
-// @ts-ignore
 import RegClient from "another-npm-registry-client";
 import log from "./logger";
 
