@@ -12,7 +12,7 @@ import {
   PkgName,
   PkgVersionName,
   Registry,
-} from "./types";
+} from "./types/types";
 
 type TableRow = [PkgName, PkgVersionName, string, ""];
 

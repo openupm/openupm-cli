@@ -8,7 +8,7 @@ import {
   parseEnv,
   parseName,
 } from "./core";
-import { GlobalOptions, Pkg, PkgInfo } from "./types";
+import { GlobalOptions, Pkg, PkgInfo } from "./types/types";
 
 export type ViewOptions = {
   _global: GlobalOptions;

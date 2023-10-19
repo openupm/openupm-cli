@@ -12,7 +12,7 @@ import {
   parseEnv,
   saveUpmConfig,
 } from "./core";
-import { GlobalOptions, Registry } from "./types";
+import { GlobalOptions, Registry } from "./types/types";
 
 export type LoginOptions = {
   username?: string;
