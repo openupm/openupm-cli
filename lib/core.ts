@@ -12,21 +12,6 @@ import yaml from "yaml";
 import execute from "./utils/process";
 import { getNpmClient } from "./client";
 import log from "./logger";
-import {
-  Dependency,
-  Env,
-  GlobalOptions,
-  NameVersionPair,
-  NpmFetchOptions,
-  Pkg,
-  PkgInfo,
-  PkgManifest,
-  PkgName,
-  PkgVersionName,
-  Registry,
-  SemanticVersion,
-  UPMConfig,
-} from "./types/types";
 
 // @ts-ignore
 export const env: Env = {};

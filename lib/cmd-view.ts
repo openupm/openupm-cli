@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import log from "./logger";
-
 import {
   env,
   fetchPackageInfo,
@@ -8,7 +7,6 @@ import {
   parseEnv,
   parseName,
 } from "./core";
-import { GlobalOptions, Pkg, PkgInfo } from "./types/types";
 
 export type ViewOptions = {
   _global: GlobalOptions;

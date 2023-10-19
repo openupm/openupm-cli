@@ -2,17 +2,8 @@ import npmSearch from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
 import Table from "cli-table";
 import log from "./logger";
-
 import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
-
 import { is404Error } from "./error-handler";
-import {
-  GlobalOptions,
-  PkgInfo,
-  PkgName,
-  PkgVersionName,
-  Registry,
-} from "./types/types";
 
 type TableRow = [PkgName, PkgVersionName, string, ""];
 
