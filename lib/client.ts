@@ -1,11 +1,21 @@
 import { promisify } from "util";
 import RegClient from "another-npm-registry-client";
 import log from "./logger";
+import { Auth, PkgInfo, Registry } from "./types/types";
+
+export type NpmClient = {
+  rawClient: RegClient;
+  get(path: string, options: { auth: Auth }): Promise<PkgInfo>;
+  adduser(
+    registry: Registry,
+    options: { auth: Auth }
+  ): Promise<{ ok: boolean | string; token: string }>;
+};
 
 /**
  * Return npm client
  */
-export const getNpmClient = function () {
+export const getNpmClient = (): NpmClient => {
   // create client
   const client = new RegClient({ log });
   return {
