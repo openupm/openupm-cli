@@ -26,7 +26,7 @@ import {
   Registry,
   SemanticVersion,
   UPMConfig,
-} from "./types";
+} from "./types/types";
 
 // @ts-ignore
 export const env: Env = {};
