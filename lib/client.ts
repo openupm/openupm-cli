@@ -1,7 +1,6 @@
 import { promisify } from "util";
 import RegClient from "another-npm-registry-client";
 import log from "./logger";
-import { Auth, PkgInfo, Registry } from "./types/types";
 
 export type NpmClient = {
   rawClient: RegClient;

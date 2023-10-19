@@ -12,7 +12,6 @@ import {
   parseName,
   saveManifest,
 } from "./core";
-import { GlobalOptions, Pkg, PkgName, ScopedRegistry } from "./types/types";
 
 export type AddOptions = {
   test: boolean;
