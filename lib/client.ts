@@ -1,14 +1,15 @@
 import { promisify } from "util";
-import RegClient from "another-npm-registry-client";
+import RegClient, {
+  GetParams,
+  AddUserParams,
+  AddUserResponse,
+} from "another-npm-registry-client";
 import log from "./logger";
 
 export type NpmClient = {
   rawClient: RegClient;
-  get(path: string, options: { auth: Auth }): Promise<PkgInfo>;
-  adduser(
-    registry: Registry,
-    options: { auth: Auth }
-  ): Promise<{ ok: boolean | string; token: string }>;
+  get(uri: string, options: GetParams): Promise<PkgInfo>;
+  adduser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
 };
 
 /**

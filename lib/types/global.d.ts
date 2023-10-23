@@ -1,4 +1,5 @@
 import { Logger } from "npmlog";
+import { NpmAuth } from "another-npm-registry-client";
 
 declare global {
   type PkgName = string;
@@ -23,22 +24,13 @@ declare global {
     locBuild?: number;
   };
 
-  type Auth = {
-    alwaysAuth?: boolean;
-    _auth?: string;
-    username?: string;
-    password?: string;
-    email?: string;
-    token?: string;
-  };
-
   type Env = {
     cwd: string;
     color: boolean;
     systemUser: boolean;
     wsl: boolean;
-    npmAuth?: Record<Registry, Auth>;
-    auth: Record<Registry, Auth>;
+    npmAuth?: Record<Registry, NpmAuth>;
+    auth: Record<Registry, NpmAuth>;
     upstream: boolean;
     upstreamRegistry: string;
     registry: string;
@@ -116,7 +108,7 @@ declare global {
   };
 
   type UPMConfig = {
-    npmAuth?: Record<Registry, Auth>;
+    npmAuth?: Record<Registry, NpmAuth>;
   };
 
   type NpmFetchOptions = {
