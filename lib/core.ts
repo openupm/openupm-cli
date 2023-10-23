@@ -158,14 +158,12 @@ export const parseEnv = async function (
 // Parse name to {name, version}
 export const parseName = function (pkg: Pkg): {
   name: PkgName;
-  version: PkgVersionName;
+  version: PkgVersionName | undefined;
 } {
   const segs = pkg.split("@");
   const name = segs[0];
   const version =
     segs.length > 1 ? segs.slice(1, segs.length).join("@") : undefined;
-  // TODO: Handle version undefined
-  // @ts-ignore
   return { name, version };
 };
 
