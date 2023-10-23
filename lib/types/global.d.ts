@@ -115,14 +115,4 @@ declare global {
   type UPMConfig = {
     npmAuth?: Record<Registry, UpmAuth>;
   };
-
-  type NpmFetchOptions = {
-    log: Logger;
-    registry: Registry;
-    alwaysAuth?: boolean;
-    email?: string;
-    password?: string;
-    token?: string;
-    username?: string;
-  };
 }

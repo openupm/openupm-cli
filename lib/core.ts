@@ -13,6 +13,7 @@ import execute from "./utils/process";
 import { getNpmClient } from "./client";
 import log from "./logger";
 import { assertIsError } from "./utils/error-type-guards";
+import search from "libnpmsearch";
 
 // @ts-ignore
 export const env: Env = {};
@@ -162,8 +163,8 @@ export const parseName = function (pkg: Pkg): {
 };
 
 // Get npm fetch options
-export const getNpmFetchOptions = function (): NpmFetchOptions {
-  const opts: NpmFetchOptions = {
+export const getNpmFetchOptions = function (): search.Options {
+  const opts: search.Options = {
     log,
     registry: env.registry,
   };
