@@ -161,8 +161,6 @@ const _add = async function ({
       // print suggestion for depsInvalid
       depsInvalid.forEach((depObj) => {
         if (depObj.reason == "package404" || depObj.reason == "version404") {
-          // TODO: Do null check on manifest
-          // @ts-ignore
           const resolvedVersion = manifest.dependencies[depObj.name];
           depObj.resolved = Boolean(resolvedVersion);
           if (!depObj.resolved)
@@ -185,8 +183,6 @@ const _add = async function ({
   }
   // add to dependencies
   const oldVersion = manifest.dependencies[name];
-  // TODO: Do undefined check on version
-  // @ts-ignore
   manifest.dependencies[name] = version;
   if (!oldVersion) {
     // Log the added package
