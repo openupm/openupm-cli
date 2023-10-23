@@ -18,10 +18,9 @@ const searchEndpoint = async function (
 ): Promise<TableRow[] | undefined> {
   if (!registry) registry = env.registry;
   try {
-    const results = await npmSearch(keyword, getNpmFetchOptions());
+    // NOTE: The results of the search will be PkgInfo objects so we can change the type
+    const results = <PkgInfo[]>await npmSearch(keyword, getNpmFetchOptions());
     log.verbose("npmsearch", results.join(os.EOL));
-    // TODO: Fix type error
-    // @ts-ignore
     return results.map(getTableRow);
   } catch (err) {
     if (isHttpError(err) && !is404Error(err)) {
