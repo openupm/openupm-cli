@@ -42,6 +42,7 @@
     "@types/npmlog": "^4.1.4",
     "@types/pkginfo": "^0.4.1",
     "@types/promptly": "^3.0.3",
+    "@types/request": "^2.48.11",
     "@types/update-notifier": "^6.0.5",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",

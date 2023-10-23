@@ -1,4 +1,5 @@
 declare module "another-npm-registry-client" {
+  import request from "request";
   export type NpmAuth =
     | {
         username: string;
@@ -19,11 +20,11 @@ declare module "another-npm-registry-client" {
 
   export type AddUserResponse = { ok: true; token: string } | { ok: false };
 
-  type ClientCallback<TData> = (
+  export type ClientCallback<TData> = (
     error: Error | null,
     data: TData,
     raw: string,
-    res: Response
+    res: request.Response
   ) => void;
 
   export default class RegClient {
