@@ -13,6 +13,7 @@ import log from "./logger";
 // update-notifier
 
 import pkg from "../package.json";
+import { assertIsError } from "./utils/error-type-guards";
 
 pkginfo(module);
 const notifier = updateNotifier({ pkg });
@@ -114,7 +115,7 @@ program
       const retCode = await login(options);
       if (retCode) process.exit(retCode);
     } catch (err) {
-      // @ts-ignore
+      assertIsError(err);
       log.error("", err.message);
       process.exit(1);
     }

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import promptly from "promptly";
-import { getNpmClient } from "./client";
+import { assertIsNpmClientError, getNpmClient } from "./client";
 
 import log from "./logger";
 
@@ -74,7 +74,6 @@ export const login = async function (options: LoginOptions) {
 
 /**
  * Return npm login token
- * @param {*} param0
  */
 const npmLogin = async function ({
   username,
@@ -97,19 +96,20 @@ const npmLogin = async function ({
       },
     });
     if (_.isString(data.ok)) log.notice("auth", data.ok);
-    else if (data.ok)
+    else if (data.ok) {
       log.notice("auth", `you are authenticated as '${username}'`);
-    const token = data.token;
-    return { code: 0, token };
+      const token = data.token;
+      return { code: 0, token };
+    }
+    return { code: 1 };
   } catch (err) {
-    // TODO: Type-check error
-    // @ts-ignore
-    if (err.statusCode == 401 || err.code == "EAUTHUNKNOWN") {
+    assertIsNpmClientError(err);
+
+    if (err.response.statusCode == 401) {
       log.warn("401", "Incorrect username or password");
       return { code: 1 };
     } else {
-      // @ts-ignore
-      log.error(err.statusCode ? err.statusCode.toString() : "", err.message);
+      log.error(err.response.statusCode.toString(), err.message);
       return { code: 1 };
     }
   }

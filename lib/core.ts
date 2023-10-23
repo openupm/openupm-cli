@@ -12,6 +12,7 @@ import yaml from "yaml";
 import execute from "./utils/process";
 import { getNpmClient } from "./client";
 import log from "./logger";
+import { assertIsError } from "./utils/error-type-guards";
 
 // @ts-ignore
 export const env: Env = {};
@@ -339,8 +340,7 @@ export const loadManifest = function (): PkgManifest | null {
     const text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
     return JSON.parse(text);
   } catch (err) {
-    // TODO: Type error
-    // @ts-ignore
+    assertIsError(err);
     if (err.code == "ENOENT")
       log.error("manifest", "file Packages/manifest.json does not exist");
     else {
@@ -348,7 +348,6 @@ export const loadManifest = function (): PkgManifest | null {
         "manifest",
         `failed to parse Packages/manifest.json at ${env.manifestPath}`
       );
-      // @ts-ignore
       log.error("manifest", err.message);
     }
     return null;
@@ -362,9 +361,8 @@ export const saveManifest = function (data: PkgManifest) {
     fs.writeFileSync(env.manifestPath, json);
     return true;
   } catch (err) {
+    assertIsError(err);
     log.error("manifest", "can not write manifest json file");
-    // @ts-ignore
-    // TODO: Type-check error
     log.error("manifest", err.message);
     return false;
   }
