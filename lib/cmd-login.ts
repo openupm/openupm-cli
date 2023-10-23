@@ -147,10 +147,8 @@ export const getNpmrcPath = function () {
   const dirPath = process.env.USERPROFILE
     ? process.env.USERPROFILE
     : process.env.HOME;
-  // TODO: Handle undefined
-  // @ts-ignore
-  const configPath = path.join(dirPath, ".npmrc");
-  return configPath;
+  if (dirPath === undefined) throw new Error("Could not determine home path");
+  return path.join(dirPath, ".npmrc");
 };
 
 /**
