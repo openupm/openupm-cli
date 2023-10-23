@@ -1,8 +1,38 @@
 declare module "another-npm-registry-client" {
-  class RegClient {
+  export type NpmAuth =
+    | {
+        username: string;
+        password: string;
+        email: string;
+        alwaysAuth?: boolean;
+      }
+    | { token: string; alwaysAuth?: boolean };
+  export type AddUserParams = { auth: NpmAuth };
+
+  export type GetParams = {
+    timeout: number;
+    follow: boolean;
+    staleOk: boolean;
+    auth: NpmAuth;
+    fullMetadata: boolean;
+  };
+
+  export type AddUserResponse = { ok: true; token: string } | { ok: false };
+
+  type ClientCallback<TData> = (
+    error: Error | null,
+    data: TData,
+    raw: string,
+    res: Response
+  ) => void;
+
+  export default class RegClient {
     constructor(...args: unknown[]);
-    get(...args: unknown[]): unknown;
-    adduser(...args: unknown[]): unknown;
+    get(uri: string, params: GetParams, cb: ClientCallback<PkgInfo>): void;
+    adduser(
+      uri: string,
+      params: AddUserParams,
+      cb: ClientCallback<AddUserResponse>
+    ): void;
   }
-  export = RegClient;
 }
