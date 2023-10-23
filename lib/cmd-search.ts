@@ -4,6 +4,7 @@ import Table from "cli-table";
 import log from "./logger";
 import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
+import * as os from "os";
 
 type TableRow = [PkgName, PkgVersionName, string, ""];
 
@@ -18,9 +19,7 @@ const searchEndpoint = async function (
   if (!registry) registry = env.registry;
   try {
     const results = await npmSearch(keyword, getNpmFetchOptions());
-    // TODO: This should be converted to a string
-    // @ts-ignore
-    log.verbose("npmsearch", results);
+    log.verbose("npmsearch", results.join(os.EOL));
     // TODO: Fix type error
     // @ts-ignore
     return results.map(getTableRow);
