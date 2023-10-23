@@ -35,8 +35,8 @@ export const login = async function (options: LoginOptions) {
     options._global.registry = await promptly.prompt("Registry: ", {
       validator: [validateRegistry],
     });
-  let token = null;
-  let _auth = null;
+  let token: string | null = null;
+  let _auth: string | null = null;
   if (options.basicAuth) {
     // basic auth
     const userPass = `${options.username}:${options.password}`;
@@ -61,6 +61,7 @@ export const login = async function (options: LoginOptions) {
       token: result.token,
     });
   }
+
   // write unity token
   await writeUnityToken({
     _auth,
@@ -214,12 +215,12 @@ const writeUnityToken = async function ({
   registry,
   token,
 }: {
-  _auth: string;
+  _auth: string | null;
   alwaysAuth: boolean;
   basicAuth: boolean;
   email: string;
   registry: Registry;
-  token: string;
+  token: string | null;
 }) {
   // Create config dir if necessary
   const configDir = await getUpmConfigDir();
@@ -230,12 +231,14 @@ const writeUnityToken = async function ({
   if (registry.endsWith("/")) registry = registry.replace(/\/$/, "");
 
   if (basicAuth) {
+    if (_auth === null) throw new Error("Auth is null");
     config["npmAuth"][registry] = {
       email,
       alwaysAuth,
       _auth,
     };
   } else {
+    if (token === null) throw new Error("Token is null");
     config["npmAuth"][registry] = {
       email,
       alwaysAuth,
