@@ -230,19 +230,18 @@ const writeUnityToken = async function ({
   // Remove ending slash of registry
   if (registry.endsWith("/")) registry = registry.replace(/\/$/, "");
 
-  // TODO: Investigate ts warnings
-  // Update config file
-  // @ts-ignore
-  config["npmAuth"][registry] = {
-    email,
-    alwaysAuth,
-  };
   if (basicAuth) {
-    // @ts-ignore
-    config["npmAuth"][registry]._auth = _auth;
+    config["npmAuth"][registry] = {
+      email,
+      alwaysAuth,
+      _auth,
+    };
   } else {
-    // @ts-ignore
-    config["npmAuth"][registry].token = token;
+    config["npmAuth"][registry] = {
+      email,
+      alwaysAuth,
+      token,
+    };
   }
   // Write config file
   await saveUpmConfig(config, configDir);
