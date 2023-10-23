@@ -29,7 +29,7 @@ declare global {
     color: boolean;
     systemUser: boolean;
     wsl: boolean;
-    npmAuth?: Record<Registry, NpmAuth>;
+    npmAuth?: Record<Registry, UpmAuth>;
     auth: Record<Registry, NpmAuth>;
     upstream: boolean;
     upstreamRegistry: string;
