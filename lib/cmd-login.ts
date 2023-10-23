@@ -205,7 +205,6 @@ export const validateRegistry = function (value: Registry): Registry {
 
 /**
  * Write npm token to Unity
- * @param {*} param0
  */
 const writeUnityToken = async function ({
   _auth,
