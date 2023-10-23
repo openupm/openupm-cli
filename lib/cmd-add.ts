@@ -57,7 +57,10 @@ const _add = async function ({
   // is upstream package flag
   let isUpstreamPackage = false;
   // parse name
-  let { name, version } = parseName(pkg);
+  const parseResult = parseName(pkg);
+  const name = parseResult.name;
+  let version = parseResult.version;
+
   // load manifest
   const manifest = loadManifest();
   if (manifest === null) return { code: 1, dirty };

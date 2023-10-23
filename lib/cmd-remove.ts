@@ -30,7 +30,9 @@ const _remove = async function (pkg: Pkg) {
   // dirty flag
   let dirty = false;
   // parse name
-  let { name, version } = parseName(pkg);
+  const parseResult = parseName(pkg);
+  const name = parseResult.name;
+  let version = parseResult.version;
   if (version) {
     log.warn("", `please replace '${name}@${version}' with '${name}'`);
     return { code: 1, dirty };
