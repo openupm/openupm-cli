@@ -215,7 +215,7 @@ const writeUnityToken = async function ({
   registry,
   token,
 }: {
-  _auth: unknown;
+  _auth: string;
   alwaysAuth: boolean;
   basicAuth: boolean;
   email: string;
