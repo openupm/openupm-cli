@@ -10,9 +10,9 @@ import isWsl from "is-wsl";
 import TOML from "@iarna/toml";
 import yaml from "yaml";
 import execute from "./utils/process";
-import {getNpmClient} from "./client";
+import { getNpmClient } from "./client";
 import log from "./logger";
-import {assertIsError} from "./utils/error-type-guards";
+import { assertIsError } from "./utils/error-type-guards";
 
 // @ts-ignore
 export const env: Env = {};
@@ -243,10 +243,12 @@ export const fetchPackageDependencies = async function ({
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        let { pkgInfo, upstream } = _.get(cachedPacakgeInfoDict, entry.name, {
+        const getResult = _.get(cachedPacakgeInfoDict, entry.name, {
           pkgInfo: null,
           upstream: false,
         });
+        let pkgInfo = getResult.pkgInfo;
+        const upstream = getResult.upstream;
         if (pkgInfo !== null) {
           depObj.upstream = upstream;
         }
