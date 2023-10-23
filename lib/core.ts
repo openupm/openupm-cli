@@ -14,8 +14,20 @@ import log from "./logger";
 import { assertIsError } from "./utils/error-type-guards";
 import search from "libnpmsearch";
 
-// @ts-ignore
-export const env: Env = {};
+export const env: Env = {
+  auth: {},
+  color: false,
+  cwd: "",
+  editorVersion: null,
+  manifestPath: "",
+  namespace: "",
+  region: "us",
+  registry: "",
+  systemUser: false,
+  upstream: false,
+  upstreamRegistry: "",
+  wsl: false,
+};
 
 // Parse env
 export const parseEnv = async function (
