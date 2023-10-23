@@ -11,7 +11,6 @@ import { login } from "./cmd-login";
 import log from "./logger";
 
 // update-notifier
-
 import pkg from "../package.json";
 import { assertIsError } from "./utils/error-type-guards";
 

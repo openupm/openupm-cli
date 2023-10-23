@@ -10,9 +10,9 @@ import isWsl from "is-wsl";
 import TOML from "@iarna/toml";
 import yaml from "yaml";
 import execute from "./utils/process";
-import { getNpmClient } from "./client";
+import {getNpmClient} from "./client";
 import log from "./logger";
-import { assertIsError } from "./utils/error-type-guards";
+import {assertIsError} from "./utils/error-type-guards";
 
 // @ts-ignore
 export const env: Env = {};
