@@ -1,14 +1,13 @@
 import { promisify } from "util";
 import RegClient, {
-  GetParams,
   AddUserParams,
   AddUserResponse,
   ClientCallback,
+  GetParams,
 } from "another-npm-registry-client";
 import log from "./logger";
 import request from "request";
 import { AssertionError } from "assert";
-import { assertIsError } from "./utils/error-type-guards";
 
 export type NpmClient = {
   rawClient: RegClient;
