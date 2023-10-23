@@ -3,7 +3,7 @@ import npmFetch from "npm-registry-fetch";
 import Table from "cli-table";
 import log from "./logger";
 import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
-import { is404Error } from "./error-handler";
+import { is404Error, isHttpError } from "./utils/error-type-guards";
 
 type TableRow = [PkgName, PkgVersionName, string, ""];
 
@@ -25,9 +25,7 @@ const searchEndpoint = async function (
     // @ts-ignore
     return results.map(getTableRow);
   } catch (err) {
-    if (!is404Error(err)) {
-      // TODO: Type check error
-      // @ts-ignore
+    if (isHttpError(err) && !is404Error(err)) {
       log.error("", err.message);
     }
     log.warn("", "fast search endpoint is not available, using old search.");
@@ -66,9 +64,7 @@ const searchOld = async function (
       (row) => row.filter((x) => x.toLowerCase().includes(klc)).length > 0
     );
   } catch (err) {
-    if (!is404Error(err)) {
-      // TODO: Type-check error
-      // @ts-ignore
+    if (isHttpError(err) && !is404Error(err)) {
       log.error("", err.message);
     }
     log.warn("", "/-/all endpoint is not available");
