@@ -3,7 +3,6 @@ import path from "path";
 import url from "url";
 import _ from "lodash";
 import chalk from "chalk";
-// @ts-ignore
 import mkdirp from "mkdirp";
 import net from "node:net";
 import isWsl from "is-wsl";
