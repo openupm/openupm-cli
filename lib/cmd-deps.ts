@@ -13,6 +13,7 @@ export const deps = async function (pkg: Pkg, options: DepsOptions) {
   // parse name
   const { name, version } = parseName(pkg);
   // deps
+  if (version === undefined) throw new Error("Version undefined");
   await _deps({ name, version, deep: options.deep });
   return 0;
 };
