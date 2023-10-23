@@ -95,8 +95,6 @@ export const parseEnv = async function (
             alwaysAuth: regAuth.alwaysAuth || false,
           };
         } else if ("_auth" in regAuth) {
-          // NOTE: We can rule out undefined because of the if
-          // @ts-ignore
           const buf = Buffer.from(regAuth._auth, "base64");
           const text = buf.toString("utf-8");
           const [username, password] = text.split(":", 2);
@@ -111,8 +109,6 @@ export const parseEnv = async function (
             "env.auth",
             `failed to parse auth info for ${reg} in .upmconfig.toml: missing token or _auth fields`
           );
-          // TODO: Convert to string
-          // @ts-ignore
           log.warn("env.auth", regAuth);
         }
       }
