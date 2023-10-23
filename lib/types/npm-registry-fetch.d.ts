@@ -1,3 +1,5 @@
+import { Response } from "request";
+
 declare module "npm-registry-fetch" {
   declare class HttpErrorBase extends Error {
     statusCode: Response["status"];
