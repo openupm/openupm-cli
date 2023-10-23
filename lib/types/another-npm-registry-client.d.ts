@@ -11,11 +11,11 @@ declare module "another-npm-registry-client" {
   export type AddUserParams = { auth: NpmAuth };
 
   export type GetParams = {
-    timeout: number;
-    follow: boolean;
-    staleOk: boolean;
-    auth: NpmAuth;
-    fullMetadata: boolean;
+    timeout?: number;
+    follow?: boolean;
+    staleOk?: boolean;
+    auth?: NpmAuth;
+    fullMetadata?: boolean;
   };
 
   export type AddUserResponse = { ok: true; token: string } | { ok: false };
