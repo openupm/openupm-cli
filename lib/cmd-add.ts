@@ -208,10 +208,10 @@ const _add = async function ({
       return addr == env.registry;
     };
     if (manifest.scopedRegistries.filter(filterEntry).length <= 0) {
+      const name = url.parse(env.registry).hostname;
+      if (name === null) throw new Error("Could not resolve registry name");
       manifest.scopedRegistries.push({
-        // TODO: Handle null name
-        // @ts-ignore
-        name: url.parse(env.registry).hostname,
+        name,
         url: env.registry,
         scopes: [],
       });
