@@ -168,12 +168,10 @@ export const generateNpmrcLines = function (
   let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
   // add trailing slash
   if (!registryUrl.endsWith("/")) registryUrl = registryUrl + "/";
-  const index = _.findIndex(lines, function (element, index, array) {
+  const index = _.findIndex(lines, function (element, index) {
     if (element.indexOf(registryUrl + ":_authToken=") !== -1) {
       // If an entry for the auth token is found, replace it
-      // TODO: Investigate error
-      // @ts-ignore
-      array[index] = element.replace(
+      lines[index] = element.replace(
         /authToken=.*/,
         "authToken=" + quotes + token + quotes
       );
