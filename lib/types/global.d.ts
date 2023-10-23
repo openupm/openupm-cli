@@ -107,8 +107,13 @@ declare global {
     chdir: string;
   };
 
+  type UpmAuth = {
+    email: string;
+    alwaysAuth: boolean;
+  } & ({ token: string } | { _auth: string });
+
   type UPMConfig = {
-    npmAuth?: Record<Registry, NpmAuth>;
+    npmAuth?: Record<Registry, UpmAuth>;
   };
 
   type NpmFetchOptions = {
