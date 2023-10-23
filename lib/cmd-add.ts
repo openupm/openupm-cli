@@ -71,7 +71,7 @@ const _add = async function ({
   // packages that added to scope registry
   const pkgsInScope: PkgName[] = [];
   const isGitOrLocal =
-    version &&
+    version !== undefined &&
     (version.startsWith("git") ||
       version.startsWith("file") ||
       version.startsWith("http"));
