@@ -165,9 +165,7 @@ export const generateNpmrcLines = function (
   let lines = content ? content.split("\n") : [];
   const quotes = /(\?|=)/.test(token) ? '"' : "";
   // get the registry url without http protocal
-  // TODO: Investigate extra quotes
-  // @ts-ignore
-  let registryUrl = registry.slice(registry.search(/:\/\//, "") + 1);
+  let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
   // add trailing slash
   if (!registryUrl.endsWith("/")) registryUrl = registryUrl + "/";
   const index = _.findIndex(lines, function (element, index, array) {
