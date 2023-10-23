@@ -174,13 +174,7 @@ export const getNpmFetchOptions = function (): search.Options {
     registry: env.registry,
   };
   const auth = env.auth[env.registry];
-  if (auth) {
-    opts.alwaysAuth = auth.alwaysAuth;
-    opts.email = auth.email;
-    opts.password = auth.password;
-    opts.token = auth.token;
-    opts.username = auth.username;
-  }
+  if (auth) Object.assign(opts, auth);
   return opts;
 };
 
