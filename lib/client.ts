@@ -22,10 +22,10 @@ export type NpmClient = {
 };
 
 export class NpmClientError extends Error {
-  cause: Error | null;
+  cause: Error;
   response: request.Response;
 
-  constructor(cause: Error | null, response: request.Response) {
+  constructor(cause: Error, response: request.Response) {
     super(
       cause?.message ??
         "An error occurred while interacting with an Npm registry"
@@ -59,10 +59,10 @@ function normalizeClientFunction<TParam, TData>(
   const withNormalizedError = (
     uri: string,
     params: TParam,
-    cb: (error: NpmClientError, data: TData) => void
+    cb: (error: NpmClientError | null, data: TData) => void
   ) => {
     return bound(uri, params, (error, data, raw, res) => {
-      cb(new NpmClientError(error, res), data);
+      cb(error !== null ? new NpmClientError(error, res) : null, data);
     });
   };
   return promisify(withNormalizedError);
