@@ -326,13 +326,7 @@ export const getLatestVersion = function (
 ): PkgVersionName | undefined {
   if (pkgInfo["dist-tags"]?.["latest"] !== undefined)
     return pkgInfo["dist-tags"]["latest"];
-  else if (pkgInfo.versions) {
-    return Object.keys(pkgInfo.versions).find(
-      // TODO: Something is wrong here
-      // @ts-ignore
-      (key) => pkgInfo.versions[key] == "latest"
-    );
-  } else if (pkgInfo.version) return pkgInfo.version;
+  else if (pkgInfo.version) return pkgInfo.version;
 };
 
 // Load manifest json file
