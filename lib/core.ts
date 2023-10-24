@@ -434,6 +434,10 @@ export const saveUpmConfig = async function (
 export const compareEditorVersion = function (a: string, b: string) {
   const verA = parseEditorVersion(a);
   const verB = parseEditorVersion(b);
+
+  if (verA === null || verB === null)
+    throw new Error("An editor version could not be parsed");
+
   const editorVersionToArray = (ver: SemanticVersion) => [
     ver.major,
     ver.minor,
@@ -443,10 +447,7 @@ export const compareEditorVersion = function (a: string, b: string) {
     ver.locValue || 0,
     ver.locBuild || 0,
   ];
-  // TODO: Handle null
-  // @ts-ignore
   const arrA = editorVersionToArray(verA);
-  // @ts-ignore
   const arrB = editorVersionToArray(verB);
   for (let i = 0; i < arrA.length; i++) {
     const valA = arrA[i];
