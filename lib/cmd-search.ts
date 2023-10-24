@@ -6,7 +6,7 @@ import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 
-type TableRow = [PkgName, PkgVersionName, string, ""];
+type TableRow = [PkgName, PkgVersionName | undefined, string, ""];
 
 export type SearchOptions = {
   _global: GlobalOptions;
