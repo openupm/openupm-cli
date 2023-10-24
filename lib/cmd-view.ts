@@ -7,6 +7,7 @@ import {
   parseEnv,
   parseName,
 } from "./core";
+import assert from "assert";
 
 export type ViewOptions = {
   _global: GlobalOptions;
@@ -38,6 +39,7 @@ export const view = async function (pkg: Pkg, options: ViewOptions) {
 const printInfo = function (pkg: PkgInfo) {
   const versionCount = Object.keys(pkg.versions).length;
   const ver = getLatestVersion(pkg);
+  assert(ver !== undefined);
   const verInfo = pkg.versions[ver];
   const license = verInfo.license || "proprietary or unlicensed";
   const displayName = verInfo.displayName;
