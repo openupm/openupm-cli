@@ -71,11 +71,10 @@ const searchOld = async function (
 };
 
 const getTable = function () {
-  const table = new Table({
+  return new Table({
     head: ["Name", "Version", "Date"],
     colWidths: [42, 20, 12],
   });
-  return table;
 };
 
 const getTableRow = function (pkg: PkgInfo): TableRow {
