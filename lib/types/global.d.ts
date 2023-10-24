@@ -46,7 +46,7 @@ declare global {
   };
 
   type PkgVersionInfo = {
-    unity: string;
+    unity?: string;
     unityRelease: string;
     dependencies: Record<PkgName, PkgVersionName>;
     license?: string;
