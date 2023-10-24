@@ -13,6 +13,7 @@ import { getNpmClient } from "./client";
 import log from "./logger";
 import { assertIsError } from "./utils/error-type-guards";
 import search from "libnpmsearch";
+import assert from "assert";
 
 export const env: Env = {
   auth: {},
@@ -279,8 +280,10 @@ export const fetchPackageDependencies = async function ({
         // verify version
         const versions = Object.keys(pkgInfo.versions);
         if (!entry.version || entry.version == "latest") {
+          const latestVersion = getLatestVersion(pkgInfo);
+          assert(latestVersion !== undefined);
           // eslint-disable-next-line require-atomic-updates
-          depObj.version = entry.version = getLatestVersion(pkgInfo);
+          depObj.version = entry.version = latestVersion;
         }
         // handle version not exist
         if (!versions.find((x) => x == entry.version)) {
