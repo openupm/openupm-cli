@@ -5,7 +5,7 @@ declare global {
 
   type PkgVersionName = string;
 
-  type Pkg = `${PkgName}@${string}`;
+  type PkgNameWithVersion = `${PkgName}@${string}`;
 
   type Region = "us" | "cn";
 

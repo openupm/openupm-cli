@@ -13,7 +13,7 @@ export type ViewOptions = {
   _global: GlobalOptions;
 };
 
-export const view = async function (pkg: Pkg, options: ViewOptions) {
+export const view = async function (pkg: PkgNameWithVersion, options: ViewOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;

@@ -6,7 +6,7 @@ export type RemoveOptions = {
 };
 
 export const remove = async function (
-  pkgs: Pkg[] | Pkg,
+  pkgs: PkgNameWithVersion[] | PkgNameWithVersion,
   options: RemoveOptions
 ) {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -26,7 +26,7 @@ export const remove = async function (
   return result.code;
 };
 
-const _remove = async function (pkg: Pkg) {
+const _remove = async function (pkg: PkgNameWithVersion) {
   // dirty flag
   let dirty = false;
   // parse name
