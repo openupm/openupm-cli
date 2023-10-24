@@ -16,7 +16,7 @@ declare global {
     major: number;
     minor: number;
     patch?: number;
-    flag?: "a" | "b" | "f";
+    flag?: "a" | "b" | "f" | "c";
     flagValue?: 0 | 1 | 2;
     build?: number;
     loc?: string;
