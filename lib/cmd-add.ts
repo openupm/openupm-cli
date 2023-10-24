@@ -20,7 +20,7 @@ export type AddOptions = {
 };
 
 export const add = async function (
-  pkgs: PkgNameWithVersion | PkgNameWithVersion[],
+  pkgs: PkgName | PkgName[],
   options: AddOptions
 ): Promise<number> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -48,7 +48,7 @@ const _add = async function ({
   testables,
   force,
 }: {
-  pkg: PkgNameWithVersion;
+  pkg: PkgName;
   testables: boolean;
   force: boolean;
 }) {
