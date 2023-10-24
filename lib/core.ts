@@ -13,6 +13,7 @@ import { getNpmClient } from "./client";
 import log from "./logger";
 import { assertIsError } from "./utils/error-type-guards";
 import search from "libnpmsearch";
+import { type } from "os";
 
 export const env: Env = {
   auth: {},
@@ -475,45 +476,38 @@ export const compareEditorVersion = function (a: string, b: string) {
 export const parseEditorVersion = function (
   version: string
 ): SemanticVersion | null {
+  type RegexMatchGroups = {
+    major: `${number}`;
+    minor: `${number}`;
+    patch?: string;
+    flag?: "a" | "b" | "f" | "c";
+    build?: `${number}`;
+    loc?: "c";
+    locBuild?: `${number}`;
+  };
+
   if (!version) return null;
   const regex =
     /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
   const match = regex.exec(version);
   if (!match) return null;
-  const groups = match.groups;
+  const groups = <RegexMatchGroups>match.groups;
   const result: SemanticVersion = {
-    // TODO: Check undefined
-    // @ts-ignore
     major: parseInt(groups.major),
-    // @ts-ignore
     minor: parseInt(groups.minor),
   };
-  // TODO: Check undefined
-  // @ts-ignore
   if (groups.patch) result.patch = parseInt(groups.patch);
-  // TODO: Check undefined
-  // @ts-ignore
   if (groups.flag) {
-    // TODO: Do type checking
-    // @ts-ignore
-    result.flag = groups.flag.toLowerCase();
+    result.flag = groups.flag;
     if (result.flag == "a") result.flagValue = 0;
     if (result.flag == "b") result.flagValue = 1;
     if (result.flag == "f") result.flagValue = 2;
-    // TODO: Handle undefined
-    // @ts-ignore
     if (groups.build) result.build = parseInt(groups.build);
   }
 
-  // TODO: Handle undefined
-  // @ts-ignore
   if (groups.loc) {
-    // TODO: Handle undefined
-    // @ts-ignore
     result.loc = groups.loc.toLowerCase();
     if (result.loc == "c") result.locValue = 1;
-    // TODO: Handle undefined
-    // @ts-ignore
     if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
   }
   return result;
