@@ -1,4 +1,3 @@
-import { Logger } from "npmlog";
 import { NpmAuth } from "another-npm-registry-client";
 
 declare global {

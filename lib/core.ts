@@ -13,7 +13,6 @@ import { getNpmClient } from "./client";
 import log from "./logger";
 import { assertIsError } from "./utils/error-type-guards";
 import search from "libnpmsearch";
-import { type } from "os";
 
 export const env: Env = {
   auth: {},
