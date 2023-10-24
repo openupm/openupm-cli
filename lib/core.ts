@@ -157,8 +157,8 @@ export const parseEnv = async function (
 };
 
 // Parse name to {name, version}
-export const parseName = function (pkg: PkgNameWithVersion): {
-  name: PkgName;
+export const parseName = function (pkg: PkgName): {
+  name: ReverseDomainName;
   version: PkgVersionName | undefined;
 } {
   const segs = pkg.split("@");

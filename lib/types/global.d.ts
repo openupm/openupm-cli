@@ -1,11 +1,11 @@
 import { NpmAuth } from "another-npm-registry-client";
 
 declare global {
-  type PkgName = string;
-
   type PkgVersionName = string;
 
-  type PkgNameWithVersion = `${PkgName}@${string}`;
+  type ReverseDomainName = string;
+
+  type PkgName = ReverseDomainName | `${ReverseDomainName}@${PkgVersionName}`;
 
   type Region = "us" | "cn";
 
