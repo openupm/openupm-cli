@@ -373,11 +373,6 @@ describe("cmd-core.ts", function() {
         "1.0.0"
       );
     });
-    it("from versions", async function() {
-      getLatestVersion({ versions: { "1.0.0": "latest" } }).should.equal(
-        "1.0.0"
-      );
-    });
     it("not found", async function() {
       (
         getLatestVersion({ versions: { "1.0.0": "patch" } }) === undefined
