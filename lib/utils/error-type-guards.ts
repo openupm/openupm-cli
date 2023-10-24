@@ -11,7 +11,7 @@ export function assertIsError(x: unknown): asserts x is ErrnoException {
 }
 
 export const isHttpError = (x: unknown): x is HttpErrorBase => {
-  return x instanceof HttpErrorBase;
+  return x instanceof Error && "statusCode" in x;
 };
 
 export const isConnectionError = (err: HttpErrorBase): boolean =>
