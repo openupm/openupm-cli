@@ -320,20 +320,17 @@ export const fetchPackageDependencies = async function ({
 };
 
 // Get latest version from package info
-// @ts-ignore
 export const getLatestVersion = function (pkgInfo: PkgInfo): PkgVersionName {
   if (pkgInfo["dist-tags"]?.["latest"] !== undefined)
     return pkgInfo["dist-tags"]["latest"];
   else if (pkgInfo.versions) {
-    // @ts-ignore
-    // TODO: Handle undefined
     return Object.keys(pkgInfo.versions).find(
       // TODO: Something is wrong here
       // @ts-ignore
       (key) => pkgInfo.versions[key] == "latest"
     );
   } else if (pkgInfo.version) return pkgInfo.version;
-  // TODO: Not handling undefined case
+  throw new Error("Could not get latest version from package");
 };
 
 // Load manifest json file
