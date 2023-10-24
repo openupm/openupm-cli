@@ -54,16 +54,16 @@ export const parseEnv = async function (
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
-  if (options._global.color === false) env.color = false;
+  if (!options._global.color) env.color = false;
   if (process.env.NODE_ENV == "test") env.color = false;
   if (!env.color) {
     chalk.level = 0;
     log.disableColor();
   }
   // upstream
-  if (options._global.upstream === false) env.upstream = false;
+  if (!options._global.upstream) env.upstream = false;
   // region cn
-  if (options._global.cn === true) {
+  if (options._global.cn) {
     env.registry = "https://package.openupm.cn";
     env.upstreamRegistry = "https://packages.unity.cn";
     env.region = "cn";
