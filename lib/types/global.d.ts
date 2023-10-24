@@ -70,12 +70,12 @@ declare global {
 
   type NameVersionPair = {
     name: PkgName;
-    version: PkgVersionName;
+    version: PkgVersionName | undefined;
   };
 
   type Dependency = {
     name: PkgName;
-    version: PkgVersionName;
+    version: PkgVersionName | undefined;
     upstream: boolean;
     self: boolean;
     internal: boolean;
