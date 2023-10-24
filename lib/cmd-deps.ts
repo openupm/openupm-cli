@@ -6,7 +6,7 @@ export type DepsOptions = {
   _global: GlobalOptions;
 };
 
-export const deps = async function (pkg: Pkg, options: DepsOptions) {
+export const deps = async function (pkg: PkgNameWithVersion, options: DepsOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
