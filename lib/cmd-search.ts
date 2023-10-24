@@ -5,8 +5,11 @@ import log from "./logger";
 import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
+import assert from "assert";
 
-type TableRow = [PkgName, PkgVersionName | undefined, string, ""];
+type DateString = string;
+
+type TableRow = [PkgName, PkgVersionName, DateString, ""];
 
 export type SearchOptions = {
   _global: GlobalOptions;
@@ -83,6 +86,7 @@ const getTableRow = function (pkg: PkgInfo): TableRow {
   if (pkg.date) {
     date = pkg.date.toISOString().slice(0, 10);
   }
+  assert(version !== undefined);
   return [name, version, date, ""];
 };
 
