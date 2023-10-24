@@ -35,10 +35,9 @@ const searchOld = async function (
 ): Promise<TableRow[] | undefined> {
   // all endpoint
   try {
-    const results = await npmFetch.json("/-/all", getNpmFetchOptions());
-    // TODO: This should be converted to a string
-    // @ts-ignore
-    log.verbose("endpoint.all", results);
+    const results = <Record<string, PkgInfo> | PkgInfo[]>(
+      await npmFetch.json("/-/all", getNpmFetchOptions())
+    );
     let objects: PkgInfo[] = [];
     if (results) {
       if (Array.isArray(results)) {
@@ -47,11 +46,10 @@ const searchOld = async function (
       } else {
         // results is an object
         if ("_updated" in results) delete results["_updated"];
-        // TODO: Do better type checking
-        // @ts-ignore
         objects = Object.values(results);
       }
     }
+    log.verbose("endpoint.all", objects.join(os.EOL));
     // prepare rows
     const rows = objects.map((pkg) => {
       return getTableRow(pkg);
