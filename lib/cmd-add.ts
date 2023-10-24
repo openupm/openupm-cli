@@ -12,6 +12,7 @@ import {
   parseName,
   saveManifest,
 } from "./core";
+import { isUrlVersion } from "./utils/version-name";
 
 export type AddOptions = {
   test: boolean;
@@ -70,12 +71,7 @@ const _add = async function ({
   }
   // packages that added to scope registry
   const pkgsInScope: PkgName[] = [];
-  const isGitOrLocal =
-    version !== undefined &&
-    (version.startsWith("git") ||
-      version.startsWith("file") ||
-      version.startsWith("http"));
-  if (!isGitOrLocal) {
+  if (version === undefined || !isUrlVersion(version)) {
     // verify name
     let pkgInfo = await fetchPackageInfo(name);
     if (!pkgInfo && env.upstream) {
