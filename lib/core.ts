@@ -369,7 +369,7 @@ export const saveManifest = function (data: PkgManifest) {
 
 // Get .upmconfig.toml directory
 export const getUpmConfigDir = async function (): Promise<string> {
-  let dirPath = "";
+  let dirPath: string | undefined = "";
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (env.wsl) {
     if (!isWsl) {
@@ -387,8 +387,6 @@ export const getUpmConfigDir = async function (): Promise<string> {
       });
     }
   } else {
-    // TODO: Handle undefined
-    // @ts-ignore
     dirPath = process.env.USERPROFILE
       ? process.env.USERPROFILE
       : process.env.HOME;
@@ -399,6 +397,8 @@ export const getUpmConfigDir = async function (): Promise<string> {
       dirPath = path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
     }
   }
+  if (dirPath === undefined)
+    throw new Error("Could not resolve upm-config dir-path");
   return dirPath;
 };
 
