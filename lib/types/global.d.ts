@@ -98,9 +98,9 @@ declare global {
   type GlobalOptions = {
     registry?: Registry;
     verbose: boolean;
-    color: boolean;
-    upstream: boolean;
-    cn: boolean;
+    color?: boolean;
+    upstream?: boolean;
+    cn?: boolean;
     systemUser: boolean;
     wsl: boolean;
     chdir: string;
