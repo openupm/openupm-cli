@@ -45,7 +45,7 @@ declare global {
     integrity: string;
   };
 
-  type PkgVersion = {
+  type PkgVersionInfo = {
     unity: string;
     unityRelease: string;
     dependencies: Record<PkgName, PkgVersionName>;
@@ -59,7 +59,7 @@ declare global {
 
   type PkgInfo = {
     name: PkgName;
-    versions: Record<PkgVersionName, PkgVersion>;
+    versions: Record<PkgVersionName, PkgVersionInfo>;
     "dist-tags": { latest?: PkgVersionName };
     version?: PkgVersionName;
     description?: string;
