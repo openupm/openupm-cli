@@ -13,7 +13,6 @@ export const deps = async function (pkg: Pkg, options: DepsOptions) {
   // parse name
   const { name, version } = parseName(pkg);
   // deps
-  if (version === undefined) throw new Error("Version undefined");
   await _deps({ name, version, deep: options.deep });
   return 0;
 };
@@ -24,7 +23,7 @@ const _deps = async function ({
   deep,
 }: {
   name: PkgName;
-  version: PkgVersionName;
+  version: PkgVersionName | undefined;
   deep: boolean;
 }) {
   // eslint-disable-next-line no-unused-vars
