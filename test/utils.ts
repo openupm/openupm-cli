@@ -1,15 +1,24 @@
-import _ from "lodash";
 import fse from "fs-extra";
 import nock from "nock";
 import path from "path";
 import os from "os";
 import testConsole from "test-console";
+import { PkgManifest } from "../lib/types/global";
+import _ from "lodash";
 
-export const getWorkDir = function (pathToTmp) {
+export type ManifestCreationOptions = {
+  manifest: boolean | PkgManifest;
+  editorVersion?: string;
+};
+
+export const getWorkDir = function (pathToTmp: string): string {
   return path.join(os.tmpdir(), pathToTmp);
 };
 
-export const createWorkDir = function (pathToTmp, { manifest, editorVersion }) {
+export const createWorkDir = function (
+  pathToTmp: string,
+  { manifest, editorVersion }: ManifestCreationOptions
+) {
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
@@ -30,7 +39,7 @@ export const createWorkDir = function (pathToTmp, { manifest, editorVersion }) {
   }
 };
 
-export const removeWorkDir = function (pathToTmp) {
+export const removeWorkDir = function (pathToTmp: string) {
   const cwd = getWorkDir(pathToTmp);
   fse.removeSync(cwd);
 };
@@ -44,14 +53,23 @@ export const nockDown = function () {
   nock.cleanAll();
 };
 
-export const getOutputs = function (stdouInspect, stderrInsepct) {
-  const results = [stdouInspect.output.join(""), stderrInsepct.output.join("")];
+export const getOutputs = function (
+  stdouInspect: testConsole.Inspector,
+  stderrInsepct: testConsole.Inspector
+): [string, string] {
+  const results: [string, string] = [
+    stdouInspect.output.join(""),
+    stderrInsepct.output.join(""),
+  ];
   stdouInspect.restore();
   stderrInsepct.restore();
   return results;
 };
 
-export const getInspects = function () {
+export const getInspects = function (): [
+  testConsole.Inspector,
+  testConsole.Inspector
+] {
   const stdoutInspect = testConsole.stdout.inspect();
   const stderrInspect = testConsole.stderr.inspect();
   return [stdoutInspect, stderrInspect];
