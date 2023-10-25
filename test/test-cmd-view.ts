@@ -1,19 +1,21 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-const assert = require("assert");
-const nock = require("nock");
-const should = require("should");
-const { parseEnv, loadManifest } = require("../build/lib/core");
-const { view } = require("../build/lib/cmd-view");
-const {
-  getWorkDir,
+import assert from "assert";
+import nock from "nock";
+import should from "should";
+import { loadManifest, parseEnv } from "../lib/core";
+
+import { view } from "../lib/cmd-view";
+
+import {
   createWorkDir,
-  removeWorkDir,
   getInspects,
   getOutputs,
-  nockUp,
+  getWorkDir,
   nockDown,
-} = require("./utils");
+  nockUp,
+  removeWorkDir,
+} from "./utils";
 
 describe("cmd-view.ts", function () {
   const options = {

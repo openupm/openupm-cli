@@ -1,15 +1,15 @@
-const _ = require("lodash");
-const fse = require("fs-extra");
-const nock = require("nock");
-const path = require("path");
-const os = require("os");
-const testConsole = require("test-console");
+import _ from "lodash";
+import fse from "fs-extra";
+import nock from "nock";
+import path from "path";
+import os from "os";
+import testConsole from "test-console";
 
-const getWorkDir = function(pathToTmp) {
+export const getWorkDir = function (pathToTmp) {
   return path.join(os.tmpdir(), pathToTmp);
 };
 
-const createWorkDir = function(pathToTmp, { manifest, editorVersion }) {
+export const createWorkDir = function (pathToTmp, { manifest, editorVersion }) {
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
@@ -30,39 +30,29 @@ const createWorkDir = function(pathToTmp, { manifest, editorVersion }) {
   }
 };
 
-const removeWorkDir = function(pathToTmp) {
+export const removeWorkDir = function (pathToTmp) {
   const cwd = getWorkDir(pathToTmp);
   fse.removeSync(cwd);
 };
 
-const nockUp = function() {
+export const nockUp = function () {
   if (!nock.isActive()) nock.activate();
 };
 
-const nockDown = function() {
+export const nockDown = function () {
   nock.restore();
   nock.cleanAll();
 };
 
-const getOutputs = function(stdouInspect, stderrInsepct) {
+export const getOutputs = function (stdouInspect, stderrInsepct) {
   const results = [stdouInspect.output.join(""), stderrInsepct.output.join("")];
   stdouInspect.restore();
   stderrInsepct.restore();
   return results;
 };
 
-const getInspects = function() {
+export const getInspects = function () {
   const stdoutInspect = testConsole.stdout.inspect();
   const stderrInspect = testConsole.stderr.inspect();
   return [stdoutInspect, stderrInspect];
-};
-
-module.exports = {
-  getWorkDir,
-  createWorkDir,
-  removeWorkDir,
-  nockUp,
-  nockDown,
-  getInspects,
-  getOutputs
 };

@@ -1,19 +1,19 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-const assert = require("assert");
-const nock = require("nock");
-const should = require("should");
+import assert from "assert";
+import nock from "nock";
+import should from "should";
+import { search } from "../lib/cmd-search";
 
-const { search } = require("../build/lib/cmd-search");
-const {
-  getWorkDir,
+import {
   createWorkDir,
-  removeWorkDir,
   getInspects,
   getOutputs,
-  nockUp,
+  getWorkDir,
   nockDown,
-} = require("./utils");
+  nockUp,
+  removeWorkDir,
+} from "./utils";
 
 describe("cmd-search.ts", function () {
   let stdoutInspect = null;

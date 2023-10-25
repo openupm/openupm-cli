@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-const assert = require("assert");
-const fs = require("fs");
-const nock = require("nock");
-const path = require("path");
-const should = require("should");
-const { splitPkgName } = require("../build/lib/utils/pkg-name");
+import assert from "assert";
+import fs from "fs";
+import nock from "nock";
+import path from "path";
+import should from "should";
+import { splitPkgName } from "../lib/utils/pkg-name";
+
 describe("pkg-name.ts", function () {
   describe("splitPkgName", function () {
     it("pkg@version", function () {
