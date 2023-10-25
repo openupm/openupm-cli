@@ -325,7 +325,7 @@ export const fetchPackageDependencies = async function ({
 
 // Get latest version from package info
 export const getLatestVersion = function (
-  pkgInfo: PkgInfo
+  pkgInfo: Partial<PkgInfo>
 ): PkgVersion | undefined {
   if (pkgInfo["dist-tags"]?.["latest"] !== undefined)
     return pkgInfo["dist-tags"]["latest"];
