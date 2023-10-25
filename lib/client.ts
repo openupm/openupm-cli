@@ -8,7 +8,7 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import { AssertionError } from "assert";
-import {PkgInfo} from "./types/global";
+import { PkgInfo } from "./types/global";
 
 export type NpmClient = {
   rawClient: RegClient;

@@ -13,7 +13,7 @@ import {
 } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
 import { splitPkgName } from "./utils/pkg-name";
-import {GlobalOptions, PkgName, ScopedRegistry} from "./types/global";
+import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 
 export type AddOptions = {
   test: boolean;
