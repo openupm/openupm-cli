@@ -213,7 +213,7 @@ export const fetchPackageDependencies = async function ({
 }: {
   name: PkgName;
   version: PkgVersion | undefined;
-  deep: boolean;
+  deep?: boolean;
 }): Promise<[Dependency[], Dependency[]]> {
   log.verbose("dependency", `fetch: ${name}@${version} deep=${deep}`);
   // a list of pending dependency {name, version}
