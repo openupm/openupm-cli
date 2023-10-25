@@ -90,8 +90,8 @@ export type ScopedRegistry = {
 
 export type PkgManifest = {
   dependencies: Record<PkgName, PkgVersion>;
-  scopedRegistries: ScopedRegistry[];
-  testables: string[];
+  scopedRegistries?: ScopedRegistry[];
+  testables?: string[];
 };
 
 export type GlobalOptions = {
