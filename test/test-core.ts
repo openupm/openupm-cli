@@ -24,11 +24,12 @@ import {
   nockUp,
   removeWorkDir,
 } from "./utils";
+import testConsole from "test-console";
 
 describe("cmd-core.ts", function () {
   describe("parseEnv", function () {
-    let stdoutInspect = null;
-    let stderrInspect = null;
+    let stdoutInspect: testConsole.Inspector = null!;
+    let stderrInspect: testConsole.Inspector = null!;
     before(function () {
       removeWorkDir("test-openupm-cli");
       removeWorkDir("test-openupm-cli-no-manifest");
@@ -214,8 +215,8 @@ describe("cmd-core.ts", function () {
   });
 
   describe("loadManifest/SaveManifest", function () {
-    let stdoutInspect = null;
-    let stderrInspect = null;
+    let stdoutInspect: testConsole.Inspector = null!;
+    let stderrInspect: testConsole.Inspector = null!;
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });

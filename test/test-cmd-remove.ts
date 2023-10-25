@@ -11,11 +11,12 @@ import {
   getWorkDir,
   removeWorkDir,
 } from "./utils";
+import testConsole from "test-console";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
-    let stdoutInspect = null;
-    let stderrInspect = null;
+    let stdoutInspect: testConsole.Inspector = null!;
+    let stderrInspect: testConsole.Inspector = null!;
     const defaultManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",
