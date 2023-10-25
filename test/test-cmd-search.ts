@@ -12,10 +12,12 @@ import {
   nockUp,
   removeWorkDir,
 } from "./utils";
+import testConsole from "test-console";
 
 describe("cmd-search.ts", function () {
-  let stdoutInspect = null;
-  let stderrInspect = null;
+  let stdoutInspect: testConsole.Inspector = null!;
+  let stderrInspect: testConsole.Inspector = null!;
+
   const options = {
     _global: {
       registry: "http://example.com",

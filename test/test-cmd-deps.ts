@@ -13,6 +13,7 @@ import {
   nockUp,
   removeWorkDir,
 } from "./utils";
+import testConsole from "test-console";
 
 describe("cmd-deps.ts", function () {
   const options = {
@@ -22,8 +23,9 @@ describe("cmd-deps.ts", function () {
     },
   };
   describe("deps", function () {
-    let stdoutInspect = null;
-    let stderrInspect = null;
+    let stdoutInspect: testConsole.Inspector = null!;
+    let stderrInspect: testConsole.Inspector = null!;
+
     const remotePkgInfoA = {
       name: "com.example.package-a",
       versions: {
