@@ -292,7 +292,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -301,7 +301,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -310,7 +310,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -321,7 +321,7 @@ describe("cmd-add.ts", function () {
       retCode2.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("modified ").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -332,7 +332,7 @@ describe("cmd-add.ts", function () {
       retCode2.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestA);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("existed ").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -341,7 +341,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("version 2.0.0 is not a valid choice").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
     });
@@ -351,7 +351,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -361,7 +361,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -371,7 +371,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.dependencies["com.base.package-a"].should.be.equal(fileUrl);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -380,7 +380,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
     it("add more than one pkgs", async function () {
@@ -391,7 +391,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestAB);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added com.base.package-a").should.be.ok();
       stdout.includes("added com.base.package-b").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
@@ -401,7 +401,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestUpstream);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added com.upstream.package-up").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -410,7 +410,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
     it("add pkg with nested dependencies", async function () {
@@ -418,7 +418,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestC);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -427,7 +427,7 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(expectedManifestTestable);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -437,7 +437,7 @@ describe("cmd-add.ts", function () {
         testableOptions
       );
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -447,7 +447,7 @@ describe("cmd-add.ts", function () {
         testableOptions
       );
       retCode.should.equal(1);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
     });
     it("force add pkg with higher editor version", async function () {
@@ -456,7 +456,7 @@ describe("cmd-add.ts", function () {
         forceOptions
       );
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
     });
     it("add pkg with wrong editor version", async function () {
@@ -465,7 +465,7 @@ describe("cmd-add.ts", function () {
         testableOptions
       );
       retCode.should.equal(1);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("2020 is not valid").should.be.ok();
       console.log(stdout);
     });
@@ -475,7 +475,7 @@ describe("cmd-add.ts", function () {
         forceOptions
       );
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("2020 is not valid").should.be.ok();
       console.log(stdout);
     });

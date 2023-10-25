@@ -98,7 +98,7 @@ describe("cmd-deps.ts", function () {
     it("deps pkg", async function () {
       const retCode = await deps("com.example.package-a", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("com.example.package-b").should.be.ok();
     });
     it("deps pkg --deep", async function () {
@@ -107,38 +107,37 @@ describe("cmd-deps.ts", function () {
         deep: true,
       });
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("com.example.package-b").should.be.ok();
       stdout.includes("com.example.package-up").should.be.ok();
     });
     it("deps pkg@latest", async function () {
       const retCode = await deps("com.example.package-a@latest", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("com.example.package-b").should.be.ok();
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps("com.example.package-a@1.0.0", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("com.example.package-b").should.be.ok();
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps("com.example.package-a@2.0.0", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("is not a valid choice").should.be.ok();
     });
     it("deps pkg-not-exist", async function () {
       const retCode = await deps("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("not found").should.be.ok();
     });
     it("deps pkg upstream", async function () {
       const retCode = await deps("com.example.package-up", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
 });

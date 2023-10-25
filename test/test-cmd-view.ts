@@ -151,31 +151,31 @@ describe("cmd-view.ts", function () {
     it("view pkg", async function () {
       const retCode = await view("com.example.package-a", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("com.example.package-a@1.0.0").should.be.ok();
     });
     it("view pkg@1.0.0", async function () {
       const retCode = await view("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("please replace").should.be.ok();
     });
     it("view pkg-not-exist", async function () {
       const retCode = await view("pkg-not-exist", options);
       retCode.should.equal(1);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
     it("view pkg from upstream", async function () {
       const retCode = await view("com.example.package-up", upstreamOptions);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("com.example.package-up@1.0.0").should.be.ok();
     });
     it("view pkg-not-exist from upstream", async function () {
       const retCode = await view("pkg-not-exist", upstreamOptions);
       retCode.should.equal(1);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
   });

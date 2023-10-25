@@ -25,12 +25,7 @@ describe("cmd-search.ts", function () {
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
-  const upstreamOptions = {
-    _global: {
-      registry: "http://example.com",
-      chdir: getWorkDir("test-openupm-cli"),
-    },
-  };
+  getWorkDir("test-openupm-cli");
   beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
@@ -102,7 +97,7 @@ describe("cmd-search.ts", function () {
     it("simple", async function () {
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
       stdout.includes("2019-10-02").should.be.ok();
@@ -110,7 +105,7 @@ describe("cmd-search.ts", function () {
     it("pkg not exist", async function () {
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("No matches found").should.be.ok();
     });
   });
@@ -154,7 +149,7 @@ describe("cmd-search.ts", function () {
       });
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("fast search endpoint is not available").should.be.ok();
       stdout.includes("package-a").should.be.ok();
       stdout.includes("1.0.0").should.be.ok();
@@ -166,7 +161,7 @@ describe("cmd-search.ts", function () {
       });
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("No matches found").should.be.ok();
     });
   });

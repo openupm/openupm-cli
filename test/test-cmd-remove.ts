@@ -63,7 +63,7 @@ describe("cmd-remove.ts", function () {
         "com.example",
         "com.example.package-b",
       ]);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("removed ").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
@@ -78,7 +78,7 @@ describe("cmd-remove.ts", function () {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("please replace").should.be.ok();
     });
     it("remove pkg-not-exist", async function () {
@@ -92,7 +92,7 @@ describe("cmd-remove.ts", function () {
       retCode.should.equal(1);
       const manifest = await loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
     it("remove more than one pkgs", async function () {
@@ -115,7 +115,7 @@ describe("cmd-remove.ts", function () {
         manifest.dependencies["com.example.package-b"] == undefined
       ).should.be.ok();
       manifest.scopedRegistries[0].scopes.should.be.deepEqual(["com.example"]);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("removed com.example.package-a").should.be.ok();
       stdout.includes("removed com.example.package-b").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
