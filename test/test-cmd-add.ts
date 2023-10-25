@@ -1,9 +1,7 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-import assert from "assert";
+import "assert";
 import nock from "nock";
-import should from "should";
-import { loadManifest, parseEnv } from "../lib/core";
+import "should";
+import { loadManifest } from "../lib/core";
 
 import { add } from "../lib/cmd-add";
 

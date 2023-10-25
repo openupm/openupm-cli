@@ -1,8 +1,6 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-import assert from "assert";
-import should from "should";
-import { loadManifest, parseEnv } from "../lib/core";
+import "assert";
+import "should";
+import { loadManifest } from "../lib/core";
 
 import { remove } from "../lib/cmd-remove";
 
