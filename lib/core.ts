@@ -472,7 +472,7 @@ export const compareEditorVersion = function (a: string, b: string) {
  *   locBuild: 4
  */
 export const parseEditorVersion = function (
-  version: string
+  version: string | null
 ): SemanticVersion | null {
   type RegexMatchGroups = {
     major: `${number}`;
