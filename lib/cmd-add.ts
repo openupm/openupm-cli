@@ -16,8 +16,8 @@ import { splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 
 export type AddOptions = {
-  test: boolean;
-  force: boolean;
+  test?: boolean;
+  force?: boolean;
   _global: GlobalOptions;
 };
 
@@ -51,8 +51,8 @@ const _add = async function ({
   force,
 }: {
   pkg: PkgName;
-  testables: boolean;
-  force: boolean;
+  testables?: boolean;
+  force?: boolean;
 }) {
   // dirty flag
   let dirty = false;

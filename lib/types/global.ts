@@ -96,13 +96,13 @@ export type PkgManifest = {
 
 export type GlobalOptions = {
   registry?: Registry;
-  verbose: boolean;
+  verbose?: boolean;
   color?: boolean;
   upstream?: boolean;
   cn?: boolean;
-  systemUser: boolean;
-  wsl: boolean;
-  chdir: string;
+  systemUser?: boolean;
+  wsl?: boolean;
+  chdir?: string;
 };
 
 export type UpmAuth = {
