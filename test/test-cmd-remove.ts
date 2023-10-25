@@ -1,17 +1,18 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-const assert = require("assert");
-const should = require("should");
+import assert from "assert";
+import should from "should";
+import { loadManifest, parseEnv } from "../lib/core";
 
-const { parseEnv, loadManifest } = require("../build/lib/core");
-const { remove } = require("../build/lib/cmd-remove");
-const {
+import { remove } from "../lib/cmd-remove";
+
+import {
+  createWorkDir,
   getInspects,
   getOutputs,
   getWorkDir,
-  createWorkDir,
   removeWorkDir,
-} = require("./utils");
+} from "./utils";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
