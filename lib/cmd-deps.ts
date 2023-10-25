@@ -23,7 +23,7 @@ const _deps = async function ({
   deep,
 }: {
   name: PkgName;
-  version: PkgVersionName | undefined;
+  version: PkgVersion | undefined;
   deep: boolean;
 }) {
   // eslint-disable-next-line no-unused-vars

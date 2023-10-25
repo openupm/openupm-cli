@@ -1,11 +1,11 @@
 import { NpmAuth } from "another-npm-registry-client";
 
 declare global {
-  type PkgVersionName = string;
+  type PkgVersion = string;
 
   type ReverseDomainName = string;
 
-  type PkgName = ReverseDomainName | `${ReverseDomainName}@${PkgVersionName}`;
+  type PkgName = ReverseDomainName | `${ReverseDomainName}@${PkgVersion}`;
 
   type Region = "us" | "cn";
 
@@ -48,7 +48,7 @@ declare global {
   type PkgVersionInfo = {
     unity?: string;
     unityRelease: string;
-    dependencies: Record<PkgName, PkgVersionName>;
+    dependencies: Record<PkgName, PkgVersion>;
     license?: string;
     displayName: string;
     description?: string;
@@ -59,23 +59,23 @@ declare global {
 
   type PkgInfo = {
     name: PkgName;
-    versions: Record<PkgVersionName, PkgVersionInfo>;
-    "dist-tags": { latest?: PkgVersionName };
-    version?: PkgVersionName;
+    versions: Record<PkgVersion, PkgVersionInfo>;
+    "dist-tags": { latest?: PkgVersion };
+    version?: PkgVersion;
     description?: string;
     keywords?: string[];
-    time: Record<"created" | "modified" | PkgVersionName, string>;
+    time: Record<"created" | "modified" | PkgVersion, string>;
     date?: Date;
   };
 
   type NameVersionPair = {
     name: PkgName;
-    version: PkgVersionName | undefined;
+    version: PkgVersion | undefined;
   };
 
   type Dependency = {
     name: PkgName;
-    version: PkgVersionName | undefined;
+    version: PkgVersion | undefined;
     upstream: boolean;
     self: boolean;
     internal: boolean;
@@ -90,7 +90,7 @@ declare global {
   };
 
   type PkgManifest = {
-    dependencies: Record<PkgName, PkgVersionName>;
+    dependencies: Record<PkgName, PkgVersion>;
     scopedRegistries: ScopedRegistry[];
     testables: string[];
   };

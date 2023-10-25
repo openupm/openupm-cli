@@ -9,7 +9,7 @@ import assert from "assert";
 
 type DateString = string;
 
-type TableRow = [PkgName, PkgVersionName, DateString, ""];
+type TableRow = [PkgName, PkgVersion, DateString, ""];
 
 export type SearchOptions = {
   _global: GlobalOptions;

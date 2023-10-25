@@ -159,7 +159,7 @@ export const parseEnv = async function (
 // Parse name to {name, version}
 export const parseName = function (pkg: PkgName): {
   name: ReverseDomainName;
-  version: PkgVersionName | undefined;
+  version: PkgVersion | undefined;
 } {
   const segs = pkg.split("@");
   const name = segs[0];
@@ -211,7 +211,7 @@ export const fetchPackageDependencies = async function ({
   deep,
 }: {
   name: PkgName;
-  version: PkgVersionName | undefined;
+  version: PkgVersion | undefined;
   deep: boolean;
 }): Promise<[Dependency[], Dependency[]]> {
   log.verbose("dependency", `fetch: ${name}@${version} deep=${deep}`);
@@ -225,7 +225,7 @@ export const fetchPackageDependencies = async function ({
   const depsInvalid = [];
   // cached dict: {pkg-name: pkgInfo}
   const cachedPacakgeInfoDict: Record<
-    PkgVersionName,
+    PkgVersion,
     { pkgInfo: PkgInfo; upstream: boolean }
   > = {};
   while (pendingList.length > 0) {
@@ -304,7 +304,7 @@ export const fetchPackageDependencies = async function ({
         if (depObj.self || deep) {
           const deps: NameVersionPair[] = _.toPairs(
             pkgInfo.versions[entry.version]["dependencies"]
-          ).map((x: [PkgName, PkgVersionName]): NameVersionPair => {
+          ).map((x: [PkgName, PkgVersion]): NameVersionPair => {
             return { name: x[0], version: x[1] };
           });
           deps.forEach((x) => pendingList.push(x));
@@ -325,7 +325,7 @@ export const fetchPackageDependencies = async function ({
 // Get latest version from package info
 export const getLatestVersion = function (
   pkgInfo: PkgInfo
-): PkgVersionName | undefined {
+): PkgVersion | undefined {
   if (pkgInfo["dist-tags"]?.["latest"] !== undefined)
     return pkgInfo["dist-tags"]["latest"];
   else if (pkgInfo.version) return pkgInfo.version;
