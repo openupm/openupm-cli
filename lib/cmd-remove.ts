@@ -1,5 +1,6 @@
 import log from "./logger";
-import { env, loadManifest, parseEnv, parseName, saveManifest } from "./core";
+import { env, loadManifest, parseEnv, saveManifest } from "./core";
+import { splitPkgName } from "./utils/pkg-name";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
@@ -30,9 +31,9 @@ const _remove = async function (pkg: PkgName) {
   // dirty flag
   let dirty = false;
   // parse name
-  const parseResult = parseName(pkg);
-  const name = parseResult.name;
-  let version = parseResult.version;
+  const split = splitPkgName(pkg);
+  const name = split.name;
+  let version = split.version;
   if (version) {
     log.warn("", `please replace '${name}@${version}' with '${name}'`);
     return { code: 1, dirty };

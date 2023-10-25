@@ -1,5 +1,6 @@
 import log from "./logger";
-import { fetchPackageDependencies, parseEnv, parseName } from "./core";
+import { fetchPackageDependencies, parseEnv } from "./core";
+import { splitPkgName } from "./utils/pkg-name";
 
 export type DepsOptions = {
   deep: boolean;
@@ -11,7 +12,7 @@ export const deps = async function (pkg: PkgName, options: DepsOptions) {
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  const { name, version } = parseName(pkg);
+  const { name, version } = splitPkgName(pkg);
   // deps
   await _deps({ name, version, deep: options.deep });
   return 0;

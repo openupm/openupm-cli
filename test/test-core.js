@@ -13,7 +13,6 @@ const {
   loadManifest,
   parseEditorVersion,
   parseEnv,
-  parseName,
   saveManifest,
   isInternalPackage
 } = require("../build/lib/core");
@@ -28,45 +27,6 @@ const {
 } = require("./utils");
 
 describe("cmd-core.ts", function() {
-  describe("parseName", function() {
-    it("pkg@version", function() {
-      parseName("pkg@1.0.0").should.deepEqual({
-        name: "pkg",
-        version: "1.0.0"
-      });
-    });
-    it("pkg@latest", function() {
-      parseName("pkg@latest").should.deepEqual({
-        name: "pkg",
-        version: "latest"
-      });
-    });
-    it("pkg", function() {
-      parseName("pkg").should.deepEqual({
-        name: "pkg",
-        version: undefined
-      });
-    });
-    it("pkg@file", function() {
-      parseName("pkg@file:../pkg").should.deepEqual({
-        name: "pkg",
-        version: "file:../pkg"
-      });
-    });
-    it("pkg@http", function() {
-      parseName("pkg@https://github.com/owner/pkg").should.deepEqual({
-        name: "pkg",
-        version: "https://github.com/owner/pkg"
-      });
-    });
-    it("pkg@git", function() {
-      parseName("pkg@git@github.com:owner/pkg.git").should.deepEqual({
-        name: "pkg",
-        version: "git@github.com:owner/pkg.git"
-      });
-    });
-  });
-
   describe("parseEnv", function() {
     let stdoutInspect = null;
     let stderrInspect = null;

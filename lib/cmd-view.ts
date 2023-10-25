@@ -1,13 +1,8 @@
 import chalk from "chalk";
 import log from "./logger";
-import {
-  env,
-  fetchPackageInfo,
-  getLatestVersion,
-  parseEnv,
-  parseName,
-} from "./core";
+import { env, fetchPackageInfo, getLatestVersion, parseEnv } from "./core";
 import assert from "assert";
+import { splitPkgName } from "./utils/pkg-name";
 
 export type ViewOptions = {
   _global: GlobalOptions;
@@ -18,7 +13,7 @@ export const view = async function (pkg: PkgName, options: ViewOptions) {
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  const { name, version } = parseName(pkg);
+  const { name, version } = splitPkgName(pkg);
   if (version) {
     log.warn("", `please replace '${name}@${version}' with '${name}'`);
     return 1;

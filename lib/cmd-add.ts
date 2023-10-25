@@ -9,10 +9,10 @@ import {
   loadManifest,
   parseEditorVersion,
   parseEnv,
-  parseName,
   saveManifest,
 } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
+import { splitPkgName } from "./utils/pkg-name";
 
 export type AddOptions = {
   test: boolean;
@@ -58,9 +58,9 @@ const _add = async function ({
   // is upstream package flag
   let isUpstreamPackage = false;
   // parse name
-  const parseResult = parseName(pkg);
-  const name = parseResult.name;
-  let version = parseResult.version;
+  const split = splitPkgName(pkg);
+  const name = split.name;
+  let version = split.version;
 
   // load manifest
   const manifest = loadManifest();

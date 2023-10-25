@@ -156,18 +156,6 @@ export const parseEnv = async function (
   return true;
 };
 
-// Parse name to {name, version}
-export const parseName = function (pkg: PkgName): {
-  name: ReverseDomainName;
-  version: PkgVersion | undefined;
-} {
-  const segs = pkg.split("@");
-  const name = segs[0];
-  const version =
-    segs.length > 1 ? segs.slice(1, segs.length).join("@") : undefined;
-  return { name, version };
-};
-
 // Get npm fetch options
 export const getNpmFetchOptions = function (): search.Options {
   const opts: search.Options = {
