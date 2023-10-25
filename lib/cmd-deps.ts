@@ -4,7 +4,7 @@ import { splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
 
 export type DepsOptions = {
-  deep: boolean;
+  deep?: boolean;
   _global: GlobalOptions;
 };
 
@@ -26,7 +26,7 @@ const _deps = async function ({
 }: {
   name: PkgName;
   version: PkgVersion | undefined;
-  deep: boolean;
+  deep?: boolean;
 }) {
   // eslint-disable-next-line no-unused-vars
   const [depsValid, depsInvalid] = await fetchPackageDependencies({
