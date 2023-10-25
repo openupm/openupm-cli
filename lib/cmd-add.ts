@@ -180,7 +180,6 @@ const _add = async function ({
     } else pkgsInScope.push(name);
   }
   // add to dependencies
-  if (version === undefined) throw new Error("Version is undefined");
   const oldVersion = manifest.dependencies[name];
   manifest.dependencies[name] = version;
   if (!oldVersion) {
