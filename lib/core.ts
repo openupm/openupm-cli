@@ -14,6 +14,19 @@ import log from "./logger";
 import { assertIsError } from "./utils/error-type-guards";
 import search from "libnpmsearch";
 import assert from "assert";
+import {
+  Dependency,
+  Env,
+  GlobalOptions,
+  NameVersionPair,
+  PkgInfo,
+  PkgManifest,
+  PkgName,
+  PkgVersion,
+  Registry,
+  SemanticVersion,
+  UPMConfig,
+} from "./types/global";
 
 export const env: Env = {
   auth: {},

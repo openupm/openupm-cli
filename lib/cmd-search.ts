@@ -6,6 +6,13 @@ import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
+import {
+  GlobalOptions,
+  PkgInfo,
+  PkgName,
+  PkgVersion,
+  Registry,
+} from "./types/global";
 
 type DateString = string;
 
