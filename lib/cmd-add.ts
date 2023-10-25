@@ -12,7 +12,7 @@ import {
   parseName,
   saveManifest,
 } from "./core";
-import { isUrlVersion } from "./utils/version";
+import { isUrlVersion } from "./utils/pkg-version";
 
 export type AddOptions = {
   test: boolean;
