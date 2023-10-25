@@ -15,6 +15,7 @@ import {
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
+import assert from "assert";
 
 describe("cmd-add.ts", function () {
   const options = {
@@ -291,6 +292,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a", options);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestA);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -300,6 +302,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a@1.0.0", options);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestA);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -309,6 +312,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a@latest", options);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestA);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -320,6 +324,7 @@ describe("cmd-add.ts", function () {
       const retCode2 = await add("com.base.package-a@1.0.0", options);
       retCode2.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestA);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("modified ").should.be.ok();
@@ -331,6 +336,7 @@ describe("cmd-add.ts", function () {
       const retCode2 = await add("com.base.package-a@1.0.0", options);
       retCode2.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestA);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("existed ").should.be.ok();
@@ -340,6 +346,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a@2.0.0", options);
       retCode.should.equal(1);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(defaultManifest);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("version 2.0.0 is not a valid choice").should.be.ok();
@@ -350,6 +357,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a@" + gitUrl, options);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -360,6 +368,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a@" + gitUrl, options);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.dependencies["com.base.package-a"].should.be.equal(gitUrl);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -370,6 +379,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a@" + fileUrl, options);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.dependencies["com.base.package-a"].should.be.equal(fileUrl);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -379,6 +389,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("pkg-not-exist", options);
       retCode.should.equal(1);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.deepEqual(defaultManifest);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
@@ -390,6 +401,7 @@ describe("cmd-add.ts", function () {
       );
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestAB);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added com.base.package-a").should.be.ok();
@@ -400,6 +412,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.upstream.package-up", upstreamOptions);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestUpstream);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added com.upstream.package-up").should.be.ok();
@@ -409,6 +422,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("pkg-not-exist", upstreamOptions);
       retCode.should.equal(1);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.deepEqual(defaultManifest);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
@@ -417,6 +431,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-c@latest", upstreamOptions);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestC);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
@@ -426,6 +441,7 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a", testableOptions);
       retCode.should.equal(0);
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(expectedManifestTestable);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("added").should.be.ok();
