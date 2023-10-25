@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-import assert from "assert";
-import nock from "nock";
+import "assert";
+import "nock";
 import should from "should";
 import {
   generateNpmrcLines,

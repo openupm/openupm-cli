@@ -1,10 +1,8 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-import assert from "assert";
+import "assert";
 import fs from "fs";
 import nock from "nock";
 import path from "path";
-import should from "should";
+import "should";
 import {
   compareEditorVersion,
   env,

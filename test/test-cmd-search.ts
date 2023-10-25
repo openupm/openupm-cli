@@ -1,8 +1,6 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-import assert from "assert";
+import "assert";
 import nock from "nock";
-import should from "should";
+import "should";
 import { search } from "../lib/cmd-search";
 
 import {
