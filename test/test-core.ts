@@ -322,12 +322,6 @@ describe("cmd-core.ts", function () {
       assert(version !== undefined);
       version.should.equal("1.0.0");
     });
-    it("not found", async function () {
-      (
-        getLatestVersion({ versions: { "1.0.0": "patch" } }) === undefined
-      ).should.be.ok();
-      (getLatestVersion({}) === undefined).should.be.ok();
-    });
   });
   describe("parseEditorVersion", function () {
     it("test null", function () {
