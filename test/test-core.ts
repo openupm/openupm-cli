@@ -62,7 +62,6 @@ describe("cmd-core.ts", function () {
       env.cwd.should.equal("");
       env.manifestPath.should.equal("");
       (env.editorVersion === null).should.be.ok();
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("check path", async function () {
       (
@@ -75,7 +74,6 @@ describe("cmd-core.ts", function () {
       env.manifestPath.should.be.equal(
         path.join(getWorkDir("test-openupm-cli"), "Packages/manifest.json")
       );
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("can not resolve path", async function () {
       (
@@ -84,7 +82,7 @@ describe("cmd-core.ts", function () {
           { checkPath: true }
         )
       ).should.not.be.ok();
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("can not resolve path").should.be.ok();
     });
     it("can not locate manifest.json", async function () {
@@ -94,7 +92,7 @@ describe("cmd-core.ts", function () {
           { checkPath: true }
         )
       ).should.not.be.ok();
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("can not locate manifest.json").should.be.ok();
     });
     it("custom registry", async function () {
@@ -106,7 +104,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with splash", async function () {
       (
@@ -117,7 +114,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with extra path", async function () {
       (
@@ -128,7 +124,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org/some");
       env.namespace.should.be.equal("org.npmjs");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with extra path and splash", async function () {
       (
@@ -139,7 +134,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org/some");
       env.namespace.should.be.equal("org.npmjs");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry without http", async function () {
       (
@@ -150,7 +144,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("http://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with ipv4+port", async function () {
       (
@@ -161,7 +154,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("http://127.0.0.1:4873");
       env.namespace.should.be.equal("127.0.0.1");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("custom registry with ipv6+port", async function () {
       (
@@ -172,14 +164,12 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       env.registry.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
       env.namespace.should.be.equal("1:2:3:4:5:6:7:8");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("upstream", async function () {
       (
         await parseEnv({ _global: { upstream: false } }, { checkPath: false })
       ).should.be.ok();
       env.upstream.should.not.be.ok();
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("editorVersion", async function () {
       (
@@ -189,7 +179,6 @@ describe("cmd-core.ts", function () {
         )
       ).should.be.ok();
       env.editorVersion.should.be.equal("2019.2.13f1");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("region cn", async function () {
       (
@@ -198,7 +187,6 @@ describe("cmd-core.ts", function () {
       env.registry.should.be.equal("https://package.openupm.cn");
       env.upstreamRegistry.should.be.equal("https://packages.unity.cn");
       env.region.should.be.equal("cn");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("region cn with a custom registry", async function () {
       (
@@ -210,7 +198,6 @@ describe("cmd-core.ts", function () {
       env.registry.should.be.equal("https://reg.custom-package.com");
       env.upstreamRegistry.should.be.equal("https://packages.unity.cn");
       env.region.should.be.equal("cn");
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
 
@@ -247,7 +234,6 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       const manifest = loadManifest();
       manifest.should.be.deepEqual({ dependencies: {} });
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
     it("no manifest file", async function () {
       (
@@ -258,7 +244,7 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       const manifest = loadManifest();
       (manifest === null).should.be.ok();
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("does not exist").should.be.ok();
     });
     it("wrong json content", async function () {
@@ -270,7 +256,7 @@ describe("cmd-core.ts", function () {
       ).should.be.ok();
       const manifest = loadManifest();
       (manifest === null).should.be.ok();
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("failed to parse").should.be.ok();
     });
     it("saveManifest", async function () {
@@ -286,7 +272,6 @@ describe("cmd-core.ts", function () {
       saveManifest(manifest).should.be.ok();
       const manifest2 = loadManifest();
       manifest2.should.be.deepEqual(manifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
     });
   });
 
@@ -318,7 +303,7 @@ describe("cmd-core.ts", function () {
           { checkPath: false }
         )
       ).should.be.ok();
-      const pkgInfoRemote = { name: "com.littlebigfun.addressable-importer" };
+
       nock("http://example.com").get("/package-a").reply(404);
       const info = await fetchPackageInfo("package-a");
       (info === undefined).should.be.ok();
