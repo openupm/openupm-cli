@@ -1,3 +1,5 @@
+import { PkgVersion } from "../types/global";
+
 const isGit = (version: PkgVersion): boolean => version.startsWith("git");
 const isHttp = (version: PkgVersion): boolean => version.startsWith("http");
 

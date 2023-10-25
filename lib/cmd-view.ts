@@ -3,6 +3,7 @@ import log from "./logger";
 import { env, fetchPackageInfo, getLatestVersion, parseEnv } from "./core";
 import assert from "assert";
 import { splitPkgName } from "./utils/pkg-name";
+import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
 
 export type ViewOptions = {
   _global: GlobalOptions;
