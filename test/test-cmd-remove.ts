@@ -12,6 +12,7 @@ import {
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
+import assert from "assert";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
@@ -55,7 +56,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove("com.example.package-a", options);
       retCode.should.equal(0);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
       (
         manifest.dependencies["com.example.package-a"] == undefined
       ).should.be.ok();
@@ -76,7 +77,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
       manifest.should.be.deepEqual(defaultManifest);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("please replace").should.be.ok();
@@ -90,7 +91,8 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove("pkg-not-exist", options);
       retCode.should.equal(1);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(defaultManifest);
       const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
