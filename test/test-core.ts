@@ -25,6 +25,7 @@ import {
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
+import assert from "assert";
 
 describe("cmd-core.ts", function () {
   describe("parseEnv", function () {
@@ -178,6 +179,7 @@ describe("cmd-core.ts", function () {
           { checkPath: true }
         )
       ).should.be.ok();
+      assert(env.editorVersion !== null);
       env.editorVersion.should.be.equal("2019.2.13f1");
     });
     it("region cn", async function () {
@@ -233,6 +235,7 @@ describe("cmd-core.ts", function () {
         )
       ).should.be.ok();
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual({ dependencies: {} });
     });
     it("no manifest file", async function () {
@@ -267,10 +270,12 @@ describe("cmd-core.ts", function () {
         )
       ).should.be.ok();
       const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual({ dependencies: {} });
       manifest.dependencies["some-pack"] = "1.0.0";
       saveManifest(manifest).should.be.ok();
       const manifest2 = loadManifest();
+      assert(manifest2 !== null);
       manifest2.should.be.deepEqual(manifest);
     });
   });
@@ -294,6 +299,7 @@ describe("cmd-core.ts", function () {
         .get("/package-a")
         .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });
       const info = await fetchPackageInfo("package-a");
+      assert(info !== undefined);
       info.should.deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
@@ -312,9 +318,9 @@ describe("cmd-core.ts", function () {
 
   describe("getLatestVersion", function () {
     it("from dist-tags", async function () {
-      getLatestVersion({ "dist-tags": { latest: "1.0.0" } }).should.equal(
-        "1.0.0"
-      );
+      const version = getLatestVersion({ "dist-tags": { latest: "1.0.0" } });
+      assert(version !== undefined);
+      version.should.equal("1.0.0");
     });
     it("not found", async function () {
       (
@@ -328,17 +334,23 @@ describe("cmd-core.ts", function () {
       (parseEditorVersion(null) === null).should.be.ok();
     });
     it("test x.y", function () {
-      parseEditorVersion("2019.2").should.deepEqual({ major: 2019, minor: 2 });
+      const version = parseEditorVersion("2019.2");
+      assert(version !== null);
+      version.should.deepEqual({ major: 2019, minor: 2 });
     });
     it("test x.y.z", function () {
-      parseEditorVersion("2019.2.1").should.deepEqual({
+      const version = parseEditorVersion("2019.2.1");
+      assert(version !== null);
+      version.should.deepEqual({
         major: 2019,
         minor: 2,
         patch: 1,
       });
     });
     it("test x.y.zan", function () {
-      parseEditorVersion("2019.2.1a5").should.deepEqual({
+      const version = parseEditorVersion("2019.2.1a5");
+      assert(version !== null);
+      version.should.deepEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -348,7 +360,9 @@ describe("cmd-core.ts", function () {
       });
     });
     it("test x.y.zbn", function () {
-      parseEditorVersion("2019.2.1b5").should.deepEqual({
+      const version = parseEditorVersion("2019.2.1b5");
+      assert(version !== null);
+      version.should.deepEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -358,7 +372,9 @@ describe("cmd-core.ts", function () {
       });
     });
     it("test x.y.zfn", function () {
-      parseEditorVersion("2019.2.1f5").should.deepEqual({
+      const version = parseEditorVersion("2019.2.1f5");
+      assert(version !== null);
+      version.should.deepEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -368,7 +384,9 @@ describe("cmd-core.ts", function () {
       });
     });
     it("test x.y.zcn", function () {
-      parseEditorVersion("2019.2.1f1c5").should.deepEqual({
+      const version = parseEditorVersion("2019.2.1f1c5");
+      assert(version !== null);
+      version.should.deepEqual({
         major: 2019,
         minor: 2,
         patch: 1,
