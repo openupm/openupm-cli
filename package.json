@@ -6,15 +6,15 @@
   "engines": {
     "node": ">=14.18"
   },
-  "main": "index.js",
+  "main": "lib/index.ts",
   "scripts": {
     "test": "cross-env NODE_ENV=test ts-mocha test/**/*.ts",
     "semantic-release": "semantic-release"
   },
   "bin": {
-    "openupm": "bin/openupm",
-    "openupm-cli": "bin/openupm",
-    "openupm-cn": "bin/openupm-cn"
+    "openupm": "lib/index.ts",
+    "openupm-cli": "lib/index.ts",
+    "openupm-cn": "lib/index-cn.ts"
   },
   "repository": {
     "type": "git",
@@ -61,8 +61,7 @@
     "semantic-release": "^19.0.3",
     "should": "^13.2.3",
     "test-console": "^2.0.0",
-    "ts-mocha": "^10.0.0",
-    "typescript": "^5.2.2"
+    "ts-mocha": "^10.0.0"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -79,6 +78,7 @@
     "npmlog": "^6.0.2",
     "pkginfo": "^0.4.1",
     "promptly": "^3.2.0",
+    "ts-node": "^10.9.1",
     "update-notifier": "^5.1.0",
     "yaml": "^2.0.1"
   }
