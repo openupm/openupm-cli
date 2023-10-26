@@ -61,7 +61,8 @@
     "semantic-release": "^19.0.3",
     "should": "^13.2.3",
     "test-console": "^2.0.0",
-    "ts-mocha": "^10.0.0"
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
