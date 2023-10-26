@@ -8,8 +8,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "tsc && cross-env NODE_ENV=test ts-mocha test/**/*.ts",
+    "test": "cross-env NODE_ENV=test ts-mocha test/**/*.ts",
     "semantic-release": "semantic-release"
   },
   "bin": {
