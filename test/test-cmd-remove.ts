@@ -1,26 +1,27 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-const assert = require("assert");
-const should = require("should");
+import "assert";
+import "should";
+import { loadManifest } from "../lib/core";
 
-const { parseEnv, loadManifest } = require("../lib/core");
-const remove = require("../lib/cmd-remove");
-const {
+import { remove } from "../lib/cmd-remove";
+
+import {
+  createWorkDir,
   getInspects,
   getOutputs,
   getWorkDir,
-  createWorkDir,
-  removeWorkDir
-} = require("./utils");
+  removeWorkDir,
+} from "./utils";
+import testConsole from "test-console";
+import assert from "assert";
 
-describe("cmd-remove.js", function() {
-  describe("remove", function() {
-    let stdoutInspect = null;
-    let stderrInspect = null;
+describe("cmd-remove.ts", function () {
+  describe("remove", function () {
+    let stdoutInspect: testConsole.Inspector = null!;
+    let stderrInspect: testConsole.Inspector = null!;
     const defaultManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",
-        "com.example.package-b": "1.0.0"
+        "com.example.package-b": "1.0.0",
       },
       scopedRegistries: [
         {
@@ -28,79 +29,84 @@ describe("cmd-remove.js", function() {
           scopes: [
             "com.example",
             "com.example.package-a",
-            "com.example.package-b"
+            "com.example.package-b",
           ],
-          url: "http://example.com"
-        }
-      ]
+          url: "http://example.com",
+        },
+      ],
     };
-    beforeEach(function() {
+    beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", {
-        manifest: defaultManifest
+        manifest: defaultManifest,
       });
       [stdoutInspect, stderrInspect] = getInspects();
     });
-    afterEach(function() {
+    afterEach(function () {
       removeWorkDir("test-openupm-cli");
       stdoutInspect.restore();
       stderrInspect.restore();
     });
-    it("remove pkg", async function() {
+    it("remove pkg", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove("com.example.package-a", options);
       retCode.should.equal(0);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
+      assert(manifest !== null);
       (
         manifest.dependencies["com.example.package-a"] == undefined
       ).should.be.ok();
+      assert(manifest.scopedRegistries !== undefined);
+      assert(manifest.scopedRegistries[0] !== undefined);
       manifest.scopedRegistries[0].scopes.should.be.deepEqual([
         "com.example",
-        "com.example.package-b"
+        "com.example.package-b",
       ]);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("removed ").should.be.ok();
       stdout.includes("open Unity").should.be.ok();
     });
-    it("remove pkg@1.0.0", async function() {
+    it("remove pkg@1.0.0", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("please replace").should.be.ok();
     });
-    it("remove pkg-not-exist", async function() {
+    it("remove pkg-not-exist", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove("pkg-not-exist", options);
       retCode.should.equal(1);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
+      assert(manifest !== null);
       manifest.should.be.deepEqual(defaultManifest);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("package not found").should.be.ok();
     });
-    it("remove more than one pkgs", async function() {
+    it("remove more than one pkgs", async function () {
       const options = {
         _global: {
           registry: "http://example.com",
-          chdir: getWorkDir("test-openupm-cli")
-        }
+          chdir: getWorkDir("test-openupm-cli"),
+        },
       };
       const retCode = await remove(
         ["com.example.package-a", "com.example.package-b"],
@@ -108,14 +114,17 @@ describe("cmd-remove.js", function() {
       );
       retCode.should.equal(0);
       const manifest = await loadManifest();
+      assert(manifest !== null);
       (
         manifest.dependencies["com.example.package-a"] == undefined
       ).should.be.ok();
       (
         manifest.dependencies["com.example.package-b"] == undefined
       ).should.be.ok();
+      assert(manifest.scopedRegistries !== undefined);
+      assert(manifest.scopedRegistries[0] !== undefined);
       manifest.scopedRegistries[0].scopes.should.be.deepEqual(["com.example"]);
-      const [stdout, stderr] = getOutputs(stdoutInspect, stderrInspect);
+      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
       stdout.includes("removed com.example.package-a").should.be.ok();
       stdout.includes("removed com.example.package-b").should.be.ok();
       stdout.includes("open Unity").should.be.ok();

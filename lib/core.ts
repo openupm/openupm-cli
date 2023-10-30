@@ -1,24 +1,53 @@
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const url = require("url");
+import fs from "fs";
+import path from "path";
+import url from "url";
+import _ from "lodash";
+import chalk from "chalk";
+import mkdirp from "mkdirp";
+import net from "node:net";
+import isWsl from "is-wsl";
+import TOML from "@iarna/toml";
+import yaml from "yaml";
+import execute from "./utils/process";
+import { getNpmClient } from "./client";
+import log from "./logger";
+import { assertIsError } from "./utils/error-type-guards";
+import search from "libnpmsearch";
+import assert from "assert";
+import {
+  Dependency,
+  Env,
+  GlobalOptions,
+  NameVersionPair,
+  PkgInfo,
+  PkgManifest,
+  PkgName,
+  PkgVersion,
+  Registry,
+  SemanticVersion,
+  UPMConfig,
+} from "./types/global";
 
-const _ = require("lodash");
-const chalk = require("chalk");
-const mkdirp = require("mkdirp");
-const net = require('node:net');
-const isWsl = require("is-wsl");
-const TOML = require("@iarna/toml");
-const yaml = require("yaml");
-
-const { execute } = require("./utils/process");
-const { getNpmClient } = require("./client");
-const { log } = require("./logger");
-
-const env = {};
+export const env: Env = {
+  auth: {},
+  color: false,
+  cwd: "",
+  editorVersion: null,
+  manifestPath: "",
+  namespace: "",
+  region: "us",
+  registry: "",
+  systemUser: false,
+  upstream: false,
+  upstreamRegistry: "",
+  wsl: false,
+};
 
 // Parse env
-const parseEnv = async function(options, { checkPath }) {
+export const parseEnv = async function (
+  options: { _global: GlobalOptions } & Record<string, unknown>,
+  { checkPath }: { checkPath: unknown }
+) {
   // set defaults
   env.registry = "https://package.openupm.com";
   env.namespace = "com.openupm";
@@ -60,14 +89,10 @@ const parseEnv = async function(options, { checkPath }) {
       registry = "http://" + registry;
     if (registry.endsWith("/")) registry = registry.slice(0, -1);
     env.registry = registry;
-    const hostname = url.parse(registry).hostname;
+    // TODO: Check hostname for null
+    const hostname = url.parse(registry).hostname as string;
     if (net.isIP(hostname)) env.namespace = hostname;
-    else
-      env.namespace = hostname
-        .split(".")
-        .reverse()
-        .slice(0, 2)
-        .join(".");
+    else env.namespace = hostname.split(".").reverse().slice(0, 2).join(".");
   }
   // auth
   if (options._global.systemUser) env.systemUser = true;
@@ -78,12 +103,12 @@ const parseEnv = async function(options, { checkPath }) {
     if (env.npmAuth) {
       for (const reg in env.npmAuth) {
         const regAuth = env.npmAuth[reg];
-        if (regAuth.token) {
+        if ("token" in regAuth) {
           env.auth[reg] = {
             token: regAuth.token,
-            alwaysAuth: regAuth.alwaysAuth || false
+            alwaysAuth: regAuth.alwaysAuth || false,
           };
-        } else if (regAuth._auth) {
+        } else if ("_auth" in regAuth) {
           const buf = Buffer.from(regAuth._auth, "base64");
           const text = buf.toString("utf-8");
           const [username, password] = text.split(":", 2);
@@ -91,7 +116,7 @@ const parseEnv = async function(options, { checkPath }) {
             username,
             password: Buffer.from(password).toString("base64"),
             email: regAuth.email,
-            alwaysAuth: regAuth.alwaysAuth || false
+            alwaysAuth: regAuth.alwaysAuth || false,
           };
         } else {
           log.warn(
@@ -144,34 +169,22 @@ const parseEnv = async function(options, { checkPath }) {
   return true;
 };
 
-// Parse name to {name, version}
-const parseName = function(pkg) {
-  const segs = pkg.split("@");
-  const name = segs[0];
-  const version =
-    segs.length > 1 ? segs.slice(1, segs.length).join("@") : undefined;
-  return { name, version };
-};
-
 // Get npm fetch options
-const getNpmFetchOptions = function() {
-  const opts = {
+export const getNpmFetchOptions = function (): search.Options {
+  const opts: search.Options = {
     log,
-    registry: env.registry
+    registry: env.registry,
   };
   const auth = env.auth[env.registry];
-  if (auth) {
-    opts.alwaysAuth = auth.alwaysAuth;
-    opts.email = auth.email;
-    opts.password = auth.password;
-    opts.token = auth.token;
-    opts.username = auth.username;
-  }
+  if (auth) Object.assign(opts, auth);
   return opts;
 };
 
 // Fetch package info json from registry
-const fetchPackageInfo = async function(name, registry) {
+export const fetchPackageInfo = async function (
+  name: PkgName,
+  registry?: Registry
+): Promise<PkgInfo | undefined> {
   if (!registry) registry = env.registry;
   const pkgPath = `${registry}/${name}`;
   const client = getNpmClient();
@@ -193,10 +206,18 @@ const fetchPackageInfo = async function(name, registry) {
     }, ...
   ]
  */
-const fetchPackageDependencies = async function({ name, version, deep }) {
+export const fetchPackageDependencies = async function ({
+  name,
+  version,
+  deep,
+}: {
+  name: PkgName;
+  version: PkgVersion | undefined;
+  deep?: boolean;
+}): Promise<[Dependency[], Dependency[]]> {
   log.verbose("dependency", `fetch: ${name}@${version} deep=${deep}`);
   // a list of pending dependency {name, version}
-  const pendingList = [{ name, version }];
+  const pendingList: NameVersionPair[] = [{ name, version }];
   // a list of processed dependency {name, version}
   const processedList = [];
   // a list of dependency entry exists on the registry
@@ -204,32 +225,38 @@ const fetchPackageDependencies = async function({ name, version, deep }) {
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = [];
   // cached dict: {pkg-name: pkgInfo}
-  const cachedPacakgeInfoDict = {};
+  const cachedPacakgeInfoDict: Record<
+    PkgVersion,
+    { pkgInfo: PkgInfo; upstream: boolean }
+  > = {};
   while (pendingList.length > 0) {
-    const entry = pendingList.shift();
-    if (processedList.find(x => _.isEqual(x, entry)) === undefined) {
+    // NOTE: Guaranteed defined because of while loop logic
+    const entry = pendingList.shift() as NameVersionPair;
+    if (processedList.find((x) => _.isEqual(x, entry)) === undefined) {
       // add entry to processed list
       processedList.push(entry);
       // create valid depedenency structure
-      const depObj = {
+      const depObj: Dependency = {
         ...entry,
         internal: isInternalPackage(entry.name),
         upstream: false,
         self: entry.name == name,
-        reason: null
+        reason: null,
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        let { pkgInfo, upstream } = _.get(cachedPacakgeInfoDict, entry.name, {
+        const getResult = _.get(cachedPacakgeInfoDict, entry.name, {
           pkgInfo: null,
-          upstream: false
+          upstream: false,
         });
-        if (pkgInfo) {
+        let pkgInfo = getResult.pkgInfo;
+        const upstream = getResult.upstream;
+        if (pkgInfo !== null) {
           depObj.upstream = upstream;
         }
         // try fetching package info from the default registry
-        if (!pkgInfo) {
-          pkgInfo = await fetchPackageInfo(entry.name);
+        if (pkgInfo === null) {
+          pkgInfo = (await fetchPackageInfo(entry.name)) ?? null;
           if (pkgInfo) {
             depObj.upstream = false;
             cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: false };
@@ -237,7 +264,8 @@ const fetchPackageDependencies = async function({ name, version, deep }) {
         }
         // try fetching package info from the upstream registry
         if (!pkgInfo) {
-          pkgInfo = await fetchPackageInfo(entry.name, env.upstreamRegistry);
+          pkgInfo =
+            (await fetchPackageInfo(entry.name, env.upstreamRegistry)) ?? null;
           if (pkgInfo) {
             depObj.upstream = true;
             cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: true };
@@ -253,11 +281,13 @@ const fetchPackageDependencies = async function({ name, version, deep }) {
         // verify version
         const versions = Object.keys(pkgInfo.versions);
         if (!entry.version || entry.version == "latest") {
+          const latestVersion = getLatestVersion(pkgInfo);
+          assert(latestVersion !== undefined);
           // eslint-disable-next-line require-atomic-updates
-          depObj.version = entry.version = getLatestVersion(pkgInfo);
+          depObj.version = entry.version = latestVersion;
         }
         // handle version not exist
-        if (!versions.find(x => x == entry.version)) {
+        if (!versions.find((x) => x == entry.version)) {
           log.warn(
             "404",
             `package ${entry.name}@${
@@ -273,12 +303,12 @@ const fetchPackageDependencies = async function({ name, version, deep }) {
         }
         // add dependencies to pending list
         if (depObj.self || deep) {
-          const deps = _.toPairs(
+          const deps: NameVersionPair[] = _.toPairs(
             pkgInfo.versions[entry.version]["dependencies"]
-          ).map(x => {
+          ).map((x: [PkgName, PkgVersion]): NameVersionPair => {
             return { name: x[0], version: x[1] };
           });
-          deps.forEach(x => pendingList.push(x));
+          deps.forEach((x) => pendingList.push(x));
         }
       }
       depsValid.push(depObj);
@@ -294,23 +324,21 @@ const fetchPackageDependencies = async function({ name, version, deep }) {
 };
 
 // Get latest version from package info
-const getLatestVersion = function(pkgInfo) {
-  if (pkgInfo["dist-tags"] && pkgInfo["dist-tags"]["latest"])
+export const getLatestVersion = function (
+  pkgInfo: Partial<PkgInfo>
+): PkgVersion | undefined {
+  if (pkgInfo["dist-tags"]?.["latest"] !== undefined)
     return pkgInfo["dist-tags"]["latest"];
-  else if (pkgInfo.versions)
-    return Object.keys(pkgInfo.versions).find(
-      key => pkgInfo.versions[key] == "latest"
-    );
-  else if (pkgInfo.version)
-    return pkgInfo.version
+  else if (pkgInfo.version) return pkgInfo.version;
 };
 
 // Load manifest json file
-const loadManifest = function() {
+export const loadManifest = function (): PkgManifest | null {
   try {
-    let text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
+    const text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
     return JSON.parse(text);
   } catch (err) {
+    assertIsError(err);
     if (err.code == "ENOENT")
       log.error("manifest", "file Packages/manifest.json does not exist");
     else {
@@ -325,12 +353,13 @@ const loadManifest = function() {
 };
 
 // Save manifest json file
-const saveManifest = function(data) {
-  let json = JSON.stringify(data, null, 2);
+export const saveManifest = function (data: PkgManifest) {
+  const json = JSON.stringify(data, null, 2);
   try {
     fs.writeFileSync(env.manifestPath, json);
     return true;
   } catch (err) {
+    assertIsError(err);
     log.error("manifest", "can not write manifest json file");
     log.error("manifest", err.message);
     return false;
@@ -338,8 +367,8 @@ const saveManifest = function(data) {
 };
 
 // Get .upmconfig.toml directory
-const getUpmConfigDir = async function() {
-  let dirPath = "";
+export const getUpmConfigDir = async function (): Promise<string> {
+  let dirPath: string | undefined = "";
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (env.wsl) {
     if (!isWsl) {
@@ -353,7 +382,7 @@ const getUpmConfigDir = async function() {
       dirPath = path.join(allUserProfilePath, systemUserSubPath);
     } else {
       dirPath = await execute('wslpath "$(wslvar USERPROFILE)"', {
-        trim: true
+        trim: true,
       });
     }
   } else {
@@ -367,22 +396,31 @@ const getUpmConfigDir = async function() {
       dirPath = path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
     }
   }
+  if (dirPath === undefined)
+    throw new Error("Could not resolve upm-config dir-path");
   return dirPath;
 };
 
 // Load .upmconfig.toml
-const loadUpmConfig = async function(configDir) {
+export const loadUpmConfig = async function (
+  configDir?: string
+): Promise<UPMConfig | undefined> {
   if (configDir === undefined) configDir = await getUpmConfigDir();
   const configPath = path.join(configDir, ".upmconfig.toml");
   if (fs.existsSync(configPath)) {
     const content = fs.readFileSync(configPath, "utf8");
     const config = TOML.parse(content);
-    return config;
+
+    // NOTE: We assume correct format
+    return config as UPMConfig;
   }
 };
 
 // Save .upmconfig.toml
-const saveUpmConfig = async function(config, configDir) {
+export const saveUpmConfig = async function (
+  config: UPMConfig,
+  configDir: string
+) {
   if (configDir === undefined) configDir = await getUpmConfigDir();
   mkdirp.sync(configDir);
   const configPath = path.join(configDir, ".upmconfig.toml");
@@ -392,17 +430,21 @@ const saveUpmConfig = async function(config, configDir) {
 };
 
 // Compare unity editor version and return -1, 0, or 1.
-const compareEditorVersion = function(a, b) {
+export const compareEditorVersion = function (a: string, b: string) {
   const verA = parseEditorVersion(a);
   const verB = parseEditorVersion(b);
-  const editorVersionToArray = ver => [
+
+  if (verA === null || verB === null)
+    throw new Error("An editor version could not be parsed");
+
+  const editorVersionToArray = (ver: SemanticVersion) => [
     ver.major,
     ver.minor,
     ver.patch || 0,
     ver.flagValue || 0,
     ver.build || 0,
     ver.locValue || 0,
-    ver.locBuild || 0
+    ver.locBuild || 0,
   ];
   const arrA = editorVersionToArray(verA);
   const arrB = editorVersionToArray(verB);
@@ -429,24 +471,38 @@ const compareEditorVersion = function(a, b) {
  *   locValue: 1
  *   locBuild: 4
  */
-const parseEditorVersion = function(version) {
+export const parseEditorVersion = function (
+  version: string | null
+): SemanticVersion | null {
+  type RegexMatchGroups = {
+    major: `${number}`;
+    minor: `${number}`;
+    patch?: string;
+    flag?: "a" | "b" | "f" | "c";
+    build?: `${number}`;
+    loc?: "c";
+    locBuild?: `${number}`;
+  };
+
   if (!version) return null;
-  const regex = /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
+  const regex =
+    /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
   const match = regex.exec(version);
   if (!match) return null;
-  const groups = match.groups;
-  const result = {
+  const groups = <RegexMatchGroups>match.groups;
+  const result: SemanticVersion = {
     major: parseInt(groups.major),
-    minor: parseInt(groups.minor)
+    minor: parseInt(groups.minor),
   };
   if (groups.patch) result.patch = parseInt(groups.patch);
   if (groups.flag) {
-    result.flag = groups.flag.toLowerCase();
+    result.flag = groups.flag;
     if (result.flag == "a") result.flagValue = 0;
     if (result.flag == "b") result.flagValue = 1;
     if (result.flag == "f") result.flagValue = 2;
     if (groups.build) result.build = parseInt(groups.build);
   }
+
   if (groups.loc) {
     result.loc = groups.loc.toLowerCase();
     if (result.loc == "c") result.locValue = 1;
@@ -456,31 +512,13 @@ const parseEditorVersion = function(version) {
 };
 
 // Detect if the given package name is an internal package
-const isInternalPackage = function(name) {
+export const isInternalPackage = function (name: PkgName): boolean {
   const internals = [
     "com.unity.ugui",
     "com.unity.2d.sprite",
     "com.unity.2d.tilemap",
     "com.unity.package-manager-ui",
-    "com.unity.ugui"
+    "com.unity.ugui",
   ];
   return /com.unity.modules/i.test(name) || internals.includes(name);
-};
-
-module.exports = {
-  compareEditorVersion,
-  env,
-  fetchPackageDependencies,
-  fetchPackageInfo,
-  getLatestVersion,
-  getNpmFetchOptions,
-  getUpmConfigDir,
-  isInternalPackage,
-  loadManifest,
-  loadUpmConfig,
-  parseEnv,
-  parseName,
-  parseEditorVersion,
-  saveManifest,
-  saveUpmConfig
 };

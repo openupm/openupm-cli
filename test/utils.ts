@@ -1,15 +1,24 @@
-const _ = require("lodash");
-const fse = require("fs-extra");
-const nock = require("nock");
-const path = require("path");
-const os = require("os");
-const testConsole = require("test-console");
+import fse from "fs-extra";
+import nock from "nock";
+import path from "path";
+import os from "os";
+import testConsole from "test-console";
+import { PkgManifest } from "../lib/types/global";
+import _ from "lodash";
 
-const getWorkDir = function(pathToTmp) {
+export type ManifestCreationOptions = {
+  manifest: boolean | PkgManifest;
+  editorVersion?: string;
+};
+
+export const getWorkDir = function (pathToTmp: string): string {
   return path.join(os.tmpdir(), pathToTmp);
 };
 
-const createWorkDir = function(pathToTmp, { manifest, editorVersion }) {
+export const createWorkDir = function (
+  pathToTmp: string,
+  { manifest, editorVersion }: ManifestCreationOptions
+) {
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
@@ -30,39 +39,38 @@ const createWorkDir = function(pathToTmp, { manifest, editorVersion }) {
   }
 };
 
-const removeWorkDir = function(pathToTmp) {
+export const removeWorkDir = function (pathToTmp: string) {
   const cwd = getWorkDir(pathToTmp);
   fse.removeSync(cwd);
 };
 
-const nockUp = function() {
+export const nockUp = function () {
   if (!nock.isActive()) nock.activate();
 };
 
-const nockDown = function() {
+export const nockDown = function () {
   nock.restore();
   nock.cleanAll();
 };
 
-const getOutputs = function(stdouInspect, stderrInsepct) {
-  const results = [stdouInspect.output.join(""), stderrInsepct.output.join("")];
+export const getOutputs = function (
+  stdouInspect: testConsole.Inspector,
+  stderrInsepct: testConsole.Inspector
+): [string, string] {
+  const results: [string, string] = [
+    stdouInspect.output.join(""),
+    stderrInsepct.output.join(""),
+  ];
   stdouInspect.restore();
   stderrInsepct.restore();
   return results;
 };
 
-const getInspects = function() {
+export const getInspects = function (): [
+  testConsole.Inspector,
+  testConsole.Inspector
+] {
   const stdoutInspect = testConsole.stdout.inspect();
   const stderrInspect = testConsole.stderr.inspect();
   return [stdoutInspect, stderrInspect];
-};
-
-module.exports = {
-  getWorkDir,
-  createWorkDir,
-  removeWorkDir,
-  nockUp,
-  nockDown,
-  getInspects,
-  getOutputs
 };

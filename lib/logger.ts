@@ -1,8 +1,8 @@
-const npmlog = require("npmlog");
+import npmlog from "npmlog";
 
 if (process.env.NODE_ENV == "test") {
   npmlog.stream = process.stdout;
   npmlog.disableColor();
 }
 
-module.exports = { log: npmlog };
+export default npmlog;

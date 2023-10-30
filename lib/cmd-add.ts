@@ -1,6 +1,6 @@
-const { log } = require("./logger");
-const url = require("url");
-const {
+import log from "./logger";
+import url from "url";
+import {
   compareEditorVersion,
   env,
   fetchPackageDependencies,
@@ -9,11 +9,22 @@ const {
   loadManifest,
   parseEditorVersion,
   parseEnv,
-  parseName,
-  saveManifest
-} = require("./core");
+  saveManifest,
+} from "./core";
+import { isUrlVersion } from "./utils/pkg-version";
+import { splitPkgName } from "./utils/pkg-name";
+import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 
-const add = async function(pkgs, options) {
+export type AddOptions = {
+  test?: boolean;
+  force?: boolean;
+  _global: GlobalOptions;
+};
+
+export const add = async function (
+  pkgs: PkgName | PkgName[],
+  options: AddOptions
+): Promise<number> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envOk = await parseEnv(options, { checkPath: true });
@@ -25,8 +36,8 @@ const add = async function(pkgs, options) {
       await _add({ pkg, testables: options.test, force: options.force })
     );
   const result = {
-    code: results.filter(x => x.code != 0).length > 0 ? 1 : 0,
-    dirty: results.filter(x => x.dirty).length > 0
+    code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
+    dirty: results.filter((x) => x.dirty).length > 0,
   };
   // print manifest notice
   if (result.dirty)
@@ -34,28 +45,34 @@ const add = async function(pkgs, options) {
   return result.code;
 };
 
-const _add = async function({ pkg, testables, force }) {
+const _add = async function ({
+  pkg,
+  testables,
+  force,
+}: {
+  pkg: PkgName;
+  testables?: boolean;
+  force?: boolean;
+}) {
   // dirty flag
   let dirty = false;
   // is upstream package flag
   let isUpstreamPackage = false;
   // parse name
-  let { name, version } = parseName(pkg);
+  const split = splitPkgName(pkg);
+  const name = split.name;
+  let version = split.version;
+
   // load manifest
-  let manifest = loadManifest();
+  const manifest = loadManifest();
   if (manifest === null) return { code: 1, dirty };
   // ensure manifest.dependencies
   if (!manifest.dependencies) {
     manifest.dependencies = {};
   }
   // packages that added to scope registry
-  const pkgsInScope = [];
-  const isGitOrLocal =
-    version &&
-    (version.startsWith("git") ||
-      version.startsWith("file") ||
-      version.startsWith("http"));
-  if (!isGitOrLocal) {
+  const pkgsInScope: PkgName[] = [];
+  if (version === undefined || !isUrlVersion(version)) {
     // verify name
     let pkgInfo = await fetchPackageInfo(name);
     if (!pkgInfo && env.upstream) {
@@ -70,7 +87,7 @@ const _add = async function({ pkg, testables, force }) {
     const versions = Object.keys(pkgInfo.versions);
     // eslint-disable-next-line require-atomic-updates
     if (!version || version == "latest") version = getLatestVersion(pkgInfo);
-    if (versions.filter(x => x == version).length <= 0) {
+    if (versions.filter((x) => x == version).length <= 0) {
       log.warn(
         "404",
         `version ${version} is not a valid choice of: ${versions
@@ -79,6 +96,9 @@ const _add = async function({ pkg, testables, force }) {
       );
       return { code: 1, dirty };
     }
+
+    if (version === undefined)
+      throw new Error("Could not determine package version to add");
     const versionInfo = pkgInfo.versions[version];
     // verify editor version
     if (versionInfo.unity) {
@@ -130,15 +150,15 @@ const _add = async function({ pkg, testables, force }) {
       const [depsValid, depsInvalid] = await fetchPackageDependencies({
         name,
         version,
-        deep: true
+        deep: true,
       });
       // add depsValid to pkgsInScope.
       depsValid
-        .filter(x => !x.upstream && !x.internal)
-        .map(x => x.name)
-        .forEach(name => pkgsInScope.push(name));
+        .filter((x) => !x.upstream && !x.internal)
+        .map((x) => x.name)
+        .forEach((name) => pkgsInScope.push(name));
       // print suggestion for depsInvalid
-      depsInvalid.forEach(depObj => {
+      depsInvalid.forEach((depObj) => {
         if (depObj.reason == "package404" || depObj.reason == "version404") {
           const resolvedVersion = manifest.dependencies[depObj.name];
           depObj.resolved = Boolean(resolvedVersion);
@@ -149,7 +169,7 @@ const _add = async function({ pkg, testables, force }) {
             );
         }
       });
-      if (depsInvalid.filter(x => !x.resolved).length > 0) {
+      if (depsInvalid.filter((x) => !x.resolved).length > 0) {
         if (!force) {
           log.error(
             "missing dependencies",
@@ -181,24 +201,26 @@ const _add = async function({ pkg, testables, force }) {
       manifest.scopedRegistries = [];
       dirty = true;
     }
-    const filterEntry = x => {
+    const filterEntry = (x: ScopedRegistry): boolean => {
       let addr = x.url || "";
       if (addr.endsWith("/")) addr = addr.slice(0, -1);
       return addr == env.registry;
     };
     if (manifest.scopedRegistries.filter(filterEntry).length <= 0) {
+      const name = url.parse(env.registry).hostname;
+      if (name === null) throw new Error("Could not resolve registry name");
       manifest.scopedRegistries.push({
-        name: url.parse(env.registry).hostname,
+        name,
         url: env.registry,
-        scopes: []
+        scopes: [],
       });
       dirty = true;
     }
-    let entry = manifest.scopedRegistries.filter(filterEntry)[0];
+    const entry = manifest.scopedRegistries.filter(filterEntry)[0];
     // apply pkgsInScope
-    let scopesSet = new Set(entry.scopes || []);
+    const scopesSet = new Set(entry.scopes || []);
     pkgsInScope.push(env.namespace);
-    pkgsInScope.forEach(name => {
+    pkgsInScope.forEach((name) => {
       if (!scopesSet.has(name)) {
         scopesSet.add(name);
         dirty = true;
@@ -220,5 +242,3 @@ const _add = async function({ pkg, testables, force }) {
   }
   return { code: 0, dirty };
 };
-
-module.exports = add;

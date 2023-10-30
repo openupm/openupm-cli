@@ -1,20 +1,20 @@
-const chalk = require("chalk");
+import chalk from "chalk";
+import log from "./logger";
+import { env, fetchPackageInfo, getLatestVersion, parseEnv } from "./core";
+import assert from "assert";
+import { splitPkgName } from "./utils/pkg-name";
+import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
 
-const { log } = require("./logger");
-const {
-  env,
-  fetchPackageInfo,
-  getLatestVersion,
-  parseEnv,
-  parseName
-} = require("./core");
+export type ViewOptions = {
+  _global: GlobalOptions;
+};
 
-const view = async function(pkg, options) {
+export const view = async function (pkg: PkgName, options: ViewOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  let { name, version } = parseName(pkg);
+  const { name, version } = splitPkgName(pkg);
   if (version) {
     log.warn("", `please replace '${name}@${version}' with '${name}'`);
     return 1;
@@ -32,9 +32,10 @@ const view = async function(pkg, options) {
   return 0;
 };
 
-const printInfo = function(pkg) {
+const printInfo = function (pkg: PkgInfo) {
   const versionCount = Object.keys(pkg.versions).length;
   const ver = getLatestVersion(pkg);
+  assert(ver !== undefined);
   const verInfo = pkg.versions[ver];
   const license = verInfo.license || "proprietary or unlicensed";
   const displayName = verInfo.displayName;
@@ -45,7 +46,7 @@ const printInfo = function(pkg) {
   const dependencies = verInfo.dependencies;
   const latest = pkg["dist-tags"].latest;
   let time = pkg.time.modified;
-  if (!time && latest in pkg.time) time = pkg.time[latest];
+  if (!time && latest && latest in pkg.time) time = pkg.time[latest];
 
   console.log();
   console.log(
@@ -78,7 +79,7 @@ const printInfo = function(pkg) {
     console.log("dependencies");
     Object.keys(dependencies)
       .sort()
-      .forEach(n => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
+      .forEach((n) => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
   }
 
   console.log();
@@ -93,5 +94,3 @@ const printInfo = function(pkg) {
     console.log("  " + chalk.greenBright(version));
   }
 };
-
-module.exports = view;

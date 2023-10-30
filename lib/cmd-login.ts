@@ -1,19 +1,29 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import _ from "lodash";
+import promptly from "promptly";
+import { assertIsNpmClientError, getNpmClient } from "./client";
 
-const _ = require("lodash");
-const promptly = require("promptly");
+import log from "./logger";
 
-const { getNpmClient } = require("./client");
-const { log } = require("./logger");
-const {
+import {
   getUpmConfigDir,
   loadUpmConfig,
+  parseEnv,
   saveUpmConfig,
-  parseEnv
-} = require("./core");
+} from "./core";
+import { GlobalOptions, Registry } from "./types/global";
 
-const login = async function(options) {
+export type LoginOptions = {
+  username?: string;
+  password?: string;
+  email?: string;
+  basicAuth?: boolean;
+  alwaysAuth?: boolean;
+  _global: GlobalOptions;
+};
+
+export const login = async function (options: LoginOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
@@ -24,21 +34,21 @@ const login = async function(options) {
   if (!options.email) options.email = await promptly.prompt("Email: ");
   if (!options._global.registry)
     options._global.registry = await promptly.prompt("Registry: ", {
-      validator: [validateRegistry]
+      validator: [validateRegistry],
     });
-  let token = null;
-  let _auth = null;
+  let token: string | null = null;
+  let _auth: string | null = null;
   if (options.basicAuth) {
     // basic auth
     const userPass = `${options.username}:${options.password}`;
     _auth = Buffer.from(userPass).toString("base64");
   } else {
     // npm login
-    let result = await npmLogin({
+    const result = await npmLogin({
       username: options.username,
       password: options.password,
       email: options.email,
-      registry: options._global.registry
+      registry: options._global.registry,
     });
     if (result.code == 1) return result.code;
     if (!result.token) {
@@ -49,9 +59,10 @@ const login = async function(options) {
     // write npm token
     await writeNpmToken({
       registry: options._global.registry,
-      token: result.token
+      token: result.token,
     });
   }
+
   // write unity token
   await writeUnityToken({
     _auth,
@@ -59,35 +70,48 @@ const login = async function(options) {
     basicAuth: options.basicAuth || false,
     email: options.email,
     registry: options._global.registry,
-    token
+    token,
   });
 };
 
 /**
  * Return npm login token
- * @param {*} param0
  */
-const npmLogin = async function({ username, password, email, registry }) {
+const npmLogin = async function ({
+  username,
+  password,
+  email,
+  registry,
+}: {
+  username: string;
+  password: string;
+  email: string;
+  registry: Registry;
+}) {
   const client = getNpmClient();
   try {
     const data = await client.adduser(registry, {
       auth: {
         username,
         password,
-        email
-      }
+        email,
+      },
     });
     if (_.isString(data.ok)) log.notice("auth", data.ok);
-    else if (data.ok)
+    else if (data.ok) {
       log.notice("auth", `you are authenticated as '${username}'`);
-    const token = data.token;
-    return { code: 0, token };
+      const token = data.token;
+      return { code: 0, token };
+    }
+    return { code: 1 };
   } catch (err) {
-    if (err.statusCode == 401 || err.code == "EAUTHUNKNOWN") {
+    assertIsNpmClientError(err);
+
+    if (err.response.statusCode == 401) {
       log.warn("401", "Incorrect username or password");
       return { code: 1 };
     } else {
-      log.error(err.statusCode ? err.statusCode.toString() : "", err.message);
+      log.error(err.response.statusCode.toString(), err.message);
       return { code: 1 };
     }
   }
@@ -97,7 +121,13 @@ const npmLogin = async function({ username, password, email, registry }) {
  * Write npm token to .npmrc
  * @param {*} param0
  */
-const writeNpmToken = async function({ registry, token }) {
+const writeNpmToken = async function ({
+  registry,
+  token,
+}: {
+  registry: Registry;
+  token: string;
+}) {
   const configPath = getNpmrcPath();
   // read config
   let content = "";
@@ -114,12 +144,12 @@ const writeNpmToken = async function({ registry, token }) {
 /**
  * Return .npmrc config file path
  */
-const getNpmrcPath = function() {
+export const getNpmrcPath = function () {
   const dirPath = process.env.USERPROFILE
     ? process.env.USERPROFILE
     : process.env.HOME;
-  const configPath = path.join(dirPath, ".npmrc");
-  return configPath;
+  if (dirPath === undefined) throw new Error("Could not determine home path");
+  return path.join(dirPath, ".npmrc");
 };
 
 /**
@@ -128,29 +158,34 @@ const getNpmrcPath = function() {
  * @param {*} registry
  * @param {*} token
  */
-const generateNpmrcLines = function(content, registry, token) {
+export const generateNpmrcLines = function (
+  content: string,
+  registry: Registry,
+  token: string
+) {
   let lines = content ? content.split("\n") : [];
   const quotes = /(\?|=)/.test(token) ? '"' : "";
   // get the registry url without http protocal
-  let registryUrl = registry.slice(registry.search(/:\/\//, "") + 1);
+  let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
   // add trailing slash
   if (!registryUrl.endsWith("/")) registryUrl = registryUrl + "/";
-  const index = _.findIndex(lines, function(element, index, array) {
+  const index = _.findIndex(lines, function (element, index) {
     if (element.indexOf(registryUrl + ":_authToken=") !== -1) {
       // If an entry for the auth token is found, replace it
-      array[index] = element.replace(
+      lines[index] = element.replace(
         /authToken=.*/,
         "authToken=" + quotes + token + quotes
       );
       return true;
     }
+    return false;
   });
   // If no entry for the auth token is found, add one
   if (index === -1) {
     lines.push(registryUrl + ":_authToken=" + quotes + token + quotes);
   }
   // Remove empty lines
-  lines = lines.filter(l => l);
+  lines = lines.filter((l) => l);
   return lines;
 };
 
@@ -158,7 +193,7 @@ const generateNpmrcLines = function(content, registry, token) {
  * http protocal validator
  * @param {*} value
  */
-const validateRegistry = function(value) {
+export const validateRegistry = function (value: Registry): Registry {
   if (!/http(s?):\/\//.test(value))
     throw new Error("The registry address should starts with http(s)://");
   return value;
@@ -166,15 +201,21 @@ const validateRegistry = function(value) {
 
 /**
  * Write npm token to Unity
- * @param {*} param0
  */
-const writeUnityToken = async function({
+const writeUnityToken = async function ({
   _auth,
   alwaysAuth,
   basicAuth,
   email,
   registry,
-  token
+  token,
+}: {
+  _auth: string | null;
+  alwaysAuth: boolean;
+  basicAuth: boolean;
+  email: string;
+  registry: Registry;
+  token: string | null;
 }) {
   // Create config dir if necessary
   const configDir = await getUpmConfigDir();
@@ -183,21 +224,22 @@ const writeUnityToken = async function({
   if (!config.npmAuth) config.npmAuth = {};
   // Remove ending slash of registry
   if (registry.endsWith("/")) registry = registry.replace(/\/$/, "");
-  // Update config file
-  config["npmAuth"][registry] = {
-    email,
-    alwaysAuth
-  };
-  if (basicAuth) config["npmAuth"][registry]._auth = _auth;
-  else config["npmAuth"][registry].token = token;
+
+  if (basicAuth) {
+    if (_auth === null) throw new Error("Auth is null");
+    config["npmAuth"][registry] = {
+      email,
+      alwaysAuth,
+      _auth,
+    };
+  } else {
+    if (token === null) throw new Error("Token is null");
+    config["npmAuth"][registry] = {
+      email,
+      alwaysAuth,
+      token,
+    };
+  }
   // Write config file
   await saveUpmConfig(config, configDir);
-};
-
-module.exports = {
-  generateNpmrcLines,
-  getNpmrcPath,
-  login,
-  npmLogin,
-  validateRegistry
 };
