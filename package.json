@@ -80,7 +80,6 @@
     "npmlog": "^6.0.2",
     "pkginfo": "^0.4.1",
     "promptly": "^3.2.0",
-    "ts-node": "^10.9.1",
     "update-notifier": "^5.1.0",
     "yaml": "^2.0.1"
   }
