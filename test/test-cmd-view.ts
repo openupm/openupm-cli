@@ -2,7 +2,7 @@ import "assert";
 import nock from "nock";
 import "should";
 
-import { view } from "../lib/cmd-view";
+import { view } from "../src/cmd-view";
 
 import {
   createWorkDir,

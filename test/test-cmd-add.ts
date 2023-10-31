@@ -1,9 +1,9 @@
 import "assert";
 import nock from "nock";
 import "should";
-import { loadManifest } from "../lib/core";
+import { loadManifest } from "../src/core";
 
-import { add } from "../lib/cmd-add";
+import { add } from "../src/cmd-add";
 
 import {
   createWorkDir,

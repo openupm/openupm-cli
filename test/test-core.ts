@@ -13,7 +13,7 @@ import {
   parseEditorVersion,
   parseEnv,
   saveManifest,
-} from "../lib/core";
+} from "../src/core";
 
 import {
   createWorkDir,

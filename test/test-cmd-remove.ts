@@ -1,8 +1,8 @@
 import "assert";
 import "should";
-import { loadManifest } from "../lib/core";
+import { loadManifest } from "../src/core";
 
-import { remove } from "../lib/cmd-remove";
+import { remove } from "../src/cmd-remove";
 
 import {
   createWorkDir,

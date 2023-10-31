@@ -3,3 +3,5 @@
 .eslintrc.js
 test/
 .vscode/
+src/
+!lib/

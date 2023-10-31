@@ -2,7 +2,7 @@ import "assert";
 import nock from "nock";
 import "should";
 
-import { deps } from "../lib/cmd-deps";
+import { deps } from "../src/cmd-deps";
 
 import {
   createWorkDir,

@@ -5,7 +5,7 @@ import {
   generateNpmrcLines,
   getNpmrcPath,
   validateRegistry,
-} from "../lib/cmd-login";
+} from "../src/cmd-login";
 
 describe("cmd-login.ts", function () {
   describe("validateRegistry", function () {

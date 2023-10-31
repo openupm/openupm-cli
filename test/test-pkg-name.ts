@@ -1,6 +1,6 @@
 import "assert";
 import "should";
-import { splitPkgName } from "../lib/utils/pkg-name";
+import { splitPkgName } from "../src/utils/pkg-name";
 
 describe("pkg-name.ts", function () {
   describe("splitPkgName", function () {

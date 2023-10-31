@@ -3,7 +3,7 @@ import nock from "nock";
 import path from "path";
 import os from "os";
 import testConsole from "test-console";
-import { PkgManifest } from "../lib/types/global";
+import { PkgManifest } from "../src/types/global";
 import _ from "lodash";
 
 export type ManifestCreationOptions = {

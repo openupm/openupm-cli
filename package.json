@@ -6,15 +6,16 @@
   "engines": {
     "node": ">=16"
   },
-  "main": "lib/index.ts",
   "scripts": {
     "test": "cross-env NODE_ENV=test ts-mocha test/**/*.ts",
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -w -p tsconfig.json",
     "semantic-release": "semantic-release"
   },
   "bin": {
-    "openupm": "lib/index.ts",
-    "openupm-cli": "lib/index.ts",
-    "openupm-cn": "lib/index-cn.ts"
+    "openupm": "lib/index.js",
+    "openupm-cli": "lib/index.js",
+    "openupm-cn": "lib/index-cn.js"
   },
   "repository": {
     "type": "git",

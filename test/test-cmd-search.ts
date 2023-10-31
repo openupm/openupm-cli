@@ -1,7 +1,7 @@
 import "assert";
 import nock from "nock";
 import "should";
-import { search } from "../lib/cmd-search";
+import { search } from "../src/cmd-search";
 
 import {
   createWorkDir,
