@@ -2,7 +2,7 @@ import chalk from "chalk";
 import log from "./logger";
 import { env, fetchPackageInfo, getLatestVersion, parseEnv } from "./core";
 import assert from "assert";
-import { splitPkgName } from "./utils/pkg-name";
+import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
 
 export type ViewOptions = {
@@ -16,7 +16,7 @@ export const view = async function (pkg: PkgName, options: ViewOptions) {
   // parse name
   const { name, version } = splitPkgName(pkg);
   if (version) {
-    log.warn("", `please replace '${name}@${version}' with '${name}'`);
+    log.warn("", `please replace '${atVersion(name, version)}' with '${name}'`);
     return 1;
   }
   // verify name

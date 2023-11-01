@@ -27,6 +27,7 @@ import {
   SemanticVersion,
   UPMConfig,
 } from "./types/global";
+import { atVersion } from "./utils/pkg-name";
 
 export const env: Env = {
   auth: {},
@@ -215,7 +216,12 @@ export const fetchPackageDependencies = async function ({
   version: PkgVersion | undefined;
   deep?: boolean;
 }): Promise<[Dependency[], Dependency[]]> {
-  log.verbose("dependency", `fetch: ${name}@${version} deep=${deep}`);
+  log.verbose(
+    "dependency",
+    `fetch: ${
+      version !== undefined ? atVersion(name, version) : name
+    } deep=${deep}`
+  );
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
   // a list of processed dependency {name, version}
@@ -291,8 +297,8 @@ export const fetchPackageDependencies = async function ({
         if (!versions.find((x) => x == entry.version)) {
           log.warn(
             "404",
-            `package ${entry.name}@${
-              entry.version
+            `package ${
+              version !== undefined ? atVersion(name, version) : name
             } is not a valid choice of ${versions.reverse().join(", ")}`
           );
           depObj.reason = "version404";
@@ -315,9 +321,13 @@ export const fetchPackageDependencies = async function ({
       depsValid.push(depObj);
       log.verbose(
         "dependency",
-        `${entry.name}@${entry.version} ${
-          depObj.internal ? "[internal] " : ""
-        }${depObj.upstream ? "[upstream]" : ""}`
+        `${
+          entry.version !== undefined
+            ? atVersion(entry.name, entry.version)
+            : entry.name
+        } ${depObj.internal ? "[internal] " : ""}${
+          depObj.upstream ? "[upstream]" : ""
+        }`
       );
     }
   }

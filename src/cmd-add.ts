@@ -12,7 +12,7 @@ import {
   saveManifest,
 } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
-import { splitPkgName } from "./utils/pkg-name";
+import { splitPkgName, atVersion } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 
 export type AddOptions = {
@@ -165,7 +165,10 @@ const _add = async function ({
           if (!depObj.resolved)
             log.notice(
               "suggest",
-              `to install ${depObj.name}@${depObj.version} or a replaceable version manually`
+              `to install ${atVersion(
+                depObj.name,
+                depObj.version
+              )} or a replaceable version manually`
             );
         }
       });
@@ -185,7 +188,7 @@ const _add = async function ({
   manifest.dependencies[name] = version;
   if (!oldVersion) {
     // Log the added package
-    log.notice("manifest", `added ${name}@${version}`);
+    log.notice("manifest", `added ${atVersion(name, version)}`);
     dirty = true;
   } else if (oldVersion != version) {
     // Log the modified package version
@@ -193,7 +196,7 @@ const _add = async function ({
     dirty = true;
   } else {
     // Log the existed package
-    log.notice("manifest", `existed ${name}@${version}`);
+    log.notice("manifest", `existed ${atVersion(name, version)}`);
   }
   if (!isUpstreamPackage) {
     // add to scopedRegistries

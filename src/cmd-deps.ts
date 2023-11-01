@@ -1,6 +1,6 @@
 import log from "./logger";
 import { fetchPackageDependencies, parseEnv } from "./core";
-import { splitPkgName } from "./utils/pkg-name";
+import { splitPkgName, atVersion } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
 
 export type DepsOptions = {
@@ -36,13 +36,15 @@ const _deps = async function ({
   });
   depsValid
     .filter((x) => !x.self)
-    .forEach((x) => log.notice("dependency", `${x.name}@${x.version}`));
+    .forEach((x) =>
+      log.notice("dependency", `${atVersion(x.name, x.version)}`)
+    );
   depsInvalid
     .filter((x) => !x.self)
     .forEach((x) => {
       let reason = "unknown";
       if (x.reason == "package404") reason = "missing dependency";
       else if (x.reason == "version404") reason = "missing dependency version";
-      log.warn(reason, `${x.name}@${x.version}`);
+      log.warn(reason, atVersion(x.name, x.version));
     });
 };
