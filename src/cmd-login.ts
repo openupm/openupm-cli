@@ -6,13 +6,13 @@ import { assertIsNpmClientError, getNpmClient } from "./client";
 
 import log from "./logger";
 
+import { parseEnv } from "./core";
+import { GlobalOptions, Registry } from "./types/global";
 import {
   getUpmConfigDir,
   loadUpmConfig,
-  parseEnv,
   saveUpmConfig,
-} from "./core";
-import { GlobalOptions, Registry } from "./types/global";
+} from "./utils/upm-config";
 
 export type LoginOptions = {
   username?: string;

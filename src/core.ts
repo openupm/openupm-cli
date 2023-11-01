@@ -3,12 +3,8 @@ import path from "path";
 import url from "url";
 import _ from "lodash";
 import chalk from "chalk";
-import mkdirp from "mkdirp";
 import net from "node:net";
-import isWsl from "is-wsl";
-import TOML from "@iarna/toml";
 import yaml from "yaml";
-import execute from "./utils/process";
 import { getNpmClient } from "./client";
 import log from "./logger";
 import search from "libnpmsearch";
@@ -23,10 +19,10 @@ import {
   PkgVersion,
   Registry,
   SemanticVersion,
-  UPMConfig,
 } from "./types/global";
 import { atVersion, isInternalPackage } from "./utils/pkg-name";
 import { tryGetLatestVersion } from "./utils/pkg-info";
+import { loadUpmConfig } from "./utils/upm-config";
 
 export const env: Env = {
   auth: {},
@@ -331,69 +327,6 @@ export const fetchPackageDependencies = async function ({
     }
   }
   return [depsValid, depsInvalid];
-};
-
-// Get .upmconfig.toml directory
-export const getUpmConfigDir = async function (): Promise<string> {
-  let dirPath: string | undefined = "";
-  const systemUserSubPath = "Unity/config/ServiceAccounts";
-  if (env.wsl) {
-    if (!isWsl) {
-      throw new Error("no WSL detected");
-    }
-    if (env.systemUser) {
-      const allUserProfilePath = await execute(
-        'wslpath "$(wslvar ALLUSERSPROFILE)"',
-        { trim: true }
-      );
-      dirPath = path.join(allUserProfilePath, systemUserSubPath);
-    } else {
-      dirPath = await execute('wslpath "$(wslvar USERPROFILE)"', {
-        trim: true,
-      });
-    }
-  } else {
-    dirPath = process.env.USERPROFILE
-      ? process.env.USERPROFILE
-      : process.env.HOME;
-    if (env.systemUser) {
-      if (!process.env.ALLUSERSPROFILE) {
-        throw new Error("env ALLUSERSPROFILE is empty");
-      }
-      dirPath = path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
-    }
-  }
-  if (dirPath === undefined)
-    throw new Error("Could not resolve upm-config dir-path");
-  return dirPath;
-};
-
-// Load .upmconfig.toml
-export const loadUpmConfig = async function (
-  configDir?: string
-): Promise<UPMConfig | undefined> {
-  if (configDir === undefined) configDir = await getUpmConfigDir();
-  const configPath = path.join(configDir, ".upmconfig.toml");
-  if (fs.existsSync(configPath)) {
-    const content = fs.readFileSync(configPath, "utf8");
-    const config = TOML.parse(content);
-
-    // NOTE: We assume correct format
-    return config as UPMConfig;
-  }
-};
-
-// Save .upmconfig.toml
-export const saveUpmConfig = async function (
-  config: UPMConfig,
-  configDir: string
-) {
-  if (configDir === undefined) configDir = await getUpmConfigDir();
-  mkdirp.sync(configDir);
-  const configPath = path.join(configDir, ".upmconfig.toml");
-  const content = TOML.stringify(config);
-  fs.writeFileSync(configPath, content, "utf8");
-  log.notice("config", "saved unity config at " + configPath);
 };
 
 // Compare unity editor version and return -1, 0, or 1.
