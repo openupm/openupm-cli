@@ -30,6 +30,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [Command options](#command-options)
   - [Work with Unity official (upstream) registry](#work-with-unity-official-upstream-registry)
   - [Work with proxy](#work-with-proxy)
+  - [Contributors](#contributors)
 
 ## How it works
 
@@ -289,3 +290,14 @@ http_proxy="http://127.0.0.1:8080" openupm ...
 ```
 
 You may need to set both http_proxy and https_proxy environment variables at the system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
