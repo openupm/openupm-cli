@@ -5,3 +5,11 @@ test/
 .vscode/
 src/
 !lib/
+.github/
+.idea/
+.nvmrc
+.node-version
+.releaserc.json
+tsconfig.json
+*.tgz
+*.tar.gz
