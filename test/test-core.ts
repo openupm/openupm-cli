@@ -1,5 +1,4 @@
 import "assert";
-import fs from "fs";
 import nock from "nock";
 import path from "path";
 import "should";
@@ -22,8 +21,6 @@ import {
 } from "./utils";
 import testConsole from "test-console";
 import assert from "assert";
-import { isInternalPackage } from "../src/utils/pkg-name";
-import { loadManifest, saveManifest } from "../src/utils/manifest";
 
 describe("cmd-core.ts", function () {
   describe("parseEnv", function () {
@@ -200,8 +197,6 @@ describe("cmd-core.ts", function () {
       env.region.should.be.equal("cn");
     });
   });
-
-  
 
   describe("fetchPackageInfo", function () {
     beforeEach(function () {
