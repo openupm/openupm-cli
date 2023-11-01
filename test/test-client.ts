@@ -1,13 +1,13 @@
 import "assert";
 import nock from "nock";
 import "should";
-import { fetchPackageInfo } from "../src/core";
 
 import { nockDown, nockUp } from "./utils";
 import assert from "assert";
 import { parseEnv } from "../src/utils/env";
+import { fetchPackageInfo } from "../src/client";
 
-describe("cmd-core.ts", function () {
+describe("client", function () {
   describe("fetchPackageInfo", function () {
     beforeEach(function () {
       nockUp();

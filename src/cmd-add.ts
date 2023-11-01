@@ -1,6 +1,5 @@
 import log from "./logger";
 import url from "url";
-import { fetchPackageDependencies, fetchPackageInfo } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
@@ -12,6 +11,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./utils/editor-version";
+import { fetchPackageDependencies, fetchPackageInfo } from "./client";
 
 export type AddOptions = {
   test?: boolean;

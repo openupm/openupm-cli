@@ -1,11 +1,10 @@
-import npmSearch from "libnpmsearch";
+import npmSearch, { Options } from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
 import Table from "cli-table";
 import log from "./logger";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
-import { Options } from "libnpmsearch";
 import {
   GlobalOptions,
   PkgInfo,
