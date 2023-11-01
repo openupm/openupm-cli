@@ -1,6 +1,6 @@
 import log from "./logger";
 import { fetchPackageDependencies, parseEnv } from "./core";
-import { splitPkgName, atVersion } from "./utils/pkg-name";
+import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
 
 export type DepsOptions = {

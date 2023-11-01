@@ -11,9 +11,9 @@ import {
   saveManifest,
 } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
-import { splitPkgName, atVersion } from "./utils/pkg-name";
+import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
-import {tryGetLatestVersion} from "./utils/pkg-info";
+import { tryGetLatestVersion } from "./utils/pkg-info";
 
 export type AddOptions = {
   test?: boolean;

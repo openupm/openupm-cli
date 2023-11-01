@@ -13,7 +13,7 @@ import {
   PkgVersion,
   Registry,
 } from "./types/global";
-import {tryGetLatestVersion} from "./utils/pkg-info";
+import { tryGetLatestVersion } from "./utils/pkg-info";
 
 type DateString = string;
 

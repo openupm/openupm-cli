@@ -4,7 +4,7 @@ import { env, fetchPackageInfo, parseEnv } from "./core";
 import assert from "assert";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
-import {tryGetLatestVersion} from "./utils/pkg-info";
+import { tryGetLatestVersion } from "./utils/pkg-info";
 
 export type ViewOptions = {
   _global: GlobalOptions;
