@@ -31,7 +31,7 @@ export const atVersion = (
  * Detect if the given package name is an internal package
  * @param name The name of the package
  */
-export const isInternalPackage = (name: PkgName): boolean => {
+export const isInternalPackage = (name: ReverseDomainName): boolean => {
   const internals = [
     "com.unity.ugui",
     "com.unity.2d.sprite",
