@@ -1,17 +1,17 @@
 import log from "./logger";
 import url from "url";
-import {
-  compareEditorVersion,
-  fetchPackageDependencies,
-  fetchPackageInfo,
-  parseEditorVersion,
-} from "./core";
+import { fetchPackageDependencies, fetchPackageInfo } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
+
+import {
+  compareEditorVersion,
+  tryParseEditorVersion,
+} from "./utils/editor-version";
 
 export type AddOptions = {
   test?: boolean;
@@ -104,8 +104,8 @@ const _add = async function ({
         ? versionInfo.unity + "." + versionInfo.unityRelease
         : versionInfo.unity;
       if (env.editorVersion) {
-        const editorVersionResult = parseEditorVersion(env.editorVersion);
-        const requiredEditorVersionResult = parseEditorVersion(
+        const editorVersionResult = tryParseEditorVersion(env.editorVersion);
+        const requiredEditorVersionResult = tryParseEditorVersion(
           requiredEditorVersion
         );
         if (!editorVersionResult) {
