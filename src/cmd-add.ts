@@ -5,15 +5,14 @@ import {
   env,
   fetchPackageDependencies,
   fetchPackageInfo,
-  loadManifest,
   parseEditorVersion,
   parseEnv,
-  saveManifest,
 } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
+import { loadManifest, saveManifest } from "./utils/manifest";
 
 export type AddOptions = {
   test?: boolean;

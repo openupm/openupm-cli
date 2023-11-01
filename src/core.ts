@@ -11,7 +11,6 @@ import yaml from "yaml";
 import execute from "./utils/process";
 import { getNpmClient } from "./client";
 import log from "./logger";
-import { assertIsError } from "./utils/error-type-guards";
 import search from "libnpmsearch";
 import assert from "assert";
 import {
@@ -20,7 +19,6 @@ import {
   GlobalOptions,
   NameVersionPair,
   PkgInfo,
-  PkgManifest,
   PkgName,
   PkgVersion,
   Registry,
@@ -333,40 +331,6 @@ export const fetchPackageDependencies = async function ({
     }
   }
   return [depsValid, depsInvalid];
-};
-
-// Load manifest json file
-export const loadManifest = function (): PkgManifest | null {
-  try {
-    const text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
-    return JSON.parse(text);
-  } catch (err) {
-    assertIsError(err);
-    if (err.code == "ENOENT")
-      log.error("manifest", "file Packages/manifest.json does not exist");
-    else {
-      log.error(
-        "manifest",
-        `failed to parse Packages/manifest.json at ${env.manifestPath}`
-      );
-      log.error("manifest", err.message);
-    }
-    return null;
-  }
-};
-
-// Save manifest json file
-export const saveManifest = function (data: PkgManifest) {
-  const json = JSON.stringify(data, null, 2);
-  try {
-    fs.writeFileSync(env.manifestPath, json);
-    return true;
-  } catch (err) {
-    assertIsError(err);
-    log.error("manifest", "can not write manifest json file");
-    log.error("manifest", err.message);
-    return false;
-  }
 };
 
 // Get .upmconfig.toml directory

@@ -1,6 +1,5 @@
 import "assert";
 import "should";
-import { loadManifest } from "../src/core";
 
 import { remove } from "../src/cmd-remove";
 
@@ -13,6 +12,7 @@ import {
 } from "./utils";
 import testConsole from "test-console";
 import assert from "assert";
+import { loadManifest } from "../src/utils/manifest";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {

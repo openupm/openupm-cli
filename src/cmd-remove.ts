@@ -1,7 +1,8 @@
 import log from "./logger";
-import { env, loadManifest, parseEnv, saveManifest } from "./core";
+import { env, parseEnv } from "./core";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+import { loadManifest, saveManifest } from "./utils/manifest";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
