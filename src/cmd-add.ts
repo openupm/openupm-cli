@@ -2,17 +2,16 @@ import log from "./logger";
 import url from "url";
 import {
   compareEditorVersion,
-  env,
   fetchPackageDependencies,
   fetchPackageInfo,
   parseEditorVersion,
-  parseEnv,
 } from "./core";
 import { isUrlVersion } from "./utils/pkg-version";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { loadManifest, saveManifest } from "./utils/manifest";
+import { env, parseEnv } from "./utils/env";
 
 export type AddOptions = {
   test?: boolean;

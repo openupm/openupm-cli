@@ -1,7 +1,8 @@
 import log from "./logger";
-import { fetchPackageDependencies, parseEnv } from "./core";
+import { fetchPackageDependencies } from "./core";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
+import { parseEnv } from "./utils/env";
 
 export type DepsOptions = {
   deep?: boolean;

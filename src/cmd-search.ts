@@ -2,7 +2,7 @@ import npmSearch from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
 import Table from "cli-table";
 import log from "./logger";
-import { env, getNpmFetchOptions, parseEnv } from "./core";
+import { getNpmFetchOptions } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
@@ -14,6 +14,7 @@ import {
   Registry,
 } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
+import { env, parseEnv } from "./utils/env";
 
 type DateString = string;
 

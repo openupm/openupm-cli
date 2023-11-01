@@ -1,10 +1,11 @@
 import chalk from "chalk";
 import log from "./logger";
-import { env, fetchPackageInfo, parseEnv } from "./core";
+import { fetchPackageInfo } from "./core";
 import assert from "assert";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
+import { env, parseEnv } from "./utils/env";
 
 export type ViewOptions = {
   _global: GlobalOptions;

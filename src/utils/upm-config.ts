@@ -6,7 +6,7 @@ import fs from "fs";
 import log from "../logger";
 import isWsl from "is-wsl";
 import execute from "./process";
-import { env } from "../core";
+import { env } from "./env";
 
 /**
  * Gets the path to directory in which the upm config is stored

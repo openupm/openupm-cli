@@ -9,10 +9,10 @@ import {
 import fs from "fs";
 import "should";
 import path from "path";
-import { parseEnv } from "../src/core";
 import { loadManifest, saveManifest } from "../src/utils/manifest";
 import assert from "assert";
 import { describe } from "mocha";
+import { parseEnv } from "../src/utils/env";
 
 describe("manifest", function () {
   let stdoutInspect: testConsole.Inspector = null!;
