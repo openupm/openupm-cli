@@ -7,7 +7,6 @@ import {
   compareEditorVersion,
   env,
   fetchPackageInfo,
-  getLatestVersion,
   isInternalPackage,
   loadManifest,
   parseEditorVersion,
@@ -316,13 +315,6 @@ describe("cmd-core.ts", function () {
     });
   });
 
-  describe("getLatestVersion", function () {
-    it("from dist-tags", async function () {
-      const version = getLatestVersion({ "dist-tags": { latest: "1.0.0" } });
-      assert(version !== undefined);
-      version.should.equal("1.0.0");
-    });
-  });
   describe("parseEditorVersion", function () {
     it("test null", function () {
       (parseEditorVersion(null) === null).should.be.ok();

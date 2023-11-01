@@ -1,9 +1,10 @@
 import chalk from "chalk";
 import log from "./logger";
-import { env, fetchPackageInfo, getLatestVersion, parseEnv } from "./core";
+import { env, fetchPackageInfo, parseEnv } from "./core";
 import assert from "assert";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
+import {tryGetLatestVersion} from "./utils/pkg-info";
 
 export type ViewOptions = {
   _global: GlobalOptions;
@@ -34,7 +35,7 @@ export const view = async function (pkg: PkgName, options: ViewOptions) {
 
 const printInfo = function (pkg: PkgInfo) {
   const versionCount = Object.keys(pkg.versions).length;
-  const ver = getLatestVersion(pkg);
+  const ver = tryGetLatestVersion(pkg);
   assert(ver !== undefined);
   const verInfo = pkg.versions[ver];
   const license = verInfo.license || "proprietary or unlicensed";

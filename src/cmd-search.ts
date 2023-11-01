@@ -2,7 +2,7 @@ import npmSearch from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
 import Table from "cli-table";
 import log from "./logger";
-import { env, getLatestVersion, getNpmFetchOptions, parseEnv } from "./core";
+import { env, getNpmFetchOptions, parseEnv } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
@@ -13,6 +13,7 @@ import {
   PkgVersion,
   Registry,
 } from "./types/global";
+import {tryGetLatestVersion} from "./utils/pkg-info";
 
 type DateString = string;
 
@@ -86,7 +87,7 @@ const getTable = function () {
 
 const getTableRow = function (pkg: PkgInfo): TableRow {
   const name = pkg.name;
-  const version = getLatestVersion(pkg);
+  const version = tryGetLatestVersion(pkg);
   let date = "";
   if (pkg.time && pkg.time.modified) date = pkg.time.modified.split("T")[0];
   if (pkg.date) {

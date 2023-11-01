@@ -28,6 +28,7 @@ import {
   UPMConfig,
 } from "./types/global";
 import { atVersion } from "./utils/pkg-name";
+import { tryGetLatestVersion } from "./utils/pkg-info";
 
 export const env: Env = {
   auth: {},
@@ -288,7 +289,7 @@ export const fetchPackageDependencies = async function ({
         // verify version
         const versions = Object.keys(pkgInfo.versions);
         if (!entry.version || entry.version == "latest") {
-          const latestVersion = getLatestVersion(pkgInfo);
+          const latestVersion = tryGetLatestVersion(pkgInfo);
           assert(latestVersion !== undefined);
           // eslint-disable-next-line require-atomic-updates
           depObj.version = entry.version = latestVersion;
@@ -332,15 +333,6 @@ export const fetchPackageDependencies = async function ({
     }
   }
   return [depsValid, depsInvalid];
-};
-
-// Get latest version from package info
-export const getLatestVersion = function (
-  pkgInfo: Partial<PkgInfo>
-): PkgVersion | undefined {
-  if (pkgInfo["dist-tags"]?.["latest"] !== undefined)
-    return pkgInfo["dist-tags"]["latest"];
-  else if (pkgInfo.version) return pkgInfo.version;
 };
 
 // Load manifest json file

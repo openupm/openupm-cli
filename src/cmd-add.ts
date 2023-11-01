@@ -5,7 +5,6 @@ import {
   env,
   fetchPackageDependencies,
   fetchPackageInfo,
-  getLatestVersion,
   loadManifest,
   parseEditorVersion,
   parseEnv,
@@ -14,6 +13,7 @@ import {
 import { isUrlVersion } from "./utils/pkg-version";
 import { splitPkgName, atVersion } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+import {tryGetLatestVersion} from "./utils/pkg-info";
 
 export type AddOptions = {
   test?: boolean;
@@ -86,7 +86,7 @@ const _add = async function ({
     // verify version
     const versions = Object.keys(pkgInfo.versions);
     // eslint-disable-next-line require-atomic-updates
-    if (!version || version == "latest") version = getLatestVersion(pkgInfo);
+    if (!version || version == "latest") version = tryGetLatestVersion(pkgInfo);
     if (versions.filter((x) => x == version).length <= 0) {
       log.warn(
         "404",
