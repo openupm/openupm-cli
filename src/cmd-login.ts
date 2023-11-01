@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import promptly from "promptly";
-import { assertIsNpmClientError, getNpmClient } from "./client";
+import { assertIsNpmClientError, getNpmClient } from "./registry-client";
 
 import log from "./logger";
 

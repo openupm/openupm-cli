@@ -5,9 +5,9 @@ import "should";
 import { nockDown, nockUp } from "./utils";
 import assert from "assert";
 import { parseEnv } from "../src/utils/env";
-import { fetchPackageInfo } from "../src/client";
+import { fetchPackageInfo } from "../src/registry-client";
 
-describe("client", function () {
+describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
     beforeEach(function () {
       nockUp();

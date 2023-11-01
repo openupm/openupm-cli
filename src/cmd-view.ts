@@ -5,7 +5,7 @@ import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
-import { fetchPackageInfo } from "./client";
+import { fetchPackageInfo } from "./registry-client";
 
 export type ViewOptions = {
   _global: GlobalOptions;

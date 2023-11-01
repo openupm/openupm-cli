@@ -2,7 +2,7 @@ import log from "./logger";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies } from "./client";
+import { fetchPackageDependencies } from "./registry-client";
 
 export type DepsOptions = {
   deep?: boolean;

@@ -11,7 +11,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./utils/editor-version";
-import { fetchPackageDependencies, fetchPackageInfo } from "./client";
+import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
 
 export type AddOptions = {
   test?: boolean;
