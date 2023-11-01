@@ -4,12 +4,24 @@
   ],
   "imageSize": 100,
   "commit": false,
-  "contributors": [],
+  "contributors": [
+    {
+      "login": "favoyang",
+      "name": "Favo Yang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/125390?v=4",
+      "profile": "http://littlebigfun.com",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    }
+  ],
   "contributorsPerLine": 7,
   "projectName": "openupm-cli",
   "projectOwner": "openupm",
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }
