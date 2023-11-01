@@ -2,10 +2,10 @@ import npmSearch from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
 import Table from "cli-table";
 import log from "./logger";
-import { getNpmFetchOptions } from "./core";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
+import { Options } from "libnpmsearch";
 import {
   GlobalOptions,
   PkgInfo,
@@ -22,6 +22,16 @@ type TableRow = [PkgName, PkgVersion, DateString, ""];
 
 export type SearchOptions = {
   _global: GlobalOptions;
+};
+// Get npm fetch options
+const getNpmFetchOptions = function (): Options {
+  const opts: Options = {
+    log,
+    registry: env.registry,
+  };
+  const auth = env.auth[env.registry];
+  if (auth) Object.assign(opts, auth);
+  return opts;
 };
 
 const searchEndpoint = async function (

@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { getNpmClient } from "./client";
 import log from "./logger";
-import search from "libnpmsearch";
 import assert from "assert";
 import {
   Dependency,
@@ -14,17 +13,6 @@ import {
 import { atVersion, isInternalPackage } from "./utils/pkg-name";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env } from "./utils/env";
-
-// Get npm fetch options
-export const getNpmFetchOptions = function (): search.Options {
-  const opts: search.Options = {
-    log,
-    registry: env.registry,
-  };
-  const auth = env.auth[env.registry];
-  if (auth) Object.assign(opts, auth);
-  return opts;
-};
 
 // Fetch package info json from registry
 export const fetchPackageInfo = async function (
