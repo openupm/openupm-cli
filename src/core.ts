@@ -10,7 +10,7 @@ import {
   PkgName,
   PkgVersion,
   Registry,
-  SemanticVersion,
+  EditorVersion,
 } from "./types/global";
 import { atVersion, isInternalPackage } from "./utils/pkg-name";
 import { tryGetLatestVersion } from "./utils/pkg-info";
@@ -188,7 +188,7 @@ export const compareEditorVersion = function (a: string, b: string) {
   if (verA === null || verB === null)
     throw new Error("An editor version could not be parsed");
 
-  const editorVersionToArray = (ver: SemanticVersion) => [
+  const editorVersionToArray = (ver: EditorVersion) => [
     ver.major,
     ver.minor,
     ver.patch || 0,
@@ -224,7 +224,7 @@ export const compareEditorVersion = function (a: string, b: string) {
  */
 export const parseEditorVersion = function (
   version: string | null
-): SemanticVersion | null {
+): EditorVersion | null {
   type RegexMatchGroups = {
     major: `${number}`;
     minor: `${number}`;
@@ -241,7 +241,7 @@ export const parseEditorVersion = function (
   const match = regex.exec(version);
   if (!match) return null;
   const groups = <RegexMatchGroups>match.groups;
-  const result: SemanticVersion = {
+  const result: EditorVersion = {
     major: parseInt(groups.major),
     minor: parseInt(groups.minor),
   };

@@ -10,7 +10,7 @@ export type Region = "us" | "cn";
 
 export type Registry = string;
 
-export type SemanticVersion = {
+export type EditorVersion = {
   major: number;
   minor: number;
   patch?: number;
