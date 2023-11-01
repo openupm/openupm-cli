@@ -27,7 +27,7 @@ import {
   SemanticVersion,
   UPMConfig,
 } from "./types/global";
-import { atVersion } from "./utils/pkg-name";
+import { atVersion, isInternalPackage } from "./utils/pkg-name";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 
 export const env: Env = {
@@ -512,16 +512,4 @@ export const parseEditorVersion = function (
     if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
   }
   return result;
-};
-
-// Detect if the given package name is an internal package
-export const isInternalPackage = function (name: PkgName): boolean {
-  const internals = [
-    "com.unity.ugui",
-    "com.unity.2d.sprite",
-    "com.unity.2d.tilemap",
-    "com.unity.package-manager-ui",
-    "com.unity.ugui",
-  ];
-  return /com.unity.modules/i.test(name) || internals.includes(name);
 };

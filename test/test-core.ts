@@ -7,7 +7,6 @@ import {
   compareEditorVersion,
   env,
   fetchPackageInfo,
-  isInternalPackage,
   loadManifest,
   parseEditorVersion,
   parseEnv,
@@ -25,6 +24,7 @@ import {
 } from "./utils";
 import testConsole from "test-console";
 import assert from "assert";
+import { isInternalPackage } from "../src/utils/pkg-name";
 
 describe("cmd-core.ts", function () {
   describe("parseEnv", function () {
@@ -428,18 +428,6 @@ describe("cmd-core.ts", function () {
     });
     it("test 2019.1.1f1 < 2020.1.1f1c1", function () {
       compareEditorVersion("2019.1.1f1", "2020.1.1f1c1").should.equal(-1);
-    });
-  });
-
-  describe("isInternalPackage", function () {
-    it("test com.otherorg.software", function () {
-      isInternalPackage("com.otherorg.software").should.not.be.ok();
-    });
-    it("test com.unity.ugui", function () {
-      isInternalPackage("com.unity.ugui").should.be.ok();
-    });
-    it("test com.unity.modules.tilemap", function () {
-      isInternalPackage("com.unity.modules.tilemap").should.be.ok();
     });
   });
 });

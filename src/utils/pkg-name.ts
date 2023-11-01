@@ -26,3 +26,18 @@ export const atVersion = (
   name: ReverseDomainName,
   version: PkgVersion
 ): PkgName => `${name}@${version}`;
+
+/**
+ * Detect if the given package name is an internal package
+ * @param name The name of the package
+ */
+export const isInternalPackage = (name: PkgName): boolean => {
+  const internals = [
+    "com.unity.ugui",
+    "com.unity.2d.sprite",
+    "com.unity.2d.tilemap",
+    "com.unity.package-manager-ui",
+    "com.unity.ugui",
+  ];
+  return /com.unity.modules/i.test(name) || internals.includes(name);
+};
