@@ -1,19 +1,17 @@
 import log from "./logger";
 import url from "url";
+import { isUrlVersion } from "./utils/pkg-version";
+import { atVersion, splitPkgName } from "./utils/pkg-name";
+import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+import { tryGetLatestVersion } from "./utils/pkg-info";
+import { loadManifest, saveManifest } from "./utils/manifest";
+import { env, parseEnv } from "./utils/env";
+
 import {
   compareEditorVersion,
-  env,
-  fetchPackageDependencies,
-  fetchPackageInfo,
-  getLatestVersion,
-  loadManifest,
-  parseEditorVersion,
-  parseEnv,
-  saveManifest,
-} from "./core";
-import { isUrlVersion } from "./utils/pkg-version";
-import { splitPkgName } from "./utils/pkg-name";
-import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+  tryParseEditorVersion,
+} from "./utils/editor-version";
+import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
 
 export type AddOptions = {
   test?: boolean;
@@ -86,7 +84,7 @@ const _add = async function ({
     // verify version
     const versions = Object.keys(pkgInfo.versions);
     // eslint-disable-next-line require-atomic-updates
-    if (!version || version == "latest") version = getLatestVersion(pkgInfo);
+    if (!version || version == "latest") version = tryGetLatestVersion(pkgInfo);
     if (versions.filter((x) => x == version).length <= 0) {
       log.warn(
         "404",
@@ -106,8 +104,8 @@ const _add = async function ({
         ? versionInfo.unity + "." + versionInfo.unityRelease
         : versionInfo.unity;
       if (env.editorVersion) {
-        const editorVersionResult = parseEditorVersion(env.editorVersion);
-        const requiredEditorVersionResult = parseEditorVersion(
+        const editorVersionResult = tryParseEditorVersion(env.editorVersion);
+        const requiredEditorVersionResult = tryParseEditorVersion(
           requiredEditorVersion
         );
         if (!editorVersionResult) {
@@ -165,7 +163,10 @@ const _add = async function ({
           if (!depObj.resolved)
             log.notice(
               "suggest",
-              `to install ${depObj.name}@${depObj.version} or a replaceable version manually`
+              `to install ${atVersion(
+                depObj.name,
+                depObj.version
+              )} or a replaceable version manually`
             );
         }
       });
@@ -185,7 +186,7 @@ const _add = async function ({
   manifest.dependencies[name] = version;
   if (!oldVersion) {
     // Log the added package
-    log.notice("manifest", `added ${name}@${version}`);
+    log.notice("manifest", `added ${atVersion(name, version)}`);
     dirty = true;
   } else if (oldVersion != version) {
     // Log the modified package version
@@ -193,7 +194,7 @@ const _add = async function ({
     dirty = true;
   } else {
     // Log the existed package
-    log.notice("manifest", `existed ${name}@${version}`);
+    log.notice("manifest", `existed ${atVersion(name, version)}`);
   }
   if (!isUpstreamPackage) {
     // add to scopedRegistries

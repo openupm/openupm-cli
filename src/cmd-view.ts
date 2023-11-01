@@ -1,9 +1,11 @@
 import chalk from "chalk";
 import log from "./logger";
-import { env, fetchPackageInfo, getLatestVersion, parseEnv } from "./core";
 import assert from "assert";
-import { splitPkgName } from "./utils/pkg-name";
+import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
+import { tryGetLatestVersion } from "./utils/pkg-info";
+import { env, parseEnv } from "./utils/env";
+import { fetchPackageInfo } from "./registry-client";
 
 export type ViewOptions = {
   _global: GlobalOptions;
@@ -16,7 +18,7 @@ export const view = async function (pkg: PkgName, options: ViewOptions) {
   // parse name
   const { name, version } = splitPkgName(pkg);
   if (version) {
-    log.warn("", `please replace '${name}@${version}' with '${name}'`);
+    log.warn("", `please replace '${atVersion(name, version)}' with '${name}'`);
     return 1;
   }
   // verify name
@@ -34,7 +36,7 @@ export const view = async function (pkg: PkgName, options: ViewOptions) {
 
 const printInfo = function (pkg: PkgInfo) {
   const versionCount = Object.keys(pkg.versions).length;
-  const ver = getLatestVersion(pkg);
+  const ver = tryGetLatestVersion(pkg);
   assert(ver !== undefined);
   const verInfo = pkg.versions[ver];
   const license = verInfo.license || "proprietary or unlicensed";

@@ -10,7 +10,7 @@ export type Region = "us" | "cn";
 
 export type Registry = string;
 
-export type SemanticVersion = {
+export type EditorVersion = {
   major: number;
   minor: number;
   patch?: number;
@@ -74,7 +74,7 @@ export type NameVersionPair = {
 
 export type Dependency = {
   name: PkgName;
-  version: PkgVersion | undefined;
+  version: PkgVersion;
   upstream: boolean;
   self: boolean;
   internal: boolean;

@@ -1,7 +1,8 @@
 import log from "./logger";
-import { env, loadManifest, parseEnv, saveManifest } from "./core";
-import { splitPkgName } from "./utils/pkg-name";
+import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+import { loadManifest, saveManifest } from "./utils/manifest";
+import { env, parseEnv } from "./utils/env";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
@@ -36,7 +37,7 @@ const _remove = async function (pkg: PkgName) {
   const name = split.name;
   let version = split.version;
   if (version) {
-    log.warn("", `please replace '${name}@${version}' with '${name}'`);
+    log.warn("", `please replace '${atVersion(name, version)}' with '${name}'`);
     return { code: 1, dirty };
   }
   // load manifest
@@ -48,7 +49,7 @@ const _remove = async function (pkg: PkgName) {
   if (manifest.dependencies) {
     version = manifest.dependencies[name];
     if (version) {
-      log.notice("manifest", `removed ${name}@${version}`);
+      log.notice("manifest", `removed ${atVersion(name, version)}`);
       delete manifest.dependencies[name];
       dirty = true;
     } else pkgsNotFound.push(pkg);

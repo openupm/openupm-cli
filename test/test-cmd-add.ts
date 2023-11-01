@@ -1,7 +1,6 @@
 import "assert";
 import nock from "nock";
 import "should";
-import { loadManifest } from "../src/core";
 
 import { add } from "../src/cmd-add";
 
@@ -16,6 +15,7 @@ import {
 } from "./utils";
 import testConsole from "test-console";
 import assert from "assert";
+import { loadManifest } from "../src/utils/manifest";
 
 describe("cmd-add.ts", function () {
   const options = {

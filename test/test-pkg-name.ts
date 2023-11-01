@@ -1,6 +1,6 @@
 import "assert";
 import "should";
-import { splitPkgName } from "../src/utils/pkg-name";
+import { isInternalPackage, splitPkgName } from "../src/utils/pkg-name";
 
 describe("pkg-name.ts", function () {
   describe("splitPkgName", function () {
@@ -39,6 +39,17 @@ describe("pkg-name.ts", function () {
         name: "pkg",
         version: "git@github.com:owner/pkg.git",
       });
+    });
+  });
+  describe("isInternalPackage", function () {
+    it("test com.otherorg.software", function () {
+      isInternalPackage("com.otherorg.software").should.not.be.ok();
+    });
+    it("test com.unity.ugui", function () {
+      isInternalPackage("com.unity.ugui").should.be.ok();
+    });
+    it("test com.unity.modules.tilemap", function () {
+      isInternalPackage("com.unity.modules.tilemap").should.be.ok();
     });
   });
 });

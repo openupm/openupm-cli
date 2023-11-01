@@ -2,17 +2,17 @@ import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import promptly from "promptly";
-import { assertIsNpmClientError, getNpmClient } from "./client";
+import { assertIsNpmClientError, getNpmClient } from "./registry-client";
 
 import log from "./logger";
 
+import { GlobalOptions, Registry } from "./types/global";
 import {
   getUpmConfigDir,
   loadUpmConfig,
-  parseEnv,
   saveUpmConfig,
-} from "./core";
-import { GlobalOptions, Registry } from "./types/global";
+} from "./utils/upm-config";
+import { parseEnv } from "./utils/env";
 
 export type LoginOptions = {
   username?: string;

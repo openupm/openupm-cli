@@ -1,0 +1,90 @@
+import { EditorVersion } from "../types/global";
+
+/**
+ * Compares two editor versions for ordering
+ * @param a The first version
+ * @param b The second version
+ */
+export const compareEditorVersion = function (
+  a: string,
+  b: string
+): -1 | 0 | 1 {
+  const verA = tryParseEditorVersion(a);
+  const verB = tryParseEditorVersion(b);
+
+  if (verA === null || verB === null)
+    throw new Error("An editor version could not be parsed");
+
+  const editorVersionToArray = (ver: EditorVersion) => [
+    ver.major,
+    ver.minor,
+    ver.patch || 0,
+    ver.flagValue || 0,
+    ver.build || 0,
+    ver.locValue || 0,
+    ver.locBuild || 0,
+  ];
+  const arrA = editorVersionToArray(verA);
+  const arrB = editorVersionToArray(verB);
+  for (let i = 0; i < arrA.length; i++) {
+    const valA = arrA[i];
+    const valB = arrB[i];
+    if (valA > valB) return 1;
+    else if (valA < valB) return -1;
+  }
+  return 0;
+};
+
+/**
+ * Attempts to parse editor version string to groups
+ *
+ * E.g. 2020.2.0f2c4
+ *   major: 2020
+ *   minor: 2
+ *   patch: 0
+ *   flag: 'f'
+ *   flagValue: 2
+ *   build: 2
+ *   loc: 'c'
+ *   locValue: 1
+ *   locBuild: 4
+ */
+export const tryParseEditorVersion = function (
+  version: string | null
+): EditorVersion | null {
+  type RegexMatchGroups = {
+    major: `${number}`;
+    minor: `${number}`;
+    patch?: string;
+    flag?: "a" | "b" | "f" | "c";
+    build?: `${number}`;
+    loc?: "c";
+    locBuild?: `${number}`;
+  };
+
+  if (!version) return null;
+  const regex =
+    /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
+  const match = regex.exec(version);
+  if (!match) return null;
+  const groups = <RegexMatchGroups>match.groups;
+  const result: EditorVersion = {
+    major: parseInt(groups.major),
+    minor: parseInt(groups.minor),
+  };
+  if (groups.patch) result.patch = parseInt(groups.patch);
+  if (groups.flag) {
+    result.flag = groups.flag;
+    if (result.flag == "a") result.flagValue = 0;
+    if (result.flag == "b") result.flagValue = 1;
+    if (result.flag == "f") result.flagValue = 2;
+    if (groups.build) result.build = parseInt(groups.build);
+  }
+
+  if (groups.loc) {
+    result.loc = groups.loc.toLowerCase();
+    if (result.loc == "c") result.locValue = 1;
+    if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
+  }
+  return result;
+};
