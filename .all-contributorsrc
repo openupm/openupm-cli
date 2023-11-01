@@ -14,6 +14,15 @@
         "code",
         "maintenance"
       ]
+    },
+    {
+      "login": "ComradeVanti",
+      "name": "Ramon Brullo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31240807?v=4",
+      "profile": "https://comradevanti.itch.io",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
