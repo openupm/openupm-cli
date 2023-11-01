@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/openupm/openupm-cli/compare/1.15.5...1.16.0) (2023-11-01)
+
+
+### Features
+
+* convert project to TypeScript ([#52](https://github.com/openupm/openupm-cli/issues/52)), require node v16 ([8e68b9a](https://github.com/openupm/openupm-cli/commit/8e68b9a9a2a1956cdc482ddad90523e4752a8b03)), closes [/github.com/prettier/eslint-config-prettier/blob/main/CHANGELOG.md#version-800-2021-02-21](https://github.com//github.com/prettier/eslint-config-prettier/blob/main/CHANGELOG.md/issues/version-800-2021-02-21) [/github.com/prettier/eslint-config-prettier/blob/main/CHANGELOG.md#version-800-2021-02-21](https://github.com//github.com/prettier/eslint-config-prettier/blob/main/CHANGELOG.md/issues/version-800-2021-02-21) [/github.com/openupm/openupm-cli/pull/52#issuecomment-1776779428](https://github.com//github.com/openupm/openupm-cli/pull/52/issues/issuecomment-1776779428) [#50](https://github.com/openupm/openupm-cli/issues/50) [/github.com/prettier/eslint-config-prettier/blob/main/CHANGELOG.md#version-800-2021-02-21](https://github.com//github.com/prettier/eslint-config-prettier/blob/main/CHANGELOG.md/issues/version-800-2021-02-21) [/github.com/openupm/openupm-cli/pull/52#issuecomment-1776779428](https://github.com//github.com/openupm/openupm-cli/pull/52/issues/issuecomment-1776779428) [/github.com/openupm/openupm-cli/pull/52#discussion_r1375481622](https://github.com//github.com/openupm/openupm-cli/pull/52/issues/discussion_r1375481622) [/github.com/openupm/openupm-cli/pull/52#discussion_r1378008074](https://github.com//github.com/openupm/openupm-cli/pull/52/issues/discussion_r1378008074)
+
 ## [1.15.5](https://github.com/openupm/openupm-cli/compare/1.15.4...1.15.5) (2022-10-25)
 
 
