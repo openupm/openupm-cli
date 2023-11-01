@@ -74,7 +74,7 @@ export type NameVersionPair = {
 
 export type Dependency = {
   name: PkgName;
-  version: PkgVersion | undefined;
+  version: PkgVersion;
   upstream: boolean;
   self: boolean;
   internal: boolean;

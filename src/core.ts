@@ -241,6 +241,7 @@ export const fetchPackageDependencies = async function ({
         internal: isInternalPackage(entry.name),
         upstream: false,
         self: entry.name == name,
+        version: "",
         reason: null,
       };
       if (!depObj.internal) {
