@@ -1,11 +1,5 @@
 import testConsole from "test-console";
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { getInspects, getOutputs } from "./mock-console";
 import fs from "fs";
 import "should";
 import path from "path";
@@ -13,6 +7,7 @@ import { loadManifest, saveManifest } from "../src/utils/manifest";
 import assert from "assert";
 import { describe } from "mocha";
 import { parseEnv } from "../src/utils/env";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("manifest", function () {
   let stdoutInspect: testConsole.Inspector = null!;

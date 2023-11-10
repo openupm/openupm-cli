@@ -3,13 +3,7 @@ import "should";
 
 import { add, AddOptions } from "../src/cmd-add";
 
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { getInspects, getOutputs } from "./mock-console";
 import testConsole from "test-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
@@ -22,6 +16,7 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("cmd-add.ts", function () {
   const options: AddOptions = {

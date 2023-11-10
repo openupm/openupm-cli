@@ -3,13 +3,7 @@ import "should";
 
 import { deps, DepsOptions } from "../src/cmd-deps";
 
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { getInspects, getOutputs } from "./mock-console";
 import testConsole from "test-console";
 import {
   exampleRegistryUrl,
@@ -20,6 +14,7 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { PkgInfo } from "../src/types/global";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {

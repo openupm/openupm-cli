@@ -3,18 +3,13 @@ import "should";
 
 import { remove } from "../src/cmd-remove";
 
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { getInspects, getOutputs } from "./mock-console";
 import testConsole from "test-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgManifest } from "../src/types/global";
 import { exampleRegistryUrl } from "./mock-registry";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {

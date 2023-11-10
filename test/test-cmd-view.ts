@@ -1,13 +1,7 @@
 import "assert";
 import "should";
 import { view, ViewOptions } from "../src/cmd-view";
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { getInspects, getOutputs } from "./mock-console";
 import testConsole from "test-console";
 import { PkgInfo } from "../src/types/global";
 import {
@@ -18,6 +12,7 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {

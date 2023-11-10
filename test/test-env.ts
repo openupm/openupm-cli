@@ -1,15 +1,10 @@
 import testConsole from "test-console";
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { getInspects, getOutputs } from "./mock-console";
 import "should";
 import { env, parseEnv } from "../src/utils/env";
 import path from "path";
 import assert from "assert";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("env", function () {
   describe("parseEnv", function () {
