@@ -11,6 +11,7 @@ import {
 import testConsole from "test-console";
 import { PkgInfo } from "../src/types/global";
 import {
+  exampleRegistryUrl,
   registerMissingPackage,
   registerRemotePkg,
   registerRemoteUpstreamPkg,
@@ -21,14 +22,14 @@ import {
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
   const upstreamOptions: ViewOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };

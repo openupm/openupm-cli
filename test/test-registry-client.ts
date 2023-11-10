@@ -5,6 +5,7 @@ import { parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
 import { PkgInfo } from "../src/types/global";
 import {
+  exampleRegistryUrl,
   registerMissingPackage,
   registerRemotePkg,
   startMockRegistry,
@@ -22,7 +23,7 @@ describe("registry-client", function () {
     it("simple", async function () {
       (
         await parseEnv(
-          { _global: { registry: "http://example.com" } },
+          { _global: { registry: exampleRegistryUrl } },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -39,7 +40,7 @@ describe("registry-client", function () {
     it("404", async function () {
       (
         await parseEnv(
-          { _global: { registry: "http://example.com" } },
+          { _global: { registry: exampleRegistryUrl } },
           { checkPath: false }
         )
       ).should.be.ok();

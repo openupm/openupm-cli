@@ -12,6 +12,7 @@ import {
 } from "./utils";
 import testConsole from "test-console";
 import {
+  exampleRegistryUrl,
   registerSearchResult,
   startMockRegistry,
   stopMockRegistry,
@@ -24,7 +25,7 @@ describe("cmd-search.ts", function () {
 
   const options: SearchOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
@@ -126,7 +127,7 @@ describe("cmd-search.ts", function () {
     };
     beforeEach(function () {
       startMockRegistry();
-      nock("http://example.com")
+      nock(exampleRegistryUrl)
         .persist()
         .get(/-\/v1\/search\?text=/)
         .reply(404);
@@ -135,7 +136,7 @@ describe("cmd-search.ts", function () {
       stopMockRegistry();
     });
     it("from remote", async function () {
-      nock("http://example.com").get("/-/all").reply(200, allResult, {
+      nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
       const retCode = await search("package-a", options);
@@ -147,7 +148,7 @@ describe("cmd-search.ts", function () {
       stdout.includes("2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function () {
-      nock("http://example.com").get("/-/all").reply(200, allResult, {
+      nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
       const retCode = await search("pkg-not-exist", options);

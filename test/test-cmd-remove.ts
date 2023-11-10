@@ -14,6 +14,7 @@ import testConsole from "test-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgManifest } from "../src/types/global";
+import { exampleRegistryUrl } from "./mock-registry";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
@@ -32,7 +33,7 @@ describe("cmd-remove.ts", function () {
             "com.example.package-a",
             "com.example.package-b",
           ],
-          url: "http://example.com",
+          url: exampleRegistryUrl,
         },
       ],
     };
@@ -51,7 +52,7 @@ describe("cmd-remove.ts", function () {
     it("remove pkg", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
@@ -75,7 +76,7 @@ describe("cmd-remove.ts", function () {
     it("remove pkg@1.0.0", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
@@ -90,7 +91,7 @@ describe("cmd-remove.ts", function () {
     it("remove pkg-not-exist", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
@@ -105,7 +106,7 @@ describe("cmd-remove.ts", function () {
     it("remove more than one pkgs", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };

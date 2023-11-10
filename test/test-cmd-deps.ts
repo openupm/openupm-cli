@@ -12,6 +12,7 @@ import {
 } from "./utils";
 import testConsole from "test-console";
 import {
+  exampleRegistryUrl,
   registerMissingPackage,
   registerRemotePkg,
   registerRemoteUpstreamPkg,
@@ -23,7 +24,7 @@ import { PkgInfo } from "../src/types/global";
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };

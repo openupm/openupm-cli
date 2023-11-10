@@ -15,6 +15,7 @@ import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgInfo, PkgManifest } from "../src/types/global";
 import {
+  exampleRegistryUrl,
   registerMissingPackage,
   registerRemotePkg,
   registerRemoteUpstreamPkg,
@@ -25,21 +26,21 @@ import {
 describe("cmd-add.ts", function () {
   const options: AddOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
   const upstreamOptions: AddOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: true,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
   const testableOptions: AddOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
@@ -47,7 +48,7 @@ describe("cmd-add.ts", function () {
   };
   const forceOptions: AddOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
@@ -190,7 +191,7 @@ describe("cmd-add.ts", function () {
         {
           name: "example.com",
           scopes: ["com.base.package-a", "com.example"],
-          url: "http://example.com",
+          url: exampleRegistryUrl,
         },
       ],
     };
@@ -203,7 +204,7 @@ describe("cmd-add.ts", function () {
         {
           name: "example.com",
           scopes: ["com.base.package-a", "com.base.package-b", "com.example"],
-          url: "http://example.com",
+          url: exampleRegistryUrl,
         },
       ],
     };
@@ -215,7 +216,7 @@ describe("cmd-add.ts", function () {
         {
           name: "example.com",
           scopes: ["com.base.package-c", "com.base.package-d", "com.example"],
-          url: "http://example.com",
+          url: exampleRegistryUrl,
         },
       ],
     };
@@ -232,7 +233,7 @@ describe("cmd-add.ts", function () {
         {
           name: "example.com",
           scopes: ["com.base.package-a", "com.example"],
-          url: "http://example.com",
+          url: exampleRegistryUrl,
         },
       ],
       testables: ["com.base.package-a"],
