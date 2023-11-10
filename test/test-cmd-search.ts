@@ -1,51 +1,22 @@
 import "assert";
 import nock from "nock";
 import "should";
-import { SearchOptions, search } from "../src/cmd-search";
+import { search, SearchOptions } from "../src/cmd-search";
 
 import {
   createWorkDir,
   getInspects,
   getOutputs,
   getWorkDir,
-  nockDown,
-  nockUp,
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
-import { PkgVersion, ReverseDomainName } from "../src/types/global";
-
-type Author = { name: string; email?: string; url?: string };
-
-type Maintainer = { username: string; email: string };
-
-type EndpointResult = {
-  objects: Array<{
-    package: {
-      name: ReverseDomainName;
-      description?: string;
-      date: string;
-      scope: "unscoped";
-      version: PkgVersion;
-      links: Record<string, unknown>;
-      author: Author;
-      publisher: Maintainer;
-      maintainers: Maintainer[];
-    };
-    flags: { unstable: boolean };
-    score: {
-      final: number;
-      detail: {
-        quality: number;
-        popularity: number;
-        maintenance: number;
-      };
-    };
-    searchScore: number;
-  }>;
-  total: number;
-  time: string;
-};
+import {
+  registerSearchResult,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
+import { SearchEndpointResult } from "./types";
 
 describe("cmd-search.ts", function () {
   let stdoutInspect: testConsole.Inspector = null!;
@@ -72,7 +43,7 @@ describe("cmd-search.ts", function () {
     stderrInspect.restore();
   });
   describe("search endpoint", function () {
-    const searchEndpointResult: EndpointResult = {
+    const searchEndpointResult: SearchEndpointResult = {
       objects: [
         {
           package: {
@@ -101,26 +72,18 @@ describe("cmd-search.ts", function () {
       total: 1,
       time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)",
     };
-    const searchEndpointEmptyResult: EndpointResult = {
+    const searchEndpointEmptyResult: SearchEndpointResult = {
       objects: [],
       total: 0,
       time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)",
     };
     beforeEach(function () {
-      nockUp();
-      nock("http://example.com")
-        .get(/-\/v1\/search\?text=package-a/)
-        .reply(200, searchEndpointResult, {
-          "Content-Type": "application/json",
-        });
-      nock("http://example.com")
-        .get(/-\/v1\/search\?text=pkg-not-exist/)
-        .reply(200, searchEndpointEmptyResult, {
-          "Content-Type": "application/json",
-        });
+      startMockRegistry();
+      registerSearchResult("package-a", searchEndpointResult);
+      registerSearchResult("pkg-not-exit", searchEndpointEmptyResult);
     });
     afterEach(function () {
-      nockDown();
+      stopMockRegistry();
     });
     it("simple", async function () {
       const retCode = await search("package-a", options);
@@ -162,14 +125,14 @@ describe("cmd-search.ts", function () {
       },
     };
     beforeEach(function () {
-      nockUp();
+      startMockRegistry();
       nock("http://example.com")
         .persist()
         .get(/-\/v1\/search\?text=/)
         .reply(404);
     });
     afterEach(function () {
-      nockDown();
+      stopMockRegistry();
     });
     it("from remote", async function () {
       nock("http://example.com").get("/-/all").reply(200, allResult, {

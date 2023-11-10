@@ -1,20 +1,23 @@
 import "assert";
-import nock from "nock";
 import "should";
-
-import { nockDown, nockUp } from "./utils";
 import assert from "assert";
 import { parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
 import { PkgInfo } from "../src/types/global";
+import {
+  registerMissingPackage,
+  registerRemotePkg,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
     beforeEach(function () {
-      nockUp();
+      startMockRegistry();
     });
     afterEach(function () {
-      nockDown();
+      stopMockRegistry();
     });
     it("simple", async function () {
       (
@@ -24,13 +27,11 @@ describe("registry-client", function () {
         )
       ).should.be.ok();
       const pkgInfoRemote: PkgInfo = {
-        name: "com.littlebigfun.addressable-importer",
+        name: "package-a",
         versions: {},
         time: {},
       };
-      nock("http://example.com")
-        .get("/package-a")
-        .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });
+      registerRemotePkg(pkgInfoRemote);
       const info = await fetchPackageInfo("package-a");
       assert(info !== undefined);
       info.should.deepEqual(pkgInfoRemote);
@@ -43,7 +44,7 @@ describe("registry-client", function () {
         )
       ).should.be.ok();
 
-      nock("http://example.com").get("/package-a").reply(404);
+      registerMissingPackage("package-a");
       const info = await fetchPackageInfo("package-a");
       (info === undefined).should.be.ok();
     });

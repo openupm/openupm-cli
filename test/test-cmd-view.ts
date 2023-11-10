@@ -1,20 +1,22 @@
 import "assert";
-import nock from "nock";
 import "should";
-
 import { view, ViewOptions } from "../src/cmd-view";
-
 import {
   createWorkDir,
   getInspects,
   getOutputs,
   getWorkDir,
-  nockDown,
-  nockUp,
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
 import { PkgInfo } from "../src/types/global";
+import {
+  registerMissingPackage,
+  registerRemotePkg,
+  registerRemoteUpstreamPkg,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
 
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {
@@ -129,23 +131,15 @@ describe("cmd-view.ts", function () {
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
-      nockUp();
-      nock("http://example.com")
-        .get("/com.example.package-a")
-        .reply(200, remotePkgInfoA, { "Content-Type": "application/json" });
-      nock("http://example.com").get("/pkg-not-exist").reply(404);
-      nock("http://example.com").get("/com.example.package-up").reply(404);
-      nock("https://packages.unity.com")
-        .get("/com.example.package-up")
-        .reply(200, remotePkgInfoUp, {
-          "Content-Type": "application/json",
-        });
-      nock("https://packages.unity.com").get("/pkg-not-exist").reply(404);
+      startMockRegistry();
+      registerRemotePkg(remotePkgInfoA);
+      registerMissingPackage("pkg-not-exist");
+      registerRemoteUpstreamPkg(remotePkgInfoUp);
       [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function () {
       removeWorkDir("test-openupm-cli");
-      nockDown();
+      stopMockRegistry();
       stdoutInspect.restore();
       stderrInspect.restore();
     });

@@ -1,5 +1,4 @@
 import fse from "fs-extra";
-import nock from "nock";
 import path from "path";
 import os from "os";
 import testConsole from "test-console";
@@ -42,15 +41,6 @@ export const createWorkDir = function (
 export const removeWorkDir = function (pathToTmp: string) {
   const cwd = getWorkDir(pathToTmp);
   fse.removeSync(cwd);
-};
-
-export const nockUp = function () {
-  if (!nock.isActive()) nock.activate();
-};
-
-export const nockDown = function () {
-  nock.restore();
-  nock.cleanAll();
 };
 
 export const getOutputs = function (

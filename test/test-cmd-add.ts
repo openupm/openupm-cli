@@ -1,5 +1,4 @@
 import "assert";
-import nock from "nock";
 import "should";
 
 import { add, AddOptions } from "../src/cmd-add";
@@ -9,14 +8,19 @@ import {
   getInspects,
   getOutputs,
   getWorkDir,
-  nockDown,
-  nockUp,
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgInfo, PkgManifest } from "../src/types/global";
+import {
+  registerMissingPackage,
+  registerRemotePkg,
+  registerRemoteUpstreamPkg,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
 
 describe("cmd-add.ts", function () {
   const options: AddOptions = {
@@ -239,61 +243,23 @@ describe("cmd-add.ts", function () {
         manifest: true,
         editorVersion: "2019.2.13f1",
       });
-      nockUp();
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-a")
-        .reply(200, remotePkgInfoA, { "Content-Type": "application/json" });
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-b")
-        .reply(200, remotePkgInfoB, { "Content-Type": "application/json" });
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-c")
-        .reply(200, remotePkgInfoC, { "Content-Type": "application/json" });
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-d")
-        .reply(200, remotePkgInfoD, { "Content-Type": "application/json" });
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-with-lower-editor-version")
-        .reply(200, remotePkgInfoWithLowerEditorVersion, {
-          "Content-Type": "application/json",
-        });
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-with-higher-editor-version")
-        .reply(200, remotePkgInfoWithHigherEditorVersion, {
-          "Content-Type": "application/json",
-        });
-      nock("http://example.com")
-        .persist()
-        .get("/com.base.package-with-wrong-editor-version")
-        .reply(200, remotePkgInfoWithWrongEditorVersion, {
-          "Content-Type": "application/json",
-        });
-      nock("http://example.com").persist().get("/pkg-not-exist").reply(404);
-      nock("http://example.com")
-        .persist()
-        .get("/com.upstream.package-up")
-        .reply(404);
-      nock("https://packages.unity.com")
-        .persist()
-        .get("/com.upstream.package-up")
-        .reply(200, remotePkgInfoUp, {
-          "Content-Type": "application/json",
-        });
-      nock("https://packages.unity.com")
-        .persist()
-        .get("/pkg-not-exist")
-        .reply(404);
+
+      startMockRegistry();
+      registerRemotePkg(remotePkgInfoA);
+      registerRemotePkg(remotePkgInfoB);
+      registerRemotePkg(remotePkgInfoC);
+      registerRemotePkg(remotePkgInfoD);
+      registerRemotePkg(remotePkgInfoWithLowerEditorVersion);
+      registerRemotePkg(remotePkgInfoWithHigherEditorVersion);
+      registerRemotePkg(remotePkgInfoWithWrongEditorVersion);
+      registerRemoteUpstreamPkg(remotePkgInfoUp);
+      registerMissingPackage("pkg-not-exist");
+
       [stdoutInspect, stderrInspect] = getInspects();
     });
     afterEach(function () {
       removeWorkDir("test-openupm-cli");
-      nockDown();
+      stopMockRegistry();
       stdoutInspect.restore();
       stderrInspect.restore();
     });
