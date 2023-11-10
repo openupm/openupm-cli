@@ -2,7 +2,7 @@ import "assert";
 import nock from "nock";
 import "should";
 
-import { add } from "../src/cmd-add";
+import { add, AddOptions } from "../src/cmd-add";
 
 import {
   createWorkDir,
@@ -16,23 +16,24 @@ import {
 import testConsole from "test-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
+import { PkgInfo, PkgManifest } from "../src/types/global";
 
 describe("cmd-add.ts", function () {
-  const options = {
+  const options: AddOptions = {
     _global: {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
-  const upstreamOptions = {
+  const upstreamOptions: AddOptions = {
     _global: {
       registry: "http://example.com",
       upstream: true,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
-  const testableOptions = {
+  const testableOptions: AddOptions = {
     _global: {
       registry: "http://example.com",
       upstream: false,
@@ -40,7 +41,7 @@ describe("cmd-add.ts", function () {
     },
     test: true,
   };
-  const forceOptions = {
+  const forceOptions: AddOptions = {
     _global: {
       registry: "http://example.com",
       upstream: false,
@@ -51,7 +52,7 @@ describe("cmd-add.ts", function () {
   describe("add", function () {
     let stdoutInspect: testConsole.Inspector = null!;
     let stderrInspect: testConsole.Inspector = null!;
-    const remotePkgInfoA = {
+    const remotePkgInfoA: PkgInfo = {
       name: "com.base.package-a",
       versions: {
         "0.1.0": {
@@ -68,8 +69,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoB = {
+    const remotePkgInfoB: PkgInfo = {
       name: "com.base.package-b",
       versions: {
         "1.0.0": {
@@ -81,8 +83,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoC = {
+    const remotePkgInfoC: PkgInfo = {
       name: "com.base.package-c",
       versions: {
         "1.0.0": {
@@ -97,8 +100,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoD = {
+    const remotePkgInfoD: PkgInfo = {
       name: "com.base.package-d",
       versions: {
         "1.0.0": {
@@ -112,8 +116,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoWithLowerEditorVersion = {
+    const remotePkgInfoWithLowerEditorVersion: PkgInfo = {
       name: "com.base.package-with-lower-editor-version",
       versions: {
         "1.0.0": {
@@ -126,8 +131,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoWithHigherEditorVersion = {
+    const remotePkgInfoWithHigherEditorVersion: PkgInfo = {
       name: "com.base.package-with-higher-editor-version",
       versions: {
         "1.0.0": {
@@ -139,8 +145,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoWithWrongEditorVersion = {
+    const remotePkgInfoWithWrongEditorVersion: PkgInfo = {
       name: "com.base.package-with-wrong-editor-version",
       versions: {
         "1.0.0": {
@@ -152,8 +159,9 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoUp = {
+    const remotePkgInfoUp: PkgInfo = {
       name: "com.upstream.package-up",
       versions: {
         "1.0.0": {
@@ -165,11 +173,12 @@ describe("cmd-add.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const defaultManifest = {
+    const defaultManifest: PkgManifest = {
       dependencies: {},
     };
-    const expectedManifestA = {
+    const expectedManifestA: PkgManifest = {
       dependencies: {
         "com.base.package-a": "1.0.0",
       },
@@ -181,7 +190,7 @@ describe("cmd-add.ts", function () {
         },
       ],
     };
-    const expectedManifestAB = {
+    const expectedManifestAB: PkgManifest = {
       dependencies: {
         "com.base.package-a": "1.0.0",
         "com.base.package-b": "1.0.0",
@@ -194,7 +203,7 @@ describe("cmd-add.ts", function () {
         },
       ],
     };
-    const expectedManifestC = {
+    const expectedManifestC: PkgManifest = {
       dependencies: {
         "com.base.package-c": "1.0.0",
       },
@@ -206,12 +215,12 @@ describe("cmd-add.ts", function () {
         },
       ],
     };
-    const expectedManifestUpstream = {
+    const expectedManifestUpstream: PkgManifest = {
       dependencies: {
         "com.upstream.package-up": "1.0.0",
       },
     };
-    const expectedManifestTestable = {
+    const expectedManifestTestable: PkgManifest = {
       dependencies: {
         "com.base.package-a": "1.0.0",
       },

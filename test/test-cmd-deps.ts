@@ -2,7 +2,7 @@ import "assert";
 import nock from "nock";
 import "should";
 
-import { deps } from "../src/cmd-deps";
+import { deps, DepsOptions } from "../src/cmd-deps";
 
 import {
   createWorkDir,
@@ -14,9 +14,10 @@ import {
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
+import { PkgInfo } from "../src/types/global";
 
 describe("cmd-deps.ts", function () {
-  const options = {
+  const options: DepsOptions = {
     _global: {
       registry: "http://example.com",
       chdir: getWorkDir("test-openupm-cli"),
@@ -26,7 +27,7 @@ describe("cmd-deps.ts", function () {
     let stdoutInspect: testConsole.Inspector = null!;
     let stderrInspect: testConsole.Inspector = null!;
 
-    const remotePkgInfoA = {
+    const remotePkgInfoA: PkgInfo = {
       name: "com.example.package-a",
       versions: {
         "1.0.0": {
@@ -40,8 +41,9 @@ describe("cmd-deps.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoB = {
+    const remotePkgInfoB: PkgInfo = {
       name: "com.example.package-b",
       versions: {
         "1.0.0": {
@@ -55,8 +57,9 @@ describe("cmd-deps.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
-    const remotePkgInfoUp = {
+    const remotePkgInfoUp: PkgInfo = {
       name: "com.example.package-up",
       versions: {
         "1.0.0": {
@@ -68,6 +71,7 @@ describe("cmd-deps.ts", function () {
       "dist-tags": {
         latest: "1.0.0",
       },
+      time: {},
     };
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");

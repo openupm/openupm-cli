@@ -13,12 +13,13 @@ import {
 import testConsole from "test-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
+import { PkgManifest } from "../src/types/global";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
     let stdoutInspect: testConsole.Inspector = null!;
     let stderrInspect: testConsole.Inspector = null!;
-    const defaultManifest = {
+    const defaultManifest: PkgManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",
         "com.example.package-b": "1.0.0",

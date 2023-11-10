@@ -6,6 +6,7 @@ import { nockDown, nockUp } from "./utils";
 import assert from "assert";
 import { parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
+import { PkgInfo } from "../src/types/global";
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
@@ -22,7 +23,11 @@ describe("registry-client", function () {
           { checkPath: false }
         )
       ).should.be.ok();
-      const pkgInfoRemote = { name: "com.littlebigfun.addressable-importer" };
+      const pkgInfoRemote: PkgInfo = {
+        name: "com.littlebigfun.addressable-importer",
+        versions: {},
+        time: {},
+      };
       nock("http://example.com")
         .get("/package-a")
         .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });

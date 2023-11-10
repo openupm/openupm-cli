@@ -2,7 +2,7 @@ import "assert";
 import nock from "nock";
 import "should";
 
-import { view } from "../src/cmd-view";
+import { view, ViewOptions } from "../src/cmd-view";
 
 import {
   createWorkDir,
@@ -14,16 +14,17 @@ import {
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
+import { PkgInfo } from "../src/types/global";
 
 describe("cmd-view.ts", function () {
-  const options = {
+  const options: ViewOptions = {
     _global: {
       registry: "http://example.com",
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
-  const upstreamOptions = {
+  const upstreamOptions: ViewOptions = {
     _global: {
       registry: "http://example.com",
       chdir: getWorkDir("test-openupm-cli"),
@@ -33,7 +34,7 @@ describe("cmd-view.ts", function () {
     let stdoutInspect: testConsole.Inspector = null!;
     let stderrInspect: testConsole.Inspector = null!;
 
-    const remotePkgInfoA = {
+    const remotePkgInfoA: PkgInfo = {
       name: "com.example.package-a",
       versions: {
         "1.0.0": {
@@ -79,7 +80,7 @@ describe("cmd-view.ts", function () {
       readme: "A demo package",
       _attachments: {},
     };
-    const remotePkgInfoUp = {
+    const remotePkgInfoUp: PkgInfo = {
       name: "com.example.package-up",
       versions: {
         "1.0.0": {

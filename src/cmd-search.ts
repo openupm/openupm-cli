@@ -11,6 +11,7 @@ import {
   PkgName,
   PkgVersion,
   Registry,
+  ReverseDomainName,
 } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
@@ -22,6 +23,15 @@ type TableRow = [PkgName, PkgVersion, DateString, ""];
 export type SearchOptions = {
   _global: GlobalOptions;
 };
+
+export type SearchedPkgInfo = Omit<PkgInfo, "versions"> & {
+  versions: Record<PkgVersion, "latest">;
+};
+
+export type OldSearchResult =
+  | SearchedPkgInfo[]
+  | Record<ReverseDomainName, SearchedPkgInfo>;
+
 // Get npm fetch options
 const getNpmFetchOptions = function (): Options {
   const opts: Options = {
@@ -40,7 +50,9 @@ const searchEndpoint = async function (
   if (!registry) registry = env.registry;
   try {
     // NOTE: The results of the search will be PkgInfo objects so we can change the type
-    const results = <PkgInfo[]>await npmSearch(keyword, getNpmFetchOptions());
+    const results = <SearchedPkgInfo[]>(
+      await npmSearch(keyword, getNpmFetchOptions())
+    );
     log.verbose("npmsearch", results.join(os.EOL));
     return results.map(getTableRow);
   } catch (err) {
@@ -56,10 +68,10 @@ const searchOld = async function (
 ): Promise<TableRow[] | undefined> {
   // all endpoint
   try {
-    const results = <Record<string, PkgInfo> | PkgInfo[]>(
+    const results = <OldSearchResult | undefined>(
       await npmFetch.json("/-/all", getNpmFetchOptions())
     );
-    let objects: PkgInfo[] = [];
+    let objects: SearchedPkgInfo[] = [];
     if (results) {
       if (Array.isArray(results)) {
         // results is an array of objects
@@ -95,7 +107,7 @@ const getTable = function () {
   });
 };
 
-const getTableRow = function (pkg: PkgInfo): TableRow {
+const getTableRow = function (pkg: SearchedPkgInfo): TableRow {
   const name = pkg.name;
   const version = tryGetLatestVersion(pkg);
   let date = "";

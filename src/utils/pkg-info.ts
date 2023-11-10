@@ -10,9 +10,10 @@ const hasLatestDistTag = (
  * Attempt to get the latest version from a package
  * @param pkgInfo The package. All properties are assumed to be potentially missing
  */
-export const tryGetLatestVersion = function (
-  pkgInfo: Partial<PkgInfo>
-): PkgVersion | undefined {
+export const tryGetLatestVersion = function (pkgInfo: {
+  "dist-tags"?: { latest?: PkgVersion };
+  version?: PkgVersion;
+}): PkgVersion | undefined {
   if (hasLatestDistTag(pkgInfo)) return pkgInfo["dist-tags"].latest;
   else if (pkgInfo.version) return pkgInfo.version;
 };

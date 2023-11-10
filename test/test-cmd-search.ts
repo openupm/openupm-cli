@@ -1,7 +1,7 @@
 import "assert";
 import nock from "nock";
 import "should";
-import { search } from "../src/cmd-search";
+import { SearchOptions, search } from "../src/cmd-search";
 
 import {
   createWorkDir,
@@ -13,12 +13,45 @@ import {
   removeWorkDir,
 } from "./utils";
 import testConsole from "test-console";
+import { PkgVersion, ReverseDomainName } from "../src/types/global";
+
+type Author = { name: string; email?: string; url?: string };
+
+type Maintainer = { username: string; email: string };
+
+type EndpointResult = {
+  objects: Array<{
+    package: {
+      name: ReverseDomainName;
+      description?: string;
+      date: string;
+      scope: "unscoped";
+      version: PkgVersion;
+      links: Record<string, unknown>;
+      author: Author;
+      publisher: Maintainer;
+      maintainers: Maintainer[];
+    };
+    flags: { unstable: boolean };
+    score: {
+      final: number;
+      detail: {
+        quality: number;
+        popularity: number;
+        maintenance: number;
+      };
+    };
+    searchScore: number;
+  }>;
+  total: number;
+  time: string;
+};
 
 describe("cmd-search.ts", function () {
   let stdoutInspect: testConsole.Inspector = null!;
   let stderrInspect: testConsole.Inspector = null!;
 
-  const options = {
+  const options: SearchOptions = {
     _global: {
       registry: "http://example.com",
       upstream: false,
@@ -39,20 +72,15 @@ describe("cmd-search.ts", function () {
     stderrInspect.restore();
   });
   describe("search endpoint", function () {
-    const searchEndpointResult = {
+    const searchEndpointResult: EndpointResult = {
       objects: [
         {
           package: {
             name: "com.example.package-a",
             scope: "unscoped",
-            "dist-tags": { latest: "1.0.0" },
-            versions: {
-              "1.0.0": "latest",
-            },
+            version: "1.0.0",
             description: "A demo package",
-            time: {
-              modified: "2019-10-02T04:02:38.335Z",
-            },
+            date: "2019-10-02T04:02:38.335Z",
             links: {},
             author: { name: "yo", url: "https://github.com/yo" },
             publisher: { username: "yo", email: "yo@example.com" },
@@ -73,7 +101,7 @@ describe("cmd-search.ts", function () {
       total: 1,
       time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)",
     };
-    const searchEndpointEmptyResult = {
+    const searchEndpointEmptyResult: EndpointResult = {
       objects: [],
       total: 0,
       time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)",
