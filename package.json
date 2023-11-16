@@ -47,7 +47,6 @@
     "@types/pkginfo": "^0.4.1",
     "@types/promptly": "^3.0.3",
     "@types/request": "^2.48.11",
-    "@types/should": "^13.0.0",
     "@types/test-console": "^2.0.1",
     "@types/update-notifier": "^6.0.5",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
