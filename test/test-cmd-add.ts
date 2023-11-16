@@ -3,8 +3,7 @@ import "should";
 
 import { add, AddOptions } from "../src/cmd-add";
 
-import { getInspects, getOutputs } from "./mock-console";
-import testConsole from "test-console";
+import { MockConsoleInspector, getInspects, getOutputs } from "./mock-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgInfo, PkgManifest } from "../src/types/global";
@@ -50,8 +49,8 @@ describe("cmd-add.ts", function () {
     force: true,
   };
   describe("add", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
+    let stdoutInspect: MockConsoleInspector = null!;
+    let stderrInspect: MockConsoleInspector = null!;
     const remotePkgInfoA: PkgInfo = {
       name: "com.base.package-a",
       versions: {

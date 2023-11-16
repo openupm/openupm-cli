@@ -1,8 +1,7 @@
 import "assert";
 import "should";
 import { view, ViewOptions } from "../src/cmd-view";
-import { getInspects, getOutputs } from "./mock-console";
-import testConsole from "test-console";
+import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import { PkgInfo } from "../src/types/global";
 import {
   exampleRegistryUrl,
@@ -29,8 +28,8 @@ describe("cmd-view.ts", function () {
     },
   };
   describe("view", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
+    let stdoutInspect: MockConsoleInspector = null!;
+    let stderrInspect: MockConsoleInspector = null!;
 
     const remotePkgInfoA: PkgInfo = {
       name: "com.example.package-a",

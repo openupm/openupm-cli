@@ -3,8 +3,7 @@ import "should";
 
 import { remove } from "../src/cmd-remove";
 
-import { getInspects, getOutputs } from "./mock-console";
-import testConsole from "test-console";
+import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import assert from "assert";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgManifest } from "../src/types/global";
@@ -13,8 +12,8 @@ import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
+    let stdoutInspect: MockConsoleInspector = null!;
+    let stderrInspect: MockConsoleInspector = null!;
     const defaultManifest: PkgManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",

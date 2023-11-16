@@ -1,5 +1,4 @@
-import testConsole from "test-console";
-import { getInspects, getOutputs } from "./mock-console";
+import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import fs from "fs";
 import "should";
 import path from "path";
@@ -10,8 +9,8 @@ import { parseEnv } from "../src/utils/env";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("manifest", function () {
-  let stdoutInspect: testConsole.Inspector = null!;
-  let stderrInspect: testConsole.Inspector = null!;
+  let stdoutInspect: MockConsoleInspector = null!;
+  let stderrInspect: MockConsoleInspector = null!;
   beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });

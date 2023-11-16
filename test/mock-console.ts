@@ -1,8 +1,10 @@
 import testConsole from "test-console";
 
+export type MockConsoleInspector = testConsole.Inspector;
+
 export const getOutputs = function (
-  stdouInspect: testConsole.Inspector,
-  stderrInsepct: testConsole.Inspector
+  stdouInspect: MockConsoleInspector,
+  stderrInsepct: MockConsoleInspector
 ): [string, string] {
   const results: [string, string] = [
     stdouInspect.output.join(""),
@@ -14,8 +16,8 @@ export const getOutputs = function (
 };
 
 export const getInspects = function (): [
-  testConsole.Inspector,
-  testConsole.Inspector
+  MockConsoleInspector,
+  MockConsoleInspector
 ] {
   const stdoutInspect = testConsole.stdout.inspect();
   const stderrInspect = testConsole.stderr.inspect();

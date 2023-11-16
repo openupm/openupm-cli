@@ -3,8 +3,7 @@ import nock from "nock";
 import "should";
 import { search, SearchOptions } from "../src/cmd-search";
 
-import { getInspects, getOutputs } from "./mock-console";
-import testConsole from "test-console";
+import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import {
   exampleRegistryUrl,
   registerSearchResult,
@@ -15,8 +14,8 @@ import { SearchEndpointResult } from "./types";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("cmd-search.ts", function () {
-  let stdoutInspect: testConsole.Inspector = null!;
-  let stderrInspect: testConsole.Inspector = null!;
+  let stdoutInspect: MockConsoleInspector = null!;
+  let stderrInspect: MockConsoleInspector = null!;
 
   const options: SearchOptions = {
     _global: {

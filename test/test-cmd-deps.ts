@@ -3,8 +3,7 @@ import "should";
 
 import { deps, DepsOptions } from "../src/cmd-deps";
 
-import { getInspects, getOutputs } from "./mock-console";
-import testConsole from "test-console";
+import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import {
   exampleRegistryUrl,
   registerMissingPackage,
@@ -24,8 +23,8 @@ describe("cmd-deps.ts", function () {
     },
   };
   describe("deps", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
+    let stdoutInspect: MockConsoleInspector = null!;
+    let stderrInspect: MockConsoleInspector = null!;
 
     const remotePkgInfoA: PkgInfo = {
       name: "com.example.package-a",
