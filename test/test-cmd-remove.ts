@@ -102,7 +102,7 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(0);
-      const manifest = await loadManifest();
+      const manifest = loadManifest();
       assert(manifest !== null);
       (
         manifest.dependencies["com.example.package-a"] == undefined
