@@ -12,6 +12,21 @@ export function shouldHaveDependency(
   manifest: PkgManifest,
   name: PkgName,
   version: PkgVersion
-): should.Assertion {
-  return should(manifest.dependencies[name]).equal(version);
+) {
+  should(manifest.dependencies[name]).equal(version);
+}
+export function shouldNotHaveDependency(manifest: PkgManifest, name: PkgName) {
+  should(manifest.dependencies[name]).be.undefined();
+}
+
+export function shouldHaveRegistryWithScopes(
+  manifest: PkgManifest,
+  scopes: PkgName[]
+) {
+  should(manifest.scopedRegistries).not.be.undefined();
+  manifest
+    .scopedRegistries!.some((registry) =>
+      scopes.every((scope) => registry.scopes.includes(scope))
+    )
+    .should.be.true("At least one scope was missing");
 }

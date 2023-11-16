@@ -7,6 +7,12 @@ import { PkgManifest } from "../src/types/global";
 import { exampleRegistryUrl } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
+import {
+  shouldHaveDependency,
+  shouldHaveManifest,
+  shouldHaveRegistryWithScopes,
+  shouldNotHaveDependency,
+} from "./manifest-assertions";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
@@ -48,14 +54,9 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove("com.example.package-a", options);
       retCode.should.equal(0);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      (
-        manifest.dependencies["com.example.package-a"] == undefined
-      ).should.be.ok();
-      assert(manifest.scopedRegistries !== undefined);
-      assert(manifest.scopedRegistries[0] !== undefined);
-      manifest.scopedRegistries[0].scopes.should.be.deepEqual([
+      const manifest = shouldHaveManifest();
+      shouldNotHaveDependency(manifest, "com.example.package-a");
+      shouldHaveRegistryWithScopes(manifest, [
         "com.example",
         "com.example.package-b",
       ]);
@@ -71,9 +72,8 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      manifest.should.be.deepEqual(defaultManifest);
+      const manifest = shouldHaveManifest();
+      manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
     it("remove pkg-not-exist", async function () {
@@ -85,9 +85,8 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove("pkg-not-exist", options);
       retCode.should.equal(1);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      manifest.should.be.deepEqual(defaultManifest);
+      const manifest = shouldHaveManifest();
+      manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("remove more than one pkgs", async function () {
@@ -102,17 +101,10 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(0);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      (
-        manifest.dependencies["com.example.package-a"] == undefined
-      ).should.be.ok();
-      (
-        manifest.dependencies["com.example.package-b"] == undefined
-      ).should.be.ok();
-      assert(manifest.scopedRegistries !== undefined);
-      assert(manifest.scopedRegistries[0] !== undefined);
-      manifest.scopedRegistries[0].scopes.should.be.deepEqual(["com.example"]);
+      const manifest = shouldHaveManifest();
+      shouldNotHaveDependency(manifest, "com.example.package-a");
+      shouldNotHaveDependency(manifest, "com.example.package-b");
+      shouldHaveRegistryWithScopes(manifest, ["com.example"]);
       mockConsole
         .hasLineIncluding("out", "removed com.example.package-a")
         .should.be.ok();
