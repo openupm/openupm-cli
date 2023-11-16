@@ -8,12 +8,21 @@ export function shouldHaveManifest(): PkgManifest {
   return manifest!;
 }
 
+export function shouldHaveNoManifest() {
+  const manifest = loadManifest();
+  should(manifest).be.null();
+}
+
 export function shouldHaveDependency(
   manifest: PkgManifest,
   name: PkgName,
   version: PkgVersion
 ) {
   should(manifest.dependencies[name]).equal(version);
+}
+
+export function shouldNotHaveAnyDependencies(manifest: PkgManifest) {
+  should(manifest.dependencies).be.empty();
 }
 export function shouldNotHaveDependency(manifest: PkgManifest, name: PkgName) {
   should(manifest.dependencies[name]).be.undefined();
