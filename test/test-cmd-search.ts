@@ -1,4 +1,3 @@
-import "assert";
 import nock from "nock";
 import "should";
 import { search, SearchOptions } from "../src/cmd-search";

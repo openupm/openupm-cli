@@ -1,4 +1,3 @@
-import "assert";
 import "nock";
 import should from "should";
 import {

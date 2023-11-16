@@ -1,4 +1,3 @@
-import "assert";
 import "should";
 import { add, AddOptions } from "../src/cmd-add";
 import { PkgInfo, PkgManifest } from "../src/types/global";

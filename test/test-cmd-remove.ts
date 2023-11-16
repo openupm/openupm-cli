@@ -1,4 +1,3 @@
-import "assert";
 import "should";
 import { remove } from "../src/cmd-remove";
 import { PkgManifest } from "../src/types/global";

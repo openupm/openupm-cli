@@ -1,9 +1,9 @@
 import "should";
 import { env, parseEnv } from "../src/utils/env";
 import path from "path";
-import assert from "assert";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
+import should from "should";
 
 describe("env", function () {
   describe("parseEnv", function () {
@@ -157,8 +157,7 @@ describe("env", function () {
           { checkPath: true }
         )
       ).should.be.ok();
-      assert(env.editorVersion !== null);
-      env.editorVersion.should.be.equal("2019.2.13f1");
+      should(env.editorVersion).be.equal("2019.2.13f1");
     });
     it("region cn", async function () {
       (

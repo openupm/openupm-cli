@@ -1,6 +1,5 @@
 import "assert";
 import "should";
-import assert from "assert";
 import { parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
 import { PkgInfo } from "../src/types/global";
@@ -11,6 +10,7 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
+import should from "should";
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
@@ -34,8 +34,7 @@ describe("registry-client", function () {
       };
       registerRemotePkg(pkgInfoRemote);
       const info = await fetchPackageInfo("package-a");
-      assert(info !== undefined);
-      info.should.deepEqual(pkgInfoRemote);
+      should(info).deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
       (

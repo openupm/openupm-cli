@@ -1,4 +1,3 @@
-import "assert";
 import "should";
 import { view, ViewOptions } from "../src/cmd-view";
 import { PkgInfo } from "../src/types/global";
