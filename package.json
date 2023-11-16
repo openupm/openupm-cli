@@ -56,7 +56,6 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.7.1",
-    "fast-check": "^3.13.2",
     "mocha": "^10.1.0",
     "nock": "^13.2.4",
     "prettier": "^2.6.2",
