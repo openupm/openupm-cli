@@ -3,7 +3,6 @@ import nock from "nock";
 import "should";
 import { search, SearchOptions } from "../src/cmd-search";
 
-import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import {
   exampleRegistryUrl,
   registerSearchResult,
@@ -12,10 +11,10 @@ import {
 } from "./mock-registry";
 import { SearchEndpointResult } from "./types";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
 
 describe("cmd-search.ts", function () {
-  let stdoutInspect: MockConsoleInspector = null!;
-  let stderrInspect: MockConsoleInspector = null!;
+  let mockConsole: MockConsole = null!;
 
   const options: SearchOptions = {
     _global: {
@@ -30,12 +29,11 @@ describe("cmd-search.ts", function () {
     createWorkDir("test-openupm-cli", { manifest: true });
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
-    [stdoutInspect, stderrInspect] = getInspects();
+    mockConsole = attachMockConsole();
   });
   afterEach(function () {
     removeWorkDir("test-openupm-cli");
-    stdoutInspect.restore();
-    stderrInspect.restore();
+    mockConsole.detach();
   });
   describe("search endpoint", function () {
     const searchEndpointResult: SearchEndpointResult = {
@@ -83,16 +81,14 @@ describe("cmd-search.ts", function () {
     it("simple", async function () {
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
+      mockConsole.hasLineIncluding("out", "package-a").should.be.ok();
+      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
+      mockConsole.hasLineIncluding("out", "2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function () {
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("No matches found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "No matches found").should.be.ok();
     });
   });
 
@@ -135,11 +131,12 @@ describe("cmd-search.ts", function () {
       });
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("fast search endpoint is not available").should.be.ok();
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "fast search endpoint is not available")
+        .should.be.ok();
+      mockConsole.hasLineIncluding("out", "package-a").should.be.ok();
+      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
+      mockConsole.hasLineIncluding("out", "2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function () {
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
@@ -147,8 +144,7 @@ describe("cmd-search.ts", function () {
       });
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("No matches found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "No matches found").should.be.ok();
     });
   });
 });

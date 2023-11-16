@@ -3,7 +3,6 @@ import "should";
 
 import { deps, DepsOptions } from "../src/cmd-deps";
 
-import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import {
   exampleRegistryUrl,
   registerMissingPackage,
@@ -14,6 +13,7 @@ import {
 } from "./mock-registry";
 import { PkgInfo } from "../src/types/global";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
@@ -23,8 +23,7 @@ describe("cmd-deps.ts", function () {
     },
   };
   describe("deps", function () {
-    let stdoutInspect: MockConsoleInspector = null!;
-    let stderrInspect: MockConsoleInspector = null!;
+    let mockConsole: MockConsole = null!;
 
     const remotePkgInfoA: PkgInfo = {
       name: "com.example.package-a",
@@ -81,19 +80,19 @@ describe("cmd-deps.ts", function () {
       registerMissingPackage("pkg-not-exist");
       registerRemoteUpstreamPkg(remotePkgInfoUp);
 
-      [stdoutInspect, stderrInspect] = getInspects();
+      mockConsole = attachMockConsole();
     });
     afterEach(function () {
       removeWorkDir("test-openupm-cli");
       stopMockRegistry();
-      stdoutInspect.restore();
-      stderrInspect.restore();
+      mockConsole.detach();
     });
     it("deps pkg", async function () {
       const retCode = await deps("com.example.package-a", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("com.example.package-b").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-b")
+        .should.be.ok();
     });
     it("deps pkg --deep", async function () {
       const retCode = await deps("com.example.package-a", {
@@ -101,33 +100,38 @@ describe("cmd-deps.ts", function () {
         deep: true,
       });
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("com.example.package-b").should.be.ok();
-      stdout.includes("com.example.package-up").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-b")
+        .should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-up")
+        .should.be.ok();
     });
     it("deps pkg@latest", async function () {
       const retCode = await deps("com.example.package-a@latest", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("com.example.package-b").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-b")
+        .should.be.ok();
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps("com.example.package-a@1.0.0", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("com.example.package-b").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-b")
+        .should.be.ok();
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps("com.example.package-a@2.0.0", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("is not a valid choice").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "is not a valid choice")
+        .should.be.ok();
     });
     it("deps pkg-not-exist", async function () {
       const retCode = await deps("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("not found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "not found").should.be.ok();
     });
     it("deps pkg upstream", async function () {
       const retCode = await deps("com.example.package-up", options);

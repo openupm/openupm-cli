@@ -1,25 +1,23 @@
 import testConsole from "test-console";
 
-export type MockConsoleInspector = testConsole.Inspector;
+type Stream = "out" | "error";
 
-export const getOutputs = function (
-  stdouInspect: MockConsoleInspector,
-  stderrInsepct: MockConsoleInspector
-): [string, string] {
-  const results: [string, string] = [
-    stdouInspect.output.join(""),
-    stderrInsepct.output.join(""),
-  ];
-  stdouInspect.restore();
-  stderrInsepct.restore();
-  return results;
+export type MockConsole = {
+  hasLineIncluding(stream: Stream, text: string): boolean;
+  detach(): void;
 };
 
-export const getInspects = function (): [
-  MockConsoleInspector,
-  MockConsoleInspector
-] {
-  const stdoutInspect = testConsole.stdout.inspect();
-  const stderrInspect = testConsole.stderr.inspect();
-  return [stdoutInspect, stderrInspect];
-};
+export function attachMockConsole(): MockConsole {
+  const out = testConsole.stdout.inspect();
+  const error = testConsole.stderr.inspect();
+  return {
+    hasLineIncluding(stream: Stream, text: string): boolean {
+      const inspector = stream === "out" ? out : error;
+      return inspector.output.some((line) => line.includes(text));
+    },
+    detach() {
+      out.restore();
+      error.restore();
+    },
+  };
+}

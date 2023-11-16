@@ -3,7 +3,6 @@ import "should";
 
 import { add, AddOptions } from "../src/cmd-add";
 
-import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
 import { loadManifest } from "../src/utils/manifest";
 import { PkgInfo, PkgManifest, PkgName, PkgVersion } from "../src/types/global";
 import {
@@ -15,6 +14,7 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
 
 describe("cmd-add.ts", function () {
   const options: AddOptions = {
@@ -48,8 +48,7 @@ describe("cmd-add.ts", function () {
     force: true,
   };
   describe("add", function () {
-    let stdoutInspect: MockConsoleInspector = null!;
-    let stderrInspect: MockConsoleInspector = null!;
+    let mockConsole: MockConsole = null!;
     const remotePkgInfoA: PkgInfo = {
       name: "com.base.package-a",
       versions: {
@@ -249,13 +248,12 @@ describe("cmd-add.ts", function () {
       registerRemoteUpstreamPkg(remotePkgInfoUp);
       registerMissingPackage("pkg-not-exist");
 
-      [stdoutInspect, stderrInspect] = getInspects();
+      mockConsole = attachMockConsole();
     });
     afterEach(function () {
       removeWorkDir("test-openupm-cli");
       stopMockRegistry();
-      stdoutInspect.restore();
-      stderrInspect.restore();
+      mockConsole.detach();
     });
 
     function shouldHaveManifest(): PkgManifest {
@@ -283,25 +281,22 @@ describe("cmd-add.ts", function () {
       const retCode = await add("com.base.package-a", options);
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestA);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@1.0.0", async function () {
       const retCode = await add("com.base.package-a@1.0.0", options);
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestA);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@latest", async function () {
       const retCode = await add("com.base.package-a@latest", options);
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestA);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
       const retCode1 = await add("com.base.package-a@0.1.0", options);
@@ -309,9 +304,8 @@ describe("cmd-add.ts", function () {
       const retCode2 = await add("com.base.package-a@1.0.0", options);
       retCode2.should.equal(0);
       shouldHaveManifestMatching(expectedManifestA);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("modified ").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "modified ").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add exited pkg version", async function () {
       const retCode1 = await add("com.base.package-a@1.0.0", options);
@@ -319,51 +313,47 @@ describe("cmd-add.ts", function () {
       const retCode2 = await add("com.base.package-a@1.0.0", options);
       retCode2.should.equal(0);
       shouldHaveManifestMatching(expectedManifestA);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("existed ").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "existed ").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@not-exist-version", async function () {
       const retCode = await add("com.base.package-a@2.0.0", options);
       retCode.should.equal(1);
       shouldHaveManifestMatching(defaultManifest);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("version 2.0.0 is not a valid choice").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "version 2.0.0 is not a valid choice")
+        .should.be.ok();
+      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
     });
     it("add pkg@http", async function () {
       const gitUrl = "https://github.com/yo/com.base.package-a";
       const retCode = await add("com.base.package-a@" + gitUrl, options);
       retCode.should.equal(0);
       shouldHaveManifestWithDependency("com.base.package-a", gitUrl);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@git", async function () {
       const gitUrl = "git@github.com:yo/com.base.package-a";
       const retCode = await add("com.base.package-a@" + gitUrl, options);
       retCode.should.equal(0);
       shouldHaveManifestWithDependency("com.base.package-a", gitUrl);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@file", async function () {
       const fileUrl = "file../yo/com.base.package-a";
       const retCode = await add("com.base.package-a@" + fileUrl, options);
       retCode.should.equal(0);
       shouldHaveManifestWithDependency("com.base.package-a", fileUrl);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg-not-exist", async function () {
       const retCode = await add("pkg-not-exist", options);
       retCode.should.equal(1);
       shouldHaveManifestMatching(defaultManifest);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package not found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("add more than one pkgs", async function () {
       const retCode = await add(
@@ -372,41 +362,42 @@ describe("cmd-add.ts", function () {
       );
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestAB);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added com.base.package-a").should.be.ok();
-      stdout.includes("added com.base.package-b").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "added com.base.package-a")
+        .should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "added com.base.package-b")
+        .should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg from upstream", async function () {
       const retCode = await add("com.upstream.package-up", upstreamOptions);
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestUpstream);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added com.upstream.package-up").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "added com.upstream.package-up")
+        .should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg-not-exist from upstream", async function () {
       const retCode = await add("pkg-not-exist", upstreamOptions);
       retCode.should.equal(1);
       shouldHaveManifestMatching(defaultManifest);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package not found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("add pkg with nested dependencies", async function () {
       const retCode = await add("com.base.package-c@latest", upstreamOptions);
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestC);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg with tests", async function () {
       const retCode = await add("com.base.package-a", testableOptions);
       retCode.should.equal(0);
       shouldHaveManifestMatching(expectedManifestTestable);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg with lower editor version", async function () {
       const retCode = await add(
@@ -414,9 +405,8 @@ describe("cmd-add.ts", function () {
         testableOptions
       );
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("added").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "added").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg with higher editor version", async function () {
       const retCode = await add(
@@ -424,8 +414,9 @@ describe("cmd-add.ts", function () {
         testableOptions
       );
       retCode.should.equal(1);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "requires 2020.2 but found 2019.2.13f1")
+        .should.be.ok();
     });
     it("force add pkg with higher editor version", async function () {
       const retCode = await add(
@@ -433,8 +424,9 @@ describe("cmd-add.ts", function () {
         forceOptions
       );
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("requires 2020.2 but found 2019.2.13f1").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "requires 2020.2 but found 2019.2.13f1")
+        .should.be.ok();
     });
     it("add pkg with wrong editor version", async function () {
       const retCode = await add(
@@ -442,9 +434,7 @@ describe("cmd-add.ts", function () {
         testableOptions
       );
       retCode.should.equal(1);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("2020 is not valid").should.be.ok();
-      console.log(stdout);
+      mockConsole.hasLineIncluding("out", "2020 is not valid").should.be.ok();
     });
     it("force add pkg with wrong editor version", async function () {
       const retCode = await add(
@@ -452,9 +442,7 @@ describe("cmd-add.ts", function () {
         forceOptions
       );
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("2020 is not valid").should.be.ok();
-      console.log(stdout);
+      mockConsole.hasLineIncluding("out", "2020 is not valid").should.be.ok();
     });
   });
 });

@@ -1,4 +1,4 @@
-import { getInspects, getOutputs, MockConsoleInspector } from "./mock-console";
+import { attachMockConsole, MockConsole } from "./mock-console";
 import fs from "fs";
 import "should";
 import path from "path";
@@ -9,8 +9,7 @@ import { parseEnv } from "../src/utils/env";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 
 describe("manifest", function () {
-  let stdoutInspect: MockConsoleInspector = null!;
-  let stderrInspect: MockConsoleInspector = null!;
+  let mockConsole: MockConsole = null!;
   beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
@@ -24,13 +23,12 @@ describe("manifest", function () {
       ),
       "wrong-json"
     );
-    [stdoutInspect, stderrInspect] = getInspects();
+    mockConsole = attachMockConsole();
   });
   afterEach(function () {
     removeWorkDir("test-openupm-cli");
     removeWorkDir("test-openupm-cli-wrong-json");
-    stdoutInspect.restore();
-    stderrInspect.restore();
+    mockConsole.detach();
   });
   it("loadManifest", async function () {
     (
@@ -52,8 +50,7 @@ describe("manifest", function () {
     ).should.be.ok();
     const manifest = loadManifest();
     (manifest === null).should.be.ok();
-    const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-    stdout.includes("does not exist").should.be.ok();
+    mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
   });
   it("wrong json content", async function () {
     (
@@ -64,8 +61,7 @@ describe("manifest", function () {
     ).should.be.ok();
     const manifest = loadManifest();
     (manifest === null).should.be.ok();
-    const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-    stdout.includes("failed to parse").should.be.ok();
+    mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
   it("saveManifest", async function () {
     (
