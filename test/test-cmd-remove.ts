@@ -1,14 +1,11 @@
 import "assert";
 import "should";
 import { remove } from "../src/cmd-remove";
-import assert from "assert";
-import { loadManifest } from "../src/utils/manifest";
 import { PkgManifest } from "../src/types/global";
 import { exampleRegistryUrl } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
-  shouldHaveDependency,
   shouldHaveManifest,
   shouldHaveRegistryWithScopes,
   shouldNotHaveDependency,

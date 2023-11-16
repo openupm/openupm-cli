@@ -13,8 +13,8 @@ import {
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
-  shouldHaveManifest,
   shouldHaveDependency,
+  shouldHaveManifest,
 } from "./manifest-assertions";
 
 describe("cmd-add.ts", function () {
