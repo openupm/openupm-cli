@@ -27,8 +27,6 @@ describe("cmd-search.ts", function () {
   beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
-    removeWorkDir("test-openupm-cli");
-    createWorkDir("test-openupm-cli", { manifest: true });
     mockConsole = attachMockConsole();
   });
   afterEach(function () {
