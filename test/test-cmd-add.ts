@@ -1,10 +1,7 @@
 import "assert";
 import "should";
-
 import { add, AddOptions } from "../src/cmd-add";
-
-import { loadManifest } from "../src/utils/manifest";
-import { PkgInfo, PkgManifest, PkgName, PkgVersion } from "../src/types/global";
+import { PkgInfo, PkgManifest } from "../src/types/global";
 import {
   exampleRegistryUrl,
   registerMissingPackage,
@@ -15,6 +12,10 @@ import {
 } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
+import {
+  shouldHaveManifestMatching,
+  shouldHaveManifestWithDependency,
+} from "./manifest-assertions";
 
 describe("cmd-add.ts", function () {
   const options: AddOptions = {
@@ -255,27 +256,6 @@ describe("cmd-add.ts", function () {
       stopMockRegistry();
       mockConsole.detach();
     });
-
-    function shouldHaveManifest(): PkgManifest {
-      const manifest = loadManifest();
-      (manifest !== null).should.be.ok();
-      return manifest!;
-    }
-
-    function shouldHaveManifestMatching(expected: PkgManifest) {
-      const manifest = shouldHaveManifest();
-      manifest!.should.be.deepEqual(expected);
-    }
-
-    function shouldHaveManifestWithDependency(
-      name: PkgName,
-      version: PkgVersion
-    ) {
-      const manifest = shouldHaveManifest();
-      const dependency = manifest.dependencies[name];
-      (dependency !== undefined).should.be.ok();
-      dependency.should.be.equal(version);
-    }
 
     it("add pkg", async function () {
       const retCode = await add("com.base.package-a", options);
