@@ -74,7 +74,7 @@ export type PkgVersionInfo = {
 };
 
 export type PkgInfo = {
-  name: PkgName;
+  name: ReverseDomainName;
   _id?: PkgName;
   _rev?: string;
   _attachments?: Record<string, unknown>;
