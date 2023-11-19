@@ -1,4 +1,4 @@
-import { PkgName, PkgVersion, ReverseDomainName } from "../types/global";
+import {PkgName, PkgVersion, ReverseDomainName} from "../types/global";
 
 /**
  * Split package-name, which may include a version into the actual name of the

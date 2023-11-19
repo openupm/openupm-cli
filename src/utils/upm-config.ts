@@ -1,4 +1,4 @@
-import { UPMConfig } from "../types/global";
+import {UPMConfig} from "../types/global";
 import mkdirp from "mkdirp";
 import path from "path";
 import TOML from "@iarna/toml";
@@ -6,7 +6,7 @@ import fs from "fs";
 import log from "../logger";
 import isWsl from "is-wsl";
 import execute from "./process";
-import { env } from "./env";
+import {env} from "./env";
 
 /**
  * Gets the path to directory in which the upm config is stored
