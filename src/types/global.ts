@@ -1,4 +1,5 @@
 import { NpmAuth } from "another-npm-registry-client";
+import { IpAddress } from "./ip-address";
 
 export type PkgVersion = string;
 
@@ -32,7 +33,7 @@ export type Env = {
   upstream: boolean;
   upstreamRegistry: string;
   registry: string;
-  namespace: string;
+  namespace: ReverseDomainName | IpAddress;
   editorVersion: string | null;
   region: Region;
   manifestPath: string;
