@@ -11,10 +11,10 @@ import {
   PkgName,
   PkgVersion,
   Registry,
-  ReverseDomainName,
 } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
+import { ReverseDomainName } from "./types/reverse-domain-name";
 
 type DateString = string;
 

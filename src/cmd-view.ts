@@ -6,6 +6,7 @@ import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { fetchPackageInfo } from "./registry-client";
+import { ReverseDomainName } from "./types/reverse-domain-name";
 
 export type ViewOptions = {
   _global: GlobalOptions;
@@ -81,7 +82,11 @@ const printInfo = function (pkg: PkgInfo) {
     console.log("dependencies");
     Object.keys(dependencies)
       .sort()
-      .forEach((n) => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
+      .forEach((n) =>
+        console.log(
+          chalk.yellow(n) + ` ${dependencies[n as ReverseDomainName]}`
+        )
+      );
   }
 
   console.log();

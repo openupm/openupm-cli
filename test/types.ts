@@ -1,4 +1,5 @@
-import { Contact, PkgVersion, ReverseDomainName } from "../src/types/global";
+import { Contact, PkgVersion } from "../src/types/global";
+import { ReverseDomainName } from "../src/types/reverse-domain-name";
 
 type Maintainer = { username: string; email: string };
 

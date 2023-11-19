@@ -7,21 +7,13 @@ import path from "path";
 import fs from "fs";
 import yaml from "yaml";
 import { isIpAddress } from "../types/ip-address";
+import {
+  namespaceFor,
+  openUpmReverseDomainName,
+} from "../types/reverse-domain-name";
 
-export const env: Env = {
-  auth: {},
-  color: false,
-  cwd: "",
-  editorVersion: null,
-  manifestPath: "",
-  namespace: "",
-  region: "us",
-  registry: "",
-  systemUser: false,
-  upstream: false,
-  upstreamRegistry: "",
-  wsl: false,
-};
+export const env: Env = <Env>{};
+
 // Parse env
 export const parseEnv = async function (
   options: { _global: GlobalOptions } & Record<string, unknown>,
@@ -29,9 +21,9 @@ export const parseEnv = async function (
 ) {
   // set defaults
   env.registry = "https://package.openupm.com";
-  env.namespace = "com.openupm";
   env.cwd = "";
   env.manifestPath = "";
+  env.namespace = openUpmReverseDomainName;
   env.upstream = true;
   env.color = true;
   env.upstreamRegistry = "https://packages.unity.com";
@@ -71,7 +63,7 @@ export const parseEnv = async function (
     // TODO: Check hostname for null
     const hostname = url.parse(registry).hostname as string;
     if (isIpAddress(hostname)) env.namespace = hostname;
-    else env.namespace = hostname.split(".").reverse().slice(0, 2).join(".");
+    else env.namespace = namespaceFor(hostname);
   }
   // auth
   if (options._global.systemUser) env.systemUser = true;

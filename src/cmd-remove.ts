@@ -3,6 +3,7 @@ import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
+import { isReverseDomainName } from "./types/reverse-domain-name";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
@@ -68,7 +69,7 @@ const _remove = async function (pkg: PkgName) {
       if (index > -1) {
         entry.scopes.splice(index, 1);
         const scopesSet = new Set(entry.scopes);
-        scopesSet.add(env.namespace);
+        if (isReverseDomainName(env.namespace)) scopesSet.add(env.namespace);
         entry.scopes = Array.from(scopesSet).sort();
         dirty = true;
       }
