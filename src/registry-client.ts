@@ -20,6 +20,7 @@ import { env } from "./utils/env";
 import { atVersion, isInternalPackage } from "./utils/pkg-name";
 import _ from "lodash";
 import { tryGetLatestVersion } from "./utils/pkg-info";
+import { ReverseDomainName } from "./types/reverse-domain-name";
 
 export type NpmClient = {
   rawClient: RegClient;
@@ -124,7 +125,7 @@ export const fetchPackageDependencies = async function ({
   version,
   deep,
 }: {
-  name: PkgName;
+  name: ReverseDomainName;
   version: PkgVersion | undefined;
   deep?: boolean;
 }): Promise<[Dependency[], Dependency[]]> {
@@ -224,8 +225,11 @@ export const fetchPackageDependencies = async function ({
         if (depObj.self || deep) {
           const deps: NameVersionPair[] = _.toPairs(
             pkgInfo.versions[entry.version]["dependencies"]
-          ).map((x: [PkgName, PkgVersion]): NameVersionPair => {
-            return { name: x[0], version: x[1] };
+          ).map((x): NameVersionPair => {
+            return {
+              name: x[0] as ReverseDomainName,
+              version: x[1] as PkgVersion,
+            };
           });
           deps.forEach((x) => pendingList.push(x));
         }

@@ -1,9 +1,8 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { IpAddress } from "./ip-address";
+import { ReverseDomainName } from "./reverse-domain-name";
 
 export type PkgVersion = string;
-
-export type ReverseDomainName = string;
 
 export type PkgName = ReverseDomainName | `${ReverseDomainName}@${PkgVersion}`;
 
@@ -60,7 +59,7 @@ export type PkgVersionInfo = {
   version: string;
   unity?: string;
   unityRelease?: string;
-  dependencies?: Record<PkgName, PkgVersion>;
+  dependencies?: Record<ReverseDomainName, PkgVersion>;
   license?: string;
   displayName?: string;
   description?: string;
@@ -91,12 +90,12 @@ export type PkgInfo = {
 };
 
 export type NameVersionPair = {
-  name: PkgName;
+  name: ReverseDomainName;
   version: PkgVersion | undefined;
 };
 
 export type Dependency = {
-  name: PkgName;
+  name: ReverseDomainName;
   version: PkgVersion;
   upstream: boolean;
   self: boolean;
