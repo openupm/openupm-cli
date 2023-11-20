@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/openupm/openupm-cli/compare/1.16.0...1.17.0) (2023-11-20)
+
+
+### Features
+
+* require Node.js 16 ([2a04683](https://github.com/openupm/openupm-cli/commit/2a0468313b54c053fab681e61dc93c249ed66298))
+
 # [1.16.0](https://github.com/openupm/openupm-cli/compare/1.15.5...1.16.0) (2023-11-01)
 
 
