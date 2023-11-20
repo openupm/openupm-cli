@@ -19,10 +19,17 @@ export type AddOptions = {
   _global: GlobalOptions;
 };
 
+type ResultCode = 0 | 1;
+
+type AddResult = {
+  dirty: boolean;
+  code: ResultCode;
+};
+
 export const add = async function (
   pkgs: PkgName | PkgName[],
   options: AddOptions
-): Promise<number> {
+): Promise<ResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envOk = await parseEnv(options, { checkPath: true });
@@ -33,7 +40,7 @@ export const add = async function (
     results.push(
       await _add({ pkg, testables: options.test, force: options.force })
     );
-  const result = {
+  const result: AddResult = {
     code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
     dirty: results.filter((x) => x.dirty).length > 0,
   };
@@ -51,7 +58,7 @@ const _add = async function ({
   pkg: PkgName;
   testables?: boolean;
   force?: boolean;
-}) {
+}): Promise<AddResult> {
   // dirty flag
   let dirty = false;
   // is upstream package flag

@@ -1,24 +1,19 @@
-import "assert";
 import "should";
-
 import { remove } from "../src/cmd-remove";
-
+import { PkgManifest } from "../src/types/global";
+import { exampleRegistryUrl } from "./mock-registry";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
 import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
-import testConsole from "test-console";
-import assert from "assert";
-import { loadManifest } from "../src/utils/manifest";
+  shouldHaveManifest,
+  shouldHaveRegistryWithScopes,
+  shouldNotHaveDependency,
+} from "./manifest-assertions";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
-    const defaultManifest = {
+    let mockConsole: MockConsole = null!;
+    const defaultManifest: PkgManifest = {
       dependencies: {
         "com.example.package-a": "1.0.0",
         "com.example.package-b": "1.0.0",
@@ -31,7 +26,7 @@ describe("cmd-remove.ts", function () {
             "com.example.package-a",
             "com.example.package-b",
           ],
-          url: "http://example.com",
+          url: exampleRegistryUrl,
         },
       ],
     };
@@ -40,71 +35,60 @@ describe("cmd-remove.ts", function () {
       createWorkDir("test-openupm-cli", {
         manifest: defaultManifest,
       });
-      [stdoutInspect, stderrInspect] = getInspects();
+      mockConsole = attachMockConsole();
     });
     afterEach(function () {
       removeWorkDir("test-openupm-cli");
-      stdoutInspect.restore();
-      stderrInspect.restore();
+      mockConsole.detach();
     });
     it("remove pkg", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
       const retCode = await remove("com.example.package-a", options);
       retCode.should.equal(0);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      (
-        manifest.dependencies["com.example.package-a"] == undefined
-      ).should.be.ok();
-      assert(manifest.scopedRegistries !== undefined);
-      assert(manifest.scopedRegistries[0] !== undefined);
-      manifest.scopedRegistries[0].scopes.should.be.deepEqual([
+      const manifest = shouldHaveManifest();
+      shouldNotHaveDependency(manifest, "com.example.package-a");
+      shouldHaveRegistryWithScopes(manifest, [
         "com.example",
         "com.example.package-b",
       ]);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("removed ").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      mockConsole.hasLineIncluding("out", "removed ").should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("remove pkg@1.0.0", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
       const retCode = await remove("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      manifest.should.be.deepEqual(defaultManifest);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("please replace").should.be.ok();
+      const manifest = shouldHaveManifest();
+      manifest.should.deepEqual(defaultManifest);
+      mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
     it("remove pkg-not-exist", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
       const retCode = await remove("pkg-not-exist", options);
       retCode.should.equal(1);
-      const manifest = loadManifest();
-      assert(manifest !== null);
-      manifest.should.be.deepEqual(defaultManifest);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package not found").should.be.ok();
+      const manifest = shouldHaveManifest();
+      manifest.should.deepEqual(defaultManifest);
+      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("remove more than one pkgs", async function () {
       const options = {
         _global: {
-          registry: "http://example.com",
+          registry: exampleRegistryUrl,
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
@@ -113,21 +97,17 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(0);
-      const manifest = await loadManifest();
-      assert(manifest !== null);
-      (
-        manifest.dependencies["com.example.package-a"] == undefined
-      ).should.be.ok();
-      (
-        manifest.dependencies["com.example.package-b"] == undefined
-      ).should.be.ok();
-      assert(manifest.scopedRegistries !== undefined);
-      assert(manifest.scopedRegistries[0] !== undefined);
-      manifest.scopedRegistries[0].scopes.should.be.deepEqual(["com.example"]);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("removed com.example.package-a").should.be.ok();
-      stdout.includes("removed com.example.package-b").should.be.ok();
-      stdout.includes("open Unity").should.be.ok();
+      const manifest = shouldHaveManifest();
+      shouldNotHaveDependency(manifest, "com.example.package-a");
+      shouldNotHaveDependency(manifest, "com.example.package-b");
+      shouldHaveRegistryWithScopes(manifest, ["com.example"]);
+      mockConsole
+        .hasLineIncluding("out", "removed com.example.package-a")
+        .should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "removed com.example.package-b")
+        .should.be.ok();
+      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
   });
 });

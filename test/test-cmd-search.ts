@@ -1,26 +1,23 @@
-import "assert";
 import nock from "nock";
 import "should";
-import { search } from "../src/cmd-search";
+import { search, SearchOptions } from "../src/cmd-search";
 
 import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  nockDown,
-  nockUp,
-  removeWorkDir,
-} from "./utils";
-import testConsole from "test-console";
+  exampleRegistryUrl,
+  registerSearchResult,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
+import { SearchEndpointResult } from "./types";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
 
 describe("cmd-search.ts", function () {
-  let stdoutInspect: testConsole.Inspector = null!;
-  let stderrInspect: testConsole.Inspector = null!;
+  let mockConsole: MockConsole = null!;
 
-  const options = {
+  const options: SearchOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
@@ -29,30 +26,22 @@ describe("cmd-search.ts", function () {
   beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
-    removeWorkDir("test-openupm-cli");
-    createWorkDir("test-openupm-cli", { manifest: true });
-    [stdoutInspect, stderrInspect] = getInspects();
+    mockConsole = attachMockConsole();
   });
   afterEach(function () {
     removeWorkDir("test-openupm-cli");
-    stdoutInspect.restore();
-    stderrInspect.restore();
+    mockConsole.detach();
   });
   describe("search endpoint", function () {
-    const searchEndpointResult = {
+    const searchEndpointResult: SearchEndpointResult = {
       objects: [
         {
           package: {
             name: "com.example.package-a",
             scope: "unscoped",
-            "dist-tags": { latest: "1.0.0" },
-            versions: {
-              "1.0.0": "latest",
-            },
+            version: "1.0.0",
             description: "A demo package",
-            time: {
-              modified: "2019-10-02T04:02:38.335Z",
-            },
+            date: "2019-10-02T04:02:38.335Z",
             links: {},
             author: { name: "yo", url: "https://github.com/yo" },
             publisher: { username: "yo", email: "yo@example.com" },
@@ -73,40 +62,30 @@ describe("cmd-search.ts", function () {
       total: 1,
       time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)",
     };
-    const searchEndpointEmptyResult = {
+    const searchEndpointEmptyResult: SearchEndpointResult = {
       objects: [],
       total: 0,
       time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)",
     };
     beforeEach(function () {
-      nockUp();
-      nock("http://example.com")
-        .get(/-\/v1\/search\?text=package-a/)
-        .reply(200, searchEndpointResult, {
-          "Content-Type": "application/json",
-        });
-      nock("http://example.com")
-        .get(/-\/v1\/search\?text=pkg-not-exist/)
-        .reply(200, searchEndpointEmptyResult, {
-          "Content-Type": "application/json",
-        });
+      startMockRegistry();
+      registerSearchResult("package-a", searchEndpointResult);
+      registerSearchResult("pkg-not-exit", searchEndpointEmptyResult);
     });
     afterEach(function () {
-      nockDown();
+      stopMockRegistry();
     });
     it("simple", async function () {
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
+      mockConsole.hasLineIncluding("out", "package-a").should.be.ok();
+      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
+      mockConsole.hasLineIncluding("out", "2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function () {
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("No matches found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "No matches found").should.be.ok();
     });
   });
 
@@ -134,35 +113,35 @@ describe("cmd-search.ts", function () {
       },
     };
     beforeEach(function () {
-      nockUp();
-      nock("http://example.com")
+      startMockRegistry();
+      nock(exampleRegistryUrl)
         .persist()
         .get(/-\/v1\/search\?text=/)
         .reply(404);
     });
     afterEach(function () {
-      nockDown();
+      stopMockRegistry();
     });
     it("from remote", async function () {
-      nock("http://example.com").get("/-/all").reply(200, allResult, {
+      nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("fast search endpoint is not available").should.be.ok();
-      stdout.includes("package-a").should.be.ok();
-      stdout.includes("1.0.0").should.be.ok();
-      stdout.includes("2019-10-02").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "fast search endpoint is not available")
+        .should.be.ok();
+      mockConsole.hasLineIncluding("out", "package-a").should.be.ok();
+      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
+      mockConsole.hasLineIncluding("out", "2019-10-02").should.be.ok();
     });
     it("pkg not exist", async function () {
-      nock("http://example.com").get("/-/all").reply(200, allResult, {
+      nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("No matches found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "No matches found").should.be.ok();
     });
   });
 });

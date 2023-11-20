@@ -44,27 +44,49 @@ export type Dist = {
   integrity: string;
 };
 
+export type Contact = {
+  name: string;
+  email?: string;
+  url?: string;
+};
+
 export type PkgVersionInfo = {
+  _id?: PkgName;
+  _nodeVersion?: string;
+  _npmVersion?: string;
+  _rev?: string;
+  name: string;
+  version: string;
   unity?: string;
-  unityRelease: string;
-  dependencies: Record<PkgName, PkgVersion>;
+  unityRelease?: string;
+  dependencies?: Record<PkgName, PkgVersion>;
   license?: string;
-  displayName: string;
+  displayName?: string;
   description?: string;
   keywords?: string[];
-  homepage: string;
+  homepage?: string;
+  category?: string;
+  gitHead?: string;
+  readmeFilename?: string;
+  author?: Contact;
+  contributors?: Contact[];
   dist?: Dist;
 };
 
 export type PkgInfo = {
-  name: PkgName;
+  name: ReverseDomainName;
+  _id?: PkgName;
+  _rev?: string;
+  _attachments?: Record<string, unknown>;
+  readme?: string;
   versions: Record<PkgVersion, PkgVersionInfo>;
-  "dist-tags": { latest?: PkgVersion };
+  "dist-tags"?: { latest?: PkgVersion };
   version?: PkgVersion;
   description?: string;
   keywords?: string[];
   time: Record<"created" | "modified" | PkgVersion, string>;
   date?: Date;
+  users?: Record<string, unknown>;
 };
 
 export type NameVersionPair = {

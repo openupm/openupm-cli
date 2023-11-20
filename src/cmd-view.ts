@@ -46,7 +46,7 @@ const printInfo = function (pkg: PkgInfo) {
   const homepage = verInfo.homepage;
   const dist = verInfo.dist;
   const dependencies = verInfo.dependencies;
-  const latest = pkg["dist-tags"].latest;
+  const latest = pkg["dist-tags"]?.latest;
   let time = pkg.time.modified;
   if (!time && latest && latest in pkg.time) time = pkg.time[latest];
 

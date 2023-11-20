@@ -1,22 +1,19 @@
-import testConsole from "test-console";
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
+import { attachMockConsole, MockConsole } from "./mock-console";
 import fs from "fs";
 import "should";
 import path from "path";
-import { loadManifest, saveManifest } from "../src/utils/manifest";
-import assert from "assert";
+import { saveManifest } from "../src/utils/manifest";
 import { describe } from "mocha";
 import { parseEnv } from "../src/utils/env";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import {
+  shouldHaveManifest,
+  shouldHaveNoManifest,
+  shouldNotHaveAnyDependencies,
+} from "./manifest-assertions";
 
 describe("manifest", function () {
-  let stdoutInspect: testConsole.Inspector = null!;
-  let stderrInspect: testConsole.Inspector = null!;
+  let mockConsole: MockConsole = null!;
   beforeEach(function () {
     removeWorkDir("test-openupm-cli");
     createWorkDir("test-openupm-cli", { manifest: true });
@@ -30,13 +27,12 @@ describe("manifest", function () {
       ),
       "wrong-json"
     );
-    [stdoutInspect, stderrInspect] = getInspects();
+    mockConsole = attachMockConsole();
   });
   afterEach(function () {
     removeWorkDir("test-openupm-cli");
     removeWorkDir("test-openupm-cli-wrong-json");
-    stdoutInspect.restore();
-    stderrInspect.restore();
+    mockConsole.detach();
   });
   it("loadManifest", async function () {
     (
@@ -45,8 +41,7 @@ describe("manifest", function () {
         { checkPath: true }
       )
     ).should.be.ok();
-    const manifest = loadManifest();
-    assert(manifest !== null);
+    const manifest = shouldHaveManifest();
     manifest.should.be.deepEqual({ dependencies: {} });
   });
   it("no manifest file", async function () {
@@ -56,10 +51,8 @@ describe("manifest", function () {
         { checkPath: false }
       )
     ).should.be.ok();
-    const manifest = loadManifest();
-    (manifest === null).should.be.ok();
-    const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-    stdout.includes("does not exist").should.be.ok();
+    shouldHaveNoManifest();
+    mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
   });
   it("wrong json content", async function () {
     (
@@ -68,10 +61,8 @@ describe("manifest", function () {
         { checkPath: true }
       )
     ).should.be.ok();
-    const manifest = loadManifest();
-    (manifest === null).should.be.ok();
-    const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-    stdout.includes("failed to parse").should.be.ok();
+    shouldHaveNoManifest();
+    mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
   it("saveManifest", async function () {
     (
@@ -80,13 +71,11 @@ describe("manifest", function () {
         { checkPath: true }
       )
     ).should.be.ok();
-    const manifest = loadManifest();
-    assert(manifest !== null);
-    manifest.should.be.deepEqual({ dependencies: {} });
+    const manifest = shouldHaveManifest();
+    shouldNotHaveAnyDependencies(manifest);
     manifest.dependencies["some-pack"] = "1.0.0";
     saveManifest(manifest).should.be.ok();
-    const manifest2 = loadManifest();
-    assert(manifest2 !== null);
+    const manifest2 = shouldHaveManifest();
     manifest2.should.be.deepEqual(manifest);
   });
 });

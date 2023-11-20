@@ -1,20 +1,13 @@
-import testConsole from "test-console";
-import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  removeWorkDir,
-} from "./utils";
 import "should";
 import { env, parseEnv } from "../src/utils/env";
 import path from "path";
-import assert from "assert";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
+import should from "should";
 
 describe("env", function () {
   describe("parseEnv", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
+    let mockConsole: MockConsole = null!;
     before(function () {
       removeWorkDir("test-openupm-cli");
       removeWorkDir("test-openupm-cli-no-manifest");
@@ -32,11 +25,10 @@ describe("env", function () {
       removeWorkDir("test-openupm-cli-no-manifest");
     });
     beforeEach(function () {
-      [stdoutInspect, stderrInspect] = getInspects();
+      mockConsole = attachMockConsole();
     });
     afterEach(function () {
-      stdoutInspect.restore();
-      stderrInspect.restore();
+      mockConsole.detach();
     });
     it("defaults", async function () {
       (await parseEnv({ _global: {} }, { checkPath: false })).should.be.ok();
@@ -67,8 +59,9 @@ describe("env", function () {
           { checkPath: true }
         )
       ).should.not.be.ok();
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("can not resolve path").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "can not resolve path")
+        .should.be.ok();
     });
     it("can not locate manifest.json", async function () {
       (
@@ -77,8 +70,9 @@ describe("env", function () {
           { checkPath: true }
         )
       ).should.not.be.ok();
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("can not locate manifest.json").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "can not locate manifest.json")
+        .should.be.ok();
     });
     it("custom registry", async function () {
       (
@@ -163,8 +157,7 @@ describe("env", function () {
           { checkPath: true }
         )
       ).should.be.ok();
-      assert(env.editorVersion !== null);
-      env.editorVersion.should.be.equal("2019.2.13f1");
+      should(env.editorVersion).be.equal("2019.2.13f1");
     });
     it("region cn", async function () {
       (

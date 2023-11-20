@@ -1,39 +1,35 @@
-import "assert";
-import nock from "nock";
 import "should";
-
-import { view } from "../src/cmd-view";
-
+import { view, ViewOptions } from "../src/cmd-view";
+import { PkgInfo } from "../src/types/global";
 import {
-  createWorkDir,
-  getInspects,
-  getOutputs,
-  getWorkDir,
-  nockDown,
-  nockUp,
-  removeWorkDir,
-} from "./utils";
-import testConsole from "test-console";
+  exampleRegistryUrl,
+  registerMissingPackage,
+  registerRemotePkg,
+  registerRemoteUpstreamPkg,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
+import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { attachMockConsole, MockConsole } from "./mock-console";
 
 describe("cmd-view.ts", function () {
-  const options = {
+  const options: ViewOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       upstream: false,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
-  const upstreamOptions = {
+  const upstreamOptions: ViewOptions = {
     _global: {
-      registry: "http://example.com",
+      registry: exampleRegistryUrl,
       chdir: getWorkDir("test-openupm-cli"),
     },
   };
   describe("view", function () {
-    let stdoutInspect: testConsole.Inspector = null!;
-    let stderrInspect: testConsole.Inspector = null!;
+    let mockConsole: MockConsole = null!;
 
-    const remotePkgInfoA = {
+    const remotePkgInfoA: PkgInfo = {
       name: "com.example.package-a",
       versions: {
         "1.0.0": {
@@ -79,7 +75,7 @@ describe("cmd-view.ts", function () {
       readme: "A demo package",
       _attachments: {},
     };
-    const remotePkgInfoUp = {
+    const remotePkgInfoUp: PkgInfo = {
       name: "com.example.package-up",
       versions: {
         "1.0.0": {
@@ -128,55 +124,45 @@ describe("cmd-view.ts", function () {
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
-      nockUp();
-      nock("http://example.com")
-        .get("/com.example.package-a")
-        .reply(200, remotePkgInfoA, { "Content-Type": "application/json" });
-      nock("http://example.com").get("/pkg-not-exist").reply(404);
-      nock("http://example.com").get("/com.example.package-up").reply(404);
-      nock("https://packages.unity.com")
-        .get("/com.example.package-up")
-        .reply(200, remotePkgInfoUp, {
-          "Content-Type": "application/json",
-        });
-      nock("https://packages.unity.com").get("/pkg-not-exist").reply(404);
-      [stdoutInspect, stderrInspect] = getInspects();
+      startMockRegistry();
+      registerRemotePkg(remotePkgInfoA);
+      registerMissingPackage("pkg-not-exist");
+      registerRemoteUpstreamPkg(remotePkgInfoUp);
+      mockConsole = attachMockConsole();
     });
     afterEach(function () {
       removeWorkDir("test-openupm-cli");
-      nockDown();
-      stdoutInspect.restore();
-      stderrInspect.restore();
+      stopMockRegistry();
+      mockConsole.detach();
     });
     it("view pkg", async function () {
       const retCode = await view("com.example.package-a", options);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("com.example.package-a@1.0.0").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-a@1.0.0")
+        .should.be.ok();
     });
     it("view pkg@1.0.0", async function () {
       const retCode = await view("com.example.package-a@1.0.0", options);
       retCode.should.equal(1);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("please replace").should.be.ok();
+      mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
     it("view pkg-not-exist", async function () {
       const retCode = await view("pkg-not-exist", options);
       retCode.should.equal(1);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package not found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("view pkg from upstream", async function () {
       const retCode = await view("com.example.package-up", upstreamOptions);
       retCode.should.equal(0);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("com.example.package-up@1.0.0").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "com.example.package-up@1.0.0")
+        .should.be.ok();
     });
     it("view pkg-not-exist from upstream", async function () {
       const retCode = await view("pkg-not-exist", upstreamOptions);
       retCode.should.equal(1);
-      const [stdout] = getOutputs(stdoutInspect, stderrInspect);
-      stdout.includes("package not found").should.be.ok();
+      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
   });
 });

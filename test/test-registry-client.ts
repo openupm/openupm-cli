@@ -1,44 +1,50 @@
 import "assert";
-import nock from "nock";
 import "should";
-
-import { nockDown, nockUp } from "./utils";
-import assert from "assert";
 import { parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
+import { PkgInfo } from "../src/types/global";
+import {
+  exampleRegistryUrl,
+  registerMissingPackage,
+  registerRemotePkg,
+  startMockRegistry,
+  stopMockRegistry,
+} from "./mock-registry";
+import should from "should";
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
     beforeEach(function () {
-      nockUp();
+      startMockRegistry();
     });
     afterEach(function () {
-      nockDown();
+      stopMockRegistry();
     });
     it("simple", async function () {
       (
         await parseEnv(
-          { _global: { registry: "http://example.com" } },
+          { _global: { registry: exampleRegistryUrl } },
           { checkPath: false }
         )
       ).should.be.ok();
-      const pkgInfoRemote = { name: "com.littlebigfun.addressable-importer" };
-      nock("http://example.com")
-        .get("/package-a")
-        .reply(200, pkgInfoRemote, { "Content-Type": "application/json" });
+      const pkgInfoRemote: PkgInfo = {
+        name: "package-a",
+        versions: {},
+        time: {},
+      };
+      registerRemotePkg(pkgInfoRemote);
       const info = await fetchPackageInfo("package-a");
-      assert(info !== undefined);
-      info.should.deepEqual(pkgInfoRemote);
+      should(info).deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
       (
         await parseEnv(
-          { _global: { registry: "http://example.com" } },
+          { _global: { registry: exampleRegistryUrl } },
           { checkPath: false }
         )
       ).should.be.ok();
 
-      nock("http://example.com").get("/package-a").reply(404);
+      registerMissingPackage("package-a");
       const info = await fetchPackageInfo("package-a");
       (info === undefined).should.be.ok();
     });
