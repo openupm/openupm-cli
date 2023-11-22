@@ -1,4 +1,4 @@
-import {EditorVersion} from "../types/global";
+import { EditorVersion } from "../types/global";
 
 /**
  * Compares two editor versions for ordering
