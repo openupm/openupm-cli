@@ -1,8 +1,5 @@
 import { PkgName, PkgVersion } from "../types/global";
-import {
-  isReverseDomainName,
-  ReverseDomainName,
-} from "../types/reverse-domain-name";
+import { ReverseDomainName } from "../types/reverse-domain-name";
 
 /**
  * Split package-name, which may include a version into the actual name of the
