@@ -14,7 +14,7 @@ import {
 } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
-import { ReverseDomainName } from "./types/reverse-domain-name";
+import { DomainName } from "./types/domain-name";
 
 type DateString = string;
 
@@ -30,7 +30,7 @@ export type SearchedPkgInfo = Omit<PkgInfo, "versions"> & {
 
 export type OldSearchResult =
   | SearchedPkgInfo[]
-  | Record<ReverseDomainName, SearchedPkgInfo>;
+  | Record<DomainName, SearchedPkgInfo>;
 
 // Get npm fetch options
 const getNpmFetchOptions = function (): Options {

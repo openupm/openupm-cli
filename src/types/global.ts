@@ -1,10 +1,10 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { IpAddress } from "./ip-address";
-import { ReverseDomainName } from "./reverse-domain-name";
+import { DomainName } from "./domain-name";
 
 export type PkgVersion = string;
 
-export type PkgName = ReverseDomainName | `${ReverseDomainName}@${PkgVersion}`;
+export type PkgName = DomainName | `${DomainName}@${PkgVersion}`;
 
 export type Region = "us" | "cn";
 
@@ -32,7 +32,7 @@ export type Env = {
   upstream: boolean;
   upstreamRegistry: string;
   registry: string;
-  namespace: ReverseDomainName | IpAddress;
+  namespace: DomainName | IpAddress;
   editorVersion: string | null;
   region: Region;
   manifestPath: string;
@@ -59,7 +59,7 @@ export type PkgVersionInfo = {
   version: string;
   unity?: string;
   unityRelease?: string;
-  dependencies?: Record<ReverseDomainName, PkgVersion>;
+  dependencies?: Record<DomainName, PkgVersion>;
   license?: string;
   displayName?: string;
   description?: string;
@@ -74,7 +74,7 @@ export type PkgVersionInfo = {
 };
 
 export type PkgInfo = {
-  name: ReverseDomainName;
+  name: DomainName;
   _id?: PkgName;
   _rev?: string;
   _attachments?: Record<string, unknown>;
@@ -90,12 +90,12 @@ export type PkgInfo = {
 };
 
 export type NameVersionPair = {
-  name: ReverseDomainName;
+  name: DomainName;
   version: PkgVersion | undefined;
 };
 
 export type Dependency = {
-  name: ReverseDomainName;
+  name: DomainName;
   version: PkgVersion;
   upstream: boolean;
   self: boolean;

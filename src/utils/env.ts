@@ -7,10 +7,7 @@ import path from "path";
 import fs from "fs";
 import yaml from "yaml";
 import { isIpAddress } from "../types/ip-address";
-import {
-  namespaceFor,
-  openUpmReverseDomainName,
-} from "../types/reverse-domain-name";
+import { namespaceFor, openUpmReverseDomainName } from "../types/domain-name";
 
 export const env: Env = <Env>{};
 

@@ -1,16 +1,16 @@
 import { PkgName, PkgVersion } from "../types/global";
-import { ReverseDomainName } from "../types/reverse-domain-name";
+import { DomainName } from "../types/domain-name";
 
 /**
  * Split package-name, which may include a version into the actual name of the
  * package and the version if it exists
  */
 export const splitPkgName = function (pkgName: PkgName): {
-  name: ReverseDomainName;
+  name: DomainName;
   version: PkgVersion | undefined;
 } {
   const segments = pkgName.split("@");
-  const name = segments[0] as ReverseDomainName;
+  const name = segments[0] as DomainName;
   const version =
     segments.length > 1
       ? segments.slice(1, segments.length).join("@")
@@ -23,16 +23,14 @@ export const splitPkgName = function (pkgName: PkgName): {
  * @param name The name of the package
  * @param version The version of the package
  */
-export const atVersion = (
-  name: ReverseDomainName,
-  version: PkgVersion
-): PkgName => `${name}@${version}`;
+export const atVersion = (name: DomainName, version: PkgVersion): PkgName =>
+  `${name}@${version}`;
 
 /**
  * Detect if the given package name is an internal package
  * @param name The name of the package
  */
-export const isInternalPackage = (name: ReverseDomainName): boolean => {
+export const isInternalPackage = (name: DomainName): boolean => {
   const internals = [
     "com.unity.ugui",
     "com.unity.2d.sprite",

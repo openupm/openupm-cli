@@ -1,11 +1,8 @@
 import { describe } from "mocha";
-import {
-  isReverseDomainName,
-  namespaceFor,
-} from "../src/types/reverse-domain-name";
+import { isDomainName, namespaceFor } from "../src/types/domain-name";
 import should from "should";
 
-describe("reverse-domain-name", function () {
+describe("domain-name", function () {
   describe("namespace", function () {
     [
       ["unity.com", "com.unity"],
@@ -21,19 +18,18 @@ describe("reverse-domain-name", function () {
   });
   describe("validation", function () {
     [
+      "com",
       "com.unity",
       "com.openupm",
       "at.ac.my-school",
       "dev.comradevanti123",
     ].forEach((s) =>
-      it(`"${s}" should be reverse-domain-name`, () =>
-        should(isReverseDomainName(s)).be.true())
+      it(`"${s}" should be domain-name`, () =>
+        should(isDomainName(s)).be.true())
     );
     [
       "",
       " ",
-      // Single segments are not valid reverse-domain-names
-      "com",
       // Invalid characters
       "com.x💀x",
       // No double hyphens
@@ -43,8 +39,8 @@ describe("reverse-domain-name", function () {
       // No trailing hyphens
       "com.unity-",
     ].forEach((s) =>
-      it(`"${s}" should not be reverse-domain-name`, () =>
-        should(isReverseDomainName(s)).be.false())
+      it(`"${s}" should not be domain-name`, () =>
+        should(isDomainName(s)).be.false())
     );
   });
 });

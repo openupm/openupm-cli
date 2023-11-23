@@ -3,7 +3,7 @@ import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
 import { parseEnv } from "./utils/env";
 import { fetchPackageDependencies } from "./registry-client";
-import { ReverseDomainName } from "./types/reverse-domain-name";
+import { DomainName } from "./types/domain-name";
 
 export type DepsOptions = {
   deep?: boolean;
@@ -26,7 +26,7 @@ const _deps = async function ({
   version,
   deep,
 }: {
-  name: ReverseDomainName;
+  name: DomainName;
   version: PkgVersion | undefined;
   deep?: boolean;
 }) {

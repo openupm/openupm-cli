@@ -1,15 +1,15 @@
 import { Brand } from "ts-brand";
 
 /**
- * A string matching the format of a reverse domain name.
+ * A string matching the format of a domain name.
  * @example com.unity
  * @example com.my-company
  */
-export type ReverseDomainName = Brand<string, "ReverseDomainName">;
+export type DomainName = Brand<string, "DomainName">;
 
-const segmentRegex = /^(?!.*--)[^-][a-zA-Z0-9-]{0,20}[^-]$/;
+const segmentRegex = /^(?!.*--|^-.*|.*-$)[a-zA-Z0-9-]+$/;
 
-export const openUpmReverseDomainName = "com.openupm" as ReverseDomainName;
+export const openUpmReverseDomainName = "com.openupm" as DomainName;
 
 function domainSegmentsIn(hostName: string): string[] {
   return hostName.split(".");
@@ -22,7 +22,7 @@ function domainSegmentsIn(hostName: string): string[] {
  * @example registry.npmjs.org becomes org.npmjs.
  * @example my-school.ac.at becomes at.ac.my-school
  */
-export function namespaceFor(hostname: string): ReverseDomainName {
+export function namespaceFor(hostname: string): DomainName {
   const segments = domainSegmentsIn(hostname);
   const namespaceSegments = (function () {
     const count = segments.length;
@@ -42,11 +42,16 @@ export function namespaceFor(hostname: string): ReverseDomainName {
     // Domains with one extension such as registry.npmjs.org
     return segments.slice(count - 2);
   })();
-  return namespaceSegments.reverse().join(".") as ReverseDomainName;
+  return namespaceSegments.reverse().join(".") as DomainName;
 }
 
-export function isReverseDomainName(s: string): s is ReverseDomainName {
+/**
+ * Checks if a string is a domain name. Only does basic syntax validation.
+ * Does not check for correct segment-count etc.
+ * @param s The string
+ */
+export function isDomainName(s: string): s is DomainName {
   const segments = domainSegmentsIn(s);
-  if (segments === null || segments.length < 2) return false;
+  if (segments === null || segments.length === 0) return false;
   return segments.every((segment) => segmentRegex.test(segment));
 }
