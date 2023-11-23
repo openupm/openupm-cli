@@ -11,6 +11,7 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import should from "should";
+import { buildPackageInfo } from "./data-pkg-info";
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
@@ -27,11 +28,7 @@ describe("registry-client", function () {
           { checkPath: false }
         )
       ).should.be.ok();
-      const pkgInfoRemote: PkgInfo = {
-        name: "package-a",
-        versions: {},
-        time: {},
-      };
+      const pkgInfoRemote = buildPackageInfo("package-a");
       registerRemotePkg(pkgInfoRemote);
       const info = await fetchPackageInfo("package-a");
       should(info).deepEqual(pkgInfoRemote);
