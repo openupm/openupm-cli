@@ -11,6 +11,7 @@ import {
 import { SearchEndpointResult } from "./types";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
+import { DomainName } from "../src/types/domain-name";
 
 describe("cmd-search.ts", function () {
   let mockConsole: MockConsole = null!;
@@ -37,7 +38,7 @@ describe("cmd-search.ts", function () {
       objects: [
         {
           package: {
-            name: "com.example.package-a",
+            name: "com.example.package-a" as DomainName,
             scope: "unscoped",
             version: "1.0.0",
             description: "A demo package",
