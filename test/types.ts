@@ -1,12 +1,12 @@
 import { Contact, PkgVersion } from "../src/types/global";
-import { ReverseDomainName } from "../src/types/reverse-domain-name";
+import { DomainName } from "../src/types/domain-name";
 
 type Maintainer = { username: string; email: string };
 
 export type SearchEndpointResult = {
   objects: Array<{
     package: {
-      name: ReverseDomainName;
+      name: DomainName;
       description?: string;
       date: string;
       scope: "unscoped";

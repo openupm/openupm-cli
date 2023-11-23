@@ -12,7 +12,7 @@ import {
   tryParseEditorVersion,
 } from "./utils/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
-import { isReverseDomainName } from "./types/reverse-domain-name";
+import { isDomainName } from "./types/domain-name";
 
 export type AddOptions = {
   test?: boolean;
@@ -228,7 +228,7 @@ const _add = async function ({
     const entry = manifest.scopedRegistries.filter(filterEntry)[0];
     // apply pkgsInScope
     const scopesSet = new Set(entry.scopes || []);
-    if (isReverseDomainName(env.namespace)) pkgsInScope.push(env.namespace);
+    if (isDomainName(env.namespace)) pkgsInScope.push(env.namespace);
     pkgsInScope.forEach((name) => {
       if (!scopesSet.has(name)) {
         scopesSet.add(name);
