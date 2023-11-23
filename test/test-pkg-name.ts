@@ -1,8 +1,7 @@
 import "assert";
 import "should";
-import { isInternalPackage, splitPkgName } from "../src/utils/pkg-name";
+import { splitPkgName } from "../src/utils/pkg-name";
 import { PkgName } from "../src/types/global";
-import { DomainName } from "../src/types/domain-name";
 
 describe("pkg-name.ts", function () {
   describe("splitPkgName", function () {
@@ -45,21 +44,6 @@ describe("pkg-name.ts", function () {
         name: "pkg",
         version: "git@github.com:owner/pkg.git",
       });
-    });
-  });
-  describe("isInternalPackage", function () {
-    it("test com.otherorg.software", function () {
-      isInternalPackage(
-        "com.otherorg.software" as DomainName
-      ).should.not.be.ok();
-    });
-    it("test com.unity.ugui", function () {
-      isInternalPackage("com.unity.ugui" as DomainName).should.be.ok();
-    });
-    it("test com.unity.modules.tilemap", function () {
-      isInternalPackage(
-        "com.unity.modules.tilemap" as DomainName
-      ).should.be.ok();
     });
   });
 });
