@@ -17,10 +17,10 @@ import {
   Registry,
 } from "./types/global";
 import { env } from "./utils/env";
-import { atVersion, isInternalPackage } from "./utils/pkg-name";
+import { atVersion } from "./utils/pkg-name";
 import _ from "lodash";
 import { tryGetLatestVersion } from "./utils/pkg-info";
-import { DomainName } from "./types/domain-name";
+import { DomainName, isInternalPackage } from "./types/domain-name";
 
 export type NpmClient = {
   rawClient: RegClient;

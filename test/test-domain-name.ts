@@ -1,5 +1,10 @@
 import { describe } from "mocha";
-import { isDomainName, namespaceFor } from "../src/types/domain-name";
+import {
+  DomainName,
+  isDomainName,
+  isInternalPackage,
+  namespaceFor,
+} from "../src/types/domain-name";
 import should from "should";
 
 describe("domain-name", function () {
@@ -42,5 +47,20 @@ describe("domain-name", function () {
       it(`"${s}" should not be domain-name`, () =>
         should(isDomainName(s)).be.false())
     );
+  });
+  describe("internal package", function () {
+    it("test com.otherorg.software", function () {
+      isInternalPackage(
+        "com.otherorg.software" as DomainName
+      ).should.not.be.ok();
+    });
+    it("test com.unity.ugui", function () {
+      isInternalPackage("com.unity.ugui" as DomainName).should.be.ok();
+    });
+    it("test com.unity.modules.tilemap", function () {
+      isInternalPackage(
+        "com.unity.modules.tilemap" as DomainName
+      ).should.be.ok();
+    });
   });
 });
