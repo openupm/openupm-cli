@@ -1,12 +1,11 @@
 import log from "./logger";
 import url from "url";
-import { isUrlVersion } from "./utils/pkg-version";
+import { isPackageUrl } from "./types/package-url";
 import { atVersion, splitPkgName } from "./utils/pkg-name";
 import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
-
 import {
   compareEditorVersion,
   tryParseEditorVersion,
@@ -78,7 +77,7 @@ const _add = async function ({
   }
   // packages that added to scope registry
   const pkgsInScope: PkgName[] = [];
-  if (version === undefined || !isUrlVersion(version)) {
+  if (version === undefined || !isPackageUrl(version)) {
     // verify name
     let pkgInfo = await fetchPackageInfo(name);
     if (!pkgInfo && env.upstream) {
