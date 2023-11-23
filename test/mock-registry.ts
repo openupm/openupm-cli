@@ -1,9 +1,11 @@
 import { PkgInfo, PkgName } from "../src/types/global";
 import nock from "nock";
 import { SearchEndpointResult } from "./types";
+import { DomainName } from "../src/types/domain-name";
 
 export const unityRegistryUrl = "https://packages.unity.com";
 export const exampleRegistryUrl = "http://example.com";
+export const exampleRegistryReverseDomain = "com.example" as DomainName;
 
 export function startMockRegistry() {
   if (!nock.isActive()) nock.activate();

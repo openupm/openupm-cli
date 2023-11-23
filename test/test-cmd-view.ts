@@ -11,6 +11,12 @@ import {
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
+import { DomainName } from "../src/types/domain-name";
+import { atVersion } from "../src/utils/pkg-name";
+
+const packageA = "com.example.package-a" as DomainName;
+const packageUp = "com.example.package-up" as DomainName;
+const packageMissing = "pkg-not-exist" as DomainName;
 
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {
@@ -29,7 +35,7 @@ describe("cmd-view.ts", function () {
   describe("view", function () {
     let mockConsole: MockConsole = null!;
 
-    const remotePkgInfoA = buildPackageInfo("com.example.package-a", (pkg) =>
+    const remotePkgInfoA = buildPackageInfo(packageA, (pkg) =>
       pkg
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
@@ -57,11 +63,11 @@ describe("cmd-view.ts", function () {
               tarball:
                 "https://cdn.example.com/com.example.package-a/com.example.package-a-1.0.0.tgz",
             })
-            .addDependency("com.example.package-a", "^1.0.0")
+            .addDependency(packageA, "^1.0.0")
         )
     );
 
-    const remotePkgInfoUp = buildPackageInfo("com.example.package-up", (pkg) =>
+    const remotePkgInfoUp = buildPackageInfo(packageUp, (pkg) =>
       pkg
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
@@ -80,7 +86,7 @@ describe("cmd-view.ts", function () {
             .set("description", "A demo package")
             .set("keywords", [""])
             .set("category", "Unity")
-            .addDependency("com.example.package-up", "^1.0.0")
+            .addDependency(packageUp, "^1.0.0")
             .set("gitHead", "5c141ecfac59c389090a07540f44c8ac5d07a729")
             .set("readmeFilename", "README.md")
             .set("_nodeVersion", "12.13.1")
@@ -100,7 +106,7 @@ describe("cmd-view.ts", function () {
       createWorkDir("test-openupm-cli", { manifest: true });
       startMockRegistry();
       registerRemotePkg(remotePkgInfoA);
-      registerMissingPackage("pkg-not-exist");
+      registerMissingPackage(packageMissing);
       registerRemoteUpstreamPkg(remotePkgInfoUp);
       mockConsole = attachMockConsole();
     });
@@ -110,31 +116,31 @@ describe("cmd-view.ts", function () {
       mockConsole.detach();
     });
     it("view pkg", async function () {
-      const retCode = await view("com.example.package-a", options);
+      const retCode = await view(packageA, options);
       retCode.should.equal(0);
       mockConsole
         .hasLineIncluding("out", "com.example.package-a@1.0.0")
         .should.be.ok();
     });
     it("view pkg@1.0.0", async function () {
-      const retCode = await view("com.example.package-a@1.0.0", options);
+      const retCode = await view(atVersion(packageA, "1.0.0"), options);
       retCode.should.equal(1);
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
     it("view pkg-not-exist", async function () {
-      const retCode = await view("pkg-not-exist", options);
+      const retCode = await view(packageMissing, options);
       retCode.should.equal(1);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("view pkg from upstream", async function () {
-      const retCode = await view("com.example.package-up", upstreamOptions);
+      const retCode = await view(packageUp, upstreamOptions);
       retCode.should.equal(0);
       mockConsole
         .hasLineIncluding("out", "com.example.package-up@1.0.0")
         .should.be.ok();
     });
     it("view pkg-not-exist from upstream", async function () {
-      const retCode = await view("pkg-not-exist", upstreamOptions);
+      const retCode = await view(packageMissing, upstreamOptions);
       retCode.should.equal(1);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });

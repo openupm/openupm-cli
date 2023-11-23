@@ -11,6 +11,8 @@ import {
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
+import { DomainName } from "../src/types/domain-name";
+import { atVersion } from "../src/utils/pkg-name";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
@@ -42,7 +44,7 @@ describe("cmd-deps.ts", function () {
       startMockRegistry();
       registerRemotePkg(remotePkgInfoA);
       registerRemotePkg(remotePkgInfoB);
-      registerMissingPackage("pkg-not-exist");
+      registerMissingPackage("pkg-not-exist" as DomainName);
       registerRemoteUpstreamPkg(remotePkgInfoUp);
 
       mockConsole = attachMockConsole();
@@ -53,53 +55,52 @@ describe("cmd-deps.ts", function () {
       mockConsole.detach();
     });
     it("deps pkg", async function () {
-      const retCode = await deps("com.example.package-a", options);
+      const retCode = await deps(remotePkgInfoA.name, options);
       retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-b")
-        .should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
     });
     it("deps pkg --deep", async function () {
-      const retCode = await deps("com.example.package-a", {
+      const retCode = await deps(remotePkgInfoA.name, {
         ...options,
         deep: true,
       });
       retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-b")
-        .should.be.ok();
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-up")
-        .should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePkgInfoUp.name).should.be.ok();
     });
     it("deps pkg@latest", async function () {
-      const retCode = await deps("com.example.package-a@latest", options);
+      const retCode = await deps(
+        atVersion(remotePkgInfoA.name, "latest"),
+        options
+      );
       retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-b")
-        .should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
     });
     it("deps pkg@1.0.0", async function () {
-      const retCode = await deps("com.example.package-a@1.0.0", options);
+      const retCode = await deps(
+        atVersion(remotePkgInfoA.name, "1.0.0"),
+        options
+      );
       retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-b")
-        .should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
     });
     it("deps pkg@not-exist-version", async function () {
-      const retCode = await deps("com.example.package-a@2.0.0", options);
+      const retCode = await deps(
+        atVersion(remotePkgInfoA.name, "2.0.0"),
+        options
+      );
       retCode.should.equal(0);
       mockConsole
         .hasLineIncluding("out", "is not a valid choice")
         .should.be.ok();
     });
     it("deps pkg-not-exist", async function () {
-      const retCode = await deps("pkg-not-exist", options);
+      const retCode = await deps("pkg-not-exist" as DomainName, options);
       retCode.should.equal(0);
       mockConsole.hasLineIncluding("out", "not found").should.be.ok();
     });
     it("deps pkg upstream", async function () {
-      const retCode = await deps("com.example.package-up", options);
+      const retCode = await deps(remotePkgInfoUp.name, options);
       retCode.should.equal(0);
     });
   });
