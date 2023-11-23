@@ -1,6 +1,6 @@
 import "should";
 import { add, AddOptions } from "../src/cmd-add";
-import { PkgInfo, PkgManifest } from "../src/types/global";
+import { PkgManifest } from "../src/types/global";
 import {
   exampleRegistryUrl,
   registerMissingPackage,
@@ -15,6 +15,7 @@ import {
   shouldHaveDependency,
   shouldHaveManifest,
 } from "./manifest-assertions";
+import { buildPackageInfo } from "./data-pkg-info";
 
 describe("cmd-add.ts", function () {
   const options: AddOptions = {
@@ -49,129 +50,46 @@ describe("cmd-add.ts", function () {
   };
   describe("add", function () {
     let mockConsole: MockConsole = null!;
-    const remotePkgInfoA: PkgInfo = {
-      name: "com.base.package-a",
-      versions: {
-        "0.1.0": {
-          name: "com.base.package-a",
-          version: "0.1.0",
-          dependencies: {},
-        },
-        "1.0.0": {
-          name: "com.base.package-a",
-          version: "1.0.0",
-          dependencies: {},
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoB: PkgInfo = {
-      name: "com.base.package-b",
-      versions: {
-        "1.0.0": {
-          name: "com.base.package-b",
-          version: "1.0.0",
-          dependencies: {},
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoC: PkgInfo = {
-      name: "com.base.package-c",
-      versions: {
-        "1.0.0": {
-          name: "com.base.package-c",
-          version: "1.0.0",
-          dependencies: {
-            "com.base.package-d": "1.0.0",
-            "com.unity.modules.x": "1.0.0",
-          },
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoD: PkgInfo = {
-      name: "com.base.package-d",
-      versions: {
-        "1.0.0": {
-          name: "com.base.package-d",
-          version: "1.0.0",
-          dependencies: {
-            "com.upstream.package-up": "1.0.0",
-          },
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoWithLowerEditorVersion: PkgInfo = {
-      name: "com.base.package-with-lower-editor-version",
-      versions: {
-        "1.0.0": {
-          name: "com.base.package-with-lower-editor-version",
-          version: "1.0.0",
-          unity: "2019.1",
-          unityRelease: "0b1",
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoWithHigherEditorVersion: PkgInfo = {
-      name: "com.base.package-with-higher-editor-version",
-      versions: {
-        "1.0.0": {
-          name: "com.base.package-with-higher-editor-version",
-          version: "1.0.0",
-          unity: "2020.2",
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoWithWrongEditorVersion: PkgInfo = {
-      name: "com.base.package-with-wrong-editor-version",
-      versions: {
-        "1.0.0": {
-          name: "com.base.package-with-wrong-editor-version",
-          version: "1.0.0",
-          unity: "2020",
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoUp: PkgInfo = {
-      name: "com.upstream.package-up",
-      versions: {
-        "1.0.0": {
-          name: "com.upstream.package-up",
-          version: "1.0.0",
-          dependencies: {},
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
+    const remotePkgInfoA = buildPackageInfo("com.base.package-a", (pkg) =>
+      pkg.addVersion("0.1.0").addVersion("1.0.0")
+    );
+    const remotePkgInfoB = buildPackageInfo("com.base.package-b", (pkg) =>
+      pkg.addVersion("1.0.0")
+    );
+    const remotePkgInfoC = buildPackageInfo("com.base.package-c", (pkg) =>
+      pkg.addVersion("1.0.0", (version) =>
+        version
+          .addDependency("com.base.package-d", "1.0.0")
+          .addDependency("com.unity.modules.x", "1.0.0")
+      )
+    );
+    const remotePkgInfoD = buildPackageInfo("com.base.package-d", (pkg) =>
+      pkg.addVersion("1.0.0", (version) =>
+        version.addDependency("com.upstream.package-up", "1.0.0")
+      )
+    );
+    const remotePkgInfoWithLowerEditorVersion = buildPackageInfo(
+      "com.base.package-with-lower-editor-version",
+      (pkg) =>
+        pkg.addVersion("1.0.0", (version) =>
+          version.set("unity", "2019.1").set("unityRelease", "0b1")
+        )
+    );
+    const remotePkgInfoWithHigherEditorVersion = buildPackageInfo(
+      "com.base.package-with-higher-editor-version",
+      (pkg) =>
+        pkg.addVersion("1.0.0", (version) => version.set("unity", "2020.2"))
+    );
+    const remotePkgInfoWithWrongEditorVersion = buildPackageInfo(
+      "com.base.package-with-wrong-editor-version",
+      (pkg) =>
+        pkg.addVersion("1.0.0", (version) => version.set("unity", "2020"))
+    );
+
+    const remotePkgInfoUp = buildPackageInfo("com.upstream.package-up", (pkg) =>
+      pkg.addVersion("1.0.0")
+    );
+
     const defaultManifest: PkgManifest = {
       dependencies: {},
     };

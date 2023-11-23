@@ -8,9 +8,9 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { PkgInfo } from "../src/types/global";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
+import { buildPackageInfo } from "./data-pkg-info";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
@@ -22,52 +22,20 @@ describe("cmd-deps.ts", function () {
   describe("deps", function () {
     let mockConsole: MockConsole = null!;
 
-    const remotePkgInfoA: PkgInfo = {
-      name: "com.example.package-a",
-      versions: {
-        "1.0.0": {
-          name: "com.example.package-a",
-          version: "1.0.0",
-          dependencies: {
-            "com.example.package-b": "1.0.0",
-          },
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoB: PkgInfo = {
-      name: "com.example.package-b",
-      versions: {
-        "1.0.0": {
-          name: "com.example.package-b",
-          version: "1.0.0",
-          dependencies: {
-            "com.example.package-up": "1.0.0",
-          },
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
-    const remotePkgInfoUp: PkgInfo = {
-      name: "com.example.package-up",
-      versions: {
-        "1.0.0": {
-          name: "com.example.package-up",
-          version: "1.0.0",
-          dependencies: {},
-        },
-      },
-      "dist-tags": {
-        latest: "1.0.0",
-      },
-      time: {},
-    };
+    const remotePkgInfoA = buildPackageInfo("com.example.package-a", (pkg) =>
+      pkg.addVersion("1.0.0", (version) =>
+        version.addDependency("com.example.package-b", "1.0.0")
+      )
+    );
+    const remotePkgInfoB = buildPackageInfo("com.example.package-b", (pkg) =>
+      pkg.addVersion("1.0.0", (version) =>
+        version.addDependency("com.example.package-up", "1.0.0")
+      )
+    );
+    const remotePkgInfoUp = buildPackageInfo("com.example.package-up", (pkg) =>
+      pkg.addVersion("1.0.0")
+    );
+
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
