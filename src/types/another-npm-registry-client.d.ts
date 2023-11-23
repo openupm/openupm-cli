@@ -1,5 +1,7 @@
+import { PkgInfo } from "./global";
+import request from "request";
+
 declare module "another-npm-registry-client" {
-  import request from "request";
   export type NpmAuth =
     | {
         username: string;
