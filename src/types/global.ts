@@ -1,8 +1,9 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { IpAddress } from "./ip-address";
 import { DomainName } from "./domain-name";
+import { PackageUrl } from "./package-url";
 
-export type PkgVersion = string;
+export type PkgVersion = PackageUrl | string;
 
 export type PkgName = DomainName | `${DomainName}@${PkgVersion}`;
 
