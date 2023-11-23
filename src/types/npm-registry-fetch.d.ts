@@ -1,4 +1,4 @@
-import { Response } from "request";
+import { Response } from "node-fetch";
 
 declare module "npm-registry-fetch" {
   class HttpErrorBase extends Error {
