@@ -11,6 +11,7 @@ import {
   shouldHaveNoManifest,
   shouldNotHaveAnyDependencies,
 } from "./manifest-assertions";
+import { DomainName } from "../src/types/domain-name";
 
 describe("manifest", function () {
   let mockConsole: MockConsole = null!;
@@ -73,7 +74,7 @@ describe("manifest", function () {
     ).should.be.ok();
     const manifest = shouldHaveManifest();
     shouldNotHaveAnyDependencies(manifest);
-    manifest.dependencies["some-pack"] = "1.0.0";
+    manifest.dependencies["some-pack" as DomainName] = "1.0.0";
     saveManifest(manifest).should.be.ok();
     const manifest2 = shouldHaveManifest();
     manifest2.should.be.deepEqual(manifest);
