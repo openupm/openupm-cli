@@ -1,6 +1,5 @@
 import "should";
 import { add, AddOptions } from "../src/cmd-add";
-import { PkgManifest } from "../src/types/global";
 import {
   exampleRegistryUrl,
   registerMissingPackage,
@@ -16,6 +15,7 @@ import {
   shouldHaveManifest,
 } from "./manifest-assertions";
 import { buildPackageInfo } from "./data-pkg-info";
+import { buildPackageManifest } from "./data-pkg-manifest";
 
 describe("cmd-add.ts", function () {
   const options: AddOptions = {
@@ -85,69 +85,31 @@ describe("cmd-add.ts", function () {
       (pkg) =>
         pkg.addVersion("1.0.0", (version) => version.set("unity", "2020"))
     );
-
     const remotePkgInfoUp = buildPackageInfo("com.upstream.package-up", (pkg) =>
       pkg.addVersion("1.0.0")
     );
 
-    const defaultManifest: PkgManifest = {
-      dependencies: {},
-    };
-    const expectedManifestA: PkgManifest = {
-      dependencies: {
-        "com.base.package-a": "1.0.0",
-      },
-      scopedRegistries: [
-        {
-          name: "example.com",
-          scopes: ["com.base.package-a", "com.example"],
-          url: exampleRegistryUrl,
-        },
-      ],
-    };
-    const expectedManifestAB: PkgManifest = {
-      dependencies: {
-        "com.base.package-a": "1.0.0",
-        "com.base.package-b": "1.0.0",
-      },
-      scopedRegistries: [
-        {
-          name: "example.com",
-          scopes: ["com.base.package-a", "com.base.package-b", "com.example"],
-          url: exampleRegistryUrl,
-        },
-      ],
-    };
-    const expectedManifestC: PkgManifest = {
-      dependencies: {
-        "com.base.package-c": "1.0.0",
-      },
-      scopedRegistries: [
-        {
-          name: "example.com",
-          scopes: ["com.base.package-c", "com.base.package-d", "com.example"],
-          url: exampleRegistryUrl,
-        },
-      ],
-    };
-    const expectedManifestUpstream: PkgManifest = {
-      dependencies: {
-        "com.upstream.package-up": "1.0.0",
-      },
-    };
-    const expectedManifestTestable: PkgManifest = {
-      dependencies: {
-        "com.base.package-a": "1.0.0",
-      },
-      scopedRegistries: [
-        {
-          name: "example.com",
-          scopes: ["com.base.package-a", "com.example"],
-          url: exampleRegistryUrl,
-        },
-      ],
-      testables: ["com.base.package-a"],
-    };
+    const defaultManifest = buildPackageManifest();
+    const expectedManifestA = buildPackageManifest((manifest) =>
+      manifest.addDependency("com.base.package-a", "1.0.0", true, false)
+    );
+    const expectedManifestAB = buildPackageManifest((manifest) =>
+      manifest
+        .addDependency("com.base.package-a", "1.0.0", true, false)
+        .addDependency("com.base.package-b", "1.0.0", true, false)
+    );
+    const expectedManifestC = buildPackageManifest((manifest) =>
+      manifest
+        .addDependency("com.base.package-c", "1.0.0", true, false)
+        .addScope("com.base.package-d")
+    );
+    const expectedManifestUpstream = buildPackageManifest((manifest) =>
+      manifest.addDependency("com.upstream.package-up", "1.0.0", false, false)
+    );
+    const expectedManifestTestable = buildPackageManifest((manifest) =>
+      manifest.addDependency("com.base.package-a", "1.0.0", true, true)
+    );
+
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", {
