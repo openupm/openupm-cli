@@ -1,6 +1,5 @@
 import "should";
 import { remove } from "../src/cmd-remove";
-import { PkgManifest } from "../src/types/global";
 import { exampleRegistryUrl } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
@@ -9,27 +8,17 @@ import {
   shouldHaveRegistryWithScopes,
   shouldNotHaveDependency,
 } from "./manifest-assertions";
+import { buildPackageManifest } from "./data-pkg-manifest";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
     let mockConsole: MockConsole = null!;
-    const defaultManifest: PkgManifest = {
-      dependencies: {
-        "com.example.package-a": "1.0.0",
-        "com.example.package-b": "1.0.0",
-      },
-      scopedRegistries: [
-        {
-          name: "example.com",
-          scopes: [
-            "com.example",
-            "com.example.package-a",
-            "com.example.package-b",
-          ],
-          url: exampleRegistryUrl,
-        },
-      ],
-    };
+    const defaultManifest = buildPackageManifest((manifest) =>
+      manifest
+        .addDependency("com.example.package-a", "1.0.0", true, false)
+        .addDependency("com.example.package-b", "1.0.0", true, false)
+    );
+
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", {
