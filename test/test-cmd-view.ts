@@ -12,7 +12,7 @@ import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
 import { DomainName } from "../src/types/domain-name";
-import { SemanticVersion } from "../src/types/semantic-version";
+import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 
 const packageA = "com.example.package-a" as DomainName;
@@ -41,7 +41,7 @@ describe("cmd-view.ts", function () {
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
-          ["1.0.0" as SemanticVersion]: "2019-11-28T18:51:58.123Z",
+          [semanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
         })
         .set("_rev", "3-418f950115c32bd0")
         .set("readme", "A demo package")
@@ -73,7 +73,7 @@ describe("cmd-view.ts", function () {
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
-          ["1.0.0" as SemanticVersion]: "2019-11-28T18:51:58.123Z",
+          [semanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
         })
         .set("_rev", "3-418f950115c32bd0")
         .set("readme", "A demo package")
@@ -125,7 +125,7 @@ describe("cmd-view.ts", function () {
     });
     it("view pkg@1.0.0", async function () {
       const retCode = await view(
-        packageReference(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       retCode.should.equal(1);
