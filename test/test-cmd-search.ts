@@ -10,7 +10,7 @@ import {
 import { SearchEndpointResult } from "./types";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { DomainName } from "../src/types/domain-name";
+import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 
 describe("cmd-search.ts", function () {
@@ -38,7 +38,7 @@ describe("cmd-search.ts", function () {
       objects: [
         {
           package: {
-            name: "com.example.package-a" as DomainName,
+            name: domainName("com.example.package-a"),
             scope: "unscoped",
             version: semanticVersion("1.0.0"),
             description: "A demo package",

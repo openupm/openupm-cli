@@ -90,11 +90,9 @@ const printInfo = function (pkg: PkgInfo) {
   if (dependencies && Object.keys(dependencies).length > 0) {
     console.log();
     console.log("dependencies");
-    Object.keys(dependencies)
+    (Object.keys(dependencies) as DomainName[])
       .sort()
-      .forEach((n) =>
-        console.log(chalk.yellow(n) + ` ${dependencies[n as DomainName]}`)
-      );
+      .forEach((n) => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
   }
 
   console.log();

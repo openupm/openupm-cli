@@ -12,13 +12,13 @@ import {
   shouldNotHaveDependency,
 } from "./manifest-assertions";
 import { buildPackageManifest } from "./data-pkg-manifest";
-import { DomainName } from "../src/types/domain-name";
+import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 
-const packageA = "com.example.package-a" as DomainName;
-const packageB = "com.example.package-b" as DomainName;
-const missingPackage = "pkg-not-exist" as DomainName;
+const packageA = domainName("com.example.package-a");
+const packageB = domainName("com.example.package-b");
+const missingPackage = domainName("pkg-not-exist");
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {

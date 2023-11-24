@@ -1,4 +1,5 @@
 import { Brand } from "ts-brand";
+import assert from "assert";
 
 /**
  * A string matching the format of a domain name.
@@ -9,7 +10,7 @@ export type DomainName = Brand<string, "DomainName">;
 
 const segmentRegex = /^(?!.*--|^-.*|.*-$)[a-zA-Z0-9-]+$/;
 
-export const openUpmReverseDomainName = "com.openupm" as DomainName;
+export const openUpmReverseDomainName = domainName("com.openupm");
 
 function domainSegmentsIn(hostName: string): string[] {
   return hostName.split(".");
@@ -70,3 +71,13 @@ export const isInternalPackage = (name: DomainName): boolean => {
   ];
   return /com.unity.modules/i.test(name) || internals.includes(name);
 };
+
+/**
+ * Constructs a domain-name from a string.
+ * @param s The string.
+ * @throws assert.AssertionError if string is not in valid format
+ */
+export function domainName(s: string): DomainName {
+  assert(isDomainName(s), `"${s}" is a domain name`);
+  return s;
+}
