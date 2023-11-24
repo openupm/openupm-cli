@@ -13,7 +13,7 @@ import { env } from "./utils/env";
 import _ from "lodash";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { DomainName, isInternalPackage } from "./types/domain-name";
-import {semanticVersion, SemanticVersion} from "./types/semantic-version";
+import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 
 export type NpmClient = {

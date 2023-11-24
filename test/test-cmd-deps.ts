@@ -11,7 +11,7 @@ import {
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
-import { DomainName } from "../src/types/domain-name";
+import { domainName } from "../src/types/domain-name";
 import { packageReference } from "../src/types/package-reference";
 
 describe("cmd-deps.ts", function () {
@@ -44,7 +44,7 @@ describe("cmd-deps.ts", function () {
       startMockRegistry();
       registerRemotePkg(remotePkgInfoA);
       registerRemotePkg(remotePkgInfoB);
-      registerMissingPackage("pkg-not-exist" as DomainName);
+      registerMissingPackage("pkg-not-exist");
       registerRemoteUpstreamPkg(remotePkgInfoUp);
 
       mockConsole = attachMockConsole();
@@ -95,7 +95,7 @@ describe("cmd-deps.ts", function () {
         .should.be.ok();
     });
     it("deps pkg-not-exist", async function () {
-      const retCode = await deps("pkg-not-exist" as DomainName, options);
+      const retCode = await deps(domainName("pkg-not-exist"), options);
       retCode.should.equal(0);
       mockConsole.hasLineIncluding("out", "not found").should.be.ok();
     });

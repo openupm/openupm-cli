@@ -11,13 +11,13 @@ import {
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
-import { DomainName } from "../src/types/domain-name";
+import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 
-const packageA = "com.example.package-a" as DomainName;
-const packageUp = "com.example.package-up" as DomainName;
-const packageMissing = "pkg-not-exist" as DomainName;
+const packageA = domainName("com.example.package-a");
+const packageUp = domainName("com.example.package-up");
+const packageMissing = domainName("pkg-not-exist");
 
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {

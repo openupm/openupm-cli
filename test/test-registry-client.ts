@@ -11,9 +11,9 @@ import {
 } from "./mock-registry";
 import should from "should";
 import { buildPackageInfo } from "./data-pkg-info";
-import { DomainName } from "../src/types/domain-name";
+import { domainName } from "../src/types/domain-name";
 
-const packageA = "package-a" as DomainName;
+const packageA = domainName("package-a");
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {

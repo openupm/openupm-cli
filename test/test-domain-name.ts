@@ -1,6 +1,6 @@
 import { describe } from "mocha";
 import {
-  DomainName,
+  domainName,
   isDomainName,
   isInternalPackage,
   namespaceFor,
@@ -50,17 +50,13 @@ describe("domain-name", function () {
   });
   describe("internal package", function () {
     it("test com.otherorg.software", function () {
-      isInternalPackage(
-        "com.otherorg.software" as DomainName
-      ).should.not.be.ok();
+      isInternalPackage(domainName("com.otherorg.software")).should.not.be.ok();
     });
     it("test com.unity.ugui", function () {
-      isInternalPackage("com.unity.ugui" as DomainName).should.be.ok();
+      isInternalPackage(domainName("com.unity.ugui")).should.be.ok();
     });
     it("test com.unity.modules.tilemap", function () {
-      isInternalPackage(
-        "com.unity.modules.tilemap" as DomainName
-      ).should.be.ok();
+      isInternalPackage(domainName("com.unity.modules.tilemap")).should.be.ok();
     });
   });
 });

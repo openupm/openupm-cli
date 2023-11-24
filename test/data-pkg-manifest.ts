@@ -1,6 +1,6 @@
 import { PkgManifest } from "../src/types/global";
 import assert from "assert";
-import { DomainName, isDomainName } from "../src/types/domain-name";
+import { domainName, isDomainName } from "../src/types/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
 import { isSemanticVersion } from "../src/types/semantic-version";
 
@@ -27,7 +27,7 @@ class PkgManifestBuilder {
       this.manifest.scopedRegistries = [
         {
           name: "example.com",
-          scopes: ["com.example" as DomainName],
+          scopes: [domainName("com.example")],
           url: exampleRegistryUrl,
         },
       ];

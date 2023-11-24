@@ -3,7 +3,6 @@ import should from "should";
 import {
   isPackageReference,
   packageReference,
-  PackageReference,
   splitPackageReference,
 } from "../src/types/package-reference";
 

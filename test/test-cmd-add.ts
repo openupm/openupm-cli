@@ -16,24 +16,27 @@ import {
 } from "./manifest-assertions";
 import { buildPackageInfo } from "./data-pkg-info";
 import { buildPackageManifest } from "./data-pkg-manifest";
-import { DomainName } from "../src/types/domain-name";
+import { domainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 
 describe("cmd-add.ts", function () {
-  const packageMissing = "pkg-not-exist" as DomainName;
-  const packageA = "com.base.package-a" as DomainName;
-  const packageB = "com.base.package-b" as DomainName;
-  const packageC = "com.base.package-c" as DomainName;
-  const packageD = "com.base.package-d" as DomainName;
-  const packageUp = "com.upstream.package-up" as DomainName;
-  const packageLowerEditor =
-    "com.base.package-with-lower-editor-version" as DomainName;
-  const packageHigherEditor =
-    "com.base.package-with-higher-editor-version" as DomainName;
-  const packageWrongEditor =
-    "com.base.package-with-wrong-editor-version" as DomainName;
+  const packageMissing = domainName("pkg-not-exist");
+  const packageA = domainName("com.base.package-a");
+  const packageB = domainName("com.base.package-b");
+  const packageC = domainName("com.base.package-c");
+  const packageD = domainName("com.base.package-d");
+  const packageUp = domainName("com.upstream.package-up");
+  const packageLowerEditor = domainName(
+    "com.base.package-with-lower-editor-version"
+  );
+  const packageHigherEditor = domainName(
+    "com.base.package-with-higher-editor-version"
+  );
+  const packageWrongEditor = domainName(
+    "com.base.package-with-wrong-editor-version"
+  );
 
   const options: AddOptions = {
     _global: {
