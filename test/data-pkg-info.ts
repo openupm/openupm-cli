@@ -5,6 +5,7 @@ import {
   isSemanticVersion,
   SemanticVersion,
 } from "../src/types/semantic-version";
+import { packageId } from "../src/types/package-id";
 
 /**
  * Builder class for {@link PkgVersionInfo}
@@ -15,7 +16,7 @@ class VersionInfoBuilder {
   constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
       name,
-      _id: `${name}@${version}`,
+      _id: packageId(name, version),
       version,
       dependencies: {},
       contributors: [],

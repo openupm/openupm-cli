@@ -3,6 +3,7 @@ import { IpAddress } from "./ip-address";
 import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
+import { PackageId } from "./package-id";
 
 export type PkgVersion = PackageUrl | SemanticVersion | "latest";
 
@@ -53,7 +54,7 @@ export type Contact = {
 };
 
 export type PkgVersionInfo = {
-  _id?: PkgName;
+  _id?: PackageId;
   _nodeVersion?: string;
   _npmVersion?: string;
   _rev?: string;
