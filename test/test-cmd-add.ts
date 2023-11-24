@@ -18,7 +18,7 @@ import { buildPackageInfo } from "./data-pkg-info";
 import { buildPackageManifest } from "./data-pkg-manifest";
 import { DomainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
-import { SemanticVersion } from "../src/types/semantic-version";
+import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 
 describe("cmd-add.ts", function () {
@@ -162,7 +162,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@1.0.0", async function () {
       const retCode = await add(
-        packageReference(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       retCode.should.equal(0);
@@ -181,12 +181,12 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
       const retCode1 = await add(
-        packageReference(packageA, "0.1.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("0.1.0")),
         options
       );
       retCode1.should.equal(0);
       const retCode2 = await add(
-        packageReference(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       retCode2.should.equal(0);
@@ -197,12 +197,12 @@ describe("cmd-add.ts", function () {
     });
     it("add exited pkg version", async function () {
       const retCode1 = await add(
-        packageReference(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       retCode1.should.equal(0);
       const retCode2 = await add(
-        packageReference(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       retCode2.should.equal(0);
@@ -213,7 +213,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@not-exist-version", async function () {
       const retCode = await add(
-        packageReference(packageA, "2.0.0" as SemanticVersion),
+        packageReference(packageA, semanticVersion("2.0.0")),
         options
       );
       retCode.should.equal(1);
