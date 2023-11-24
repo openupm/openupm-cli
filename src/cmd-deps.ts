@@ -34,7 +34,6 @@ const _deps = async function ({
   if (version !== undefined && isPackageUrl(version))
     throw new Error("Cannot get dependencies for url-version");
 
-  // eslint-disable-next-line no-unused-vars
   const [depsValid, depsInvalid] = await fetchPackageDependencies({
     name,
     version,
