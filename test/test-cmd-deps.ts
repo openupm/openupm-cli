@@ -13,6 +13,7 @@ import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
 import { DomainName } from "../src/types/domain-name";
 import { atVersion } from "../src/utils/pkg-name";
+import { SemanticVersion } from "../src/types/semantic-version";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
@@ -78,7 +79,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps(
-        atVersion(remotePkgInfoA.name, "1.0.0"),
+        atVersion(remotePkgInfoA.name, "1.0.0" as SemanticVersion),
         options
       );
       retCode.should.equal(0);
@@ -86,7 +87,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps(
-        atVersion(remotePkgInfoA.name, "2.0.0"),
+        atVersion(remotePkgInfoA.name, "2.0.0" as SemanticVersion),
         options
       );
       retCode.should.equal(0);

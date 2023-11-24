@@ -2,8 +2,9 @@ import { NpmAuth } from "another-npm-registry-client";
 import { IpAddress } from "./ip-address";
 import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
+import { SemanticVersion } from "./semantic-version";
 
-export type PkgVersion = PackageUrl | string;
+export type PkgVersion = PackageUrl | SemanticVersion | "latest";
 
 export type PkgName = DomainName | `${DomainName}@${PkgVersion}`;
 
@@ -57,10 +58,10 @@ export type PkgVersionInfo = {
   _npmVersion?: string;
   _rev?: string;
   name: string;
-  version: string;
+  version: SemanticVersion;
   unity?: string;
   unityRelease?: string;
-  dependencies?: Record<DomainName, PkgVersion>;
+  dependencies?: Record<DomainName, SemanticVersion>;
   license?: string;
   displayName?: string;
   description?: string;
@@ -80,24 +81,28 @@ export type PkgInfo = {
   _rev?: string;
   _attachments?: Record<string, unknown>;
   readme?: string;
-  versions: Record<PkgVersion, PkgVersionInfo>;
-  "dist-tags"?: { latest?: PkgVersion };
-  version?: PkgVersion;
+  versions: Record<SemanticVersion, PkgVersionInfo>;
+  "dist-tags"?: { latest?: SemanticVersion };
+  version?: SemanticVersion;
   description?: string;
   keywords?: string[];
-  time: Record<"created" | "modified" | PkgVersion, string>;
+  time: {
+    [key: SemanticVersion]: string;
+    created?: string;
+    modified?: string;
+  };
   date?: Date;
   users?: Record<string, unknown>;
 };
 
 export type NameVersionPair = {
   name: DomainName;
-  version: PkgVersion | undefined;
+  version: SemanticVersion | "latest" | undefined;
 };
 
 export type Dependency = {
   name: DomainName;
-  version: PkgVersion;
+  version: SemanticVersion;
   upstream: boolean;
   self: boolean;
   internal: boolean;
@@ -112,7 +117,7 @@ export type ScopedRegistry = {
 };
 
 export type PkgManifest = {
-  dependencies: Record<PkgName, PkgVersion>;
+  dependencies: Record<PkgName, SemanticVersion | PackageUrl>;
   scopedRegistries?: ScopedRegistry[];
   testables?: string[];
 };

@@ -1,6 +1,10 @@
 import { PkgInfo, PkgVersionInfo } from "../src/types/global";
 import assert from "assert";
 import { DomainName, isDomainName } from "../src/types/domain-name";
+import {
+  isSemanticVersion,
+  SemanticVersion,
+} from "../src/types/semantic-version";
 
 /**
  * Builder class for {@link PkgVersionInfo}
@@ -8,7 +12,7 @@ import { DomainName, isDomainName } from "../src/types/domain-name";
 class VersionInfoBuilder {
   readonly version: PkgVersionInfo;
 
-  constructor(name: DomainName, version: string) {
+  constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
       name,
       _id: `${name}@${version}`,
@@ -25,6 +29,7 @@ class VersionInfoBuilder {
    */
   addDependency(name: string, version: string): VersionInfoBuilder {
     assert(isDomainName(name), `${name} is domain name`);
+    assert(isSemanticVersion(version), `${version} is semantic version`);
     this.version.dependencies![name] = version;
     return this;
   }
@@ -51,8 +56,7 @@ class VersionInfoBuilder {
 class PackageInfoBuilder {
   readonly package: PkgInfo;
 
-  constructor(name: string) {
-    assert(isDomainName(name), `${name} is domain name`);
+  constructor(name: DomainName) {
     this.package = {
       name,
       _id: name,
@@ -72,6 +76,7 @@ class PackageInfoBuilder {
     version: string,
     build?: (builder: VersionInfoBuilder) => unknown
   ): PackageInfoBuilder {
+    assert(isSemanticVersion(version), `${version} is semantic version`);
     const builder = new VersionInfoBuilder(this.package.name, version);
     if (build !== undefined) build(builder);
     this.package.versions[version] = builder.version;
@@ -102,6 +107,7 @@ export function buildPackageInfo(
   name: string,
   build?: (builder: PackageInfoBuilder) => unknown
 ): PkgInfo {
+  assert(isDomainName(name), `${name} is domain name`);
   const builder = new PackageInfoBuilder(name);
   if (build !== undefined) build(builder);
   return builder.package;

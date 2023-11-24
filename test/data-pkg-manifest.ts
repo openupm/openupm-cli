@@ -2,6 +2,7 @@ import { PkgManifest } from "../src/types/global";
 import assert from "assert";
 import { DomainName, isDomainName } from "../src/types/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
+import { isSemanticVersion } from "../src/types/semantic-version";
 
 /**
  * Builder class for {@link PkgManifest}
@@ -64,6 +65,7 @@ class PkgManifestBuilder {
     testable: boolean
   ): PkgManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
+    assert(isSemanticVersion(version), `${version} is semantic version`);
     if (withScope) this.addScope(name);
     if (testable) this.addTestable(name);
     this.manifest.dependencies[name] = version;
