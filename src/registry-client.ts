@@ -13,7 +13,6 @@ import {
   NameVersionPair,
   PkgInfo,
   PkgName,
-  PkgVersion,
   Registry,
 } from "./types/global";
 import { env } from "./utils/env";
@@ -21,6 +20,7 @@ import { atVersion } from "./utils/pkg-name";
 import _ from "lodash";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { DomainName, isInternalPackage } from "./types/domain-name";
+import { SemanticVersion } from "./types/semantic-version";
 
 export type NpmClient = {
   rawClient: RegClient;
@@ -126,7 +126,7 @@ export const fetchPackageDependencies = async function ({
   deep,
 }: {
   name: DomainName;
-  version: PkgVersion | undefined;
+  version: SemanticVersion | "latest" | undefined;
   deep?: boolean;
 }): Promise<[Dependency[], Dependency[]]> {
   log.verbose(
@@ -145,7 +145,7 @@ export const fetchPackageDependencies = async function ({
   const depsInvalid = [];
   // cached dict: {pkg-name: pkgInfo}
   const cachedPacakgeInfoDict: Record<
-    PkgVersion,
+    DomainName,
     { pkgInfo: PkgInfo; upstream: boolean }
   > = {};
   while (pendingList.length > 0) {
@@ -160,7 +160,7 @@ export const fetchPackageDependencies = async function ({
         internal: isInternalPackage(entry.name),
         upstream: false,
         self: entry.name == name,
-        version: "",
+        version: "" as SemanticVersion,
         reason: null,
       };
       if (!depObj.internal) {
@@ -223,12 +223,15 @@ export const fetchPackageDependencies = async function ({
         }
         // add dependencies to pending list
         if (depObj.self || deep) {
-          const deps: NameVersionPair[] = _.toPairs(
-            pkgInfo.versions[entry.version]["dependencies"]
+          const deps: NameVersionPair[] = (
+            _.toPairs(pkgInfo.versions[entry.version]["dependencies"]) as [
+              DomainName,
+              SemanticVersion
+            ][]
           ).map((x): NameVersionPair => {
             return {
-              name: x[0] as DomainName,
-              version: x[1] as PkgVersion,
+              name: x[0],
+              version: x[1],
             };
           });
           deps.forEach((x) => pendingList.push(x));

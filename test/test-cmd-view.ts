@@ -13,6 +13,7 @@ import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
 import { DomainName } from "../src/types/domain-name";
 import { atVersion } from "../src/utils/pkg-name";
+import { SemanticVersion } from "../src/types/semantic-version";
 
 const packageA = "com.example.package-a" as DomainName;
 const packageUp = "com.example.package-up" as DomainName;
@@ -40,7 +41,7 @@ describe("cmd-view.ts", function () {
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
-          "1.0.0": "2019-11-28T18:51:58.123Z",
+          ["1.0.0" as SemanticVersion]: "2019-11-28T18:51:58.123Z",
         })
         .set("_rev", "3-418f950115c32bd0")
         .set("readme", "A demo package")
@@ -63,7 +64,7 @@ describe("cmd-view.ts", function () {
               tarball:
                 "https://cdn.example.com/com.example.package-a/com.example.package-a-1.0.0.tgz",
             })
-            .addDependency(packageA, "^1.0.0")
+            .addDependency(packageA, "1.0.0")
         )
     );
 
@@ -72,7 +73,7 @@ describe("cmd-view.ts", function () {
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
-          "1.0.0": "2019-11-28T18:51:58.123Z",
+          ["1.0.0" as SemanticVersion]: "2019-11-28T18:51:58.123Z",
         })
         .set("_rev", "3-418f950115c32bd0")
         .set("readme", "A demo package")
@@ -86,7 +87,7 @@ describe("cmd-view.ts", function () {
             .set("description", "A demo package")
             .set("keywords", [""])
             .set("category", "Unity")
-            .addDependency(packageUp, "^1.0.0")
+            .addDependency(packageUp, "1.0.0")
             .set("gitHead", "5c141ecfac59c389090a07540f44c8ac5d07a729")
             .set("readmeFilename", "README.md")
             .set("_nodeVersion", "12.13.1")
@@ -123,7 +124,10 @@ describe("cmd-view.ts", function () {
         .should.be.ok();
     });
     it("view pkg@1.0.0", async function () {
-      const retCode = await view(atVersion(packageA, "1.0.0"), options);
+      const retCode = await view(
+        atVersion(packageA, "1.0.0" as SemanticVersion),
+        options
+      );
       retCode.should.equal(1);
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });

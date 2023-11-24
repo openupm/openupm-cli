@@ -14,6 +14,7 @@ import {
 import { buildPackageManifest } from "./data-pkg-manifest";
 import { DomainName } from "../src/types/domain-name";
 import { atVersion } from "../src/utils/pkg-name";
+import { SemanticVersion } from "../src/types/semantic-version";
 
 const packageA = "com.example.package-a" as DomainName;
 const packageB = "com.example.package-b" as DomainName;
@@ -65,7 +66,10 @@ describe("cmd-remove.ts", function () {
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
-      const retCode = await remove(atVersion(packageA, "1.0.0"), options);
+      const retCode = await remove(
+        atVersion(packageA, "1.0.0" as SemanticVersion),
+        options
+      );
       retCode.should.equal(1);
       const manifest = shouldHaveManifest();
       manifest.should.deepEqual(defaultManifest);

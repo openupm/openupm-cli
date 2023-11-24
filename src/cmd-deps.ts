@@ -4,6 +4,7 @@ import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
 import { parseEnv } from "./utils/env";
 import { fetchPackageDependencies } from "./registry-client";
 import { DomainName } from "./types/domain-name";
+import { isPackageUrl } from "./types/package-url";
 
 export type DepsOptions = {
   deep?: boolean;
@@ -30,6 +31,9 @@ const _deps = async function ({
   version: PkgVersion | undefined;
   deep?: boolean;
 }) {
+  if (version !== undefined && isPackageUrl(version))
+    throw new Error("Cannot get dependencies for url-version");
+
   // eslint-disable-next-line no-unused-vars
   const [depsValid, depsInvalid] = await fetchPackageDependencies({
     name,

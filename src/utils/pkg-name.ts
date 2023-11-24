@@ -13,7 +13,7 @@ export const splitPkgName = function (pkgName: PkgName): {
   const name = segments[0] as DomainName;
   const version =
     segments.length > 1
-      ? segments.slice(1, segments.length).join("@")
+      ? (segments.slice(1, segments.length).join("@") as PkgVersion)
       : undefined;
   return { name, version };
 };

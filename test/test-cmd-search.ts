@@ -12,6 +12,7 @@ import { SearchEndpointResult } from "./types";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { DomainName } from "../src/types/domain-name";
+import { SemanticVersion } from "../src/types/semantic-version";
 
 describe("cmd-search.ts", function () {
   let mockConsole: MockConsole = null!;
@@ -40,7 +41,7 @@ describe("cmd-search.ts", function () {
           package: {
             name: "com.example.package-a" as DomainName,
             scope: "unscoped",
-            version: "1.0.0",
+            version: "1.0.0" as SemanticVersion,
             description: "A demo package",
             date: "2019-10-02T04:02:38.335Z",
             links: {},

@@ -12,6 +12,7 @@ import {
 } from "./utils/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
 import { isDomainName } from "./types/domain-name";
+import { SemanticVersion } from "./types/semantic-version";
 
 export type AddOptions = {
   test?: boolean;
@@ -89,10 +90,11 @@ const _add = async function ({
       return { code: 1, dirty };
     }
     // verify version
-    const versions = Object.keys(pkgInfo.versions);
+    const versions = Object.keys(pkgInfo.versions) as SemanticVersion[];
     // eslint-disable-next-line require-atomic-updates
-    if (!version || version == "latest") version = tryGetLatestVersion(pkgInfo);
-    if (versions.filter((x) => x == version).length <= 0) {
+    if (!version || version === "latest")
+      version = tryGetLatestVersion(pkgInfo);
+    if (versions.filter((x) => x === version).length <= 0) {
       log.warn(
         "404",
         `version ${version} is not a valid choice of: ${versions
