@@ -17,9 +17,9 @@ import {
 import { buildPackageInfo } from "./data-pkg-info";
 import { buildPackageManifest } from "./data-pkg-manifest";
 import { DomainName } from "../src/types/domain-name";
-import { atVersion } from "../src/utils/pkg-name";
 import { PackageUrl } from "../src/types/package-url";
 import { SemanticVersion } from "../src/types/semantic-version";
+import { packageReference } from "../src/types/package-reference";
 
 describe("cmd-add.ts", function () {
   const packageMissing = "pkg-not-exist" as DomainName;
@@ -162,7 +162,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@1.0.0", async function () {
       const retCode = await add(
-        atVersion(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, "1.0.0" as SemanticVersion),
         options
       );
       retCode.should.equal(0);
@@ -172,7 +172,7 @@ describe("cmd-add.ts", function () {
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
     it("add pkg@latest", async function () {
-      const retCode = await add(atVersion(packageA, "latest"), options);
+      const retCode = await add(packageReference(packageA, "latest"), options);
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
       manifest.should.deepEqual(expectedManifestA);
@@ -181,12 +181,12 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
       const retCode1 = await add(
-        atVersion(packageA, "0.1.0" as SemanticVersion),
+        packageReference(packageA, "0.1.0" as SemanticVersion),
         options
       );
       retCode1.should.equal(0);
       const retCode2 = await add(
-        atVersion(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, "1.0.0" as SemanticVersion),
         options
       );
       retCode2.should.equal(0);
@@ -197,12 +197,12 @@ describe("cmd-add.ts", function () {
     });
     it("add exited pkg version", async function () {
       const retCode1 = await add(
-        atVersion(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, "1.0.0" as SemanticVersion),
         options
       );
       retCode1.should.equal(0);
       const retCode2 = await add(
-        atVersion(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, "1.0.0" as SemanticVersion),
         options
       );
       retCode2.should.equal(0);
@@ -213,7 +213,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@not-exist-version", async function () {
       const retCode = await add(
-        atVersion(packageA, "2.0.0" as SemanticVersion),
+        packageReference(packageA, "2.0.0" as SemanticVersion),
         options
       );
       retCode.should.equal(1);
@@ -226,7 +226,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@http", async function () {
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(atVersion(packageA, gitUrl), options);
+      const retCode = await add(packageReference(packageA, gitUrl), options);
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
       shouldHaveDependency(manifest, packageA, gitUrl);
@@ -235,7 +235,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@git", async function () {
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(atVersion(packageA, gitUrl), options);
+      const retCode = await add(packageReference(packageA, gitUrl), options);
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
       shouldHaveDependency(manifest, packageA, gitUrl);
@@ -244,7 +244,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@file", async function () {
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(atVersion(packageA, fileUrl), options);
+      const retCode = await add(packageReference(packageA, fileUrl), options);
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
       shouldHaveDependency(manifest, packageA, fileUrl);
@@ -289,7 +289,10 @@ describe("cmd-add.ts", function () {
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("add pkg with nested dependencies", async function () {
-      const retCode = await add(atVersion(packageC, "latest"), upstreamOptions);
+      const retCode = await add(
+        packageReference(packageC, "latest"),
+        upstreamOptions
+      );
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
       manifest.should.deepEqual(expectedManifestC);

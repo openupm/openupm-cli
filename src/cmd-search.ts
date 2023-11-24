@@ -5,27 +5,22 @@ import log from "./logger";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
-import {
-  GlobalOptions,
-  PkgInfo,
-  PkgName,
-  PkgVersion,
-  Registry,
-} from "./types/global";
+import { GlobalOptions, PkgInfo, Registry } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
+import { SemanticVersion } from "./types/semantic-version";
 
 type DateString = string;
 
-type TableRow = [PkgName, PkgVersion, DateString, ""];
+type TableRow = [DomainName, SemanticVersion, DateString, ""];
 
 export type SearchOptions = {
   _global: GlobalOptions;
 };
 
 export type SearchedPkgInfo = Omit<PkgInfo, "versions"> & {
-  versions: Record<PkgVersion, "latest">;
+  versions: Record<SemanticVersion, "latest">;
 };
 
 export type OldSearchResult =

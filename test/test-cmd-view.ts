@@ -12,8 +12,8 @@ import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
 import { DomainName } from "../src/types/domain-name";
-import { atVersion } from "../src/utils/pkg-name";
 import { SemanticVersion } from "../src/types/semantic-version";
+import { packageReference } from "../src/types/package-reference";
 
 const packageA = "com.example.package-a" as DomainName;
 const packageUp = "com.example.package-up" as DomainName;
@@ -125,7 +125,7 @@ describe("cmd-view.ts", function () {
     });
     it("view pkg@1.0.0", async function () {
       const retCode = await view(
-        atVersion(packageA, "1.0.0" as SemanticVersion),
+        packageReference(packageA, "1.0.0" as SemanticVersion),
         options
       );
       retCode.should.equal(1);

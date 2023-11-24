@@ -12,8 +12,7 @@ import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackageInfo } from "./data-pkg-info";
 import { DomainName } from "../src/types/domain-name";
-import { atVersion } from "../src/utils/pkg-name";
-import { SemanticVersion } from "../src/types/semantic-version";
+import { packageReference } from "../src/types/package-reference";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
@@ -71,7 +70,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@latest", async function () {
       const retCode = await deps(
-        atVersion(remotePkgInfoA.name, "latest"),
+        packageReference(remotePkgInfoA.name, "latest"),
         options
       );
       retCode.should.equal(0);
@@ -79,7 +78,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps(
-        atVersion(remotePkgInfoA.name, "1.0.0" as SemanticVersion),
+        packageReference(remotePkgInfoA.name, "1.0.0"),
         options
       );
       retCode.should.equal(0);
@@ -87,7 +86,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps(
-        atVersion(remotePkgInfoA.name, "2.0.0" as SemanticVersion),
+        packageReference(remotePkgInfoA.name, "2.0.0"),
         options
       );
       retCode.should.equal(0);
