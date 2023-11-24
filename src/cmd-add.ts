@@ -1,8 +1,7 @@
 import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
-import { atVersion, splitPkgName } from "./utils/pkg-name";
-import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+import { GlobalOptions, ScopedRegistry } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
@@ -11,8 +10,13 @@ import {
   tryParseEditorVersion,
 } from "./utils/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
-import { isDomainName } from "./types/domain-name";
+import { DomainName, isDomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
+import {
+  packageReference,
+  PackageReference,
+  splitPackageReference,
+} from "./types/package-reference";
 
 export type AddOptions = {
   test?: boolean;
@@ -28,7 +32,7 @@ type AddResult = {
 };
 
 export const add = async function (
-  pkgs: PkgName | PkgName[],
+  pkgs: PackageReference | PackageReference[],
   options: AddOptions
 ): Promise<ResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -56,7 +60,7 @@ const _add = async function ({
   testables,
   force,
 }: {
-  pkg: PkgName;
+  pkg: PackageReference;
   testables?: boolean;
   force?: boolean;
 }): Promise<AddResult> {
@@ -65,9 +69,9 @@ const _add = async function ({
   // is upstream package flag
   let isUpstreamPackage = false;
   // parse name
-  const split = splitPkgName(pkg);
-  const name = split.name;
-  let version = split.version;
+  const split = splitPackageReference(pkg);
+  const name = split[0];
+  let version = split[1];
 
   // load manifest
   const manifest = loadManifest();
@@ -77,7 +81,7 @@ const _add = async function ({
     manifest.dependencies = {};
   }
   // packages that added to scope registry
-  const pkgsInScope: PkgName[] = [];
+  const pkgsInScope: DomainName[] = [];
   if (version === undefined || !isPackageUrl(version)) {
     // verify name
     let pkgInfo = await fetchPackageInfo(name);
@@ -172,7 +176,7 @@ const _add = async function ({
           if (!depObj.resolved)
             log.notice(
               "suggest",
-              `to install ${atVersion(
+              `to install ${packageReference(
                 depObj.name,
                 depObj.version
               )} or a replaceable version manually`
@@ -195,7 +199,7 @@ const _add = async function ({
   manifest.dependencies[name] = version;
   if (!oldVersion) {
     // Log the added package
-    log.notice("manifest", `added ${atVersion(name, version)}`);
+    log.notice("manifest", `added ${packageReference(name, version)}`);
     dirty = true;
   } else if (oldVersion != version) {
     // Log the modified package version
@@ -203,7 +207,7 @@ const _add = async function ({
     dirty = true;
   } else {
     // Log the existed package
-    log.notice("manifest", `existed ${atVersion(name, version)}`);
+    log.notice("manifest", `existed ${packageReference(name, version)}`);
   }
   if (!isUpstreamPackage) {
     // add to scopedRegistries

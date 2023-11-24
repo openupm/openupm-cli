@@ -1,9 +1,11 @@
-import { PkgInfo, PkgVersion } from "../types/global";
+import { PkgInfo } from "../types/global";
 import { SemanticVersion } from "../types/semantic-version";
 
 const hasLatestDistTag = (
   pkgInfo: Partial<PkgInfo>
-): pkgInfo is Partial<PkgInfo> & { "dist-tags": { latest: PkgVersion } } => {
+): pkgInfo is Partial<PkgInfo> & {
+  "dist-tags": { latest: SemanticVersion };
+} => {
   return pkgInfo["dist-tags"]?.["latest"] !== undefined;
 };
 

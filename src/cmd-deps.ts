@@ -1,22 +1,30 @@
 import log from "./logger";
-import { atVersion, splitPkgName } from "./utils/pkg-name";
-import { GlobalOptions, PkgName, PkgVersion } from "./types/global";
+import { GlobalOptions } from "./types/global";
 import { parseEnv } from "./utils/env";
 import { fetchPackageDependencies } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import { isPackageUrl } from "./types/package-url";
+import {
+  packageReference,
+  PackageReference,
+  splitPackageReference,
+  VersionReference,
+} from "./types/package-reference";
 
 export type DepsOptions = {
   deep?: boolean;
   _global: GlobalOptions;
 };
 
-export const deps = async function (pkg: PkgName, options: DepsOptions) {
+export const deps = async function (
+  pkg: PackageReference,
+  options: DepsOptions
+) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  const { name, version } = splitPkgName(pkg);
+  const [name, version] = splitPackageReference(pkg);
   // deps
   await _deps({ name, version, deep: options.deep });
   return 0;
@@ -28,7 +36,7 @@ const _deps = async function ({
   deep,
 }: {
   name: DomainName;
-  version: PkgVersion | undefined;
+  version: VersionReference | undefined;
   deep?: boolean;
 }) {
   if (version !== undefined && isPackageUrl(version))
@@ -42,7 +50,7 @@ const _deps = async function ({
   depsValid
     .filter((x) => !x.self)
     .forEach((x) =>
-      log.notice("dependency", `${atVersion(x.name, x.version)}`)
+      log.notice("dependency", `${packageReference(x.name, x.version)}`)
     );
   depsInvalid
     .filter((x) => !x.self)
@@ -50,6 +58,6 @@ const _deps = async function ({
       let reason = "unknown";
       if (x.reason == "package404") reason = "missing dependency";
       else if (x.reason == "version404") reason = "missing dependency version";
-      log.warn(reason, atVersion(x.name, x.version));
+      log.warn(reason, packageReference(x.name, x.version));
     });
 };

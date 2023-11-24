@@ -1,5 +1,6 @@
-import { Contact, PkgVersion } from "../src/types/global";
+import { Contact } from "../src/types/global";
 import { DomainName } from "../src/types/domain-name";
+import { SemanticVersion } from "../src/types/semantic-version";
 
 type Maintainer = { username: string; email: string };
 
@@ -10,7 +11,7 @@ export type SearchEndpointResult = {
       description?: string;
       date: string;
       scope: "unscoped";
-      version: PkgVersion;
+      version: SemanticVersion;
       links: Record<string, unknown>;
       author: Contact;
       publisher: Maintainer;

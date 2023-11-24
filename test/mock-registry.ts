@@ -1,4 +1,4 @@
-import { PkgInfo, PkgName } from "../src/types/global";
+import { PkgInfo } from "../src/types/global";
 import nock from "nock";
 import { SearchEndpointResult } from "./types";
 import { DomainName } from "../src/types/domain-name";
@@ -25,7 +25,7 @@ export function registerRemoteUpstreamPkg(pkg: PkgInfo) {
   nock(exampleRegistryUrl).persist().get(`/${pkg.name}`).reply(404);
 }
 
-export function registerMissingPackage(name: PkgName) {
+export function registerMissingPackage(name: DomainName) {
   nock(exampleRegistryUrl).persist().get(`/${name}`).reply(404);
   nock(unityRegistryUrl).persist().get(`/${name}`).reply(404);
 }

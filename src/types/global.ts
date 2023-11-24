@@ -5,10 +5,6 @@ import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
 
-export type PkgVersion = PackageUrl | SemanticVersion | "latest";
-
-export type PkgName = DomainName | `${DomainName}@${PkgVersion}`;
-
 export type Region = "us" | "cn";
 
 export type Registry = string;
@@ -78,7 +74,7 @@ export type PkgVersionInfo = {
 
 export type PkgInfo = {
   name: DomainName;
-  _id?: PkgName;
+  _id?: DomainName;
   _rev?: string;
   _attachments?: Record<string, unknown>;
   readme?: string;
@@ -103,7 +99,7 @@ export type NameVersionPair = {
 
 export type Dependency = {
   name: DomainName;
-  version: SemanticVersion;
+  version?: SemanticVersion;
   upstream: boolean;
   self: boolean;
   internal: boolean;
@@ -114,11 +110,11 @@ export type Dependency = {
 export type ScopedRegistry = {
   name: string;
   url: string;
-  scopes: PkgName[];
+  scopes: DomainName[];
 };
 
 export type PkgManifest = {
-  dependencies: Record<PkgName, SemanticVersion | PackageUrl>;
+  dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
   scopedRegistries?: ScopedRegistry[];
   testables?: string[];
 };
