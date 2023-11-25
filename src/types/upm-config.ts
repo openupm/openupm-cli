@@ -15,7 +15,7 @@ type AuthBase = {
   /**
    * Whether to always authenticate
    */
-  alwaysAuth: boolean;
+  alwaysAuth?: boolean;
 };
 
 /**
@@ -94,4 +94,12 @@ export function decodeBasicAuth(base64: Base64AuthData): [string, string] {
   const [username, password] = trySplitAtFirstOccurrenceOf(text, ":");
   if (password === undefined) throw new Error("Base64 had invalid format");
   return [username, password];
+}
+
+/**
+ * Checks if this auth-object should always authenticate
+ * @param auth The auth-object
+ */
+export function shouldAlwaysAuth(auth: UpmAuth): boolean {
+  return auth.alwaysAuth || false;
 }

@@ -5,6 +5,7 @@ import {
   encodeBasicAuth,
   isBasicAuth,
   isTokenAuth,
+  shouldAlwaysAuth,
   UpmAuth,
 } from "../src/types/upm-config";
 import should from "should";
@@ -39,6 +40,34 @@ describe("upm-config", function () {
         const [actualUsername, actualPassword] = decodeBasicAuth(encoded);
         should(actualUsername).be.equal(expectedUsername);
         should(actualPassword).be.equal(expectedPassword);
+      });
+    });
+    describe("always-auth", function () {
+      it("should always-auth when prop is true", () => {
+        const auth: UpmAuth = {
+          email: "real@email.com",
+          alwaysAuth: true,
+          // Not a real base64 string, but we don't care in this test
+          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+        };
+        should(shouldAlwaysAuth(auth)).be.true();
+      });
+      it("should not always-auth when prop is false", () => {
+        const auth: UpmAuth = {
+          email: "real@email.com",
+          alwaysAuth: false,
+          // Not a real base64 string, but we don't care in this test
+          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+        };
+        should(shouldAlwaysAuth(auth)).be.false();
+      });
+      it("should not always-auth when prop is missing", () => {
+        const auth: UpmAuth = {
+          email: "real@email.com",
+          // Not a real base64 string, but we don't care in this test
+          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+        };
+        should(shouldAlwaysAuth(auth)).be.false();
       });
     });
   });

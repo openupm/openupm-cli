@@ -13,7 +13,12 @@ import {
   registryUrl,
 } from "../types/registry-url";
 import url from "url";
-import { decodeBasicAuth, isBasicAuth, isTokenAuth } from "../types/upm-config";
+import {
+  decodeBasicAuth,
+  isBasicAuth,
+  isTokenAuth,
+  shouldAlwaysAuth,
+} from "../types/upm-config";
 
 export const env: Env = <Env>{};
 
@@ -76,7 +81,7 @@ export const parseEnv = async function (
         if (isTokenAuth(regAuth)) {
           env.auth[reg] = {
             token: regAuth.token,
-            alwaysAuth: regAuth.alwaysAuth || false,
+            alwaysAuth: shouldAlwaysAuth(regAuth),
           };
         } else if (isBasicAuth(regAuth)) {
           const [username, password] = decodeBasicAuth(regAuth._auth);
@@ -84,7 +89,7 @@ export const parseEnv = async function (
             username,
             password: Buffer.from(password).toString("base64"),
             email: regAuth.email,
-            alwaysAuth: regAuth.alwaysAuth || false,
+            alwaysAuth: shouldAlwaysAuth(regAuth),
           };
         } else {
           log.warn(
