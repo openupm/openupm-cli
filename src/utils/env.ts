@@ -1,12 +1,16 @@
-import { Env, GlobalOptions } from "../types/global";
+import { GlobalOptions, Region } from "../types/global";
 import log from "../logger";
 import chalk from "chalk";
 import { loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
-import { isIpAddress } from "../types/ip-address";
-import { namespaceFor, openUpmReverseDomainName } from "../types/domain-name";
+import { IpAddress, isIpAddress } from "../types/ip-address";
+import {
+  DomainName,
+  namespaceFor,
+  openUpmReverseDomainName,
+} from "../types/domain-name";
 import {
   coerceRegistryUrl,
   RegistryUrl,
@@ -15,12 +19,29 @@ import {
 import url from "url";
 import {
   decodeBasicAuth,
-  encodeBasicAuth,
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
+  UpmAuth,
 } from "../types/upm-config";
 import { encodeBase64 } from "../types/base64";
+import { NpmAuth } from "another-npm-registry-client";
+
+export type Env = {
+  cwd: string;
+  color: boolean;
+  systemUser: boolean;
+  wsl: boolean;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
+  auth: Record<RegistryUrl, NpmAuth>;
+  upstream: boolean;
+  upstreamRegistry: RegistryUrl;
+  registry: RegistryUrl;
+  namespace: DomainName | IpAddress;
+  editorVersion: string | null;
+  region: Region;
+  manifestPath: string;
+};
 
 export const env: Env = <Env>{};
 

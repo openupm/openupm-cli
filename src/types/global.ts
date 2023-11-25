@@ -1,29 +1,10 @@
-import { NpmAuth } from "another-npm-registry-client";
-import { IpAddress } from "./ip-address";
 import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
 import { RegistryUrl } from "./registry-url";
-import { UpmAuth } from "./upm-config";
 
 export type Region = "us" | "cn";
-
-export type Env = {
-  cwd: string;
-  color: boolean;
-  systemUser: boolean;
-  wsl: boolean;
-  npmAuth?: Record<RegistryUrl, UpmAuth>;
-  auth: Record<RegistryUrl, NpmAuth>;
-  upstream: boolean;
-  upstreamRegistry: RegistryUrl;
-  registry: RegistryUrl;
-  namespace: DomainName | IpAddress;
-  editorVersion: string | null;
-  region: Region;
-  manifestPath: string;
-};
 
 export type Dist = {
   tarball: string;
