@@ -1,8 +1,6 @@
 import { DomainName } from "./domain-name";
-import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
-import { ScopedRegistry } from "./scoped-registry";
 
 export type Dist = {
   tarball: string;
@@ -37,12 +35,6 @@ export type PkgVersionInfo = {
   author?: Contact;
   contributors?: Contact[];
   dist?: Dist;
-};
-
-export type PkgManifest = {
-  dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
-  scopedRegistries?: ScopedRegistry[];
-  testables?: string[];
 };
 
 export type GlobalOptions = {

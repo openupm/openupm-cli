@@ -1,9 +1,14 @@
-import { PkgManifest } from "../src/types/global";
 import assert from "assert";
 import { domainName, isDomainName } from "../src/types/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
 import { isSemanticVersion } from "../src/types/semantic-version";
 import { addScope, scopedRegistry } from "../src/types/scoped-registry";
+import {
+  addDependency,
+  addTestable,
+  emptyPackageManifest,
+  PkgManifest,
+} from "../src/types/pkg-manifest";
 
 /**
  * Builder class for {@link PkgManifest}
@@ -12,9 +17,7 @@ class PkgManifestBuilder {
   readonly manifest: PkgManifest;
 
   constructor() {
-    this.manifest = {
-      dependencies: {},
-    };
+    this.manifest = emptyPackageManifest();
   }
 
   /**
@@ -43,9 +46,7 @@ class PkgManifestBuilder {
    */
   addTestable(name: string): PkgManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
-    if (this.manifest.testables === undefined) this.manifest.testables = [];
-    this.manifest.testables.push(name);
-    this.manifest.testables.sort();
+    addTestable(this.manifest, name);
     return this;
   }
 
@@ -66,7 +67,7 @@ class PkgManifestBuilder {
     assert(isSemanticVersion(version), `${version} is semantic version`);
     if (withScope) this.addScope(name);
     if (testable) this.addTestable(name);
-    this.manifest.dependencies[name] = version;
+    addDependency(this.manifest, name, version);
     return this;
   }
 }

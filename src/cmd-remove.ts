@@ -1,6 +1,6 @@
 import log from "./logger";
 import { GlobalOptions } from "./types/global";
-import { loadManifest, saveManifest } from "./utils/manifest";
+import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
 import { env, parseEnv } from "./utils/env";
 import { isDomainName } from "./types/domain-name";
 import {
@@ -8,7 +8,11 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import { hasScope, removeScope, ScopedRegistry } from "./types/scoped-registry";
+import { hasScope, removeScope } from "./types/scoped-registry";
+import {
+  removeDependency,
+  tryGetScopedRegistryByUrl,
+} from "./types/pkg-manifest";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
@@ -54,32 +58,21 @@ const _remove = async function (pkg: PackageReference) {
   if (manifest === null) return { code: 1, dirty };
   // not found array
   const pkgsNotFound = [];
-  // remove from dependencies
-  if (manifest.dependencies) {
-    version = manifest.dependencies[name];
-    if (version) {
-      log.notice("manifest", `removed ${packageReference(name, version)}`);
-      delete manifest.dependencies[name];
+  version = manifest.dependencies[name];
+  if (version) {
+    log.notice("manifest", `removed ${packageReference(name, version)}`);
+    removeDependency(manifest, name);
+    dirty = true;
+  } else pkgsNotFound.push(pkg);
+
+  const entry = tryGetScopedRegistryByUrl(manifest, env.registry);
+  if (entry !== null) {
+    if (hasScope(entry, name)) {
+      removeScope(entry, name);
+      const scopesSet = new Set(entry.scopes);
+      if (isDomainName(env.namespace)) scopesSet.add(env.namespace);
+      entry.scopes = Array.from(scopesSet).sort();
       dirty = true;
-    } else pkgsNotFound.push(pkg);
-  }
-  // remove from scopedRegistries
-  if (manifest.scopedRegistries) {
-    const filterEntry = (x: ScopedRegistry) => {
-      let url = x.url || "";
-      if (url.endsWith("/")) url = url.slice(0, -1);
-      return url == env.registry;
-    };
-    const entires = manifest.scopedRegistries.filter(filterEntry);
-    if (entires.length > 0) {
-      const entry = entires[0];
-      if (hasScope(entry, name)) {
-        removeScope(entry, name);
-        const scopesSet = new Set(entry.scopes);
-        if (isDomainName(env.namespace)) scopesSet.add(env.namespace);
-        entry.scopes = Array.from(scopesSet).sort();
-        dirty = true;
-      }
     }
   }
   // save manifest

@@ -1,10 +1,10 @@
-import { PkgManifest } from "../src/types/global";
-import { loadManifest } from "../src/utils/manifest";
+import { loadManifest } from "../src/utils/pkg-manifest-io";
 import should from "should";
 import { DomainName } from "../src/types/domain-name";
 import { SemanticVersion } from "../src/types/semantic-version";
 import { PackageUrl } from "../src/types/package-url";
 import { hasScope } from "../src/types/scoped-registry";
+import { PkgManifest } from "../src/types/pkg-manifest";
 
 export function shouldHaveManifest(): PkgManifest {
   const manifest = loadManifest();
