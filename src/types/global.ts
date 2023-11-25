@@ -108,7 +108,7 @@ export type Dependency = {
 
 export type ScopedRegistry = {
   name: string;
-  url: string;
+  url: RegistryUrl;
   scopes: DomainName[];
 };
 
