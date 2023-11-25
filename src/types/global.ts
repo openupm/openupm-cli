@@ -43,16 +43,6 @@ export type PkgVersionInfo = {
 
 
 
-export type Dependency = {
-  name: DomainName;
-  version?: SemanticVersion;
-  upstream: boolean;
-  self: boolean;
-  internal: boolean;
-  reason: string | null;
-  resolved?: boolean;
-};
-
 export type PkgManifest = {
   dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
   scopedRegistries?: ScopedRegistry[];

@@ -8,7 +8,6 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import { Dependency } from "./types/global";
 import { env } from "./utils/env";
 import _ from "lodash";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
@@ -43,6 +42,16 @@ export class NpmClientError extends Error {
     this.response = response;
   }
 }
+
+export type Dependency = {
+  name: DomainName;
+  version?: SemanticVersion;
+  upstream: boolean;
+  self: boolean;
+  internal: boolean;
+  reason: string | null;
+  resolved?: boolean;
+};
 
 type NameVersionPair = {
   name: DomainName;
@@ -108,6 +117,7 @@ export const fetchPackageInfo = async function (
     // eslint-disable-next-line no-empty
   } catch (err) {}
 };
+
 /* Fetch package [valid dependencies, invalid dependencies] with a structure of
   [
     {
