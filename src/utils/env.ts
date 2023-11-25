@@ -1,7 +1,7 @@
 import { Env, GlobalOptions } from "../types/global";
 import log from "../logger";
 import chalk from "chalk";
-import { loadUpmConfig } from "./upm-config";
+import { loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";

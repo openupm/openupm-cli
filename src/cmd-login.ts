@@ -11,7 +11,7 @@ import {
   getUpmConfigDir,
   loadUpmConfig,
   saveUpmConfig,
-} from "./utils/upm-config";
+} from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
 import {
   RegistryUrl,
