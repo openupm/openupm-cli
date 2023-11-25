@@ -1,6 +1,6 @@
-import { Registry } from "./global";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { Base64, decodeBase64, encodeBase64 } from "./base64";
+import { RegistryUrl } from "./registry-url";
 
 /**
  * Authentication information that is shared between different authentication methods
@@ -49,7 +49,7 @@ export type UPMConfig = {
   /**
    * Authentication information organized by the registry they should be used on
    */
-  npmAuth?: Record<Registry, UpmAuth>;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
 };
 
 /**
