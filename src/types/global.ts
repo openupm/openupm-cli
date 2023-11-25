@@ -5,6 +5,7 @@ import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
 import { RegistryUrl } from "./registry-url";
+import { UpmAuth } from "./upm-config";
 
 export type Region = "us" | "cn";
 
@@ -95,13 +96,4 @@ export type GlobalOptions = {
   systemUser?: boolean;
   wsl?: boolean;
   chdir?: string;
-};
-
-export type UpmAuth = {
-  email: string;
-  alwaysAuth: boolean;
-} & ({ token: string } | { _auth: string });
-
-export type UPMConfig = {
-  npmAuth?: Record<RegistryUrl, UpmAuth>;
 };
