@@ -4,10 +4,9 @@ import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
+import { RegistryUrl } from "./registry-url";
 
 export type Region = "us" | "cn";
-
-export type Registry = string;
 
 export type EditorVersion = {
   major: number;
@@ -26,11 +25,11 @@ export type Env = {
   color: boolean;
   systemUser: boolean;
   wsl: boolean;
-  npmAuth?: Record<Registry, UpmAuth>;
-  auth: Record<Registry, NpmAuth>;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
+  auth: Record<RegistryUrl, NpmAuth>;
   upstream: boolean;
-  upstreamRegistry: string;
-  registry: string;
+  upstreamRegistry: RegistryUrl;
+  registry: RegistryUrl;
   namespace: DomainName | IpAddress;
   editorVersion: string | null;
   region: Region;
@@ -120,7 +119,7 @@ export type PkgManifest = {
 };
 
 export type GlobalOptions = {
-  registry?: Registry;
+  registry?: string;
   verbose?: boolean;
   color?: boolean;
   upstream?: boolean;
@@ -136,5 +135,5 @@ export type UpmAuth = {
 } & ({ token: string } | { _auth: string });
 
 export type UPMConfig = {
-  npmAuth?: Record<Registry, UpmAuth>;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
 };
