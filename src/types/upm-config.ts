@@ -1,8 +1,6 @@
 import { Registry } from "./global";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
-import { Brand } from "ts-brand";
-
-export type Base64AuthData = Brand<string, "Base64AuthData">;
+import { Base64, decodeBase64, encodeBase64 } from "./base64";
 
 /**
  * Authentication information that is shared between different authentication methods
@@ -25,7 +23,7 @@ export type BasicAuth = AuthBase & {
   /**
    * Base64 encoded username and password to authenticate with
    */
-  _auth: Base64AuthData;
+  _auth: Base64;
 };
 
 /**
@@ -74,13 +72,8 @@ export function isTokenAuth(auth: UpmAuth): auth is TokenAuth {
  * @param username The username
  * @param password The password
  */
-export function encodeBasicAuth(
-  username: string,
-  password: string
-): Base64AuthData {
-  return Buffer.from(`${username}:${password}`).toString(
-    "base64"
-  ) as Base64AuthData;
+export function encodeBasicAuth(username: string, password: string): Base64 {
+  return encodeBase64(`${username}:${password}`);
 }
 
 /**
@@ -88,9 +81,8 @@ export function encodeBasicAuth(
  * @param base64 The base64 string
  * @throws Error if the string cannot be decoded
  */
-export function decodeBasicAuth(base64: Base64AuthData): [string, string] {
-  const buffer = Buffer.from(base64, "base64");
-  const text = buffer.toString("utf-8");
+export function decodeBasicAuth(base64: Base64): [string, string] {
+  const text = decodeBase64(base64);
   const [username, password] = trySplitAtFirstOccurrenceOf(text, ":");
   if (password === undefined) throw new Error("Base64 had invalid format");
   return [username, password];

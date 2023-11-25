@@ -15,10 +15,12 @@ import {
 import url from "url";
 import {
   decodeBasicAuth,
+  encodeBasicAuth,
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
 } from "../types/upm-config";
+import { encodeBase64 } from "../types/base64";
 
 export const env: Env = <Env>{};
 
@@ -87,7 +89,7 @@ export const parseEnv = async function (
           const [username, password] = decodeBasicAuth(regAuth._auth);
           env.auth[reg] = {
             username,
-            password: Buffer.from(password).toString("base64"),
+            password: encodeBase64(password),
             email: regAuth.email,
             alwaysAuth: shouldAlwaysAuth(regAuth),
           };
