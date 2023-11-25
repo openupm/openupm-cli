@@ -1,12 +1,38 @@
+/**
+ * Describes a version of a Unity editor. Mostly this follows calendar-versioning,
+ * with some extra rules for chinese releases.
+ * @see https://calver.org/
+ */
 export type EditorVersion = {
+  /**
+   * The major version. This is the release year.
+   */
   major: number;
+  /**
+   * The minor version. This is usually a number from 1 to 3
+   */
   minor: number;
+  /**
+   * An optional patch.
+   */
   patch?: number;
+  /**
+   * A flag describing a specific release
+   */
   flag?: "a" | "b" | "f" | "c";
   flagValue?: 0 | 1 | 2;
+  /**
+   * A specific build
+   */
   build?: number;
+  /**
+   * A flag describing a specific locale build
+   */
   loc?: string;
   locValue?: number;
+  /**
+   * The specific build for a locale
+   */
   locBuild?: number;
 };
 
