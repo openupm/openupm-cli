@@ -1,9 +1,9 @@
 import { Registry } from "./global";
 
 /**
- * Authentication information for a registry
+ * Authentication information that is shared between different authentication methods
  */
-export type UpmAuth = {
+type AuthBase = {
   /**
    * The email to use
    */
@@ -12,20 +12,32 @@ export type UpmAuth = {
    * Whether to always authenticate
    */
   alwaysAuth: boolean;
-} & (
-  | {
-      /**
-       * A token to authenticate with
-       */
-      token: string;
-    }
-  | {
-      /**
-       * Base64 encoded username and password to authenticate with
-       */
-      _auth: string;
-    }
-);
+};
+
+/**
+ * Authenticates using encoded username and password
+ */
+export type BasicAuth = AuthBase & {
+  /**
+   * Base64 encoded username and password to authenticate with
+   */
+  _auth: string;
+};
+
+/**
+ * Authenticates using token
+ */
+export type TokenAuth = AuthBase & {
+  /**
+   * A token to authenticate with
+   */
+  token: string;
+};
+
+/**
+ * Authentication information for a registry
+ */
+export type UpmAuth = BasicAuth | TokenAuth;
 
 /**
  * Content of .upmconfig.toml. Used to authenticate with package registries
