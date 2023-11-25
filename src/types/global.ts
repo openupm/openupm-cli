@@ -41,10 +41,7 @@ export type PkgVersionInfo = {
   dist?: Dist;
 };
 
-export type NameVersionPair = {
-  name: DomainName;
-  version: SemanticVersion | "latest" | undefined;
-};
+
 
 export type Dependency = {
   name: DomainName;

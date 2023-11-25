@@ -8,7 +8,7 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import { Dependency, NameVersionPair } from "./types/global";
+import { Dependency } from "./types/global";
 import { env } from "./utils/env";
 import _ from "lodash";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
@@ -43,6 +43,11 @@ export class NpmClientError extends Error {
     this.response = response;
   }
 }
+
+type NameVersionPair = {
+  name: DomainName;
+  version: SemanticVersion | "latest" | undefined;
+};
 
 export function assertIsNpmClientError(
   x: unknown
