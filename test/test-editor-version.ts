@@ -2,7 +2,7 @@ import { describe } from "mocha";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
-} from "../src/utils/editor-version";
+} from "../src/types/editor-version";
 import "should";
 import assert from "assert";
 

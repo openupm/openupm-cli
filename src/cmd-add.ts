@@ -8,7 +8,7 @@ import { env, parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
-} from "./utils/editor-version";
+} from "./types/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
 import { DomainName, isDomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";

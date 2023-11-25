@@ -8,18 +8,6 @@ import { RegistryUrl } from "./registry-url";
 
 export type Region = "us" | "cn";
 
-export type EditorVersion = {
-  major: number;
-  minor: number;
-  patch?: number;
-  flag?: "a" | "b" | "f" | "c";
-  flagValue?: 0 | 1 | 2;
-  build?: number;
-  loc?: string;
-  locValue?: number;
-  locBuild?: number;
-};
-
 export type Env = {
   cwd: string;
   color: boolean;
