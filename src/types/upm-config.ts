@@ -49,3 +49,18 @@ export type UPMConfig = {
    */
   npmAuth?: Record<Registry, UpmAuth>;
 };
+
+/**
+ * Checks if an auth-object uses basic authentication
+ * @param auth The auth-object
+ */
+export function isBasicAuth(auth: UpmAuth): auth is BasicAuth {
+  return "_auth" in auth;
+}
+/**
+ * Checks if an auth-object uses token authentication
+ * @param auth The auth-object
+ */
+export function isTokenAuth(auth: UpmAuth): auth is TokenAuth {
+  return "token" in auth;
+}

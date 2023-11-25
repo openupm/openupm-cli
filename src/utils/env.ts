@@ -13,6 +13,7 @@ import {
   registryUrl,
 } from "../types/registry-url";
 import url from "url";
+import { isBasicAuth, isTokenAuth } from "../types/upm-config";
 
 export const env: Env = <Env>{};
 
@@ -72,12 +73,12 @@ export const parseEnv = async function (
     if (env.npmAuth !== undefined) {
       (Object.keys(env.npmAuth) as RegistryUrl[]).forEach((reg) => {
         const regAuth = env.npmAuth![reg];
-        if ("token" in regAuth) {
+        if (isTokenAuth(regAuth)) {
           env.auth[reg] = {
             token: regAuth.token,
             alwaysAuth: regAuth.alwaysAuth || false,
           };
-        } else if ("_auth" in regAuth) {
+        } else if (isBasicAuth(regAuth)) {
           const buf = Buffer.from(regAuth._auth, "base64");
           const text = buf.toString("utf-8");
           const [username, password] = text.split(":", 2);
