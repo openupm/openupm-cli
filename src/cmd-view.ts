@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
-import { GlobalOptions, PkgInfo } from "./types/global";
-import { tryGetLatestVersion } from "./utils/pkg-info";
+import { GlobalOptions } from "./types/global";
+import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { fetchPackageInfo } from "./registry-client";
 import { DomainName } from "./types/domain-name";

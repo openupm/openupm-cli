@@ -59,26 +59,6 @@ export type PkgVersionInfo = {
   dist?: Dist;
 };
 
-export type PkgInfo = {
-  name: DomainName;
-  _id?: DomainName;
-  _rev?: string;
-  _attachments?: Record<string, unknown>;
-  readme?: string;
-  versions: Record<SemanticVersion, PkgVersionInfo>;
-  "dist-tags"?: { latest?: SemanticVersion };
-  version?: SemanticVersion;
-  description?: string;
-  keywords?: string[];
-  time: {
-    [key: SemanticVersion]: string;
-    created?: string;
-    modified?: string;
-  };
-  date?: Date;
-  users?: Record<string, unknown>;
-};
-
 export type NameVersionPair = {
   name: DomainName;
   version: SemanticVersion | "latest" | undefined;

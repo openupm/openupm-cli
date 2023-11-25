@@ -8,10 +8,10 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import { Dependency, NameVersionPair, PkgInfo } from "./types/global";
+import { Dependency, NameVersionPair } from "./types/global";
 import { env } from "./utils/env";
 import _ from "lodash";
-import { tryGetLatestVersion } from "./utils/pkg-info";
+import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";

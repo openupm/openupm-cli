@@ -1,4 +1,3 @@
-import { PkgInfo, PkgVersionInfo } from "../src/types/global";
 import assert from "assert";
 import { DomainName, isDomainName } from "../src/types/domain-name";
 import {
@@ -6,6 +5,8 @@ import {
   SemanticVersion,
 } from "../src/types/semantic-version";
 import { packageId } from "../src/types/package-id";
+import { PkgInfo } from "../src/types/pkg-info";
+import { PkgVersionInfo } from "../src/types/global";
 
 /**
  * Builder class for {@link PkgVersionInfo}

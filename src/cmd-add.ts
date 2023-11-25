@@ -2,7 +2,7 @@ import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
 import { GlobalOptions, ScopedRegistry } from "./types/global";
-import { tryGetLatestVersion } from "./utils/pkg-info";
+import { tryGetLatestVersion } from "./types/pkg-info";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
 import {
