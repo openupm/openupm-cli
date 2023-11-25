@@ -8,6 +8,8 @@ import execute from "./process";
 import { env } from "./env";
 import { UPMConfig } from "../types/upm-config";
 
+const configFileName = ".upmconfig.toml";
+
 /**
  * Gets the path to directory in which the upm config is stored
  */
@@ -52,7 +54,7 @@ export const loadUpmConfig = async (
   configDir?: string
 ): Promise<UPMConfig | undefined> => {
   if (configDir === undefined) configDir = await getUpmConfigDir();
-  const configPath = path.join(configDir, ".upmconfig.toml");
+  const configPath = path.join(configDir, configFileName);
   if (fs.existsSync(configPath)) {
     const content = fs.readFileSync(configPath, "utf8");
     const config = TOML.parse(content);
@@ -68,7 +70,7 @@ export const loadUpmConfig = async (
 export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
   if (configDir === undefined) configDir = await getUpmConfigDir();
   mkdirp.sync(configDir);
-  const configPath = path.join(configDir, ".upmconfig.toml");
+  const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
   fs.writeFileSync(configPath, content, "utf8");
   log.notice("config", "saved unity config at " + configPath);
