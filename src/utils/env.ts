@@ -1,4 +1,4 @@
-import { GlobalOptions, Region } from "../types/global";
+import { GlobalOptions } from "../types/global";
 import log from "../logger";
 import chalk from "chalk";
 import { loadUpmConfig } from "./upm-config-io";
@@ -26,6 +26,8 @@ import {
 } from "../types/upm-config";
 import { encodeBase64 } from "../types/base64";
 import { NpmAuth } from "another-npm-registry-client";
+
+type Region = "us" | "cn";
 
 export type Env = {
   cwd: string;

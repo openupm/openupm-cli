@@ -4,8 +4,6 @@ import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
 import { ScopedRegistry } from "./scoped-registry";
 
-export type Region = "us" | "cn";
-
 export type Dist = {
   tarball: string;
   shasum: string;
@@ -40,8 +38,6 @@ export type PkgVersionInfo = {
   contributors?: Contact[];
   dist?: Dist;
 };
-
-
 
 export type PkgManifest = {
   dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
