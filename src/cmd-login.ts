@@ -18,6 +18,8 @@ import {
   registryUrl,
   removeTrailingSlash,
 } from "./types/registry-url";
+import { Base64AuthData, encodeBasicAuth } from "./types/upm-config";
+import { userInfo } from "os";
 
 export type LoginOptions = {
   username?: string;
@@ -42,11 +44,10 @@ export const login = async function (options: LoginOptions) {
       validator: [registryUrl],
     })) as RegistryUrl;
   let token: string | null = null;
-  let _auth: string | null = null;
+  let _auth: Base64AuthData | null = null;
   if (options.basicAuth) {
     // basic auth
-    const userPass = `${options.username}:${options.password}`;
-    _auth = Buffer.from(userPass).toString("base64");
+    _auth = encodeBasicAuth(options.username, options.password);
   } else {
     // npm login
     const result = await npmLogin({
@@ -205,7 +206,7 @@ const writeUnityToken = async function ({
   registry,
   token,
 }: {
-  _auth: string | null;
+  _auth: Base64AuthData | null;
   alwaysAuth: boolean;
   basicAuth: boolean;
   email: string;
