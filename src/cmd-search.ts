@@ -5,11 +5,12 @@ import log from "./logger";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
-import { GlobalOptions, PkgInfo, Registry } from "./types/global";
+import { GlobalOptions, PkgInfo } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
+import { RegistryUrl } from "./types/registry-url";
 
 type DateString = string;
 
@@ -40,7 +41,7 @@ const getNpmFetchOptions = function (): Options {
 
 const searchEndpoint = async function (
   keyword: string,
-  registry?: Registry
+  registry?: RegistryUrl
 ): Promise<TableRow[] | undefined> {
   if (!registry) registry = env.registry;
   try {

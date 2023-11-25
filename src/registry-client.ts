@@ -8,13 +8,14 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import { Dependency, NameVersionPair, PkgInfo, Registry } from "./types/global";
+import { Dependency, NameVersionPair, PkgInfo } from "./types/global";
 import { env } from "./utils/env";
 import _ from "lodash";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
+import { RegistryUrl } from "./types/registry-url";
 
 export type NpmClient = {
   rawClient: RegClient;
@@ -92,7 +93,7 @@ export const getNpmClient = (): NpmClient => {
 // Fetch package info json from registry
 export const fetchPackageInfo = async function (
   name: DomainName,
-  registry?: Registry
+  registry?: RegistryUrl
 ): Promise<PkgInfo | undefined> {
   if (!registry) registry = env.registry;
   const pkgPath = `${registry}/${name}`;
