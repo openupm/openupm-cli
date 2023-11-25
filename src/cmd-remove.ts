@@ -1,5 +1,5 @@
 import log from "./logger";
-import { GlobalOptions, ScopedRegistry } from "./types/global";
+import { GlobalOptions } from "./types/global";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
 import { isDomainName } from "./types/domain-name";
@@ -8,6 +8,7 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
+import { hasScope, removeScope, ScopedRegistry } from "./types/scoped-registry";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
@@ -72,9 +73,8 @@ const _remove = async function (pkg: PackageReference) {
     const entires = manifest.scopedRegistries.filter(filterEntry);
     if (entires.length > 0) {
       const entry = entires[0];
-      const index = entry.scopes.indexOf(name);
-      if (index > -1) {
-        entry.scopes.splice(index, 1);
+      if (hasScope(entry, name)) {
+        removeScope(entry, name);
         const scopesSet = new Set(entry.scopes);
         if (isDomainName(env.namespace)) scopesSet.add(env.namespace);
         entry.scopes = Array.from(scopesSet).sort();

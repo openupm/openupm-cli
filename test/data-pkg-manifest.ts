@@ -3,6 +3,7 @@ import assert from "assert";
 import { domainName, isDomainName } from "../src/types/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
 import { isSemanticVersion } from "../src/types/semantic-version";
+import { addScope, scopedRegistry } from "../src/types/scoped-registry";
 
 /**
  * Builder class for {@link PkgManifest}
@@ -25,16 +26,13 @@ class PkgManifestBuilder {
 
     if (this.manifest.scopedRegistries === undefined)
       this.manifest.scopedRegistries = [
-        {
-          name: "example.com",
-          scopes: [domainName("com.example")],
-          url: exampleRegistryUrl,
-        },
+        scopedRegistry("example.com", exampleRegistryUrl, [
+          domainName("com.example"),
+        ]),
       ];
 
     const registry = this.manifest.scopedRegistries![0];
-    registry.scopes = [name, ...registry.scopes];
-    registry.scopes.sort();
+    addScope(registry, name);
 
     return this;
   }

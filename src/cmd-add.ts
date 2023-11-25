@@ -1,7 +1,7 @@
 import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
-import { GlobalOptions, ScopedRegistry } from "./types/global";
+import { GlobalOptions } from "./types/global";
 import { tryGetLatestVersion } from "./types/pkg-info";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
@@ -17,6 +17,7 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
+import { scopedRegistry, ScopedRegistry } from "./types/scoped-registry";
 
 export type AddOptions = {
   test?: boolean;
@@ -223,11 +224,7 @@ const _add = async function ({
     if (manifest.scopedRegistries.filter(filterEntry).length <= 0) {
       const name = url.parse(env.registry).hostname;
       if (name === null) throw new Error("Could not resolve registry name");
-      manifest.scopedRegistries.push({
-        name,
-        url: env.registry,
-        scopes: [],
-      });
+      manifest.scopedRegistries.push(scopedRegistry(name, env.registry));
       dirty = true;
     }
     const entry = manifest.scopedRegistries.filter(filterEntry)[0];

@@ -4,6 +4,7 @@ import should from "should";
 import { DomainName } from "../src/types/domain-name";
 import { SemanticVersion } from "../src/types/semantic-version";
 import { PackageUrl } from "../src/types/package-url";
+import { hasScope } from "../src/types/scoped-registry";
 
 export function shouldHaveManifest(): PkgManifest {
   const manifest = loadManifest();
@@ -42,7 +43,7 @@ export function shouldHaveRegistryWithScopes(
   should(manifest.scopedRegistries).not.be.undefined();
   manifest
     .scopedRegistries!.some((registry) =>
-      scopes.every((scope) => registry.scopes.includes(scope))
+      scopes.every((scope) => hasScope(registry, scope))
     )
     .should.be.true("At least one scope was missing");
 }

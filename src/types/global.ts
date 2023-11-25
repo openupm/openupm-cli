@@ -2,7 +2,7 @@ import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
 import { SemanticVersion } from "./semantic-version";
 import { PackageId } from "./package-id";
-import { RegistryUrl } from "./registry-url";
+import { ScopedRegistry } from "./scoped-registry";
 
 export type Region = "us" | "cn";
 
@@ -54,12 +54,6 @@ export type Dependency = {
   internal: boolean;
   reason: string | null;
   resolved?: boolean;
-};
-
-export type ScopedRegistry = {
-  name: string;
-  url: RegistryUrl;
-  scopes: DomainName[];
 };
 
 export type PkgManifest = {
