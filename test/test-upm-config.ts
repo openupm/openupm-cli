@@ -1,6 +1,5 @@
 import { describe } from "mocha";
 import {
-  Base64AuthData,
   decodeBasicAuth,
   encodeBasicAuth,
   isBasicAuth,
@@ -9,6 +8,7 @@ import {
   UpmAuth,
 } from "../src/types/upm-config";
 import should from "should";
+import { Base64 } from "../src/types/base64";
 
 describe("upm-config", function () {
   describe("auth", function () {
@@ -18,7 +18,7 @@ describe("upm-config", function () {
           email: "real@email.com",
           alwaysAuth: true,
           // Not a real base64 string, but we don't care in this test
-          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+          _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
         should(isBasicAuth(auth)).be.true();
       });
@@ -48,7 +48,7 @@ describe("upm-config", function () {
           email: "real@email.com",
           alwaysAuth: true,
           // Not a real base64 string, but we don't care in this test
-          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+          _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
         should(shouldAlwaysAuth(auth)).be.true();
       });
@@ -57,7 +57,7 @@ describe("upm-config", function () {
           email: "real@email.com",
           alwaysAuth: false,
           // Not a real base64 string, but we don't care in this test
-          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+          _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
         should(shouldAlwaysAuth(auth)).be.false();
       });
@@ -65,7 +65,7 @@ describe("upm-config", function () {
         const auth: UpmAuth = {
           email: "real@email.com",
           // Not a real base64 string, but we don't care in this test
-          _auth: "h8gz8s9zgseihgisejf" as Base64AuthData,
+          _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
         should(shouldAlwaysAuth(auth)).be.false();
       });
