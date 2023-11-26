@@ -1,11 +1,8 @@
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
-import promptly from "promptly";
 import { assertIsNpmClientError, getNpmClient } from "./registry-client";
-
 import log from "./logger";
-
 import { GlobalOptions } from "./types/global";
 import {
   getUpmConfigDir,
@@ -13,13 +10,15 @@ import {
   saveUpmConfig,
 } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
-import {
-  RegistryUrl,
-  registryUrl,
-  removeTrailingSlash,
-} from "./types/registry-url";
 import { encodeBasicAuth } from "./types/upm-config";
 import { Base64 } from "./types/base64";
+import { RegistryUrl, removeTrailingSlash } from "./types/registry-url";
+import {
+  promptEmail,
+  promptPassword,
+  promptRegistryUrl,
+  promptUsername,
+} from "./utils/prompts";
 
 export type LoginOptions = {
   username?: string;
@@ -35,14 +34,11 @@ export const login = async function (options: LoginOptions) {
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // query parameters
-  if (!options.username) options.username = await promptly.prompt("Username: ");
-  if (!options.password)
-    options.password = await promptly.password("Password: ");
-  if (!options.email) options.email = await promptly.prompt("Email: ");
+  if (!options.username) options.username = await promptUsername();
+  if (!options.password) options.password = await promptPassword();
+  if (!options.email) options.email = await promptEmail();
   if (!options._global.registry)
-    options._global.registry = (await promptly.prompt("Registry: ", {
-      validator: [registryUrl],
-    })) as RegistryUrl;
+    options._global.registry = await promptRegistryUrl();
   let token: string | null = null;
   let _auth: Base64 | null = null;
   if (options.basicAuth) {
