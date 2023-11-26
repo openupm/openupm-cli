@@ -1,6 +1,6 @@
 import { SemanticVersion } from "./semantic-version";
 import { DomainName } from "./domain-name";
-import { PkgVersionInfo } from "./global";
+import { PkgVersionInfo } from "./pkg-version-info";
 
 /**
  * Describes a package

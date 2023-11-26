@@ -6,7 +6,7 @@ import {
 } from "../src/types/semantic-version";
 import { packageId } from "../src/types/package-id";
 import { PkgInfo } from "../src/types/pkg-info";
-import { PkgVersionInfo } from "../src/types/global";
+import { PkgVersionInfo } from "../src/types/pkg-version-info";
 
 /**
  * Builder class for {@link PkgVersionInfo}
