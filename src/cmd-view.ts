@@ -1,7 +1,6 @@
 import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
-import { GlobalOptions } from "./types/global";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { fetchPackageInfo } from "./registry-client";
@@ -11,10 +10,9 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
+import { CmdOptions } from "./types/options";
 
-export type ViewOptions = {
-  _global: GlobalOptions;
-};
+export type ViewOptions = CmdOptions;
 
 export const view = async function (
   pkg: PackageReference,

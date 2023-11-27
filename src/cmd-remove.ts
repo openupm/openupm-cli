@@ -1,5 +1,4 @@
 import log from "./logger";
-import { GlobalOptions } from "./types/global";
 import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
 import { env, parseEnv } from "./utils/env";
 import { isDomainName } from "./types/domain-name";
@@ -13,10 +12,9 @@ import {
   removeDependency,
   tryGetScopedRegistryByUrl,
 } from "./types/pkg-manifest";
+import { CmdOptions } from "./types/options";
 
-export type RemoveOptions = {
-  _global: GlobalOptions;
-};
+export type RemoveOptions = CmdOptions;
 
 export const remove = async function (
   pkgs: PackageReference[] | PackageReference,

@@ -1,7 +1,6 @@
 import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
-import { GlobalOptions } from "./types/global";
 import { tryGetLatestVersion } from "./types/pkg-info";
 import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
 import { env, parseEnv } from "./utils/env";
@@ -24,12 +23,12 @@ import {
   addTestable,
   tryGetScopedRegistryByUrl,
 } from "./types/pkg-manifest";
+import { CmdOptions } from "./types/options";
 
-export type AddOptions = {
+export type AddOptions = CmdOptions<{
   test?: boolean;
   force?: boolean;
-  _global: GlobalOptions;
-};
+}>;
 
 type ResultCode = 0 | 1;
 

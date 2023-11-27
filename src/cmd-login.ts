@@ -3,7 +3,6 @@ import path from "path";
 import _ from "lodash";
 import { assertIsNpmClientError, getNpmClient } from "./registry-client";
 import log from "./logger";
-import { GlobalOptions } from "./types/global";
 import {
   getUpmConfigDir,
   loadUpmConfig,
@@ -19,15 +18,15 @@ import {
   promptRegistryUrl,
   promptUsername,
 } from "./utils/prompts";
+import { CmdOptions } from "./types/options";
 
-export type LoginOptions = {
+export type LoginOptions = CmdOptions<{
   username?: string;
   password?: string;
   email?: string;
   basicAuth?: boolean;
   alwaysAuth?: boolean;
-  _global: GlobalOptions;
-};
+}>;
 
 export const login = async function (options: LoginOptions) {
   // parse env

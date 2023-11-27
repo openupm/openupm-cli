@@ -1,4 +1,3 @@
-import { GlobalOptions } from "../types/global";
 import log from "../logger";
 import chalk from "chalk";
 import { loadUpmConfig } from "./upm-config-io";
@@ -26,6 +25,9 @@ import {
 } from "../types/upm-config";
 import { encodeBase64 } from "../types/base64";
 import { NpmAuth } from "another-npm-registry-client";
+import {
+  CmdOptions,
+} from "../types/options";
 
 type Region = "us" | "cn";
 
@@ -49,7 +51,7 @@ export const env: Env = <Env>{};
 
 // Parse env
 export const parseEnv = async function (
-  options: { _global: GlobalOptions } & Record<string, unknown>,
+  options: CmdOptions,
   { checkPath }: { checkPath: unknown }
 ) {
   // set defaults
