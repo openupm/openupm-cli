@@ -25,9 +25,7 @@ import {
 } from "../types/upm-config";
 import { encodeBase64 } from "../types/base64";
 import { NpmAuth } from "another-npm-registry-client";
-import {
-  CmdOptions,
-} from "../types/options";
+import { CmdOptions } from "../types/options";
 
 type Region = "us" | "cn";
 

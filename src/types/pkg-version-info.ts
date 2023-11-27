@@ -1,7 +1,7 @@
 import { PackageId } from "./package-id";
 import { SemanticVersion } from "./semantic-version";
 import { DomainName } from "./domain-name";
-import { Contact } from "./global";
+import { Contact } from "./contact";
 
 /**
  * Distribution information

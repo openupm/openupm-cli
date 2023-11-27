@@ -1,4 +1,4 @@
-import { Contact } from "../src/types/global";
+import { Contact } from "../src/types/contact";
 import { DomainName } from "../src/types/domain-name";
 import { SemanticVersion } from "../src/types/semantic-version";
 
