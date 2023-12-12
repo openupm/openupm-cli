@@ -30,7 +30,12 @@ program
   .option("--no-color", "disable color");
 
 program
-  .command("add <pkg> [otherPkgs...]")
+  .command("add")
+  .argument("<pkg>", "Reference to the package that should be added")
+  .argument(
+    "[otherPkgs...]",
+    "References to additional packages that should be added"
+  )
   .aliases(["install", "i"])
   .option("-t, --test", "add package as testable")
   .option(
@@ -50,7 +55,9 @@ openupm add <pkg>@<version> [otherPkgs...]`
   });
 
 program
-  .command("remove <pkg> [otherPkgs...]")
+  .command("remove")
+  .argument("<pkg>", "Name of the package to remove")
+  .argument("[otherPkgs...]", "Names of additional packages to remove")
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
@@ -61,7 +68,8 @@ program
   });
 
 program
-  .command("search <keyword>")
+  .command("search")
+  .argument("<keyword>", "The keyword to search")
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
@@ -71,7 +79,8 @@ program
   });
 
 program
-  .command("view <pkg>")
+  .command("view")
+  .argument("<pkg>", "Reference to a package")
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
@@ -81,7 +90,8 @@ program
   });
 
 program
-  .command("deps <pkg>")
+  .command("deps")
+  .argument("<pkg>", "Reference to a package")
   .alias("dep")
   .option("-d, --deep", "view package dependencies recursively")
   .description(
