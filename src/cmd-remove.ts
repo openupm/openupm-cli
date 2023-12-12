@@ -16,16 +16,25 @@ import { CmdOptions } from "./types/options";
 
 export type RemoveOptions = CmdOptions;
 
+type RemoveResultCode = 0 | 1;
+
+type RemoveResult = {
+  code: RemoveResultCode;
+  dirty: boolean;
+};
+
 export const remove = async function (
   pkgs: PackageReference[] | PackageReference,
   options: RemoveOptions
-) {
+): Promise<RemoveResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const env = await parseEnv(options, true);
   if (env === null) return 1;
 
-  const removeSingle = async function (pkg: PackageReference) {
+  const removeSingle = async function (
+    pkg: PackageReference
+  ): Promise<RemoveResult> {
     // dirty flag
     let dirty = false;
     // parse name
@@ -75,7 +84,7 @@ export const remove = async function (
   // remove
   const results = [];
   for (const pkg of pkgs) results.push(await removeSingle(pkg));
-  const result = {
+  const result: RemoveResult = {
     code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
     dirty: results.filter((x) => x.dirty).length > 0,
   };

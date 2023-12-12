@@ -28,7 +28,11 @@ export type LoginOptions = CmdOptions<{
   alwaysAuth?: boolean;
 }>;
 
-export const login = async function (options: LoginOptions) {
+type LoginResultCode = 0 | 1;
+
+export const login = async function (
+  options: LoginOptions
+): Promise<LoginResultCode> {
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
@@ -72,6 +76,8 @@ export const login = async function (options: LoginOptions) {
     options._global.registry as RegistryUrl,
     token
   );
+
+  return 0;
 };
 
 /**

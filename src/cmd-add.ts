@@ -30,17 +30,17 @@ export type AddOptions = CmdOptions<{
   force?: boolean;
 }>;
 
-type ResultCode = 0 | 1;
+type AddResultCode = 0 | 1;
 
 type AddResult = {
   dirty: boolean;
-  code: ResultCode;
+  code: AddResultCode;
 };
 
 export const add = async function (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
-): Promise<ResultCode> {
+): Promise<AddResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const env = await parseEnv(options, true);

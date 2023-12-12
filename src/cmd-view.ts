@@ -14,10 +14,12 @@ import { CmdOptions } from "./types/options";
 
 export type ViewOptions = CmdOptions;
 
+type ViewResultCode = 0 | 1;
+
 export const view = async function (
   pkg: PackageReference,
   options: ViewOptions
-) {
+): Promise<ViewResultCode> {
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
