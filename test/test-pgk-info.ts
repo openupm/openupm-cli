@@ -1,4 +1,4 @@
-import { tryGetLatestVersion } from "../src/utils/pkg-info";
+import { tryGetLatestVersion } from "../src/types/pkg-info";
 import "should";
 import { describe } from "mocha";
 import should from "should";

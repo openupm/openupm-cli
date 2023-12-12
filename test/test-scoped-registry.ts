@@ -1,0 +1,47 @@
+import { describe } from "mocha";
+import {
+  addScope,
+  hasScope,
+  removeScope,
+  scopedRegistry,
+} from "../src/types/scoped-registry";
+import { exampleRegistryUrl } from "./mock-registry";
+import should from "should";
+import { domainName } from "../src/types/domain-name";
+
+describe("scoped-registry", function () {
+  describe("construction", function () {
+    it("should have empty scopes list if scopes are not specified", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl);
+      should(registry.scopes).be.empty();
+    });
+  });
+  describe("add scope", function () {
+    it("should keep scope-list alphabetical", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl);
+      addScope(registry, domainName("b"));
+      addScope(registry, domainName("a"));
+      should(registry.scopes).be.deepEqual(["a", "b"]);
+    });
+  });
+  describe("has scope", function () {
+    it("should have scope that was added", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl);
+      addScope(registry, domainName("a"));
+      should(hasScope(registry, domainName("a"))).be.true();
+    });
+    it("should not have scope that was not added", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl);
+      should(hasScope(registry, domainName("a"))).be.false();
+    });
+  });
+  describe("remove scope", function () {
+    it("should not have scope after removing it", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl, [
+        domainName("a"),
+      ]);
+      removeScope(registry, domainName("a"));
+      should(hasScope(registry, domainName("a"))).be.false();
+    });
+  });
+});

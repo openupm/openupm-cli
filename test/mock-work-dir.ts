@@ -1,8 +1,8 @@
 import path from "path";
 import os from "os";
-import { PkgManifest } from "../src/types/global";
 import fse from "fs-extra";
 import _ from "lodash";
+import { emptyPackageManifest, PkgManifest } from "../src/types/pkg-manifest";
 
 export type ManifestCreationOptions = {
   manifest: boolean | PkgManifest;
@@ -18,7 +18,7 @@ export const createWorkDir = function (
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
-    if (!_.isObjectLike(manifest)) manifest = { dependencies: {} };
+    if (!_.isObjectLike(manifest)) manifest = emptyPackageManifest();
     const manifestDir = path.join(workDir, "Packages");
     fse.mkdirpSync(manifestDir);
     const data = JSON.stringify(manifest);

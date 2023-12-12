@@ -8,10 +8,9 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import { Dependency, NameVersionPair, PkgInfo } from "./types/global";
 import { env } from "./utils/env";
 import _ from "lodash";
-import { tryGetLatestVersion } from "./utils/pkg-info";
+import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
@@ -43,6 +42,21 @@ export class NpmClientError extends Error {
     this.response = response;
   }
 }
+
+export type Dependency = {
+  name: DomainName;
+  version?: SemanticVersion;
+  upstream: boolean;
+  self: boolean;
+  internal: boolean;
+  reason: string | null;
+  resolved?: boolean;
+};
+
+type NameVersionPair = {
+  name: DomainName;
+  version: SemanticVersion | "latest" | undefined;
+};
 
 export function assertIsNpmClientError(
   x: unknown
@@ -103,6 +117,7 @@ export const fetchPackageInfo = async function (
     // eslint-disable-next-line no-empty
   } catch (err) {}
 };
+
 /* Fetch package [valid dependencies, invalid dependencies] with a structure of
   [
     {

@@ -1,8 +1,8 @@
-import { PkgManifest } from "../types/global";
 import fs from "fs";
 import { assertIsError } from "./error-type-guards";
 import log from "../logger";
 import { env } from "./env";
+import { PkgManifest } from "../types/pkg-manifest";
 
 /**
  * Attempts to load the manifest from the path specified in env

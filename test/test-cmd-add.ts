@@ -101,10 +101,14 @@ describe("cmd-add.ts", function () {
       (pkg) =>
         pkg.addVersion("1.0.0", (version) => version.set("unity", "2020.2"))
     );
+
     const remotePkgInfoWithWrongEditorVersion = buildPackageInfo(
       packageWrongEditor,
-      (pkg) =>
-        pkg.addVersion("1.0.0", (version) => version.set("unity", "2020"))
+      (
+        pkg
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore 2020 is not a valid major.minor version, but this is on purpose for this test
+      ) => pkg.addVersion("1.0.0", (version) => version.set("unity", "2020"))
     );
     const remotePkgInfoUp = buildPackageInfo(packageUp, (pkg) =>
       pkg.addVersion("1.0.0")

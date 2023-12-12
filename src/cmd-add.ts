@@ -1,14 +1,13 @@
 import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
-import { GlobalOptions, ScopedRegistry } from "./types/global";
-import { tryGetLatestVersion } from "./utils/pkg-info";
-import { loadManifest, saveManifest } from "./utils/manifest";
+import { tryGetLatestVersion } from "./types/pkg-info";
+import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
 import { env, parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
-} from "./utils/editor-version";
+} from "./types/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
 import { DomainName, isDomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
@@ -17,12 +16,19 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
+import { scopedRegistry } from "./types/scoped-registry";
+import {
+  addDependency,
+  addScopedRegistry,
+  addTestable,
+  tryGetScopedRegistryByUrl,
+} from "./types/pkg-manifest";
+import { CmdOptions } from "./types/options";
 
-export type AddOptions = {
+export type AddOptions = CmdOptions<{
   test?: boolean;
   force?: boolean;
-  _global: GlobalOptions;
-};
+}>;
 
 type ResultCode = 0 | 1;
 
@@ -76,10 +82,6 @@ const _add = async function ({
   // load manifest
   const manifest = loadManifest();
   if (manifest === null) return { code: 1, dirty };
-  // ensure manifest.dependencies
-  if (!manifest.dependencies) {
-    manifest.dependencies = {};
-  }
   // packages that added to scope registry
   const pkgsInScope: DomainName[] = [];
   if (version === undefined || !isPackageUrl(version)) {
@@ -196,7 +198,7 @@ const _add = async function ({
   }
   // add to dependencies
   const oldVersion = manifest.dependencies[name];
-  manifest.dependencies[name] = version;
+  addDependency(manifest, name, version);
   if (!oldVersion) {
     // Log the added package
     log.notice("manifest", `added ${packageReference(name, version)}`);
@@ -215,22 +217,14 @@ const _add = async function ({
       manifest.scopedRegistries = [];
       dirty = true;
     }
-    const filterEntry = (x: ScopedRegistry): boolean => {
-      let addr = x.url || "";
-      if (addr.endsWith("/")) addr = addr.slice(0, -1);
-      return addr == env.registry;
-    };
-    if (manifest.scopedRegistries.filter(filterEntry).length <= 0) {
+    let entry = tryGetScopedRegistryByUrl(manifest, env.registry);
+    if (entry === null) {
       const name = url.parse(env.registry).hostname;
       if (name === null) throw new Error("Could not resolve registry name");
-      manifest.scopedRegistries.push({
-        name,
-        url: env.registry,
-        scopes: [],
-      });
+      entry = scopedRegistry(name, env.registry);
+      addScopedRegistry(manifest, entry);
       dirty = true;
     }
-    const entry = manifest.scopedRegistries.filter(filterEntry)[0];
     // apply pkgsInScope
     const scopesSet = new Set(entry.scopes || []);
     if (isDomainName(env.namespace)) pkgsInScope.push(env.namespace);
@@ -242,14 +236,7 @@ const _add = async function ({
     });
     entry.scopes = Array.from(scopesSet).sort();
   }
-  if (testables) {
-    if (!manifest.testables) {
-      manifest.testables = [];
-    }
-    if (manifest.testables.indexOf(name) === -1) {
-      manifest.testables.push(name);
-    }
-  }
+  if (testables) addTestable(manifest, name);
   // save manifest
   if (dirty) {
     if (!saveManifest(manifest)) return { code: 1, dirty };

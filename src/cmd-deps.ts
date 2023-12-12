@@ -1,5 +1,4 @@
 import log from "./logger";
-import { GlobalOptions } from "./types/global";
 import { parseEnv } from "./utils/env";
 import { fetchPackageDependencies } from "./registry-client";
 import { DomainName } from "./types/domain-name";
@@ -10,11 +9,11 @@ import {
   splitPackageReference,
   VersionReference,
 } from "./types/package-reference";
+import { CmdOptions } from "./types/options";
 
-export type DepsOptions = {
+export type DepsOptions = CmdOptions<{
   deep?: boolean;
-  _global: GlobalOptions;
-};
+}>;
 
 export const deps = async function (
   pkg: PackageReference,

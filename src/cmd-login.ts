@@ -1,52 +1,48 @@
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
-import promptly from "promptly";
 import { assertIsNpmClientError, getNpmClient } from "./registry-client";
-
 import log from "./logger";
-
-import { GlobalOptions } from "./types/global";
 import {
   getUpmConfigDir,
   loadUpmConfig,
   saveUpmConfig,
-} from "./utils/upm-config";
+} from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
+import { encodeBasicAuth } from "./types/upm-config";
+import { Base64 } from "./types/base64";
+import { RegistryUrl, removeTrailingSlash } from "./types/registry-url";
 import {
-  RegistryUrl,
-  registryUrl,
-  removeTrailingSlash,
-} from "./types/registry-url";
+  promptEmail,
+  promptPassword,
+  promptRegistryUrl,
+  promptUsername,
+} from "./utils/prompts";
+import { CmdOptions } from "./types/options";
 
-export type LoginOptions = {
+export type LoginOptions = CmdOptions<{
   username?: string;
   password?: string;
   email?: string;
   basicAuth?: boolean;
   alwaysAuth?: boolean;
-  _global: GlobalOptions;
-};
+}>;
 
 export const login = async function (options: LoginOptions) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // query parameters
-  if (!options.username) options.username = await promptly.prompt("Username: ");
-  if (!options.password)
-    options.password = await promptly.password("Password: ");
-  if (!options.email) options.email = await promptly.prompt("Email: ");
+  if (!options.username) options.username = await promptUsername();
+  if (!options.password) options.password = await promptPassword();
+  if (!options.email) options.email = await promptEmail();
   if (!options._global.registry)
-    options._global.registry = (await promptly.prompt("Registry: ", {
-      validator: [registryUrl],
-    })) as RegistryUrl;
+    options._global.registry = await promptRegistryUrl();
   let token: string | null = null;
-  let _auth: string | null = null;
+  let _auth: Base64 | null = null;
   if (options.basicAuth) {
     // basic auth
-    const userPass = `${options.username}:${options.password}`;
-    _auth = Buffer.from(userPass).toString("base64");
+    _auth = encodeBasicAuth(options.username, options.password);
   } else {
     // npm login
     const result = await npmLogin({
@@ -205,7 +201,7 @@ const writeUnityToken = async function ({
   registry,
   token,
 }: {
-  _auth: string | null;
+  _auth: Base64 | null;
   alwaysAuth: boolean;
   basicAuth: boolean;
   email: string;

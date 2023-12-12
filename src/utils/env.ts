@@ -1,24 +1,55 @@
-import { Env, GlobalOptions } from "../types/global";
 import log from "../logger";
 import chalk from "chalk";
-import { loadUpmConfig } from "./upm-config";
+import { loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
-import { isIpAddress } from "../types/ip-address";
-import { namespaceFor, openUpmReverseDomainName } from "../types/domain-name";
+import { IpAddress, isIpAddress } from "../types/ip-address";
+import {
+  DomainName,
+  namespaceFor,
+  openUpmReverseDomainName,
+} from "../types/domain-name";
 import {
   coerceRegistryUrl,
   RegistryUrl,
   registryUrl,
 } from "../types/registry-url";
 import url from "url";
+import {
+  decodeBasicAuth,
+  isBasicAuth,
+  isTokenAuth,
+  shouldAlwaysAuth,
+  UpmAuth,
+} from "../types/upm-config";
+import { encodeBase64 } from "../types/base64";
+import { NpmAuth } from "another-npm-registry-client";
+import { CmdOptions } from "../types/options";
+
+type Region = "us" | "cn";
+
+export type Env = {
+  cwd: string;
+  color: boolean;
+  systemUser: boolean;
+  wsl: boolean;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
+  auth: Record<RegistryUrl, NpmAuth>;
+  upstream: boolean;
+  upstreamRegistry: RegistryUrl;
+  registry: RegistryUrl;
+  namespace: DomainName | IpAddress;
+  editorVersion: string | null;
+  region: Region;
+  manifestPath: string;
+};
 
 export const env: Env = <Env>{};
 
 // Parse env
 export const parseEnv = async function (
-  options: { _global: GlobalOptions } & Record<string, unknown>,
+  options: CmdOptions,
   { checkPath }: { checkPath: unknown }
 ) {
   // set defaults
@@ -72,20 +103,18 @@ export const parseEnv = async function (
     if (env.npmAuth !== undefined) {
       (Object.keys(env.npmAuth) as RegistryUrl[]).forEach((reg) => {
         const regAuth = env.npmAuth![reg];
-        if ("token" in regAuth) {
+        if (isTokenAuth(regAuth)) {
           env.auth[reg] = {
             token: regAuth.token,
-            alwaysAuth: regAuth.alwaysAuth || false,
+            alwaysAuth: shouldAlwaysAuth(regAuth),
           };
-        } else if ("_auth" in regAuth) {
-          const buf = Buffer.from(regAuth._auth, "base64");
-          const text = buf.toString("utf-8");
-          const [username, password] = text.split(":", 2);
+        } else if (isBasicAuth(regAuth)) {
+          const [username, password] = decodeBasicAuth(regAuth._auth);
           env.auth[reg] = {
             username,
-            password: Buffer.from(password).toString("base64"),
+            password: encodeBase64(password),
             email: regAuth.email,
-            alwaysAuth: regAuth.alwaysAuth || false,
+            alwaysAuth: shouldAlwaysAuth(regAuth),
           };
         } else {
           log.warn(

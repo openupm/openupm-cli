@@ -97,7 +97,11 @@ describe("env", function () {
     it("custom registry with extra path", async function () {
       (
         await parseEnv(
-          { _global: { registry: "https://registry.npmjs.org/some" } },
+          {
+            _global: {
+              registry: "https://registry.npmjs.org/some",
+            },
+          },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -107,7 +111,11 @@ describe("env", function () {
     it("custom registry with extra path and splash", async function () {
       (
         await parseEnv(
-          { _global: { registry: "https://registry.npmjs.org/some/" } },
+          {
+            _global: {
+              registry: "https://registry.npmjs.org/some/",
+            },
+          },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -137,7 +145,9 @@ describe("env", function () {
     it("custom registry with ipv6+port", async function () {
       (
         await parseEnv(
-          { _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" } },
+          {
+            _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" },
+          },
           { checkPath: false }
         )
       ).should.be.ok();
@@ -170,7 +180,12 @@ describe("env", function () {
     it("region cn with a custom registry", async function () {
       (
         await parseEnv(
-          { _global: { cn: true, registry: "https://reg.custom-package.com" } },
+          {
+            _global: {
+              cn: true,
+              registry: "https://reg.custom-package.com",
+            },
+          },
           { checkPath: false }
         )
       ).should.be.ok();
