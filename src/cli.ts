@@ -46,7 +46,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
     options._global = program.opts();
     const pkgs = [pkg].concat(otherPkgs);
     const retCode = await add(pkgs, options);
-    if (retCode) process.exit(retCode);
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
@@ -57,7 +57,7 @@ program
     options._global = program.opts();
     const pkgs = [pkg].concat(otherPkgs);
     const retCode = await remove(pkgs, options);
-    if (retCode) process.exit(retCode);
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
@@ -67,7 +67,7 @@ program
   .action(async function (keyword, options) {
     options._global = program.opts();
     const retCode = await search(keyword, options);
-    if (retCode) process.exit(retCode);
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
@@ -77,7 +77,7 @@ program
   .action(async function (pkg, options) {
     options._global = program.opts();
     const retCode = await view(pkg, options);
-    if (retCode) process.exit(retCode);
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
@@ -92,7 +92,7 @@ openupm deps <pkg>@<version>`
   .action(async function (pkg, options) {
     options._global = program.opts();
     const retCode = await deps(pkg, options);
-    if (retCode) process.exit(retCode);
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
@@ -112,7 +112,7 @@ program
     options._global = program.opts();
     try {
       const retCode = await login(options);
-      if (retCode) process.exit(retCode);
+      if (retCode !== 0) process.exit(retCode);
     } catch (err) {
       assertIsError(err);
       log.error("", err.message);
