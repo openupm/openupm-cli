@@ -1,14 +1,12 @@
 import { NpmAuth } from "another-npm-registry-client";
-
-export type PkgVersion = string;
-
-export type ReverseDomainName = string;
-
-export type PkgName = ReverseDomainName | `${ReverseDomainName}@${PkgVersion}`;
+import { IpAddress } from "./ip-address";
+import { DomainName } from "./domain-name";
+import { PackageUrl } from "./package-url";
+import { SemanticVersion } from "./semantic-version";
+import { PackageId } from "./package-id";
+import { RegistryUrl } from "./registry-url";
 
 export type Region = "us" | "cn";
-
-export type Registry = string;
 
 export type EditorVersion = {
   major: number;
@@ -27,12 +25,12 @@ export type Env = {
   color: boolean;
   systemUser: boolean;
   wsl: boolean;
-  npmAuth?: Record<Registry, UpmAuth>;
-  auth: Record<Registry, NpmAuth>;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
+  auth: Record<RegistryUrl, NpmAuth>;
   upstream: boolean;
-  upstreamRegistry: string;
-  registry: string;
-  namespace: string;
+  upstreamRegistry: RegistryUrl;
+  registry: RegistryUrl;
+  namespace: DomainName | IpAddress;
   editorVersion: string | null;
   region: Region;
   manifestPath: string;
@@ -51,15 +49,15 @@ export type Contact = {
 };
 
 export type PkgVersionInfo = {
-  _id?: PkgName;
+  _id?: PackageId;
   _nodeVersion?: string;
   _npmVersion?: string;
   _rev?: string;
   name: string;
-  version: string;
+  version: SemanticVersion;
   unity?: string;
   unityRelease?: string;
-  dependencies?: Record<PkgName, PkgVersion>;
+  dependencies?: Record<DomainName, SemanticVersion>;
   license?: string;
   displayName?: string;
   description?: string;
@@ -74,29 +72,33 @@ export type PkgVersionInfo = {
 };
 
 export type PkgInfo = {
-  name: ReverseDomainName;
-  _id?: PkgName;
+  name: DomainName;
+  _id?: DomainName;
   _rev?: string;
   _attachments?: Record<string, unknown>;
   readme?: string;
-  versions: Record<PkgVersion, PkgVersionInfo>;
-  "dist-tags"?: { latest?: PkgVersion };
-  version?: PkgVersion;
+  versions: Record<SemanticVersion, PkgVersionInfo>;
+  "dist-tags"?: { latest?: SemanticVersion };
+  version?: SemanticVersion;
   description?: string;
   keywords?: string[];
-  time: Record<"created" | "modified" | PkgVersion, string>;
+  time: {
+    [key: SemanticVersion]: string;
+    created?: string;
+    modified?: string;
+  };
   date?: Date;
   users?: Record<string, unknown>;
 };
 
 export type NameVersionPair = {
-  name: PkgName;
-  version: PkgVersion | undefined;
+  name: DomainName;
+  version: SemanticVersion | "latest" | undefined;
 };
 
 export type Dependency = {
-  name: PkgName;
-  version: PkgVersion;
+  name: DomainName;
+  version?: SemanticVersion;
   upstream: boolean;
   self: boolean;
   internal: boolean;
@@ -106,18 +108,18 @@ export type Dependency = {
 
 export type ScopedRegistry = {
   name: string;
-  url: string;
-  scopes: PkgName[];
+  url: RegistryUrl;
+  scopes: DomainName[];
 };
 
 export type PkgManifest = {
-  dependencies: Record<PkgName, PkgVersion>;
+  dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
   scopedRegistries?: ScopedRegistry[];
   testables?: string[];
 };
 
 export type GlobalOptions = {
-  registry?: Registry;
+  registry?: string;
   verbose?: boolean;
   color?: boolean;
   upstream?: boolean;
@@ -133,5 +135,5 @@ export type UpmAuth = {
 } & ({ token: string } | { _auth: string });
 
 export type UPMConfig = {
-  npmAuth?: Record<Registry, UpmAuth>;
+  npmAuth?: Record<RegistryUrl, UpmAuth>;
 };

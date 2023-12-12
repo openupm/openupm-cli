@@ -1,40 +1,34 @@
 import { Env, GlobalOptions } from "../types/global";
 import log from "../logger";
 import chalk from "chalk";
-import url from "url";
-import net from "node:net";
 import { loadUpmConfig } from "./upm-config";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
+import { isIpAddress } from "../types/ip-address";
+import { namespaceFor, openUpmReverseDomainName } from "../types/domain-name";
+import {
+  coerceRegistryUrl,
+  RegistryUrl,
+  registryUrl,
+} from "../types/registry-url";
+import url from "url";
 
-export const env: Env = {
-  auth: {},
-  color: false,
-  cwd: "",
-  editorVersion: null,
-  manifestPath: "",
-  namespace: "",
-  region: "us",
-  registry: "",
-  systemUser: false,
-  upstream: false,
-  upstreamRegistry: "",
-  wsl: false,
-};
+export const env: Env = <Env>{};
+
 // Parse env
 export const parseEnv = async function (
   options: { _global: GlobalOptions } & Record<string, unknown>,
   { checkPath }: { checkPath: unknown }
 ) {
   // set defaults
-  env.registry = "https://package.openupm.com";
-  env.namespace = "com.openupm";
+  env.registry = registryUrl("https://package.openupm.com");
   env.cwd = "";
   env.manifestPath = "";
+  env.namespace = openUpmReverseDomainName;
   env.upstream = true;
   env.color = true;
-  env.upstreamRegistry = "https://packages.unity.com";
+  env.upstreamRegistry = registryUrl("https://packages.unity.com");
   env.systemUser = false;
   env.wsl = false;
   env.editorVersion = null;
@@ -56,22 +50,18 @@ export const parseEnv = async function (
   if (options._global.upstream === false) env.upstream = false;
   // region cn
   if (options._global.cn === true) {
-    env.registry = "https://package.openupm.cn";
-    env.upstreamRegistry = "https://packages.unity.cn";
+    env.registry = registryUrl("https://package.openupm.cn");
+    env.upstreamRegistry = registryUrl("https://packages.unity.cn");
     env.region = "cn";
     log.notice("region", "cn");
   }
   // registry
   if (options._global.registry) {
-    let registry = options._global.registry;
-    if (!registry.toLowerCase().startsWith("http"))
-      registry = "http://" + registry;
-    if (registry.endsWith("/")) registry = registry.slice(0, -1);
-    env.registry = registry;
+    env.registry = coerceRegistryUrl(options._global.registry);
     // TODO: Check hostname for null
-    const hostname = url.parse(registry).hostname as string;
-    if (net.isIP(hostname)) env.namespace = hostname;
-    else env.namespace = hostname.split(".").reverse().slice(0, 2).join(".");
+    const hostname = url.parse(env.registry).hostname as string;
+    if (isIpAddress(hostname)) env.namespace = hostname;
+    else env.namespace = namespaceFor(hostname);
   }
   // auth
   if (options._global.systemUser) env.systemUser = true;
@@ -79,9 +69,9 @@ export const parseEnv = async function (
   const upmConfig = await loadUpmConfig();
   if (upmConfig) {
     env.npmAuth = upmConfig.npmAuth;
-    if (env.npmAuth) {
-      for (const reg in env.npmAuth) {
-        const regAuth = env.npmAuth[reg];
+    if (env.npmAuth !== undefined) {
+      (Object.keys(env.npmAuth) as RegistryUrl[]).forEach((reg) => {
+        const regAuth = env.npmAuth![reg];
         if ("token" in regAuth) {
           env.auth[reg] = {
             token: regAuth.token,
@@ -104,7 +94,7 @@ export const parseEnv = async function (
           );
           log.warn("env.auth", regAuth);
         }
-      }
+      });
     }
   }
   // log.verbose("env.npmAuth", env.npmAuth);

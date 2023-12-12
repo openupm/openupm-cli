@@ -1,15 +1,20 @@
 import log from "./logger";
-import { atVersion, splitPkgName } from "./utils/pkg-name";
-import { GlobalOptions, PkgName, ScopedRegistry } from "./types/global";
+import { GlobalOptions, ScopedRegistry } from "./types/global";
 import { loadManifest, saveManifest } from "./utils/manifest";
 import { env, parseEnv } from "./utils/env";
+import { isDomainName } from "./types/domain-name";
+import {
+  packageReference,
+  PackageReference,
+  splitPackageReference,
+} from "./types/package-reference";
 
 export type RemoveOptions = {
   _global: GlobalOptions;
 };
 
 export const remove = async function (
-  pkgs: PkgName[] | PkgName,
+  pkgs: PackageReference[] | PackageReference,
   options: RemoveOptions
 ) {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -29,15 +34,18 @@ export const remove = async function (
   return result.code;
 };
 
-const _remove = async function (pkg: PkgName) {
+const _remove = async function (pkg: PackageReference) {
   // dirty flag
   let dirty = false;
   // parse name
-  const split = splitPkgName(pkg);
-  const name = split.name;
-  let version = split.version;
+  const split = splitPackageReference(pkg);
+  const name = split[0];
+  let version = split[1];
   if (version) {
-    log.warn("", `please replace '${atVersion(name, version)}' with '${name}'`);
+    log.warn(
+      "",
+      `please replace '${packageReference(name, version)}' with '${name}'`
+    );
     return { code: 1, dirty };
   }
   // load manifest
@@ -49,7 +57,7 @@ const _remove = async function (pkg: PkgName) {
   if (manifest.dependencies) {
     version = manifest.dependencies[name];
     if (version) {
-      log.notice("manifest", `removed ${atVersion(name, version)}`);
+      log.notice("manifest", `removed ${packageReference(name, version)}`);
       delete manifest.dependencies[name];
       dirty = true;
     } else pkgsNotFound.push(pkg);
@@ -68,7 +76,7 @@ const _remove = async function (pkg: PkgName) {
       if (index > -1) {
         entry.scopes.splice(index, 1);
         const scopesSet = new Set(entry.scopes);
-        scopesSet.add(env.namespace);
+        if (isDomainName(env.namespace)) scopesSet.add(env.namespace);
         entry.scopes = Array.from(scopesSet).sort();
         dirty = true;
       }

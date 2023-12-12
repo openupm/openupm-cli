@@ -2,7 +2,6 @@ import "assert";
 import "should";
 import { parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
-import { PkgInfo } from "../src/types/global";
 import {
   exampleRegistryUrl,
   registerMissingPackage,
@@ -11,6 +10,10 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import should from "should";
+import { buildPackageInfo } from "./data-pkg-info";
+import { domainName } from "../src/types/domain-name";
+
+const packageA = domainName("package-a");
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
@@ -27,13 +30,9 @@ describe("registry-client", function () {
           { checkPath: false }
         )
       ).should.be.ok();
-      const pkgInfoRemote: PkgInfo = {
-        name: "package-a",
-        versions: {},
-        time: {},
-      };
+      const pkgInfoRemote = buildPackageInfo(packageA);
       registerRemotePkg(pkgInfoRemote);
-      const info = await fetchPackageInfo("package-a");
+      const info = await fetchPackageInfo(packageA);
       should(info).deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
@@ -44,8 +43,8 @@ describe("registry-client", function () {
         )
       ).should.be.ok();
 
-      registerMissingPackage("package-a");
-      const info = await fetchPackageInfo("package-a");
+      registerMissingPackage(packageA);
+      const info = await fetchPackageInfo(packageA);
       (info === undefined).should.be.ok();
     });
   });

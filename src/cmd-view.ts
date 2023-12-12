@@ -1,24 +1,35 @@
 import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
-import { atVersion, splitPkgName } from "./utils/pkg-name";
-import { GlobalOptions, PkgInfo, PkgName } from "./types/global";
+import { GlobalOptions, PkgInfo } from "./types/global";
 import { tryGetLatestVersion } from "./utils/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { fetchPackageInfo } from "./registry-client";
+import { DomainName } from "./types/domain-name";
+import {
+  packageReference,
+  PackageReference,
+  splitPackageReference,
+} from "./types/package-reference";
 
 export type ViewOptions = {
   _global: GlobalOptions;
 };
 
-export const view = async function (pkg: PkgName, options: ViewOptions) {
+export const view = async function (
+  pkg: PackageReference,
+  options: ViewOptions
+) {
   // parse env
   const envOk = await parseEnv(options, { checkPath: false });
   if (!envOk) return 1;
   // parse name
-  const { name, version } = splitPkgName(pkg);
+  const [name, version] = splitPackageReference(pkg);
   if (version) {
-    log.warn("", `please replace '${atVersion(name, version)}' with '${name}'`);
+    log.warn(
+      "",
+      `please replace '${packageReference(name, version)}' with '${name}'`
+    );
     return 1;
   }
   // verify name
@@ -79,7 +90,7 @@ const printInfo = function (pkg: PkgInfo) {
   if (dependencies && Object.keys(dependencies).length > 0) {
     console.log();
     console.log("dependencies");
-    Object.keys(dependencies)
+    (Object.keys(dependencies) as DomainName[])
       .sort()
       .forEach((n) => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
   }

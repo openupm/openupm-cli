@@ -8,18 +8,14 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import {
-  Dependency,
-  NameVersionPair,
-  PkgInfo,
-  PkgName,
-  PkgVersion,
-  Registry,
-} from "./types/global";
+import { Dependency, NameVersionPair, PkgInfo } from "./types/global";
 import { env } from "./utils/env";
-import { atVersion, isInternalPackage } from "./utils/pkg-name";
 import _ from "lodash";
 import { tryGetLatestVersion } from "./utils/pkg-info";
+import { DomainName, isInternalPackage } from "./types/domain-name";
+import { SemanticVersion } from "./types/semantic-version";
+import { packageReference } from "./types/package-reference";
+import { RegistryUrl } from "./types/registry-url";
 
 export type NpmClient = {
   rawClient: RegClient;
@@ -96,8 +92,8 @@ export const getNpmClient = (): NpmClient => {
 };
 // Fetch package info json from registry
 export const fetchPackageInfo = async function (
-  name: PkgName,
-  registry?: Registry
+  name: DomainName,
+  registry?: RegistryUrl
 ): Promise<PkgInfo | undefined> {
   if (!registry) registry = env.registry;
   const pkgPath = `${registry}/${name}`;
@@ -124,15 +120,13 @@ export const fetchPackageDependencies = async function ({
   version,
   deep,
 }: {
-  name: PkgName;
-  version: PkgVersion | undefined;
+  name: DomainName;
+  version: SemanticVersion | "latest" | undefined;
   deep?: boolean;
 }): Promise<[Dependency[], Dependency[]]> {
   log.verbose(
     "dependency",
-    `fetch: ${
-      version !== undefined ? atVersion(name, version) : name
-    } deep=${deep}`
+    `fetch: ${packageReference(name, version)} deep=${deep}`
   );
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
@@ -144,7 +138,7 @@ export const fetchPackageDependencies = async function ({
   const depsInvalid = [];
   // cached dict: {pkg-name: pkgInfo}
   const cachedPacakgeInfoDict: Record<
-    PkgVersion,
+    DomainName,
     { pkgInfo: PkgInfo; upstream: boolean }
   > = {};
   while (pendingList.length > 0) {
@@ -155,11 +149,16 @@ export const fetchPackageDependencies = async function ({
       processedList.push(entry);
       // create valid depedenency structure
       const depObj: Dependency = {
-        ...entry,
+        name: entry.name,
+        /* 
+        NOTE: entry.version could also be "latest" or undefiend. 
+        Later code guarantees that in that case depObj.version will be replaced
+        with a valid-semantic version. So we can assert the value here safely
+         */
+        version: entry.version as SemanticVersion,
         internal: isInternalPackage(entry.name),
         upstream: false,
         self: entry.name == name,
-        version: "",
         reason: null,
       };
       if (!depObj.internal) {
@@ -209,9 +208,10 @@ export const fetchPackageDependencies = async function ({
         if (!versions.find((x) => x == entry.version)) {
           log.warn(
             "404",
-            `package ${
-              version !== undefined ? atVersion(name, version) : name
-            } is not a valid choice of ${versions.reverse().join(", ")}`
+            `package ${packageReference(
+              name,
+              version
+            )} is not a valid choice of ${versions.reverse().join(", ")}`
           );
           depObj.reason = "version404";
           // eslint-disable-next-line require-atomic-updates
@@ -222,10 +222,16 @@ export const fetchPackageDependencies = async function ({
         }
         // add dependencies to pending list
         if (depObj.self || deep) {
-          const deps: NameVersionPair[] = _.toPairs(
-            pkgInfo.versions[entry.version]["dependencies"]
-          ).map((x: [PkgName, PkgVersion]): NameVersionPair => {
-            return { name: x[0], version: x[1] };
+          const deps: NameVersionPair[] = (
+            _.toPairs(pkgInfo.versions[entry.version]["dependencies"]) as [
+              DomainName,
+              SemanticVersion
+            ][]
+          ).map((x): NameVersionPair => {
+            return {
+              name: x[0],
+              version: x[1],
+            };
           });
           deps.forEach((x) => pendingList.push(x));
         }
@@ -233,13 +239,9 @@ export const fetchPackageDependencies = async function ({
       depsValid.push(depObj);
       log.verbose(
         "dependency",
-        `${
-          entry.version !== undefined
-            ? atVersion(entry.name, entry.version)
-            : entry.name
-        } ${depObj.internal ? "[internal] " : ""}${
-          depObj.upstream ? "[upstream]" : ""
-        }`
+        `${packageReference(entry.name, entry.version)} ${
+          depObj.internal ? "[internal] " : ""
+        }${depObj.upstream ? "[upstream]" : ""}`
       );
     }
   }

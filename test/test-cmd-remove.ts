@@ -1,7 +1,9 @@
 import "should";
 import { remove } from "../src/cmd-remove";
-import { PkgManifest } from "../src/types/global";
-import { exampleRegistryUrl } from "./mock-registry";
+import {
+  exampleRegistryReverseDomain,
+  exampleRegistryUrl,
+} from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
@@ -9,27 +11,25 @@ import {
   shouldHaveRegistryWithScopes,
   shouldNotHaveDependency,
 } from "./manifest-assertions";
+import { buildPackageManifest } from "./data-pkg-manifest";
+import { domainName } from "../src/types/domain-name";
+import { semanticVersion } from "../src/types/semantic-version";
+import { packageReference } from "../src/types/package-reference";
+
+const packageA = domainName("com.example.package-a");
+const packageB = domainName("com.example.package-b");
+const missingPackage = domainName("pkg-not-exist");
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
     let mockConsole: MockConsole = null!;
-    const defaultManifest: PkgManifest = {
-      dependencies: {
-        "com.example.package-a": "1.0.0",
-        "com.example.package-b": "1.0.0",
-      },
-      scopedRegistries: [
-        {
-          name: "example.com",
-          scopes: [
-            "com.example",
-            "com.example.package-a",
-            "com.example.package-b",
-          ],
-          url: exampleRegistryUrl,
-        },
-      ],
-    };
+
+    const defaultManifest = buildPackageManifest((manifest) =>
+      manifest
+        .addDependency(packageA, "1.0.0", true, false)
+        .addDependency(packageB, "1.0.0", true, false)
+    );
+
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", {
@@ -48,13 +48,13 @@ describe("cmd-remove.ts", function () {
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
-      const retCode = await remove("com.example.package-a", options);
+      const retCode = await remove(packageA, options);
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
-      shouldNotHaveDependency(manifest, "com.example.package-a");
+      shouldNotHaveDependency(manifest, packageA);
       shouldHaveRegistryWithScopes(manifest, [
-        "com.example",
-        "com.example.package-b",
+        exampleRegistryReverseDomain,
+        packageB,
       ]);
       mockConsole.hasLineIncluding("out", "removed ").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -66,7 +66,10 @@ describe("cmd-remove.ts", function () {
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
-      const retCode = await remove("com.example.package-a@1.0.0", options);
+      const retCode = await remove(
+        packageReference(packageA, semanticVersion("1.0.0")),
+        options
+      );
       retCode.should.equal(1);
       const manifest = shouldHaveManifest();
       manifest.should.deepEqual(defaultManifest);
@@ -79,7 +82,7 @@ describe("cmd-remove.ts", function () {
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
-      const retCode = await remove("pkg-not-exist", options);
+      const retCode = await remove(missingPackage, options);
       retCode.should.equal(1);
       const manifest = shouldHaveManifest();
       manifest.should.deepEqual(defaultManifest);
@@ -92,15 +95,12 @@ describe("cmd-remove.ts", function () {
           chdir: getWorkDir("test-openupm-cli"),
         },
       };
-      const retCode = await remove(
-        ["com.example.package-a", "com.example.package-b"],
-        options
-      );
+      const retCode = await remove([packageA, packageB], options);
       retCode.should.equal(0);
       const manifest = shouldHaveManifest();
-      shouldNotHaveDependency(manifest, "com.example.package-a");
-      shouldNotHaveDependency(manifest, "com.example.package-b");
-      shouldHaveRegistryWithScopes(manifest, ["com.example"]);
+      shouldNotHaveDependency(manifest, packageA);
+      shouldNotHaveDependency(manifest, packageB);
+      shouldHaveRegistryWithScopes(manifest, [exampleRegistryReverseDomain]);
       mockConsole
         .hasLineIncluding("out", "removed com.example.package-a")
         .should.be.ok();

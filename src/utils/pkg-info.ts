@@ -1,8 +1,11 @@
-import { PkgInfo, PkgVersion } from "../types/global";
+import { PkgInfo } from "../types/global";
+import { SemanticVersion } from "../types/semantic-version";
 
 const hasLatestDistTag = (
   pkgInfo: Partial<PkgInfo>
-): pkgInfo is Partial<PkgInfo> & { "dist-tags": { latest: PkgVersion } } => {
+): pkgInfo is Partial<PkgInfo> & {
+  "dist-tags": { latest: SemanticVersion };
+} => {
   return pkgInfo["dist-tags"]?.["latest"] !== undefined;
 };
 
@@ -11,9 +14,9 @@ const hasLatestDistTag = (
  * @param pkgInfo The package. All properties are assumed to be potentially missing
  */
 export const tryGetLatestVersion = function (pkgInfo: {
-  "dist-tags"?: { latest?: PkgVersion };
-  version?: PkgVersion;
-}): PkgVersion | undefined {
+  "dist-tags"?: { latest?: SemanticVersion };
+  version?: SemanticVersion;
+}): SemanticVersion | undefined {
   if (hasLatestDistTag(pkgInfo)) return pkgInfo["dist-tags"].latest;
   else if (pkgInfo.version) return pkgInfo.version;
 };

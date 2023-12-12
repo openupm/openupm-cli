@@ -1,5 +1,7 @@
+import { Response } from "request";
+import { PkgInfo } from "./global";
+
 declare module "another-npm-registry-client" {
-  import request from "request";
   export type NpmAuth =
     | {
         username: string;
@@ -24,7 +26,7 @@ declare module "another-npm-registry-client" {
     error: Error | null,
     data: TData,
     raw: string,
-    res: request.Response
+    res: Response
   ) => void;
 
   export default class RegClient {

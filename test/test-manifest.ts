@@ -11,6 +11,8 @@ import {
   shouldHaveNoManifest,
   shouldNotHaveAnyDependencies,
 } from "./manifest-assertions";
+import { domainName } from "../src/types/domain-name";
+import { semanticVersion } from "../src/types/semantic-version";
 
 describe("manifest", function () {
   let mockConsole: MockConsole = null!;
@@ -73,7 +75,7 @@ describe("manifest", function () {
     ).should.be.ok();
     const manifest = shouldHaveManifest();
     shouldNotHaveAnyDependencies(manifest);
-    manifest.dependencies["some-pack"] = "1.0.0";
+    manifest.dependencies[domainName("some-pack")] = semanticVersion("1.0.0");
     saveManifest(manifest).should.be.ok();
     const manifest2 = shouldHaveManifest();
     manifest2.should.be.deepEqual(manifest);

@@ -1,6 +1,9 @@
-import { PkgManifest, PkgName, PkgVersion } from "../src/types/global";
+import { PkgManifest } from "../src/types/global";
 import { loadManifest } from "../src/utils/manifest";
 import should from "should";
+import { DomainName } from "../src/types/domain-name";
+import { SemanticVersion } from "../src/types/semantic-version";
+import { PackageUrl } from "../src/types/package-url";
 
 export function shouldHaveManifest(): PkgManifest {
   const manifest = loadManifest();
@@ -15,8 +18,8 @@ export function shouldHaveNoManifest() {
 
 export function shouldHaveDependency(
   manifest: PkgManifest,
-  name: PkgName,
-  version: PkgVersion
+  name: DomainName,
+  version: SemanticVersion | PackageUrl
 ) {
   should(manifest.dependencies[name]).equal(version);
 }
@@ -24,13 +27,17 @@ export function shouldHaveDependency(
 export function shouldNotHaveAnyDependencies(manifest: PkgManifest) {
   should(manifest.dependencies).be.empty();
 }
-export function shouldNotHaveDependency(manifest: PkgManifest, name: PkgName) {
+
+export function shouldNotHaveDependency(
+  manifest: PkgManifest,
+  name: DomainName
+) {
   should(manifest.dependencies[name]).be.undefined();
 }
 
 export function shouldHaveRegistryWithScopes(
   manifest: PkgManifest,
-  scopes: PkgName[]
+  scopes: DomainName[]
 ) {
   should(manifest.scopedRegistries).not.be.undefined();
   manifest
