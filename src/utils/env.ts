@@ -1,6 +1,6 @@
 import log from "../logger";
 import chalk from "chalk";
-import { loadUpmConfig } from "./upm-config-io";
+import { getUpmConfigDir, loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
@@ -97,7 +97,8 @@ export const parseEnv = async function (
   // auth
   if (options._global.systemUser) env.systemUser = true;
   if (options._global.wsl) env.wsl = true;
-  const upmConfig = await loadUpmConfig();
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  const upmConfig = await loadUpmConfig(configDir);
   if (upmConfig) {
     env.npmAuth = upmConfig.npmAuth;
     if (env.npmAuth !== undefined) {

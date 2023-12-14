@@ -8,7 +8,7 @@ import {
   loadUpmConfig,
   saveUpmConfig,
 } from "./utils/upm-config-io";
-import { parseEnv } from "./utils/env";
+import { env, parseEnv } from "./utils/env";
 import { encodeBasicAuth } from "./types/upm-config";
 import { Base64 } from "./types/base64";
 import { RegistryUrl, removeTrailingSlash } from "./types/registry-url";
@@ -187,7 +187,7 @@ const writeUnityToken = async function (
   token: string | null
 ) {
   // Create config dir if necessary
-  const configDir = await getUpmConfigDir();
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
   // Read config file
   const config = (await loadUpmConfig(configDir)) || {};
   if (!config.npmAuth) config.npmAuth = {};

@@ -5,22 +5,26 @@ import fs from "fs";
 import log from "../logger";
 import isWsl from "is-wsl";
 import execute from "./process";
-import { env } from "./env";
 import { UPMConfig } from "../types/upm-config";
 
 const configFileName = ".upmconfig.toml";
 
 /**
  * Gets the path to directory in which the upm config is stored
+ * @param wsl Whether WSL should be treated as Windows
+ * @param systemUser Whether to authenticate as a Windows system-user
  */
-export const getUpmConfigDir = async (): Promise<string> => {
+export const getUpmConfigDir = async (
+  wsl: boolean,
+  systemUser: boolean
+): Promise<string> => {
   let dirPath: string | undefined = "";
   const systemUserSubPath = "Unity/config/ServiceAccounts";
-  if (env.wsl) {
+  if (wsl) {
     if (!isWsl) {
       throw new Error("no WSL detected");
     }
-    if (env.systemUser) {
+    if (systemUser) {
       const allUserProfilePath = await execute(
         'wslpath "$(wslvar ALLUSERSPROFILE)"',
         { trim: true }
@@ -35,7 +39,7 @@ export const getUpmConfigDir = async (): Promise<string> => {
     dirPath = process.env.USERPROFILE
       ? process.env.USERPROFILE
       : process.env.HOME;
-    if (env.systemUser) {
+    if (systemUser) {
       if (!process.env.ALLUSERSPROFILE) {
         throw new Error("env ALLUSERSPROFILE is empty");
       }
@@ -49,11 +53,11 @@ export const getUpmConfigDir = async (): Promise<string> => {
 
 /**
  * Attempts to load the upm config
+ * @param configDir The directory from which to load the config
  */
 export const loadUpmConfig = async (
-  configDir?: string
+  configDir: string
 ): Promise<UPMConfig | undefined> => {
-  if (configDir === undefined) configDir = await getUpmConfigDir();
   const configPath = path.join(configDir, configFileName);
   if (fs.existsSync(configPath)) {
     const content = fs.readFileSync(configPath, "utf8");
@@ -66,9 +70,10 @@ export const loadUpmConfig = async (
 
 /**
  * Save the upm config
+ * @param config The config to save
+ * @param configDir The directory in which to save the config
  */
 export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
-  if (configDir === undefined) configDir = await getUpmConfigDir();
   mkdirp.sync(configDir);
   const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
