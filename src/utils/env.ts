@@ -36,7 +36,6 @@ export type Env = {
   color: boolean;
   systemUser: boolean;
   wsl: boolean;
-  npmAuth?: Record<RegistryUrl, UpmAuth | undefined>;
   upstream: boolean;
   upstreamRegistry: Registry;
   registry: Registry;
@@ -68,8 +67,6 @@ export const parseEnv = async function (
   env.wsl = false;
   env.editorVersion = null;
   env.region = "us";
-  // the npmAuth field of .upmconfig.toml
-  env.npmAuth = {};
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
@@ -124,8 +121,14 @@ export const parseEnv = async function (
     return null;
   }
 
+  // auth
+  if (options._global.systemUser) env.systemUser = true;
+  if (options._global.wsl) env.wsl = true;
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  const upmConfig = await loadUpmConfig(configDir);
+
   function tryGetAuthForRegistry(registry: RegistryUrl): NpmAuth | null {
-    const upmAuth = env.npmAuth![registry];
+    const upmAuth = upmConfig!.npmAuth![registry];
     if (upmAuth === undefined) return null;
     const npmAuth = tryToNpmAuth(upmAuth);
     if (npmAuth === null) {
@@ -137,19 +140,9 @@ export const parseEnv = async function (
     return null;
   }
 
-  // auth
-  if (options._global.systemUser) env.systemUser = true;
-  if (options._global.wsl) env.wsl = true;
-  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
-  const upmConfig = await loadUpmConfig(configDir);
-  if (upmConfig) {
-    env.npmAuth = upmConfig.npmAuth;
-    if (env.npmAuth !== undefined) {
-      env.registry.auth = tryGetAuthForRegistry(env.registry.url);
-      env.upstreamRegistry.auth = tryGetAuthForRegistry(
-        env.upstreamRegistry.url
-      );
-    }
+  if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
+    env.registry.auth = tryGetAuthForRegistry(env.registry.url);
+    env.upstreamRegistry.auth = tryGetAuthForRegistry(env.upstreamRegistry.url);
   }
   // log.verbose("env.npmAuth", env.npmAuth);
   // log.verbose("env.auth", env.auth);
