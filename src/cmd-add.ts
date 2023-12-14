@@ -70,7 +70,7 @@ export const add = async function (
     let version = split[1];
 
     // load manifest
-    const manifest = loadManifest(env.manifestPath);
+    const manifest = loadManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty };
     // packages that added to scope registry
     const pkgsInScope: DomainName[] = [];
@@ -231,7 +231,7 @@ export const add = async function (
     if (options.test) addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      if (!saveManifest(env.manifestPath, manifest)) return { code: 1, dirty };
+      if (!saveManifest(env.cwd, manifest)) return { code: 1, dirty };
     }
     return { code: 0, dirty };
   };

@@ -43,7 +43,6 @@ export type Env = {
   namespace: DomainName | IpAddress;
   editorVersion: string | null;
   region: Region;
-  manifestPath: string;
 };
 
 export const env: Env = <Env>{};
@@ -56,7 +55,6 @@ export const parseEnv = async function (
   // set defaults
   env.registry = registryUrl("https://package.openupm.com");
   env.cwd = "";
-  env.manifestPath = "";
   env.namespace = openUpmReverseDomainName;
   env.upstream = true;
   env.color = true;
@@ -149,7 +147,7 @@ export const parseEnv = async function (
       `can not locate manifest.json at path ${manifestPath}`
     );
     return false;
-  } else env.manifestPath = manifestPath;
+  }
   // editor version
   const projectVersionPath = path.join(
     env.cwd,

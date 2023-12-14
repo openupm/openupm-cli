@@ -6,14 +6,14 @@ import { PackageUrl } from "../src/types/package-url";
 import { hasScope } from "../src/types/scoped-registry";
 import { PkgManifest } from "../src/types/pkg-manifest";
 
-export function shouldHaveManifestAt(manifestPath: string): PkgManifest {
-  const manifest = loadManifest(manifestPath);
+export function shouldHaveManifest(workingDirectory: string): PkgManifest {
+  const manifest = loadManifest(workingDirectory);
   should(manifest).not.be.null();
   return manifest!;
 }
 
-export function shouldHaveNoManifestAt(manifestPath: string) {
-  const manifest = loadManifest(manifestPath);
+export function shouldHaveNoManifest(workingDirectory: string) {
+  const manifest = loadManifest(workingDirectory);
   should(manifest).be.null();
 }
 

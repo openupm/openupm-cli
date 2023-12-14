@@ -1,25 +1,25 @@
 import fs from "fs";
 import { assertIsError } from "./error-type-guards";
 import log from "../logger";
-import { PkgManifest } from "../types/pkg-manifest";
+import { manifestPathFor, PkgManifest } from "../types/pkg-manifest";
 
 /**
  * Attempts to load the manifest from the path specified in env
- * @param path The path where the manifest is located
+ * @param workingDirectory The working directory
  */
-export const loadManifest = function (path: string): PkgManifest | null {
+export const loadManifest = function (
+  workingDirectory: string
+): PkgManifest | null {
+  const manifestPath = manifestPathFor(workingDirectory);
   try {
-    const text = fs.readFileSync(path, { encoding: "utf8" });
+    const text = fs.readFileSync(manifestPath, { encoding: "utf8" });
     return JSON.parse(text);
   } catch (err) {
     assertIsError(err);
     if (err.code == "ENOENT")
-      log.error("manifest", "file Packages/manifest.json does not exist");
+      log.error("manifest", `manifest at ${manifestPath} does not exist`);
     else {
-      log.error(
-        "manifest",
-        `failed to parse Packages/manifest.json at ${path}`
-      );
+      log.error("manifest", `failed to parse manifest at ${manifestPath}`);
       log.error("manifest", err.message);
     }
     return null;
@@ -28,13 +28,17 @@ export const loadManifest = function (path: string): PkgManifest | null {
 
 /**
  * Save manifest json file to the path specified in enva
- * @param path The path where the manifest is located
+ * @param workingDirectory The working directory
  * @param data The manifest to save
  */
-export const saveManifest = function (path: string, data: PkgManifest) {
+export const saveManifest = function (
+  workingDirectory: string,
+  data: PkgManifest
+) {
+  const manifestPath = manifestPathFor(workingDirectory);
   const json = JSON.stringify(data, null, 2);
   try {
-    fs.writeFileSync(path, json);
+    fs.writeFileSync(manifestPath, json);
     return true;
   } catch (err) {
     assertIsError(err);

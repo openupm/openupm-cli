@@ -7,13 +7,14 @@ import { describe } from "mocha";
 import { env, parseEnv } from "../src/utils/env";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import {
-  shouldHaveManifestAt,
-  shouldHaveNoManifestAt,
+  shouldHaveManifest,
+  shouldHaveNoManifest,
   shouldNotHaveAnyDependencies,
 } from "./manifest-assertions";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
-import { addDependency } from "../src/types/pkg-manifest";
+import { addDependency, manifestPathFor } from "../src/types/pkg-manifest";
+import should from "should";
 
 describe("pkg-manifest io", function () {
   let mockConsole: MockConsole = null!;
@@ -44,7 +45,7 @@ describe("pkg-manifest io", function () {
         true
       )
     ).should.be.ok();
-    const manifest = shouldHaveManifestAt(env.manifestPath);
+    const manifest = shouldHaveManifest(env.cwd);
     manifest.should.be.deepEqual({ dependencies: {} });
   });
   it("no manifest file", async function () {
@@ -54,7 +55,7 @@ describe("pkg-manifest io", function () {
         false
       )
     ).should.be.ok();
-    shouldHaveNoManifestAt(env.manifestPath);
+    shouldHaveNoManifest(env.cwd);
     mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
   });
   it("wrong json content", async function () {
@@ -64,7 +65,7 @@ describe("pkg-manifest io", function () {
         true
       )
     ).should.be.ok();
-    shouldHaveNoManifestAt(env.manifestPath);
+    shouldHaveNoManifest(env.cwd);
     mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
   it("saveManifest", async function () {
@@ -74,11 +75,15 @@ describe("pkg-manifest io", function () {
         true
       )
     ).should.be.ok();
-    const manifest = shouldHaveManifestAt(env.manifestPath);
+    const manifest = shouldHaveManifest(env.cwd);
     shouldNotHaveAnyDependencies(manifest);
     addDependency(manifest, domainName("some-pack"), semanticVersion("1.0.0"));
-    saveManifest(env.manifestPath, manifest).should.be.ok();
-    const manifest2 = shouldHaveManifestAt(env.manifestPath);
+    saveManifest(env.cwd, manifest).should.be.ok();
+    const manifest2 = shouldHaveManifest(env.cwd);
     manifest2.should.be.deepEqual(manifest);
+  });
+  it("manifest-path is correct", function () {
+    const manifestPath = manifestPathFor("test-openupm-cli");
+    should(manifestPath).be.equal("test-openupm-cli/Packages/manifest.json");
   });
 });

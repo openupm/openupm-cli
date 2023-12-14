@@ -37,7 +37,6 @@ describe("env", function () {
       env.upstreamRegistry.should.equal("https://packages.unity.com");
       env.namespace.should.equal("com.openupm");
       env.cwd.should.equal("");
-      env.manifestPath.should.equal("");
       (env.editorVersion === null).should.be.ok();
     });
     it("check path", async function () {
@@ -48,9 +47,6 @@ describe("env", function () {
         )
       ).should.be.ok();
       env.cwd.should.be.equal(getWorkDir("test-openupm-cli"));
-      env.manifestPath.should.be.equal(
-        path.join(getWorkDir("test-openupm-cli"), "Packages/manifest.json")
-      );
     });
     it("can not resolve path", async function () {
       (
