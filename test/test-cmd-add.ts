@@ -12,7 +12,7 @@ import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
   shouldHaveDependency,
-  shouldHaveManifest,
+  shouldHaveManifestAt,
 } from "./manifest-assertions";
 import { buildPackageInfo } from "./data-pkg-info";
 import { buildPackageManifest } from "./data-pkg-manifest";
@@ -20,6 +20,7 @@ import { domainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
+import { env } from "../src/utils/env";
 
 describe("cmd-add.ts", function () {
   const packageMissing = domainName("pkg-not-exist");
@@ -162,7 +163,7 @@ describe("cmd-add.ts", function () {
     it("add pkg", async function () {
       const retCode = await add(packageA, options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestA);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -173,7 +174,7 @@ describe("cmd-add.ts", function () {
         options
       );
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestA);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -181,7 +182,7 @@ describe("cmd-add.ts", function () {
     it("add pkg@latest", async function () {
       const retCode = await add(packageReference(packageA, "latest"), options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestA);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -197,7 +198,7 @@ describe("cmd-add.ts", function () {
         options
       );
       retCode2.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestA);
       mockConsole.hasLineIncluding("out", "modified ").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -213,7 +214,7 @@ describe("cmd-add.ts", function () {
         options
       );
       retCode2.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestA);
       mockConsole.hasLineIncluding("out", "existed ").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -224,7 +225,7 @@ describe("cmd-add.ts", function () {
         options
       );
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(defaultManifest);
       mockConsole
         .hasLineIncluding("out", "version 2.0.0 is not a valid choice")
@@ -235,7 +236,7 @@ describe("cmd-add.ts", function () {
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
       const retCode = await add(packageReference(packageA, gitUrl), options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       shouldHaveDependency(manifest, packageA, gitUrl);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -244,7 +245,7 @@ describe("cmd-add.ts", function () {
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
       const retCode = await add(packageReference(packageA, gitUrl), options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       shouldHaveDependency(manifest, packageA, gitUrl);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -253,7 +254,7 @@ describe("cmd-add.ts", function () {
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
       const retCode = await add(packageReference(packageA, fileUrl), options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       shouldHaveDependency(manifest, packageA, fileUrl);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -261,14 +262,14 @@ describe("cmd-add.ts", function () {
     it("add pkg-not-exist", async function () {
       const retCode = await add(packageMissing, options);
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("add more than one pkgs", async function () {
       const retCode = await add([packageA, packageB], options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestAB);
       mockConsole
         .hasLineIncluding("out", "added com.base.package-a")
@@ -281,7 +282,7 @@ describe("cmd-add.ts", function () {
     it("add pkg from upstream", async function () {
       const retCode = await add(packageUp, upstreamOptions);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestUpstream);
       mockConsole
         .hasLineIncluding("out", "added com.upstream.package-up")
@@ -291,7 +292,7 @@ describe("cmd-add.ts", function () {
     it("add pkg-not-exist from upstream", async function () {
       const retCode = await add(packageMissing, upstreamOptions);
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
@@ -301,7 +302,7 @@ describe("cmd-add.ts", function () {
         upstreamOptions
       );
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestC);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
@@ -309,7 +310,7 @@ describe("cmd-add.ts", function () {
     it("add pkg with tests", async function () {
       const retCode = await add(packageA, testableOptions);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(expectedManifestTestable);
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();

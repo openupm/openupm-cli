@@ -7,7 +7,7 @@ import {
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
-  shouldHaveManifest,
+  shouldHaveManifestAt,
   shouldHaveRegistryWithScopes,
   shouldNotHaveDependency,
 } from "./manifest-assertions";
@@ -15,6 +15,7 @@ import { buildPackageManifest } from "./data-pkg-manifest";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
+import { env } from "../src/utils/env";
 
 const packageA = domainName("com.example.package-a");
 const packageB = domainName("com.example.package-b");
@@ -50,7 +51,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove(packageA, options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       shouldNotHaveDependency(manifest, packageA);
       shouldHaveRegistryWithScopes(manifest, [
         exampleRegistryReverseDomain,
@@ -71,7 +72,7 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
@@ -84,7 +85,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove(missingPackage, options);
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
@@ -97,7 +98,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove([packageA, packageB], options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifestAt(env.manifestPath);
       shouldNotHaveDependency(manifest, packageA);
       shouldNotHaveDependency(manifest, packageB);
       shouldHaveRegistryWithScopes(manifest, [exampleRegistryReverseDomain]);

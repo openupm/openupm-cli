@@ -7,8 +7,8 @@ import { describe } from "mocha";
 import { env, parseEnv } from "../src/utils/env";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import {
-  shouldHaveManifest,
-  shouldHaveNoManifest,
+  shouldHaveManifestAt,
+  shouldHaveNoManifestAt,
   shouldNotHaveAnyDependencies,
 } from "./manifest-assertions";
 import { domainName } from "../src/types/domain-name";
@@ -44,7 +44,7 @@ describe("pkg-manifest io", function () {
         true
       )
     ).should.be.ok();
-    const manifest = shouldHaveManifest();
+    const manifest = shouldHaveManifestAt(env.manifestPath);
     manifest.should.be.deepEqual({ dependencies: {} });
   });
   it("no manifest file", async function () {
@@ -54,7 +54,7 @@ describe("pkg-manifest io", function () {
         false
       )
     ).should.be.ok();
-    shouldHaveNoManifest();
+    shouldHaveNoManifestAt(env.manifestPath);
     mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
   });
   it("wrong json content", async function () {
@@ -64,7 +64,7 @@ describe("pkg-manifest io", function () {
         true
       )
     ).should.be.ok();
-    shouldHaveNoManifest();
+    shouldHaveNoManifestAt(env.manifestPath);
     mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
   it("saveManifest", async function () {
@@ -74,11 +74,11 @@ describe("pkg-manifest io", function () {
         true
       )
     ).should.be.ok();
-    const manifest = shouldHaveManifest();
+    const manifest = shouldHaveManifestAt(env.manifestPath);
     shouldNotHaveAnyDependencies(manifest);
     addDependency(manifest, domainName("some-pack"), semanticVersion("1.0.0"));
     saveManifest(env.manifestPath, manifest).should.be.ok();
-    const manifest2 = shouldHaveManifest();
+    const manifest2 = shouldHaveManifestAt(env.manifestPath);
     manifest2.should.be.deepEqual(manifest);
   });
 });
