@@ -62,7 +62,9 @@ export const login = async function (options: LoginOptions) {
   }
 
   // write unity token
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
   await writeUnityToken(
+    configDir,
     _auth,
     options.alwaysAuth || false,
     options.basicAuth || false,
@@ -179,6 +181,7 @@ export const generateNpmrcLines = function (
  * Write npm token to Unity
  */
 const writeUnityToken = async function (
+  configDir: string,
   _auth: Base64 | null,
   alwaysAuth: boolean,
   basicAuth: boolean,
@@ -186,8 +189,6 @@ const writeUnityToken = async function (
   registry: RegistryUrl,
   token: string | null
 ) {
-  // Create config dir if necessary
-  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
   // Read config file
   const config = (await loadUpmConfig(configDir)) || {};
   if (!config.npmAuth) config.npmAuth = {};
