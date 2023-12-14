@@ -50,7 +50,7 @@ export const env: Env = <Env>{};
 // Parse env
 export const parseEnv = async function (
   options: CmdOptions,
-  { checkPath }: { checkPath: unknown }
+  checkPath: boolean
 ) {
   // set defaults
   env.registry = registryUrl("https://package.openupm.com");

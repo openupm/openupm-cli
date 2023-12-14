@@ -31,7 +31,7 @@ describe("env", function () {
       mockConsole.detach();
     });
     it("defaults", async function () {
-      (await parseEnv({ _global: {} }, { checkPath: false })).should.be.ok();
+      (await parseEnv({ _global: {} }, false)).should.be.ok();
       env.registry.should.equal("https://package.openupm.com");
       env.upstream.should.be.ok();
       env.upstreamRegistry.should.equal("https://packages.unity.com");
@@ -44,7 +44,7 @@ describe("env", function () {
       (
         await parseEnv(
           { _global: { chdir: getWorkDir("test-openupm-cli") } },
-          { checkPath: true }
+          true
         )
       ).should.be.ok();
       env.cwd.should.be.equal(getWorkDir("test-openupm-cli"));
@@ -56,7 +56,7 @@ describe("env", function () {
       (
         await parseEnv(
           { _global: { chdir: getWorkDir("path-not-exist") } },
-          { checkPath: true }
+          true
         )
       ).should.not.be.ok();
       mockConsole
@@ -67,7 +67,7 @@ describe("env", function () {
       (
         await parseEnv(
           { _global: { chdir: getWorkDir("test-openupm-cli-no-manifest") } },
-          { checkPath: true }
+          true
         )
       ).should.not.be.ok();
       mockConsole
@@ -78,7 +78,7 @@ describe("env", function () {
       (
         await parseEnv(
           { _global: { registry: "https://registry.npmjs.org" } },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org");
@@ -88,7 +88,7 @@ describe("env", function () {
       (
         await parseEnv(
           { _global: { registry: "https://registry.npmjs.org/" } },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org");
@@ -102,7 +102,7 @@ describe("env", function () {
               registry: "https://registry.npmjs.org/some",
             },
           },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org/some");
@@ -116,7 +116,7 @@ describe("env", function () {
               registry: "https://registry.npmjs.org/some/",
             },
           },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("https://registry.npmjs.org/some");
@@ -124,10 +124,7 @@ describe("env", function () {
     });
     it("custom registry without http", async function () {
       (
-        await parseEnv(
-          { _global: { registry: "registry.npmjs.org" } },
-          { checkPath: false }
-        )
+        await parseEnv({ _global: { registry: "registry.npmjs.org" } }, false)
       ).should.be.ok();
       env.registry.should.be.equal("http://registry.npmjs.org");
       env.namespace.should.be.equal("org.npmjs");
@@ -136,7 +133,7 @@ describe("env", function () {
       (
         await parseEnv(
           { _global: { registry: "http://127.0.0.1:4873" } },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("http://127.0.0.1:4873");
@@ -148,31 +145,27 @@ describe("env", function () {
           {
             _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" },
           },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
       env.namespace.should.be.equal("1:2:3:4:5:6:7:8");
     });
     it("upstream", async function () {
-      (
-        await parseEnv({ _global: { upstream: false } }, { checkPath: false })
-      ).should.be.ok();
+      (await parseEnv({ _global: { upstream: false } }, false)).should.be.ok();
       env.upstream.should.not.be.ok();
     });
     it("editorVersion", async function () {
       (
         await parseEnv(
           { _global: { chdir: getWorkDir("test-openupm-cli") } },
-          { checkPath: true }
+          true
         )
       ).should.be.ok();
       should(env.editorVersion).be.equal("2019.2.13f1");
     });
     it("region cn", async function () {
-      (
-        await parseEnv({ _global: { cn: true } }, { checkPath: false })
-      ).should.be.ok();
+      (await parseEnv({ _global: { cn: true } }, false)).should.be.ok();
       env.registry.should.be.equal("https://package.openupm.cn");
       env.upstreamRegistry.should.be.equal("https://packages.unity.cn");
       env.region.should.be.equal("cn");
@@ -186,7 +179,7 @@ describe("env", function () {
               registry: "https://reg.custom-package.com",
             },
           },
-          { checkPath: false }
+          false
         )
       ).should.be.ok();
       env.registry.should.be.equal("https://reg.custom-package.com");

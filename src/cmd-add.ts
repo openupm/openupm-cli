@@ -43,14 +43,12 @@ export const add = async function (
 ): Promise<ResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const envOk = await parseEnv(options, { checkPath: true });
+  const envOk = await parseEnv(options, true);
   if (!envOk) return 1;
   // add
   const results = [];
   for (const pkg of pkgs)
-    results.push(
-      await _add({ pkg, testables: options.test, force: options.force })
-    );
+    results.push(await _add(pkg, options.test, options.force));
   const result: AddResult = {
     code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
     dirty: results.filter((x) => x.dirty).length > 0,
@@ -61,15 +59,11 @@ export const add = async function (
   return result.code;
 };
 
-const _add = async function ({
-  pkg,
-  testables,
-  force,
-}: {
-  pkg: PackageReference;
-  testables?: boolean;
-  force?: boolean;
-}): Promise<AddResult> {
+const _add = async function (
+  pkg: PackageReference,
+  testables?: boolean,
+  force?: boolean
+): Promise<AddResult> {
   // dirty flag
   let dirty = false;
   // is upstream package flag
@@ -160,11 +154,11 @@ const _add = async function ({
     }
     // pkgsInScope
     if (!isUpstreamPackage) {
-      const [depsValid, depsInvalid] = await fetchPackageDependencies({
+      const [depsValid, depsInvalid] = await fetchPackageDependencies(
         name,
         version,
-        deep: true,
-      });
+        true
+      );
       // add depsValid to pkgsInScope.
       depsValid
         .filter((x) => !x.upstream && !x.internal)

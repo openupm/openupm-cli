@@ -19,7 +19,7 @@ export const view = async function (
   options: ViewOptions
 ) {
   // parse env
-  const envOk = await parseEnv(options, { checkPath: false });
+  const envOk = await parseEnv(options, false);
   if (!envOk) return 1;
   // parse name
   const [name, version] = splitPackageReference(pkg);

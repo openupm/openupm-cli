@@ -41,7 +41,7 @@ describe("pkg-manifest io", function () {
     (
       await parseEnv(
         { _global: { chdir: getWorkDir("test-openupm-cli") } },
-        { checkPath: true }
+        true
       )
     ).should.be.ok();
     const manifest = shouldHaveManifest();
@@ -51,7 +51,7 @@ describe("pkg-manifest io", function () {
     (
       await parseEnv(
         { _global: { chdir: getWorkDir("path-not-exist") } },
-        { checkPath: false }
+        false
       )
     ).should.be.ok();
     shouldHaveNoManifest();
@@ -61,7 +61,7 @@ describe("pkg-manifest io", function () {
     (
       await parseEnv(
         { _global: { chdir: getWorkDir("test-openupm-cli-wrong-json") } },
-        { checkPath: true }
+        true
       )
     ).should.be.ok();
     shouldHaveNoManifest();
@@ -71,7 +71,7 @@ describe("pkg-manifest io", function () {
     (
       await parseEnv(
         { _global: { chdir: getWorkDir("test-openupm-cli") } },
-        { checkPath: true }
+        true
       )
     ).should.be.ok();
     const manifest = shouldHaveManifest();

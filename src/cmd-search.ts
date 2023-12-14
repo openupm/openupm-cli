@@ -115,7 +115,7 @@ const getTableRow = function (pkg: SearchedPkgInfo): TableRow {
 
 export async function search(keyword: string, options: SearchOptions) {
   // parse env
-  const envOk = await parseEnv(options, { checkPath: false });
+  const envOk = await parseEnv(options, false);
   if (!envOk) return 1;
   const table = getTable();
   // search endpoint

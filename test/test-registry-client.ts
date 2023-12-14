@@ -25,10 +25,7 @@ describe("registry-client", function () {
     });
     it("simple", async function () {
       (
-        await parseEnv(
-          { _global: { registry: exampleRegistryUrl } },
-          { checkPath: false }
-        )
+        await parseEnv({ _global: { registry: exampleRegistryUrl } }, false)
       ).should.be.ok();
       const pkgInfoRemote = buildPackageInfo(packageA);
       registerRemotePkg(pkgInfoRemote);
@@ -37,10 +34,7 @@ describe("registry-client", function () {
     });
     it("404", async function () {
       (
-        await parseEnv(
-          { _global: { registry: exampleRegistryUrl } },
-          { checkPath: false }
-        )
+        await parseEnv({ _global: { registry: exampleRegistryUrl } }, false)
       ).should.be.ok();
 
       registerMissingPackage(packageA);

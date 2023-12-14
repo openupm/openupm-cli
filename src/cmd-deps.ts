@@ -20,32 +20,28 @@ export const deps = async function (
   options: DepsOptions
 ) {
   // parse env
-  const envOk = await parseEnv(options, { checkPath: false });
+  const envOk = await parseEnv(options, false);
   if (!envOk) return 1;
   // parse name
   const [name, version] = splitPackageReference(pkg);
   // deps
-  await _deps({ name, version, deep: options.deep });
+  await _deps(name, version, options.deep);
   return 0;
 };
 
-const _deps = async function ({
-  name,
-  version,
-  deep,
-}: {
-  name: DomainName;
-  version: VersionReference | undefined;
-  deep?: boolean;
-}) {
+const _deps = async function (
+  name: DomainName,
+  version: VersionReference | undefined,
+  deep?: boolean
+) {
   if (version !== undefined && isPackageUrl(version))
     throw new Error("Cannot get dependencies for url-version");
 
-  const [depsValid, depsInvalid] = await fetchPackageDependencies({
+  const [depsValid, depsInvalid] = await fetchPackageDependencies(
     name,
     version,
-    deep,
-  });
+    deep
+  );
   depsValid
     .filter((x) => !x.self)
     .forEach((x) =>

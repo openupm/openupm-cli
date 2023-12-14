@@ -130,15 +130,11 @@ export const fetchPackageInfo = async function (
     }, ...
   ]
  */
-export const fetchPackageDependencies = async function ({
-  name,
-  version,
-  deep,
-}: {
-  name: DomainName;
-  version: SemanticVersion | "latest" | undefined;
-  deep?: boolean;
-}): Promise<[Dependency[], Dependency[]]> {
+export const fetchPackageDependencies = async function (
+  name: DomainName,
+  version: SemanticVersion | "latest" | undefined,
+  deep?: boolean
+): Promise<[Dependency[], Dependency[]]> {
   log.verbose(
     "dependency",
     `fetch: ${packageReference(name, version)} deep=${deep}`

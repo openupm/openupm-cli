@@ -22,7 +22,7 @@ export const remove = async function (
 ) {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const envOk = await parseEnv(options, { checkPath: true });
+  const envOk = await parseEnv(options, true);
   if (!envOk) return 1;
   // remove
   const results = [];
