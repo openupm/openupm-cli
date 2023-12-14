@@ -9,8 +9,8 @@ import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
 import { env, parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
-import { RegistryUrl } from "./types/registry-url";
 import { CmdOptions } from "./types/options";
+import { Registry } from "./registry-client";
 
 type DateString = string;
 
@@ -26,26 +26,28 @@ export type OldSearchResult =
   | SearchedPkgInfo[]
   | Record<DomainName, SearchedPkgInfo>;
 
-// Get npm fetch options
-const getNpmFetchOptions = function (): Options {
+/**
+ * Get npm fetch options
+ * @param registry The registry for which to get the options
+ */
+const getNpmFetchOptions = function (registry: Registry): Options {
   const opts: Options = {
     log,
-    registry: env.registry,
+    registry: registry.url,
   };
-  const auth = env.auth[env.registry];
-  if (auth) Object.assign(opts, auth);
+  const auth = registry.auth;
+  if (auth !== null) Object.assign(opts, auth);
   return opts;
 };
 
 const searchEndpoint = async function (
-  keyword: string,
-  registry?: RegistryUrl
+  registry: Registry,
+  keyword: string
 ): Promise<TableRow[] | undefined> {
-  if (!registry) registry = env.registry;
   try {
     // NOTE: The results of the search will be PkgInfo objects so we can change the type
     const results = <SearchedPkgInfo[]>(
-      await npmSearch(keyword, getNpmFetchOptions())
+      await npmSearch(keyword, getNpmFetchOptions(registry))
     );
     log.verbose("npmsearch", results.join(os.EOL));
     return results.map(getTableRow);
@@ -58,12 +60,13 @@ const searchEndpoint = async function (
 };
 
 const searchOld = async function (
+  registry: Registry,
   keyword: string
 ): Promise<TableRow[] | undefined> {
   // all endpoint
   try {
     const results = <OldSearchResult | undefined>(
-      await npmFetch.json("/-/all", getNpmFetchOptions())
+      await npmFetch.json("/-/all", getNpmFetchOptions(registry))
     );
     let objects: SearchedPkgInfo[] = [];
     if (results) {
@@ -117,12 +120,18 @@ export async function search(keyword: string, options: SearchOptions) {
   // parse env
   const envOk = await parseEnv(options, false);
   if (!envOk) return 1;
+
+  const registry: Registry = {
+    url: env.registry,
+    auth: env.auth[env.registry],
+  };
+
   const table = getTable();
   // search endpoint
-  let results = await searchEndpoint(keyword);
+  let results = await searchEndpoint(registry, keyword);
   // search old search
   if (results === undefined) {
-    results = (await searchOld(keyword)) || [];
+    results = (await searchOld(registry, keyword)) || [];
   }
   // search upstream
   // if (env.upstream) {
