@@ -1,6 +1,6 @@
 import log from "./logger";
 import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import { isDomainName } from "./types/domain-name";
 import {
   packageReference,
@@ -22,8 +22,8 @@ export const remove = async function (
 ) {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const envOk = await parseEnv(options, true);
-  if (!envOk) return 1;
+  const env = await parseEnv(options, true);
+  if (env === null) return 1;
 
   const removeSingle = async function (pkg: PackageReference) {
     // dirty flag

@@ -45,14 +45,13 @@ export type Env = {
   region: Region;
 };
 
-export const env: Env = <Env>{};
-
 // Parse env
 export const parseEnv = async function (
   options: CmdOptions,
   checkPath: boolean
-) {
+): Promise<Env | null> {
   // set defaults
+  const env = <Env>{};
   env.registry = registryUrl("https://package.openupm.com");
   env.cwd = "";
   env.namespace = openUpmReverseDomainName;
@@ -129,13 +128,13 @@ export const parseEnv = async function (
   // log.verbose("env.npmAuth", env.npmAuth);
   // log.verbose("env.auth", env.auth);
   // return if no need to check path
-  if (!checkPath) return true;
+  if (!checkPath) return env;
   // cwd
   if (options._global.chdir) {
     const cwd = path.resolve(options._global.chdir);
     if (!fs.existsSync(cwd)) {
       log.error("env", `can not resolve path ${cwd}`);
-      return false;
+      return null;
     }
     env.cwd = cwd;
   } else env.cwd = process.cwd();
@@ -146,8 +145,9 @@ export const parseEnv = async function (
       "manifest",
       `can not locate manifest.json at path ${manifestPath}`
     );
-    return false;
+    return null;
   }
+
   // editor version
   const projectVersionPath = path.join(
     env.cwd,
@@ -164,5 +164,5 @@ export const parseEnv = async function (
     env.editorVersion = projectVersionContent.m_EditorVersion;
   }
   // return
-  return true;
+  return env;
 };

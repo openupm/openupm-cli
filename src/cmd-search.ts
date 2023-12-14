@@ -6,7 +6,7 @@ import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { CmdOptions } from "./types/options";
@@ -118,8 +118,8 @@ const getTableRow = function (pkg: SearchedPkgInfo): TableRow {
 
 export async function search(keyword: string, options: SearchOptions) {
   // parse env
-  const envOk = await parseEnv(options, false);
-  if (!envOk) return 1;
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
 
   const registry: Registry = {
     url: env.registry,

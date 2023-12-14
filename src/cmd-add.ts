@@ -3,7 +3,7 @@ import url from "url";
 import { isPackageUrl } from "./types/package-url";
 import { tryGetLatestVersion } from "./types/pkg-info";
 import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
@@ -47,8 +47,8 @@ export const add = async function (
 ): Promise<ResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const envOk = await parseEnv(options, true);
-  if (!envOk) return 1;
+  const env = await parseEnv(options, true);
+  if (env === null) return 1;
 
   const registry: Registry = {
     url: env.registry,

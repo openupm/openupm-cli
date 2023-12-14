@@ -1,5 +1,5 @@
 import log from "./logger";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import { fetchPackageDependencies, Registry } from "./registry-client";
 import { isPackageUrl } from "./types/package-url";
 import {
@@ -18,8 +18,8 @@ export const deps = async function (
   options: DepsOptions
 ) {
   // parse env
-  const envOk = await parseEnv(options, false);
-  if (!envOk) return 1;
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
 
   const registry: Registry = {
     url: env.registry,

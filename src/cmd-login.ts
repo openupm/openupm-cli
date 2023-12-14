@@ -8,7 +8,7 @@ import {
   loadUpmConfig,
   saveUpmConfig,
 } from "./utils/upm-config-io";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import { encodeBasicAuth } from "./types/upm-config";
 import { Base64 } from "./types/base64";
 import { RegistryUrl, removeTrailingSlash } from "./types/registry-url";
@@ -30,8 +30,8 @@ export type LoginOptions = CmdOptions<{
 
 export const login = async function (options: LoginOptions) {
   // parse env
-  const envOk = await parseEnv(options, false);
-  if (!envOk) return 1;
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
   // query parameters
   if (!options.username) options.username = await promptUsername();
   if (!options.password) options.password = await promptPassword();

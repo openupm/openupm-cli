@@ -2,7 +2,7 @@ import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import { fetchPackageInfo } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import {
@@ -19,8 +19,8 @@ export const view = async function (
   options: ViewOptions
 ) {
   // parse env
-  const envOk = await parseEnv(options, false);
-  if (!envOk) return 1;
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
   // parse name
   const [name, version] = splitPackageReference(pkg);
   if (version) {
