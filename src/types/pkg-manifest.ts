@@ -3,6 +3,7 @@ import { SemanticVersion } from "./semantic-version";
 import { PackageUrl } from "./package-url";
 import { ScopedRegistry } from "./scoped-registry";
 import { RegistryUrl, removeTrailingSlash } from "./registry-url";
+import path from "path";
 
 /**
  * The content of the package-manifest (manifest.json) of a Unity project
@@ -95,4 +96,13 @@ export function addTestable(manifest: PkgManifest, name: DomainName) {
   if (!manifest.testables) manifest.testables = [];
   if (manifest.testables.indexOf(name) === -1) manifest.testables.push(name);
   manifest.testables.sort();
+}
+
+/**
+ * Determines the path to the package manifest based on the working
+ * directory (Root of Unity project).
+ * @param workingDirectory The working directory
+ */
+export function manifestPathFor(workingDirectory: string): string {
+  return path.join(workingDirectory, "Packages/manifest.json");
 }

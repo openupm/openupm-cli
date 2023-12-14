@@ -26,6 +26,7 @@ import {
 import { encodeBase64 } from "../types/base64";
 import { NpmAuth } from "another-npm-registry-client";
 import { CmdOptions } from "../types/options";
+import { manifestPathFor } from "../types/pkg-manifest";
 
 type Region = "us" | "cn";
 
@@ -141,7 +142,7 @@ export const parseEnv = async function (
     env.cwd = cwd;
   } else env.cwd = process.cwd();
   // manifest path
-  const manifestPath = path.join(env.cwd, "Packages/manifest.json");
+  const manifestPath = manifestPathFor(env.cwd);
   if (!fs.existsSync(manifestPath)) {
     log.error(
       "manifest",
