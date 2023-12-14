@@ -1,15 +1,15 @@
 import fs from "fs";
 import { assertIsError } from "./error-type-guards";
 import log from "../logger";
-import { env } from "./env";
 import { PkgManifest } from "../types/pkg-manifest";
 
 /**
  * Attempts to load the manifest from the path specified in env
+ * @param path The path where the manifest is located
  */
-export const loadManifest = function (): PkgManifest | null {
+export const loadManifest = function (path: string): PkgManifest | null {
   try {
-    const text = fs.readFileSync(env.manifestPath, { encoding: "utf8" });
+    const text = fs.readFileSync(path, { encoding: "utf8" });
     return JSON.parse(text);
   } catch (err) {
     assertIsError(err);
@@ -18,7 +18,7 @@ export const loadManifest = function (): PkgManifest | null {
     else {
       log.error(
         "manifest",
-        `failed to parse Packages/manifest.json at ${env.manifestPath}`
+        `failed to parse Packages/manifest.json at ${path}`
       );
       log.error("manifest", err.message);
     }
@@ -27,12 +27,14 @@ export const loadManifest = function (): PkgManifest | null {
 };
 
 /**
- * Save manifest json file to the path specified in env
+ * Save manifest json file to the path specified in enva
+ * @param path The path where the manifest is located
+ * @param data The manifest to save
  */
-export const saveManifest = function (data: PkgManifest) {
+export const saveManifest = function (path: string, data: PkgManifest) {
   const json = JSON.stringify(data, null, 2);
   try {
-    fs.writeFileSync(env.manifestPath, json);
+    fs.writeFileSync(path, json);
     return true;
   } catch (err) {
     assertIsError(err);

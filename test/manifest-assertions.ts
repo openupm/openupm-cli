@@ -5,15 +5,16 @@ import { SemanticVersion } from "../src/types/semantic-version";
 import { PackageUrl } from "../src/types/package-url";
 import { hasScope } from "../src/types/scoped-registry";
 import { PkgManifest } from "../src/types/pkg-manifest";
+import { env } from "../src/utils/env";
 
 export function shouldHaveManifest(): PkgManifest {
-  const manifest = loadManifest();
+  const manifest = loadManifest(env.manifestPath);
   should(manifest).not.be.null();
   return manifest!;
 }
 
 export function shouldHaveNoManifest() {
-  const manifest = loadManifest();
+  const manifest = loadManifest(env.manifestPath);
   should(manifest).be.null();
 }
 

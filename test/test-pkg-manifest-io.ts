@@ -4,7 +4,7 @@ import "should";
 import path from "path";
 import { saveManifest } from "../src/utils/pkg-manifest-io";
 import { describe } from "mocha";
-import { parseEnv } from "../src/utils/env";
+import { env, parseEnv } from "../src/utils/env";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import {
   shouldHaveManifest,
@@ -77,7 +77,7 @@ describe("pkg-manifest io", function () {
     const manifest = shouldHaveManifest();
     shouldNotHaveAnyDependencies(manifest);
     addDependency(manifest, domainName("some-pack"), semanticVersion("1.0.0"));
-    saveManifest(manifest).should.be.ok();
+    saveManifest(env.manifestPath, manifest).should.be.ok();
     const manifest2 = shouldHaveManifest();
     manifest2.should.be.deepEqual(manifest);
   });
