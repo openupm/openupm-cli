@@ -80,9 +80,18 @@ const _add = async function (
   const pkgsInScope: DomainName[] = [];
   if (version === undefined || !isPackageUrl(version)) {
     // verify name
-    let pkgInfo = await fetchPackageInfo(name);
+    let pkgInfo = await fetchPackageInfo(
+      { url: env.registry, auth: env.auth[env.registry] ?? null },
+      name
+    );
     if (!pkgInfo && env.upstream) {
-      pkgInfo = await fetchPackageInfo(name, env.upstreamRegistry);
+      pkgInfo = await fetchPackageInfo(
+        {
+          url: env.upstreamRegistry,
+          auth: env.auth[env.upstreamRegistry] ?? null,
+        },
+        name
+      );
       if (pkgInfo) isUpstreamPackage = true;
     }
     if (!pkgInfo) {

@@ -1,6 +1,6 @@
 import "assert";
 import "should";
-import { parseEnv } from "../src/utils/env";
+import { env, parseEnv } from "../src/utils/env";
 import { fetchPackageInfo } from "../src/registry-client";
 import {
   exampleRegistryUrl,
@@ -29,7 +29,10 @@ describe("registry-client", function () {
       ).should.be.ok();
       const pkgInfoRemote = buildPackageInfo(packageA);
       registerRemotePkg(pkgInfoRemote);
-      const info = await fetchPackageInfo(packageA);
+      const info = await fetchPackageInfo(
+        { url: env.registry, auth: env.auth[env.registry] ?? null },
+        packageA
+      );
       should(info).deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
@@ -38,7 +41,10 @@ describe("registry-client", function () {
       ).should.be.ok();
 
       registerMissingPackage(packageA);
-      const info = await fetchPackageInfo(packageA);
+      const info = await fetchPackageInfo(
+        { url: env.registry, auth: env.auth[env.registry] ?? null },
+        packageA
+      );
       (info === undefined).should.be.ok();
     });
   });

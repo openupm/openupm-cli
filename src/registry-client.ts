@@ -4,17 +4,18 @@ import RegClient, {
   AddUserResponse,
   ClientCallback,
   GetParams,
+  NpmAuth,
 } from "another-npm-registry-client";
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import { env } from "./utils/env";
 import _ from "lodash";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
+import { env } from "./utils/env";
 
 export type NpmClient = {
   rawClient: RegClient;
@@ -51,6 +52,11 @@ export type Dependency = {
   internal: boolean;
   reason: string | null;
   resolved?: boolean;
+};
+
+export type Registry = {
+  url: RegistryUrl;
+  auth: NpmAuth | null;
 };
 
 type NameVersionPair = {
@@ -106,14 +112,13 @@ export const getNpmClient = (): NpmClient => {
 };
 // Fetch package info json from registry
 export const fetchPackageInfo = async function (
-  name: DomainName,
-  registry?: RegistryUrl
+  registry: Registry,
+  name: DomainName
 ): Promise<PkgInfo | undefined> {
-  if (!registry) registry = env.registry;
-  const pkgPath = `${registry}/${name}`;
+  const pkgPath = `${registry.url}/${name}`;
   const client = getNpmClient();
   try {
-    return await client.get(pkgPath, { auth: env.auth[registry] || undefined });
+    return await client.get(pkgPath, { auth: registry.auth || undefined });
     // eslint-disable-next-line no-empty
   } catch (err) {}
 };
@@ -185,7 +190,14 @@ export const fetchPackageDependencies = async function (
         }
         // try fetching package info from the default registry
         if (pkgInfo === null) {
-          pkgInfo = (await fetchPackageInfo(entry.name)) ?? null;
+          pkgInfo =
+            (await fetchPackageInfo(
+              {
+                url: env.registry,
+                auth: env.auth[env.registry] ?? null,
+              },
+              entry.name
+            )) ?? null;
           if (pkgInfo) {
             depObj.upstream = false;
             cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: false };
@@ -194,7 +206,13 @@ export const fetchPackageDependencies = async function (
         // try fetching package info from the upstream registry
         if (!pkgInfo) {
           pkgInfo =
-            (await fetchPackageInfo(entry.name, env.upstreamRegistry)) ?? null;
+            (await fetchPackageInfo(
+              {
+                url: env.upstreamRegistry,
+                auth: env.auth[env.upstreamRegistry] ?? null,
+              },
+              entry.name
+            )) ?? null;
           if (pkgInfo) {
             depObj.upstream = true;
             cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: true };

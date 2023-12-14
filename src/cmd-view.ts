@@ -31,9 +31,18 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let pkgInfo = await fetchPackageInfo(name);
+  let pkgInfo = await fetchPackageInfo(
+    { url: env.registry, auth: env.auth[env.registry] ?? null },
+    name
+  );
   if (!pkgInfo && env.upstream)
-    pkgInfo = await fetchPackageInfo(name, env.upstreamRegistry);
+    pkgInfo = await fetchPackageInfo(
+      {
+        url: env.upstreamRegistry,
+        auth: env.auth[env.upstreamRegistry] ?? null,
+      },
+      name
+    );
   if (!pkgInfo) {
     log.error("404", `package not found: ${name}`);
     return 1;
