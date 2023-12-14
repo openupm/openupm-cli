@@ -29,8 +29,6 @@ import { manifestPathFor } from "../types/pkg-manifest";
 import { Registry } from "../registry-client";
 import { NpmAuth } from "another-npm-registry-client";
 
-type Region = "us" | "cn";
-
 export type Env = {
   cwd: string;
   systemUser: boolean;
@@ -40,7 +38,6 @@ export type Env = {
   registry: Registry;
   namespace: DomainName | IpAddress;
   editorVersion: string | null;
-  region: Region;
 };
 
 // Parse env
@@ -64,7 +61,6 @@ export const parseEnv = async function (
   env.systemUser = false;
   env.wsl = false;
   env.editorVersion = null;
-  env.region = "us";
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
@@ -86,7 +82,6 @@ export const parseEnv = async function (
       url: registryUrl("https://packages.unity.cn"),
       auth: null,
     };
-    env.region = "cn";
     log.notice("region", "cn");
   }
   // registry

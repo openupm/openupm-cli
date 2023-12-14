@@ -158,7 +158,6 @@ describe("env", function () {
       should(env).not.be.null();
       env!.registry.url.should.be.equal("https://package.openupm.cn");
       env!.upstreamRegistry.url.should.be.equal("https://packages.unity.cn");
-      env!.region.should.be.equal("cn");
     });
     it("region cn with a custom registry", async function () {
       const env = await parseEnv(
@@ -173,7 +172,6 @@ describe("env", function () {
       should(env).not.be.null();
       env!.registry.url.should.be.equal("https://reg.custom-package.com");
       env!.upstreamRegistry.url.should.be.equal("https://packages.unity.cn");
-      env!.region.should.be.equal("cn");
     });
   });
 });
