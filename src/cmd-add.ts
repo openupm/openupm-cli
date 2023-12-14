@@ -8,7 +8,11 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
+import {
+  fetchPackageDependencies,
+  fetchPackageInfo,
+  Registry,
+} from "./registry-client";
 import { DomainName, isDomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import {
@@ -45,10 +49,22 @@ export const add = async function (
   // parse env
   const envOk = await parseEnv(options, true);
   if (!envOk) return 1;
+
+  const registry: Registry = {
+    url: env.registry,
+    auth: env.auth[env.registry] ?? null,
+  };
+  const upstreamRegistry: Registry = {
+    url: env.upstreamRegistry,
+    auth: env.auth[env.upstreamRegistry] ?? null,
+  };
+
   // add
   const results = [];
   for (const pkg of pkgs)
-    results.push(await _add(pkg, options.test, options.force));
+    results.push(
+      await _add(registry, upstreamRegistry, pkg, options.test, options.force)
+    );
   const result: AddResult = {
     code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
     dirty: results.filter((x) => x.dirty).length > 0,
@@ -60,6 +76,8 @@ export const add = async function (
 };
 
 const _add = async function (
+  registry: Registry,
+  upstreamRegistry: Registry,
   pkg: PackageReference,
   testables?: boolean,
   force?: boolean
@@ -80,18 +98,9 @@ const _add = async function (
   const pkgsInScope: DomainName[] = [];
   if (version === undefined || !isPackageUrl(version)) {
     // verify name
-    let pkgInfo = await fetchPackageInfo(
-      { url: env.registry, auth: env.auth[env.registry] ?? null },
-      name
-    );
+    let pkgInfo = await fetchPackageInfo(registry, name);
     if (!pkgInfo && env.upstream) {
-      pkgInfo = await fetchPackageInfo(
-        {
-          url: env.upstreamRegistry,
-          auth: env.auth[env.upstreamRegistry] ?? null,
-        },
-        name
-      );
+      pkgInfo = await fetchPackageInfo(upstreamRegistry, name);
       if (pkgInfo) isUpstreamPackage = true;
     }
     if (!pkgInfo) {
@@ -164,6 +173,8 @@ const _add = async function (
     // pkgsInScope
     if (!isUpstreamPackage) {
       const [depsValid, depsInvalid] = await fetchPackageDependencies(
+        registry,
+        upstreamRegistry,
         name,
         version,
         true

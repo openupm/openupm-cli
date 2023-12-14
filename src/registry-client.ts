@@ -15,7 +15,6 @@ import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
-import { env } from "./utils/env";
 
 export type NpmClient = {
   rawClient: RegClient;
@@ -136,6 +135,8 @@ export const fetchPackageInfo = async function (
   ]
  */
 export const fetchPackageDependencies = async function (
+  registry: Registry,
+  upstreamRegistry: Registry,
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep?: boolean
@@ -190,14 +191,7 @@ export const fetchPackageDependencies = async function (
         }
         // try fetching package info from the default registry
         if (pkgInfo === null) {
-          pkgInfo =
-            (await fetchPackageInfo(
-              {
-                url: env.registry,
-                auth: env.auth[env.registry] ?? null,
-              },
-              entry.name
-            )) ?? null;
+          pkgInfo = (await fetchPackageInfo(registry, entry.name)) ?? null;
           if (pkgInfo) {
             depObj.upstream = false;
             cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: false };
@@ -206,13 +200,7 @@ export const fetchPackageDependencies = async function (
         // try fetching package info from the upstream registry
         if (!pkgInfo) {
           pkgInfo =
-            (await fetchPackageInfo(
-              {
-                url: env.upstreamRegistry,
-                auth: env.auth[env.upstreamRegistry] ?? null,
-              },
-              entry.name
-            )) ?? null;
+            (await fetchPackageInfo(upstreamRegistry, entry.name)) ?? null;
           if (pkgInfo) {
             depObj.upstream = true;
             cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: true };
