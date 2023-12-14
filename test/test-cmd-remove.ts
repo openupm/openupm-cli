@@ -4,7 +4,7 @@ import {
   exampleRegistryReverseDomain,
   exampleRegistryUrl,
 } from "./mock-registry";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { createWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
   shouldHaveManifest,

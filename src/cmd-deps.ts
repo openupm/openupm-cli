@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies, Registry } from "./registry-client";
+import { fetchPackageDependencies } from "./registry-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -21,22 +21,14 @@ export const deps = async function (
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
-  const registry: Registry = {
-    url: env.registry,
-    auth: env.auth[env.registry] ?? null,
-  };
-  const upstreamRegistry: Registry = {
-    url: env.upstreamRegistry,
-    auth: env.auth[env.upstreamRegistry] ?? null,
-  };
   const [name, version] = splitPackageReference(pkg);
 
   if (version !== undefined && isPackageUrl(version))
     throw new Error("Cannot get dependencies for url-version");
 
   const [depsValid, depsInvalid] = await fetchPackageDependencies(
-    registry,
-    upstreamRegistry,
+    env.registry,
+    env.upstreamRegistry,
     name,
     version,
     options.deep

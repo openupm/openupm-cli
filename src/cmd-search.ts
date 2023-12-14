@@ -121,17 +121,12 @@ export async function search(keyword: string, options: SearchOptions) {
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
-  const registry: Registry = {
-    url: env.registry,
-    auth: env.auth[env.registry],
-  };
-
   const table = getTable();
   // search endpoint
-  let results = await searchEndpoint(registry, keyword);
+  let results = await searchEndpoint(env.registry, keyword);
   // search old search
   if (results === undefined) {
-    results = (await searchOld(registry, keyword)) || [];
+    results = (await searchOld(env.registry, keyword)) || [];
   }
   // search upstream
   // if (env.upstream) {

@@ -51,7 +51,7 @@ export const remove = async function (
       dirty = true;
     } else pkgsNotFound.push(pkg);
 
-    const entry = tryGetScopedRegistryByUrl(manifest, env.registry);
+    const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
     if (entry !== null) {
       if (hasScope(entry, name)) {
         removeScope(entry, name);

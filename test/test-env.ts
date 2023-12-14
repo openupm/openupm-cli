@@ -32,9 +32,9 @@ describe("env", function () {
     it("defaults", async function () {
       const env = await parseEnv({ _global: {} }, false);
       should(env).not.be.null();
-      env!.registry.should.equal("https://package.openupm.com");
+      env!.registry.url.should.equal("https://package.openupm.com");
       env!.upstream.should.be.ok();
-      env!.upstreamRegistry.should.equal("https://packages.unity.com");
+      env!.upstreamRegistry.url.should.equal("https://packages.unity.com");
       env!.namespace.should.equal("com.openupm");
       env!.cwd.should.equal("");
       (env!.editorVersion === null).should.be.ok();
@@ -73,7 +73,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("https://registry.npmjs.org");
+      env!.registry.url.should.be.equal("https://registry.npmjs.org");
       env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with splash", async function () {
@@ -82,7 +82,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("https://registry.npmjs.org");
+      env!.registry.url.should.be.equal("https://registry.npmjs.org");
       env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with extra path", async function () {
@@ -95,7 +95,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("https://registry.npmjs.org/some");
+      env!.registry.url.should.be.equal("https://registry.npmjs.org/some");
       env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with extra path and splash", async function () {
@@ -108,7 +108,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("https://registry.npmjs.org/some");
+      env!.registry.url.should.be.equal("https://registry.npmjs.org/some");
       env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry without http", async function () {
@@ -117,7 +117,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("http://registry.npmjs.org");
+      env!.registry.url.should.be.equal("http://registry.npmjs.org");
       env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with ipv4+port", async function () {
@@ -126,7 +126,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("http://127.0.0.1:4873");
+      env!.registry.url.should.be.equal("http://127.0.0.1:4873");
       env!.namespace.should.be.equal("127.0.0.1");
     });
     it("custom registry with ipv6+port", async function () {
@@ -137,7 +137,7 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
+      env!.registry.url.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
       env!.namespace.should.be.equal("1:2:3:4:5:6:7:8");
     });
     it("upstream", async function () {
@@ -156,8 +156,8 @@ describe("env", function () {
     it("region cn", async function () {
       const env = await parseEnv({ _global: { cn: true } }, false);
       should(env).not.be.null();
-      env!.registry.should.be.equal("https://package.openupm.cn");
-      env!.upstreamRegistry.should.be.equal("https://packages.unity.cn");
+      env!.registry.url.should.be.equal("https://package.openupm.cn");
+      env!.upstreamRegistry.url.should.be.equal("https://packages.unity.cn");
       env!.region.should.be.equal("cn");
     });
     it("region cn with a custom registry", async function () {
@@ -171,8 +171,8 @@ describe("env", function () {
         false
       );
       should(env).not.be.null();
-      env!.registry.should.be.equal("https://reg.custom-package.com");
-      env!.upstreamRegistry.should.be.equal("https://packages.unity.cn");
+      env!.registry.url.should.be.equal("https://reg.custom-package.com");
+      env!.upstreamRegistry.url.should.be.equal("https://packages.unity.cn");
       env!.region.should.be.equal("cn");
     });
   });

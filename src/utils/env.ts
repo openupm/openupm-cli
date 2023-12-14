@@ -24,9 +24,10 @@ import {
   UpmAuth,
 } from "../types/upm-config";
 import { encodeBase64 } from "../types/base64";
-import { NpmAuth } from "another-npm-registry-client";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/pkg-manifest";
+import { Registry } from "../registry-client";
+import { NpmAuth } from "another-npm-registry-client";
 
 type Region = "us" | "cn";
 
@@ -35,11 +36,10 @@ export type Env = {
   color: boolean;
   systemUser: boolean;
   wsl: boolean;
-  npmAuth?: Record<RegistryUrl, UpmAuth>;
-  auth: Record<RegistryUrl, NpmAuth>;
+  npmAuth?: Record<RegistryUrl, UpmAuth | undefined>;
   upstream: boolean;
-  upstreamRegistry: RegistryUrl;
-  registry: RegistryUrl;
+  upstreamRegistry: Registry;
+  registry: Registry;
   namespace: DomainName | IpAddress;
   editorVersion: string | null;
   region: Region;
@@ -52,20 +52,24 @@ export const parseEnv = async function (
 ): Promise<Env | null> {
   // set defaults
   const env = <Env>{};
-  env.registry = registryUrl("https://package.openupm.com");
+  env.registry = {
+    url: registryUrl("https://package.openupm.com"),
+    auth: null,
+  };
   env.cwd = "";
   env.namespace = openUpmReverseDomainName;
   env.upstream = true;
   env.color = true;
-  env.upstreamRegistry = registryUrl("https://packages.unity.com");
+  env.upstreamRegistry = {
+    url: registryUrl("https://packages.unity.com"),
+    auth: null,
+  };
   env.systemUser = false;
   env.wsl = false;
   env.editorVersion = null;
   env.region = "us";
   // the npmAuth field of .upmconfig.toml
   env.npmAuth = {};
-  // the dict of auth param for npm registry API
-  env.auth = {};
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
@@ -79,19 +83,60 @@ export const parseEnv = async function (
   if (options._global.upstream === false) env.upstream = false;
   // region cn
   if (options._global.cn === true) {
-    env.registry = registryUrl("https://package.openupm.cn");
-    env.upstreamRegistry = registryUrl("https://packages.unity.cn");
+    env.registry = {
+      url: registryUrl("https://package.openupm.cn"),
+      auth: null,
+    };
+    env.upstreamRegistry = {
+      url: registryUrl("https://packages.unity.cn"),
+      auth: null,
+    };
     env.region = "cn";
     log.notice("region", "cn");
   }
   // registry
   if (options._global.registry) {
-    env.registry = coerceRegistryUrl(options._global.registry);
+    env.registry = {
+      url: coerceRegistryUrl(options._global.registry),
+      auth: null,
+    };
     // TODO: Check hostname for null
-    const hostname = url.parse(env.registry).hostname as string;
+    const hostname = url.parse(env.registry.url).hostname as string;
     if (isIpAddress(hostname)) env.namespace = hostname;
     else env.namespace = namespaceFor(hostname);
   }
+
+  function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
+    if (isTokenAuth(upmAuth)) {
+      return {
+        token: upmAuth.token,
+        alwaysAuth: shouldAlwaysAuth(upmAuth),
+      };
+    } else if (isBasicAuth(upmAuth)) {
+      const [username, password] = decodeBasicAuth(upmAuth._auth);
+      return {
+        username,
+        password: encodeBase64(password),
+        email: upmAuth.email,
+        alwaysAuth: shouldAlwaysAuth(upmAuth),
+      };
+    }
+    return null;
+  }
+
+  function tryGetAuthForRegistry(registry: RegistryUrl): NpmAuth | null {
+    const upmAuth = env.npmAuth![registry];
+    if (upmAuth === undefined) return null;
+    const npmAuth = tryToNpmAuth(upmAuth);
+    if (npmAuth === null) {
+      log.warn(
+        "env.auth",
+        `failed to parse auth info for ${registry} in .upmconfig.toml: missing token or _auth fields`
+      );
+    }
+    return null;
+  }
+
   // auth
   if (options._global.systemUser) env.systemUser = true;
   if (options._global.wsl) env.wsl = true;
@@ -100,29 +145,10 @@ export const parseEnv = async function (
   if (upmConfig) {
     env.npmAuth = upmConfig.npmAuth;
     if (env.npmAuth !== undefined) {
-      (Object.keys(env.npmAuth) as RegistryUrl[]).forEach((reg) => {
-        const regAuth = env.npmAuth![reg];
-        if (isTokenAuth(regAuth)) {
-          env.auth[reg] = {
-            token: regAuth.token,
-            alwaysAuth: shouldAlwaysAuth(regAuth),
-          };
-        } else if (isBasicAuth(regAuth)) {
-          const [username, password] = decodeBasicAuth(regAuth._auth);
-          env.auth[reg] = {
-            username,
-            password: encodeBase64(password),
-            email: regAuth.email,
-            alwaysAuth: shouldAlwaysAuth(regAuth),
-          };
-        } else {
-          log.warn(
-            "env.auth",
-            `failed to parse auth info for ${reg} in .upmconfig.toml: missing token or _auth fields`
-          );
-          log.warn("env.auth", regAuth);
-        }
-      });
+      env.registry.auth = tryGetAuthForRegistry(env.registry.url);
+      env.upstreamRegistry.auth = tryGetAuthForRegistry(
+        env.upstreamRegistry.url
+      );
     }
   }
   // log.verbose("env.npmAuth", env.npmAuth);

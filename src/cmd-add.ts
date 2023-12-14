@@ -8,11 +8,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import {
-  fetchPackageDependencies,
-  fetchPackageInfo,
-  Registry,
-} from "./registry-client";
+import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
 import { DomainName, isDomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import {
@@ -50,15 +46,6 @@ export const add = async function (
   const env = await parseEnv(options, true);
   if (env === null) return 1;
 
-  const registry: Registry = {
-    url: env.registry,
-    auth: env.auth[env.registry] ?? null,
-  };
-  const upstreamRegistry: Registry = {
-    url: env.upstreamRegistry,
-    auth: env.auth[env.upstreamRegistry] ?? null,
-  };
-
   const addSingle = async function (pkg: PackageReference): Promise<AddResult> {
     // dirty flag
     let dirty = false;
@@ -76,9 +63,9 @@ export const add = async function (
     const pkgsInScope: DomainName[] = [];
     if (version === undefined || !isPackageUrl(version)) {
       // verify name
-      let pkgInfo = await fetchPackageInfo(registry, name);
+      let pkgInfo = await fetchPackageInfo(env.registry, name);
       if (!pkgInfo && env.upstream) {
-        pkgInfo = await fetchPackageInfo(upstreamRegistry, name);
+        pkgInfo = await fetchPackageInfo(env.upstreamRegistry, name);
         if (pkgInfo) isUpstreamPackage = true;
       }
       if (!pkgInfo) {
@@ -151,8 +138,8 @@ export const add = async function (
       // pkgsInScope
       if (!isUpstreamPackage) {
         const [depsValid, depsInvalid] = await fetchPackageDependencies(
-          registry,
-          upstreamRegistry,
+          env.registry,
+          env.upstreamRegistry,
           name,
           version,
           true
@@ -209,11 +196,11 @@ export const add = async function (
         manifest.scopedRegistries = [];
         dirty = true;
       }
-      let entry = tryGetScopedRegistryByUrl(manifest, env.registry);
+      let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
       if (entry === null) {
-        const name = url.parse(env.registry).hostname;
+        const name = url.parse(env.registry.url).hostname;
         if (name === null) throw new Error("Could not resolve registry name");
-        entry = scopedRegistry(name, env.registry);
+        entry = scopedRegistry(name, env.registry.url);
         addScopedRegistry(manifest, entry);
         dirty = true;
       }

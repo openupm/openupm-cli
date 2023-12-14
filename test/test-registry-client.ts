@@ -31,10 +31,7 @@ describe("registry-client", function () {
       should(env).not.be.null();
       const pkgInfoRemote = buildPackageInfo(packageA);
       registerRemotePkg(pkgInfoRemote);
-      const info = await fetchPackageInfo(
-        { url: env!.registry, auth: env!.auth[env!.registry] ?? null },
-        packageA
-      );
+      const info = await fetchPackageInfo(env!.registry, packageA);
       should(info).deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
@@ -44,10 +41,7 @@ describe("registry-client", function () {
       );
       should(env).not.be.null();
       registerMissingPackage(packageA);
-      const info = await fetchPackageInfo(
-        { url: env!.registry, auth: env!.auth[env!.registry] ?? null },
-        packageA
-      );
+      const info = await fetchPackageInfo(env!.registry, packageA);
       (info === undefined).should.be.ok();
     });
   });
