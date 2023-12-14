@@ -33,7 +33,6 @@ type Region = "us" | "cn";
 
 export type Env = {
   cwd: string;
-  color: boolean;
   systemUser: boolean;
   wsl: boolean;
   upstream: boolean;
@@ -58,7 +57,6 @@ export const parseEnv = async function (
   env.cwd = "";
   env.namespace = openUpmReverseDomainName;
   env.upstream = true;
-  env.color = true;
   env.upstreamRegistry = {
     url: registryUrl("https://packages.unity.com"),
     auth: null,
@@ -70,9 +68,9 @@ export const parseEnv = async function (
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
-  if (options._global.color === false) env.color = false;
-  if (process.env.NODE_ENV == "test") env.color = false;
-  if (!env.color) {
+  const useColor =
+    options._global.color === true && process.env.NOVE_ENV !== "test";
+  if (!useColor) {
     chalk.level = 0;
     log.disableColor();
   }
