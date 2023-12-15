@@ -72,7 +72,7 @@
     "another-npm-registry-client": "^8.7.0",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
-    "commander": "^9.3.0",
+    "commander": "^9.5.0",
     "fs-extra": "^10.1.0",
     "is-wsl": "^2.2.0",
     "libnpmsearch": "^5.0.3",
