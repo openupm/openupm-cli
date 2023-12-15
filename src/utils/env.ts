@@ -65,7 +65,7 @@ export const parseEnv = async function (
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
   const useColor =
-    options._global.color === true && process.env.NOVE_ENV !== "test";
+    options._global.color === true && process.env.NODE_ENV !== "test";
   if (!useColor) {
     chalk.level = 0;
     log.disableColor();
