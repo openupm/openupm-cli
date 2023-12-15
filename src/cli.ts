@@ -111,7 +111,6 @@ program
   .option("-u, --username <username>", "username")
   .option("-p, --password <password>", "password")
   .option("-e, --email <email>", "email address")
-  .option("-r, --registry <url>", "registry url")
   .option("--basic-auth", "use basic authentication instead of token")
   .option(
     "--always-auth",
