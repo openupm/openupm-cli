@@ -24,7 +24,7 @@ const mustBePackageReference = mustSatisfy(
 
 const mustBeDomainName = mustSatisfy(
   isDomainName,
-  (input) => `"${input}" is not a valid domain name`
+  (input) => `"${input}" is not a valid package name`
 );
 
 const mustBeRegistryUrl = mustBeParceable(
