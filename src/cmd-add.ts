@@ -9,7 +9,7 @@ import {
   tryParseEditorVersion,
 } from "./types/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
-import { DomainName, isDomainName } from "./types/domain-name";
+import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import {
   packageReference,
@@ -206,7 +206,6 @@ export const add = async function (
       }
       // apply pkgsInScope
       const scopesSet = new Set(entry.scopes || []);
-      if (isDomainName(env.namespace)) pkgsInScope.push(env.namespace);
       pkgsInScope.forEach((name) => {
         if (!scopesSet.has(name)) {
           scopesSet.add(name);
