@@ -11,7 +11,6 @@ import log from "./logger";
 
 // update-notifier
 import pkg from "../package.json";
-import { assertIsError } from "./utils/error-type-guards";
 import { eachValue, mustBeParceable, mustSatisfy } from "./cli-parsing";
 import { isPackageReference } from "./types/package-reference";
 import { isDomainName } from "./types/domain-name";
@@ -152,14 +151,8 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(async function (options) {
-    try {
-      const retCode = await login(makeCmdOptions(options));
-      if (retCode !== 0) process.exit(retCode);
-    } catch (err) {
-      assertIsError(err);
-      log.error("", err.message);
-      process.exit(1);
-    }
+    const retCode = await login(makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 // prompt for invalid command
