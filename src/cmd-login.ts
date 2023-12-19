@@ -30,8 +30,8 @@ export type LoginOptions = CmdOptions<{
 
 export const login = async function (options: LoginOptions) {
   // parse env
-  const envOk = await parseEnv(options, { checkPath: false });
-  if (!envOk) return 1;
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
   // query parameters
   if (!options.username) options.username = await promptUsername();
   if (!options.password) options.password = await promptPassword();
@@ -45,12 +45,12 @@ export const login = async function (options: LoginOptions) {
     _auth = encodeBasicAuth(options.username, options.password);
   } else {
     // npm login
-    const result = await npmLogin({
-      username: options.username,
-      password: options.password,
-      email: options.email,
-      registry: options._global.registry as RegistryUrl,
-    });
+    const result = await npmLogin(
+      options.username,
+      options.password,
+      options.email,
+      options._global.registry as RegistryUrl
+    );
     if (result.code == 1) return result.code;
     if (!result.token) {
       log.error("auth", "can not find token from server response");
@@ -58,37 +58,31 @@ export const login = async function (options: LoginOptions) {
     }
     token = result.token;
     // write npm token
-    await writeNpmToken({
-      registry: options._global.registry as RegistryUrl,
-      token: result.token,
-    });
+    await writeNpmToken(options._global.registry as RegistryUrl, result.token);
   }
 
   // write unity token
-  await writeUnityToken({
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  await writeUnityToken(
+    configDir,
     _auth,
-    alwaysAuth: options.alwaysAuth || false,
-    basicAuth: options.basicAuth || false,
-    email: options.email,
-    registry: options._global.registry as RegistryUrl,
-    token,
-  });
+    options.alwaysAuth || false,
+    options.basicAuth || false,
+    options.email,
+    options._global.registry as RegistryUrl,
+    token
+  );
 };
 
 /**
  * Return npm login token
  */
-const npmLogin = async function ({
-  username,
-  password,
-  email,
-  registry,
-}: {
-  username: string;
-  password: string;
-  email: string;
-  registry: RegistryUrl;
-}) {
+const npmLogin = async function (
+  username: string,
+  password: string,
+  email: string,
+  registry: RegistryUrl
+) {
   const client = getNpmClient();
   try {
     const data = await client.adduser(registry, {
@@ -120,15 +114,8 @@ const npmLogin = async function ({
 
 /**
  * Write npm token to .npmrc
- * @param {*} param0
  */
-const writeNpmToken = async function ({
-  registry,
-  token,
-}: {
-  registry: RegistryUrl;
-  token: string;
-}) {
+const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   const configPath = getNpmrcPath();
   // read config
   let content = "";
@@ -193,23 +180,15 @@ export const generateNpmrcLines = function (
 /**
  * Write npm token to Unity
  */
-const writeUnityToken = async function ({
-  _auth,
-  alwaysAuth,
-  basicAuth,
-  email,
-  registry,
-  token,
-}: {
-  _auth: Base64 | null;
-  alwaysAuth: boolean;
-  basicAuth: boolean;
-  email: string;
-  registry: RegistryUrl;
-  token: string | null;
-}) {
-  // Create config dir if necessary
-  const configDir = await getUpmConfigDir();
+const writeUnityToken = async function (
+  configDir: string,
+  _auth: Base64 | null,
+  alwaysAuth: boolean,
+  basicAuth: boolean,
+  email: string,
+  registry: RegistryUrl,
+  token: string | null
+) {
   // Read config file
   const config = (await loadUpmConfig(configDir)) || {};
   if (!config.npmAuth) config.npmAuth = {};

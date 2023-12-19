@@ -14,7 +14,7 @@ export const getWorkDir = function (pathToTmp: string): string {
 export const createWorkDir = function (
   pathToTmp: string,
   { manifest, editorVersion }: ManifestCreationOptions
-) {
+): string {
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
@@ -33,6 +33,7 @@ export const createWorkDir = function (
       data
     );
   }
+  return workDir;
 };
 export const removeWorkDir = function (pathToTmp: string) {
   const cwd = getWorkDir(pathToTmp);

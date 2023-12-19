@@ -4,7 +4,7 @@ import {
   exampleRegistryReverseDomain,
   exampleRegistryUrl,
 } from "./mock-registry";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
+import { createWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
   shouldHaveManifest,
@@ -19,10 +19,12 @@ import { packageReference } from "../src/types/package-reference";
 const packageA = domainName("com.example.package-a");
 const packageB = domainName("com.example.package-b");
 const missingPackage = domainName("pkg-not-exist");
+const workDirName = "test-openupm-cli";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
     let mockConsole: MockConsole = null!;
+    let workDir = "";
 
     const defaultManifest = buildPackageManifest((manifest) =>
       manifest
@@ -31,26 +33,26 @@ describe("cmd-remove.ts", function () {
     );
 
     beforeEach(function () {
-      removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", {
+      removeWorkDir(workDirName);
+      workDir = createWorkDir(workDirName, {
         manifest: defaultManifest,
       });
       mockConsole = attachMockConsole();
     });
     afterEach(function () {
-      removeWorkDir("test-openupm-cli");
+      removeWorkDir(workDirName);
       mockConsole.detach();
     });
     it("remove pkg", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: getWorkDir("test-openupm-cli"),
+          chdir: workDir,
         },
       };
       const retCode = await remove(packageA, options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifest(workDir);
       shouldNotHaveDependency(manifest, packageA);
       shouldHaveRegistryWithScopes(manifest, [
         exampleRegistryReverseDomain,
@@ -63,7 +65,7 @@ describe("cmd-remove.ts", function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: getWorkDir("test-openupm-cli"),
+          chdir: workDir,
         },
       };
       const retCode = await remove(
@@ -71,7 +73,7 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifest(workDir);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
@@ -79,12 +81,12 @@ describe("cmd-remove.ts", function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: getWorkDir("test-openupm-cli"),
+          chdir: workDir,
         },
       };
       const retCode = await remove(missingPackage, options);
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifest(workDir);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
@@ -92,12 +94,12 @@ describe("cmd-remove.ts", function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: getWorkDir("test-openupm-cli"),
+          chdir: workDir,
         },
       };
       const retCode = await remove([packageA, packageB], options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest();
+      const manifest = shouldHaveManifest(workDir);
       shouldNotHaveDependency(manifest, packageA);
       shouldNotHaveDependency(manifest, packageB);
       shouldHaveRegistryWithScopes(manifest, [exampleRegistryReverseDomain]);

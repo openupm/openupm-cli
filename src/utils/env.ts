@@ -1,6 +1,6 @@
 import log from "../logger";
 import chalk from "chalk";
-import { loadUpmConfig } from "./upm-config-io";
+import { getUpmConfigDir, loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
@@ -24,56 +24,49 @@ import {
   UpmAuth,
 } from "../types/upm-config";
 import { encodeBase64 } from "../types/base64";
-import { NpmAuth } from "another-npm-registry-client";
 import { CmdOptions } from "../types/options";
-
-type Region = "us" | "cn";
+import { manifestPathFor } from "../types/pkg-manifest";
+import { Registry } from "../registry-client";
+import { NpmAuth } from "another-npm-registry-client";
 
 export type Env = {
   cwd: string;
-  color: boolean;
   systemUser: boolean;
   wsl: boolean;
-  npmAuth?: Record<RegistryUrl, UpmAuth>;
-  auth: Record<RegistryUrl, NpmAuth>;
   upstream: boolean;
-  upstreamRegistry: RegistryUrl;
-  registry: RegistryUrl;
+  upstreamRegistry: Registry;
+  registry: Registry;
   namespace: DomainName | IpAddress;
   editorVersion: string | null;
-  region: Region;
-  manifestPath: string;
 };
-
-export const env: Env = <Env>{};
 
 // Parse env
 export const parseEnv = async function (
   options: CmdOptions,
-  { checkPath }: { checkPath: unknown }
-) {
+  checkPath: boolean
+): Promise<Env | null> {
   // set defaults
-  env.registry = registryUrl("https://package.openupm.com");
+  const env = <Env>{};
+  env.registry = {
+    url: registryUrl("https://package.openupm.com"),
+    auth: null,
+  };
   env.cwd = "";
-  env.manifestPath = "";
   env.namespace = openUpmReverseDomainName;
   env.upstream = true;
-  env.color = true;
-  env.upstreamRegistry = registryUrl("https://packages.unity.com");
+  env.upstreamRegistry = {
+    url: registryUrl("https://packages.unity.com"),
+    auth: null,
+  };
   env.systemUser = false;
   env.wsl = false;
   env.editorVersion = null;
-  env.region = "us";
-  // the npmAuth field of .upmconfig.toml
-  env.npmAuth = {};
-  // the dict of auth param for npm registry API
-  env.auth = {};
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
-  if (options._global.color === false) env.color = false;
-  if (process.env.NODE_ENV == "test") env.color = false;
-  if (!env.color) {
+  const useColor =
+    options._global.color !== false && process.env.NODE_ENV !== "test";
+  if (!useColor) {
     chalk.level = 0;
     log.disableColor();
   }
@@ -81,73 +74,92 @@ export const parseEnv = async function (
   if (options._global.upstream === false) env.upstream = false;
   // region cn
   if (options._global.cn === true) {
-    env.registry = registryUrl("https://package.openupm.cn");
-    env.upstreamRegistry = registryUrl("https://packages.unity.cn");
-    env.region = "cn";
+    env.registry = {
+      url: registryUrl("https://package.openupm.cn"),
+      auth: null,
+    };
+    env.upstreamRegistry = {
+      url: registryUrl("https://packages.unity.cn"),
+      auth: null,
+    };
     log.notice("region", "cn");
   }
   // registry
   if (options._global.registry) {
-    env.registry = coerceRegistryUrl(options._global.registry);
+    env.registry = {
+      url: coerceRegistryUrl(options._global.registry),
+      auth: null,
+    };
     // TODO: Check hostname for null
-    const hostname = url.parse(env.registry).hostname as string;
+    const hostname = url.parse(env.registry.url).hostname as string;
     if (isIpAddress(hostname)) env.namespace = hostname;
     else env.namespace = namespaceFor(hostname);
   }
+
+  function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
+    if (isTokenAuth(upmAuth)) {
+      return {
+        token: upmAuth.token,
+        alwaysAuth: shouldAlwaysAuth(upmAuth),
+      };
+    } else if (isBasicAuth(upmAuth)) {
+      const [username, password] = decodeBasicAuth(upmAuth._auth);
+      return {
+        username,
+        password: encodeBase64(password),
+        email: upmAuth.email,
+        alwaysAuth: shouldAlwaysAuth(upmAuth),
+      };
+    }
+    return null;
+  }
+
   // auth
   if (options._global.systemUser) env.systemUser = true;
   if (options._global.wsl) env.wsl = true;
-  const upmConfig = await loadUpmConfig();
-  if (upmConfig) {
-    env.npmAuth = upmConfig.npmAuth;
-    if (env.npmAuth !== undefined) {
-      (Object.keys(env.npmAuth) as RegistryUrl[]).forEach((reg) => {
-        const regAuth = env.npmAuth![reg];
-        if (isTokenAuth(regAuth)) {
-          env.auth[reg] = {
-            token: regAuth.token,
-            alwaysAuth: shouldAlwaysAuth(regAuth),
-          };
-        } else if (isBasicAuth(regAuth)) {
-          const [username, password] = decodeBasicAuth(regAuth._auth);
-          env.auth[reg] = {
-            username,
-            password: encodeBase64(password),
-            email: regAuth.email,
-            alwaysAuth: shouldAlwaysAuth(regAuth),
-          };
-        } else {
-          log.warn(
-            "env.auth",
-            `failed to parse auth info for ${reg} in .upmconfig.toml: missing token or _auth fields`
-          );
-          log.warn("env.auth", regAuth);
-        }
-      });
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  const upmConfig = await loadUpmConfig(configDir);
+
+  function tryGetAuthForRegistry(registry: RegistryUrl): NpmAuth | null {
+    const upmAuth = upmConfig!.npmAuth![registry];
+    if (upmAuth === undefined) return null;
+    const npmAuth = tryToNpmAuth(upmAuth);
+    if (npmAuth === null) {
+      log.warn(
+        "env.auth",
+        `failed to parse auth info for ${registry} in .upmconfig.toml: missing token or _auth fields`
+      );
     }
+    return null;
+  }
+
+  if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
+    env.registry.auth = tryGetAuthForRegistry(env.registry.url);
+    env.upstreamRegistry.auth = tryGetAuthForRegistry(env.upstreamRegistry.url);
   }
   // log.verbose("env.npmAuth", env.npmAuth);
   // log.verbose("env.auth", env.auth);
   // return if no need to check path
-  if (!checkPath) return true;
+  if (!checkPath) return env;
   // cwd
   if (options._global.chdir) {
     const cwd = path.resolve(options._global.chdir);
     if (!fs.existsSync(cwd)) {
       log.error("env", `can not resolve path ${cwd}`);
-      return false;
+      return null;
     }
     env.cwd = cwd;
   } else env.cwd = process.cwd();
   // manifest path
-  const manifestPath = path.join(env.cwd, "Packages/manifest.json");
+  const manifestPath = manifestPathFor(env.cwd);
   if (!fs.existsSync(manifestPath)) {
     log.error(
       "manifest",
       `can not locate manifest.json at path ${manifestPath}`
     );
-    return false;
-  } else env.manifestPath = manifestPath;
+    return null;
+  }
+
   // editor version
   const projectVersionPath = path.join(
     env.cwd,
@@ -164,5 +176,5 @@ export const parseEnv = async function (
     env.editorVersion = projectVersionContent.m_EditorVersion;
   }
   // return
-  return true;
+  return env;
 };

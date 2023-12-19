@@ -24,27 +24,24 @@ describe("registry-client", function () {
       stopMockRegistry();
     });
     it("simple", async function () {
-      (
-        await parseEnv(
-          { _global: { registry: exampleRegistryUrl } },
-          { checkPath: false }
-        )
-      ).should.be.ok();
+      const env = await parseEnv(
+        { _global: { registry: exampleRegistryUrl } },
+        false
+      );
+      should(env).not.be.null();
       const pkgInfoRemote = buildPackageInfo(packageA);
       registerRemotePkg(pkgInfoRemote);
-      const info = await fetchPackageInfo(packageA);
+      const info = await fetchPackageInfo(env!.registry, packageA);
       should(info).deepEqual(pkgInfoRemote);
     });
     it("404", async function () {
-      (
-        await parseEnv(
-          { _global: { registry: exampleRegistryUrl } },
-          { checkPath: false }
-        )
-      ).should.be.ok();
-
+      const env = await parseEnv(
+        { _global: { registry: exampleRegistryUrl } },
+        false
+      );
+      should(env).not.be.null();
       registerMissingPackage(packageA);
-      const info = await fetchPackageInfo(packageA);
+      const info = await fetchPackageInfo(env!.registry, packageA);
       (info === undefined).should.be.ok();
     });
   });

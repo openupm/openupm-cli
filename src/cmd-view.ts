@@ -2,7 +2,7 @@ import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
 import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
-import { env, parseEnv } from "./utils/env";
+import { parseEnv } from "./utils/env";
 import { fetchPackageInfo } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import {
@@ -19,8 +19,8 @@ export const view = async function (
   options: ViewOptions
 ) {
   // parse env
-  const envOk = await parseEnv(options, { checkPath: false });
-  if (!envOk) return 1;
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
   // parse name
   const [name, version] = splitPackageReference(pkg);
   if (version) {
@@ -31,9 +31,9 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let pkgInfo = await fetchPackageInfo(name);
+  let pkgInfo = await fetchPackageInfo(env.registry, name);
   if (!pkgInfo && env.upstream)
-    pkgInfo = await fetchPackageInfo(name, env.upstreamRegistry);
+    pkgInfo = await fetchPackageInfo(env.upstreamRegistry, name);
   if (!pkgInfo) {
     log.error("404", `package not found: ${name}`);
     return 1;

@@ -1,13 +1,11 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
 import { fetchPackageDependencies } from "./registry-client";
-import { DomainName } from "./types/domain-name";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
   PackageReference,
   splitPackageReference,
-  VersionReference,
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 
@@ -20,32 +18,21 @@ export const deps = async function (
   options: DepsOptions
 ) {
   // parse env
-  const envOk = await parseEnv(options, { checkPath: false });
-  if (!envOk) return 1;
-  // parse name
-  const [name, version] = splitPackageReference(pkg);
-  // deps
-  await _deps({ name, version, deep: options.deep });
-  return 0;
-};
+  const env = await parseEnv(options, false);
+  if (env === null) return 1;
 
-const _deps = async function ({
-  name,
-  version,
-  deep,
-}: {
-  name: DomainName;
-  version: VersionReference | undefined;
-  deep?: boolean;
-}) {
+  const [name, version] = splitPackageReference(pkg);
+
   if (version !== undefined && isPackageUrl(version))
     throw new Error("Cannot get dependencies for url-version");
 
-  const [depsValid, depsInvalid] = await fetchPackageDependencies({
+  const [depsValid, depsInvalid] = await fetchPackageDependencies(
+    env.registry,
+    env.upstreamRegistry,
     name,
     version,
-    deep,
-  });
+    options.deep
+  );
   depsValid
     .filter((x) => !x.self)
     .forEach((x) =>
@@ -59,4 +46,6 @@ const _deps = async function ({
       else if (x.reason == "version404") reason = "missing dependency version";
       log.warn(reason, packageReference(x.name, x.version));
     });
+
+  return 0;
 };
