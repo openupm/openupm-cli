@@ -1,8 +1,7 @@
 import { HttpErrorBase } from "npm-registry-fetch";
 import { AssertionError } from "assert";
-import ErrnoException = NodeJS.ErrnoException;
 
-export function assertIsError(x: unknown): asserts x is ErrnoException {
+export function assertIsError(x: unknown): asserts x is Error {
   if (!(x instanceof Error))
     throw new AssertionError({
       message: "Argument was not an error!",
