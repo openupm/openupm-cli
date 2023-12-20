@@ -42,7 +42,7 @@
     "@types/libnpmsearch": "^2.0.4",
     "@types/lodash": "^4.14.199",
     "@types/mocha": "^10.0.3",
-    "@types/node": "^14.18.63",
+    "@types/node": "^16.18.68",
     "@types/node-fetch": "^2.6.9",
     "@types/npmlog": "^4.1.4",
     "@types/pkginfo": "^0.4.1",
