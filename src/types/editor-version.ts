@@ -40,6 +40,7 @@ export type EditorVersion = {
  * Compares two editor versions for ordering
  * @param a The first version
  * @param b The second version
+ * @throws Error An editor version could not be parsed
  */
 export const compareEditorVersion = function (
   a: string,
