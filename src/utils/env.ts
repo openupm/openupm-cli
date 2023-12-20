@@ -32,7 +32,10 @@ export type Env = {
   editorVersion: string | null;
 };
 
-// Parse env
+/**
+ * Parse env
+ * @throws Error An unhandled error occurred
+ */
 export const parseEnv = async function (
   options: CmdOptions,
   checkPath: boolean

@@ -38,6 +38,7 @@ export function removeTrailingSlash(registry: RegistryUrl): RegistryUrl {
  * - Prepending http if it is missing
  * - Removing trailing slashes
  * @param s The string
+ * @throws assert.AssertionError if string does not have valid format
  */
 export function coerceRegistryUrl(s: string): RegistryUrl {
   if (!s.toLowerCase().startsWith("http")) s = "http://" + s;

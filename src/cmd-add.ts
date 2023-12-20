@@ -37,6 +37,9 @@ type AddResult = {
   code: ResultCode;
 };
 
+/**
+ * @throws Error An unhandled error occurred
+ */
 export const add = async function (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions

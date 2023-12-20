@@ -1,6 +1,10 @@
 import { HttpErrorBase } from "npm-registry-fetch";
 import { AssertionError } from "assert";
 
+
+/**
+ * @throws AssertionError The given parameter is not an error
+ */
 export function assertIsError(x: unknown): asserts x is Error {
   if (!(x instanceof Error))
     throw new AssertionError({

@@ -63,6 +63,9 @@ type NameVersionPair = {
   version: SemanticVersion | "latest" | undefined;
 };
 
+/**
+ * @throws AssertionError The given parameter is not a {@link NpmClientError}
+ */
 export function assertIsNpmClientError(
   x: unknown
 ): asserts x is NpmClientError {
