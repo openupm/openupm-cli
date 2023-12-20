@@ -38,7 +38,7 @@ export function namespaceFor(hostname: string): DomainName {
     // 2-part domains, like unity.com
     if (count < 3) return segments;
     // Domains with two short extensions like my-school.ac.at
-    if (segments[count - 1].length <= 3 && segments[count - 2].length <= 3)
+    if (segments[count - 1]!.length <= 3 && segments[count - 2]!.length <= 3)
       return segments.slice(count - 3);
     // Domains with one extension such as registry.npmjs.org
     return segments.slice(count - 2);

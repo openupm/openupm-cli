@@ -89,7 +89,7 @@ export const add = async function (
 
       if (version === undefined)
         throw new Error("Could not determine package version to add");
-      const versionInfo = pkgInfo.versions[version];
+      const versionInfo = pkgInfo.versions[version]!;
       // verify editor version
       if (versionInfo.unity) {
         const requiredEditorVersion = versionInfo.unityRelease
