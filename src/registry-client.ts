@@ -49,7 +49,7 @@ export type Dependency = {
   upstream: boolean;
   self: boolean;
   internal: boolean;
-  reason: string | null;
+  reason: "package404" | "version404" | null;
   resolved?: boolean;
 };
 
