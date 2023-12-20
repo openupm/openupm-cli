@@ -47,7 +47,7 @@ const printInfo = function (pkg: PkgInfo) {
   const versionCount = Object.keys(pkg.versions).length;
   const ver = tryGetLatestVersion(pkg);
   assert(ver !== undefined);
-  const verInfo = pkg.versions[ver];
+  const verInfo = pkg.versions[ver]!;
   const license = verInfo.license || "proprietary or unlicensed";
   const displayName = verInfo.displayName;
   const description = verInfo.description || pkg.description;
