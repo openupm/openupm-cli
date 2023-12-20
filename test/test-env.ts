@@ -35,7 +35,6 @@ describe("env", function () {
       env!.registry.url.should.equal("https://package.openupm.com");
       env!.upstream.should.be.ok();
       env!.upstreamRegistry.url.should.equal("https://packages.unity.com");
-      env!.namespace.should.equal("com.openupm");
       env!.cwd.should.equal("");
       (env!.editorVersion === null).should.be.ok();
     });
@@ -74,7 +73,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("https://registry.npmjs.org");
-      env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with splash", async function () {
       const env = await parseEnv(
@@ -83,7 +81,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("https://registry.npmjs.org");
-      env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with extra path", async function () {
       const env = await parseEnv(
@@ -96,7 +93,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("https://registry.npmjs.org/some");
-      env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with extra path and splash", async function () {
       const env = await parseEnv(
@@ -109,7 +105,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("https://registry.npmjs.org/some");
-      env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry without http", async function () {
       const env = await parseEnv(
@@ -118,7 +113,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("http://registry.npmjs.org");
-      env!.namespace.should.be.equal("org.npmjs");
     });
     it("custom registry with ipv4+port", async function () {
       const env = await parseEnv(
@@ -127,7 +121,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("http://127.0.0.1:4873");
-      env!.namespace.should.be.equal("127.0.0.1");
     });
     it("custom registry with ipv6+port", async function () {
       const env = await parseEnv(
@@ -138,7 +131,6 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
-      env!.namespace.should.be.equal("1:2:3:4:5:6:7:8");
     });
     it("upstream", async function () {
       const env = await parseEnv({ _global: { upstream: false } }, false);

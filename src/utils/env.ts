@@ -4,18 +4,11 @@ import { getUpmConfigDir, loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
-import { IpAddress, isIpAddress } from "../types/ip-address";
-import {
-  DomainName,
-  namespaceFor,
-  openUpmReverseDomainName,
-} from "../types/domain-name";
 import {
   coerceRegistryUrl,
   RegistryUrl,
   registryUrl,
 } from "../types/registry-url";
-import url from "url";
 import {
   decodeBasicAuth,
   isBasicAuth,
@@ -36,7 +29,6 @@ export type Env = {
   upstream: boolean;
   upstreamRegistry: Registry;
   registry: Registry;
-  namespace: DomainName | IpAddress;
   editorVersion: string | null;
 };
 
@@ -55,7 +47,6 @@ export const parseEnv = async function (
     auth: null,
   };
   env.cwd = "";
-  env.namespace = openUpmReverseDomainName;
   env.upstream = true;
   env.upstreamRegistry = {
     url: registryUrl("https://packages.unity.com"),
@@ -93,10 +84,6 @@ export const parseEnv = async function (
       url: coerceRegistryUrl(options._global.registry),
       auth: null,
     };
-    // TODO: Check hostname for null
-    const hostname = url.parse(env.registry.url).hostname as string;
-    if (isIpAddress(hostname)) env.namespace = hostname;
-    else env.namespace = namespaceFor(hostname);
   }
 
   function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {

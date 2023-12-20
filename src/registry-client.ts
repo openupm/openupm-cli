@@ -243,7 +243,7 @@ export const fetchPackageDependencies = async function (
         // add dependencies to pending list
         if (depObj.self || deep) {
           const deps: NameVersionPair[] = (
-            _.toPairs(pkgInfo.versions[entry.version]["dependencies"]) as [
+            _.toPairs(pkgInfo.versions[entry.version]!["dependencies"]) as [
               DomainName,
               SemanticVersion
             ][]

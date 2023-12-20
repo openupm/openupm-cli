@@ -64,8 +64,8 @@ export const compareEditorVersion = function (
   const arrA = editorVersionToArray(verA);
   const arrB = editorVersionToArray(verB);
   for (let i = 0; i < arrA.length; i++) {
-    const valA = arrA[i];
-    const valB = arrB[i];
+    const valA = arrA[i]!;
+    const valB = arrB[i]!;
     if (valA > valB) return 1;
     else if (valA < valB) return -1;
   }
