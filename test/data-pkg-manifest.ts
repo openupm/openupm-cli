@@ -1,5 +1,5 @@
 import assert from "assert";
-import { domainName, isDomainName } from "../src/types/domain-name";
+import { isDomainName } from "../src/types/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
 import { isSemanticVersion } from "../src/types/semantic-version";
 import { addScope, scopedRegistry } from "../src/types/scoped-registry";
@@ -29,9 +29,7 @@ class PkgManifestBuilder {
 
     if (this.manifest.scopedRegistries === undefined)
       this.manifest.scopedRegistries = [
-        scopedRegistry("example.com", exampleRegistryUrl, [
-          domainName("com.example"),
-        ]),
+        scopedRegistry("example.com", exampleRegistryUrl),
       ];
 
     const registry = this.manifest.scopedRegistries![0];

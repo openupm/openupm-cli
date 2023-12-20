@@ -13,6 +13,7 @@ const configFileName = ".upmconfig.toml";
  * Gets the path to directory in which the upm config is stored
  * @param wsl Whether WSL should be treated as Windows
  * @param systemUser Whether to authenticate as a Windows system-user
+ * @throws Error Could not determine upm config directory
  */
 export const getUpmConfigDir = async (
   wsl: boolean,

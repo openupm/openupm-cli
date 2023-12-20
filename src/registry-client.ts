@@ -63,6 +63,9 @@ type NameVersionPair = {
   version: SemanticVersion | "latest" | undefined;
 };
 
+/**
+ * @throws AssertionError The given parameter is not a {@link NpmClientError}
+ */
 export function assertIsNpmClientError(
   x: unknown
 ): asserts x is NpmClientError {
@@ -240,7 +243,7 @@ export const fetchPackageDependencies = async function (
         // add dependencies to pending list
         if (depObj.self || deep) {
           const deps: NameVersionPair[] = (
-            _.toPairs(pkgInfo.versions[entry.version]["dependencies"]) as [
+            _.toPairs(pkgInfo.versions[entry.version]!["dependencies"]) as [
               DomainName,
               SemanticVersion
             ][]

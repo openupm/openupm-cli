@@ -110,7 +110,7 @@ const getTableRow = function (pkg: SearchedPkgInfo): TableRow {
   const name = pkg.name;
   const version = tryGetLatestVersion(pkg);
   let date = "";
-  if (pkg.time && pkg.time.modified) date = pkg.time.modified.split("T")[0];
+  if (pkg.time && pkg.time.modified) date = pkg.time.modified.split("T")[0]!;
   if (pkg.date) {
     date = pkg.date.toISOString().slice(0, 10);
   }

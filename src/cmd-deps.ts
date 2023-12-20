@@ -15,6 +15,9 @@ export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
 
+/**
+ * @throws Error An unhandled error occurred
+ */
 export const deps = async function (
   pkg: PackageReference,
   options: DepsOptions

@@ -4,5 +4,5 @@ export function trySplitAtFirstOccurrenceOf(
 ): [string, string | undefined] {
   const elements = s.split(split);
   if (elements.length === 1) return [s, undefined];
-  return [elements[0], elements.slice(1).join(split)];
+  return [elements[0]!, elements.slice(1).join(split)];
 }

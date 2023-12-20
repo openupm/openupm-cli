@@ -9,7 +9,7 @@ import {
   tryParseEditorVersion,
 } from "./types/editor-version";
 import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
-import { DomainName, isDomainName } from "./types/domain-name";
+import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import {
   packageReference,
@@ -37,6 +37,9 @@ type AddResult = {
   code: AddResultCode;
 };
 
+/**
+ * @throws Error An unhandled error occurred
+ */
 export const add = async function (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
@@ -89,7 +92,7 @@ export const add = async function (
 
       if (version === undefined)
         throw new Error("Could not determine package version to add");
-      const versionInfo = pkgInfo.versions[version];
+      const versionInfo = pkgInfo.versions[version]!;
       // verify editor version
       if (versionInfo.unity) {
         const requiredEditorVersion = versionInfo.unityRelease
@@ -206,7 +209,6 @@ export const add = async function (
       }
       // apply pkgsInScope
       const scopesSet = new Set(entry.scopes || []);
-      if (isDomainName(env.namespace)) pkgsInScope.push(env.namespace);
       pkgsInScope.forEach((name) => {
         if (!scopesSet.has(name)) {
           scopesSet.add(name);

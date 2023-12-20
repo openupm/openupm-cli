@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/openupm/openupm-cli/compare/1.17.0...1.18.0) (2023-12-20)
+
+
+### Features
+
+* drop namespace logic ([#67](https://github.com/openupm/openupm-cli/issues/67)) ([4a6eef2](https://github.com/openupm/openupm-cli/commit/4a6eef2dc70880a38f1508287ca975c9c16092c3))
+
 # [1.17.0](https://github.com/openupm/openupm-cli/compare/1.16.0...1.17.0) (2023-11-20)
 
 

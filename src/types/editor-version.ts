@@ -40,6 +40,7 @@ export type EditorVersion = {
  * Compares two editor versions for ordering
  * @param a The first version
  * @param b The second version
+ * @throws Error An editor version could not be parsed
  */
 export const compareEditorVersion = function (
   a: string,
@@ -63,8 +64,8 @@ export const compareEditorVersion = function (
   const arrA = editorVersionToArray(verA);
   const arrB = editorVersionToArray(verB);
   for (let i = 0; i < arrA.length; i++) {
-    const valA = arrA[i];
-    const valB = arrB[i];
+    const valA = arrA[i]!;
+    const valB = arrB[i]!;
     if (valA > valB) return 1;
     else if (valA < valB) return -1;
   }
