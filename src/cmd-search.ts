@@ -16,6 +16,8 @@ type DateString = string;
 
 type TableRow = [DomainName, SemanticVersion, DateString, ""];
 
+type SearchResultCode = 0 | 1;
+
 export type SearchOptions = CmdOptions;
 
 export type SearchedPkgInfo = Omit<PkgInfo, "versions"> & {
@@ -116,7 +118,10 @@ const getTableRow = function (pkg: SearchedPkgInfo): TableRow {
   return [name, version, date, ""];
 };
 
-export async function search(keyword: string, options: SearchOptions) {
+export async function search(
+  keyword: string,
+  options: SearchOptions
+): Promise<SearchResultCode> {
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;

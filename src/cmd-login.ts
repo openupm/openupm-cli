@@ -28,10 +28,14 @@ export type LoginOptions = CmdOptions<{
   alwaysAuth?: boolean;
 }>;
 
+type LoginResultCode = 0 | 1;
+
 /**
  * @throws Error An unhandled error occurred
  */
-export const login = async function (options: LoginOptions) {
+export const login = async function (
+  options: LoginOptions
+): Promise<LoginResultCode> {
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
@@ -75,6 +79,8 @@ export const login = async function (options: LoginOptions) {
     options._global.registry as RegistryUrl,
     token
   );
+
+  return 0;
 };
 
 /**

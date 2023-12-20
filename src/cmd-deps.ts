@@ -9,6 +9,8 @@ import {
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 
+type DepsResultCode = 0 | 1;
+
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
@@ -19,7 +21,7 @@ export type DepsOptions = CmdOptions<{
 export const deps = async function (
   pkg: PackageReference,
   options: DepsOptions
-) {
+): Promise<DepsResultCode> {
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
