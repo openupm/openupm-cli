@@ -1,3 +1,11 @@
+## [1.18.1](https://github.com/openupm/openupm-cli/compare/1.18.0...1.18.1) (2023-12-20)
+
+
+### Bug Fixes
+
+* incorrect error type ([#68](https://github.com/openupm/openupm-cli/issues/68)) ([a0f1abe](https://github.com/openupm/openupm-cli/commit/a0f1abea67a42238e17c1bb8c300661147ead81c))
+* type error ([#73](https://github.com/openupm/openupm-cli/issues/73)) ([7303ab6](https://github.com/openupm/openupm-cli/commit/7303ab675eda6f5509e49d6e9ac64cbfab04cd72))
+
 # [1.18.0](https://github.com/openupm/openupm-cli/compare/1.17.0...1.18.0) (2023-12-20)
 
 
