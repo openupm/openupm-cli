@@ -1,7 +1,6 @@
 import log from "./logger";
 import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
 import { parseEnv } from "./utils/env";
-import { isDomainName } from "./types/domain-name";
 import {
   packageReference,
   PackageReference,
@@ -56,7 +55,6 @@ export const remove = async function (
       if (hasScope(entry, name)) {
         removeScope(entry, name);
         const scopesSet = new Set(entry.scopes);
-        if (isDomainName(env.namespace)) scopesSet.add(env.namespace);
         entry.scopes = Array.from(scopesSet).sort();
         dirty = true;
       }

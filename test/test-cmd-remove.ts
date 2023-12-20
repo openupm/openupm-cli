@@ -1,9 +1,6 @@
 import "should";
 import { remove } from "../src/cmd-remove";
-import {
-  exampleRegistryReverseDomain,
-  exampleRegistryUrl,
-} from "./mock-registry";
+import { exampleRegistryUrl } from "./mock-registry";
 import { createWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
@@ -54,10 +51,7 @@ describe("cmd-remove.ts", function () {
       retCode.should.equal(0);
       const manifest = shouldHaveManifest(workDir);
       shouldNotHaveDependency(manifest, packageA);
-      shouldHaveRegistryWithScopes(manifest, [
-        exampleRegistryReverseDomain,
-        packageB,
-      ]);
+      shouldHaveRegistryWithScopes(manifest, [packageB]);
       mockConsole.hasLineIncluding("out", "removed ").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
@@ -102,7 +96,6 @@ describe("cmd-remove.ts", function () {
       const manifest = shouldHaveManifest(workDir);
       shouldNotHaveDependency(manifest, packageA);
       shouldNotHaveDependency(manifest, packageB);
-      shouldHaveRegistryWithScopes(manifest, [exampleRegistryReverseDomain]);
       mockConsole
         .hasLineIncluding("out", "removed com.example.package-a")
         .should.be.ok();
