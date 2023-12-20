@@ -86,5 +86,8 @@
     "ts-brand": "^0.0.2",
     "update-notifier": "^5.1.0",
     "yaml": "^2.0.1"
+  },
+  "volta": {
+    "node": "16.20.2"
   }
 }
