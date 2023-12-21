@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/openupm/openupm-cli/compare/1.18.1...1.19.0) (2023-12-21)
+
+
+### Features
+
+* basic cli-argument validation ([#72](https://github.com/openupm/openupm-cli/issues/72)) ([49d0a96](https://github.com/openupm/openupm-cli/commit/49d0a9663dfcd6ab2b08ef983509ad8db434ed28))
+
 ## [1.18.1](https://github.com/openupm/openupm-cli/compare/1.18.0...1.18.1) (2023-12-20)
 
 

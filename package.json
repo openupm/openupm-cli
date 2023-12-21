@@ -1,6 +1,6 @@
 {
   "name": "openupm-cli",
-  "version": "1.18.1",
+  "version": "1.19.0",
   "preferGlobal": true,
   "description": "openupm command line interface",
   "engines": {
