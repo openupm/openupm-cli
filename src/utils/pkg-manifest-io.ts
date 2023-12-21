@@ -27,7 +27,7 @@ export const loadManifest = function (
 };
 
 /**
- * Save manifest json file to the path specified in enva
+ * Save manifest json file to the path specified in env
  * @param workingDirectory The working directory
  * @param data The manifest to save
  */

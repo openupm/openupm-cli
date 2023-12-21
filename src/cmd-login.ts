@@ -164,7 +164,7 @@ export const generateNpmrcLines = function (
 ) {
   let lines = content ? content.split("\n") : [];
   const quotes = /(\?|=)/.test(token) ? '"' : "";
-  // get the registry url without http protocal
+  // get the registry url without http protocol
   let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
   // add trailing slash
   if (!registryUrl.endsWith("/")) registryUrl = registryUrl + "/";

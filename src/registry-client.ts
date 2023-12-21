@@ -157,7 +157,7 @@ export const fetchPackageDependencies = async function (
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = [];
   // cached dict: {pkg-name: pkgInfo}
-  const cachedPacakgeInfoDict: Record<
+  const cachedPackageInfoDict: Record<
     DomainName,
     { pkgInfo: PkgInfo; upstream: boolean }
   > = {};
@@ -167,11 +167,11 @@ export const fetchPackageDependencies = async function (
     if (processedList.find((x) => _.isEqual(x, entry)) === undefined) {
       // add entry to processed list
       processedList.push(entry);
-      // create valid depedenency structure
+      // create valid dependency structure
       const depObj: Dependency = {
         name: entry.name,
         /* 
-        NOTE: entry.version could also be "latest" or undefiend. 
+        NOTE: entry.version could also be "latest" or undefined. 
         Later code guarantees that in that case depObj.version will be replaced
         with a valid-semantic version. So we can assert the value here safely
          */
@@ -183,7 +183,7 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const getResult = _.get(cachedPacakgeInfoDict, entry.name, {
+        const getResult = _.get(cachedPackageInfoDict, entry.name, {
           pkgInfo: null,
           upstream: false,
         });
@@ -197,7 +197,7 @@ export const fetchPackageDependencies = async function (
           pkgInfo = (await fetchPackageInfo(registry, entry.name)) ?? null;
           if (pkgInfo) {
             depObj.upstream = false;
-            cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: false };
+            cachedPackageInfoDict[entry.name] = { pkgInfo, upstream: false };
           }
         }
         // try fetching package info from the upstream registry
@@ -206,7 +206,7 @@ export const fetchPackageDependencies = async function (
             (await fetchPackageInfo(upstreamRegistry, entry.name)) ?? null;
           if (pkgInfo) {
             depObj.upstream = true;
-            cachedPacakgeInfoDict[entry.name] = { pkgInfo, upstream: true };
+            cachedPackageInfoDict[entry.name] = { pkgInfo, upstream: true };
           }
         }
         // handle package not exist

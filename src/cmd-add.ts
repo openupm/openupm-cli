@@ -171,7 +171,7 @@ export const add = async function (
           if (!options.force) {
             log.error(
               "missing dependencies",
-              "please resolve thie issue or run with option -f to ignore the warning"
+              "please resolve the issue or run with option -f to ignore the warning"
             );
             return { code: 1, dirty };
           }
