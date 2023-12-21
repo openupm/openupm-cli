@@ -9,12 +9,14 @@ import should from "should";
 
 describe("domain-name", function () {
   describe("namespace", function () {
-    [
-      ["unity.com", "com.unity"],
-      ["my-school.ac.at", "at.ac.my-school"],
-      ["openupm.com", "com.openupm"],
-      ["registry.npmjs.org", "org.npmjs"],
-    ].forEach(([hostName, expected]) =>
+    (
+      [
+        ["unity.com", "com.unity"],
+        ["my-school.ac.at", "at.ac.my-school"],
+        ["openupm.com", "com.openupm"],
+        ["registry.npmjs.org", "org.npmjs"],
+      ] as [string, string][]
+    ).forEach(([hostName, expected]) =>
       it(`"${hostName}" should become "${expected}"`, function () {
         const actual = namespaceFor(hostName);
         should(actual).be.equal(expected);
