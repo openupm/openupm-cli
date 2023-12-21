@@ -1,4 +1,4 @@
-import { program } from "commander";
+import { createCommand } from "@commander-js/extra-typings";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import { add } from "./cmd-add";
@@ -7,21 +7,39 @@ import { search } from "./cmd-search";
 import { view } from "./cmd-view";
 import { deps } from "./cmd-deps";
 import { login } from "./cmd-login";
-
 import log from "./logger";
 
 // update-notifier
 import pkg from "../package.json";
-import { assertIsError } from "./utils/error-type-guards";
+import { eachValue, mustBeParceable, mustSatisfy } from "./cli-parsing";
+import { isPackageReference } from "./types/package-reference";
+import { isDomainName } from "./types/domain-name";
+import { coerceRegistryUrl } from "./types/registry-url";
+import { CmdOptions } from "./types/options";
+
+const mustBePackageReference = mustSatisfy(
+  isPackageReference,
+  (input) => `"${input}" is not a valid package-reference`
+);
+
+const mustBeDomainName = mustSatisfy(
+  isDomainName,
+  (input) => `"${input}" is not a valid package name`
+);
+
+const mustBeRegistryUrl = mustBeParceable(
+  coerceRegistryUrl,
+  (input) => `"${input}" is not a valid registry-url`
+);
 
 pkginfo(module);
 const notifier = updateNotifier({ pkg });
 notifier.notify();
 
-program
+const program = createCommand()
   .version(module.exports.version)
   .option("-c, --chdir <path>", "change the working directory")
-  .option("-r, --registry <url>", "specify registry url")
+  .option("-r, --registry <url>", "specify registry url", mustBeRegistryUrl)
   .option("-v, --verbose", "output extra debugging")
   .option("--cn", "use the China region registry")
   .option("--system-user", "auth for Windows system user")
@@ -29,8 +47,29 @@ program
   .option("--no-upstream", "don't use upstream unity registry")
   .option("--no-color", "disable color");
 
+/**
+ * Creates a CmdOptions object by adding global options to the given
+ * specific options
+ * @param specificOptions The specific options
+ */
+function makeCmdOptions<T extends Record<string, unknown>>(
+  specificOptions: T
+): CmdOptions<T> {
+  return { ...specificOptions, _global: program.opts() };
+}
+
 program
-  .command("add <pkg> [otherPkgs...]")
+  .command("add")
+  .argument(
+    "<pkg>",
+    "Reference to the package that should be added",
+    mustBePackageReference
+  )
+  .argument(
+    "[otherPkgs...]",
+    "References to additional packages that should be added",
+    eachValue(mustBePackageReference)
+  )
   .aliases(["install", "i"])
   .option("-t, --test", "add package as testable")
   .option(
@@ -43,45 +82,50 @@ openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
-    options._global = program.opts();
     const pkgs = [pkg].concat(otherPkgs);
-    const retCode = await add(pkgs, options);
-    if (retCode) process.exit(retCode);
+    const retCode = await add(pkgs, makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
-  .command("remove <pkg> [otherPkgs...]")
+  .command("remove")
+  .argument("<pkg>", "Name of the package to remove", mustBeDomainName)
+  .argument(
+    "[otherPkgs...]",
+    "Names of additional packages to remove",
+    eachValue(mustBeDomainName)
+  )
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
-    options._global = program.opts();
     const pkgs = [pkg].concat(otherPkgs);
-    const retCode = await remove(pkgs, options);
-    if (retCode) process.exit(retCode);
+    const retCode = await remove(pkgs, makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
-  .command("search <keyword>")
+  .command("search")
+  .argument("<keyword>", "The keyword to search")
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
-    options._global = program.opts();
-    const retCode = await search(keyword, options);
-    if (retCode) process.exit(retCode);
+    const retCode = await search(keyword, makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
-  .command("view <pkg>")
+  .command("view")
+  .argument("<pkg>", "Reference to a package", mustBePackageReference)
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    options._global = program.opts();
-    const retCode = await view(pkg, options);
-    if (retCode) process.exit(retCode);
+    const retCode = await view(pkg, makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
-  .command("deps <pkg>")
+  .command("deps")
+  .argument("<pkg>", "Reference to a package", mustBePackageReference)
   .alias("dep")
   .option("-d, --deep", "view package dependencies recursively")
   .description(
@@ -90,9 +134,8 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    options._global = program.opts();
-    const retCode = await deps(pkg, options);
-    if (retCode) process.exit(retCode);
+    const retCode = await deps(pkg, makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 program
@@ -101,7 +144,6 @@ program
   .option("-u, --username <username>", "username")
   .option("-p, --password <password>", "password")
   .option("-e, --email <email>", "email address")
-  .option("-r, --registry <url>", "registry url")
   .option("--basic-auth", "use basic authentication instead of token")
   .option(
     "--always-auth",
@@ -109,15 +151,8 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(async function (options) {
-    options._global = program.opts();
-    try {
-      const retCode = await login(options);
-      if (retCode) process.exit(retCode);
-    } catch (err) {
-      assertIsError(err);
-      log.error("", err.message);
-      process.exit(1);
-    }
+    const retCode = await login(makeCmdOptions(options));
+    if (retCode !== 0) process.exit(retCode);
   });
 
 // prompt for invalid command
