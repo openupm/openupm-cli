@@ -1,13 +1,12 @@
 import nock from "nock";
 import { SearchEndpointResult } from "./types";
-import { domainName, isDomainName } from "../src/types/domain-name";
+import { isDomainName } from "../src/types/domain-name";
 import assert from "assert";
 import { registryUrl } from "../src/types/registry-url";
 import { PkgInfo } from "../src/types/pkg-info";
 
 export const unityRegistryUrl = registryUrl("https://packages.unity.com");
 export const exampleRegistryUrl = registryUrl("http://example.com");
-export const exampleRegistryReverseDomain = domainName("com.example");
 
 export function startMockRegistry() {
   if (!nock.isActive()) nock.activate();
