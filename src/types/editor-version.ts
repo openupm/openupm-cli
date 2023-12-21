@@ -74,17 +74,6 @@ export const compareEditorVersion = function (
 
 /**
  * Attempts to parse editor version string to groups
- *
- * E.g. 2020.2.0f2c4
- *   major: 2020
- *   minor: 2
- *   patch: 0
- *   flag: 'f'
- *   flagValue: 2
- *   build: 2
- *   loc: 'c'
- *   locValue: 1
- *   locBuild: 4
  */
 export const tryParseEditorVersion = function (
   version: string | null
