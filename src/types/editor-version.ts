@@ -35,23 +35,16 @@ export type EditorVersion = {
    */
   locBuild?: number;
 };
-
 /**
  * Compares two editor versions for ordering
- * @param a The first version
- * @param b The second version
- * @throws Error An editor version could not be parsed
+ * @param verA The first version
+ * @param verB The second version
+ * @returns A number indicating the ordering
  */
 export const compareEditorVersion = function (
-  a: string,
-  b: string
+  verA: EditorVersion,
+  verB: EditorVersion
 ): -1 | 0 | 1 {
-  const verA = tryParseEditorVersion(a);
-  const verB = tryParseEditorVersion(b);
-
-  if (verA === null || verB === null)
-    throw new Error("An editor version could not be parsed");
-
   const editorVersionToArray = (ver: EditorVersion) => [
     ver.major,
     ver.minor,
@@ -70,6 +63,22 @@ export const compareEditorVersion = function (
     else if (valA < valB) return -1;
   }
   return 0;
+};
+/**
+ * Attempts to compare two unparsed editor versions for ordering
+ * @param a The first version
+ * @param b The second version
+ * @returns A number indicating the ordering or null if either version could
+ * not be parsed
+ */
+export const tryCompareEditorVersion = function (
+  a: string,
+  b: string
+): -1 | 0 | 1 | null {
+  const verA = tryParseEditorVersion(a);
+  const verB = tryParseEditorVersion(b);
+  if (verA === null || verB === null) return null;
+  return compareEditorVersion(verA, verB);
 };
 
 /**
