@@ -87,7 +87,7 @@ export const compareEditorVersion = function (
  *   locBuild: 4
  */
 export const tryParseEditorVersion = function (
-  version: string | null
+  version: string
 ): EditorVersion | null {
   type RegexMatchGroups = {
     major: `${number}`;
@@ -98,8 +98,6 @@ export const tryParseEditorVersion = function (
     loc?: "c";
     locBuild?: `${number}`;
   };
-
-  if (!version) return null;
   const regex =
     /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
   const match = regex.exec(version);
