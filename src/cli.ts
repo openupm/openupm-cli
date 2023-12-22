@@ -11,7 +11,7 @@ import log from "./logger";
 
 // update-notifier
 import pkg from "../package.json";
-import { eachValue, mustBeParceable, mustSatisfy } from "./cli-parsing";
+import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
 import { isPackageReference } from "./types/package-reference";
 import { isDomainName } from "./types/domain-name";
 import { coerceRegistryUrl } from "./types/registry-url";
@@ -27,7 +27,7 @@ const mustBeDomainName = mustSatisfy(
   (input) => `"${input}" is not a valid package name`
 );
 
-const mustBeRegistryUrl = mustBeParceable(
+const mustBeRegistryUrl = mustBeParsable(
   coerceRegistryUrl,
   (input) => `"${input}" is not a valid registry-url`
 );

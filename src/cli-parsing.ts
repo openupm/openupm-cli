@@ -16,7 +16,7 @@ export function mustSatisfy<TOut extends string>(
   };
 }
 
-export function mustBeParceable<TOut>(
+export function mustBeParsable<TOut>(
   parse: (input: string) => TOut,
   makeErrorMessage: (input: string, error: unknown) => string
 ): CliValueParser<TOut> {
