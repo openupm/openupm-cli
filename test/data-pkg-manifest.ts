@@ -32,7 +32,7 @@ class PkgManifestBuilder {
         scopedRegistry("example.com", exampleRegistryUrl),
       ];
 
-    const registry = this.manifest.scopedRegistries![0];
+    const registry = this.manifest.scopedRegistries![0]!;
     addScope(registry, name);
 
     return this;
