@@ -121,22 +121,12 @@ export const fetchPackageInfo = async function (
   const client = getNpmClient();
   try {
     return await client.get(pkgPath, { auth: registry.auth || undefined });
-    // eslint-disable-next-line no-empty
-  } catch (err) {}
+  } catch (err) {
+    /* empty */
+  }
 };
 
-/* Fetch package [valid dependencies, invalid dependencies] with a structure of
-  [
-    {
-      name,
-      version,
-      upstream,   // whether belongs to upstream registry
-      self,       // whether is the source package
-      internal,     // whether is an internal package
-      reason      // invalid reason of "version404", "package404"
-    }, ...
-  ]
- */
+// Fetch package dependencies
 export const fetchPackageDependencies = async function (
   registry: Registry,
   upstreamRegistry: Registry,
@@ -221,7 +211,6 @@ export const fetchPackageDependencies = async function (
         if (!entry.version || entry.version == "latest") {
           const latestVersion = tryGetLatestVersion(pkgInfo);
           assert(latestVersion !== undefined);
-          // eslint-disable-next-line require-atomic-updates
           depObj.version = entry.version = latestVersion;
         }
         // handle version not exist
@@ -234,9 +223,6 @@ export const fetchPackageDependencies = async function (
             )} is not a valid choice of ${versions.reverse().join(", ")}`
           );
           depObj.reason = "version404";
-          // eslint-disable-next-line require-atomic-updates
-          // depObj.version = entry.version = getLatestVersion(pkgInfo);
-          // log.warn("notarget", `fallback to ${entry.name}@${entry.version}`);
           depsInvalid.push(depObj);
           continue;
         }

@@ -134,11 +134,6 @@ export async function search(
     results = (await searchOld(env.registry, keyword)) || [];
   }
   // search upstream
-  // if (env.upstream) {
-  //   const upstreamResults =
-  //     (await searchEndpoint(keyword, env.upstreamRegistry)) || [];
-  //   results.push(...upstreamResults);
-  // }
   if (results && results.length) {
     results.forEach((x) => table.push(x.slice(0, -1)));
     console.log(table.toString());

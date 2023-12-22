@@ -77,7 +77,6 @@ export const add = async function (
       }
       // verify version
       const versions = Object.keys(pkgInfo.versions) as SemanticVersion[];
-      // eslint-disable-next-line require-atomic-updates
       if (!version || version === "latest")
         version = tryGetLatestVersion(pkgInfo);
       if (versions.filter((x) => x === version).length <= 0) {

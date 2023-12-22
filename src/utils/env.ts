@@ -127,8 +127,6 @@ export const parseEnv = async function (
     env.registry.auth = tryGetAuthForRegistry(env.registry.url);
     env.upstreamRegistry.auth = tryGetAuthForRegistry(env.upstreamRegistry.url);
   }
-  // log.verbose("env.npmAuth", env.npmAuth);
-  // log.verbose("env.auth", env.auth);
   // return if no need to check path
   if (!checkPath) return env;
   // cwd
