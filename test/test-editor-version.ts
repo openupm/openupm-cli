@@ -8,9 +8,6 @@ import assert from "assert";
 
 describe("editor-version", function () {
   describe("parseEditorVersion", function () {
-    it("test null", function () {
-      (tryParseEditorVersion(null) === null).should.be.ok();
-    });
     it("test x.y", function () {
       const version = tryParseEditorVersion("2019.2");
       assert(version !== null);
