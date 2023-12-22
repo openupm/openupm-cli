@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/openupm/openupm-cli/compare/1.19.0...1.19.1) (2023-12-22)
+
+
+### Bug Fixes
+
+* misc undefined ts errors ([#77](https://github.com/openupm/openupm-cli/issues/77)) ([1a749f6](https://github.com/openupm/openupm-cli/commit/1a749f6018703639ad8ab6ea76eb3e90ec45fee6))
+
 # [1.19.0](https://github.com/openupm/openupm-cli/compare/1.18.1...1.19.0) (2023-12-21)
 
 
