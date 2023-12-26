@@ -54,7 +54,7 @@ describe("cmd-login.ts", function () {
   });
 
   describe("getNpmrcPath", function () {
-    it("should includes .npmrc", async function () {
+    it("should include .npmrc", async function () {
       getNpmrcPath().includes(".npmrc").should.be.ok();
     });
   });
