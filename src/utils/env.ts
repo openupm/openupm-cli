@@ -120,7 +120,7 @@ export const parseEnv = async function (
         `failed to parse auth info for ${registry} in .upmconfig.toml: missing token or _auth fields`
       );
     }
-    return null;
+    return npmAuth;
   }
 
   if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
