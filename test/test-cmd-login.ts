@@ -1,6 +1,8 @@
 import "nock";
 import { generateNpmrcLines, getNpmrcPath } from "../src/cmd-login";
 import { registryUrl } from "../src/types/registry-url";
+import { runWithEnv } from "./mock-env";
+import should from "should";
 
 describe("cmd-login.ts", function () {
   describe("generateNpmrcLines", function () {
@@ -54,8 +56,16 @@ describe("cmd-login.ts", function () {
   });
 
   describe("getNpmrcPath", function () {
-    it("should includes .npmrc", async function () {
-      getNpmrcPath().includes(".npmrc").should.be.ok();
+    it("should be USERPROFILE if defined", function () {
+      const path = runWithEnv({ USERPROFILE: "/user/dir" }, getNpmrcPath);
+      should(path).be.equal("/user/dir/.npmrc");
+    });
+    it("should be HOME if USERPROFILE is not defined", function () {
+      const path = runWithEnv({ HOME: "/user/dir" }, getNpmrcPath);
+      should(path).be.equal("/user/dir/.npmrc");
+    });
+    it("should fail if HOME and USERPROFILE are not defined", function () {
+      should(() => runWithEnv({}, getNpmrcPath)).throw();
     });
   });
 });
