@@ -9,8 +9,8 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test ts-mocha test/**/*.ts",
     "clean": "rimraf lib",
-    "build": "npm run clean && tsc -p tsconfig.json",
-    "build:watch": "tsc -w -p tsconfig.json",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build:watch": "tsc -w -p tsconfig.build.json",
     "semantic-release": "semantic-release"
   },
   "bin": {
