@@ -75,7 +75,11 @@ export const loadUpmConfig = async (
  * @param configDir The directory in which to save the config
  */
 export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
-  mkdirp.sync(configDir);
+  try {
+    mkdirp.sync(configDir);
+  } catch {
+    /* empty */
+  }
   const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
   fs.writeFileSync(configPath, content, "utf8");

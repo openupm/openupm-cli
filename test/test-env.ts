@@ -3,6 +3,25 @@ import { parseEnv } from "../src/utils/env";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import should from "should";
+import { runWithEnv } from "./mock-env";
+import { saveUpmConfig } from "../src/utils/upm-config-io";
+import { registryUrl } from "../src/types/registry-url";
+import { TokenAuth, UPMConfig } from "../src/types/upm-config";
+import { NpmAuth } from "another-npm-registry-client";
+
+const testUpmAuth: TokenAuth = {
+  email: "test@mail.com",
+  token: "ThisIsNotAValidToken",
+};
+
+const testNpmAuth: NpmAuth = {
+  token: "ThisIsNotAValidToken",
+  alwaysAuth: false,
+};
+
+const testUpmConfig: UPMConfig = {
+  npmAuth: { [registryUrl("http://registry.npmjs.org")]: testUpmAuth },
+};
 
 describe("env", function () {
   describe("parseEnv", function () {
@@ -18,6 +37,7 @@ describe("env", function () {
         manifest: false,
         editorVersion: " 2019.2.13f1",
       });
+      saveUpmConfig(testUpmConfig, getWorkDir("test-openupm-cli"));
     });
     after(function () {
       removeWorkDir("test-openupm-cli");
@@ -131,6 +151,38 @@ describe("env", function () {
       );
       should(env).not.be.null();
       env!.registry.url.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
+    });
+    it("should have registry auth if specified", async function () {
+      const projectDir = getWorkDir("test-openupm-cli");
+      const env = await runWithEnv({ HOME: projectDir }, () =>
+        parseEnv(
+          {
+            _global: {
+              registry: "registry.npmjs.org",
+              chdir: projectDir,
+            },
+          },
+          true
+        )
+      );
+      should(env).not.be.null();
+      should(env!.registry.auth).deepEqual(testNpmAuth);
+    });
+    it("should not have unspecified registry auth", async function () {
+      const projectDir = getWorkDir("test-openupm-cli");
+      const env = await runWithEnv({ HOME: projectDir }, () =>
+        parseEnv(
+          {
+            _global: {
+              registry: "registry.other.org",
+              chdir: projectDir,
+            },
+          },
+          true
+        )
+      );
+      should(env).not.be.null();
+      should(env!.registry.auth).be.null();
     });
     it("upstream", async function () {
       const env = await parseEnv({ _global: { upstream: false } }, false);
