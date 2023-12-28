@@ -1,6 +1,8 @@
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { Base64, decodeBase64, encodeBase64 } from "./base64";
 import { RegistryUrl } from "./registry-url";
+import log from "../logger";
+import { NpmAuth } from "another-npm-registry-client";
 
 /**
  * Authentication information that is shared between different authentication methods
@@ -94,4 +96,46 @@ export function decodeBasicAuth(base64: Base64): [string, string] {
  */
 export function shouldAlwaysAuth(auth: UpmAuth): boolean {
   return auth.alwaysAuth || false;
+}
+
+function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
+  if (isTokenAuth(upmAuth)) {
+    return {
+      token: upmAuth.token,
+      alwaysAuth: shouldAlwaysAuth(upmAuth),
+    };
+  } else if (isBasicAuth(upmAuth)) {
+    const [username, password] = decodeBasicAuth(upmAuth._auth);
+    return {
+      username,
+      password: encodeBase64(password),
+      email: upmAuth.email,
+      alwaysAuth: shouldAlwaysAuth(upmAuth),
+    };
+  }
+  return null;
+}
+
+/**
+ * Attempts to get the {@link NpmAuth} information for a specific registry
+ * from a {@link UPMConfig} object.
+ * @param upmConfig The config
+ * @param registry The registry
+ * @returns The auth information or null if the registry does not exist
+ * in the config
+ */
+export function tryGetAuthForRegistry(
+  upmConfig: UPMConfig,
+  registry: RegistryUrl
+): NpmAuth | null {
+  const upmAuth = upmConfig.npmAuth![registry];
+  if (upmAuth === undefined) return null;
+  const npmAuth = tryToNpmAuth(upmAuth);
+  if (npmAuth === null) {
+    log.warn(
+      "env.auth",
+      `failed to parse auth info for ${registry} in .upmconfig.toml: missing token or _auth fields`
+    );
+  }
+  return npmAuth;
 }

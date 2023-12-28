@@ -4,23 +4,11 @@ import { getUpmConfigDir, loadUpmConfig } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
-import {
-  coerceRegistryUrl,
-  RegistryUrl,
-  registryUrl,
-} from "../types/registry-url";
-import {
-  decodeBasicAuth,
-  isBasicAuth,
-  isTokenAuth,
-  shouldAlwaysAuth,
-  UpmAuth,
-} from "../types/upm-config";
-import { encodeBase64 } from "../types/base64";
+import { coerceRegistryUrl, registryUrl } from "../types/registry-url";
+import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/pkg-manifest";
 import { Registry } from "../registry-client";
-import { NpmAuth } from "another-npm-registry-client";
 
 export type Env = {
   cwd: string;
@@ -86,46 +74,18 @@ export const parseEnv = async function (
     };
   }
 
-  function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
-    if (isTokenAuth(upmAuth)) {
-      return {
-        token: upmAuth.token,
-        alwaysAuth: shouldAlwaysAuth(upmAuth),
-      };
-    } else if (isBasicAuth(upmAuth)) {
-      const [username, password] = decodeBasicAuth(upmAuth._auth);
-      return {
-        username,
-        password: encodeBase64(password),
-        email: upmAuth.email,
-        alwaysAuth: shouldAlwaysAuth(upmAuth),
-      };
-    }
-    return null;
-  }
-
   // auth
   if (options._global.systemUser) env.systemUser = true;
   if (options._global.wsl) env.wsl = true;
   const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
   const upmConfig = await loadUpmConfig(configDir);
 
-  function tryGetAuthForRegistry(registry: RegistryUrl): NpmAuth | null {
-    const upmAuth = upmConfig!.npmAuth![registry];
-    if (upmAuth === undefined) return null;
-    const npmAuth = tryToNpmAuth(upmAuth);
-    if (npmAuth === null) {
-      log.warn(
-        "env.auth",
-        `failed to parse auth info for ${registry} in .upmconfig.toml: missing token or _auth fields`
-      );
-    }
-    return npmAuth;
-  }
-
   if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
-    env.registry.auth = tryGetAuthForRegistry(env.registry.url);
-    env.upstreamRegistry.auth = tryGetAuthForRegistry(env.upstreamRegistry.url);
+    env.registry.auth = tryGetAuthForRegistry(upmConfig, env.registry.url);
+    env.upstreamRegistry.auth = tryGetAuthForRegistry(
+      upmConfig,
+      env.upstreamRegistry.url
+    );
   }
   // return if no need to check path
   if (!checkPath) return env;
