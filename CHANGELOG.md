@@ -1,3 +1,10 @@
+## [1.19.2](https://github.com/openupm/openupm-cli/compare/1.19.1...1.19.2) (2023-12-28)
+
+
+### Bug Fixes
+
+* npm auth null ([#81](https://github.com/openupm/openupm-cli/issues/81)) ([1ac0c6e](https://github.com/openupm/openupm-cli/commit/1ac0c6e7f1c060d58ac94b9c2397c040e464f4b2))
+
 ## [1.19.1](https://github.com/openupm/openupm-cli/compare/1.19.0...1.19.1) (2023-12-22)
 
 
