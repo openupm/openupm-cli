@@ -1,3 +1,10 @@
+## [1.19.3](https://github.com/openupm/openupm-cli/compare/1.19.2...1.19.3) (2023-12-29)
+
+
+### Bug Fixes
+
+* incorrect path in eslint ignore ([#83](https://github.com/openupm/openupm-cli/issues/83)) ([d83e0a7](https://github.com/openupm/openupm-cli/commit/d83e0a77026a4839f3f6dc38bf7596f1d7ec977a))
+
 ## [1.19.2](https://github.com/openupm/openupm-cli/compare/1.19.1...1.19.2) (2023-12-28)
 
 
