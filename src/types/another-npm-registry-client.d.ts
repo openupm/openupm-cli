@@ -1,42 +1,49 @@
-import { Response } from "request";
-
-import { PkgInfo } from "./pkg-info";
-
 declare module "another-npm-registry-client" {
-  export type NpmAuth =
-    | {
-        username: string;
-        password: string;
-        email: string;
-        alwaysAuth?: boolean;
-      }
-    | { token: string; alwaysAuth?: boolean };
-  export type AddUserParams = { auth: NpmAuth };
+  import { type Response } from "request";
 
-  export type GetParams = {
-    timeout?: number;
-    follow?: boolean;
-    staleOk?: boolean;
-    auth?: NpmAuth;
-    fullMetadata?: boolean;
-  };
+  namespace RegClient {
+    type NpmAuth =
+      | {
+          username: string;
+          password: string;
+          email: string;
+          alwaysAuth?: boolean;
+        }
+      | { token: string; alwaysAuth?: boolean };
 
-  export type AddUserResponse = { ok: true; token: string } | { ok: false };
+    type AddUserParams = { auth: NpmAuth };
 
-  export type ClientCallback<TData> = (
-    error: Error | null,
-    data: TData,
-    raw: string,
-    res: Response
-  ) => void;
+    type GetParams = {
+      timeout?: number;
+      follow?: boolean;
+      staleOk?: boolean;
+      auth?: NpmAuth;
+      fullMetadata?: boolean;
+    };
 
-  export default class RegClient {
-    constructor(...args: unknown[]);
-    get(uri: string, params: GetParams, cb: ClientCallback<PkgInfo>): void;
-    adduser(
-      uri: string,
-      params: AddUserParams,
-      cb: ClientCallback<AddUserResponse>
-    ): void;
+    type AddUserResponse = { ok: true; token: string } | { ok: false };
+
+    type ClientCallback<TData> = (
+      error: Error | null,
+      data: TData,
+      raw: string,
+      res: Response
+    ) => void;
+
+    type Instance = {
+      get(
+        uri: string,
+        params: GetParams,
+        cb: ClientCallback<import("./pkg-info").PkgInfo>
+      ): void;
+      adduser(
+        uri: string,
+        params: AddUserParams,
+        cb: ClientCallback<AddUserResponse>
+      ): void;
+    };
   }
+
+  const RegClient: new (...args: unknown[]) => RegClient.Instance;
+  export = RegClient;
 }
