@@ -1,7 +1,7 @@
 import { PackageId } from "./package-id";
 import { SemanticVersion } from "./semantic-version";
 import { DomainName } from "./domain-name";
-import { Contact } from "./contact";
+import { Maintainer } from "@npm/types";
 
 /**
  * Distribution information
@@ -75,7 +75,7 @@ export type PkgVersionInfo = {
   /**
    * The author of the package.
    */
-  author?: Contact;
-  contributors?: Contact[];
+  author?: Maintainer;
+  contributors?: Maintainer[];
   dist?: Dist;
 };
