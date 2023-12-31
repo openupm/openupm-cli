@@ -51,7 +51,7 @@ export type UPMConfig = {
   /**
    * Authentication information organized by the registry they should be used on
    */
-  npmAuth?: Record<RegistryUrl, UpmAuth>;
+  npmAuth?: Record<string, UpmAuth>;
 };
 
 /**
@@ -128,7 +128,10 @@ export function tryGetAuthForRegistry(
   upmConfig: UPMConfig,
   registry: RegistryUrl
 ): NpmAuth | null {
-  const upmAuth = upmConfig.npmAuth![registry];
+  const upmAuth =
+    upmConfig.npmAuth?.[registry] ||
+    // As a backup search for the registry with trailing slash
+    upmConfig.npmAuth?.[registry + "/"];
   if (upmAuth === undefined) return null;
   const npmAuth = tryToNpmAuth(upmAuth);
   if (npmAuth === null) {
