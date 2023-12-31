@@ -11,7 +11,7 @@ import {
 import { parseEnv } from "./utils/env";
 import { encodeBasicAuth } from "./types/upm-config";
 import { Base64 } from "./types/base64";
-import { RegistryUrl, removeTrailingSlash } from "./types/registry-url";
+import { RegistryUrl } from "./types/registry-url";
 import {
   promptEmail,
   promptPassword,
@@ -19,6 +19,7 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
+import { removeTrailingSlash } from "./utils/string-utils";
 
 export type LoginOptions = CmdOptions<{
   username?: string;
@@ -204,8 +205,6 @@ const writeUnityToken = async function (
   // Read config file
   const config = (await loadUpmConfig(configDir)) || {};
   if (!config.npmAuth) config.npmAuth = {};
-  // Remove ending slash of registry
-  registry = removeTrailingSlash(registry);
 
   if (basicAuth) {
     if (_auth === null) throw new Error("Auth is null");
