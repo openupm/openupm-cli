@@ -1,3 +1,10 @@
+## [1.19.4](https://github.com/openupm/openupm-cli/compare/1.19.3...1.19.4) (2023-12-31)
+
+
+### Bug Fixes
+
+* dependency was dev-dependency ([#91](https://github.com/openupm/openupm-cli/issues/91)) ([79640df](https://github.com/openupm/openupm-cli/commit/79640df4a2d101f698c7c9927409cf318e96e284))
+
 ## [1.19.3](https://github.com/openupm/openupm-cli/compare/1.19.2...1.19.3) (2023-12-29)
 
 
