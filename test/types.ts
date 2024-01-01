@@ -1,8 +1,6 @@
-import { Contact } from "../src/types/contact";
 import { DomainName } from "../src/types/domain-name";
 import { SemanticVersion } from "../src/types/semantic-version";
-
-type Maintainer = { username: string; email: string };
+import { Maintainer } from "@npm/types";
 
 export type SearchEndpointResult = {
   objects: Array<{
@@ -13,7 +11,7 @@ export type SearchEndpointResult = {
       scope: "unscoped";
       version: SemanticVersion;
       links: Record<string, unknown>;
-      author: Contact;
+      author: Maintainer;
       publisher: Maintainer;
       maintainers: Maintainer[];
     };

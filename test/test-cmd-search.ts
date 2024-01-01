@@ -45,8 +45,8 @@ describe("cmd-search.ts", function () {
             date: "2019-10-02T04:02:38.335Z",
             links: {},
             author: { name: "yo", url: "https://github.com/yo" },
-            publisher: { username: "yo", email: "yo@example.com" },
-            maintainers: [{ username: "yo", email: "yo@example.com" }],
+            publisher: { name: "yo", email: "yo@example.com" },
+            maintainers: [{ name: "yo", email: "yo@example.com" }],
           },
           flags: { unstable: true },
           score: {
