@@ -2,10 +2,13 @@ import path from "path";
 import os from "os";
 import fse from "fs-extra";
 import _ from "lodash";
-import { emptyPackageManifest, PkgManifest } from "../src/types/pkg-manifest";
+import {
+  emptyProjectManifest,
+  UnityProjectManifest,
+} from "../src/types/project-manifest";
 
 export type ManifestCreationOptions = {
-  manifest: boolean | PkgManifest;
+  manifest: boolean | UnityProjectManifest;
   editorVersion?: string;
 };
 export const getWorkDir = function (pathToTmp: string): string {
@@ -18,7 +21,7 @@ export const createWorkDir = function (
   const workDir = getWorkDir(pathToTmp);
   fse.mkdirpSync(workDir);
   if (manifest) {
-    if (!_.isObjectLike(manifest)) manifest = emptyPackageManifest();
+    if (!_.isObjectLike(manifest)) manifest = emptyProjectManifest();
     const manifestDir = path.join(workDir, "Packages");
     fse.mkdirpSync(manifestDir);
     const data = JSON.stringify(manifest);

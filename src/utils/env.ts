@@ -7,7 +7,7 @@ import yaml from "yaml";
 import { coerceRegistryUrl, registryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
-import { manifestPathFor } from "../types/pkg-manifest";
+import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../registry-client";
 
 export type Env = {

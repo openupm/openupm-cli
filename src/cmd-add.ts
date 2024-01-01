@@ -1,8 +1,11 @@
 import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
-import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
 import { tryGetLatestVersion } from "./types/packument";
+import {
+  loadProjectManifest,
+  saveProjectManifest,
+} from "./utils/project-manifest-io";
 import { parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
@@ -22,7 +25,7 @@ import {
   addScopedRegistry,
   addTestable,
   tryGetScopedRegistryByUrl,
-} from "./types/pkg-manifest";
+} from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 
 export type AddOptions = CmdOptions<{
@@ -60,7 +63,7 @@ export const add = async function (
     let version = split[1];
 
     // load manifest
-    const manifest = loadManifest(env.cwd);
+    const manifest = loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty };
     // packages that added to scope registry
     const pkgsInScope: DomainName[] = [];
@@ -222,7 +225,7 @@ export const add = async function (
     if (options.test) addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      if (!saveManifest(env.cwd, manifest)) return { code: 1, dirty };
+      if (!saveProjectManifest(env.cwd, manifest)) return { code: 1, dirty };
     }
     return { code: 0, dirty };
   };

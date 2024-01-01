@@ -4,11 +4,11 @@ import { exampleRegistryUrl } from "./mock-registry";
 import { createWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
-  shouldHaveManifest,
+  shouldHaveProjectManifest,
   shouldHaveRegistryWithScopes,
   shouldNotHaveDependency,
-} from "./manifest-assertions";
-import { buildPackageManifest } from "./data-pkg-manifest";
+} from "./project-manifest-assertions";
+import { buildProjectManifest } from "./data-project-manifest";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
@@ -23,7 +23,7 @@ describe("cmd-remove.ts", function () {
     let mockConsole: MockConsole = null!;
     let workDir = "";
 
-    const defaultManifest = buildPackageManifest((manifest) =>
+    const defaultManifest = buildProjectManifest((manifest) =>
       manifest
         .addDependency(packageA, "1.0.0", true, false)
         .addDependency(packageB, "1.0.0", true, false)
@@ -49,7 +49,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove(packageA, options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest(workDir);
+      const manifest = shouldHaveProjectManifest(workDir);
       shouldNotHaveDependency(manifest, packageA);
       shouldHaveRegistryWithScopes(manifest, [packageB]);
       mockConsole.hasLineIncluding("out", "removed ").should.be.ok();
@@ -67,7 +67,7 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest(workDir);
+      const manifest = shouldHaveProjectManifest(workDir);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
@@ -80,7 +80,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove(missingPackage, options);
       retCode.should.equal(1);
-      const manifest = shouldHaveManifest(workDir);
+      const manifest = shouldHaveProjectManifest(workDir);
       manifest.should.deepEqual(defaultManifest);
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
@@ -93,7 +93,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove([packageA, packageB], options);
       retCode.should.equal(0);
-      const manifest = shouldHaveManifest(workDir);
+      const manifest = shouldHaveProjectManifest(workDir);
       shouldNotHaveDependency(manifest, packageA);
       shouldNotHaveDependency(manifest, packageB);
       mockConsole

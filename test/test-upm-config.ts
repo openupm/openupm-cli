@@ -1,11 +1,11 @@
 import { describe } from "mocha";
 import {
-  tryDecodeBasicAuth,
   encodeBasicAuth,
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
   tryGetAuthForRegistry,
+  tryDecodeBasicAuth,
   UpmAuth,
   UPMConfig,
 } from "../src/types/upm-config";
