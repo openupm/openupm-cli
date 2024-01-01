@@ -17,7 +17,7 @@ import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
 
 export type NpmClient = {
-  rawClient: RegClient;
+  rawClient: RegClient.Instance;
   /**
    * @throws {NpmClientError}
    */
@@ -82,7 +82,7 @@ export function assertIsNpmClientError(
  * also takes care of binding and promisifying.
  */
 function normalizeClientFunction<TParam, TData>(
-  client: RegClient,
+  client: RegClient.Instance,
   fn: (uri: string, params: TParam, cb: ClientCallback<TData>) => void
 ): (uri: string, params: TParam) => Promise<TData> {
   const bound = fn.bind(client);
