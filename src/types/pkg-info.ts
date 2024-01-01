@@ -1,6 +1,29 @@
 import { SemanticVersion } from "./semantic-version";
 import { DomainName } from "./domain-name";
-import { PkgVersionInfo } from "./pkg-version-info";
+import { UnityPackageManifest } from "./package-manifest";
+import { PackageId } from "./package-id";
+import { Dist, Maintainer } from "@npm/types";
+
+/**
+ * Contains information about a specific version of a package. This is based on
+ * the information contained inside a Unity package manifest, with some
+ * additions.
+ */
+export type UnityPackumentVersion = UnityPackageManifest & {
+  /**
+   * Same as {@link name}
+   */
+  _id?: PackageId;
+  _nodeVersion?: string;
+  _npmVersion?: string;
+  _rev?: string;
+  homepage?: string;
+  category?: string;
+  gitHead?: string;
+  readmeFilename?: string;
+  contributors?: Maintainer[];
+  dist?: Dist;
+};
 
 /**
  * Describes a package
@@ -20,7 +43,7 @@ export type PkgInfo = {
   /**
    * The packages versions, organized by their version
    */
-  versions: Record<SemanticVersion, PkgVersionInfo>;
+  versions: Record<SemanticVersion, UnityPackumentVersion>;
   /**
    * Dist-tags. Only includes information about the latest version
    */
