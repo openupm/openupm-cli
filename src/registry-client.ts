@@ -10,7 +10,7 @@ import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
 import _ from "lodash";
-import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
+import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
@@ -21,7 +21,7 @@ export type NpmClient = {
   /**
    * @throws {NpmClientError}
    */
-  get(uri: string, options: GetParams): Promise<PkgInfo>;
+  get(uri: string, options: GetParams): Promise<UnityPackument>;
   /**
    * @throws {NpmClientError}
    */
@@ -113,10 +113,10 @@ export const getNpmClient = (): NpmClient => {
   };
 };
 // Fetch package info json from registry
-export const fetchPackageInfo = async function (
+export const fetchPackument = async function (
   registry: Registry,
   name: DomainName
-): Promise<PkgInfo | undefined> {
+): Promise<UnityPackument | undefined> {
   const pkgPath = `${registry.url}/${name}`;
   const client = getNpmClient();
   try {
@@ -146,10 +146,10 @@ export const fetchPackageDependencies = async function (
   const depsValid = [];
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = [];
-  // cached dict: {pkg-name: pkgInfo}
+  // cached dict
   const cachedPackageInfoDict: Record<
     DomainName,
-    { pkgInfo: PkgInfo; upstream: boolean }
+    { packument: UnityPackument; upstream: boolean }
   > = {};
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
@@ -174,42 +174,48 @@ export const fetchPackageDependencies = async function (
       if (!depObj.internal) {
         // try fetching package info from cache
         const getResult = _.get(cachedPackageInfoDict, entry.name, {
-          pkgInfo: null,
+          packument: null,
           upstream: false,
         });
-        let pkgInfo = getResult.pkgInfo;
+        let packument = getResult.packument;
         const upstream = getResult.upstream;
-        if (pkgInfo !== null) {
+        if (packument !== null) {
           depObj.upstream = upstream;
         }
         // try fetching package info from the default registry
-        if (pkgInfo === null) {
-          pkgInfo = (await fetchPackageInfo(registry, entry.name)) ?? null;
-          if (pkgInfo) {
+        if (packument === null) {
+          packument = (await fetchPackument(registry, entry.name)) ?? null;
+          if (packument) {
             depObj.upstream = false;
-            cachedPackageInfoDict[entry.name] = { pkgInfo, upstream: false };
+            cachedPackageInfoDict[entry.name] = {
+              packument: packument,
+              upstream: false,
+            };
           }
         }
         // try fetching package info from the upstream registry
-        if (!pkgInfo) {
-          pkgInfo =
-            (await fetchPackageInfo(upstreamRegistry, entry.name)) ?? null;
-          if (pkgInfo) {
+        if (!packument) {
+          packument =
+            (await fetchPackument(upstreamRegistry, entry.name)) ?? null;
+          if (packument) {
             depObj.upstream = true;
-            cachedPackageInfoDict[entry.name] = { pkgInfo, upstream: true };
+            cachedPackageInfoDict[entry.name] = {
+              packument: packument,
+              upstream: true,
+            };
           }
         }
         // handle package not exist
-        if (!pkgInfo) {
+        if (!packument) {
           log.warn("404", `package not found: ${entry.name}`);
           depObj.reason = "package404";
           depsInvalid.push(depObj);
           continue;
         }
         // verify version
-        const versions = Object.keys(pkgInfo.versions);
+        const versions = Object.keys(packument.versions);
         if (!entry.version || entry.version == "latest") {
-          const latestVersion = tryGetLatestVersion(pkgInfo);
+          const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
           depObj.version = entry.version = latestVersion;
         }
@@ -229,7 +235,7 @@ export const fetchPackageDependencies = async function (
         // add dependencies to pending list
         if (depObj.self || deep) {
           const deps: NameVersionPair[] = (
-            _.toPairs(pkgInfo.versions[entry.version]!["dependencies"]) as [
+            _.toPairs(packument.versions[entry.version]!["dependencies"]) as [
               DomainName,
               SemanticVersion
             ][]

@@ -28,7 +28,7 @@ export type UnityPackumentVersion = UnityPackageManifest & {
 /**
  * Describes a package
  */
-export type PkgInfo = {
+export type UnityPackument = {
   /**
    * The packages name
    */
@@ -73,21 +73,21 @@ export type PkgInfo = {
 };
 
 const hasLatestDistTag = (
-  pkgInfo: Partial<PkgInfo>
-): pkgInfo is Partial<PkgInfo> & {
+  packument: Partial<UnityPackument>
+): packument is Partial<UnityPackument> & {
   "dist-tags": { latest: SemanticVersion };
 } => {
-  return pkgInfo["dist-tags"]?.["latest"] !== undefined;
+  return packument["dist-tags"]?.["latest"] !== undefined;
 };
 
 /**
  * Attempt to get the latest version from a package
- * @param pkgInfo The package. All properties are assumed to be potentially missing
+ * @param packument The package. All properties are assumed to be potentially missing
  */
-export const tryGetLatestVersion = function (pkgInfo: {
+export const tryGetLatestVersion = function (packument: {
   "dist-tags"?: { latest?: SemanticVersion };
   version?: SemanticVersion;
 }): SemanticVersion | undefined {
-  if (hasLatestDistTag(pkgInfo)) return pkgInfo["dist-tags"].latest;
-  else if (pkgInfo.version) return pkgInfo.version;
+  if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
+  else if (packument.version) return packument.version;
 };

@@ -1,10 +1,10 @@
-import { tryGetLatestVersion } from "../src/types/pkg-info";
+import { tryGetLatestVersion } from "../src/types/packument";
 import "should";
 import { describe } from "mocha";
 import should from "should";
 import { semanticVersion } from "../src/types/semantic-version";
 
-describe("pkg-info", function () {
+describe("packument", function () {
   describe("tryGetLatestVersion", function () {
     it("from dist-tags", async function () {
       const version = tryGetLatestVersion({

@@ -1,9 +1,9 @@
 import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
-import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
+import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
-import { fetchPackageInfo } from "./registry-client";
+import { fetchPackument } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import {
   packageReference,
@@ -33,37 +33,38 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let pkgInfo = await fetchPackageInfo(env.registry, name);
-  if (!pkgInfo && env.upstream)
-    pkgInfo = await fetchPackageInfo(env.upstreamRegistry, name);
-  if (!pkgInfo) {
+  let packument = await fetchPackument(env.registry, name);
+  if (!packument && env.upstream)
+    packument = await fetchPackument(env.upstreamRegistry, name);
+  if (!packument) {
     log.error("404", `package not found: ${name}`);
     return 1;
   }
   // print info
-  printInfo(pkgInfo);
+  printInfo(packument);
   return 0;
 };
 
-const printInfo = function (pkg: PkgInfo) {
-  const versionCount = Object.keys(pkg.versions).length;
-  const ver = tryGetLatestVersion(pkg);
+const printInfo = function (packument: UnityPackument) {
+  const versionCount = Object.keys(packument.versions).length;
+  const ver = tryGetLatestVersion(packument);
   assert(ver !== undefined);
-  const verInfo = pkg.versions[ver]!;
+  const verInfo = packument.versions[ver]!;
   const license = verInfo.license || "proprietary or unlicensed";
   const displayName = verInfo.displayName;
-  const description = verInfo.description || pkg.description;
-  const keywords = verInfo.keywords || pkg.keywords;
+  const description = verInfo.description || packument.description;
+  const keywords = verInfo.keywords || packument.keywords;
   const homepage = verInfo.homepage;
   const dist = verInfo.dist;
   const dependencies = verInfo.dependencies;
-  const latest = pkg["dist-tags"]?.latest;
-  let time = pkg.time.modified;
-  if (!time && latest && latest in pkg.time) time = pkg.time[latest];
+  const latest = packument["dist-tags"]?.latest;
+  let time = packument.time.modified;
+  if (!time && latest && latest in packument.time)
+    time = packument.time[latest];
 
   console.log();
   console.log(
-    chalk.greenBright(pkg.name) +
+    chalk.greenBright(packument.name) +
       "@" +
       chalk.greenBright(ver) +
       " | " +
@@ -103,7 +104,7 @@ const printInfo = function (pkg: PkgInfo) {
 
   console.log();
   console.log("versions:");
-  for (const version in pkg.versions) {
+  for (const version in packument.versions) {
     console.log("  " + chalk.greenBright(version));
   }
 };

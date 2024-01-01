@@ -2,9 +2,9 @@ import "should";
 import { add, AddOptions } from "../src/cmd-add";
 import {
   exampleRegistryUrl,
-  registerMissingPackage,
-  registerRemotePkg,
-  registerRemoteUpstreamPkg,
+  registerMissingPackument,
+  registerRemotePackument,
+  registerRemoteUpstreamPackument,
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
@@ -14,7 +14,7 @@ import {
   shouldHaveDependency,
   shouldHaveManifest,
 } from "./manifest-assertions";
-import { buildPackageInfo } from "./data-pkg-info";
+import { buildPackument } from "./data-packument";
 import { buildPackageManifest } from "./data-pkg-manifest";
 import { domainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
@@ -73,47 +73,48 @@ describe("cmd-add.ts", function () {
     let mockConsole: MockConsole = null!;
     let workDir = "";
 
-    const remotePkgInfoA = buildPackageInfo(packageA, (pkg) =>
-      pkg.addVersion("0.1.0").addVersion("1.0.0")
+    const remotePackumentA = buildPackument(packageA, (packument) =>
+      packument.addVersion("0.1.0").addVersion("1.0.0")
     );
-    const remotePkgInfoB = buildPackageInfo(packageB, (pkg) =>
-      pkg.addVersion("1.0.0")
+    const remotePackumentB = buildPackument(packageB, (packument) =>
+      packument.addVersion("1.0.0")
     );
-    const remotePkgInfoC = buildPackageInfo(packageC, (pkg) =>
-      pkg.addVersion("1.0.0", (version) =>
+    const remotePackumentC = buildPackument(packageC, (packument) =>
+      packument.addVersion("1.0.0", (version) =>
         version
           .addDependency(packageD, "1.0.0")
           .addDependency("com.unity.modules.x", "1.0.0")
       )
     );
-    const remotePkgInfoD = buildPackageInfo(packageD, (pkg) =>
-      pkg.addVersion("1.0.0", (version) => {
+    const remotePackumentD = buildPackument(packageD, (packument) =>
+      packument.addVersion("1.0.0", (version) => {
         return version.addDependency(packageUp, "1.0.0");
       })
     );
-    const remotePkgInfoWithLowerEditorVersion = buildPackageInfo(
+    const remotePackumentWithLowerEditorVersion = buildPackument(
       packageLowerEditor,
-      (pkg) =>
-        pkg.addVersion("1.0.0", (version) =>
+      (packument) =>
+        packument.addVersion("1.0.0", (version) =>
           version.set("unity", "2019.1").set("unityRelease", "0b1")
         )
     );
-    const remotePkgInfoWithHigherEditorVersion = buildPackageInfo(
+    const remotePackumentWithHigherEditorVersion = buildPackument(
       packageHigherEditor,
-      (pkg) =>
-        pkg.addVersion("1.0.0", (version) => version.set("unity", "2020.2"))
+      (packument) =>
+        packument.addVersion("1.0.0", (version) =>
+          version.set("unity", "2020.2")
+        )
     );
 
-    const remotePkgInfoWithWrongEditorVersion = buildPackageInfo(
+    const remotePackumentWithWrongEditorVersion = buildPackument(
       packageWrongEditor,
-      (
-        pkg
+      (packument) =>
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore 2020 is not a valid major.minor version, but this is on purpose for this test
-      ) => pkg.addVersion("1.0.0", (version) => version.set("unity", "2020"))
+        packument.addVersion("1.0.0", (version) => version.set("unity", "2020"))
     );
-    const remotePkgInfoUp = buildPackageInfo(packageUp, (pkg) =>
-      pkg.addVersion("1.0.0")
+    const remotePackumentUp = buildPackument(packageUp, (packument) =>
+      packument.addVersion("1.0.0")
     );
 
     const defaultManifest = buildPackageManifest();
@@ -143,15 +144,15 @@ describe("cmd-add.ts", function () {
       });
 
       startMockRegistry();
-      registerRemotePkg(remotePkgInfoA);
-      registerRemotePkg(remotePkgInfoB);
-      registerRemotePkg(remotePkgInfoC);
-      registerRemotePkg(remotePkgInfoD);
-      registerRemotePkg(remotePkgInfoWithLowerEditorVersion);
-      registerRemotePkg(remotePkgInfoWithHigherEditorVersion);
-      registerRemotePkg(remotePkgInfoWithWrongEditorVersion);
-      registerRemoteUpstreamPkg(remotePkgInfoUp);
-      registerMissingPackage(packageMissing);
+      registerRemotePackument(remotePackumentA);
+      registerRemotePackument(remotePackumentB);
+      registerRemotePackument(remotePackumentC);
+      registerRemotePackument(remotePackumentD);
+      registerRemotePackument(remotePackumentWithLowerEditorVersion);
+      registerRemotePackument(remotePackumentWithHigherEditorVersion);
+      registerRemotePackument(remotePackumentWithWrongEditorVersion);
+      registerRemoteUpstreamPackument(remotePackumentUp);
+      registerMissingPackument(packageMissing);
 
       mockConsole = attachMockConsole();
     });

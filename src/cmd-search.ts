@@ -5,7 +5,7 @@ import log from "./logger";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
 import assert from "assert";
-import { PkgInfo, tryGetLatestVersion } from "./types/pkg-info";
+import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
@@ -20,13 +20,13 @@ type SearchResultCode = 0 | 1;
 
 export type SearchOptions = CmdOptions;
 
-export type SearchedPkgInfo = Omit<PkgInfo, "versions"> & {
+export type SearchedPackument = Omit<UnityPackument, "versions"> & {
   versions: Record<SemanticVersion, "latest">;
 };
 
 export type OldSearchResult =
-  | SearchedPkgInfo[]
-  | Record<DomainName, SearchedPkgInfo>;
+  | SearchedPackument[]
+  | Record<DomainName, SearchedPackument>;
 
 /**
  * Get npm fetch options
@@ -47,8 +47,8 @@ const searchEndpoint = async function (
   keyword: string
 ): Promise<TableRow[] | undefined> {
   try {
-    // NOTE: The results of the search will be PkgInfo objects so we can change the type
-    const results = <SearchedPkgInfo[]>(
+    // NOTE: The results of the search will be Packument objects so we can change the type
+    const results = <SearchedPackument[]>(
       await npmSearch(keyword, getNpmFetchOptions(registry))
     );
     log.verbose("npmsearch", results.join(os.EOL));
@@ -70,7 +70,7 @@ const searchOld = async function (
     const results = <OldSearchResult | undefined>(
       await npmFetch.json("/-/all", getNpmFetchOptions(registry))
     );
-    let objects: SearchedPkgInfo[] = [];
+    let objects: SearchedPackument[] = [];
     if (results) {
       if (Array.isArray(results)) {
         // results is an array of objects
@@ -83,8 +83,8 @@ const searchOld = async function (
     }
     log.verbose("endpoint.all", objects.join(os.EOL));
     // prepare rows
-    const rows = objects.map((pkg) => {
-      return getTableRow(pkg);
+    const rows = objects.map((packument) => {
+      return getTableRow(packument);
     });
     // filter keyword
     const klc = keyword.toLowerCase();
@@ -106,13 +106,14 @@ const getTable = function () {
   });
 };
 
-const getTableRow = function (pkg: SearchedPkgInfo): TableRow {
-  const name = pkg.name;
-  const version = tryGetLatestVersion(pkg);
+const getTableRow = function (packument: SearchedPackument): TableRow {
+  const name = packument.name;
+  const version = tryGetLatestVersion(packument);
   let date = "";
-  if (pkg.time && pkg.time.modified) date = pkg.time.modified.split("T")[0]!;
-  if (pkg.date) {
-    date = pkg.date.toISOString().slice(0, 10);
+  if (packument.time && packument.time.modified)
+    date = packument.time.modified.split("T")[0]!;
+  if (packument.date) {
+    date = packument.date.toISOString().slice(0, 10);
   }
   assert(version !== undefined);
   return [name, version, date, ""];
