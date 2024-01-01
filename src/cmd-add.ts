@@ -121,7 +121,10 @@ export const add = async function (
           if (
             editorVersionResult &&
             requiredEditorVersionResult &&
-            compareEditorVersion(env.editorVersion, requiredEditorVersion) < 0
+            compareEditorVersion(
+              editorVersionResult,
+              requiredEditorVersionResult
+            ) < 0
           ) {
             log.warn(
               "editor.version",

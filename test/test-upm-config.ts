@@ -1,6 +1,6 @@
 import { describe } from "mocha";
 import {
-  decodeBasicAuth,
+  tryDecodeBasicAuth,
   encodeBasicAuth,
   isBasicAuth,
   isTokenAuth,
@@ -37,9 +37,14 @@ describe("upm-config", function () {
         const expectedUsername = "my-name";
         const expectedPassword = "123pass";
         const encoded = encodeBasicAuth(expectedUsername, expectedPassword);
-        const [actualUsername, actualPassword] = decodeBasicAuth(encoded);
+        const [actualUsername, actualPassword] = tryDecodeBasicAuth(encoded)!;
         should(actualUsername).be.equal(expectedUsername);
         should(actualPassword).be.equal(expectedPassword);
+      });
+      it("should not decode invalid data", () => {
+        const encoded = "This is not valid data" as Base64;
+        const decoded = tryDecodeBasicAuth(encoded)!;
+        should(decoded).be.null();
       });
     });
     describe("always-auth", function () {

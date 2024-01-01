@@ -81,12 +81,13 @@ export function encodeBasicAuth(username: string, password: string): Base64 {
 /**
  * Decodes a base64 encoded username and password
  * @param base64 The base64 string
- * @throws Error if the string cannot be decoded
+ * @returns Password/username tuple or null if the decoded string could
+ * not be parsed
  */
-export function decodeBasicAuth(base64: Base64): [string, string] {
+export function tryDecodeBasicAuth(base64: Base64): [string, string] | null {
   const text = decodeBase64(base64);
   const [username, password] = trySplitAtFirstOccurrenceOf(text, ":");
-  if (password === undefined) throw new Error("Base64 had invalid format");
+  if (password === undefined) return null;
   return [username, password];
 }
 
@@ -105,7 +106,9 @@ function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
       alwaysAuth: shouldAlwaysAuth(upmAuth),
     };
   } else if (isBasicAuth(upmAuth)) {
-    const [username, password] = decodeBasicAuth(upmAuth._auth);
+    const decoded = tryDecodeBasicAuth(upmAuth._auth);
+    if (decoded === null) return null;
+    const [username, password] = decoded;
     return {
       username,
       password: encodeBase64(password),
