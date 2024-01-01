@@ -19,7 +19,6 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
-import { removeTrailingSlash } from "./utils/string-utils";
 
 export type LoginOptions = CmdOptions<{
   username?: string;
