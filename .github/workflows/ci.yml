@@ -20,7 +20,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: npm run test
-        run: npm run test
+        run: npm run test:full
 
   release:
     runs-on: ubuntu-latest
