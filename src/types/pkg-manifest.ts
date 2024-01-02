@@ -2,8 +2,9 @@ import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { PackageUrl } from "./package-url";
 import { ScopedRegistry } from "./scoped-registry";
-import { RegistryUrl, removeTrailingSlash } from "./registry-url";
+import { RegistryUrl } from "./registry-url";
 import path from "path";
+import { removeTrailingSlash } from "../utils/string-utils";
 
 /**
  * The content of the package-manifest (manifest.json) of a Unity project

@@ -9,14 +9,14 @@ describe("cmd-login.ts", function () {
     it("should append token to empty content", async function () {
       generateNpmrcLines(
         "",
-        registryUrl("http://registry.npmjs.org/"),
+        registryUrl("http://registry.npmjs.org"),
         "123-456-789"
       ).should.deepEqual(["//registry.npmjs.org/:_authToken=123-456-789"]);
     });
     it("should append token to exist contents", async function () {
       generateNpmrcLines(
         "registry=https://registry.npmjs.org/",
-        registryUrl(" registry(http://registry.npmjs.org/"),
+        registryUrl(" registry(http://registry.npmjs.org"),
         "123-456-789"
       ).should.deepEqual([
         "registry=https://registry.npmjs.org/",
@@ -26,7 +26,7 @@ describe("cmd-login.ts", function () {
     it("should replace token to exist contents", async function () {
       generateNpmrcLines(
         "registry=https://registry.npmjs.org/\n//127.0.0.1:4873/:_authToken=blar-blar-blar\n//registry.npmjs.org/:_authToken=blar-blar-blar",
-        registryUrl("http://registry.npmjs.org/"),
+        registryUrl("http://registry.npmjs.org"),
         "123-456-789"
       ).should.deepEqual([
         "registry=https://registry.npmjs.org/",
@@ -44,12 +44,12 @@ describe("cmd-login.ts", function () {
     it("should quote token if necessary", async function () {
       generateNpmrcLines(
         "",
-        registryUrl("http://registry.npmjs.org/"),
+        registryUrl("http://registry.npmjs.org"),
         "=123-456-789="
       ).should.deepEqual(['//registry.npmjs.org/:_authToken="=123-456-789="']);
       generateNpmrcLines(
         "",
-        registryUrl("http://registry.npmjs.org/"),
+        registryUrl("http://registry.npmjs.org"),
         "?123-456-789?"
       ).should.deepEqual(['//registry.npmjs.org/:_authToken="?123-456-789?"']);
     });

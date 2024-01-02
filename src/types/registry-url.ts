@@ -1,8 +1,10 @@
 import { Brand } from "ts-brand";
 import assert from "assert";
+import { removeTrailingSlash } from "../utils/string-utils";
 
 /**
  * A string of a http-based registry-url
+ * Registry-urls may not have trailing slashes
  */
 export type RegistryUrl = Brand<string, "RegistryUrl">;
 
@@ -11,7 +13,7 @@ export type RegistryUrl = Brand<string, "RegistryUrl">;
  * @param s The string
  */
 export function isRegistryUrl(s: string): s is RegistryUrl {
-  return /http(s?):\/\//.test(s);
+  return /http(s?):\/\/.*[^/]$/.test(s);
 }
 
 /**
@@ -25,15 +27,6 @@ export function registryUrl(s: string): RegistryUrl {
 }
 
 /**
- * Removes trailing slash from a registry-url
- * @param registry The url
- */
-export function removeTrailingSlash(registry: RegistryUrl): RegistryUrl {
-  if (registry.endsWith("/")) return registry.slice(0, -1) as RegistryUrl;
-  return registry;
-}
-
-/**
  * Attempts to coerce a string into a registry-url, by
  * - Prepending http if it is missing
  * - Removing trailing slashes
@@ -42,5 +35,6 @@ export function removeTrailingSlash(registry: RegistryUrl): RegistryUrl {
  */
 export function coerceRegistryUrl(s: string): RegistryUrl {
   if (!s.toLowerCase().startsWith("http")) s = "http://" + s;
-  return removeTrailingSlash(registryUrl(s));
+  s = removeTrailingSlash(s);
+  return registryUrl(s);
 }

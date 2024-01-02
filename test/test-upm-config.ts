@@ -5,10 +5,14 @@ import {
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
+  tryGetAuthForRegistry,
   UpmAuth,
+  UPMConfig,
 } from "../src/types/upm-config";
 import should from "should";
 import { Base64 } from "../src/types/base64";
+import { registryUrl, RegistryUrl } from "../src/types/registry-url";
+import { NpmAuth } from "another-npm-registry-client";
 
 describe("upm-config", function () {
   describe("auth", function () {
@@ -73,6 +77,63 @@ describe("upm-config", function () {
           _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
         should(shouldAlwaysAuth(auth)).be.false();
+      });
+    });
+    describe("get auth for registry", function () {
+      it("should find auth for url without trailing slash", function () {
+        const url = registryUrl("http://registry.npmjs.com");
+        const expected: NpmAuth = {
+          alwaysAuth: false,
+          token: "This is not a valid token",
+        };
+        const config: UPMConfig = {
+          npmAuth: {
+            [url]: {
+              alwaysAuth: expected.alwaysAuth,
+              email: "real@email.com",
+              token: expected.token,
+            },
+          },
+        };
+
+        const actual = tryGetAuthForRegistry(config, url);
+        should(actual).be.deepEqual(expected);
+      });
+      it("should find auth for url with trailing slash", function () {
+        const url = "http://registry.npmjs.com/" as RegistryUrl;
+        const expected: NpmAuth = {
+          alwaysAuth: false,
+          token: "This is not a valid token",
+        };
+        const config: UPMConfig = {
+          npmAuth: {
+            [url]: {
+              alwaysAuth: expected.alwaysAuth,
+              email: "real@email.com",
+              token: expected.token,
+            },
+          },
+        };
+
+        const actual = tryGetAuthForRegistry(config, url);
+        should(actual).be.deepEqual(expected);
+      });
+      it("should not find auth for url that does not exist", function () {
+        const config: UPMConfig = {
+          npmAuth: {
+            ["http://registryA.com"]: {
+              alwaysAuth: false,
+              email: "real@email.com",
+              token: "This is not a valid token",
+            },
+          },
+        };
+
+        const actual = tryGetAuthForRegistry(
+          config,
+          registryUrl("http://registryB.com")
+        );
+        should(actual).be.null();
       });
     });
   });
