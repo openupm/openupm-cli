@@ -1,3 +1,10 @@
+## [1.19.5](https://github.com/openupm/openupm-cli/compare/1.19.4...1.19.5) (2024-01-02)
+
+
+### Bug Fixes
+
+* trailing slash issue when finding auth in upmconfig ([#94](https://github.com/openupm/openupm-cli/issues/94)) (close [#29](https://github.com/openupm/openupm-cli/issues/29)) ([162f5e8](https://github.com/openupm/openupm-cli/commit/162f5e807c136ab92d44d2be5feb14767cdf764e))
+
 ## [1.19.4](https://github.com/openupm/openupm-cli/compare/1.19.3...1.19.4) (2023-12-31)
 
 
