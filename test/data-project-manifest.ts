@@ -6,25 +6,25 @@ import { addScope, scopedRegistry } from "../src/types/scoped-registry";
 import {
   addDependency,
   addTestable,
-  emptyPackageManifest,
-  PkgManifest,
-} from "../src/types/pkg-manifest";
+  emptyProjectManifest,
+  UnityProjectManifest,
+} from "../src/types/project-manifest";
 
 /**
- * Builder class for {@link PkgManifest}
+ * Builder class for {@link UnityProjectManifest}
  */
-class PkgManifestBuilder {
-  readonly manifest: PkgManifest;
+class UnityProjectManifestBuilder {
+  readonly manifest: UnityProjectManifest;
 
   constructor() {
-    this.manifest = emptyPackageManifest();
+    this.manifest = emptyProjectManifest();
   }
 
   /**
    * Add a scope to the manifests scoped registry
    * @param name The name of the scope
    */
-  addScope(name: string): PkgManifestBuilder {
+  addScope(name: string): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
 
     if (this.manifest.scopedRegistries === undefined)
@@ -42,7 +42,7 @@ class PkgManifestBuilder {
    * Add a testable to the manifest
    * @param name The packages name
    */
-  addTestable(name: string): PkgManifestBuilder {
+  addTestable(name: string): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
     addTestable(this.manifest, name);
     return this;
@@ -60,7 +60,7 @@ class PkgManifestBuilder {
     version: string,
     withScope: boolean,
     testable: boolean
-  ): PkgManifestBuilder {
+  ): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
     assert(isSemanticVersion(version), `${version} is semantic version`);
     if (withScope) this.addScope(name);
@@ -71,14 +71,14 @@ class PkgManifestBuilder {
 }
 
 /**
- * Builder function for {@link PkgManifest}. All dependencies will be put
+ * Builder function for {@link UnityProjectManifest}. All dependencies will be put
  * into a default scoped-registry referencing an example registry
  * @param build A builder function.
  */
-export function buildPackageManifest(
-  build?: (builder: PkgManifestBuilder) => unknown
+export function buildProjectManifest(
+  build?: (builder: UnityProjectManifestBuilder) => unknown
 ) {
-  const builder = new PkgManifestBuilder();
+  const builder = new UnityProjectManifestBuilder();
   if (build !== undefined) build(builder);
   return builder.manifest;
 }

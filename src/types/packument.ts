@@ -1,11 +1,34 @@
 import { SemanticVersion } from "./semantic-version";
 import { DomainName } from "./domain-name";
-import { PkgVersionInfo } from "./pkg-version-info";
+import { UnityPackageManifest } from "./package-manifest";
+import { PackageId } from "./package-id";
+import { Dist, Maintainer } from "@npm/types";
+
+/**
+ * Contains information about a specific version of a package. This is based on
+ * the information contained inside a Unity package manifest, with some
+ * additions.
+ */
+export type UnityPackumentVersion = UnityPackageManifest & {
+  /**
+   * Same as {@link name}
+   */
+  _id?: PackageId;
+  _nodeVersion?: string;
+  _npmVersion?: string;
+  _rev?: string;
+  homepage?: string;
+  category?: string;
+  gitHead?: string;
+  readmeFilename?: string;
+  contributors?: Maintainer[];
+  dist?: Dist;
+};
 
 /**
  * Describes a package
  */
-export type PkgInfo = {
+export type UnityPackument = {
   /**
    * The packages name
    */
@@ -20,7 +43,7 @@ export type PkgInfo = {
   /**
    * The packages versions, organized by their version
    */
-  versions: Record<SemanticVersion, PkgVersionInfo>;
+  versions: Record<SemanticVersion, UnityPackumentVersion>;
   /**
    * Dist-tags. Only includes information about the latest version
    */
@@ -50,21 +73,21 @@ export type PkgInfo = {
 };
 
 const hasLatestDistTag = (
-  pkgInfo: Partial<PkgInfo>
-): pkgInfo is Partial<PkgInfo> & {
+  packument: Partial<UnityPackument>
+): packument is Partial<UnityPackument> & {
   "dist-tags": { latest: SemanticVersion };
 } => {
-  return pkgInfo["dist-tags"]?.["latest"] !== undefined;
+  return packument["dist-tags"]?.["latest"] !== undefined;
 };
 
 /**
  * Attempt to get the latest version from a package
- * @param pkgInfo The package. All properties are assumed to be potentially missing
+ * @param packument The package. All properties are assumed to be potentially missing
  */
-export const tryGetLatestVersion = function (pkgInfo: {
+export const tryGetLatestVersion = function (packument: {
   "dist-tags"?: { latest?: SemanticVersion };
   version?: SemanticVersion;
 }): SemanticVersion | undefined {
-  if (hasLatestDistTag(pkgInfo)) return pkgInfo["dist-tags"].latest;
-  else if (pkgInfo.version) return pkgInfo.version;
+  if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
+  else if (packument.version) return packument.version;
 };

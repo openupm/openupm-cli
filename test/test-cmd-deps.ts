@@ -2,15 +2,15 @@ import "should";
 import { deps, DepsOptions } from "../src/cmd-deps";
 import {
   exampleRegistryUrl,
-  registerMissingPackage,
-  registerRemotePkg,
-  registerRemoteUpstreamPkg,
+  registerMissingPackument,
+  registerRemotePackument,
+  registerRemoteUpstreamPackument,
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { buildPackageInfo } from "./data-pkg-info";
+import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { packageReference } from "../src/types/package-reference";
 
@@ -24,28 +24,33 @@ describe("cmd-deps.ts", function () {
   describe("deps", function () {
     let mockConsole: MockConsole = null!;
 
-    const remotePkgInfoA = buildPackageInfo("com.example.package-a", (pkg) =>
-      pkg.addVersion("1.0.0", (version) =>
-        version.addDependency("com.example.package-b", "1.0.0")
-      )
+    const remotePackumentA = buildPackument(
+      "com.example.package-a",
+      (packument) =>
+        packument.addVersion("1.0.0", (version) =>
+          version.addDependency("com.example.package-b", "1.0.0")
+        )
     );
-    const remotePkgInfoB = buildPackageInfo("com.example.package-b", (pkg) =>
-      pkg.addVersion("1.0.0", (version) =>
-        version.addDependency("com.example.package-up", "1.0.0")
-      )
+    const remotePackumentB = buildPackument(
+      "com.example.package-b",
+      (packument) =>
+        packument.addVersion("1.0.0", (version) =>
+          version.addDependency("com.example.package-up", "1.0.0")
+        )
     );
-    const remotePkgInfoUp = buildPackageInfo("com.example.package-up", (pkg) =>
-      pkg.addVersion("1.0.0")
+    const remotePackumentUp = buildPackument(
+      "com.example.package-up",
+      (packument) => packument.addVersion("1.0.0")
     );
 
     beforeEach(function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
       startMockRegistry();
-      registerRemotePkg(remotePkgInfoA);
-      registerRemotePkg(remotePkgInfoB);
-      registerMissingPackage("pkg-not-exist");
-      registerRemoteUpstreamPkg(remotePkgInfoUp);
+      registerRemotePackument(remotePackumentA);
+      registerRemotePackument(remotePackumentB);
+      registerMissingPackument("pkg-not-exist");
+      registerRemoteUpstreamPackument(remotePackumentUp);
 
       mockConsole = attachMockConsole();
     });
@@ -55,38 +60,40 @@ describe("cmd-deps.ts", function () {
       mockConsole.detach();
     });
     it("deps pkg", async function () {
-      const retCode = await deps(remotePkgInfoA.name, options);
+      const retCode = await deps(remotePackumentA.name, options);
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
     });
     it("deps pkg --deep", async function () {
-      const retCode = await deps(remotePkgInfoA.name, {
+      const retCode = await deps(remotePackumentA.name, {
         ...options,
         deep: true,
       });
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
-      mockConsole.hasLineIncluding("out", remotePkgInfoUp.name).should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", remotePackumentUp.name)
+        .should.be.ok();
     });
     it("deps pkg@latest", async function () {
       const retCode = await deps(
-        packageReference(remotePkgInfoA.name, "latest"),
+        packageReference(remotePackumentA.name, "latest"),
         options
       );
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps(
-        packageReference(remotePkgInfoA.name, "1.0.0"),
+        packageReference(remotePackumentA.name, "1.0.0"),
         options
       );
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePkgInfoB.name).should.be.ok();
+      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps(
-        packageReference(remotePkgInfoA.name, "2.0.0"),
+        packageReference(remotePackumentA.name, "2.0.0"),
         options
       );
       retCode.should.equal(0);
@@ -100,7 +107,7 @@ describe("cmd-deps.ts", function () {
       mockConsole.hasLineIncluding("out", "not found").should.be.ok();
     });
     it("deps pkg upstream", async function () {
-      const retCode = await deps(remotePkgInfoUp.name, options);
+      const retCode = await deps(remotePackumentUp.name, options);
       retCode.should.equal(0);
     });
   });

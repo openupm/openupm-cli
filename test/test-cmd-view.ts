@@ -2,15 +2,15 @@ import "should";
 import { view, ViewOptions } from "../src/cmd-view";
 import {
   exampleRegistryUrl,
-  registerMissingPackage,
-  registerRemotePkg,
-  registerRemoteUpstreamPkg,
+  registerMissingPackument,
+  registerRemotePackument,
+  registerRemoteUpstreamPackument,
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { buildPackageInfo } from "./data-pkg-info";
+import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
@@ -36,8 +36,8 @@ describe("cmd-view.ts", function () {
   describe("view", function () {
     let mockConsole: MockConsole = null!;
 
-    const remotePkgInfoA = buildPackageInfo(packageA, (pkg) =>
-      pkg
+    const remotePackumentA = buildPackument(packageA, (packument) =>
+      packument
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
@@ -68,8 +68,8 @@ describe("cmd-view.ts", function () {
         )
     );
 
-    const remotePkgInfoUp = buildPackageInfo(packageUp, (pkg) =>
-      pkg
+    const remotePackumentUp = buildPackument(packageUp, (packument) =>
+      packument
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
@@ -106,9 +106,9 @@ describe("cmd-view.ts", function () {
       removeWorkDir("test-openupm-cli");
       createWorkDir("test-openupm-cli", { manifest: true });
       startMockRegistry();
-      registerRemotePkg(remotePkgInfoA);
-      registerMissingPackage(packageMissing);
-      registerRemoteUpstreamPkg(remotePkgInfoUp);
+      registerRemotePackument(remotePackumentA);
+      registerMissingPackument(packageMissing);
+      registerRemoteUpstreamPackument(remotePackumentUp);
       mockConsole = attachMockConsole();
     });
     afterEach(function () {

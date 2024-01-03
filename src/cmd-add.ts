@@ -1,14 +1,17 @@
 import log from "./logger";
 import url from "url";
 import { isPackageUrl } from "./types/package-url";
-import { tryGetLatestVersion } from "./types/pkg-info";
-import { loadManifest, saveManifest } from "./utils/pkg-manifest-io";
+import { tryGetLatestVersion } from "./types/packument";
+import {
+  loadProjectManifest,
+  saveProjectManifest,
+} from "./utils/project-manifest-io";
 import { parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import { fetchPackageDependencies, fetchPackageInfo } from "./registry-client";
+import { fetchPackageDependencies, fetchPackument } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import {
@@ -22,7 +25,7 @@ import {
   addScopedRegistry,
   addTestable,
   tryGetScopedRegistryByUrl,
-} from "./types/pkg-manifest";
+} from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 
 export type AddOptions = CmdOptions<{
@@ -60,25 +63,25 @@ export const add = async function (
     let version = split[1];
 
     // load manifest
-    const manifest = loadManifest(env.cwd);
+    const manifest = loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty };
     // packages that added to scope registry
     const pkgsInScope: DomainName[] = [];
     if (version === undefined || !isPackageUrl(version)) {
       // verify name
-      let pkgInfo = await fetchPackageInfo(env.registry, name);
-      if (!pkgInfo && env.upstream) {
-        pkgInfo = await fetchPackageInfo(env.upstreamRegistry, name);
-        if (pkgInfo) isUpstreamPackage = true;
+      let packument = await fetchPackument(env.registry, name);
+      if (!packument && env.upstream) {
+        packument = await fetchPackument(env.upstreamRegistry, name);
+        if (packument) isUpstreamPackage = true;
       }
-      if (!pkgInfo) {
+      if (!packument) {
         log.error("404", `package not found: ${name}`);
         return { code: 1, dirty };
       }
       // verify version
-      const versions = Object.keys(pkgInfo.versions) as SemanticVersion[];
+      const versions = Object.keys(packument.versions) as SemanticVersion[];
       if (!version || version === "latest")
-        version = tryGetLatestVersion(pkgInfo);
+        version = tryGetLatestVersion(packument);
       if (versions.filter((x) => x === version).length <= 0) {
         log.warn(
           "404",
@@ -91,7 +94,7 @@ export const add = async function (
 
       if (version === undefined)
         throw new Error("Could not determine package version to add");
-      const versionInfo = pkgInfo.versions[version]!;
+      const versionInfo = packument.versions[version]!;
       // verify editor version
       if (versionInfo.unity) {
         const requiredEditorVersion = versionInfo.unityRelease
@@ -222,7 +225,7 @@ export const add = async function (
     if (options.test) addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      if (!saveManifest(env.cwd, manifest)) return { code: 1, dirty };
+      if (!saveProjectManifest(env.cwd, manifest)) return { code: 1, dirty };
     }
     return { code: 0, dirty };
   };

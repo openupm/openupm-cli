@@ -1,15 +1,18 @@
 import fs from "fs";
 import { assertIsError } from "./error-type-guards";
 import log from "../logger";
-import { manifestPathFor, PkgManifest } from "../types/pkg-manifest";
+import {
+  manifestPathFor,
+  UnityProjectManifest,
+} from "../types/project-manifest";
 
 /**
  * Attempts to load the manifest from the path specified in env
  * @param workingDirectory The working directory
  */
-export const loadManifest = function (
+export const loadProjectManifest = function (
   workingDirectory: string
-): PkgManifest | null {
+): UnityProjectManifest | null {
   const manifestPath = manifestPathFor(workingDirectory);
   try {
     const text = fs.readFileSync(manifestPath, { encoding: "utf8" });
@@ -31,9 +34,9 @@ export const loadManifest = function (
  * @param workingDirectory The working directory
  * @param data The manifest to save
  */
-export const saveManifest = function (
+export const saveProjectManifest = function (
   workingDirectory: string,
-  data: PkgManifest
+  data: UnityProjectManifest
 ) {
   const manifestPath = manifestPathFor(workingDirectory);
   const json = JSON.stringify(data, null, 2);

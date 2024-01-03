@@ -5,14 +5,13 @@ import {
   SemanticVersion,
 } from "../src/types/semantic-version";
 import { packageId } from "../src/types/package-id";
-import { PkgInfo } from "../src/types/pkg-info";
-import { PkgVersionInfo } from "../src/types/pkg-version-info";
+import { UnityPackument, UnityPackumentVersion } from "../src/types/packument";
 
 /**
- * Builder class for {@link PkgVersionInfo}
+ * Builder class for {@link UnityPackumentVersion}
  */
-class VersionInfoBuilder {
-  readonly version: PkgVersionInfo;
+class UnityPackumentVersionBuilder {
+  readonly version: UnityPackumentVersion;
 
   constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
@@ -29,7 +28,7 @@ class VersionInfoBuilder {
    * @param name The name of the dependency
    * @param version The version
    */
-  addDependency(name: string, version: string): VersionInfoBuilder {
+  addDependency(name: string, version: string): UnityPackumentVersionBuilder {
     assert(isDomainName(name), `${name} is domain name`);
     assert(isSemanticVersion(version), `${version} is semantic version`);
     this.version.dependencies![name] = version;
@@ -43,23 +42,26 @@ class VersionInfoBuilder {
    */
   set<
     TKey extends keyof Omit<
-      PkgVersionInfo,
+      UnityPackumentVersion,
       "version" | "name" | "dependencies" | "_id"
     >
-  >(key: TKey, value: PkgVersionInfo[TKey]): VersionInfoBuilder {
+  >(
+    key: TKey,
+    value: UnityPackumentVersion[TKey]
+  ): UnityPackumentVersionBuilder {
     this.version[key] = value;
     return this;
   }
 }
 
 /**
- * Builder class for {@link PkgInfo}
+ * Builder class for {@link UnityPackument}
  */
-class PackageInfoBuilder {
-  readonly package: PkgInfo;
+class UnityPackumentBuilder {
+  readonly packument: UnityPackument;
 
   constructor(name: DomainName) {
-    this.package = {
+    this.packument = {
       name,
       _id: name,
       versions: {},
@@ -76,13 +78,16 @@ class PackageInfoBuilder {
    */
   addVersion(
     version: string,
-    build?: (builder: VersionInfoBuilder) => unknown
-  ): PackageInfoBuilder {
+    build?: (builder: UnityPackumentVersionBuilder) => unknown
+  ): UnityPackumentBuilder {
     assert(isSemanticVersion(version), `${version} is semantic version`);
-    const builder = new VersionInfoBuilder(this.package.name, version);
+    const builder = new UnityPackumentVersionBuilder(
+      this.packument.name,
+      version
+    );
     if (build !== undefined) build(builder);
-    this.package.versions[version] = builder.version;
-    this.package["dist-tags"] = {
+    this.packument.versions[version] = builder.version;
+    this.packument["dist-tags"] = {
       latest: version,
     };
     return this;
@@ -90,27 +95,27 @@ class PackageInfoBuilder {
 
   set<
     TKey extends keyof Omit<
-      PkgInfo,
+      UnityPackument,
       "name" | "version" | "versions" | "dist-tags" | "_id"
     >
-  >(key: TKey, value: PkgInfo[TKey]): PackageInfoBuilder {
-    this.package[key] = value;
+  >(key: TKey, value: UnityPackument[TKey]): UnityPackumentBuilder {
+    this.packument[key] = value;
     return this;
   }
 }
 
 /**
- * Helper for building a {@link PkgInfo} object. Does validation and also
+ * Helper for building a {@link UnityPackument} object. Does validation and also
  * sets repeated properties for you
  * @param name The name of the package
  * @param build A builder function
  */
-export function buildPackageInfo(
+export function buildPackument(
   name: string,
-  build?: (builder: PackageInfoBuilder) => unknown
-): PkgInfo {
+  build?: (builder: UnityPackumentBuilder) => unknown
+): UnityPackument {
   assert(isDomainName(name), `${name} is domain name`);
-  const builder = new PackageInfoBuilder(name);
+  const builder = new UnityPackumentBuilder(name);
   if (build !== undefined) build(builder);
-  return builder.package;
+  return builder.packument;
 }

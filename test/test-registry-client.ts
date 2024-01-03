@@ -1,16 +1,16 @@
 import "assert";
 import "should";
 import { parseEnv } from "../src/utils/env";
-import { fetchPackageInfo } from "../src/registry-client";
+import { fetchPackument } from "../src/registry-client";
 import {
   exampleRegistryUrl,
-  registerMissingPackage,
-  registerRemotePkg,
+  registerMissingPackument,
+  registerRemotePackument,
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
 import should from "should";
-import { buildPackageInfo } from "./data-pkg-info";
+import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 
 const packageA = domainName("package-a");
@@ -29,10 +29,10 @@ describe("registry-client", function () {
         false
       );
       should(env).not.be.null();
-      const pkgInfoRemote = buildPackageInfo(packageA);
-      registerRemotePkg(pkgInfoRemote);
-      const info = await fetchPackageInfo(env!.registry, packageA);
-      should(info).deepEqual(pkgInfoRemote);
+      const packumentRemote = buildPackument(packageA);
+      registerRemotePackument(packumentRemote);
+      const info = await fetchPackument(env!.registry, packageA);
+      should(info).deepEqual(packumentRemote);
     });
     it("404", async function () {
       const env = await parseEnv(
@@ -40,8 +40,8 @@ describe("registry-client", function () {
         false
       );
       should(env).not.be.null();
-      registerMissingPackage(packageA);
-      const info = await fetchPackageInfo(env!.registry, packageA);
+      registerMissingPackument(packageA);
+      const info = await fetchPackument(env!.registry, packageA);
       (info === undefined).should.be.ok();
     });
   });

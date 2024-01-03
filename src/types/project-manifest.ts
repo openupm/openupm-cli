@@ -7,21 +7,33 @@ import path from "path";
 import { removeTrailingSlash } from "../utils/string-utils";
 
 /**
- * The content of the package-manifest (manifest.json) of a Unity project
+ * The content of the project-manifest (manifest.json) of a Unity project
  * @see https://docs.unity3d.com/Manual/upm-manifestPrj.html
  */
-export type PkgManifest = {
+export type UnityProjectManifest = {
   /**
-   * Direct dependencies, keyed by their name. Version can be either a
-   * semantic version or package-url
+   * Collection of packages required for your project. This includes only
+   * direct dependencies. Each entry maps the package name to the minimum
+   * version. required for the project
    */
   dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
   /**
-   * Scoped-registries for this project
+   * Enables a lock file to ensure that dependencies are resolved in a
+   * deterministic manner.
+   */
+  enableLockFile?: boolean;
+  /**
+   * Upgrades indirect dependencies based on Semantic Versioning rules.
+   */
+  resolutionStrategy?: string;
+  /**
+   * Specify custom registries in addition to the default registry.
+   * This allows you to host your own packages.
    */
   scopedRegistries?: ScopedRegistry[];
   /**
-   * Testable package-names
+   * Lists the names of packages whose tests you want to load in the
+   * Unity Test Framework.
    */
   testables?: DomainName[];
 };
@@ -29,7 +41,7 @@ export type PkgManifest = {
 /**
  * Constructs an empty package-manifest
  */
-export function emptyPackageManifest(): PkgManifest {
+export function emptyProjectManifest(): UnityProjectManifest {
   return { dependencies: {} };
 }
 
@@ -41,10 +53,11 @@ export function emptyPackageManifest(): PkgManifest {
  * @param version The dependency version or url
  */
 export function addDependency(
-  manifest: PkgManifest,
+  manifest: UnityProjectManifest,
   name: DomainName,
   version: SemanticVersion | PackageUrl
 ) {
+  if (manifest.dependencies === undefined) manifest.dependencies = {};
   manifest.dependencies[name] = version;
 }
 
@@ -53,7 +66,11 @@ export function addDependency(
  * @param manifest The manifest
  * @param name The dependency name
  */
-export function removeDependency(manifest: PkgManifest, name: DomainName) {
+export function removeDependency(
+  manifest: UnityProjectManifest,
+  name: DomainName
+) {
+  if (manifest.dependencies === undefined) return;
   delete manifest.dependencies[name];
 }
 
@@ -64,7 +81,7 @@ export function removeDependency(manifest: PkgManifest, name: DomainName) {
  * @returns The scoped-registry or null if not found
  */
 export function tryGetScopedRegistryByUrl(
-  manifest: PkgManifest,
+  manifest: UnityProjectManifest,
   url: RegistryUrl
 ): ScopedRegistry | null {
   function hasCorrectUrl(registry: ScopedRegistry): boolean {
@@ -81,7 +98,7 @@ export function tryGetScopedRegistryByUrl(
  * @param scopedRegistry The scoped-registry
  */
 export function addScopedRegistry(
-  manifest: PkgManifest,
+  manifest: UnityProjectManifest,
   scopedRegistry: ScopedRegistry
 ) {
   if (manifest.scopedRegistries === undefined) manifest.scopedRegistries = [];
@@ -93,7 +110,7 @@ export function addScopedRegistry(
  * @param manifest The manifest
  * @param name The testable name
  */
-export function addTestable(manifest: PkgManifest, name: DomainName) {
+export function addTestable(manifest: UnityProjectManifest, name: DomainName) {
   if (!manifest.testables) manifest.testables = [];
   if (manifest.testables.indexOf(name) === -1) manifest.testables.push(name);
   manifest.testables.sort();
