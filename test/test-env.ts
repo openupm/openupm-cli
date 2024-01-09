@@ -1,13 +1,15 @@
 import "should";
 import { parseEnv } from "../src/utils/env";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import should from "should";
-import { runWithEnv } from "./mock-env";
 import { saveUpmConfig } from "../src/utils/upm-config-io";
 import { registryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
+import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { afterEach, before } from "mocha";
+import { manifestPathFor } from "../src/types/project-manifest";
+import fse from "fs-extra";
 
 const testUpmAuth: TokenAuth = {
   email: "test@mail.com",
@@ -26,29 +28,28 @@ const testUpmConfig: UPMConfig = {
 describe("env", function () {
   describe("parseEnv", function () {
     let mockConsole: MockConsole = null!;
-    before(function () {
-      removeWorkDir("test-openupm-cli");
-      removeWorkDir("test-openupm-cli-no-manifest");
-      createWorkDir("test-openupm-cli", {
-        manifest: true,
-        editorVersion: " 2019.2.13f1",
+    let mockProject: MockUnityProject = null!;
+
+    before(async function () {
+      mockProject = await setupUnityProject({
+        version: "2019.2.13f1",
+        upmConfig: testUpmConfig,
       });
-      createWorkDir("test-openupm-cli-no-manifest", {
-        manifest: false,
-        editorVersion: " 2019.2.13f1",
-      });
-      saveUpmConfig(testUpmConfig, getWorkDir("test-openupm-cli"));
     });
-    after(function () {
-      removeWorkDir("test-openupm-cli");
-      removeWorkDir("test-openupm-cli-no-manifest");
-    });
+
     beforeEach(function () {
       mockConsole = attachMockConsole();
     });
-    afterEach(function () {
+
+    afterEach(async function () {
       mockConsole.detach();
+      await mockProject.reset();
     });
+
+    after(async function () {
+      await mockProject.restore();
+    });
+
     it("defaults", async function () {
       const env = await parseEnv({ _global: {} }, false);
       should(env).not.be.null();
@@ -58,17 +59,15 @@ describe("env", function () {
       env!.cwd.should.equal("");
       (env!.editorVersion === null).should.be.ok();
     });
+
     it("check path", async function () {
-      const env = await parseEnv(
-        { _global: { chdir: getWorkDir("test-openupm-cli") } },
-        true
-      );
+      const env = await parseEnv({ _global: {} }, true);
       should(env).not.be.null();
-      env!.cwd.should.be.equal(getWorkDir("test-openupm-cli"));
+      env!.cwd.should.be.equal(mockProject.projectPath);
     });
     it("can not resolve path", async function () {
       const env = await parseEnv(
-        { _global: { chdir: getWorkDir("path-not-exist") } },
+        { _global: { chdir: "/path-not-exist" } },
         true
       );
       should(env).be.null();
@@ -76,11 +75,13 @@ describe("env", function () {
         .hasLineIncluding("out", "can not resolve path")
         .should.be.ok();
     });
+
     it("can not locate manifest.json", async function () {
-      const env = await parseEnv(
-        { _global: { chdir: getWorkDir("test-openupm-cli-no-manifest") } },
-        true
-      );
+      // Delete manifest
+      const manifestPath = manifestPathFor(mockProject.projectPath);
+      fse.rmSync(manifestPath);
+
+      const env = await parseEnv({ _global: {} }, true);
       should(env).be.null();
       mockConsole
         .hasLineIncluding("out", "can not locate manifest.json")
@@ -153,33 +154,25 @@ describe("env", function () {
       env!.registry.url.should.be.equal("http://[1:2:3:4:5:6:7:8]:4873");
     });
     it("should have registry auth if specified", async function () {
-      const projectDir = getWorkDir("test-openupm-cli");
-      const env = await runWithEnv({ HOME: projectDir }, () =>
-        parseEnv(
-          {
-            _global: {
-              registry: "registry.npmjs.org",
-              chdir: projectDir,
-            },
+      const env = await parseEnv(
+        {
+          _global: {
+            registry: "registry.npmjs.org",
           },
-          true
-        )
+        },
+        true
       );
       should(env).not.be.null();
       should(env!.registry.auth).deepEqual(testNpmAuth);
     });
     it("should not have unspecified registry auth", async function () {
-      const projectDir = getWorkDir("test-openupm-cli");
-      const env = await runWithEnv({ HOME: projectDir }, () =>
-        parseEnv(
-          {
-            _global: {
-              registry: "registry.other.org",
-              chdir: projectDir,
-            },
+      const env = await parseEnv(
+        {
+          _global: {
+            registry: "registry.other.org",
           },
-          true
-        )
+        },
+        true
       );
       should(env).not.be.null();
       should(env!.registry.auth).be.null();
@@ -190,10 +183,7 @@ describe("env", function () {
       env!.upstream.should.not.be.ok();
     });
     it("editorVersion", async function () {
-      const env = await parseEnv(
-        { _global: { chdir: getWorkDir("test-openupm-cli") } },
-        true
-      );
+      const env = await parseEnv({ _global: {} }, true);
       should(env).not.be.null();
       should(env!.editorVersion).be.equal("2019.2.13f1");
     });

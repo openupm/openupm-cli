@@ -20,6 +20,11 @@ import { saveUpmConfig } from "../../src/utils/upm-config-io";
  */
 export type MockUnityProject = {
   /**
+   * The path to the projects root folder
+   */
+  projectPath: string;
+
+  /**
    * Attempts to load the project manifest for the project.
    * Null if not found.
    */
@@ -139,6 +144,7 @@ export async function setupUnityProject(
 
   await setup();
   return {
+    projectPath,
     tryGetManifest,
     tryAssertManifest,
     reset,
