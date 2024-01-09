@@ -1,3 +1,11 @@
+## [1.19.6](https://github.com/openupm/openupm-cli/compare/1.19.5...1.19.6) (2024-01-09)
+
+
+### Bug Fixes
+
+* manifest save crash ([#98](https://github.com/openupm/openupm-cli/issues/98)) ([0bf3096](https://github.com/openupm/openupm-cli/commit/0bf30962a1157f2fa3ae373026eddca23fad36ab))
+* test selector ([#97](https://github.com/openupm/openupm-cli/issues/97)) ([5624edc](https://github.com/openupm/openupm-cli/commit/5624edc433ae02c4c73926c54490e0135eed21de))
+
 ## [1.19.5](https://github.com/openupm/openupm-cli/compare/1.19.4...1.19.5) (2024-01-02)
 
 
