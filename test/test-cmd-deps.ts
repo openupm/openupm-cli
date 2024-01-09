@@ -8,21 +8,22 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { packageReference } from "../src/types/package-reference";
+import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { before } from "mocha";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
     _global: {
       registry: exampleRegistryUrl,
-      chdir: getWorkDir("test-openupm-cli"),
     },
   };
   describe("deps", function () {
     let mockConsole: MockConsole = null!;
+    let mockProject: MockUnityProject = null!;
 
     const remotePackumentA = buildPackument(
       "com.example.package-a",
@@ -43,9 +44,11 @@ describe("cmd-deps.ts", function () {
       (packument) => packument.addVersion("1.0.0")
     );
 
+    before(function () {
+      mockProject = setupUnityProject({});
+    });
+
     beforeEach(function () {
-      removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", { manifest: true });
       startMockRegistry();
       registerRemotePackument(remotePackumentA);
       registerRemotePackument(remotePackumentB);
@@ -55,10 +58,14 @@ describe("cmd-deps.ts", function () {
       mockConsole = attachMockConsole();
     });
     afterEach(function () {
-      removeWorkDir("test-openupm-cli");
+      mockProject.reset();
       stopMockRegistry();
       mockConsole.detach();
     });
+    after(function () {
+      mockProject.restore();
+    });
+
     it("deps pkg", async function () {
       const retCode = await deps(remotePackumentA.name, options);
       retCode.should.equal(0);
