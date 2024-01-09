@@ -8,31 +8,40 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { SearchEndpointResult } from "./types";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
+import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { before } from "mocha";
 
 describe("cmd-search.ts", function () {
   let mockConsole: MockConsole = null!;
+  let mockProject: MockUnityProject = null!;
 
   const options: SearchOptions = {
     _global: {
       registry: exampleRegistryUrl,
       upstream: false,
-      chdir: getWorkDir("test-openupm-cli"),
     },
   };
-  getWorkDir("test-openupm-cli");
+
+  before(function () {
+    mockProject = setupUnityProject({});
+  });
+
   beforeEach(function () {
-    removeWorkDir("test-openupm-cli");
-    createWorkDir("test-openupm-cli", { manifest: true });
     mockConsole = attachMockConsole();
   });
+
   afterEach(function () {
-    removeWorkDir("test-openupm-cli");
+    mockProject.reset();
     mockConsole.detach();
   });
+
+  after(function () {
+    mockProject.restore();
+  });
+
   describe("search endpoint", function () {
     const searchEndpointResult: SearchEndpointResult = {
       objects: [
