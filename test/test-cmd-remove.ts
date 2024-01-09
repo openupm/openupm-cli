@@ -1,10 +1,8 @@
 import "should";
 import { remove } from "../src/cmd-remove";
 import { exampleRegistryUrl } from "./mock-registry";
-import { createWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import {
-  shouldHaveProjectManifest,
   shouldHaveRegistryWithScopes,
   shouldNotHaveDependency,
 } from "./project-manifest-assertions";
@@ -12,46 +10,53 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
+import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { after } from "mocha";
 
 const packageA = domainName("com.example.package-a");
 const packageB = domainName("com.example.package-b");
 const missingPackage = domainName("pkg-not-exist");
-const workDirName = "test-openupm-cli";
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
-    let mockConsole: MockConsole = null!;
-    let workDir = "";
-
     const defaultManifest = buildProjectManifest((manifest) =>
       manifest
         .addDependency(packageA, "1.0.0", true, false)
         .addDependency(packageB, "1.0.0", true, false)
     );
 
+    let mockConsole: MockConsole = null!;
+    let mockProject: MockUnityProject = null!;
+
+    before(function () {
+      mockProject = setupUnityProject({ manifest: defaultManifest });
+    });
+
     beforeEach(function () {
-      removeWorkDir(workDirName);
-      workDir = createWorkDir(workDirName, {
-        manifest: defaultManifest,
-      });
       mockConsole = attachMockConsole();
     });
+
     afterEach(function () {
-      removeWorkDir(workDirName);
+      mockProject.reset();
       mockConsole.detach();
     });
+
+    after(function () {
+      mockProject.restore();
+    });
+
     it("remove pkg", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: workDir,
         },
       };
       const retCode = await remove(packageA, options);
       retCode.should.equal(0);
-      const manifest = shouldHaveProjectManifest(workDir);
-      shouldNotHaveDependency(manifest, packageA);
-      shouldHaveRegistryWithScopes(manifest, [packageB]);
+      mockProject.tryAssertManifest((manifest) => {
+        shouldNotHaveDependency(manifest, packageA);
+        shouldHaveRegistryWithScopes(manifest, [packageB]);
+      });
       mockConsole.hasLineIncluding("out", "removed ").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
@@ -59,7 +64,6 @@ describe("cmd-remove.ts", function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: workDir,
         },
       };
       const retCode = await remove(
@@ -67,35 +71,37 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(1);
-      const manifest = shouldHaveProjectManifest(workDir);
-      manifest.should.deepEqual(defaultManifest);
+      mockProject.tryAssertManifest((manifest) => {
+        manifest.should.deepEqual(defaultManifest);
+      });
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
     });
     it("remove pkg-not-exist", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: workDir,
         },
       };
       const retCode = await remove(missingPackage, options);
       retCode.should.equal(1);
-      const manifest = shouldHaveProjectManifest(workDir);
-      manifest.should.deepEqual(defaultManifest);
+      mockProject.tryAssertManifest((manifest) => {
+        manifest.should.deepEqual(defaultManifest);
+      });
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
     });
     it("remove more than one pkgs", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
-          chdir: workDir,
         },
       };
       const retCode = await remove([packageA, packageB], options);
       retCode.should.equal(0);
-      const manifest = shouldHaveProjectManifest(workDir);
-      shouldNotHaveDependency(manifest, packageA);
-      shouldNotHaveDependency(manifest, packageB);
+
+      mockProject.tryAssertManifest((manifest) => {
+        shouldNotHaveDependency(manifest, packageA);
+        shouldNotHaveDependency(manifest, packageB);
+      });
       mockConsole
         .hasLineIncluding("out", "removed com.example.package-a")
         .should.be.ok();
