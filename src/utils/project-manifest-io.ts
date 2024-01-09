@@ -5,6 +5,8 @@ import {
   manifestPathFor,
   UnityProjectManifest,
 } from "../types/project-manifest";
+import fse from "fs-extra";
+import path from "path";
 
 /**
  * Attempts to load the manifest from the path specified in env
@@ -41,6 +43,7 @@ export const saveProjectManifest = function (
   const manifestPath = manifestPathFor(workingDirectory);
   const json = JSON.stringify(data, null, 2);
   try {
+    fse.ensureDirSync(path.dirname(manifestPath));
     fs.writeFileSync(manifestPath, json);
     return true;
   } catch (err) {
