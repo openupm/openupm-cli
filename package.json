@@ -7,8 +7,8 @@
     "node": ">=16"
   },
   "scripts": {
-    "test:quick": "cross-env NODE_ENV=test ts-mocha test/**/*.ts",
-    "test:full": "cross-env NODE_ENV=test ts-mocha test/**/*.ts --type-check",
+    "test:quick": "cross-env NODE_ENV=test ts-mocha test/**/test-*.ts",
+    "test:full": "cross-env NODE_ENV=test ts-mocha test/**/test-*.ts --type-check",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
