@@ -10,10 +10,10 @@ import {
   saveProjectManifest,
 } from "../../src/utils/project-manifest-io";
 import assert from "assert";
-import { createProjectVersionTxt } from "../mock-work-dir";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
 import { saveUpmConfig } from "../../src/utils/upm-config-io";
+import {createProjectVersionTxt} from "../../src/utils/project-version-io";
 
 /**
  * A mock Unity project for testing
