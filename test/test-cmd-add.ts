@@ -129,8 +129,8 @@ describe("cmd-add.ts", function () {
       manifest.addDependency(packageA, "1.0.0", true, true)
     );
 
-    before(function () {
-      mockProject = setupUnityProject({ version: "2019.2.13f1" });
+    before(async function () {
+      mockProject = await setupUnityProject({ version: "2019.2.13f1" });
     });
 
     beforeEach(function () {
@@ -147,14 +147,14 @@ describe("cmd-add.ts", function () {
 
       mockConsole = attachMockConsole();
     });
-    afterEach(function () {
-      mockProject.reset();
+    afterEach(async function () {
+      await mockProject.reset();
       stopMockRegistry();
       mockConsole.detach();
     });
 
-    after(function () {
-      mockProject.restore();
+    after(async function () {
+      await mockProject.restore();
     });
 
     it("add pkg", async function () {

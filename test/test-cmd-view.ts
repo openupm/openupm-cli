@@ -102,8 +102,8 @@ describe("cmd-view.ts", function () {
         )
     );
 
-    before(function () {
-      mockProject = setupUnityProject({});
+    before(async function () {
+      mockProject = await setupUnityProject({});
     });
 
     beforeEach(function () {
@@ -113,14 +113,14 @@ describe("cmd-view.ts", function () {
       registerRemoteUpstreamPackument(remotePackumentUp);
       mockConsole = attachMockConsole();
     });
-    afterEach(function () {
-      mockProject.reset();
+    afterEach(async function () {
+      await mockProject.reset();
       stopMockRegistry();
       mockConsole.detach();
     });
 
-    after(function () {
-      mockProject.restore();
+    after(async function () {
+      await mockProject.restore();
     });
 
     it("view pkg", async function () {

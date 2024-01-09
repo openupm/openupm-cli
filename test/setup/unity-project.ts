@@ -32,12 +32,12 @@ export type MockUnityProject = {
   /**
    * Resets the mock-project to its original state
    */
-  reset(): void;
+  reset(): Promise<void>;
 
   /**
    * Deletes the mock-project
    */
-  restore(): void;
+  restore(): Promise<void>;
 };
 
 const defaultVersion = "2020.2.1f1";
@@ -66,12 +66,14 @@ const projectPath = path.join(rootPath, "Project");
  * Setups a mock Unity project for testing
  * @param config Config describing the project to be setup
  */
-export function setupUnityProject(config: Config): MockUnityProject {
+export async function setupUnityProject(
+  config: Config
+): Promise<MockUnityProject> {
   const originalCwd = process.cwd;
 
-  function setup() {
+  async function setup() {
     process.cwd = () => projectPath;
-    fse.ensureDirSync(projectPath);
+    await fse.ensureDir(projectPath);
 
     // Editor-version
     const version = config.version ?? defaultVersion;
@@ -84,9 +86,9 @@ export function setupUnityProject(config: Config): MockUnityProject {
     }
   }
 
-  function restore() {
+  async function restore() {
     process.cwd = originalCwd;
-    fse.rmSync(rootPath, { recursive: true, force: true });
+    await fse.rm(rootPath, { recursive: true, force: true });
   }
 
   function tryGetManifest(): UnityProjectManifest | null {
@@ -101,12 +103,12 @@ export function setupUnityProject(config: Config): MockUnityProject {
     assertFn(manifest);
   }
 
-  function reset() {
-    restore();
-    setup();
+  async function reset() {
+    await restore();
+    await setup();
   }
 
-  reset();
+  await reset();
   return {
     tryGetManifest,
     tryAssertManifest,

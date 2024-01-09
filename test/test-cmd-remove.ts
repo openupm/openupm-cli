@@ -28,21 +28,21 @@ describe("cmd-remove.ts", function () {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
-    before(function () {
-      mockProject = setupUnityProject({ manifest: defaultManifest });
+    before(async function () {
+      mockProject = await setupUnityProject({ manifest: defaultManifest });
     });
 
     beforeEach(function () {
       mockConsole = attachMockConsole();
     });
 
-    afterEach(function () {
-      mockProject.reset();
+    afterEach(async function () {
+      await mockProject.reset();
       mockConsole.detach();
     });
 
-    after(function () {
-      mockProject.restore();
+    after(async function () {
+      await mockProject.restore();
     });
 
     it("remove pkg", async function () {

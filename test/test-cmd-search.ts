@@ -25,21 +25,21 @@ describe("cmd-search.ts", function () {
     },
   };
 
-  before(function () {
-    mockProject = setupUnityProject({});
+  before(async function () {
+    mockProject = await setupUnityProject({});
   });
 
   beforeEach(function () {
     mockConsole = attachMockConsole();
   });
 
-  afterEach(function () {
-    mockProject.reset();
+  afterEach(async function () {
+    await mockProject.reset();
     mockConsole.detach();
   });
 
-  after(function () {
-    mockProject.restore();
+  after(async function () {
+    await mockProject.restore();
   });
 
   describe("search endpoint", function () {
