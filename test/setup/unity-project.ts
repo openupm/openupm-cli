@@ -11,6 +11,9 @@ import {
 } from "../../src/utils/project-manifest-io";
 import assert from "assert";
 import { createProjectVersionTxt } from "../mock-work-dir";
+import { mockEnv, MockEnvSession } from "../mock-env";
+import { UPMConfig } from "../../src/types/upm-config";
+import { saveUpmConfig } from "../../src/utils/upm-config-io";
 
 /**
  * A mock Unity project for testing
@@ -44,6 +47,8 @@ const defaultVersion = "2020.2.1f1";
 
 const defaultManifest = emptyProjectManifest();
 
+const defaultUpmConfig = {} satisfies UPMConfig;
+
 type Config = {
   /**
    * The version to use for the project.
@@ -56,6 +61,12 @@ type Config = {
    * If {@link false} no manifest is created
    */
   manifest?: UnityProjectManifest | false;
+
+  /**
+   * Override for the generated .upmconfig.toml.
+   * If not specified uses {@link defaultUpmConfig}
+   */
+  upmConfig?: UPMConfig;
 };
 
 const rootPath = path.join(os.tmpdir(), "test-openupm-cli");
@@ -69,6 +80,7 @@ const projectPath = path.join(rootPath, "Project");
  * - Change {@link process.cwd} to {@link projectPath}.
  * - Clear {@link process.env.USERPROFILE}.
  * - Change {@link process.env.HOME} to {@link rootPath}.
+ * - Place a .upmconfig.toml in the root folder of the test directory structure.
  * @param config Config describing the project to be setup
  */
 export async function setupUnityProject(
@@ -84,6 +96,10 @@ export async function setupUnityProject(
     await fse.ensureDir(projectPath);
 
     envSession = mockEnv({ HOME: rootPath });
+
+    // Upmconfig
+    const upmConfig = config.upmConfig ?? defaultUpmConfig;
+    await saveUpmConfig(upmConfig, rootPath);
 
     // Editor-version
     const version = config.version ?? defaultVersion;
