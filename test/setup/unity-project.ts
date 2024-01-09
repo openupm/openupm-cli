@@ -63,17 +63,27 @@ const rootPath = path.join(os.tmpdir(), "test-openupm-cli");
 const projectPath = path.join(rootPath, "Project");
 
 /**
- * Setups a mock Unity project for testing
+ * Setups a mock Unity project for testing.
+ * This will set up a directory structure with a Unity project, as well
+ * as some other effects:
+ * - Change {@link process.cwd} to {@link projectPath}.
+ * - Clear {@link process.env.USERPROFILE}.
+ * - Change {@link process.env.HOME} to {@link rootPath}.
  * @param config Config describing the project to be setup
  */
 export async function setupUnityProject(
   config: Config
 ): Promise<MockUnityProject> {
-  const originalCwd = process.cwd;
+  let originalCwd: () => string = null!;
+  let envSession: MockEnvSession = null!;
 
   async function setup() {
+    originalCwd = process.cwd;
     process.cwd = () => projectPath;
+
     await fse.ensureDir(projectPath);
+
+    envSession = mockEnv({ HOME: rootPath });
 
     // Editor-version
     const version = config.version ?? defaultVersion;
@@ -88,7 +98,10 @@ export async function setupUnityProject(
 
   async function restore() {
     process.cwd = originalCwd;
+
     await fse.rm(rootPath, { recursive: true, force: true });
+
+    envSession?.unhook();
   }
 
   function tryGetManifest(): UnityProjectManifest | null {
@@ -108,7 +121,7 @@ export async function setupUnityProject(
     await setup();
   }
 
-  await reset();
+  await setup();
   return {
     tryGetManifest,
     tryAssertManifest,

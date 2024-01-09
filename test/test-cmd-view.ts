@@ -23,12 +23,14 @@ const packageMissing = domainName("pkg-not-exist");
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {
     _global: {
+      color: false,
       registry: exampleRegistryUrl,
       upstream: false,
     },
   };
   const upstreamOptions: ViewOptions = {
     _global: {
+      color: false,
       registry: exampleRegistryUrl,
     },
   };
