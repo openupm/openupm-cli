@@ -8,12 +8,13 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
+import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { after, before } from "mocha";
 
 const packageA = domainName("com.example.package-a");
 const packageUp = domainName("com.example.package-up");
@@ -24,17 +25,16 @@ describe("cmd-view.ts", function () {
     _global: {
       registry: exampleRegistryUrl,
       upstream: false,
-      chdir: getWorkDir("test-openupm-cli"),
     },
   };
   const upstreamOptions: ViewOptions = {
     _global: {
       registry: exampleRegistryUrl,
-      chdir: getWorkDir("test-openupm-cli"),
     },
   };
   describe("view", function () {
     let mockConsole: MockConsole = null!;
+    let mockProject: MockUnityProject = null!;
 
     const remotePackumentA = buildPackument(packageA, (packument) =>
       packument
@@ -102,9 +102,11 @@ describe("cmd-view.ts", function () {
         )
     );
 
+    before(function () {
+      mockProject = setupUnityProject({});
+    });
+
     beforeEach(function () {
-      removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", { manifest: true });
       startMockRegistry();
       registerRemotePackument(remotePackumentA);
       registerMissingPackument(packageMissing);
@@ -112,10 +114,15 @@ describe("cmd-view.ts", function () {
       mockConsole = attachMockConsole();
     });
     afterEach(function () {
-      removeWorkDir("test-openupm-cli");
+      mockProject.reset();
       stopMockRegistry();
       mockConsole.detach();
     });
+
+    after(function () {
+      mockProject.restore();
+    });
+
     it("view pkg", async function () {
       const retCode = await view(packageA, options);
       retCode.should.equal(0);
