@@ -14,6 +14,17 @@ export type ManifestCreationOptions = {
 export const getWorkDir = function (pathToTmp: string): string {
   return path.join(os.tmpdir(), pathToTmp);
 };
+
+export function createProjectVersionTxt(
+  projectDirPath: string,
+  version: string
+) {
+  const projectSettingsDir = path.join(projectDirPath, "ProjectSettings");
+  fse.mkdirpSync(projectSettingsDir);
+  const data = `m_EditorVersion: ${version}`;
+  fse.writeFileSync(path.join(projectSettingsDir, "ProjectVersion.txt"), data);
+}
+
 export const createWorkDir = function (
   pathToTmp: string,
   { manifest, editorVersion }: ManifestCreationOptions
@@ -28,13 +39,7 @@ export const createWorkDir = function (
     fse.writeFileSync(path.join(manifestDir, "manifest.json"), data);
   }
   if (editorVersion) {
-    const projectSettingsDir = path.join(workDir, "ProjectSettings");
-    fse.mkdirpSync(projectSettingsDir);
-    const data = `m_EditorVersion: ${editorVersion}`;
-    fse.writeFileSync(
-      path.join(projectSettingsDir, "ProjectVersion.txt"),
-      data
-    );
+    createProjectVersionTxt(workDir, editorVersion);
   }
   return workDir;
 };
