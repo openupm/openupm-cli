@@ -112,7 +112,10 @@ export const getNpmClient = (): NpmClient => {
     adduser: normalizeClientFunction(client, client.adduser),
   };
 };
-// Fetch package info json from registry
+
+/**
+ * Fetch package info json from registry
+ */
 export const fetchPackument = async function (
   registry: Registry,
   name: DomainName
