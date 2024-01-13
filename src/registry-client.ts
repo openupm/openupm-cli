@@ -115,6 +115,8 @@ export const getNpmClient = (): NpmClient => {
 
 /**
  * Fetch package info json from registry
+ * @param registry The registry from which to get the packument
+ * @param name The name of the packument
  */
 export const fetchPackument = async function (
   registry: Registry,
