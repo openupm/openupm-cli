@@ -1,16 +1,15 @@
 import npmSearch, { Options } from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
-import Table from "cli-table";
 import log from "./logger";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
-import assert from "assert";
-import { tryGetLatestVersion, UnityPackument } from "./types/packument";
+import { UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { CmdOptions } from "./types/options";
 import { Registry } from "./registry-client";
+import { formatAsTable } from "./output-formatting";
 
 type SearchResultCode = 0 | 1;
 
@@ -91,33 +90,6 @@ const searchOld = async function (
   }
 };
 
-function formatResults(searchResults: SearchedPackument[]): string {
-  function getTable(): Table<[string, string, string]> {
-    return new Table({
-      head: ["Name", "Version", "Date"],
-      colWidths: [42, 20, 12],
-    });
-  }
-
-  function getTableRow(packument: SearchedPackument): [string, string, string] {
-    const name = packument.name;
-    const version = tryGetLatestVersion(packument);
-    let date = "";
-    if (packument.time && packument.time.modified)
-      date = packument.time.modified.split("T")[0]!;
-    if (packument.date) {
-      date = packument.date.toISOString().slice(0, 10);
-    }
-    assert(version !== undefined);
-    return [name, version, date];
-  }
-
-  const rows = searchResults.map(getTableRow);
-  const table = getTable();
-  rows.forEach((row) => table.push(row));
-  return table.toString();
-}
-
 export async function search(
   keyword: string,
   options: SearchOptions
@@ -134,7 +106,7 @@ export async function search(
   }
   // search upstream
   if (results !== undefined && results.length > 0) {
-    console.log(formatResults(results));
+    console.log(formatAsTable(results));
   } else log.notice("", `No matches found for "${keyword}"`);
   return 0;
 }
