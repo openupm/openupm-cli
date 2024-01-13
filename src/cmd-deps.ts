@@ -36,7 +36,7 @@ export const deps = async function (
     env.upstreamRegistry,
     name,
     version,
-    options.deep
+    options.deep || false
   );
   depsValid
     .filter((x) => !x.self)

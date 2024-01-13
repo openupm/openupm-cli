@@ -145,7 +145,7 @@ export const fetchPackageDependencies = async function (
   upstreamRegistry: Registry,
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
-  deep?: boolean
+  deep: boolean
 ): Promise<[Dependency[], Dependency[]]> {
   log.verbose(
     "dependency",
