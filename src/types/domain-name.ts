@@ -59,7 +59,7 @@ export function isDomainName(s: string): s is DomainName {
  * Detect if the given package name is an internal package
  * @param name The name of the package
  */
-export const isInternalPackage = (name: DomainName): boolean => {
+export function isInternalPackage(name: DomainName): boolean {
   const internals = [
     "com.unity.ugui",
     "com.unity.2d.sprite",
@@ -68,7 +68,7 @@ export const isInternalPackage = (name: DomainName): boolean => {
     "com.unity.ugui",
   ];
   return /com.unity.modules/i.test(name) || internals.includes(name);
-};
+}
 
 /**
  * Constructs a domain-name from a string.

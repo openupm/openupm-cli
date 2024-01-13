@@ -19,9 +19,10 @@ export function assertIsError(x: unknown): asserts x is ErrnoException {
     });
 }
 
-export const isHttpError = (x: unknown): x is HttpErrorBase => {
+export function isHttpError(x: unknown): x is HttpErrorBase {
   return x instanceof Error && "statusCode" in x;
-};
+}
 
-export const is404Error = (err: HttpErrorBase): boolean =>
-  err.statusCode === 404 || err.message.includes("404");
+export function is404Error(err: HttpErrorBase): boolean {
+  return err.statusCode === 404 || err.message.includes("404");
+}

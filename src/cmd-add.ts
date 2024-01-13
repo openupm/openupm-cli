@@ -43,7 +43,7 @@ type AddResult = {
 /**
  * @throws Error An unhandled error occurred
  */
-export const add = async function (
+export async function add(
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
 ): Promise<AddResultCode> {
@@ -52,7 +52,7 @@ export const add = async function (
   const env = await parseEnv(options, true);
   if (env === null) return 1;
 
-  const addSingle = async function (pkg: PackageReference): Promise<AddResult> {
+  const addSingle = async (pkg: PackageReference): Promise<AddResult> => {
     // dirty flag
     let dirty = false;
     // is upstream package flag
@@ -241,4 +241,4 @@ export const add = async function (
   if (result.dirty)
     log.notice("", "please open Unity project to apply changes");
   return result.code;
-};
+}

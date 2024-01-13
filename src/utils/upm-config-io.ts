@@ -15,10 +15,10 @@ const configFileName = ".upmconfig.toml";
  * @param systemUser Whether to authenticate as a Windows system-user
  * @throws Error Could not determine upm config directory
  */
-export const getUpmConfigDir = async (
+export async function getUpmConfigDir(
   wsl: boolean,
   systemUser: boolean
-): Promise<string> => {
+): Promise<string> {
   let dirPath: string | undefined = "";
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (wsl) {
@@ -50,15 +50,15 @@ export const getUpmConfigDir = async (
   if (dirPath === undefined)
     throw new Error("Could not resolve upm-config dir-path");
   return dirPath;
-};
+}
 
 /**
  * Attempts to load the upm config
  * @param configDir The directory from which to load the config
  */
-export const loadUpmConfig = async (
+export async function loadUpmConfig(
   configDir: string
-): Promise<UPMConfig | undefined> => {
+): Promise<UPMConfig | undefined> {
   const configPath = path.join(configDir, configFileName);
   if (fs.existsSync(configPath)) {
     const content = fs.readFileSync(configPath, "utf8");
@@ -67,14 +67,14 @@ export const loadUpmConfig = async (
     // NOTE: We assume correct format
     return config as UPMConfig;
   }
-};
+}
 
 /**
  * Save the upm config
  * @param config The config to save
  * @param configDir The directory in which to save the config
  */
-export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
+export async function saveUpmConfig(config: UPMConfig, configDir: string) {
   try {
     mkdirp.sync(configDir);
   } catch {
@@ -84,4 +84,4 @@ export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
   const content = TOML.stringify(config);
   fs.writeFileSync(configPath, content, "utf8");
   log.notice("config", "saved unity config at " + configPath);
-};
+}

@@ -18,7 +18,7 @@ export type DepsOptions = CmdOptions<{
 /**
  * @throws Error An unhandled error occurred
  */
-export const deps = async function (
+export async function deps(
   pkg: PackageReference,
   options: DepsOptions
 ): Promise<DepsResultCode> {
@@ -53,4 +53,4 @@ export const deps = async function (
     });
 
   return 0;
-};
+}

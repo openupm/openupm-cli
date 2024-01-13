@@ -24,7 +24,7 @@ export type Env = {
  * Parse env
  * @throws Error An unhandled error occurred
  */
-export const parseEnv = async function (
+export async function parseEnv(
   options: CmdOptions,
   checkPath: boolean
 ): Promise<Env | null> {
@@ -125,4 +125,4 @@ export const parseEnv = async function (
   }
   // return
   return env;
-};
+}

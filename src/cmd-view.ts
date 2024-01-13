@@ -16,7 +16,7 @@ export type ViewOptions = CmdOptions;
 
 type ViewResultCode = 0 | 1;
 
-export const view = async function (
+export async function view(
   pkg: PackageReference,
   options: ViewOptions
 ): Promise<ViewResultCode> {
@@ -43,9 +43,9 @@ export const view = async function (
   // print info
   printInfo(packument);
   return 0;
-};
+}
 
-const printInfo = function (packument: UnityPackument) {
+function printInfo(packument: UnityPackument) {
   const versionCount = Object.keys(packument.versions).length;
   const ver = tryGetLatestVersion(packument);
   assert(ver !== undefined);
@@ -107,4 +107,4 @@ const printInfo = function (packument: UnityPackument) {
   for (const version in packument.versions) {
     console.log("  " + chalk.greenBright(version));
   }
-};
+}

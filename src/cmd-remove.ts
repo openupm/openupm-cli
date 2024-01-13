@@ -25,7 +25,7 @@ type RemoveResult = {
   dirty: boolean;
 };
 
-export const remove = async function (
+export async function remove(
   pkgs: PackageReference[] | PackageReference,
   options: RemoveOptions
 ): Promise<RemoveResultCode> {
@@ -34,9 +34,7 @@ export const remove = async function (
   const env = await parseEnv(options, true);
   if (env === null) return 1;
 
-  const removeSingle = async function (
-    pkg: PackageReference
-  ): Promise<RemoveResult> {
+  const removeSingle = async (pkg: PackageReference): Promise<RemoveResult> => {
     // dirty flag
     let dirty = false;
     // parse name
@@ -93,4 +91,4 @@ export const remove = async function (
   if (result.dirty)
     log.notice("", "please open Unity project to apply changes");
   return result.code;
-};
+}

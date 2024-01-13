@@ -11,10 +11,12 @@ export type ManifestCreationOptions = {
   manifest: boolean | UnityProjectManifest;
   editorVersion?: string;
 };
-export const getWorkDir = function (pathToTmp: string): string {
+
+export function getWorkDir(pathToTmp: string): string {
   return path.join(os.tmpdir(), pathToTmp);
-};
-export const createWorkDir = function (
+}
+
+export function createWorkDir(
   pathToTmp: string,
   { manifest, editorVersion }: ManifestCreationOptions
 ): string {
@@ -37,8 +39,9 @@ export const createWorkDir = function (
     );
   }
   return workDir;
-};
-export const removeWorkDir = function (pathToTmp: string) {
+}
+
+export function removeWorkDir(pathToTmp: string) {
   const cwd = getWorkDir(pathToTmp);
   fse.removeSync(cwd);
-};
+}

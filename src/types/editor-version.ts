@@ -35,25 +35,29 @@ export type EditorVersion = {
    */
   locBuild?: number;
 };
+
 /**
  * Compares two editor versions for ordering
  * @param verA The first version
  * @param verB The second version
  * @returns A number indicating the ordering
  */
-export const compareEditorVersion = function (
+export function compareEditorVersion(
   verA: EditorVersion,
   verB: EditorVersion
 ): -1 | 0 | 1 {
-  const editorVersionToArray = (ver: EditorVersion) => [
-    ver.major,
-    ver.minor,
-    ver.patch || 0,
-    ver.flagValue || 0,
-    ver.build || 0,
-    ver.locValue || 0,
-    ver.locBuild || 0,
-  ];
+  function editorVersionToArray(ver: EditorVersion) {
+    return [
+      ver.major,
+      ver.minor,
+      ver.patch || 0,
+      ver.flagValue || 0,
+      ver.build || 0,
+      ver.locValue || 0,
+      ver.locBuild || 0,
+    ];
+  }
+
   const arrA = editorVersionToArray(verA);
   const arrB = editorVersionToArray(verB);
   for (let i = 0; i < arrA.length; i++) {
@@ -63,7 +67,8 @@ export const compareEditorVersion = function (
     else if (valA < valB) return -1;
   }
   return 0;
-};
+}
+
 /**
  * Attempts to compare two unparsed editor versions for ordering
  * @param a The first version
@@ -71,7 +76,7 @@ export const compareEditorVersion = function (
  * @returns A number indicating the ordering or null if either version could
  * not be parsed
  */
-export const tryCompareEditorVersion = function (
+export function tryCompareEditorVersion(
   a: string,
   b: string
 ): -1 | 0 | 1 | null {
@@ -79,14 +84,12 @@ export const tryCompareEditorVersion = function (
   const verB = tryParseEditorVersion(b);
   if (verA === null || verB === null) return null;
   return compareEditorVersion(verA, verB);
-};
+}
 
 /**
  * Attempts to parse editor version string to groups
  */
-export const tryParseEditorVersion = function (
-  version: string
-): EditorVersion | null {
+export function tryParseEditorVersion(version: string): EditorVersion | null {
   type RegexMatchGroups = {
     major: `${number}`;
     minor: `${number}`;
@@ -120,4 +123,4 @@ export const tryParseEditorVersion = function (
     if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
   }
   return result;
-};
+}

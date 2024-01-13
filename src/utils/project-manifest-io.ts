@@ -12,7 +12,7 @@ import path from "path";
  * Attempts to load the manifest from the path specified in env
  * @param workingDirectory The working directory
  */
-export const loadProjectManifest = function (
+export function loadProjectManifest(
   workingDirectory: string
 ): UnityProjectManifest | null {
   const manifestPath = manifestPathFor(workingDirectory);
@@ -29,14 +29,14 @@ export const loadProjectManifest = function (
     }
     return null;
   }
-};
+}
 
 /**
  * Save manifest json file to the path specified in env
  * @param workingDirectory The working directory
  * @param data The manifest to save
  */
-export const saveProjectManifest = function (
+export function saveProjectManifest(
   workingDirectory: string,
   data: UnityProjectManifest
 ) {
@@ -52,4 +52,4 @@ export const saveProjectManifest = function (
     log.error("manifest", err.message);
     return false;
   }
-};
+}

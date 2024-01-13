@@ -86,22 +86,24 @@ function normalizeClientFunction<TParam, TData>(
   fn: (uri: string, params: TParam, cb: ClientCallback<TData>) => void
 ): (uri: string, params: TParam) => Promise<TData> {
   const bound = fn.bind(client);
-  const withNormalizedError = (
+
+  function withNormalizedError(
     uri: string,
     params: TParam,
     cb: (error: NpmClientError | null, data: TData) => void
-  ) => {
+  ) {
     return bound(uri, params, (error, data, raw, res) => {
       cb(error !== null ? new NpmClientError(error, res) : null, data);
     });
-  };
+  }
+
   return promisify(withNormalizedError);
 }
 
 /**
  * Return npm client
  */
-export const getNpmClient = (): NpmClient => {
+export function getNpmClient(): NpmClient {
   // create client
   const client = new RegClient({ log });
   return {
@@ -111,9 +113,10 @@ export const getNpmClient = (): NpmClient => {
     get: normalizeClientFunction(client, client.get),
     adduser: normalizeClientFunction(client, client.adduser),
   };
-};
+}
+
 // Fetch package info json from registry
-export const fetchPackument = async function (
+export async function fetchPackument(
   registry: Registry,
   name: DomainName
 ): Promise<UnityPackument | undefined> {
@@ -124,10 +127,10 @@ export const fetchPackument = async function (
   } catch (err) {
     /* empty */
   }
-};
+}
 
 // Fetch package dependencies
-export const fetchPackageDependencies = async function (
+export async function fetchPackageDependencies(
   registry: Registry,
   upstreamRegistry: Registry,
   name: DomainName,
@@ -258,4 +261,4 @@ export const fetchPackageDependencies = async function (
     }
   }
   return [depsValid, depsInvalid];
-};
+}

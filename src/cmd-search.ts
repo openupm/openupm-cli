@@ -32,7 +32,7 @@ export type OldSearchResult =
  * Get npm fetch options
  * @param registry The registry for which to get the options
  */
-const getNpmFetchOptions = function (registry: Registry): Options {
+function getNpmFetchOptions(registry: Registry): Options {
   const opts: Options = {
     log,
     registry: registry.url,
@@ -40,9 +40,9 @@ const getNpmFetchOptions = function (registry: Registry): Options {
   const auth = registry.auth;
   if (auth !== null) Object.assign(opts, auth);
   return opts;
-};
+}
 
-const searchEndpoint = async function (
+async function searchEndpoint(
   registry: Registry,
   keyword: string
 ): Promise<TableRow[] | undefined> {
@@ -59,9 +59,9 @@ const searchEndpoint = async function (
     }
     log.warn("", "fast search endpoint is not available, using old search.");
   }
-};
+}
 
-const searchOld = async function (
+async function searchOld(
   registry: Registry,
   keyword: string
 ): Promise<TableRow[] | undefined> {
@@ -97,16 +97,16 @@ const searchOld = async function (
     }
     log.warn("", "/-/all endpoint is not available");
   }
-};
+}
 
-const getTable = function () {
+function getTable() {
   return new Table({
     head: ["Name", "Version", "Date"],
     colWidths: [42, 20, 12],
   });
-};
+}
 
-const getTableRow = function (packument: SearchedPackument): TableRow {
+function getTableRow(packument: SearchedPackument): TableRow {
   const name = packument.name;
   const version = tryGetLatestVersion(packument);
   let date = "";
@@ -117,7 +117,7 @@ const getTableRow = function (packument: SearchedPackument): TableRow {
   }
   assert(version !== undefined);
   return [name, version, date, ""];
-};
+}
 
 export async function search(
   keyword: string,

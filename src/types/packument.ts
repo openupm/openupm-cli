@@ -72,22 +72,22 @@ export type UnityPackument = {
   users?: Record<string, unknown>;
 };
 
-const hasLatestDistTag = (
+function hasLatestDistTag(
   packument: Partial<UnityPackument>
 ): packument is Partial<UnityPackument> & {
   "dist-tags": { latest: SemanticVersion };
-} => {
+} {
   return packument["dist-tags"]?.["latest"] !== undefined;
-};
+}
 
 /**
  * Attempt to get the latest version from a package
  * @param packument The package. All properties are assumed to be potentially missing
  */
-export const tryGetLatestVersion = function (packument: {
+export function tryGetLatestVersion(packument: {
   "dist-tags"?: { latest?: SemanticVersion };
   version?: SemanticVersion;
 }): SemanticVersion | undefined {
   if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
   else if (packument.version) return packument.version;
-};
+}

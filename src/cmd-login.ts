@@ -33,9 +33,7 @@ type LoginResultCode = 0 | 1;
 /**
  * @throws Error An unhandled error occurred
  */
-export const login = async function (
-  options: LoginOptions
-): Promise<LoginResultCode> {
+export async function login(options: LoginOptions): Promise<LoginResultCode> {
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
@@ -81,12 +79,12 @@ export const login = async function (
   );
 
   return 0;
-};
+}
 
 /**
  * Return npm login token
  */
-const npmLogin = async function (
+async function npmLogin(
   username: string,
   password: string,
   email: string,
@@ -119,13 +117,13 @@ const npmLogin = async function (
       return { code: 1 };
     }
   }
-};
+}
 
 /**
  * Write npm token to .npmrc
  * @throws Error An unhandled error occurred
  */
-const writeNpmToken = async function (registry: RegistryUrl, token: string) {
+async function writeNpmToken(registry: RegistryUrl, token: string) {
   const configPath = getNpmrcPath();
   // read config
   let content = "";
@@ -137,19 +135,19 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   const newContent = lines.join("\n") + "\n";
   fs.writeFileSync(configPath, newContent);
   log.notice("config", `saved to npm config: ${configPath}`);
-};
+}
 
 /**
  * Return .npmrc config file path
  * @throws Error Home-path could not be determined
  */
-export const getNpmrcPath = function () {
+export function getNpmrcPath() {
   const dirPath = process.env.USERPROFILE
     ? process.env.USERPROFILE
     : process.env.HOME;
   if (dirPath === undefined) throw new Error("Could not determine home path");
   return path.join(dirPath, ".npmrc");
-};
+}
 
 /**
  * Generate .npmrc file content lines
@@ -157,7 +155,7 @@ export const getNpmrcPath = function () {
  * @param {*} registry
  * @param {*} token
  */
-export const generateNpmrcLines = function (
+export function generateNpmrcLines(
   content: string,
   registry: RegistryUrl,
   token: string
@@ -186,13 +184,13 @@ export const generateNpmrcLines = function (
   // Remove empty lines
   lines = lines.filter((l) => l);
   return lines;
-};
+}
 
 /**
  * Write npm token to Unity
  * @throws Error The specified authentication information was missing
  */
-const writeUnityToken = async function (
+async function writeUnityToken(
   configDir: string,
   _auth: Base64 | null,
   alwaysAuth: boolean,
@@ -222,4 +220,4 @@ const writeUnityToken = async function (
   }
   // Write config file
   await saveUpmConfig(config, configDir);
-};
+}
