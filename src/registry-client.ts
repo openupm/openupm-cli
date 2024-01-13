@@ -117,13 +117,14 @@ export const getNpmClient = (): NpmClient => {
  * Fetch package info json from registry
  * @param registry The registry from which to get the packument
  * @param name The name of the packument
+ * @param client The client to use for fetching
  */
 export const fetchPackument = async function (
   registry: Registry,
-  name: DomainName
+  name: DomainName,
+  client: NpmClient
 ): Promise<UnityPackument | undefined> {
   const pkgPath = `${registry.url}/${name}`;
-  const client = getNpmClient();
   try {
     return await client.get(pkgPath, { auth: registry.auth || undefined });
   } catch (err) {
@@ -143,6 +144,7 @@ export const fetchPackageDependencies = async function (
     "dependency",
     `fetch: ${packageReference(name, version)} deep=${deep}`
   );
+  const client = getNpmClient();
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
   // a list of processed dependency {name, version}
@@ -189,7 +191,8 @@ export const fetchPackageDependencies = async function (
         }
         // try fetching package info from the default registry
         if (packument === null) {
-          packument = (await fetchPackument(registry, entry.name)) ?? null;
+          packument =
+            (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
             cachedPackageInfoDict[entry.name] = {
@@ -201,7 +204,8 @@ export const fetchPackageDependencies = async function (
         // try fetching package info from the upstream registry
         if (!packument) {
           packument =
-            (await fetchPackument(upstreamRegistry, entry.name)) ?? null;
+            (await fetchPackument(upstreamRegistry, entry.name, client)) ??
+            null;
           if (packument) {
             depObj.upstream = true;
             cachedPackageInfoDict[entry.name] = {
