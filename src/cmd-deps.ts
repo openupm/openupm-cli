@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies } from "./registry-client";
+import { Dependency, fetchPackageDependencies } from "./registry-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -14,6 +14,12 @@ type DepsResultCode = 0 | 1;
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
+
+function errorPrefixForError(errorReason: Dependency["reason"]): string {
+  if (errorReason === "package404") return "missing dependency";
+  else if (errorReason === "version404") return "missing dependency version";
+  return "unknown";
+}
 
 /**
  * @throws Error An unhandled error occurred
@@ -46,10 +52,8 @@ export const deps = async function (
   depsInvalid
     .filter((x) => !x.self)
     .forEach((x) => {
-      let reason = "unknown";
-      if (x.reason == "package404") reason = "missing dependency";
-      else if (x.reason == "version404") reason = "missing dependency version";
-      log.warn(reason, packageReference(x.name, x.version));
+      const prefix = errorPrefixForError(x.reason);
+      log.warn(prefix, packageReference(x.name, x.version));
     });
 
   return 0;
