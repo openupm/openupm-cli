@@ -57,6 +57,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jsdoc": "^47.0.2",
     "mocha": "^10.1.0",
     "nock": "^13.2.4",
     "prettier": "^2.8.8",
