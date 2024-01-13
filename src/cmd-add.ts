@@ -156,7 +156,8 @@ export const add = async function (
           env.upstreamRegistry,
           name,
           version,
-          true
+          true,
+          client
         );
         // add depsValid to pkgsInScope.
         depsValid

@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies } from "./registry-client";
+import { fetchPackageDependencies, getNpmClient } from "./registry-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -26,6 +26,8 @@ export const deps = async function (
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
+  const client = getNpmClient();
+
   const [name, version] = splitPackageReference(pkg);
 
   if (version !== undefined && isPackageUrl(version))
@@ -36,7 +38,8 @@ export const deps = async function (
     env.upstreamRegistry,
     name,
     version,
-    options.deep || false
+    options.deep || false,
+    client
   );
   depsValid
     .filter((x) => !x.self)

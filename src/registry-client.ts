@@ -139,19 +139,20 @@ export const fetchPackument = async function (
  * @param name The name of the package
  * @param version The version for which to search dependencies
  * @param deep Whether to search for all dependencies
+ * @param client The client to use for communicating with the registries
  */
 export const fetchPackageDependencies = async function (
   registry: Registry,
   upstreamRegistry: Registry,
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
-  deep: boolean
+  deep: boolean,
+  client: NpmClient
 ): Promise<[Dependency[], Dependency[]]> {
   log.verbose(
     "dependency",
     `fetch: ${packageReference(name, version)} deep=${deep}`
   );
-  const client = getNpmClient();
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
   // a list of processed dependency {name, version}
