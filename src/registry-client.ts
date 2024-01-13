@@ -134,6 +134,11 @@ export const fetchPackument = async function (
 
 /**
  * Fetch package dependencies
+ * @param registry The registry in which to search the dependencies
+ * @param upstreamRegistry The upstream registry in which to search as a backup
+ * @param name The name of the package
+ * @param version The version for which to search dependencies
+ * @param deep Whether to search for all dependencies
  */
 export const fetchPackageDependencies = async function (
   registry: Registry,
