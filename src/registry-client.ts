@@ -132,7 +132,9 @@ export const fetchPackument = async function (
   }
 };
 
-// Fetch package dependencies
+/**
+ * Fetch package dependencies
+ */
 export const fetchPackageDependencies = async function (
   registry: Registry,
   upstreamRegistry: Registry,
