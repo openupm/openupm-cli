@@ -9,13 +9,13 @@ import fse from "fs-extra";
 import path from "path";
 
 /**
- * Attempts to load the manifest from the path specified in env.
- * @param workingDirectory The working directory.
+ * Attempts to load the manifest for a Unity project.
+ * @param projectPath The path to the root of the project.
  */
 export const loadProjectManifest = function (
-  workingDirectory: string
+  projectPath: string
 ): UnityProjectManifest | null {
-  const manifestPath = manifestPathFor(workingDirectory);
+  const manifestPath = manifestPathFor(projectPath);
   try {
     const text = fs.readFileSync(manifestPath, { encoding: "utf8" });
     return JSON.parse(text);
@@ -32,15 +32,15 @@ export const loadProjectManifest = function (
 };
 
 /**
- * Save manifest json file to the path specified in env.
- * @param workingDirectory The working directory.
+ * Saves a Unity project manifest.
+ * @param projectPath The path to the projects root directory.
  * @param data The manifest to save.
  */
 export const saveProjectManifest = function (
-  workingDirectory: string,
+  projectPath: string,
   data: UnityProjectManifest
 ) {
-  const manifestPath = manifestPathFor(workingDirectory);
+  const manifestPath = manifestPathFor(projectPath);
   const json = JSON.stringify(data, null, 2);
   try {
     fse.ensureDirSync(path.dirname(manifestPath));

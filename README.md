@@ -4,7 +4,7 @@
 
 ![npm](https://img.shields.io/npm/v/openupm-cli) ![NPM](https://img.shields.io/npm/l/openupm-cli) ![npm](https://img.shields.io/npm/dm/openupm-cli)
 
-The command-line tool to maintain the Unity manifest file for 3rd-party upm registries, offering a similar but lighter experience like *npm* or *yarn* for NodeJS.
+The command-line tool to maintain the Unity manifest file for 3rd-party upm registries, offering a similar but lighter experience like *npm* or *yarn* for Node.js.
 
 The tool is designed to work with [the OpenUPM registry](https://openupm.com), but can also work with any upm registries, including the official Unity registry.
 
@@ -75,7 +75,7 @@ internal/modules/cjs/loader.js:818
 Error: Cannot find module 'node:net'
 ```
 
-Please install [nodejs 16 or above](https://nodejs.org/en/download/).
+Please install [Node.js 16 or above](https://nodejs.org/en/download/).
 
 ## China region
 
@@ -152,9 +152,9 @@ open deps <pkg> --deep
 
 ### Authenticate with a scoped registry
 
-Starting from Unity 2019.3.4f1, you can configure the`.upmconfig.toml` file to authenticate with a scoped registry. The `openupm login` command helps you authenticate with an npm server and store the info to the UPM config file.
+Starting from Unity 2019.3.4f1, you can configure the`.upmconfig.toml` file to authenticate with a scoped registry. The `openupm login` command helps you authenticate with a npm server and store the info to the UPM config file.
 
-There are two ways to authenticate with an npm server:
+There are two ways to authenticate with a npm server:
 - using token (recommended): a server-generated string for the grant of access and publishing rights.
 - using basic authentication: the `username:password` pair (base64 encoded) is stored to authenticate with the server on each request.
 
@@ -266,7 +266,7 @@ openupm --verbose ...
 
 ## Work with Unity official (upstream) registry
 
-Most commands can fallback to Unity upstream registry if necessary, to make it easier to mix the official registry with a 3rd-party registry. i.e.
+Most commands can fall back to Unity upstream registry if necessary, to make it easier to mix the official registry with a 3rd-party registry. i.e.
 
 ```
 $ openupm add com.unity.addressables com.littlebigfun.addressable-importer
@@ -299,7 +299,9 @@ You may need to set both http_proxy and https_proxy environment variables at the
 <table>
   <tbody>
     <tr>
+      <!--suppress HtmlDeprecatedAttribute -->
       <td align="center" valign="top" width="14.28%"><a href="http://littlebigfun.com"><img src="https://avatars.githubusercontent.com/u/125390?v=4?s=100" width="100px;" alt="Favo Yang"/><br /><sub><b>Favo Yang</b></sub></a><br /><a href="https://github.com/openupm/openupm-cli/commits?author=favoyang" title="Code">💻</a> <a href="#maintenance-favoyang" title="Maintenance">🚧</a></td>
+      <!--suppress HtmlDeprecatedAttribute -->
       <td align="center" valign="top" width="14.28%"><a href="https://comradevanti.itch.io"><img src="https://avatars.githubusercontent.com/u/31240807?v=4?s=100" width="100px;" alt="Ramon Brullo"/><br /><sub><b>Ramon Brullo</b></sub></a><br /><a href="https://github.com/openupm/openupm-cli/commits?author=ComradeVanti" title="Code">💻</a></td>
     </tr>
   </tbody>

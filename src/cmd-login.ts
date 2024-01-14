@@ -84,14 +84,19 @@ export const login = async function (
 };
 
 /**
- * Return npm login token.
+ * The result of a login attempt. Either success with the token, or failure.
+ */
+type LoginResult = { code: 0; token: string } | { code: 1 };
+
+/**
+ * Return npm login token
  */
 const npmLogin = async function (
   username: string,
   password: string,
   email: string,
   registry: RegistryUrl
-) {
+): Promise<LoginResult> {
   const client = getNpmClient();
   try {
     const data = await client.adduser(registry, {

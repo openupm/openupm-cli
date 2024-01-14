@@ -1,6 +1,5 @@
 import { describe } from "mocha";
 import {
-  compareEditorVersion,
   tryCompareEditorVersion,
   tryParseEditorVersion,
 } from "../src/types/editor-version";

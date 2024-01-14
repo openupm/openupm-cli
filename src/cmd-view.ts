@@ -3,7 +3,7 @@ import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
-import { fetchPackument } from "./registry-client";
+import { fetchPackument, getNpmClient } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import {
   packageReference,
@@ -23,6 +23,8 @@ export const view = async function (
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
+  const client = getNpmClient();
+
   // parse name
   const [name, version] = splitPackageReference(pkg);
   if (version) {
@@ -33,9 +35,9 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let packument = await fetchPackument(env.registry, name);
+  let packument = await fetchPackument(env.registry, name, client);
   if (!packument && env.upstream)
-    packument = await fetchPackument(env.upstreamRegistry, name);
+    packument = await fetchPackument(env.upstreamRegistry, name, client);
   if (!packument) {
     log.error("404", `package not found: ${name}`);
     return 1;

@@ -19,7 +19,7 @@ export default function execute(
   return new Promise(function (resolve, reject) {
     /**
      * @param {Error} error An error triggered during the execution of the
-     * childProcess.exec command.
+     * "childProcess.exec" command.
      * @param {string|Buffer} stdout The result of the shell command execution.
      * @param {string|Buffer} stderr The error resulting of the shell command
      * execution.
