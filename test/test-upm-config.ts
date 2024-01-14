@@ -4,8 +4,8 @@ import {
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
-  tryGetAuthForRegistry,
   tryDecodeBasicAuth,
+  tryGetAuthForRegistry,
   UpmAuth,
   UPMConfig,
 } from "../src/types/upm-config";
