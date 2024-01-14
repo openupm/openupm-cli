@@ -5,8 +5,8 @@ import { saveProjectManifest } from "../src/utils/project-manifest-io";
 import { describe } from "mocha";
 import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import {
-  shouldHaveProjectManifest,
   shouldHaveNoProjectManifest,
+  shouldHaveProjectManifest,
   shouldNotHaveAnyDependencies,
 } from "./project-manifest-assertions";
 import { domainName } from "../src/types/domain-name";
