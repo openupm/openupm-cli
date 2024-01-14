@@ -120,7 +120,20 @@ export const parseEnv = async function (
     );
   } else {
     const projectVersionData = fs.readFileSync(projectVersionPath, "utf8");
-    const projectVersionContent = yaml.parse(projectVersionData);
+    const projectVersionContent = yaml.parse(projectVersionData) as unknown;
+
+    if (
+      !(
+        typeof projectVersionContent === "object" &&
+        projectVersionContent !== null &&
+        "m_EditorVersion" in projectVersionContent &&
+        typeof projectVersionContent.m_EditorVersion === "string"
+      )
+    )
+      throw new Error(
+        "ProjectVersion.txt could not be parsed for editor-version!"
+      );
+
     env.editorVersion = projectVersionContent.m_EditorVersion;
   }
   // return
