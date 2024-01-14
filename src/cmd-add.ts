@@ -11,7 +11,11 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import { fetchPackageDependencies, fetchPackument } from "./registry-client";
+import {
+  fetchPackageDependencies,
+  fetchPackument,
+  getNpmClient,
+} from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import {
@@ -52,6 +56,8 @@ export const add = async function (
   const env = await parseEnv(options, true);
   if (env === null) return 1;
 
+  const client = getNpmClient();
+
   const addSingle = async function (pkg: PackageReference): Promise<AddResult> {
     // dirty flag
     let dirty = false;
@@ -69,9 +75,9 @@ export const add = async function (
     const pkgsInScope: DomainName[] = [];
     if (version === undefined || !isPackageUrl(version)) {
       // verify name
-      let packument = await fetchPackument(env.registry, name);
+      let packument = await fetchPackument(env.registry, name, client);
       if (!packument && env.upstream) {
-        packument = await fetchPackument(env.upstreamRegistry, name);
+        packument = await fetchPackument(env.upstreamRegistry, name, client);
         if (packument) isUpstreamPackage = true;
       }
       if (!packument) {
@@ -150,7 +156,8 @@ export const add = async function (
           env.upstreamRegistry,
           name,
           version,
-          true
+          true,
+          client
         );
         // add depsValid to pkgsInScope.
         depsValid
