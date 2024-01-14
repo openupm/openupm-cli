@@ -153,9 +153,6 @@ export const getNpmrcPath = function () {
 
 /**
  * Generate .npmrc file content lines
- * @param {*} content
- * @param {*} registry
- * @param {*} token
  */
 export const generateNpmrcLines = function (
   content: string,
