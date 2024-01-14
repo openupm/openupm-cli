@@ -15,11 +15,11 @@ type SearchResultCode = 0 | 1;
 
 export type SearchOptions = CmdOptions;
 
-export type SearchedPackument = Omit<UnityPackument, "versions"> & {
+type SearchedPackument = Omit<UnityPackument, "versions"> & {
   versions: Record<SemanticVersion, "latest">;
 };
 
-export type OldSearchResult =
+type OldSearchResult =
   | SearchedPackument[]
   | Record<DomainName, SearchedPackument>;
 
