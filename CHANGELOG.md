@@ -315,7 +315,7 @@
 
 ### Features
 
-* command install as an alias of command add ([b0a30f3](https://github.com/openupm/openupm-cli/commit/b0a30f3cdff6249712f532f376d5980354b9e94a))
+* command "install" as an alias of command add ([b0a30f3](https://github.com/openupm/openupm-cli/commit/b0a30f3cdff6249712f532f376d5980354b9e94a))
 
 # [1.2.0](https://github.com/openupm/openupm-cli/compare/1.1.1...1.2.0) (2020-01-05)
 
