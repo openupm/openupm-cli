@@ -13,6 +13,7 @@ export type MockEnvSession = {
  * is unhooked
  * @param env The replacement env
  * @returns A session object that can be used to unhook the replacement env
+ * @throws Error if a mock-env session is already in progress
  */
 export function mockEnv(env: object): MockEnvSession {
   const originalEnv = process.env;
