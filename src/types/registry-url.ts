@@ -19,7 +19,7 @@ export function isRegistryUrl(s: string): s is RegistryUrl {
 /**
  * Constructs a registry-url.
  * @param s The string.
- * @throws assert.AssertionError if string does not have valid format.
+ * @throws {assert.AssertionError} If string does not have valid format.
  */
 export function registryUrl(s: string): RegistryUrl {
   assert(isRegistryUrl(s), `"${s}" is url`);
@@ -31,7 +31,7 @@ export function registryUrl(s: string): RegistryUrl {
  * - Prepending http if it is missing.
  * - Removing trailing slashes.
  * @param s The string.
- * @throws assert.AssertionError if string does not have valid format.
+ * @throws {assert.AssertionError} If string does not have valid format.
  */
 export function coerceRegistryUrl(s: string): RegistryUrl {
   if (!s.toLowerCase().startsWith("http")) s = "http://" + s;

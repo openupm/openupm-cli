@@ -9,7 +9,7 @@ import { AssertionError } from "assert";
 import ErrnoException = NodeJS.ErrnoException;
 
 /**
- * @throws AssertionError The given parameter is not an error.
+ * @throws {AssertionError} The given parameter is not an error.
  */
 export function assertIsError(x: unknown): asserts x is ErrnoException {
   if (!(x instanceof Error))

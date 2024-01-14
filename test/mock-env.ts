@@ -13,7 +13,7 @@ export type MockEnvSession = {
  * is unhooked.
  * @param env The replacement env.
  * @returns A session object that can be used to unhook the replacement env.
- * @throws Error if a mock-env session is already in progress.
+ * @throws {Error} If a mock-env session is already in progress.
  */
 export function mockEnv(env: object): MockEnvSession {
   const originalEnv = process.env;
@@ -32,10 +32,10 @@ export function mockEnv(env: object): MockEnvSession {
 /**
  * Runs the given function while setting {@link process.env} to the given
  * replacement object. Resets env back to original afterward.
- * @throws unknown Any errors the original function may throw. Env is cleaned
  * @param env The replacement env.
  * @param func The function to execute.
  * @returns The result of the function.
+ * @throws {unknown} Any errors the original function may throw. Env is cleaned
  * up even if an error was thrown.
  */
 export function runWithEnv<T>(env: object, func: () => T): T {

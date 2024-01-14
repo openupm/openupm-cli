@@ -22,7 +22,7 @@ export type Env = {
 
 /**
  * Parse env.
- * @throws Error An unhandled error occurred.
+ * @throws {Error} An unhandled error occurred.
  */
 export const parseEnv = async function (
   options: CmdOptions,

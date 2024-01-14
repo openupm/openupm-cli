@@ -16,7 +16,7 @@ export type DepsOptions = CmdOptions<{
 }>;
 
 /**
- * @throws Error An unhandled error occurred.
+ * @throws {Error} An unhandled error occurred.
  */
 export const deps = async function (
   pkg: PackageReference,

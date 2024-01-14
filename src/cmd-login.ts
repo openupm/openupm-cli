@@ -31,7 +31,7 @@ export type LoginOptions = CmdOptions<{
 type LoginResultCode = 0 | 1;
 
 /**
- * @throws Error An unhandled error occurred.
+ * @throws {Error} An unhandled error occurred.
  */
 export const login = async function (
   options: LoginOptions
@@ -123,7 +123,7 @@ const npmLogin = async function (
 
 /**
  * Write npm token to .npmrc.
- * @throws Error An unhandled error occurred.
+ * @throws {Error} An unhandled error occurred.
  */
 const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   const configPath = getNpmrcPath();
@@ -141,7 +141,7 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
 
 /**
  * Return .npmrc config file path.
- * @throws Error Home-path could not be determined.
+ * @throws {Error} Home-path could not be determined.
  */
 export const getNpmrcPath = function () {
   const dirPath = process.env.USERPROFILE
@@ -187,7 +187,7 @@ export const generateNpmrcLines = function (
 
 /**
  * Write npm token to Unity.
- * @throws Error The specified authentication information was missing.
+ * @throws {Error} The specified authentication information was missing.
  */
 const writeUnityToken = async function (
   configDir: string,
