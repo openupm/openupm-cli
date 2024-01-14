@@ -2,7 +2,7 @@ import childProcess from "child_process";
 
 /**
  * @param command A shell command to execute
- * @return A promise that resolve to the output of the shell command, or an error
+ * @returns A promise that resolve to the output of the shell command, or an error
  * @example const output = await execute("ls -alh");
  */
 export default function execute(
