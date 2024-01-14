@@ -16,6 +16,7 @@ module.exports = {
     "jsdoc/require-jsdoc": 0,
     "jsdoc/require-param": 0,
     "jsdoc/require-throws": 1,
+    "jsdoc/require-description-complete-sentence": 1,
     "jsdoc/check-param-names": [1, { checkDestructured: false }],
   },
   parser: "@typescript-eslint/parser",

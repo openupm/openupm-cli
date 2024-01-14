@@ -49,8 +49,8 @@ const program = createCommand()
 
 /**
  * Creates a CmdOptions object by adding global options to the given
- * specific options
- * @param specificOptions The specific options
+ * specific options.
+ * @param specificOptions The specific options.
  */
 function makeCmdOptions<T extends Record<string, unknown>>(
   specificOptions: T

@@ -8,8 +8,8 @@ export function trySplitAtFirstOccurrenceOf(
 }
 
 /**
- * Removes trailing slash from a string
- * @param s The string
+ * Removes trailing slash from a string.
+ * @param s The string.
  */
 export function removeTrailingSlash<T extends string>(s: T): T {
   if (s.endsWith("/")) return s.slice(0, -1) as T;

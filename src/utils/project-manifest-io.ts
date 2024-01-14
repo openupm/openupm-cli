@@ -9,8 +9,8 @@ import fse from "fs-extra";
 import path from "path";
 
 /**
- * Attempts to load the manifest from the path specified in env
- * @param workingDirectory The working directory
+ * Attempts to load the manifest from the path specified in env.
+ * @param workingDirectory The working directory.
  */
 export const loadProjectManifest = function (
   workingDirectory: string
@@ -32,9 +32,9 @@ export const loadProjectManifest = function (
 };
 
 /**
- * Save manifest json file to the path specified in env
- * @param workingDirectory The working directory
- * @param data The manifest to save
+ * Save manifest json file to the path specified in env.
+ * @param workingDirectory The working directory.
+ * @param data The manifest to save.
  */
 export const saveProjectManifest = function (
   workingDirectory: string,

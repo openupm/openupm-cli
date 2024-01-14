@@ -29,8 +29,8 @@ export type OldSearchResult =
   | Record<DomainName, SearchedPackument>;
 
 /**
- * Get npm fetch options
- * @param registry The registry for which to get the options
+ * Get npm fetch options.
+ * @param registry The registry for which to get the options.
  */
 const getNpmFetchOptions = function (registry: Registry): Options {
   const opts: Options = {

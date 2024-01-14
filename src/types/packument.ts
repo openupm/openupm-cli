@@ -11,7 +11,7 @@ import { Dist, Maintainer } from "@npm/types";
  */
 export type UnityPackumentVersion = UnityPackageManifest & {
   /**
-   * Same as {@link name}
+   * Same as {@link name}.
    */
   _id?: PackageId;
   _nodeVersion?: string;
@@ -26,42 +26,43 @@ export type UnityPackumentVersion = UnityPackageManifest & {
 };
 
 /**
- * Describes a package
+ * Describes a package.
  */
 export type UnityPackument = {
   /**
-   * The packages name
+   * The packages name.
    */
   name: DomainName;
   /**
-   * Same as {@link name}
+   * Same as {@link name}.
    */
   _id?: DomainName;
   _rev?: string;
   _attachments?: Record<string, unknown>;
   readme?: string;
   /**
-   * The packages versions, organized by their version
+   * The packages versions, organized by their version.
    */
   versions: Record<SemanticVersion, UnityPackumentVersion>;
   /**
-   * Dist-tags. Only includes information about the latest version
+   * Dist-tags. Only includes information about the latest version.
    */
   "dist-tags"?: { latest?: SemanticVersion };
   /**
-   * May contain the latest version. Legacy property, use {@link dist-tags} instead
+   * May contain the latest version. Legacy property, use {@link dist-tags} 
+   * instead.
    */
   version?: SemanticVersion;
   /**
-   * Short description for the package
+   * Short description for the package.
    */
   description?: string;
   /**
-   * Package keywords
+   * Package keywords.
    */
   keywords?: string[];
   /**
-   * Information about package and version creation/modification times
+   * Information about package and version creation/modification times.
    */
   time: {
     [key: SemanticVersion]: string;
@@ -81,8 +82,9 @@ const hasLatestDistTag = (
 };
 
 /**
- * Attempt to get the latest version from a package
- * @param packument The package. All properties are assumed to be potentially missing
+ * Attempt to get the latest version from a package.
+ * @param packument The package. All properties are assumed to be potentially 
+ * missing.
  */
 export const tryGetLatestVersion = function (packument: {
   "dist-tags"?: { latest?: SemanticVersion };

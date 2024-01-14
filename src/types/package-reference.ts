@@ -6,7 +6,7 @@ import assert from "assert";
 
 /**
  * A string with the format of one of the supported version tags.
- * NOTE: Currently we only support "latest"
+ * NOTE: Currently we only support "latest".
  */
 type PackageTag = "latest";
 
@@ -19,21 +19,21 @@ export type VersionReference = SemanticVersion | PackageUrl | PackageTag;
 /**
  * References a package. Could be just the name or a reference to a specific
  * version. Not as specific as a {@link PackageId} as other version-formats
- * besides semantic versions, such as "latest" are also allowed
+ * besides semantic versions, such as "latest" are also allowed.
  */
 export type PackageReference = DomainName | `${DomainName}@${VersionReference}`;
 
 /**
- * Checks if a string is a version-reference
- * @param s The string
+ * Checks if a string is a version-reference.
+ * @param s The string.
  */
 function isVersionReference(s: string): s is VersionReference {
   return s === "latest" || isSemanticVersion(s) || isPackageUrl(s);
 }
 
 /**
- * Checks if a string is a package-reference
- * @param s The string
+ * Checks if a string is a package-reference.
+ * @param s The string.
  */
 export function isPackageReference(s: string): s is PackageReference {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
@@ -44,7 +44,7 @@ export function isPackageReference(s: string): s is PackageReference {
 
 /**
  * Split a package-reference into the name and version if present.
- * @param reference The reference
+ * @param reference The reference.
  */
 export function splitPackageReference(
   reference: PackageReference
@@ -56,9 +56,10 @@ export function splitPackageReference(
 }
 
 /**
- * Constructs a package-reference
- * @param name The package-name. Will be validated to be a {@link DomainName}
- * @param version Optional version-reference. Will be validated to be a {@link VersionReference}
+ * Constructs a package-reference.
+ * @param name The package-name. Will be validated to be a {@link DomainName}.
+ * @param version Optional version-reference. Will be validated to be a 
+ * {@link VersionReference}.
  */
 export function packageReference(
   name: string,

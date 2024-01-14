@@ -10,10 +10,10 @@ import { UPMConfig } from "../types/upm-config";
 const configFileName = ".upmconfig.toml";
 
 /**
- * Gets the path to directory in which the upm config is stored
- * @param wsl Whether WSL should be treated as Windows
- * @param systemUser Whether to authenticate as a Windows system-user
- * @throws Error Could not determine upm config directory
+ * Gets the path to directory in which the upm config is stored.
+ * @param wsl Whether WSL should be treated as Windows.
+ * @param systemUser Whether to authenticate as a Windows system-user.
+ * @throws Error Could not determine upm config directory.
  */
 export const getUpmConfigDir = async (
   wsl: boolean,
@@ -53,8 +53,8 @@ export const getUpmConfigDir = async (
 };
 
 /**
- * Attempts to load the upm config
- * @param configDir The directory from which to load the config
+ * Attempts to load the upm config.
+ * @param configDir The directory from which to load the config.
  */
 export const loadUpmConfig = async (
   configDir: string
@@ -70,9 +70,9 @@ export const loadUpmConfig = async (
 };
 
 /**
- * Save the upm config
- * @param config The config to save
- * @param configDir The directory in which to save the config
+ * Save the upm config.
+ * @param config The config to save.
+ * @param configDir The directory in which to save the config.
  */
 export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
   try {
