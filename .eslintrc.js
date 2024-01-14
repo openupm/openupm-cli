@@ -11,6 +11,7 @@ module.exports = {
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+    "jsdoc/require-throws": 1,
   },
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint", "jsdoc"],
