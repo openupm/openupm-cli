@@ -22,7 +22,7 @@ function errorPrefixForError(errorReason: Dependency["reason"]): string {
 }
 
 /**
- * @throws Error An unhandled error occurred
+ * @throws {Error} An unhandled error occurred.
  */
 export const deps = async function (
   pkg: PackageReference,

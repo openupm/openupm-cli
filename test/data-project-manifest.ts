@@ -11,7 +11,7 @@ import {
 } from "../src/types/project-manifest";
 
 /**
- * Builder class for {@link UnityProjectManifest}
+ * Builder class for {@link UnityProjectManifest}.
  */
 class UnityProjectManifestBuilder {
   readonly manifest: UnityProjectManifest;
@@ -21,8 +21,8 @@ class UnityProjectManifestBuilder {
   }
 
   /**
-   * Add a scope to the manifests scoped registry
-   * @param name The name of the scope
+   * Add a scope to the manifests scoped registry.
+   * @param name The name of the scope.
    */
   addScope(name: string): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
@@ -39,8 +39,8 @@ class UnityProjectManifestBuilder {
   }
 
   /**
-   * Add a testable to the manifest
-   * @param name The packages name
+   * Add a testable to the manifest.
+   * @param name The packages name.
    */
   addTestable(name: string): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
@@ -49,11 +49,11 @@ class UnityProjectManifestBuilder {
   }
 
   /**
-   * Add a dependency to the manifests scoped registry
-   * @param name The packages name
-   * @param version The packages version
-   * @param withScope Whether to also add the package to the scope
-   * @param testable Whether to also add the package to the testables
+   * Add a dependency to the manifests scoped registry.
+   * @param name The packages name.
+   * @param version The packages version.
+   * @param withScope Whether to also add the package to the scope.
+   * @param testable Whether to also add the package to the testables.
    */
   addDependency(
     name: string,
@@ -72,7 +72,7 @@ class UnityProjectManifestBuilder {
 
 /**
  * Builder function for {@link UnityProjectManifest}. All dependencies will be put
- * into a default scoped-registry referencing an example registry
+ * into a default scoped-registry referencing an example registry.
  * @param build A builder function.
  */
 export function buildProjectManifest(

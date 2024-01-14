@@ -1,37 +1,37 @@
 /**
- * Options which are shared between commands
+ * Options which are shared between commands.
  */
 type GlobalOptions = {
   /**
-   * Override package registry to use
+   * Override package registry to use.
    */
   registry?: string;
   /**
-   * Whether to print logs
+   * Whether to print logs.
    */
   verbose?: boolean;
   /**
-   * Whether to use color in the console
+   * Whether to use color in the console.
    */
   color?: boolean;
   /**
-   * Whether to fall back to the Unity registry
+   * Whether to fall back to the Unity registry.
    */
   upstream?: boolean;
   /**
-   * Whether to run commands for the chinese locale
+   * Whether to run commands for the chinese locale.
    */
   cn?: boolean;
   /**
-   * Whether to authenticate as a Windows system-user
+   * Whether to authenticate as a Windows system-user.
    */
   systemUser?: boolean;
   /**
-   * Whether WSL should be treated as Windows
+   * Whether WSL should be treated as Windows.
    */
   wsl?: boolean;
   /**
-   * Override working directory
+   * Override working directory.
    */
   chdir?: string;
 };

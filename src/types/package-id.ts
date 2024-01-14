@@ -10,8 +10,8 @@ import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 export type PackageId = `${DomainName}@${SemanticVersion}`;
 
 /**
- * Checks if a string is a package-id
- * @param s The string
+ * Checks if a string is a package-id.
+ * @param s The string.
  */
 export function isPackageId(s: string): s is PackageId {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
@@ -21,9 +21,9 @@ export function isPackageId(s: string): s is PackageId {
 }
 
 /**
- * Constructs a package-id
- * @param name The package name
- * @param version The version
+ * Constructs a package-id.
+ * @param name The package name.
+ * @param version The version.
  */
 export function packageId(
   name: DomainName,

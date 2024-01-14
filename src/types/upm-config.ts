@@ -5,84 +5,84 @@ import log from "../logger";
 import { NpmAuth } from "another-npm-registry-client";
 
 /**
- * Authentication information that is shared between different authentication methods
+ * Authentication information that is shared between different authentication methods.
  */
 type AuthBase = {
   /**
-   * The email to use
+   * The email to use.
    */
   email: string;
   /**
-   * Whether to always authenticate
+   * Whether to always authenticate.
    */
   alwaysAuth?: boolean;
 };
 
 /**
- * Authenticates using encoded username and password
+ * Authenticates using encoded username and password.
  */
 export type BasicAuth = AuthBase & {
   /**
-   * Base64 encoded username and password to authenticate with
+   * Base64 encoded username and password to authenticate with.
    */
   _auth: Base64;
 };
 
 /**
- * Authenticates using token
+ * Authenticates using token.
  */
 export type TokenAuth = AuthBase & {
   /**
-   * A token to authenticate with
+   * A token to authenticate with.
    */
   token: string;
 };
 
 /**
- * Authentication information for a registry
+ * Authentication information for a registry.
  */
 export type UpmAuth = BasicAuth | TokenAuth;
 
 /**
- * Content of .upmconfig.toml. Used to authenticate with package registries
+ * Content of .upmconfig.toml. Used to authenticate with package registries.
  * @see https://medium.com/openupm/how-to-authenticate-with-a-upm-scoped-registry-using-cli-afc29c13a2f8
  */
 export type UPMConfig = {
   /**
-   * Authentication information organized by the registry they should be used on
+   * Authentication information organized by the registry they should be used on.
    */
   npmAuth?: Record<string, UpmAuth>;
 };
 
 /**
- * Checks if an auth-object uses basic authentication
- * @param auth The auth-object
+ * Checks if an auth-object uses basic authentication.
+ * @param auth The auth-object.
  */
 export function isBasicAuth(auth: UpmAuth): auth is BasicAuth {
   return "_auth" in auth;
 }
 /**
- * Checks if an auth-object uses token authentication
- * @param auth The auth-object
+ * Checks if an auth-object uses token authentication.
+ * @param auth The auth-object.
  */
 export function isTokenAuth(auth: UpmAuth): auth is TokenAuth {
   return "token" in auth;
 }
 
 /**
- * Encodes a username and password using base64
- * @param username The username
- * @param password The password
+ * Encodes a username and password using base64.
+ * @param username The username.
+ * @param password The password.
  */
 export function encodeBasicAuth(username: string, password: string): Base64 {
   return encodeBase64(`${username}:${password}`);
 }
 
 /**
- * Decodes a base64 encoded username and password
- * @param base64 The base64 string
+ * Decodes a base64 encoded username and password.
+ * @param base64 The base64 string.
  * @returns Password/username tuple or null if the decoded string could
- * not be parsed
+ * not be parsed.
  */
 export function tryDecodeBasicAuth(base64: Base64): [string, string] | null {
   const text = decodeBase64(base64);
@@ -92,8 +92,8 @@ export function tryDecodeBasicAuth(base64: Base64): [string, string] | null {
 }
 
 /**
- * Checks if this auth-object should always authenticate
- * @param auth The auth-object
+ * Checks if this auth-object should always authenticate.
+ * @param auth The auth-object.
  */
 export function shouldAlwaysAuth(auth: UpmAuth): boolean {
   return auth.alwaysAuth || false;
@@ -122,10 +122,10 @@ function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
 /**
  * Attempts to get the {@link NpmAuth} information for a specific registry
  * from a {@link UPMConfig} object.
- * @param upmConfig The config
- * @param registry The registry
+ * @param upmConfig The config.
+ * @param registry The registry.
  * @returns The auth information or null if the registry does not exist
- * in the config
+ * in the config.
  */
 export function tryGetAuthForRegistry(
   upmConfig: UPMConfig,

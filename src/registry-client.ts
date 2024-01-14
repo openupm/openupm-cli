@@ -64,7 +64,7 @@ type NameVersionPair = {
 };
 
 /**
- * @throws AssertionError The given parameter is not a {@link NpmClientError}
+ * @throws {AssertionError} The given parameter is not a {@link NpmClientError}.
  */
 export function assertIsNpmClientError(
   x: unknown
@@ -99,7 +99,7 @@ function normalizeClientFunction<TParam, TData>(
 }
 
 /**
- * Return npm client
+ * Return npm client.
  */
 export const getNpmClient = (): NpmClient => {
   // create client

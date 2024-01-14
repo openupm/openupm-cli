@@ -9,7 +9,7 @@ export type EditorVersion = {
    */
   major: number;
   /**
-   * The minor version. This is usually a number from 1 to 3
+   * The minor version. This is usually a number from 1 to 3.
    */
   minor: number;
   /**
@@ -17,29 +17,29 @@ export type EditorVersion = {
    */
   patch?: number;
   /**
-   * A flag describing a specific release
+   * A flag describing a specific release.
    */
   flag?: "a" | "b" | "f" | "c";
   flagValue?: 0 | 1 | 2;
   /**
-   * A specific build
+   * A specific build.
    */
   build?: number;
   /**
-   * A flag describing a specific locale build
+   * A flag describing a specific locale build.
    */
   loc?: string;
   locValue?: number;
   /**
-   * The specific build for a locale
+   * The specific build for a locale.
    */
   locBuild?: number;
 };
 /**
- * Compares two editor versions for ordering
- * @param verA The first version
- * @param verB The second version
- * @returns A number indicating the ordering
+ * Compares two editor versions for ordering.
+ * @param verA The first version.
+ * @param verB The second version.
+ * @returns A number indicating the ordering.
  */
 export const compareEditorVersion = function (
   verA: EditorVersion,
@@ -65,11 +65,11 @@ export const compareEditorVersion = function (
   return 0;
 };
 /**
- * Attempts to compare two unparsed editor versions for ordering
- * @param a The first version
- * @param b The second version
+ * Attempts to compare two unparsed editor versions for ordering.
+ * @param a The first version.
+ * @param b The second version.
  * @returns A number indicating the ordering or null if either version could
- * not be parsed
+ * not be parsed.
  */
 export const tryCompareEditorVersion = function (
   a: string,
@@ -82,7 +82,7 @@ export const tryCompareEditorVersion = function (
 };
 
 /**
- * Attempts to parse editor version string to groups
+ * Attempts to parse editor version string to groups.
  */
 export const tryParseEditorVersion = function (
   version: string

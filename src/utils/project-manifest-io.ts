@@ -9,8 +9,8 @@ import fse from "fs-extra";
 import path from "path";
 
 /**
- * Attempts to load the manifest for a Unity project
- * @param projectPath The path to the root of the project
+ * Attempts to load the manifest for a Unity project.
+ * @param projectPath The path to the root of the project.
  */
 export const loadProjectManifest = function (
   projectPath: string
@@ -33,8 +33,8 @@ export const loadProjectManifest = function (
 
 /**
  * Saves a Unity project manifest.
- * @param projectPath The path to the projects root directory
- * @param data The manifest to save
+ * @param projectPath The path to the projects root directory.
+ * @param data The manifest to save.
  */
 export const saveProjectManifest = function (
   projectPath: string,

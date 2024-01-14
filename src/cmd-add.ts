@@ -45,7 +45,7 @@ type AddResult = {
 };
 
 /**
- * @throws Error An unhandled error occurred
+ * @throws {Error} An unhandled error occurred.
  */
 export const add = async function (
   pkgs: PackageReference | PackageReference[],

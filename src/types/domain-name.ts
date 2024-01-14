@@ -47,7 +47,7 @@ export function namespaceFor(hostname: string): DomainName {
 /**
  * Checks if a string is a domain name. Only does basic syntax validation.
  * Does not check for correct segment-count etc.
- * @param s The string
+ * @param s The string.
  */
 export function isDomainName(s: string): s is DomainName {
   const segments = domainSegmentsIn(s);
@@ -56,8 +56,8 @@ export function isDomainName(s: string): s is DomainName {
 }
 
 /**
- * Detect if the given package name is an internal package
- * @param name The name of the package
+ * Detect if the given package name is an internal package.
+ * @param name The name of the package.
  */
 export const isInternalPackage = (name: DomainName): boolean => {
   const internals = [
@@ -73,7 +73,7 @@ export const isInternalPackage = (name: DomainName): boolean => {
 /**
  * Constructs a domain-name from a string.
  * @param s The string.
- * @throws assert.AssertionError if string is not in valid format
+ * @throws {assert.AssertionError} If string is not in valid format.
  */
 export function domainName(s: string): DomainName {
   assert(isDomainName(s), `"${s}" is a domain name`);
