@@ -1,7 +1,7 @@
 import "assert";
 import "should";
 import { parseEnv } from "../src/utils/env";
-import { fetchPackument } from "../src/registry-client";
+import { fetchPackument, getNpmClient } from "../src/registry-client";
 import {
   exampleRegistryUrl,
   registerMissingPackument,
@@ -17,6 +17,8 @@ const packageA = domainName("package-a");
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
+    const client = getNpmClient();
+
     beforeEach(function () {
       startMockRegistry();
     });
@@ -31,7 +33,7 @@ describe("registry-client", function () {
       should(env).not.be.null();
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
-      const info = await fetchPackument(env!.registry, packageA);
+      const info = await fetchPackument(env!.registry, packageA, client);
       should(info).deepEqual(packumentRemote);
     });
     it("404", async function () {
@@ -41,7 +43,7 @@ describe("registry-client", function () {
       );
       should(env).not.be.null();
       registerMissingPackument(packageA);
-      const info = await fetchPackument(env!.registry, packageA);
+      const info = await fetchPackument(env!.registry, packageA, client);
       (info === undefined).should.be.ok();
     });
   });

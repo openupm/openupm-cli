@@ -8,12 +8,13 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { createWorkDir, getWorkDir, removeWorkDir } from "./mock-work-dir";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
+import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { after, before } from "mocha";
 
 const packageA = domainName("com.example.package-a");
 const packageUp = domainName("com.example.package-up");
@@ -22,19 +23,20 @@ const packageMissing = domainName("pkg-not-exist");
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {
     _global: {
+      color: false,
       registry: exampleRegistryUrl,
       upstream: false,
-      chdir: getWorkDir("test-openupm-cli"),
     },
   };
   const upstreamOptions: ViewOptions = {
     _global: {
+      color: false,
       registry: exampleRegistryUrl,
-      chdir: getWorkDir("test-openupm-cli"),
     },
   };
   describe("view", function () {
     let mockConsole: MockConsole = null!;
+    let mockProject: MockUnityProject = null!;
 
     const remotePackumentA = buildPackument(packageA, (packument) =>
       packument
@@ -102,20 +104,27 @@ describe("cmd-view.ts", function () {
         )
     );
 
+    before(async function () {
+      mockProject = await setupUnityProject({});
+    });
+
     beforeEach(function () {
-      removeWorkDir("test-openupm-cli");
-      createWorkDir("test-openupm-cli", { manifest: true });
       startMockRegistry();
       registerRemotePackument(remotePackumentA);
       registerMissingPackument(packageMissing);
       registerRemoteUpstreamPackument(remotePackumentUp);
       mockConsole = attachMockConsole();
     });
-    afterEach(function () {
-      removeWorkDir("test-openupm-cli");
+    afterEach(async function () {
+      await mockProject.reset();
       stopMockRegistry();
       mockConsole.detach();
     });
+
+    after(async function () {
+      await mockProject.restore();
+    });
+
     it("view pkg", async function () {
       const retCode = await view(packageA, options);
       retCode.should.equal(0);
