@@ -1,20 +1,15 @@
 import npmSearch, { Options } from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
-import Table from "cli-table";
 import log from "./logger";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import * as os from "os";
-import assert from "assert";
-import { tryGetLatestVersion, UnityPackument } from "./types/packument";
+import { UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { CmdOptions } from "./types/options";
 import { Registry } from "./registry-client";
-
-type DateString = string;
-
-type TableRow = [DomainName, SemanticVersion, DateString, ""];
+import { formatAsTable } from "./output-formatting";
 
 type SearchResultCode = 0 | 1;
 
@@ -45,14 +40,14 @@ const getNpmFetchOptions = function (registry: Registry): Options {
 const searchEndpoint = async function (
   registry: Registry,
   keyword: string
-): Promise<TableRow[] | undefined> {
+): Promise<SearchedPackument[] | undefined> {
   try {
     // NOTE: The results of the search will be Packument objects so we can change the type
     const results = <SearchedPackument[]>(
       await npmSearch(keyword, getNpmFetchOptions(registry))
     );
     log.verbose("npmsearch", results.join(os.EOL));
-    return results.map(getTableRow);
+    return results;
   } catch (err) {
     if (isHttpError(err) && !is404Error(err)) {
       log.error("", err.message);
@@ -64,32 +59,28 @@ const searchEndpoint = async function (
 const searchOld = async function (
   registry: Registry,
   keyword: string
-): Promise<TableRow[] | undefined> {
+): Promise<SearchedPackument[] | undefined> {
   // all endpoint
   try {
     const results = <OldSearchResult | undefined>(
       await npmFetch.json("/-/all", getNpmFetchOptions(registry))
     );
-    let objects: SearchedPackument[] = [];
+    let packuments: SearchedPackument[] = [];
     if (results) {
       if (Array.isArray(results)) {
         // results is an array of objects
-        objects = results;
+        packuments = results;
       } else {
         // results is an object
         if ("_updated" in results) delete results["_updated"];
-        objects = Object.values(results);
+        packuments = Object.values(results);
       }
     }
-    log.verbose("endpoint.all", objects.join(os.EOL));
-    // prepare rows
-    const rows = objects.map((packument) => {
-      return getTableRow(packument);
-    });
+    log.verbose("endpoint.all", packuments.join(os.EOL));
     // filter keyword
     const klc = keyword.toLowerCase();
-    return rows.filter(
-      (row) => row.filter((x) => x.toLowerCase().includes(klc)).length > 0
+    return packuments.filter((packument) =>
+      packument.name.toLowerCase().includes(klc)
     );
   } catch (err) {
     if (isHttpError(err) && !is404Error(err)) {
@@ -97,26 +88,6 @@ const searchOld = async function (
     }
     log.warn("", "/-/all endpoint is not available");
   }
-};
-
-const getTable = function () {
-  return new Table({
-    head: ["Name", "Version", "Date"],
-    colWidths: [42, 20, 12],
-  });
-};
-
-const getTableRow = function (packument: SearchedPackument): TableRow {
-  const name = packument.name;
-  const version = tryGetLatestVersion(packument);
-  let date = "";
-  if (packument.time && packument.time.modified)
-    date = packument.time.modified.split("T")[0]!;
-  if (packument.date) {
-    date = packument.date.toISOString().slice(0, 10);
-  }
-  assert(version !== undefined);
-  return [name, version, date, ""];
 };
 
 export async function search(
@@ -127,17 +98,15 @@ export async function search(
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
-  const table = getTable();
   // search endpoint
   let results = await searchEndpoint(env.registry, keyword);
   // search old search
   if (results === undefined) {
-    results = (await searchOld(env.registry, keyword)) || [];
+    results = await searchOld(env.registry, keyword);
   }
   // search upstream
-  if (results && results.length) {
-    results.forEach((x) => table.push(x.slice(0, -1)));
-    console.log(table.toString());
+  if (results !== undefined && results.length > 0) {
+    console.log(formatAsTable(results));
   } else log.notice("", `No matches found for "${keyword}"`);
   return 0;
 }
