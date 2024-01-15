@@ -9,7 +9,6 @@ import RegClient, {
 import log from "./logger";
 import request from "request";
 import assert, { AssertionError } from "assert";
-import _ from "lodash";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
@@ -156,7 +155,7 @@ export const fetchPackageDependencies = async function (
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
   // a list of processed dependency {name, version}
-  const processedList = [];
+  const processedList = Array.of<NameVersionPair>();
   // a list of dependency entry exists on the registry
   const depsValid = [];
   // a list of dependency entry doesn't exist on the registry
@@ -169,7 +168,10 @@ export const fetchPackageDependencies = async function (
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
-    if (processedList.find((x) => _.isEqual(x, entry)) === undefined) {
+    const isProcessed = processedList.some(
+      (x) => x.name === entry.name && x.version === entry.version
+    );
+    if (!isProcessed) {
       // add entry to processed list
       processedList.push(entry);
       // create valid dependency structure
@@ -188,10 +190,10 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const getResult = _.get(cachedPackageInfoDict, entry.name, {
+        const getResult = cachedPackageInfoDict[entry.name] ?? {
           packument: null,
           upstream: false,
-        });
+        };
         let packument = getResult.packument;
         const upstream = getResult.upstream;
         if (packument !== null) {
@@ -252,10 +254,9 @@ export const fetchPackageDependencies = async function (
         // add dependencies to pending list
         if (depObj.self || deep) {
           const deps: NameVersionPair[] = (
-            _.toPairs(packument.versions[entry.version]!["dependencies"]) as [
-              DomainName,
-              SemanticVersion
-            ][]
+            Object.entries(
+              packument.versions[entry.version]!["dependencies"] || {}
+            ) as [DomainName, SemanticVersion][]
           ).map((x): NameVersionPair => {
             return {
               name: x[0],
