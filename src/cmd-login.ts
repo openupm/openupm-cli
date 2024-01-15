@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import _ from "lodash";
 import { assertIsNpmClientError, getNpmClient } from "./registry-client";
 import log from "./logger";
 import {
@@ -106,8 +105,7 @@ const npmLogin = async function (
         email,
       },
     });
-    if (_.isString(data.ok)) log.notice("auth", data.ok);
-    else if (data.ok) {
+    if (data.ok) {
       log.notice("auth", `you are authenticated as '${username}'`);
       const token = data.token;
       return { code: 0, token };
@@ -170,7 +168,7 @@ export const generateNpmrcLines = function (
   let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
   // add trailing slash
   if (!registryUrl.endsWith("/")) registryUrl = registryUrl + "/";
-  const index = _.findIndex(lines, function (element, index) {
+  const index = lines.findIndex(function (element, index) {
     if (element.indexOf(registryUrl + ":_authToken=") !== -1) {
       // If an entry for the auth token is found, replace it
       lines[index] = element.replace(
