@@ -12,6 +12,7 @@ import { addDependency, manifestPathFor } from "../src/types/project-manifest";
 import should from "should";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
+import path from "path";
 
 describe("project-manifest io", function () {
   let mockConsole: MockConsole = null!;
@@ -61,6 +62,7 @@ describe("project-manifest io", function () {
   });
   it("manifest-path is correct", function () {
     const manifestPath = manifestPathFor("test-openupm-cli");
-    should(manifestPath).be.equal("test-openupm-cli/Packages/manifest.json");
+    const expected = path.join("test-openupm-cli", "Packages", "manifest.json");
+    should(manifestPath).be.equal(expected);
   });
 });
