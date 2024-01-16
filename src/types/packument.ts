@@ -9,21 +9,23 @@ import { Dist, Maintainer } from "@npm/types";
  * the information contained inside a Unity package manifest, with some
  * additions.
  */
-export type UnityPackumentVersion = UnityPackageManifest & {
-  /**
-   * Same as {@link name}.
-   */
-  _id?: PackageId;
-  _nodeVersion?: string;
-  _npmVersion?: string;
-  _rev?: string;
-  homepage?: string;
-  category?: string;
-  gitHead?: string;
-  readmeFilename?: string;
-  contributors?: ReadonlyArray<Maintainer>;
-  dist?: Readonly<Dist>;
-};
+export type UnityPackumentVersion = Readonly<
+  UnityPackageManifest & {
+    /**
+     * Same as {@link name}.
+     */
+    _id?: PackageId;
+    _nodeVersion?: string;
+    _npmVersion?: string;
+    _rev?: string;
+    homepage?: string;
+    category?: string;
+    gitHead?: string;
+    readmeFilename?: string;
+    contributors?: ReadonlyArray<Maintainer>;
+    dist?: Readonly<Dist>;
+  }
+>;
 
 /**
  * Describes a package.

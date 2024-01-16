@@ -11,7 +11,7 @@ import { UnityPackument, UnityPackumentVersion } from "../src/types/packument";
  * Builder class for {@link UnityPackumentVersion}.
  */
 class UnityPackumentVersionBuilder {
-  readonly version: UnityPackumentVersion;
+  version: UnityPackumentVersion;
 
   constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
@@ -49,7 +49,7 @@ class UnityPackumentVersionBuilder {
     key: TKey,
     value: UnityPackumentVersion[TKey]
   ): UnityPackumentVersionBuilder {
-    this.version[key] = value;
+    this.version = { ...this.version, [key]: value };
     return this;
   }
 }
