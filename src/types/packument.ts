@@ -22,7 +22,7 @@ export type UnityPackumentVersion = UnityPackageManifest & {
   gitHead?: string;
   readmeFilename?: string;
   contributors?: ReadonlyArray<Maintainer>;
-  dist?: Dist;
+  dist?: Readonly<Dist>;
 };
 
 /**
