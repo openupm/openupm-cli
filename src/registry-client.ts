@@ -113,10 +113,10 @@ export const getNpmClient = (): NpmClient => {
 };
 
 /**
- * Fetch package info json from registry
- * @param registry The registry from which to get the packument
- * @param name The name of the packument
- * @param client The client to use for fetching
+ * Fetch package info json from registry.
+ * @param registry The registry from which to get the packument.
+ * @param name The name of the packument.
+ * @param client The client to use for fetching.
  */
 export const fetchPackument = async function (
   registry: Registry,
@@ -132,13 +132,13 @@ export const fetchPackument = async function (
 };
 
 /**
- * Fetch package dependencies
- * @param registry The registry in which to search the dependencies
- * @param upstreamRegistry The upstream registry in which to search as a backup
- * @param name The name of the package
- * @param version The version for which to search dependencies
- * @param deep Whether to search for all dependencies
- * @param client The client to use for communicating with the registries
+ * Fetch package dependencies.
+ * @param registry The registry in which to search the dependencies.
+ * @param upstreamRegistry The upstream registry in which to search as a backup.
+ * @param name The name of the package.
+ * @param version The version for which to search dependencies.
+ * @param deep Whether to search for all dependencies.
+ * @param client The client to use for communicating with the registries.
  */
 export const fetchPackageDependencies = async function (
   registry: Registry,

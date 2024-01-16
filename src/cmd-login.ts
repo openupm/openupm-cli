@@ -88,7 +88,7 @@ export const login = async function (
 type LoginResult = { code: 0; token: string } | { code: 1 };
 
 /**
- * Return npm login token
+ * Return npm login token.
  */
 const npmLogin = async function (
   username: string,
