@@ -93,7 +93,7 @@ export type UnityPackageManifest = Readonly<{
   /**
    * List of samples included in the package.
    */
-  samples?: Array<Sample>;
+  samples?: ReadonlyArray<Sample>;
   /**
    * A constant that provides additional information to the Package Manager.
    */
