@@ -40,7 +40,7 @@ export type UnityPackument = {
    */
   _id?: DomainName;
   _rev?: string;
-  _attachments?: Record<string, unknown>;
+  _attachments?: Readonly<Record<string, unknown>>;
   readme?: string;
   /**
    * The packages versions, organized by their version.
