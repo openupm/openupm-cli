@@ -191,13 +191,10 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const getResult = cachedPackageInfoDict[entry.name] ?? {
-          packument: null,
-          upstream: false,
-        };
-        let packument = getResult.packument;
+        const cachedPackument = cachedPackageInfoDict[entry.name] ?? null;
+        let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
-          depObj.upstream = getResult.upstream;
+          depObj.upstream = cachedPackument!.upstream;
         }
         // try fetching package info from the default registry
         if (packument === null) {
