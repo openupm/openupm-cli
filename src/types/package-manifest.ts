@@ -56,7 +56,7 @@ export type UnityPackageManifest = Readonly<{
   /**
    * The author of the package.
    */
-  author?: Maintainer;
+  author?: Readonly<Maintainer>;
   /**
    * Custom location for this package’s changelog specified as a URL.
    */
