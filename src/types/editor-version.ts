@@ -1,3 +1,7 @@
+type LocaleCode = "c";
+
+type ReleaseFlag = "a" | "b" | "f" | "c";
+
 /**
  * Describes a version of a Unity editor. Mostly this follows calendar-versioning,
  * with some extra rules for chinese releases.
@@ -19,7 +23,7 @@ export type EditorVersion = {
   /**
    * A flag describing a specific release.
    */
-  flag?: "a" | "b" | "f" | "c";
+  flag?: ReleaseFlag;
   flagValue?: 0 | 1 | 2;
   /**
    * A specific build.
@@ -28,7 +32,7 @@ export type EditorVersion = {
   /**
    * A flag describing a specific locale build.
    */
-  loc?: "c";
+  loc?: LocaleCode;
   locValue?: number;
   /**
    * The specific build for a locale.
