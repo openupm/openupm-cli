@@ -7,3 +7,13 @@ export function recordEntries<TKey extends string | number | symbol, TValue>(
 ): [TKey, TValue][] {
   return Object.entries(record) as unknown as [TKey, TValue][];
 }
+
+/**
+ * Same as {@link Object.keys} but preserves key type.
+ * @param record The record to get keys for.
+ */
+export function recordKeys<TKey extends string | number | symbol>(
+  record: Record<TKey, unknown>
+): TKey[] {
+  return Object.keys(record) as unknown as TKey[];
+}

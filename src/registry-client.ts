@@ -14,7 +14,7 @@ import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
-import { recordEntries } from "./utils/record-utils";
+import { recordEntries, recordKeys } from "./utils/record-utils";
 
 export type NpmClient = {
   rawClient: RegClient.Instance;
@@ -233,7 +233,7 @@ export const fetchPackageDependencies = async function (
           continue;
         }
         // verify version
-        const versions = Object.keys(packument.versions);
+        const versions = recordKeys(packument.versions);
         if (!entry.version || entry.version == "latest") {
           const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
