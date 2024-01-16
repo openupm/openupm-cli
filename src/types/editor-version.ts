@@ -10,7 +10,7 @@ type RegularVersion = {
   /**
    * The minor version. This is usually a number from 1 to 3.
    */
-  minor: number;
+  minor: 1 | 2 | 3 | 4;
 };
 
 type PatchVersion = RegularVersion & {
@@ -134,14 +134,14 @@ export const tryParseEditorVersion = function (
     locBuild?: `${number}`;
   };
   const regex =
-    /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
+    /^(?<major>\d+)\.(?<minor>[1234])(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
   const match = regex.exec(version);
   if (!match) return null;
   const groups = <RegexMatchGroups>match.groups;
 
   const regular: RegularVersion = {
     major: parseInt(groups.major),
-    minor: parseInt(groups.minor),
+    minor: parseInt(groups.minor) as ReleaseVersion["minor"],
   };
 
   if (!groups.patch) return regular;
