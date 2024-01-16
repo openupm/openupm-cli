@@ -135,6 +135,13 @@ type CachedPackument = { packument: UnityPackument; upstream: boolean };
 
 type PackumentCache = Record<DomainName, CachedPackument>;
 
+function tryGetFromCache(
+  packageName: DomainName,
+  cache: PackumentCache
+): CachedPackument | null {
+  return cache[packageName] ?? null;
+}
+
 /**
  * Fetch package dependencies
  * @param registry The registry in which to search the dependencies
@@ -191,7 +198,10 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const cachedPackument = cachedPackageInfoDict[entry.name] ?? null;
+        const cachedPackument = tryGetFromCache(
+          entry.name,
+          cachedPackageInfoDict
+        );
         let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
           depObj.upstream = cachedPackument!.upstream;
