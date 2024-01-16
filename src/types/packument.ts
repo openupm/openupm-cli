@@ -49,7 +49,7 @@ export type UnityPackument = {
   /**
    * Dist-tags. Only includes information about the latest version.
    */
-  "dist-tags"?: { latest?: SemanticVersion };
+  "dist-tags"?: Readonly<{ latest?: SemanticVersion }>;
   /**
    * May contain the latest version. Legacy property, use {@link dist-tags}
    * instead.
