@@ -65,7 +65,7 @@ export type UnityPackageManifest = Readonly<{
    * A map of package dependencies. Keys are package names, and values are
    * specific versions.
    */
-  dependencies?: Record<DomainName, SemanticVersion>;
+  dependencies?: Readonly<Record<DomainName, SemanticVersion>>;
   /**
    * Custom location for this package’s documentation specified as a URL.
    */
