@@ -55,7 +55,7 @@ export type UPMConfig = Readonly<{
   /**
    * Authentication information organized by the registry they should be used on.
    */
-  npmAuth?: Record<string, UpmAuth>;
+  npmAuth?: Readonly<Record<string, UpmAuth>>;
 }>;
 
 /**
