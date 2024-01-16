@@ -7,7 +7,7 @@ import { NpmAuth } from "another-npm-registry-client";
 /**
  * Authentication information that is shared between different authentication methods.
  */
-type AuthBase = {
+type AuthBase = Readonly<{
   /**
    * The email to use.
    */
@@ -16,7 +16,7 @@ type AuthBase = {
    * Whether to always authenticate.
    */
   alwaysAuth?: boolean;
-};
+}>;
 
 /**
  * Authenticates using encoded username and password.
