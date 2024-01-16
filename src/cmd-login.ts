@@ -10,7 +10,7 @@ import {
 import { parseEnv } from "./utils/env";
 import { encodeBasicAuth } from "./types/upm-config";
 import { Base64 } from "./types/base64";
-import { RegistryUrl } from "./types/registry-url";
+import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
 import {
   promptEmail,
   promptPassword,
@@ -42,8 +42,11 @@ export const login = async function (
   if (!options.username) options.username = await promptUsername();
   if (!options.password) options.password = await promptPassword();
   if (!options.email) options.email = await promptEmail();
-  if (!options._global.registry)
-    options._global.registry = await promptRegistryUrl();
+
+  const loginRegistry =
+    options._global.registry !== undefined
+      ? coerceRegistryUrl(options._global.registry)
+      : await promptRegistryUrl();
   let token: string | null = null;
   let _auth: Base64 | null = null;
   if (options.basicAuth) {
@@ -55,7 +58,7 @@ export const login = async function (
       options.username,
       options.password,
       options.email,
-      options._global.registry as RegistryUrl
+      loginRegistry
     );
     if (result.code == 1) return result.code;
     if (!result.token) {
@@ -64,7 +67,7 @@ export const login = async function (
     }
     token = result.token;
     // write npm token
-    await writeNpmToken(options._global.registry as RegistryUrl, result.token);
+    await writeNpmToken(loginRegistry, result.token);
   }
 
   // write unity token
@@ -75,7 +78,7 @@ export const login = async function (
     options.alwaysAuth || false,
     options.basicAuth || false,
     options.email,
-    options._global.registry as RegistryUrl,
+    loginRegistry,
     token
   );
 
