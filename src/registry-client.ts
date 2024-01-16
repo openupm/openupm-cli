@@ -16,7 +16,6 @@ import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
 
 export type NpmClient = {
-  rawClient: RegClient.Instance;
   /**
    * @throws {NpmClientError}
    */
@@ -104,8 +103,6 @@ export const getNpmClient = (): NpmClient => {
   // create client
   const client = new RegClient({ log });
   return {
-    // The instance of raw npm client
-    rawClient: client,
     // Promisified methods
     get: normalizeClientFunction(client, client.get),
     adduser: normalizeClientFunction(client, client.adduser),
