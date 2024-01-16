@@ -142,6 +142,15 @@ function tryGetFromCache(
   return cache[packageName] ?? null;
 }
 
+function addToCache(
+  packageName: DomainName,
+  packument: UnityPackument,
+  upstream: boolean,
+  cache: PackumentCache
+): PackumentCache {
+  return { ...cache, [packageName]: { packument, upstream } };
+}
+
 /**
  * Fetch package dependencies
  * @param registry The registry in which to search the dependencies
@@ -172,7 +181,7 @@ export const fetchPackageDependencies = async function (
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = [];
   // cached dict
-  const cachedPackageInfoDict: PackumentCache = {};
+  let cachedPackageInfoDict: PackumentCache = {};
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
@@ -212,10 +221,12 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
-            cachedPackageInfoDict[entry.name] = {
-              packument: packument,
-              upstream: false,
-            };
+            cachedPackageInfoDict = addToCache(
+              entry.name,
+              packument,
+              false,
+              cachedPackageInfoDict
+            );
           }
         }
         // try fetching package info from the upstream registry
@@ -225,10 +236,12 @@ export const fetchPackageDependencies = async function (
             null;
           if (packument) {
             depObj.upstream = true;
-            cachedPackageInfoDict[entry.name] = {
-              packument: packument,
-              upstream: true,
-            };
+            cachedPackageInfoDict = addToCache(
+              entry.name,
+              packument,
+              true,
+              cachedPackageInfoDict
+            );
           }
         }
         // handle package not exist
