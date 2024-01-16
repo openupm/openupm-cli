@@ -33,12 +33,16 @@ export type EditorVersion = {
    * A flag describing a specific locale build.
    */
   loc?: LocaleCode;
-  locValue?: number;
   /**
    * The specific build for a locale.
    */
   locBuild?: number;
 };
+
+function localeValue(loc: LocaleCode) {
+  if (loc === "c") return 1;
+  throw new Error("Unknown locale");
+}
 
 /**
  * Compares two editor versions for ordering.
@@ -56,7 +60,7 @@ export const compareEditorVersion = function (
     ver.patch || 0,
     ver.flagValue || 0,
     ver.build || 0,
-    ver.locValue || 0,
+    ver.loc !== undefined ? localeValue(ver.loc) : 0,
     ver.locBuild || 0,
   ];
   const arrA = editorVersionToArray(verA);
@@ -121,7 +125,6 @@ export const tryParseEditorVersion = function (
 
   if (groups.loc) {
     result.loc = groups.loc;
-    if (result.loc == "c") result.locValue = 1;
     if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
   }
   return result;

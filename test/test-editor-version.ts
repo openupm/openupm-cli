@@ -70,7 +70,6 @@ describe("editor-version", function () {
         flagValue: 2,
         build: 1,
         loc: "c",
-        locValue: 1,
         locBuild: 5,
       });
     });
