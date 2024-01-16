@@ -36,13 +36,18 @@ export function scopedRegistry(
 }
 
 /**
- * Adds a scope to a registry. The list will be sorted alphabetically.
+ * Adds a scope to a registry if it is not already in the list. The scopes will
+ * also be sorted alphabetically.
  * @param registry The registry.
  * @param scope The scope.
+ * @returns Boolean whether the scope was added successfully.
  */
-export function addScope(registry: ScopedRegistry, scope: DomainName) {
+export function addScope(registry: ScopedRegistry, scope: DomainName): boolean {
+  if (registry.scopes.includes(scope)) return false;
+
   registry.scopes.push(scope);
   registry.scopes.sort();
+  return true;
 }
 
 /**

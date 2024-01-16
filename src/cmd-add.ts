@@ -23,7 +23,7 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import { scopedRegistry } from "./types/scoped-registry";
+import { addScope, scopedRegistry } from "./types/scoped-registry";
 import {
   addDependency,
   addScopedRegistry,
@@ -219,15 +219,10 @@ export const add = async function (
         addScopedRegistry(manifest, entry);
         dirty = true;
       }
-      // apply pkgsInScope
-      const scopesSet = new Set(entry.scopes || []);
       pkgsInScope.forEach((name) => {
-        if (!scopesSet.has(name)) {
-          scopesSet.add(name);
-          dirty = true;
-        }
+        const wasAdded = addScope(entry!, name);
+        if (wasAdded) dirty = true;
       });
-      entry.scopes = Array.from(scopesSet).sort();
     }
     if (options.test) addTestable(manifest, name);
     // save manifest
