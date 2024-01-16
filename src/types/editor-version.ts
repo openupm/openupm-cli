@@ -28,13 +28,14 @@ export type EditorVersion = {
   /**
    * A flag describing a specific locale build.
    */
-  loc?: string;
+  loc?: "c";
   locValue?: number;
   /**
    * The specific build for a locale.
    */
   locBuild?: number;
 };
+
 /**
  * Compares two editor versions for ordering.
  * @param verA The first version.
@@ -115,7 +116,7 @@ export const tryParseEditorVersion = function (
   }
 
   if (groups.loc) {
-    result.loc = groups.loc.toLowerCase();
+    result.loc = groups.loc;
     if (result.loc == "c") result.locValue = 1;
     if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
   }
