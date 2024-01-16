@@ -72,7 +72,7 @@ export type UnityPackument = {
     modified?: string;
   }>;
   date?: Date;
-  users?: Record<string, unknown>;
+  users?: Readonly<Record<string, unknown>>;
 };
 
 /**
