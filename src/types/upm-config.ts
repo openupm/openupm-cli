@@ -51,12 +51,12 @@ export type UpmAuth = BasicAuth | TokenAuth;
  * Content of .upmconfig.toml. Used to authenticate with package registries.
  * @see https://medium.com/openupm/how-to-authenticate-with-a-upm-scoped-registry-using-cli-afc29c13a2f8
  */
-export type UPMConfig = {
+export type UPMConfig = Readonly<{
   /**
    * Authentication information organized by the registry they should be used on.
    */
   npmAuth?: Record<string, UpmAuth>;
-};
+}>;
 
 /**
  * Checks if an auth-object uses basic authentication.
@@ -103,7 +103,12 @@ export function shouldAlwaysAuth(auth: UpmAuth): boolean {
   return auth.alwaysAuth || false;
 }
 
-function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
+/**
+ * Attempts to convert a {@link UpmAuth} object to a {@link NpmAuth} object.
+ * @param upmAuth The auth-object to convert.
+ * @returns The converted object or null, if conversion failed.
+ */
+export function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
   if (isTokenAuth(upmAuth)) {
     return {
       token: upmAuth.token,
@@ -148,4 +153,20 @@ export function tryGetAuthForRegistry(
     );
   }
   return npmAuth;
+}
+
+/**
+ * Adds authentication information to a {@link UPMConfig} object.
+ * @param registry The registry under which to add the auth-information.
+ * @param auth The auth-information.
+ * @param config The config object that should be extended.
+ * @returns An extended {@link UPMConfig} object.
+ */
+export function addAuth(
+  registry: RegistryUrl,
+  auth: UpmAuth,
+  config: UPMConfig
+): UPMConfig {
+  const authContainer = config.npmAuth || {};
+  return { npmAuth: { ...authContainer, [registry]: auth } };
 }
