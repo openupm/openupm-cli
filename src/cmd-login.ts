@@ -39,9 +39,9 @@ export const login = async function (
   const env = await parseEnv(options, false);
   if (env === null) return 1;
   // query parameters
-  if (!options.username) options.username = await promptUsername();
-  if (!options.password) options.password = await promptPassword();
-  if (!options.email) options.email = await promptEmail();
+  const username = options.username ?? (await promptUsername());
+  const password = options.password ?? (await promptPassword());
+  const email = options.email ?? (await promptEmail());
 
   const loginRegistry =
     options._global.registry !== undefined
@@ -51,15 +51,10 @@ export const login = async function (
   let _auth: Base64 | null = null;
   if (options.basicAuth) {
     // basic auth
-    _auth = encodeBasicAuth(options.username, options.password);
+    _auth = encodeBasicAuth(username, password);
   } else {
     // npm login
-    const result = await npmLogin(
-      options.username,
-      options.password,
-      options.email,
-      loginRegistry
-    );
+    const result = await npmLogin(username, password, email, loginRegistry);
     if (result.code == 1) return result.code;
     if (!result.token) {
       log.error("auth", "can not find token from server response");
@@ -77,7 +72,7 @@ export const login = async function (
     _auth,
     options.alwaysAuth || false,
     options.basicAuth || false,
-    options.email,
+    email,
     loginRegistry,
     token
   );

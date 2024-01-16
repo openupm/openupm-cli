@@ -42,6 +42,8 @@ type GlobalOptions = Readonly<{
  */
 export type CmdOptions<
   TOptions extends Record<string, unknown> = Record<string, unknown>
-> = TOptions & {
-  _global: GlobalOptions;
-};
+> = Readonly<
+  TOptions & {
+    _global: GlobalOptions;
+  }
+>;
