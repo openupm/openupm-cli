@@ -30,7 +30,7 @@ export type UnityPackumentVersion = Readonly<
 /**
  * Describes a package.
  */
-export type UnityPackument = {
+export type UnityPackument = Readonly<{
   /**
    * The packages name.
    */
@@ -73,7 +73,7 @@ export type UnityPackument = {
   }>;
   date?: Date;
   users?: Readonly<Record<string, unknown>>;
-};
+}>;
 
 /**
  * The minimum properties a Packument must have in order for it's version

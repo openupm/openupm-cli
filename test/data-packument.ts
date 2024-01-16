@@ -92,9 +92,9 @@ class UnityPackumentBuilder {
         ...this.packument.versions,
         [version]: builder.version,
       },
-    };
-    this.packument["dist-tags"] = {
-      latest: version,
+      "dist-tags": {
+        latest: version,
+      },
     };
     return this;
   }
@@ -105,7 +105,7 @@ class UnityPackumentBuilder {
       "name" | "version" | "versions" | "dist-tags" | "_id"
     >
   >(key: TKey, value: UnityPackument[TKey]): UnityPackumentBuilder {
-    this.packument[key] = value;
+    this.packument = { ...this.packument, [key]: value };
     return this;
   }
 }
