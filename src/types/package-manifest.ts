@@ -29,7 +29,7 @@ type Sample = {
  * The content of a `package.json` file for a Unity package.
  * @see https://docs.unity3d.com/Manual/upm-manifestPkg.html
  */
-export type UnityPackageManifest = {
+export type UnityPackageManifest = Readonly<{
   /**
    * A unique identifier that conforms to the Unity Package Manager naming
    * convention, which uses reverse domain name notation.
@@ -56,7 +56,7 @@ export type UnityPackageManifest = {
   /**
    * The author of the package.
    */
-  author?: Maintainer;
+  author?: Readonly<Maintainer>;
   /**
    * Custom location for this package’s changelog specified as a URL.
    */
@@ -65,7 +65,7 @@ export type UnityPackageManifest = {
    * A map of package dependencies. Keys are package names, and values are
    * specific versions.
    */
-  dependencies?: Record<DomainName, SemanticVersion>;
+  dependencies?: Readonly<Record<DomainName, SemanticVersion>>;
   /**
    * Custom location for this package’s documentation specified as a URL.
    */
@@ -80,7 +80,7 @@ export type UnityPackageManifest = {
   /**
    * An array of keywords used by the Package Manager search APIs.
    */
-  keywords?: Array<string>;
+  keywords?: ReadonlyArray<string>;
   /**
    * Identifier for an OSS license using the SPDX identifier format, or a
    * string such as “See LICENSE.md file”.
@@ -93,7 +93,7 @@ export type UnityPackageManifest = {
   /**
    * List of samples included in the package.
    */
-  samples?: Array<Sample>;
+  samples?: ReadonlyArray<Sample>;
   /**
    * A constant that provides additional information to the Package Manager.
    */
@@ -103,4 +103,4 @@ export type UnityPackageManifest = {
    * package is compatible with.
    */
   unityRelease?: string;
-};
+}>;

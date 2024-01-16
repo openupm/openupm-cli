@@ -11,7 +11,7 @@ import { UnityPackument, UnityPackumentVersion } from "../src/types/packument";
  * Builder class for {@link UnityPackumentVersion}.
  */
 class UnityPackumentVersionBuilder {
-  readonly version: UnityPackumentVersion;
+  version: UnityPackumentVersion;
 
   constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
@@ -31,7 +31,13 @@ class UnityPackumentVersionBuilder {
   addDependency(name: string, version: string): UnityPackumentVersionBuilder {
     assert(isDomainName(name), `${name} is domain name`);
     assert(isSemanticVersion(version), `${version} is semantic version`);
-    this.version.dependencies![name] = version;
+    this.version = {
+      ...this.version,
+      dependencies: {
+        ...this.version.dependencies,
+        [name]: version,
+      },
+    };
     return this;
   }
 
