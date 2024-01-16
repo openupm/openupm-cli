@@ -9,7 +9,7 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import { hasScope, removeScope } from "./types/scoped-registry";
+import { removeScope } from "./types/scoped-registry";
 import {
   removeDependency,
   tryGetScopedRegistryByUrl,
@@ -64,12 +64,8 @@ export const remove = async function (
 
     const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
     if (entry !== null) {
-      if (hasScope(entry, name)) {
-        removeScope(entry, name);
-        const scopesSet = new Set(entry.scopes);
-        entry.scopes = Array.from(scopesSet).sort();
-        dirty = true;
-      }
+      const scopeWasRemoved = removeScope(entry, name);
+      if (scopeWasRemoved) dirty = true;
     }
     // save manifest
     if (dirty) {

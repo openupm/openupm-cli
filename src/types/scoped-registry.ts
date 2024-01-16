@@ -63,8 +63,13 @@ export function hasScope(registry: ScopedRegistry, scope: DomainName): boolean {
  * Removes a scope from a registry.
  * @param registry The registry.
  * @param scope The scope.
+ * @returns Boolean indicating whether a scope was actually removed.
  */
-export function removeScope(registry: ScopedRegistry, scope: DomainName) {
-  const index = registry.scopes.indexOf(scope);
-  if (index >= 0) registry.scopes.splice(index, 1);
+export function removeScope(
+  registry: ScopedRegistry,
+  scope: DomainName
+): boolean {
+  const prevCount = registry.scopes.length;
+  registry.scopes = registry.scopes.filter((it) => it !== scope);
+  return registry.scopes.length != prevCount;
 }
