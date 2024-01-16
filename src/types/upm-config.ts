@@ -21,12 +21,14 @@ type AuthBase = Readonly<{
 /**
  * Authenticates using encoded username and password.
  */
-export type BasicAuth = AuthBase & {
-  /**
-   * Base64 encoded username and password to authenticate with.
-   */
-  _auth: Base64;
-};
+export type BasicAuth = Readonly<
+  AuthBase & {
+    /**
+     * Base64 encoded username and password to authenticate with.
+     */
+    _auth: Base64;
+  }
+>;
 
 /**
  * Authenticates using token.
