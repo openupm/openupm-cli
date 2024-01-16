@@ -195,9 +195,8 @@ export const fetchPackageDependencies = async function (
           upstream: false,
         };
         let packument = getResult.packument;
-        const upstream = getResult.upstream;
         if (packument !== null) {
-          depObj.upstream = upstream;
+          depObj.upstream = getResult.upstream;
         }
         // try fetching package info from the default registry
         if (packument === null) {
