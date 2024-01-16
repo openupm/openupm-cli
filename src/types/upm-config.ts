@@ -33,12 +33,14 @@ export type BasicAuth = Readonly<
 /**
  * Authenticates using token.
  */
-export type TokenAuth = AuthBase & {
-  /**
-   * A token to authenticate with.
-   */
-  token: string;
-};
+export type TokenAuth = Readonly<
+  AuthBase & {
+    /**
+     * A token to authenticate with.
+     */
+    token: string;
+  }
+>;
 
 /**
  * Authentication information for a registry.
