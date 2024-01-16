@@ -58,7 +58,7 @@ class UnityPackumentVersionBuilder {
  * Builder class for {@link UnityPackument}.
  */
 class UnityPackumentBuilder {
-  readonly packument: UnityPackument;
+  packument: UnityPackument;
 
   constructor(name: DomainName) {
     this.packument = {
@@ -86,7 +86,13 @@ class UnityPackumentBuilder {
       version
     );
     if (build !== undefined) build(builder);
-    this.packument.versions[version] = builder.version;
+    this.packument = {
+      ...this.packument,
+      versions: {
+        ...this.packument.versions,
+        [version]: builder.version,
+      },
+    };
     this.packument["dist-tags"] = {
       latest: version,
     };

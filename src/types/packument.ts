@@ -45,7 +45,7 @@ export type UnityPackument = {
   /**
    * The packages versions, organized by their version.
    */
-  versions: Record<SemanticVersion, UnityPackumentVersion>;
+  versions: Readonly<Record<SemanticVersion, UnityPackumentVersion>>;
   /**
    * Dist-tags. Only includes information about the latest version.
    */
