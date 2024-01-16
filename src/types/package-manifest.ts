@@ -80,7 +80,7 @@ export type UnityPackageManifest = Readonly<{
   /**
    * An array of keywords used by the Package Manager search APIs.
    */
-  keywords?: Array<string>;
+  keywords?: ReadonlyArray<string>;
   /**
    * Identifier for an OSS license using the SPDX identifier format, or a
    * string such as “See LICENSE.md file”.
