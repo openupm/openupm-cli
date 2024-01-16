@@ -19,9 +19,15 @@ describe("scoped-registry", function () {
   describe("add scope", function () {
     it("should keep scope-list alphabetical", () => {
       const registry = scopedRegistry("test", exampleRegistryUrl);
-      addScope(registry, domainName("b"));
-      addScope(registry, domainName("a"));
+      should(addScope(registry, domainName("b"))).be.true();
+      should(addScope(registry, domainName("a"))).be.true();
       should(registry.scopes).be.deepEqual(["a", "b"]);
+    });
+    it("should filter duplicates", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl);
+      should(addScope(registry, domainName("a"))).be.true();
+      should(addScope(registry, domainName("a"))).be.false();
+      should(registry.scopes).be.deepEqual(["a"]);
     });
   });
   describe("has scope", function () {
