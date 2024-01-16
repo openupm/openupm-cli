@@ -1,7 +1,7 @@
 /**
  * Options which are shared between commands.
  */
-type GlobalOptions = {
+type GlobalOptions = Readonly<{
   /**
    * Override package registry to use.
    */
@@ -34,7 +34,7 @@ type GlobalOptions = {
    * Override working directory.
    */
   chdir?: string;
-};
+}>;
 
 /**
  * Command-options. Extends the given record with a _global property
@@ -42,6 +42,8 @@ type GlobalOptions = {
  */
 export type CmdOptions<
   TOptions extends Record<string, unknown> = Record<string, unknown>
-> = TOptions & {
-  _global: GlobalOptions;
-};
+> = Readonly<
+  TOptions & {
+    _global: GlobalOptions;
+  }
+>;

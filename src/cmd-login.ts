@@ -10,7 +10,7 @@ import {
 import { parseEnv } from "./utils/env";
 import { addAuth, encodeBasicAuth, UPMConfig } from "./types/upm-config";
 import { Base64 } from "./types/base64";
-import { RegistryUrl } from "./types/registry-url";
+import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
 import {
   promptEmail,
   promptPassword,
@@ -39,24 +39,22 @@ export const login = async function (
   const env = await parseEnv(options, false);
   if (env === null) return 1;
   // query parameters
-  if (!options.username) options.username = await promptUsername();
-  if (!options.password) options.password = await promptPassword();
-  if (!options.email) options.email = await promptEmail();
-  if (!options._global.registry)
-    options._global.registry = await promptRegistryUrl();
+  const username = options.username ?? (await promptUsername());
+  const password = options.password ?? (await promptPassword());
+  const email = options.email ?? (await promptEmail());
+
+  const loginRegistry =
+    options._global.registry !== undefined
+      ? coerceRegistryUrl(options._global.registry)
+      : await promptRegistryUrl();
   let token: string | null = null;
   let _auth: Base64 | null = null;
   if (options.basicAuth) {
     // basic auth
-    _auth = encodeBasicAuth(options.username, options.password);
+    _auth = encodeBasicAuth(username, password);
   } else {
     // npm login
-    const result = await npmLogin(
-      options.username,
-      options.password,
-      options.email,
-      options._global.registry as RegistryUrl
-    );
+    const result = await npmLogin(username, password, email, loginRegistry);
     if (result.code == 1) return result.code;
     if (!result.token) {
       log.error("auth", "can not find token from server response");
@@ -64,7 +62,7 @@ export const login = async function (
     }
     token = result.token;
     // write npm token
-    await writeNpmToken(options._global.registry as RegistryUrl, result.token);
+    await writeNpmToken(loginRegistry, result.token);
   }
 
   // write unity token
@@ -74,8 +72,8 @@ export const login = async function (
     _auth,
     options.alwaysAuth || false,
     options.basicAuth || false,
-    options.email,
-    options._global.registry as RegistryUrl,
+    email,
+    loginRegistry,
     token
   );
 
