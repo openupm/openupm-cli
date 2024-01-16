@@ -31,7 +31,6 @@ describe("editor-version", function () {
         minor: 2,
         patch: 1,
         flag: "a",
-        flagValue: 0,
         build: 5,
       });
     });
@@ -43,7 +42,6 @@ describe("editor-version", function () {
         minor: 2,
         patch: 1,
         flag: "b",
-        flagValue: 1,
         build: 5,
       });
     });
@@ -55,7 +53,6 @@ describe("editor-version", function () {
         minor: 2,
         patch: 1,
         flag: "f",
-        flagValue: 2,
         build: 5,
       });
     });
@@ -67,7 +64,6 @@ describe("editor-version", function () {
         minor: 2,
         patch: 1,
         flag: "f",
-        flagValue: 2,
         build: 1,
         loc: "c",
         locBuild: 5,

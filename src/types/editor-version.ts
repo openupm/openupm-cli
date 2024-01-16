@@ -24,7 +24,6 @@ export type EditorVersion = {
    * A flag describing a specific release.
    */
   flag?: ReleaseFlag;
-  flagValue?: 0 | 1 | 2;
   /**
    * A specific build.
    */
@@ -44,6 +43,12 @@ function localeValue(loc: LocaleCode) {
   throw new Error("Unknown locale");
 }
 
+function releaseValue(flag: ReleaseFlag): number {
+  if (flag === "b") return 1;
+  if (flag === "f") return 2;
+  return 0;
+}
+
 /**
  * Compares two editor versions for ordering.
  * @param verA The first version.
@@ -58,7 +63,7 @@ export const compareEditorVersion = function (
     ver.major,
     ver.minor,
     ver.patch || 0,
-    ver.flagValue || 0,
+    ver.flag !== undefined ? releaseValue(ver.flag) : 0,
     ver.build || 0,
     ver.loc !== undefined ? localeValue(ver.loc) : 0,
     ver.locBuild || 0,
@@ -117,9 +122,6 @@ export const tryParseEditorVersion = function (
   if (groups.patch) result.patch = parseInt(groups.patch);
   if (groups.flag) {
     result.flag = groups.flag;
-    if (result.flag == "a") result.flagValue = 0;
-    if (result.flag == "b") result.flagValue = 1;
-    if (result.flag == "f") result.flagValue = 2;
     if (groups.build) result.build = parseInt(groups.build);
   }
 
