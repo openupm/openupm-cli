@@ -29,7 +29,7 @@ type Sample = {
  * The content of a `package.json` file for a Unity package.
  * @see https://docs.unity3d.com/Manual/upm-manifestPkg.html
  */
-export type UnityPackageManifest = {
+export type UnityPackageManifest = Readonly<{
   /**
    * A unique identifier that conforms to the Unity Package Manager naming
    * convention, which uses reverse domain name notation.
@@ -103,4 +103,4 @@ export type UnityPackageManifest = {
    * package is compatible with.
    */
   unityRelease?: string;
-};
+}>;
