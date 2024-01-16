@@ -131,6 +131,10 @@ export const fetchPackument = async function (
   }
 };
 
+type CachedPackument = { packument: UnityPackument; upstream: boolean };
+
+type PackumentCache = Record<DomainName, CachedPackument>;
+
 /**
  * Fetch package dependencies
  * @param registry The registry in which to search the dependencies
@@ -161,10 +165,7 @@ export const fetchPackageDependencies = async function (
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = [];
   // cached dict
-  const cachedPackageInfoDict: Record<
-    DomainName,
-    { packument: UnityPackument; upstream: boolean }
-  > = {};
+  const cachedPackageInfoDict: PackumentCache = {};
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
