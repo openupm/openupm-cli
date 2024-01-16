@@ -66,11 +66,11 @@ export type UnityPackument = {
   /**
    * Information about package and version creation/modification times.
    */
-  time: {
+  time: Readonly<{
     [key: SemanticVersion]: string;
     created?: string;
     modified?: string;
-  };
+  }>;
   date?: Date;
   users?: Record<string, unknown>;
 };
