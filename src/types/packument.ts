@@ -21,7 +21,7 @@ export type UnityPackumentVersion = UnityPackageManifest & {
   category?: string;
   gitHead?: string;
   readmeFilename?: string;
-  contributors?: Maintainer[];
+  contributors?: ReadonlyArray<Maintainer>;
   dist?: Dist;
 };
 
@@ -49,7 +49,7 @@ export type UnityPackument = {
    */
   "dist-tags"?: { latest?: SemanticVersion };
   /**
-   * May contain the latest version. Legacy property, use {@link dist-tags} 
+   * May contain the latest version. Legacy property, use {@link dist-tags}
    * instead.
    */
   version?: SemanticVersion;
@@ -89,7 +89,7 @@ const hasLatestDistTag = <T extends VersionedPackument>(
 
 /**
  * Attempt to get the latest version from a package.
- * @param packument The package. All properties are assumed to be potentially 
+ * @param packument The package. All properties are assumed to be potentially
  * missing.
  */
 export const tryGetLatestVersion = function (
