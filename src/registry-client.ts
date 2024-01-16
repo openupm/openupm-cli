@@ -14,6 +14,7 @@ import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
+import { recordEntries } from "./utils/record-utils";
 
 export type NpmClient = {
   rawClient: RegClient.Instance;
@@ -253,10 +254,8 @@ export const fetchPackageDependencies = async function (
         }
         // add dependencies to pending list
         if (depObj.self || deep) {
-          const deps: NameVersionPair[] = (
-            Object.entries(
-              packument.versions[entry.version]!["dependencies"] || {}
-            ) as [DomainName, SemanticVersion][]
+          const deps = recordEntries(
+            packument.versions[entry.version]!["dependencies"] || {}
           ).map((x): NameVersionPair => {
             return {
               name: x[0],
