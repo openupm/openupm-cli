@@ -8,7 +8,7 @@ import {
   saveUpmConfig,
 } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
-import { encodeBasicAuth } from "./types/upm-config";
+import { addAuth, encodeBasicAuth, UPMConfig } from "./types/upm-config";
 import { Base64 } from "./types/base64";
 import { RegistryUrl } from "./types/registry-url";
 import {
@@ -202,23 +202,30 @@ const writeUnityToken = async function (
   token: string | null
 ) {
   // Read config file
-  const config = (await loadUpmConfig(configDir)) || {};
-  if (!config.npmAuth) config.npmAuth = {};
+  let config: UPMConfig = (await loadUpmConfig(configDir)) || {};
 
   if (basicAuth) {
     if (_auth === null) throw new Error("Auth is null");
-    config["npmAuth"][registry] = {
-      email,
-      alwaysAuth,
-      _auth,
-    };
+    config = addAuth(
+      registry,
+      {
+        email,
+        alwaysAuth,
+        _auth,
+      },
+      config
+    );
   } else {
     if (token === null) throw new Error("Token is null");
-    config["npmAuth"][registry] = {
-      email,
-      alwaysAuth,
-      token,
-    };
+    config = addAuth(
+      registry,
+      {
+        email,
+        alwaysAuth,
+        token,
+      },
+      config
+    );
   }
   // Write config file
   await saveUpmConfig(config, configDir);

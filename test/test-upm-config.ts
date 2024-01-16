@@ -1,11 +1,14 @@
 import { describe } from "mocha";
 import {
+  addAuth,
+  BasicAuth,
   encodeBasicAuth,
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
   tryDecodeBasicAuth,
   tryGetAuthForRegistry,
+  tryToNpmAuth,
   UpmAuth,
   UPMConfig,
 } from "../src/types/upm-config";
@@ -13,9 +16,23 @@ import should from "should";
 import { Base64 } from "../src/types/base64";
 import { registryUrl, RegistryUrl } from "../src/types/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
+import { exampleRegistryUrl } from "./mock-registry";
 
 describe("upm-config", function () {
   describe("auth", function () {
+    describe("add", function () {
+      it("should have registry after adding", function () {
+        const registry = exampleRegistryUrl;
+        const auth: BasicAuth = {
+          email: "email@wow.com",
+          _auth: encodeBasicAuth("user", "pass"),
+        };
+        const config = addAuth(registry, auth, {});
+        should(tryGetAuthForRegistry(config, registry)).be.deepEqual(
+          tryToNpmAuth(auth)
+        );
+      });
+    });
     describe("classification", function () {
       it("should be basic auth if it has _auth property", () => {
         const auth: UpmAuth = {
