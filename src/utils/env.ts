@@ -10,7 +10,7 @@ import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../registry-client";
 
-export type Env = {
+export type Env = Readonly<{
   cwd: string;
   systemUser: boolean;
   wsl: boolean;
@@ -18,7 +18,7 @@ export type Env = {
   upstreamRegistry: Registry;
   registry: Registry;
   editorVersion: string | null;
-};
+}>;
 
 /**
  * Parse env.
@@ -29,20 +29,19 @@ export const parseEnv = async function (
   checkPath: boolean
 ): Promise<Env | null> {
   // set defaults
-  const env = <Env>{};
-  env.registry = {
+  let registry: Registry = {
     url: registryUrl("https://package.openupm.com"),
     auth: null,
   };
-  env.cwd = "";
-  env.upstream = true;
-  env.upstreamRegistry = {
+  let cwd = "";
+  let upstream = true;
+  let upstreamRegistry: Registry = {
     url: registryUrl("https://packages.unity.com"),
     auth: null,
   };
-  env.systemUser = false;
-  env.wsl = false;
-  env.editorVersion = null;
+  let systemUser = false;
+  let wsl = false;
+  let editorVersion: string | null = null;
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
   // color
@@ -53,14 +52,14 @@ export const parseEnv = async function (
     log.disableColor();
   }
   // upstream
-  if (options._global.upstream === false) env.upstream = false;
+  if (options._global.upstream === false) upstream = false;
   // region cn
   if (options._global.cn === true) {
-    env.registry = {
+    registry = {
       url: registryUrl("https://package.openupm.cn"),
       auth: null,
     };
-    env.upstreamRegistry = {
+    upstreamRegistry = {
       url: registryUrl("https://packages.unity.cn"),
       auth: null,
     };
@@ -68,38 +67,46 @@ export const parseEnv = async function (
   }
   // registry
   if (options._global.registry) {
-    env.registry = {
+    registry = {
       url: coerceRegistryUrl(options._global.registry),
       auth: null,
     };
   }
 
   // auth
-  if (options._global.systemUser) env.systemUser = true;
-  if (options._global.wsl) env.wsl = true;
-  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  if (options._global.systemUser) systemUser = true;
+  if (options._global.wsl) wsl = true;
+  const configDir = await getUpmConfigDir(wsl, systemUser);
   const upmConfig = await loadUpmConfig(configDir);
 
   if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
-    env.registry.auth = tryGetAuthForRegistry(upmConfig, env.registry.url);
-    env.upstreamRegistry.auth = tryGetAuthForRegistry(
+    registry.auth = tryGetAuthForRegistry(upmConfig, registry.url);
+    upstreamRegistry.auth = tryGetAuthForRegistry(
       upmConfig,
-      env.upstreamRegistry.url
+      upstreamRegistry.url
     );
   }
   // return if no need to check path
-  if (!checkPath) return env;
+  if (!checkPath)
+    return {
+      cwd,
+      editorVersion,
+      registry,
+      systemUser,
+      upstream,
+      upstreamRegistry,
+      wsl,
+    };
   // cwd
   if (options._global.chdir) {
-    const cwd = path.resolve(options._global.chdir);
+    cwd = path.resolve(options._global.chdir);
     if (!fs.existsSync(cwd)) {
       log.error("env", `can not resolve path ${cwd}`);
       return null;
     }
-    env.cwd = cwd;
-  } else env.cwd = process.cwd();
+  } else cwd = process.cwd();
   // manifest path
-  const manifestPath = manifestPathFor(env.cwd);
+  const manifestPath = manifestPathFor(cwd);
   if (!fs.existsSync(manifestPath)) {
     log.error(
       "manifest",
@@ -110,7 +117,7 @@ export const parseEnv = async function (
 
   // editor version
   const projectVersionPath = path.join(
-    env.cwd,
+    cwd,
     "ProjectSettings/ProjectVersion.txt"
   );
   if (!fs.existsSync(projectVersionPath)) {
@@ -134,8 +141,16 @@ export const parseEnv = async function (
         "ProjectVersion.txt could not be parsed for editor-version!"
       );
 
-    env.editorVersion = projectVersionContent.m_EditorVersion;
+    editorVersion = projectVersionContent.m_EditorVersion;
   }
   // return
-  return env;
+  return {
+    cwd,
+    editorVersion,
+    registry,
+    systemUser,
+    upstream,
+    upstreamRegistry,
+    wsl,
+  };
 };
