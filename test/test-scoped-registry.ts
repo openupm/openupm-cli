@@ -43,5 +43,13 @@ describe("scoped-registry", function () {
       removeScope(registry, domainName("a"));
       should(hasScope(registry, domainName("a"))).be.false();
     });
+    it("should remove duplicate scopes", () => {
+      const registry = scopedRegistry("test", exampleRegistryUrl, [
+        domainName("a"),
+        domainName("a"),
+      ]);
+      removeScope(registry, domainName("a"));
+      should(registry.scopes).be.empty();
+    });
   });
 });

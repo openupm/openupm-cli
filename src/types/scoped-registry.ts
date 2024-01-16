@@ -60,6 +60,5 @@ export function hasScope(registry: ScopedRegistry, scope: DomainName): boolean {
  * @param scope The scope.
  */
 export function removeScope(registry: ScopedRegistry, scope: DomainName) {
-  const index = registry.scopes.indexOf(scope);
-  if (index >= 0) registry.scopes.splice(index, 1);
+  registry.scopes = registry.scopes.filter((it) => it !== scope);
 }
