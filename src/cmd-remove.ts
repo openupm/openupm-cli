@@ -64,8 +64,8 @@ export const remove = async function (
 
     const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
     if (entry !== null) {
-      removeScope(entry, name);
-      dirty = true;
+      const scopeWasRemoved = removeScope(entry, name);
+      if (scopeWasRemoved) dirty = true;
     }
     // save manifest
     if (dirty) {
