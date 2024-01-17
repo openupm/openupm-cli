@@ -1,7 +1,7 @@
-import mkdirp from "mkdirp";
+import { mkdirp } from "mkdirp";
 import path from "path";
 import TOML from "@iarna/toml";
-import fs from "fs";
+import fs from "fs/promises";
 import log from "../logger";
 import isWsl from "is-wsl";
 import execute from "./process";
@@ -60,12 +60,14 @@ export const loadUpmConfig = async (
   configDir: string
 ): Promise<UPMConfig | undefined> => {
   const configPath = path.join(configDir, configFileName);
-  if (fs.existsSync(configPath)) {
-    const content = fs.readFileSync(configPath, "utf8");
+  try {
+    const content = await fs.readFile(configPath, "utf8");
     const config = TOML.parse(content);
 
     // NOTE: We assume correct format
     return config as UPMConfig;
+  } catch {
+    return undefined;
   }
 };
 
@@ -76,12 +78,12 @@ export const loadUpmConfig = async (
  */
 export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
   try {
-    mkdirp.sync(configDir);
+    await mkdirp(configDir);
   } catch {
     /* empty */
   }
   const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
-  fs.writeFileSync(configPath, content, "utf8");
+  await fs.writeFile(configPath, content, "utf8");
   log.notice("config", "saved unity config at " + configPath);
 };
