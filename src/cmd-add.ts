@@ -31,6 +31,7 @@ import {
   tryGetScopedRegistryByUrl,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
+import { recordKeys } from "./utils/record-utils";
 
 export type AddOptions = CmdOptions<{
   test?: boolean;
@@ -85,7 +86,7 @@ export const add = async function (
         return { code: 1, dirty };
       }
       // verify version
-      const versions = Object.keys(packument.versions) as SemanticVersion[];
+      const versions = recordKeys(packument.versions);
       if (!version || version === "latest")
         version = tryGetLatestVersion(packument);
       if (versions.filter((x) => x === version).length <= 0) {

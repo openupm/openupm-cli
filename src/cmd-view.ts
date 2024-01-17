@@ -11,6 +11,7 @@ import {
   splitPackageReference,
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
+import { recordKeys } from "./utils/record-utils";
 
 export type ViewOptions = CmdOptions;
 
@@ -48,7 +49,7 @@ export const view = async function (
 };
 
 const printInfo = function (packument: UnityPackument) {
-  const versionCount = Object.keys(packument.versions).length;
+  const versionCount = recordKeys(packument.versions).length;
   const ver = tryGetLatestVersion(packument);
   assert(ver !== undefined);
   const verInfo = packument.versions[ver]!;
@@ -90,10 +91,10 @@ const printInfo = function (packument: UnityPackument) {
       console.log(".integrity: " + chalk.yellow(dist.integrity));
   }
 
-  if (dependencies && Object.keys(dependencies).length > 0) {
+  if (dependencies && recordKeys(dependencies).length > 0) {
     console.log();
     console.log("dependencies");
-    (Object.keys(dependencies) as DomainName[])
+    recordKeys(dependencies)
       .sort()
       .forEach((n) => console.log(chalk.yellow(n) + ` ${dependencies[n]}`));
   }
