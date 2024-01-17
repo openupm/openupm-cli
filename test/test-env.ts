@@ -2,7 +2,6 @@ import "should";
 import { parseEnv } from "../src/utils/env";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import should from "should";
-import { saveUpmConfig } from "../src/utils/upm-config-io";
 import { registryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
