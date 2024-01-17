@@ -58,7 +58,7 @@ export function splitPackageReference(
 /**
  * Constructs a package-reference.
  * @param name The package-name. Will be validated to be a {@link DomainName}.
- * @param version Optional version-reference. Will be validated to be a 
+ * @param version Optional version-reference. Will be validated to be a
  * {@link VersionReference}.
  */
 export function packageReference(

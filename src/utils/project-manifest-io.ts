@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs/promises";
 import { assertIsError } from "./error-type-guards";
 import log from "../logger";
 import {
@@ -12,12 +12,12 @@ import path from "path";
  * Attempts to load the manifest for a Unity project.
  * @param projectPath The path to the root of the project.
  */
-export const loadProjectManifest = function (
+export const loadProjectManifest = async function (
   projectPath: string
-): UnityProjectManifest | null {
+): Promise<UnityProjectManifest | null> {
   const manifestPath = manifestPathFor(projectPath);
   try {
-    const text = fs.readFileSync(manifestPath, { encoding: "utf8" });
+    const text = await fs.readFile(manifestPath, { encoding: "utf8" });
     return JSON.parse(text);
   } catch (err) {
     assertIsError(err);
@@ -36,15 +36,15 @@ export const loadProjectManifest = function (
  * @param projectPath The path to the projects root directory.
  * @param data The manifest to save.
  */
-export const saveProjectManifest = function (
+export const saveProjectManifest = async function (
   projectPath: string,
   data: UnityProjectManifest
 ) {
   const manifestPath = manifestPathFor(projectPath);
   const json = JSON.stringify(data, null, 2);
   try {
-    fse.ensureDirSync(path.dirname(manifestPath));
-    fs.writeFileSync(manifestPath, json);
+    await fse.ensureDir(path.dirname(manifestPath));
+    await fs.writeFile(manifestPath, json);
     return true;
   } catch (err) {
     assertIsError(err);

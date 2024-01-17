@@ -6,16 +6,16 @@ import { PackageUrl } from "../src/types/package-url";
 import { hasScope } from "../src/types/scoped-registry";
 import { UnityProjectManifest } from "../src/types/project-manifest";
 
-export function shouldHaveProjectManifest(
+export async function shouldHaveProjectManifest(
   workingDirectory: string
-): UnityProjectManifest {
-  const manifest = loadProjectManifest(workingDirectory);
+): Promise<UnityProjectManifest> {
+  const manifest = await loadProjectManifest(workingDirectory);
   should(manifest).not.be.null();
   return manifest!;
 }
 
-export function shouldHaveNoProjectManifest(workingDirectory: string) {
-  const manifest = loadProjectManifest(workingDirectory);
+export async function shouldHaveNoProjectManifest(workingDirectory: string) {
+  const manifest = await loadProjectManifest(workingDirectory);
   should(manifest).be.null();
 }
 
