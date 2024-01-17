@@ -16,11 +16,11 @@ import { saveUpmConfig } from "../../src/utils/upm-config-io";
 import {createProjectVersionTxt} from "../../src/utils/project-version-io";
 
 /**
- * A mock Unity project for testing
+ * A mock Unity project for testing.
  */
 export type MockUnityProject = {
   /**
-   * The path to the projects root folder
+   * The path to the projects root folder.
    */
   projectPath: string;
 
@@ -38,12 +38,12 @@ export type MockUnityProject = {
   tryAssertManifest(assertFn: (manifest: UnityProjectManifest) => void): void;
 
   /**
-   * Resets the mock-project to its original state
+   * Resets the mock-project to its original state.
    */
   reset(): Promise<void>;
 
   /**
-   * Deletes the mock-project
+   * Deletes the mock-project.
    */
   restore(): Promise<void>;
 };
@@ -57,19 +57,19 @@ const defaultUpmConfig = {} satisfies UPMConfig;
 type Config = {
   /**
    * The version to use for the project.
-   * If not specified uses {@link defaultVersion}
+   * If not specified uses {@link defaultVersion}.
    */
   version?: string;
   /**
    * The manifest to use for the project.
    * If not specified uses {@link defaultManifest}.
-   * If {@link false} no manifest is created
+   * If {@link false} no manifest is created.
    */
   manifest?: UnityProjectManifest | false;
 
   /**
    * Override for the generated .upmconfig.toml.
-   * If not specified uses {@link defaultUpmConfig}
+   * If not specified uses {@link defaultUpmConfig}.
    */
   upmConfig?: UPMConfig;
 };
@@ -86,7 +86,7 @@ const projectPath = path.join(rootPath, "Project");
  * - Clear {@link process.env.USERPROFILE}.
  * - Change {@link process.env.HOME} to {@link rootPath}.
  * - Place a .upmconfig.toml in the root folder of the test directory structure.
- * @param config Config describing the project to be setup
+ * @param config Config describing the project to be setup.
  */
 export async function setupUnityProject(
   config: Config

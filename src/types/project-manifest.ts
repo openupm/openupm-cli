@@ -119,7 +119,7 @@ export function addTestable(manifest: UnityProjectManifest, name: DomainName) {
 /**
  * Determines the path to the package manifest based on the project 
  * directory.
- * @param projectPath The root path of the Unity project
+ * @param projectPath The root path of the Unity project.
  */
 export function manifestPathFor(projectPath: string): string {
   return path.join(projectPath, "Packages/manifest.json");
