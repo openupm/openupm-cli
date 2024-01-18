@@ -13,7 +13,7 @@ import assert from "assert";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
 import { saveUpmConfig } from "../../src/utils/upm-config-io";
-import {createProjectVersionTxt} from "../../src/utils/project-version-io";
+import { createProjectVersionTxt } from "../../src/utils/project-version-io";
 
 /**
  * A mock Unity project for testing.
@@ -28,14 +28,16 @@ export type MockUnityProject = {
    * Attempts to load the project manifest for the project.
    * Null if not found.
    */
-  tryGetManifest(): UnityProjectManifest | null;
+  tryGetManifest(): Promise<UnityProjectManifest | null>;
 
   /**
    * Runs an assertion function on the project manifest.
    * @param assertFn An assertion function.
    * @throws AssertionError if no manifest was found.
    */
-  tryAssertManifest(assertFn: (manifest: UnityProjectManifest) => void): void;
+  tryAssertManifest(
+    assertFn: (manifest: UnityProjectManifest) => void
+  ): Promise<void>;
 
   /**
    * Resets the mock-project to its original state.
@@ -113,7 +115,7 @@ export async function setupUnityProject(
     // Project manifest
     if (config.manifest !== false) {
       const manifest = config.manifest ?? defaultManifest;
-      saveProjectManifest(projectPath, manifest);
+      await saveProjectManifest(projectPath, manifest);
     }
   }
 
@@ -125,14 +127,14 @@ export async function setupUnityProject(
     envSession?.unhook();
   }
 
-  function tryGetManifest(): UnityProjectManifest | null {
+  function tryGetManifest(): Promise<UnityProjectManifest | null> {
     return loadProjectManifest(projectPath);
   }
 
-  function tryAssertManifest(
+  async function tryAssertManifest(
     assertFn: (manifest: UnityProjectManifest) => void
   ) {
-    const manifest = tryGetManifest();
+    const manifest = await tryGetManifest();
     assert(manifest !== null);
     assertFn(manifest);
   }

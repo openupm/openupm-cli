@@ -53,7 +53,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove(packageA, options);
       retCode.should.equal(0);
-      mockProject.tryAssertManifest((manifest) => {
+      await mockProject.tryAssertManifest((manifest) => {
         shouldNotHaveDependency(manifest, packageA);
         shouldHaveRegistryWithScopes(manifest, [packageB]);
       });
@@ -71,7 +71,7 @@ describe("cmd-remove.ts", function () {
         options
       );
       retCode.should.equal(1);
-      mockProject.tryAssertManifest((manifest) => {
+      await mockProject.tryAssertManifest((manifest) => {
         manifest.should.deepEqual(defaultManifest);
       });
       mockConsole.hasLineIncluding("out", "please replace").should.be.ok();
@@ -84,7 +84,7 @@ describe("cmd-remove.ts", function () {
       };
       const retCode = await remove(missingPackage, options);
       retCode.should.equal(1);
-      mockProject.tryAssertManifest((manifest) => {
+      await mockProject.tryAssertManifest((manifest) => {
         manifest.should.deepEqual(defaultManifest);
       });
       mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
@@ -98,7 +98,7 @@ describe("cmd-remove.ts", function () {
       const retCode = await remove([packageA, packageB], options);
       retCode.should.equal(0);
 
-      mockProject.tryAssertManifest((manifest) => {
+      await mockProject.tryAssertManifest((manifest) => {
         shouldNotHaveDependency(manifest, packageA);
         shouldNotHaveDependency(manifest, packageB);
       });

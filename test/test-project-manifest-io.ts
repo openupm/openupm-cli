@@ -36,11 +36,11 @@ describe("project-manifest io", function () {
   });
 
   it("loadManifest", async function () {
-    const manifest = loadProjectManifest(mockProject.projectPath);
+    const manifest = await loadProjectManifest(mockProject.projectPath);
     should(manifest).be.deepEqual({ dependencies: {} });
   });
   it("no manifest file", async function () {
-    const manifest = loadProjectManifest("/invalid-path");
+    const manifest = await loadProjectManifest("/invalid-path");
     should(manifest).be.null();
     mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
   });
@@ -48,16 +48,18 @@ describe("project-manifest io", function () {
     const manifestPath = manifestPathFor(mockProject.projectPath);
     fse.writeFileSync(manifestPath, "invalid data");
 
-    const manifest = loadProjectManifest(mockProject.projectPath);
+    const manifest = await loadProjectManifest(mockProject.projectPath);
     should(manifest).be.null();
     mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
   it("saveManifest", async function () {
-    const manifest = loadProjectManifest(mockProject.projectPath)!;
+    const manifest = (await loadProjectManifest(mockProject.projectPath))!;
     shouldNotHaveAnyDependencies(manifest);
     addDependency(manifest, domainName("some-pack"), semanticVersion("1.0.0"));
-    saveProjectManifest(mockProject.projectPath, manifest).should.be.ok();
-    const manifest2 = loadProjectManifest(mockProject.projectPath);
+    (
+      await saveProjectManifest(mockProject.projectPath, manifest)
+    ).should.be.ok();
+    const manifest2 = await loadProjectManifest(mockProject.projectPath);
     should(manifest2).be.deepEqual(manifest);
   });
   it("manifest-path is correct", function () {

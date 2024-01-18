@@ -51,7 +51,7 @@ export const remove = async function (
       return { code: 1, dirty };
     }
     // load manifest
-    const manifest = loadProjectManifest(env.cwd);
+    const manifest = await loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty };
     // not found array
     const pkgsNotFound = Array.of<PackageReference>();
@@ -69,7 +69,8 @@ export const remove = async function (
     }
     // save manifest
     if (dirty) {
-      if (!saveProjectManifest(env.cwd, manifest)) return { code: 1, dirty };
+      if (!(await saveProjectManifest(env.cwd, manifest)))
+        return { code: 1, dirty };
     }
     if (pkgsNotFound.length) {
       log.error("404", `package not found: ${pkgsNotFound.join(", ")}`);
