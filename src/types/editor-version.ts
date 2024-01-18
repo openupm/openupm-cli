@@ -10,7 +10,7 @@ type RegularVersion = {
   /**
    * The minor version. This is usually a number from 1 to 3.
    */
-  minor: 1 | 2 | 3 | 4;
+  minor: number;
 };
 
 type PatchVersion = RegularVersion & {
@@ -141,7 +141,7 @@ export const tryParseEditorVersion = function (
 
   const regular: RegularVersion = {
     major: parseInt(groups.major),
-    minor: parseInt(groups.minor) as ReleaseVersion["minor"],
+    minor: parseInt(groups.minor),
   };
 
   if (!groups.patch) return regular;
