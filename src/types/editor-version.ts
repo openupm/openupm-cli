@@ -1,9 +1,8 @@
-/**
- * Describes a version of a Unity editor. Mostly this follows calendar-versioning,
- * with some extra rules for chinese releases.
- * @see https://calver.org/
- */
-export type EditorVersion = {
+type LocaleCode = "c";
+
+type ReleaseFlag = "a" | "b" | "f" | "c";
+
+type RegularVersion = {
   /**
    * The major version. This is the release year.
    */
@@ -12,29 +11,67 @@ export type EditorVersion = {
    * The minor version. This is usually a number from 1 to 3.
    */
   minor: number;
+};
+
+type PatchVersion = RegularVersion & {
   /**
-   * An optional patch.
+   * A patch.
    */
-  patch?: number;
+  patch: number;
+};
+
+type ReleaseVersion = PatchVersion & {
   /**
    * A flag describing a specific release.
    */
-  flag?: "a" | "b" | "f" | "c";
-  flagValue?: 0 | 1 | 2;
+  flag: ReleaseFlag;
   /**
    * A specific build.
    */
-  build?: number;
+  build: number;
+};
+
+type LocalVersion = ReleaseVersion & {
   /**
    * A flag describing a specific locale build.
    */
-  loc?: string;
-  locValue?: number;
+  loc: LocaleCode;
   /**
    * The specific build for a locale.
    */
-  locBuild?: number;
+  locBuild: number;
 };
+
+/**
+ * Describes a version of a Unity editor. Mostly this follows calendar-versioning,
+ * with some extra rules for chinese releases.
+ * @see https://calver.org/
+ */
+export type EditorVersion = RegularVersion | PatchVersion | LocalVersion;
+
+function localeValue(loc: LocaleCode) {
+  if (loc === "c") return 1;
+  throw new Error("Unknown locale");
+}
+
+function releaseValue(flag: ReleaseFlag): number {
+  if (flag === "b") return 1;
+  if (flag === "f") return 2;
+  return 0;
+}
+
+function isPatch(version: EditorVersion): version is PatchVersion {
+  return "patch" in version;
+}
+
+function isRelease(version: EditorVersion): version is ReleaseVersion {
+  return isPatch(version) && "flag" in version;
+}
+
+function isLocal(version: EditorVersion): version is LocalVersion {
+  return isRelease(version) && "loc" in version;
+}
+
 /**
  * Compares two editor versions for ordering.
  * @param verA The first version.
@@ -48,11 +85,11 @@ export const compareEditorVersion = function (
   const editorVersionToArray = (ver: EditorVersion) => [
     ver.major,
     ver.minor,
-    ver.patch || 0,
-    ver.flagValue || 0,
-    ver.build || 0,
-    ver.locValue || 0,
-    ver.locBuild || 0,
+    isPatch(ver) ? ver.patch : 0,
+    ...(isRelease(ver) ? [releaseValue(ver.flag), ver.build] : [0, 0]),
+    ...(isLocal(ver)
+      ? [ver.build, localeValue(ver.loc), ver.locBuild]
+      : [0, 0, 0]),
   ];
   const arrA = editorVersionToArray(verA);
   const arrB = editorVersionToArray(verB);
@@ -97,27 +134,33 @@ export const tryParseEditorVersion = function (
     locBuild?: `${number}`;
   };
   const regex =
-    /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
+    /^(?<major>\d+)\.(?<minor>[1234])(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
   const match = regex.exec(version);
   if (!match) return null;
   const groups = <RegexMatchGroups>match.groups;
-  const result: EditorVersion = {
+
+  const regular: RegularVersion = {
     major: parseInt(groups.major),
     minor: parseInt(groups.minor),
   };
-  if (groups.patch) result.patch = parseInt(groups.patch);
-  if (groups.flag) {
-    result.flag = groups.flag;
-    if (result.flag == "a") result.flagValue = 0;
-    if (result.flag == "b") result.flagValue = 1;
-    if (result.flag == "f") result.flagValue = 2;
-    if (groups.build) result.build = parseInt(groups.build);
-  }
 
-  if (groups.loc) {
-    result.loc = groups.loc.toLowerCase();
-    if (result.loc == "c") result.locValue = 1;
-    if (groups.locBuild) result.locBuild = parseInt(groups.locBuild);
-  }
-  return result;
+  if (!groups.patch) return regular;
+  const patch: PatchVersion = {
+    ...regular,
+    patch: parseInt(groups.patch),
+  };
+
+  if (!(groups.flag && groups.build)) return patch;
+  const release: ReleaseVersion = {
+    ...patch,
+    flag: groups.flag,
+    build: parseInt(groups.build),
+  };
+
+  if (!(groups.loc && groups.locBuild)) return release;
+  return {
+    ...release,
+    loc: groups.loc,
+    locBuild: parseInt(groups.locBuild),
+  } satisfies LocalVersion;
 };
