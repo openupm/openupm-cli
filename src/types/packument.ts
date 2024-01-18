@@ -9,26 +9,28 @@ import { Dist, Maintainer } from "@npm/types";
  * the information contained inside a Unity package manifest, with some
  * additions.
  */
-export type UnityPackumentVersion = UnityPackageManifest & {
-  /**
-   * Same as {@link name}.
-   */
-  _id?: PackageId;
-  _nodeVersion?: string;
-  _npmVersion?: string;
-  _rev?: string;
-  homepage?: string;
-  category?: string;
-  gitHead?: string;
-  readmeFilename?: string;
-  contributors?: Maintainer[];
-  dist?: Dist;
-};
+export type UnityPackumentVersion = Readonly<
+  UnityPackageManifest & {
+    /**
+     * Same as {@link name}.
+     */
+    _id?: PackageId;
+    _nodeVersion?: string;
+    _npmVersion?: string;
+    _rev?: string;
+    homepage?: string;
+    category?: string;
+    gitHead?: string;
+    readmeFilename?: string;
+    contributors?: ReadonlyArray<Maintainer>;
+    dist?: Readonly<Dist>;
+  }
+>;
 
 /**
  * Describes a package.
  */
-export type UnityPackument = {
+export type UnityPackument = Readonly<{
   /**
    * The packages name.
    */
@@ -38,16 +40,16 @@ export type UnityPackument = {
    */
   _id?: DomainName;
   _rev?: string;
-  _attachments?: Record<string, unknown>;
+  _attachments?: Readonly<Record<string, unknown>>;
   readme?: string;
   /**
    * The packages versions, organized by their version.
    */
-  versions: Record<SemanticVersion, UnityPackumentVersion>;
+  versions: Readonly<Record<SemanticVersion, UnityPackumentVersion>>;
   /**
    * Dist-tags. Only includes information about the latest version.
    */
-  "dist-tags"?: { latest?: SemanticVersion };
+  "dist-tags"?: Readonly<{ latest?: SemanticVersion }>;
   /**
    * May contain the latest version. Legacy property, use {@link dist-tags}
    * instead.
@@ -64,14 +66,14 @@ export type UnityPackument = {
   /**
    * Information about package and version creation/modification times.
    */
-  time: {
+  time: Readonly<{
     [key: SemanticVersion]: string;
     created?: string;
     modified?: string;
-  };
+  }>;
   date?: Date;
-  users?: Record<string, unknown>;
-};
+  users?: Readonly<Record<string, unknown>>;
+}>;
 
 /**
  * The minimum properties a Packument must have in order for it's version

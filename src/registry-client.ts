@@ -14,9 +14,9 @@ import { DomainName, isInternalPackage } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
+import { recordEntries, recordKeys } from "./utils/record-utils";
 
 export type NpmClient = {
-  rawClient: RegClient.Instance;
   /**
    * @throws {NpmClientError}
    */
@@ -104,8 +104,6 @@ export const getNpmClient = (): NpmClient => {
   // create client
   const client = new RegClient({ log });
   return {
-    // The instance of raw npm client
-    rawClient: client,
     // Promisified methods
     get: normalizeClientFunction(client, client.get),
     adduser: normalizeClientFunction(client, client.adduser),
@@ -113,10 +111,10 @@ export const getNpmClient = (): NpmClient => {
 };
 
 /**
- * Fetch package info json from registry
- * @param registry The registry from which to get the packument
- * @param name The name of the packument
- * @param client The client to use for fetching
+ * Fetch package info json from registry.
+ * @param registry The registry from which to get the packument.
+ * @param name The name of the packument.
+ * @param client The client to use for fetching.
  */
 export const fetchPackument = async function (
   registry: Registry,
@@ -131,14 +129,34 @@ export const fetchPackument = async function (
   }
 };
 
+type CachedPackument = { packument: UnityPackument; upstream: boolean };
+
+type PackumentCache = Record<DomainName, CachedPackument>;
+
+function tryGetFromCache(
+  packageName: DomainName,
+  cache: PackumentCache
+): CachedPackument | null {
+  return cache[packageName] ?? null;
+}
+
+function addToCache(
+  packageName: DomainName,
+  packument: UnityPackument,
+  upstream: boolean,
+  cache: PackumentCache
+): PackumentCache {
+  return { ...cache, [packageName]: { packument, upstream } };
+}
+
 /**
- * Fetch package dependencies
- * @param registry The registry in which to search the dependencies
- * @param upstreamRegistry The upstream registry in which to search as a backup
- * @param name The name of the package
- * @param version The version for which to search dependencies
- * @param deep Whether to search for all dependencies
- * @param client The client to use for communicating with the registries
+ * Fetch package dependencies.
+ * @param registry The registry in which to search the dependencies.
+ * @param upstreamRegistry The upstream registry in which to search as a backup.
+ * @param name The name of the package.
+ * @param version The version for which to search dependencies.
+ * @param deep Whether to search for all dependencies.
+ * @param client The client to use for communicating with the registries.
  */
 export const fetchPackageDependencies = async function (
   registry: Registry,
@@ -157,14 +175,11 @@ export const fetchPackageDependencies = async function (
   // a list of processed dependency {name, version}
   const processedList = Array.of<NameVersionPair>();
   // a list of dependency entry exists on the registry
-  const depsValid = [];
+  const depsValid = Array.of<Dependency>();
   // a list of dependency entry doesn't exist on the registry
-  const depsInvalid = [];
+  const depsInvalid = Array.of<Dependency>();
   // cached dict
-  const cachedPackageInfoDict: Record<
-    DomainName,
-    { packument: UnityPackument; upstream: boolean }
-  > = {};
+  let packageCache: PackumentCache = {};
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
@@ -190,14 +205,10 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const getResult = cachedPackageInfoDict[entry.name] ?? {
-          packument: null,
-          upstream: false,
-        };
-        let packument = getResult.packument;
-        const upstream = getResult.upstream;
+        const cachedPackument = tryGetFromCache(entry.name, packageCache);
+        let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
-          depObj.upstream = upstream;
+          depObj.upstream = cachedPackument!.upstream;
         }
         // try fetching package info from the default registry
         if (packument === null) {
@@ -205,10 +216,12 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
-            cachedPackageInfoDict[entry.name] = {
-              packument: packument,
-              upstream: false,
-            };
+            packageCache = addToCache(
+              entry.name,
+              packument,
+              false,
+              packageCache
+            );
           }
         }
         // try fetching package info from the upstream registry
@@ -218,10 +231,12 @@ export const fetchPackageDependencies = async function (
             null;
           if (packument) {
             depObj.upstream = true;
-            cachedPackageInfoDict[entry.name] = {
-              packument: packument,
-              upstream: true,
-            };
+            packageCache = addToCache(
+              entry.name,
+              packument,
+              true,
+              packageCache
+            );
           }
         }
         // handle package not exist
@@ -232,7 +247,7 @@ export const fetchPackageDependencies = async function (
           continue;
         }
         // verify version
-        const versions = Object.keys(packument.versions);
+        const versions = recordKeys(packument.versions);
         if (!entry.version || entry.version == "latest") {
           const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
@@ -253,10 +268,8 @@ export const fetchPackageDependencies = async function (
         }
         // add dependencies to pending list
         if (depObj.self || deep) {
-          const deps: NameVersionPair[] = (
-            Object.entries(
-              packument.versions[entry.version]!["dependencies"] || {}
-            ) as [DomainName, SemanticVersion][]
+          const deps = recordEntries(
+            packument.versions[entry.version]!["dependencies"] || {}
           ).map((x): NameVersionPair => {
             return {
               name: x[0],

@@ -54,7 +54,7 @@ export const remove = async function (
     const manifest = await loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty };
     // not found array
-    const pkgsNotFound = [];
+    const pkgsNotFound = Array.of<PackageReference>();
     version = manifest.dependencies[name];
     if (version) {
       log.notice("manifest", `removed ${packageReference(name, version)}`);
@@ -80,7 +80,7 @@ export const remove = async function (
   };
 
   // remove
-  const results = [];
+  const results = Array.of<RemoveResult>();
   for (const pkg of pkgs) results.push(await removeSingle(pkg));
   const result: RemoveResult = {
     code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,

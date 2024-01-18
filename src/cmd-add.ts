@@ -23,7 +23,11 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import { addScope, scopedRegistry } from "./types/scoped-registry";
+import {
+  addScope,
+  ScopedRegistry,
+  scopedRegistry,
+} from "./types/scoped-registry";
 import {
   addDependency,
   addScopedRegistry,
@@ -31,6 +35,7 @@ import {
   tryGetScopedRegistryByUrl,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
+import { recordKeys } from "./utils/record-utils";
 
 export type AddOptions = CmdOptions<{
   test?: boolean;
@@ -72,7 +77,7 @@ export const add = async function (
     const manifest = await loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty };
     // packages that added to scope registry
-    const pkgsInScope: DomainName[] = [];
+    const pkgsInScope = Array.of<DomainName>();
     if (version === undefined || !isPackageUrl(version)) {
       // verify name
       let packument = await fetchPackument(env.registry, name, client);
@@ -85,7 +90,7 @@ export const add = async function (
         return { code: 1, dirty };
       }
       // verify version
-      const versions = Object.keys(packument.versions) as SemanticVersion[];
+      const versions = recordKeys(packument.versions);
       if (!version || version === "latest")
         version = tryGetLatestVersion(packument);
       if (versions.filter((x) => x === version).length <= 0) {
@@ -208,7 +213,7 @@ export const add = async function (
     if (!isUpstreamPackage) {
       // add to scopedRegistries
       if (!manifest.scopedRegistries) {
-        manifest.scopedRegistries = [];
+        manifest.scopedRegistries = Array.of<ScopedRegistry>();
         dirty = true;
       }
       let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
@@ -234,7 +239,7 @@ export const add = async function (
   };
 
   // add
-  const results = [];
+  const results = Array.of<AddResult>();
   for (const pkg of pkgs) results.push(await addSingle(pkg));
   const result: AddResult = {
     code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,

@@ -1,23 +1,9 @@
-import { loadProjectManifest } from "../src/utils/project-manifest-io";
 import should from "should";
 import { DomainName } from "../src/types/domain-name";
 import { SemanticVersion } from "../src/types/semantic-version";
 import { PackageUrl } from "../src/types/package-url";
 import { hasScope } from "../src/types/scoped-registry";
 import { UnityProjectManifest } from "../src/types/project-manifest";
-
-export async function shouldHaveProjectManifest(
-  workingDirectory: string
-): Promise<UnityProjectManifest> {
-  const manifest = await loadProjectManifest(workingDirectory);
-  should(manifest).not.be.null();
-  return manifest!;
-}
-
-export async function shouldHaveNoProjectManifest(workingDirectory: string) {
-  const manifest = await loadProjectManifest(workingDirectory);
-  should(manifest).be.null();
-}
 
 export function shouldHaveDependency(
   manifest: UnityProjectManifest,

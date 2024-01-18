@@ -7,12 +7,15 @@ import fse from "fs-extra";
  * @param projectDirPath The projects root folder.
  * @param version The editor-version to use.
  */
-export function createProjectVersionTxt(
+export async function createProjectVersionTxt(
   projectDirPath: string,
   version: string
 ) {
   const projectSettingsDir = path.join(projectDirPath, "ProjectSettings");
-  fse.mkdirpSync(projectSettingsDir);
+  await fse.mkdirp(projectSettingsDir);
   const data = `m_EditorVersion: ${version}`;
-  fse.writeFileSync(path.join(projectSettingsDir, "ProjectVersion.txt"), data);
+  await fse.writeFile(
+    path.join(projectSettingsDir, "ProjectVersion.txt"),
+    data
+  );
 }

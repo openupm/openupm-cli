@@ -16,7 +16,7 @@ type TableablePackument = Pick<UnityPackument, "name" | "time" | "date"> &
 /**
  * Formats an array of packuments as a table. The table is returned
  * as a single string (Includes line breaks).
- * @param packuments The packuments
+ * @param packuments The packuments.
  */
 export function formatAsTable(packuments: TableablePackument[]): string {
   const table = new Table({
