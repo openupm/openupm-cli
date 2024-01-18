@@ -65,7 +65,7 @@ const searchOld = async function (
     const results = <OldSearchResult | undefined>(
       await npmFetch.json("/-/all", getNpmFetchOptions(registry))
     );
-    let packuments: SearchedPackument[] = [];
+    let packuments = Array.of<SearchedPackument>();
     if (results) {
       if (Array.isArray(results)) {
         // results is an array of objects

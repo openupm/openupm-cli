@@ -175,9 +175,9 @@ export const fetchPackageDependencies = async function (
   // a list of processed dependency {name, version}
   const processedList = Array.of<NameVersionPair>();
   // a list of dependency entry exists on the registry
-  const depsValid = [];
+  const depsValid = Array.of<Dependency>();
   // a list of dependency entry doesn't exist on the registry
-  const depsInvalid = [];
+  const depsInvalid = Array.of<Dependency>();
   // cached dict
   let packageCache: PackumentCache = {};
   while (pendingList.length > 0) {
