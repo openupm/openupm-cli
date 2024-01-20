@@ -35,3 +35,9 @@ export function shouldHaveRegistryWithScopes(
     )
     .should.be.true("At least one scope was missing");
 }
+
+export function shouldNotHaveRegistries(
+  manifest: UnityProjectManifest
+) {
+  should(manifest.scopedRegistries).be.undefined();
+}
