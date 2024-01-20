@@ -1,3 +1,10 @@
+## [1.19.7](https://github.com/openupm/openupm-cli/compare/1.19.6...1.19.7) (2024-01-20)
+
+
+### Bug Fixes
+
+* make not create scopedRegistry when scopes are empty ([#135](https://github.com/openupm/openupm-cli/issues/135)) ([f1a2000](https://github.com/openupm/openupm-cli/commit/f1a20008ef0c3bf19f2995fcb975ac91220d3de0)), closes [#134](https://github.com/openupm/openupm-cli/issues/134)
+
 ## [1.19.6](https://github.com/openupm/openupm-cli/compare/1.19.5...1.19.6) (2024-01-09)
 
 
