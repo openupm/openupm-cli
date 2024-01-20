@@ -242,6 +242,9 @@ describe("cmd-add.ts", function () {
       await mockProject.tryAssertManifest((manifest) =>
         shouldHaveDependency(manifest, packageA, gitUrl)
       );
+      await mockProject.tryAssertManifest((manifest) =>
+        shouldNotHaveRegistries(manifest)
+      );
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
@@ -251,6 +254,9 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       await mockProject.tryAssertManifest((manifest) =>
         shouldHaveDependency(manifest, packageA, gitUrl)
+      );
+      await mockProject.tryAssertManifest((manifest) =>
+        shouldNotHaveRegistries(manifest)
       );
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
