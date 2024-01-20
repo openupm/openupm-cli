@@ -55,7 +55,7 @@ export const login = async function (
   } else {
     // npm login
     const result = await npmLogin(username, password, email, loginRegistry);
-    if (result.code == 1) return result.code;
+    if (result.code === 1) return result.code;
     if (!result.token) {
       log.error("auth", "can not find token from server response");
       return 1;
@@ -112,7 +112,7 @@ const npmLogin = async function (
   } catch (err) {
     assertIsNpmClientError(err);
 
-    if (err.response.statusCode == 401) {
+    if (err.response.statusCode === 401) {
       log.warn("401", "Incorrect username or password");
       return { code: 1 };
     } else {

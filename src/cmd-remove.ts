@@ -83,7 +83,7 @@ export const remove = async function (
   const results = Array.of<RemoveResult>();
   for (const pkg of pkgs) results.push(await removeSingle(pkg));
   const result: RemoveResult = {
-    code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
+    code: results.filter((x) => x.code !== 0).length > 0 ? 1 : 0,
     dirty: results.filter((x) => x.dirty).length > 0,
   };
   // print manifest notice

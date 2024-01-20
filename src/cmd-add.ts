@@ -171,7 +171,7 @@ export const add = async function (
           .forEach((name) => pkgsInScope.push(name));
         // print suggestion for depsInvalid
         depsInvalid.forEach((depObj) => {
-          if (depObj.reason == "package404" || depObj.reason == "version404") {
+          if (depObj.reason === "package404" || depObj.reason === "version404") {
             const resolvedVersion = manifest.dependencies[depObj.name];
             depObj.resolved = Boolean(resolvedVersion);
             if (!depObj.resolved)
@@ -202,7 +202,7 @@ export const add = async function (
       // Log the added package
       log.notice("manifest", `added ${packageReference(name, version)}`);
       dirty = true;
-    } else if (oldVersion != version) {
+    } else if (oldVersion !== version) {
       // Log the modified package version
       log.notice("manifest", `modified ${name} ${oldVersion} => ${version}`);
       dirty = true;
@@ -242,7 +242,7 @@ export const add = async function (
   const results = Array.of<AddResult>();
   for (const pkg of pkgs) results.push(await addSingle(pkg));
   const result: AddResult = {
-    code: results.filter((x) => x.code != 0).length > 0 ? 1 : 0,
+    code: results.filter((x) => x.code !== 0).length > 0 ? 1 : 0,
     dirty: results.filter((x) => x.dirty).length > 0,
   };
   // print manifest notice

@@ -21,7 +21,7 @@ export const loadProjectManifest = async function (
     return JSON.parse(text);
   } catch (err) {
     assertIsError(err);
-    if (err.code == "ENOENT")
+    if (err.code === "ENOENT")
       log.error("manifest", `manifest at ${manifestPath} does not exist`);
     else {
       log.error("manifest", `failed to parse manifest at ${manifestPath}`);
