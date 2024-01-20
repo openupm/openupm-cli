@@ -33,6 +33,15 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "maxhimmel",
+      "name": "Max Himmel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20761855?v=4",
+      "profile": "https://github.com/maxhimmel",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
