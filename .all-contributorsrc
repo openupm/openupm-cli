@@ -42,6 +42,60 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "from2001",
+      "name": "Masahiro Yamaguchi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/387880?v=4",
+      "profile": "https://twitter.com/from2001vr",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "maxhimmel",
+      "name": "Max Himmel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20761855?v=4",
+      "profile": "https://github.com/maxhimmel",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Zulu-Inuoe",
+      "name": "Wilfredo Velázquez-Rodríguez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1526310?v=4",
+      "profile": "https://github.com/Zulu-Inuoe",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "TGChrisRArendt",
+      "name": "Christopher Arendt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47191729?v=4",
+      "profile": "https://github.com/TGChrisRArendt",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Blackclaws",
+      "name": "Felix Winterhalter",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5792929?v=4",
+      "profile": "https://github.com/Blackclaws",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "alelievr",
+      "name": "Antoine Lelievre",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6877923?v=4",
+      "profile": "https://github.com/alelievr",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
