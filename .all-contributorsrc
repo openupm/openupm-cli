@@ -33,6 +33,15 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "Zulu-Inuoe",
+      "name": "Wilfredo Velázquez-Rodríguez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1526310?v=4",
+      "profile": "https://github.com/Zulu-Inuoe",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
