@@ -210,7 +210,7 @@ export const add = async function (
       // Log the existed package
       log.notice("manifest", `existed ${packageReference(name, version)}`);
     }
-    if (!isUpstreamPackage) {
+    if (!isUpstreamPackage && pkgsInScope.length > 0) {
       // add to scopedRegistries
       if (!manifest.scopedRegistries) {
         manifest.scopedRegistries = Array.of<ScopedRegistry>();

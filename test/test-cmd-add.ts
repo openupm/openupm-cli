@@ -9,7 +9,7 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { shouldHaveDependency } from "./project-manifest-assertions";
+import { shouldHaveDependency, shouldNotHaveRegistries } from "./project-manifest-assertions";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { domainName } from "../src/types/domain-name";
@@ -242,6 +242,9 @@ describe("cmd-add.ts", function () {
       await mockProject.tryAssertManifest((manifest) =>
         shouldHaveDependency(manifest, packageA, gitUrl)
       );
+      await mockProject.tryAssertManifest((manifest) =>
+        shouldNotHaveRegistries(manifest)
+      );
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
@@ -252,6 +255,9 @@ describe("cmd-add.ts", function () {
       await mockProject.tryAssertManifest((manifest) =>
         shouldHaveDependency(manifest, packageA, gitUrl)
       );
+      await mockProject.tryAssertManifest((manifest) =>
+        shouldNotHaveRegistries(manifest)
+      );
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
     });
@@ -261,6 +267,9 @@ describe("cmd-add.ts", function () {
       retCode.should.equal(0);
       await mockProject.tryAssertManifest((manifest) =>
         shouldHaveDependency(manifest, packageA, fileUrl)
+      );
+      await mockProject.tryAssertManifest((manifest) =>
+        shouldNotHaveRegistries(manifest)
       );
       mockConsole.hasLineIncluding("out", "added").should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
