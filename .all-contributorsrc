@@ -33,6 +33,15 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "alelievr",
+      "name": "Antoine Lelievre",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6877923?v=4",
+      "profile": "https://github.com/alelievr",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
