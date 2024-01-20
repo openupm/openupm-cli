@@ -23,6 +23,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "nowsprinting",
+      "name": "Koji Hasegawa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/117617?v=4",
+      "profile": "https://nowsprinting.github.io/",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
