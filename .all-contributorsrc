@@ -33,6 +33,15 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "MonoLogueChi",
+      "name": "MonoLogueChi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26868745?v=4",
+      "profile": "https://blog.xxwhite.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
