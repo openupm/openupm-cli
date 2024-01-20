@@ -171,7 +171,10 @@ export const add = async function (
           .forEach((name) => pkgsInScope.push(name));
         // print suggestion for depsInvalid
         depsInvalid.forEach((depObj) => {
-          if (depObj.reason === "package404" || depObj.reason === "version404") {
+          if (
+            depObj.reason === "package404" ||
+            depObj.reason === "version404"
+          ) {
             const resolvedVersion = manifest.dependencies[depObj.name];
             depObj.resolved = Boolean(resolvedVersion);
             if (!depObj.resolved)
