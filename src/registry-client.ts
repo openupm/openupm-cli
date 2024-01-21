@@ -200,7 +200,7 @@ export const fetchPackageDependencies = async function (
         version: entry.version as SemanticVersion,
         internal: isInternalPackage(entry.name),
         upstream: false,
-        self: entry.name == name,
+        self: entry.name === name,
         reason: null,
       };
       if (!depObj.internal) {
@@ -248,13 +248,13 @@ export const fetchPackageDependencies = async function (
         }
         // verify version
         const versions = recordKeys(packument.versions);
-        if (!entry.version || entry.version == "latest") {
+        if (!entry.version || entry.version === "latest") {
           const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
           depObj.version = entry.version = latestVersion;
         }
         // handle version not exist
-        if (!versions.find((x) => x == entry.version)) {
+        if (!versions.find((x) => x === entry.version)) {
           log.warn(
             "404",
             `package ${packageReference(

@@ -71,5 +71,5 @@ export function removeScope(
 ): boolean {
   const prevCount = registry.scopes.length;
   registry.scopes = registry.scopes.filter((it) => it !== scope);
-  return registry.scopes.length != prevCount;
+  return registry.scopes.length !== prevCount;
 }
