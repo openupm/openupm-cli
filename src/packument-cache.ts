@@ -27,27 +27,27 @@ export const emptyPackumentCache: PackumentCache = {};
 
 /**
  * Attempts to get a cached packument from a cache.
- * @param packageName The name of the packument.
  * @param cache The cache.
+ * @param packageName The name of the packument.
  */
 export function tryGetFromCache(
-  packageName: DomainName,
-  cache: PackumentCache
+  cache: PackumentCache,
+  packageName: DomainName
 ): CachedPackument | null {
   return cache[packageName] ?? null;
 }
 
 /**
  * Caches a packument.
+ * @param cache The current state of the cache.
  * @param packument The packument.
  * @param upstream Whether the packument was resolved from the upstream registry.
- * @param cache The current state of the cache.
  * @returns The new state of the cache.
  */
 export function addToCache(
+  cache: PackumentCache,
   packument: UnityPackument,
-  upstream: boolean,
-  cache: PackumentCache
+  upstream: boolean
 ): PackumentCache {
   return { ...cache, [packument.name]: { packument, upstream } };
 }

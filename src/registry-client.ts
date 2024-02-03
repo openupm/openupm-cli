@@ -191,7 +191,7 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const cachedPackument = tryGetFromCache(entry.name, packumentCache);
+        const cachedPackument = tryGetFromCache(packumentCache, entry.name);
         let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
           depObj.upstream = cachedPackument!.upstream;
@@ -202,7 +202,7 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
-            packumentCache = addToCache(packument, false, packumentCache);
+            packumentCache = addToCache(packumentCache, packument, false);
           }
         }
         // try fetching package info from the upstream registry
@@ -212,7 +212,7 @@ export const fetchPackageDependencies = async function (
             null;
           if (packument) {
             depObj.upstream = true;
-            packumentCache = addToCache(packument, true, packumentCache);
+            packumentCache = addToCache(packumentCache, packument, true);
           }
         }
         // handle package not exist
