@@ -34,17 +34,15 @@ export function tryGetFromCache(
 
 /**
  * Caches a packument.
- * @param packageName The packuments name.
  * @param packument The packument.
  * @param upstream Whether the packument was resolved from the upstream registry.
  * @param cache The current state of the cache.
  * @returns The new state of the cache.
  */
 export function addToCache(
-  packageName: DomainName,
   packument: UnityPackument,
   upstream: boolean,
   cache: PackumentCache
 ): PackumentCache {
-  return { ...cache, [packageName]: { packument, upstream } };
+  return { ...cache, [packument.name]: { packument, upstream } };
 }

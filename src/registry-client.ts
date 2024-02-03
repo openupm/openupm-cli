@@ -197,12 +197,7 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
-            packageCache = addToCache(
-              entry.name,
-              packument,
-              false,
-              packageCache
-            );
+            packageCache = addToCache(packument, false, packageCache);
           }
         }
         // try fetching package info from the upstream registry
@@ -212,12 +207,7 @@ export const fetchPackageDependencies = async function (
             null;
           if (packument) {
             depObj.upstream = true;
-            packageCache = addToCache(
-              entry.name,
-              packument,
-              true,
-              packageCache
-            );
+            packageCache = addToCache(packument, true, packageCache);
           }
         }
         // handle package not exist
