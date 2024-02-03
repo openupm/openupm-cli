@@ -15,7 +15,12 @@ import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
 import { recordEntries, recordKeys } from "./utils/record-utils";
-import { addToCache, PackumentCache, tryGetFromCache } from "./packument-cache";
+import {
+  addToCache,
+  emptyPackumentCache,
+  PackumentCache,
+  tryGetFromCache,
+} from "./packument-cache";
 
 export type NpmClient = {
   /**
@@ -160,7 +165,7 @@ export const fetchPackageDependencies = async function (
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = Array.of<Dependency>();
   // cached dict
-  let packageCache: PackumentCache = {};
+  let packageCache = emptyPackumentCache;
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;

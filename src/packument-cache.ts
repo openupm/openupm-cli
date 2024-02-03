@@ -21,6 +21,11 @@ type CachedPackument = {
 export type PackumentCache = Record<DomainName, CachedPackument>;
 
 /**
+ * An empty packument cache.
+ */
+export const emptyPackumentCache: PackumentCache = {};
+
+/**
  * Attempts to get a cached packument from a cache.
  * @param packageName The name of the packument.
  * @param cache The cache.
