@@ -15,6 +15,7 @@ import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
 import { recordEntries, recordKeys } from "./utils/record-utils";
+import { addToCache, PackumentCache, tryGetFromCache } from "./packument-cache";
 
 export type NpmClient = {
   /**
@@ -128,26 +129,6 @@ export const fetchPackument = async function (
     /* empty */
   }
 };
-
-type CachedPackument = { packument: UnityPackument; upstream: boolean };
-
-type PackumentCache = Record<DomainName, CachedPackument>;
-
-function tryGetFromCache(
-  packageName: DomainName,
-  cache: PackumentCache
-): CachedPackument | null {
-  return cache[packageName] ?? null;
-}
-
-function addToCache(
-  packageName: DomainName,
-  packument: UnityPackument,
-  upstream: boolean,
-  cache: PackumentCache
-): PackumentCache {
-  return { ...cache, [packageName]: { packument, upstream } };
-}
 
 /**
  * Fetch package dependencies.
