@@ -165,7 +165,7 @@ export const fetchPackageDependencies = async function (
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = Array.of<Dependency>();
   // cached dict
-  let packageCache = emptyPackumentCache;
+  let packumentCache = emptyPackumentCache;
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
@@ -191,7 +191,7 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const cachedPackument = tryGetFromCache(entry.name, packageCache);
+        const cachedPackument = tryGetFromCache(entry.name, packumentCache);
         let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
           depObj.upstream = cachedPackument!.upstream;
@@ -202,7 +202,7 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
-            packageCache = addToCache(packument, false, packageCache);
+            packumentCache = addToCache(packument, false, packumentCache);
           }
         }
         // try fetching package info from the upstream registry
@@ -212,7 +212,7 @@ export const fetchPackageDependencies = async function (
             null;
           if (packument) {
             depObj.upstream = true;
-            packageCache = addToCache(packument, true, packageCache);
+            packumentCache = addToCache(packument, true, packumentCache);
           }
         }
         // handle package not exist
