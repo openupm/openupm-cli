@@ -48,25 +48,68 @@ export class NpmClientError extends Error {
 }
 
 export type DependencyBase = {
+  /**
+   * The package name of the dependency.
+   */
   readonly name: DomainName;
+  /**
+   * Whether this dependency is the root package for which dependencies were
+   * requested.
+   */
   readonly self: boolean;
 };
 
+/**
+ * A dependency that was resolved successfully.
+ */
 export interface ValidDependency extends DependencyBase {
+  /**
+   * Whether this dependency was found on the upstream registry.
+   */
   readonly upstream: boolean;
+  /**
+   * Whether this dependency is an internal package.
+   */
   readonly internal: boolean;
+  /**
+   * The requested version.
+   */
   readonly version: SemanticVersion | "latest" | undefined;
 }
 
+/**
+ * A dependency that could not be resolved because a package was not
+ * found in any registry.
+ */
 interface PackageNotFoundDependency extends DependencyBase {
+  /**
+   * The requested version.
+   */
   readonly version: SemanticVersion | "latest" | undefined;
+  /**
+   * Indicates the reason why the dependency could not be resolved.
+   */
   readonly reason: "package404";
 }
+
+/**
+ * A dependency that could not be resolved because a specific version was
+ * requested but not found.
+ */
 interface VersionNotFoundDependency extends DependencyBase {
+  /**
+   * The requested version.
+   */
   readonly version: SemanticVersion;
+  /**
+   * Indicates the reason why the dependency could not be resolved.
+   */
   readonly reason: "version404";
 }
 
+/**
+ * A dependency that could not be resolved.
+ */
 export type InvalidDependency =
   | PackageNotFoundDependency
   | VersionNotFoundDependency;
