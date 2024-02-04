@@ -74,7 +74,7 @@ export interface ValidDependency extends DependencyBase {
   /**
    * The requested version.
    */
-  readonly version: SemanticVersion | "latest" | undefined;
+  readonly version: SemanticVersion;
 }
 
 /**
@@ -311,7 +311,9 @@ export const fetchPackageDependencies = async function (
       }
       depsValid.push({
         name: entry.name,
-        version: entry.version,
+        // We can safely cast here, because code-logic ensures that we only
+        // get here with valid semantic versions.
+        version: entry.version as SemanticVersion,
         internal: isInternal,
         upstream: isUpstream,
         self: isSelf,
