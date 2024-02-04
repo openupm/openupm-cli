@@ -175,33 +175,23 @@ export const fetchPackageDependencies = async function (
     if (!isProcessed) {
       // add entry to processed list
       processedList.push(entry);
-      // create valid dependency structure
-      const depObj: Dependency = {
-        name: entry.name,
-        /* 
-        NOTE: entry.version could also be "latest" or undefined. 
-        Later code guarantees that in that case depObj.version will be replaced
-        with a valid-semantic version. So we can assert the value here safely
-         */
-        version: entry.version as SemanticVersion,
-        internal: isInternalPackage(entry.name),
-        upstream: false,
-        self: entry.name === name,
-        reason: null,
-      };
-      if (!depObj.internal) {
+      const isInternal = isInternalPackage(entry.name);
+      const isSelf = entry.name === name;
+      let isUpstream = false;
+
+      if (!isInternal) {
         // try fetching package info from cache
         const cachedPackument = tryGetFromCache(packumentCache, entry.name);
         let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
-          depObj.upstream = cachedPackument!.upstream;
+          isUpstream = cachedPackument!.upstream;
         }
         // try fetching package info from the default registry
         if (packument === null) {
           packument =
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
-            depObj.upstream = false;
+            isUpstream = false;
             packumentCache = addToCache(packumentCache, packument, false);
           }
         }
@@ -211,15 +201,21 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(upstreamRegistry, entry.name, client)) ??
             null;
           if (packument) {
-            depObj.upstream = true;
+            isUpstream = true;
             packumentCache = addToCache(packumentCache, packument, true);
           }
         }
         // handle package not exist
         if (!packument) {
           log.warn("404", `package not found: ${entry.name}`);
-          depObj.reason = "package404";
-          depsInvalid.push(depObj);
+          depsInvalid.push({
+            name: entry.name,
+            version: entry.version as SemanticVersion,
+            internal: isInternal,
+            upstream: isUpstream,
+            self: isSelf,
+            reason: "package404",
+          });
           continue;
         }
         // verify version
@@ -227,7 +223,7 @@ export const fetchPackageDependencies = async function (
         if (!entry.version || entry.version === "latest") {
           const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
-          depObj.version = entry.version = latestVersion;
+          entry.version = latestVersion;
         }
         // handle version not exist
         if (!versions.find((x) => x === entry.version)) {
@@ -238,12 +234,18 @@ export const fetchPackageDependencies = async function (
               version
             )} is not a valid choice of ${versions.reverse().join(", ")}`
           );
-          depObj.reason = "version404";
-          depsInvalid.push(depObj);
+          depsInvalid.push({
+            name: entry.name,
+            version: entry.version,
+            internal: isInternal,
+            upstream: isUpstream,
+            self: isSelf,
+            reason: "version404",
+          });
           continue;
         }
         // add dependencies to pending list
-        if (depObj.self || deep) {
+        if (isSelf || deep) {
           const deps = recordEntries(
             packument.versions[entry.version]!["dependencies"] || {}
           ).map((x): NameVersionPair => {
@@ -255,12 +257,19 @@ export const fetchPackageDependencies = async function (
           deps.forEach((x) => pendingList.push(x));
         }
       }
-      depsValid.push(depObj);
+      depsValid.push({
+        name: entry.name,
+        version: entry.version as SemanticVersion,
+        internal: isInternal,
+        upstream: isUpstream,
+        self: isSelf,
+        reason: null,
+      });
       log.verbose(
         "dependency",
         `${packageReference(entry.name, entry.version)} ${
-          depObj.internal ? "[internal] " : ""
-        }${depObj.upstream ? "[upstream]" : ""}`
+          isInternal ? "[internal] " : ""
+        }${isUpstream ? "[upstream]" : ""}`
       );
     }
   }
