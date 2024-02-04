@@ -63,8 +63,6 @@ export const add = async function (
   const client = getNpmClient();
 
   const addSingle = async function (pkg: PackageReference): Promise<AddResult> {
-    // dirty flag
-    let dirty = false;
     // is upstream package flag
     let isUpstreamPackage = false;
     // parse name
@@ -74,7 +72,7 @@ export const add = async function (
 
     // load manifest
     const manifest = await loadProjectManifest(env.cwd);
-    if (manifest === null) return { code: 1, dirty };
+    if (manifest === null) return { code: 1, dirty: false };
     // packages that added to scope registry
     const pkgsInScope = Array.of<DomainName>();
     if (version === undefined || !isPackageUrl(version)) {
@@ -86,7 +84,7 @@ export const add = async function (
       }
       if (!packument) {
         log.error("404", `package not found: ${name}`);
-        return { code: 1, dirty };
+        return { code: 1, dirty: false };
       }
       // verify version
       const versions = recordKeys(packument.versions);
@@ -99,7 +97,7 @@ export const add = async function (
             .reverse()
             .join(", ")}`
         );
-        return { code: 1, dirty };
+        return { code: 1, dirty: false };
       }
 
       if (version === undefined)
@@ -128,7 +126,7 @@ export const add = async function (
                 "suggest",
                 "contact the package author to fix the issue, or run with option -f to ignore the warning"
               );
-              return { code: 1, dirty };
+              return { code: 1, dirty: false };
             }
           }
           if (
@@ -148,7 +146,7 @@ export const add = async function (
                 "suggest",
                 `upgrade the editor to ${requiredEditorVersion}, or run with option -f to ignore the warning`
               );
-              return { code: 1, dirty };
+              return { code: 1, dirty: false };
             }
           }
         }
@@ -195,13 +193,15 @@ export const add = async function (
               "missing dependencies",
               "please resolve the issue or run with option -f to ignore the warning"
             );
-            return { code: 1, dirty };
+            return { code: 1, dirty: false };
           }
         }
       } else pkgsInScope.push(name);
     }
     // add to dependencies
     const oldVersion = manifest.dependencies[name];
+    // Whether a change was made that requires overwriting the manifest
+    let dirty = false;
     addDependency(manifest, name, version);
     if (!oldVersion) {
       // Log the added package
