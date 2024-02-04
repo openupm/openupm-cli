@@ -18,7 +18,6 @@ import { recordEntries, recordKeys } from "./utils/record-utils";
 import {
   addToCache,
   emptyPackumentCache,
-  PackumentCache,
   tryGetFromCache,
 } from "./packument-cache";
 
@@ -48,15 +47,29 @@ export class NpmClientError extends Error {
   }
 }
 
-export type Dependency = {
-  name: DomainName;
-  version?: SemanticVersion;
-  upstream: boolean;
-  self: boolean;
-  internal: boolean;
-  reason: "package404" | "version404" | null;
-  resolved?: boolean;
+export type DependencyBase = {
+  readonly name: DomainName;
+  readonly self: boolean;
 };
+
+export interface ValidDependency extends DependencyBase {
+  readonly upstream: boolean;
+  readonly internal: boolean;
+  readonly version: SemanticVersion | "latest" | undefined;
+}
+
+interface PackageNotFoundDependency extends DependencyBase {
+  readonly version: SemanticVersion | "latest" | undefined;
+  readonly reason: "package404";
+}
+interface VersionNotFoundDependency extends DependencyBase {
+  readonly version: SemanticVersion;
+  readonly reason: "version404";
+}
+
+export type InvalidDependency =
+  | PackageNotFoundDependency
+  | VersionNotFoundDependency;
 
 export type Registry = {
   url: RegistryUrl;
@@ -151,7 +164,7 @@ export const fetchPackageDependencies = async function (
   version: SemanticVersion | "latest" | undefined,
   deep: boolean,
   client: NpmClient
-): Promise<[Dependency[], Dependency[]]> {
+): Promise<[ValidDependency[], InvalidDependency[]]> {
   log.verbose(
     "dependency",
     `fetch: ${packageReference(name, version)} deep=${deep}`
@@ -161,9 +174,9 @@ export const fetchPackageDependencies = async function (
   // a list of processed dependency {name, version}
   const processedList = Array.of<NameVersionPair>();
   // a list of dependency entry exists on the registry
-  const depsValid = Array.of<Dependency>();
+  const depsValid = Array.of<ValidDependency>();
   // a list of dependency entry doesn't exist on the registry
-  const depsInvalid = Array.of<Dependency>();
+  const depsInvalid = Array.of<InvalidDependency>();
   // cached dict
   let packumentCache = emptyPackumentCache;
   while (pendingList.length > 0) {
@@ -210,9 +223,7 @@ export const fetchPackageDependencies = async function (
           log.warn("404", `package not found: ${entry.name}`);
           depsInvalid.push({
             name: entry.name,
-            version: entry.version as SemanticVersion,
-            internal: isInternal,
-            upstream: isUpstream,
+            version: entry.version,
             self: isSelf,
             reason: "package404",
           });
@@ -237,8 +248,6 @@ export const fetchPackageDependencies = async function (
           depsInvalid.push({
             name: entry.name,
             version: entry.version,
-            internal: isInternal,
-            upstream: isUpstream,
             self: isSelf,
             reason: "version404",
           });
@@ -259,11 +268,10 @@ export const fetchPackageDependencies = async function (
       }
       depsValid.push({
         name: entry.name,
-        version: entry.version as SemanticVersion,
+        version: entry.version,
         internal: isInternal,
         upstream: isUpstream,
         self: isSelf,
-        reason: null,
       });
       log.verbose(
         "dependency",
