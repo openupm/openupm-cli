@@ -15,6 +15,12 @@ import { SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
 import { RegistryUrl } from "./types/registry-url";
 import { recordEntries, recordKeys } from "./utils/record-utils";
+import {
+  addToCache,
+  emptyPackumentCache,
+  PackumentCache,
+  tryGetFromCache,
+} from "./packument-cache";
 
 export type NpmClient = {
   /**
@@ -129,26 +135,6 @@ export const fetchPackument = async function (
   }
 };
 
-type CachedPackument = { packument: UnityPackument; upstream: boolean };
-
-type PackumentCache = Record<DomainName, CachedPackument>;
-
-function tryGetFromCache(
-  packageName: DomainName,
-  cache: PackumentCache
-): CachedPackument | null {
-  return cache[packageName] ?? null;
-}
-
-function addToCache(
-  packageName: DomainName,
-  packument: UnityPackument,
-  upstream: boolean,
-  cache: PackumentCache
-): PackumentCache {
-  return { ...cache, [packageName]: { packument, upstream } };
-}
-
 /**
  * Fetch package dependencies.
  * @param registry The registry in which to search the dependencies.
@@ -179,7 +165,7 @@ export const fetchPackageDependencies = async function (
   // a list of dependency entry doesn't exist on the registry
   const depsInvalid = Array.of<Dependency>();
   // cached dict
-  let packageCache: PackumentCache = {};
+  let packumentCache = emptyPackumentCache;
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
@@ -205,7 +191,7 @@ export const fetchPackageDependencies = async function (
       };
       if (!depObj.internal) {
         // try fetching package info from cache
-        const cachedPackument = tryGetFromCache(entry.name, packageCache);
+        const cachedPackument = tryGetFromCache(packumentCache, entry.name);
         let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
           depObj.upstream = cachedPackument!.upstream;
@@ -216,12 +202,7 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
             depObj.upstream = false;
-            packageCache = addToCache(
-              entry.name,
-              packument,
-              false,
-              packageCache
-            );
+            packumentCache = addToCache(packumentCache, packument, false);
           }
         }
         // try fetching package info from the upstream registry
@@ -231,12 +212,7 @@ export const fetchPackageDependencies = async function (
             null;
           if (packument) {
             depObj.upstream = true;
-            packageCache = addToCache(
-              entry.name,
-              packument,
-              true,
-              packageCache
-            );
+            packumentCache = addToCache(packumentCache, packument, true);
           }
         }
         // handle package not exist
