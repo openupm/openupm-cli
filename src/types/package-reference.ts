@@ -8,7 +8,7 @@ import assert from "assert";
  * A string with the format of one of the supported version tags.
  * NOTE: Currently we only support "latest".
  */
-type PackageTag = "latest";
+export type PackageTag = "latest";
 
 /**
  * Reference to a version, either directly by a semantic version or via an

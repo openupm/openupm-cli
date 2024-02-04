@@ -1,7 +1,6 @@
 import log from "./logger";
 import url from "url";
-import { isPackageUrl } from "./types/package-url";
-import { tryGetLatestVersion } from "./types/packument";
+import { isPackageUrl, PackageUrl } from "./types/package-url";
 import {
   loadProjectManifest,
   saveProjectManifest,
@@ -11,11 +10,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import {
-  fetchPackageDependencies,
-  fetchPackument,
-  getNpmClient,
-} from "./registry-client";
+import { fetchPackageDependencies, getNpmClient } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import {
   packageReference,
@@ -34,7 +29,8 @@ import {
   tryGetScopedRegistryByUrl,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
-import { recordKeys } from "./utils/record-utils";
+import { tryResolve } from "./packument-query";
+import { SemanticVersion } from "./types/semantic-version";
 
 export type AddOptions = CmdOptions<{
   test?: boolean;
@@ -66,48 +62,54 @@ export const add = async function (
     // is upstream package flag
     let isUpstreamPackage = false;
     // parse name
-    const split = splitPackageReference(pkg);
-    const name = split[0];
-    let version = split[1];
+    const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
     const manifest = await loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty: false };
     // packages that added to scope registry
     const pkgsInScope = Array.of<DomainName>();
-    if (version === undefined || !isPackageUrl(version)) {
-      // verify name
-      let packument = await fetchPackument(env.registry, name, client);
-      if (!packument && env.upstream) {
-        packument = await fetchPackument(env.upstreamRegistry, name, client);
-        if (packument) isUpstreamPackage = true;
-      }
-      if (!packument) {
-        log.error("404", `package not found: ${name}`);
-        return { code: 1, dirty: false };
-      }
-      // verify version
-      const versions = recordKeys(packument.versions);
-      if (!version || version === "latest")
-        version = tryGetLatestVersion(packument);
-      if (versions.filter((x) => x === version).length <= 0) {
-        log.warn(
-          "404",
-          `version ${version} is not a valid choice of: ${versions
-            .reverse()
-            .join(", ")}`
+    let versionToAdd = requestedVersion;
+    if (requestedVersion === undefined || !isPackageUrl(requestedVersion)) {
+      let resolveResult = await tryResolve(
+        client,
+        name,
+        requestedVersion,
+        env.registry
+      );
+      if (!resolveResult.isSuccess && env.upstream) {
+        resolveResult = await tryResolve(
+          client,
+          name,
+          requestedVersion,
+          env.upstreamRegistry
         );
+        if (resolveResult.isSuccess) isUpstreamPackage = true;
+      }
+
+      if (!resolveResult.isSuccess) {
+        if (resolveResult.issue === "PackumentNotFound")
+          log.error("404", `package not found: ${name}`);
+        else if (resolveResult.issue === "VersionNotFound") {
+          const versionList = [...resolveResult.availableVersions]
+            .reverse()
+            .join(", ");
+          log.warn(
+            "404",
+            `version ${resolveResult.requestedVersion} is not a valid choice of: ${versionList}`
+          );
+        }
         return { code: 1, dirty: false };
       }
 
-      if (version === undefined)
-        throw new Error("Could not determine package version to add");
-      const versionInfo = packument.versions[version]!;
+      const packumentVersion = resolveResult.packumentVersion;
+      versionToAdd = packumentVersion.version;
+
       // verify editor version
-      if (versionInfo.unity) {
-        const requiredEditorVersion = versionInfo.unityRelease
-          ? versionInfo.unity + "." + versionInfo.unityRelease
-          : versionInfo.unity;
+      if (packumentVersion.unity) {
+        const requiredEditorVersion = packumentVersion.unityRelease
+          ? packumentVersion.unity + "." + packumentVersion.unityRelease
+          : packumentVersion.unity;
         if (env.editorVersion) {
           const editorVersionResult = tryParseEditorVersion(env.editorVersion);
           const requiredEditorVersionResult = tryParseEditorVersion(
@@ -157,7 +159,7 @@ export const add = async function (
           env.registry,
           env.upstreamRegistry,
           name,
-          version,
+          requestedVersion,
           true,
           client
         );
@@ -202,18 +204,23 @@ export const add = async function (
     const oldVersion = manifest.dependencies[name];
     // Whether a change was made that requires overwriting the manifest
     let dirty = false;
-    addDependency(manifest, name, version);
+    // I am not sure why we need this assertion. I'm pretty sure
+    // code-logic ensures the correct type.
+    addDependency(manifest, name, versionToAdd as PackageUrl | SemanticVersion);
     if (!oldVersion) {
       // Log the added package
-      log.notice("manifest", `added ${packageReference(name, version)}`);
+      log.notice("manifest", `added ${packageReference(name, versionToAdd)}`);
       dirty = true;
-    } else if (oldVersion !== version) {
+    } else if (oldVersion !== versionToAdd) {
       // Log the modified package version
-      log.notice("manifest", `modified ${name} ${oldVersion} => ${version}`);
+      log.notice(
+        "manifest",
+        `modified ${name} ${oldVersion} => ${versionToAdd}`
+      );
       dirty = true;
     } else {
       // Log the existed package
-      log.notice("manifest", `existed ${packageReference(name, version)}`);
+      log.notice("manifest", `existed ${packageReference(name, versionToAdd)}`);
     }
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
       // add to scopedRegistries
