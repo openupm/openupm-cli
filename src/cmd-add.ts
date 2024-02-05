@@ -17,7 +17,6 @@ import {
   getNpmClient,
 } from "./registry-client";
 import { DomainName } from "./types/domain-name";
-import { SemanticVersion } from "./types/semantic-version";
 import {
   packageReference,
   PackageReference,
@@ -170,14 +169,16 @@ export const add = async function (
           .map((x) => x.name)
           .forEach((name) => pkgsInScope.push(name));
         // print suggestion for depsInvalid
+        let isAnyDependencyUnresolved = false;
         depsInvalid.forEach((depObj) => {
           if (
             depObj.reason === "package404" ||
             depObj.reason === "version404"
           ) {
             const resolvedVersion = manifest.dependencies[depObj.name];
-            depObj.resolved = Boolean(resolvedVersion);
-            if (!depObj.resolved)
+            const wasResolved = Boolean(resolvedVersion);
+            if (!wasResolved) {
+              isAnyDependencyUnresolved = true;
               log.notice(
                 "suggest",
                 `to install ${packageReference(
@@ -185,9 +186,10 @@ export const add = async function (
                   depObj.version
                 )} or a replaceable version manually`
               );
+            }
           }
         });
-        if (depsInvalid.filter((x) => !x.resolved).length > 0) {
+        if (isAnyDependencyUnresolved) {
           if (!options.force) {
             log.error(
               "missing dependencies",

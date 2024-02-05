@@ -1,9 +1,9 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
 import {
-  Dependency,
   fetchPackageDependencies,
   getNpmClient,
+  InvalidDependency,
 } from "./registry-client";
 import { isPackageUrl } from "./types/package-url";
 import {
@@ -19,7 +19,7 @@ export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
 
-function errorPrefixForError(errorReason: Dependency["reason"]): string {
+function errorPrefixForError(errorReason: InvalidDependency["reason"]): string {
   if (errorReason === "package404") return "missing dependency";
   else if (errorReason === "version404") return "missing dependency version";
   return "unknown";

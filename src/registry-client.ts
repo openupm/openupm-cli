@@ -18,7 +18,6 @@ import { recordEntries, recordKeys } from "./utils/record-utils";
 import {
   addToCache,
   emptyPackumentCache,
-  PackumentCache,
   tryGetFromCache,
 } from "./packument-cache";
 
@@ -48,15 +47,72 @@ export class NpmClientError extends Error {
   }
 }
 
-export type Dependency = {
-  name: DomainName;
-  version?: SemanticVersion;
-  upstream: boolean;
-  self: boolean;
-  internal: boolean;
-  reason: "package404" | "version404" | null;
-  resolved?: boolean;
+export type DependencyBase = {
+  /**
+   * The package name of the dependency.
+   */
+  readonly name: DomainName;
+  /**
+   * Whether this dependency is the root package for which dependencies were
+   * requested.
+   */
+  readonly self: boolean;
 };
+
+/**
+ * A dependency that was resolved successfully.
+ */
+export interface ValidDependency extends DependencyBase {
+  /**
+   * Whether this dependency was found on the upstream registry.
+   */
+  readonly upstream: boolean;
+  /**
+   * Whether this dependency is an internal package.
+   */
+  readonly internal: boolean;
+  /**
+   * The requested version.
+   */
+  readonly version: SemanticVersion;
+}
+
+/**
+ * A dependency that could not be resolved because a package was not
+ * found in any registry.
+ */
+interface PackageNotFoundDependency extends DependencyBase {
+  /**
+   * The requested version.
+   */
+  readonly version: SemanticVersion | "latest" | undefined;
+  /**
+   * Indicates the reason why the dependency could not be resolved.
+   */
+  readonly reason: "package404";
+}
+
+/**
+ * A dependency that could not be resolved because a specific version was
+ * requested but not found.
+ */
+interface VersionNotFoundDependency extends DependencyBase {
+  /**
+   * The requested version.
+   */
+  readonly version: SemanticVersion;
+  /**
+   * Indicates the reason why the dependency could not be resolved.
+   */
+  readonly reason: "version404";
+}
+
+/**
+ * A dependency that could not be resolved.
+ */
+export type InvalidDependency =
+  | PackageNotFoundDependency
+  | VersionNotFoundDependency;
 
 export type Registry = {
   url: RegistryUrl;
@@ -151,7 +207,7 @@ export const fetchPackageDependencies = async function (
   version: SemanticVersion | "latest" | undefined,
   deep: boolean,
   client: NpmClient
-): Promise<[Dependency[], Dependency[]]> {
+): Promise<[ValidDependency[], InvalidDependency[]]> {
   log.verbose(
     "dependency",
     `fetch: ${packageReference(name, version)} deep=${deep}`
@@ -161,9 +217,9 @@ export const fetchPackageDependencies = async function (
   // a list of processed dependency {name, version}
   const processedList = Array.of<NameVersionPair>();
   // a list of dependency entry exists on the registry
-  const depsValid = Array.of<Dependency>();
+  const depsValid = Array.of<ValidDependency>();
   // a list of dependency entry doesn't exist on the registry
-  const depsInvalid = Array.of<Dependency>();
+  const depsInvalid = Array.of<InvalidDependency>();
   // cached dict
   let packumentCache = emptyPackumentCache;
   while (pendingList.length > 0) {
@@ -175,33 +231,23 @@ export const fetchPackageDependencies = async function (
     if (!isProcessed) {
       // add entry to processed list
       processedList.push(entry);
-      // create valid dependency structure
-      const depObj: Dependency = {
-        name: entry.name,
-        /* 
-        NOTE: entry.version could also be "latest" or undefined. 
-        Later code guarantees that in that case depObj.version will be replaced
-        with a valid-semantic version. So we can assert the value here safely
-         */
-        version: entry.version as SemanticVersion,
-        internal: isInternalPackage(entry.name),
-        upstream: false,
-        self: entry.name === name,
-        reason: null,
-      };
-      if (!depObj.internal) {
+      const isInternal = isInternalPackage(entry.name);
+      const isSelf = entry.name === name;
+      let isUpstream = false;
+
+      if (!isInternal) {
         // try fetching package info from cache
         const cachedPackument = tryGetFromCache(packumentCache, entry.name);
         let packument = cachedPackument?.packument ?? null;
         if (packument !== null) {
-          depObj.upstream = cachedPackument!.upstream;
+          isUpstream = cachedPackument!.upstream;
         }
         // try fetching package info from the default registry
         if (packument === null) {
           packument =
             (await fetchPackument(registry, entry.name, client)) ?? null;
           if (packument) {
-            depObj.upstream = false;
+            isUpstream = false;
             packumentCache = addToCache(packumentCache, packument, false);
           }
         }
@@ -211,15 +257,19 @@ export const fetchPackageDependencies = async function (
             (await fetchPackument(upstreamRegistry, entry.name, client)) ??
             null;
           if (packument) {
-            depObj.upstream = true;
+            isUpstream = true;
             packumentCache = addToCache(packumentCache, packument, true);
           }
         }
         // handle package not exist
         if (!packument) {
           log.warn("404", `package not found: ${entry.name}`);
-          depObj.reason = "package404";
-          depsInvalid.push(depObj);
+          depsInvalid.push({
+            name: entry.name,
+            version: entry.version,
+            self: isSelf,
+            reason: "package404",
+          });
           continue;
         }
         // verify version
@@ -227,7 +277,7 @@ export const fetchPackageDependencies = async function (
         if (!entry.version || entry.version === "latest") {
           const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
-          depObj.version = entry.version = latestVersion;
+          entry.version = latestVersion;
         }
         // handle version not exist
         if (!versions.find((x) => x === entry.version)) {
@@ -238,12 +288,16 @@ export const fetchPackageDependencies = async function (
               version
             )} is not a valid choice of ${versions.reverse().join(", ")}`
           );
-          depObj.reason = "version404";
-          depsInvalid.push(depObj);
+          depsInvalid.push({
+            name: entry.name,
+            version: entry.version,
+            self: isSelf,
+            reason: "version404",
+          });
           continue;
         }
         // add dependencies to pending list
-        if (depObj.self || deep) {
+        if (isSelf || deep) {
           const deps = recordEntries(
             packument.versions[entry.version]!["dependencies"] || {}
           ).map((x): NameVersionPair => {
@@ -255,12 +309,20 @@ export const fetchPackageDependencies = async function (
           deps.forEach((x) => pendingList.push(x));
         }
       }
-      depsValid.push(depObj);
+      depsValid.push({
+        name: entry.name,
+        // We can safely cast here, because code-logic ensures that we only
+        // get here with valid semantic versions.
+        version: entry.version as SemanticVersion,
+        internal: isInternal,
+        upstream: isUpstream,
+        self: isSelf,
+      });
       log.verbose(
         "dependency",
         `${packageReference(entry.name, entry.version)} ${
-          depObj.internal ? "[internal] " : ""
-        }${depObj.upstream ? "[upstream]" : ""}`
+          isInternal ? "[internal] " : ""
+        }${isUpstream ? "[upstream]" : ""}`
       );
     }
   }
