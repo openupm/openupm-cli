@@ -19,17 +19,46 @@ import npmSearch from "libnpmsearch";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import npmFetch from "npm-registry-fetch";
 
+/**
+ * The result of adding a user.
+ */
 type AddUserResult =
   | {
+      /**
+       * Indicates success.
+       */
       isSuccess: true;
+      /**
+       * The authentication token retrieved by adding the user.
+       */
       token: string;
     }
-  | { isSuccess: false; status: number; message: string };
+  | {
+      /**
+       * Indicates failure.
+       */
+      isSuccess: false;
+      /**
+       * The http status code returned by the server.
+       */
+      status: number;
+      /**
+       * The message returned by the server.
+       */
+      message: string;
+    };
 
+/**
+ * A type representing a searched packument. Instead of having all versions
+ * this type only includes the latest version.
+ */
 export type SearchedPackument = Omit<UnityPackument, "versions"> & {
   versions: Record<SemanticVersion, "latest">;
 };
 
+/**
+ * The result of querying the /-/all endpoint.
+ */
 type AllPackumentsResult = {
   _updated: number;
   [name: DomainName]: SearchedPackument;
@@ -64,11 +93,20 @@ export interface NpmClient {
     password: string
   ): Promise<AddUserResult>;
 
+  /**
+   * Attempts to search a npm registry.
+   * @param registry The registry to search.
+   * @param keyword The keyword to search.
+   */
   trySearch(
     registry: Registry,
     keyword: string
   ): Promise<SearchedPackument[] | null>;
 
+  /**
+   * Attempts to query the /-/all endpoint.
+   * @param registry The registry to query.
+   */
   tryGetAll(registry: Registry): Promise<AllPackumentsResult | null>;
 }
 
