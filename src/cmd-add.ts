@@ -172,20 +172,21 @@ export const add = async function (
         let isAnyDependencyUnresolved = false;
         depsInvalid.forEach((depObj) => {
           if (
-            depObj.reason === "package404" ||
-            depObj.reason === "version404"
+            depObj.reason.issue === "PackumentNotFound" ||
+            depObj.reason.issue === "VersionNotFound"
           ) {
             const resolvedVersion = manifest.dependencies[depObj.name];
             const wasResolved = Boolean(resolvedVersion);
             if (!wasResolved) {
               isAnyDependencyUnresolved = true;
-              log.notice(
-                "suggest",
-                `to install ${packageReference(
-                  depObj.name,
-                  depObj.version
-                )} or a replaceable version manually`
-              );
+              if (depObj.reason.issue === "VersionNotFound")
+                log.notice(
+                  "suggest",
+                  `to install ${packageReference(
+                    depObj.name,
+                    depObj.reason.requestedVersion
+                  )} or a replaceable version manually`
+                );
             }
           }
         });
