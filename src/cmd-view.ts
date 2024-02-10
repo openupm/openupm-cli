@@ -3,7 +3,7 @@ import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
-import { fetchPackument, getNpmClient } from "./registry-client";
+import { getNpmClient } from "./registry-client";
 import {
   packageReference,
   PackageReference,
@@ -35,10 +35,10 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let packument = await fetchPackument(env.registry, name, client);
-  if (!packument && env.upstream)
-    packument = await fetchPackument(env.upstreamRegistry, name, client);
-  if (!packument) {
+  let packument = await client.get(name, env.registry);
+  if (packument === null && env.upstream)
+    packument = await client.get(name, env.upstreamRegistry);
+  if (packument === null) {
     log.error("404", `package not found: ${name}`);
     return 1;
   }

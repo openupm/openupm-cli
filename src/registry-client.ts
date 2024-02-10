@@ -3,7 +3,6 @@ import RegClient, {
   AddUserParams,
   AddUserResponse,
   ClientCallback,
-  GetParams,
   NpmAuth,
 } from "another-npm-registry-client";
 import log from "./logger";
@@ -30,11 +29,10 @@ import {
 export interface NpmClient {
   /**
    * Attempts to get a packument from a registry.
-   * @param uri The registry url.
-   * @param options Options to get a packument.
-   * @throws {NpmClientError}
+   * @param name The name of the packument to get.
+   * @param registry The registry to get the packument from.
    */
-  get(uri: string, options: GetParams): Promise<UnityPackument>;
+  get(name: DomainName, registry: Registry): Promise<UnityPackument | null>;
 
   /**
    * Attempts to add a user to a registry.
@@ -147,31 +145,23 @@ function normalizeClientFunction<TParam, TData>(
  */
 export const getNpmClient = (): NpmClient => {
   // create client
-  const client = new RegClient({ log });
+  const registryClient = new RegClient({ log });
   return {
-    // Promisified methods
-    get: normalizeClientFunction(client, client.get),
-    addUser: normalizeClientFunction(client, client.adduser),
+    get(name, registry) {
+      const url = `${registry.url}/${name}`;
+      return new Promise((resolve) => {
+        return registryClient.get(
+          url,
+          { auth: registry.auth || undefined },
+          (error, packument) => {
+            if (error !== null) resolve(null);
+            else resolve(packument);
+          }
+        );
+      });
+    },
+    addUser: normalizeClientFunction(registryClient, registryClient.adduser),
   };
-};
-
-/**
- * Fetch package info json from registry.
- * @param registry The registry from which to get the packument.
- * @param name The name of the packument.
- * @param client The client to use for fetching.
- */
-export const fetchPackument = async function (
-  registry: Registry,
-  name: DomainName,
-  client: NpmClient
-): Promise<UnityPackument | undefined> {
-  const pkgPath = `${registry.url}/${name}`;
-  try {
-    return await client.get(pkgPath, { auth: registry.auth || undefined });
-  } catch (err) {
-    /* empty */
-  }
 };
 
 /**
