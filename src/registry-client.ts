@@ -69,7 +69,7 @@ export interface NpmClient {
     keyword: string
   ): Promise<SearchedPackument[] | null>;
 
-  getAll(registry: Registry): Promise<AllPackumentsResult | null>;
+  tryGetAll(registry: Registry): Promise<AllPackumentsResult | null>;
 }
 
 export type DependencyBase = {
@@ -188,7 +188,7 @@ export const getNpmClient = (): NpmClient => {
       }
     },
 
-    async getAll(registry: Registry): Promise<AllPackumentsResult | null> {
+    async tryGetAll(registry: Registry): Promise<AllPackumentsResult | null> {
       try {
         return (await npmFetch.json(
           "/-/all",
