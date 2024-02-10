@@ -2,7 +2,7 @@ import { VersionReference } from "./types/package-reference";
 import { fetchPackument, NpmClient, Registry } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
-import { UnityPackumentVersion } from "./types/packument";
+import { UnityPackument, UnityPackumentVersion } from "./types/packument";
 import { recordKeys } from "./utils/record-utils";
 import { PackageUrl } from "./types/package-url";
 
@@ -77,22 +77,14 @@ type ResolveFailure =
 type ResolveResult = ResolveSuccess | ResolveFailure;
 
 /**
- * Attempts to resolve a packument from a specific registry.
- * @param npmClient An npm client to interact with the registry.
- * @param packageName The name of the package to resolve.
- * @param requestedVersion The version that should be resolved.
- * @param registry The registry to resolve the packument from.
+ * Attempts to resolve a specific version from a packument.
+ * @param packument The packument to search.
+ * @param requestedVersion The requested version.
  */
-export async function tryResolve(
-  npmClient: NpmClient,
-  packageName: DomainName,
-  requestedVersion: ResolvableVersion,
-  registry: Registry
-): Promise<ResolveResult> {
-  const packument = await fetchPackument(registry, packageName, npmClient);
-  if (packument === undefined)
-    return { isSuccess: false, issue: "PackumentNotFound" };
-
+export function tryResolveFromPackument(
+  packument: UnityPackument,
+  requestedVersion: ResolvableVersion
+): ResolveResult {
   const availableVersions = recordKeys(packument.versions);
   if (availableVersions.length === 0)
     return { isSuccess: false, issue: "NoVersions" };
@@ -119,4 +111,24 @@ export async function tryResolve(
     isSuccess: true,
     packumentVersion: packument.versions[requestedVersion]!,
   };
+}
+
+/**
+ * Attempts to resolve a packument from a specific registry.
+ * @param npmClient An npm client to interact with the registry.
+ * @param packageName The name of the package to resolve.
+ * @param requestedVersion The version that should be resolved.
+ * @param registry The registry to resolve the packument from.
+ */
+export async function tryResolve(
+  npmClient: NpmClient,
+  packageName: DomainName,
+  requestedVersion: ResolvableVersion,
+  registry: Registry
+): Promise<ResolveResult> {
+  const packument = await fetchPackument(registry, packageName, npmClient);
+  if (packument === undefined)
+    return { isSuccess: false, issue: "PackumentNotFound" };
+
+  return tryResolveFromPackument(packument, requestedVersion);
 }
