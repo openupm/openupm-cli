@@ -144,7 +144,7 @@ export async function tryResolve(
   requestedVersion: ResolvableVersion,
   source: Registry
 ): Promise<ResolveResult> {
-  const packument = await npmClient.get(packageName, source);
+  const packument = await npmClient.tryFetchPackument(packageName, source);
   if (packument === null)
     return { isSuccess: false, issue: "PackumentNotFound" };
 

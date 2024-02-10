@@ -32,7 +32,10 @@ export interface NpmClient {
    * @param name The name of the packument to get.
    * @param registry The registry to get the packument from.
    */
-  get(name: DomainName, registry: Registry): Promise<UnityPackument | null>;
+  tryFetchPackument(
+    name: DomainName,
+    registry: Registry
+  ): Promise<UnityPackument | null>;
 
   /**
    * Attempts to add a user to a registry.
@@ -147,7 +150,7 @@ export const getNpmClient = (): NpmClient => {
   // create client
   const registryClient = new RegClient({ log });
   return {
-    get(name, registry) {
+    tryFetchPackument(name, registry) {
       const url = `${registry.url}/${name}`;
       return new Promise((resolve) => {
         return registryClient.get(
