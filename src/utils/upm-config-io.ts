@@ -90,9 +90,9 @@ export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
 };
 
 /**
- * Adds authentication information to an upm config.
+ * Stores authentication information in the projects upm config.
  */
-export const addAuthToConfig = async function (
+export const storeUpmAuth = async function (
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
