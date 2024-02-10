@@ -4,7 +4,6 @@ import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
 import { fetchPackument, getNpmClient } from "./registry-client";
-import { DomainName } from "./types/domain-name";
 import {
   packageReference,
   PackageReference,

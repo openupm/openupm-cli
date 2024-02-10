@@ -9,7 +9,10 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { shouldHaveDependency, shouldNotHaveRegistries } from "./project-manifest-assertions";
+import {
+  shouldHaveDependency,
+  shouldNotHaveRegistries,
+} from "./project-manifest-assertions";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { domainName } from "../src/types/domain-name";
