@@ -8,7 +8,7 @@ import {
   splitPackageReference,
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
-import { ResolveFailure } from "./packument-query";
+import { ResolveFailure } from "./packument-resolving";
 
 type DepsResultCode = 0 | 1;
 

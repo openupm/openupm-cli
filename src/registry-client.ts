@@ -22,7 +22,7 @@ import {
   ResolveFailure,
   tryResolve,
   tryResolveFromCache,
-} from "./packument-query";
+} from "./packument-resolving";
 import { unityRegistryUrl } from "../test/mock-registry";
 
 export type NpmClient = {

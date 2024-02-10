@@ -29,7 +29,7 @@ import {
   tryGetScopedRegistryByUrl,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
-import { tryResolve } from "./packument-query";
+import { tryResolve } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 
 export type AddOptions = CmdOptions<{
