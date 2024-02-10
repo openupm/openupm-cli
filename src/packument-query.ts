@@ -78,7 +78,7 @@ interface VersionNotFoundFailure extends FailureCase<"VersionNotFound"> {
 /**
  * A failed attempt at resolving a packument-version.
  */
-type ResolveFailure =
+export type ResolveFailure =
   | PackumentNotFoundFailure
   | NoVersionsFailure
   | VersionNotFoundFailure;

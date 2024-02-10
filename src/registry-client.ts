@@ -19,6 +19,7 @@ import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {
   pickMostFixable,
   ResolvableVersion,
+  ResolveFailure,
   tryResolve,
   tryResolveFromCache,
 } from "./packument-query";
@@ -81,41 +82,11 @@ export interface ValidDependency extends DependencyBase {
 }
 
 /**
- * A dependency that could not be resolved because a package was not
- * found in any registry.
- */
-interface PackageNotFoundDependency extends DependencyBase {
-  /**
-   * The requested version.
-   */
-  readonly version: SemanticVersion | "latest" | undefined;
-  /**
-   * Indicates the reason why the dependency could not be resolved.
-   */
-  readonly reason: "package404";
-}
-
-/**
- * A dependency that could not be resolved because a specific version was
- * requested but not found.
- */
-interface VersionNotFoundDependency extends DependencyBase {
-  /**
-   * The requested version.
-   */
-  readonly version: SemanticVersion;
-  /**
-   * Indicates the reason why the dependency could not be resolved.
-   */
-  readonly reason: "version404";
-}
-
-/**
  * A dependency that could not be resolved.
  */
-export type InvalidDependency =
-  | PackageNotFoundDependency
-  | VersionNotFoundDependency;
+export interface InvalidDependency extends DependencyBase {
+  reason: ResolveFailure;
+}
 
 export type Registry = {
   url: RegistryUrl;
@@ -286,12 +257,6 @@ export const fetchPackageDependencies = async function (
         if (!resolveResult.isSuccess) {
           if (resolveResult.issue === "PackumentNotFound") {
             log.warn("404", `package not found: ${entry.name}`);
-            depsInvalid.push({
-              name: entry.name,
-              version: entry.version,
-              self: isSelf,
-              reason: "package404",
-            });
           } else if (resolveResult.issue === "VersionNotFound") {
             const versionList = [...resolveResult.availableVersions]
               .reverse()
@@ -300,14 +265,12 @@ export const fetchPackageDependencies = async function (
               "404",
               `version ${resolveResult.requestedVersion} is not a valid choice of ${versionList}`
             );
-            depsInvalid.push({
-              name: entry.name,
-              version: resolveResult.requestedVersion,
-              self: isSelf,
-              reason: "version404",
-            });
           }
-          // TODO: Handle issue "NoVersions"
+          depsInvalid.push({
+            name: entry.name,
+            self: isSelf,
+            reason: resolveResult,
+          });
           continue;
         }
 

@@ -1,10 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import {
-  fetchPackageDependencies,
-  getNpmClient,
-  InvalidDependency,
-} from "./registry-client";
+import { fetchPackageDependencies, getNpmClient } from "./registry-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -12,6 +8,7 @@ import {
   splitPackageReference,
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
+import { ResolveFailure } from "./packument-query";
 
 type DepsResultCode = 0 | 1;
 
@@ -19,9 +16,9 @@ export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
 
-function errorPrefixForError(errorReason: InvalidDependency["reason"]): string {
-  if (errorReason === "package404") return "missing dependency";
-  else if (errorReason === "version404") return "missing dependency version";
+function errorPrefixForIssue(issue: ResolveFailure["issue"]): string {
+  if (issue === "PackumentNotFound") return "missing dependency";
+  else if (issue === "VersionNotFound") return "missing dependency version";
   return "unknown";
 }
 
@@ -59,8 +56,8 @@ export const deps = async function (
   depsInvalid
     .filter((x) => !x.self)
     .forEach((x) => {
-      const prefix = errorPrefixForError(x.reason);
-      log.warn(prefix, packageReference(x.name, x.version));
+      const prefix = errorPrefixForIssue(x.reason.issue);
+      log.warn(prefix, x.name);
     });
 
   return 0;
