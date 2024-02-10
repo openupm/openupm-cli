@@ -33,7 +33,7 @@ describe("registry-client", function () {
       should(env).not.be.null();
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
-      const info = await client.tryFetchPackument(packageA, env!.registry);
+      const info = await client.tryFetchPackument(env!.registry, packageA);
       should(info).deepEqual(packumentRemote);
     });
     it("404", async function () {
@@ -43,7 +43,7 @@ describe("registry-client", function () {
       );
       should(env).not.be.null();
       registerMissingPackument(packageA);
-      const info = await client.tryFetchPackument(packageA, env!.registry);
+      const info = await client.tryFetchPackument(env!.registry, packageA);
       should(info).be.null();
     });
   });

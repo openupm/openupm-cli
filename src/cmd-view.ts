@@ -35,9 +35,9 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let packument = await client.tryFetchPackument(name, env.registry);
+  let packument = await client.tryFetchPackument(env.registry, name);
   if (packument === null && env.upstream)
-    packument = await client.tryFetchPackument(name, env.upstreamRegistry);
+    packument = await client.tryFetchPackument(env.upstreamRegistry, name);
   if (packument === null) {
     log.error("404", `package not found: ${name}`);
     return 1;
