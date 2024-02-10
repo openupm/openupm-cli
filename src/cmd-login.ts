@@ -8,8 +8,14 @@ import {
   saveUpmConfig,
 } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
-import { addAuth, encodeBasicAuth, UPMConfig } from "./types/upm-config";
-import { Base64 } from "./types/base64";
+import {
+  addAuth,
+  BasicAuth,
+  encodeBasicAuth,
+  TokenAuth,
+  UpmAuth,
+  UPMConfig,
+} from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
 import {
   promptEmail,
@@ -47,11 +53,19 @@ export const login = async function (
     options._global.registry !== undefined
       ? coerceRegistryUrl(options._global.registry)
       : await promptRegistryUrl();
-  let token: string | null = null;
-  let _auth: Base64 | null = null;
+
+  const alwaysAuth = options.alwaysAuth || false;
+
+  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+
   if (options.basicAuth) {
     // basic auth
-    _auth = encodeBasicAuth(username, password);
+    const _auth = encodeBasicAuth(username, password);
+    await addAuthToConfig(configDir, loginRegistry, {
+      email,
+      alwaysAuth,
+      _auth,
+    } satisfies BasicAuth);
   } else {
     // npm login
     const result = await npmLogin(username, password, email, loginRegistry);
@@ -60,22 +74,15 @@ export const login = async function (
       log.error("auth", "can not find token from server response");
       return 1;
     }
-    token = result.token;
+    const token = result.token;
     // write npm token
     await writeNpmToken(loginRegistry, result.token);
+    await addAuthToConfig(configDir, loginRegistry, {
+      email,
+      alwaysAuth,
+      token,
+    } satisfies TokenAuth);
   }
-
-  // write unity token
-  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
-  await writeUnityToken(
-    configDir,
-    _auth,
-    options.alwaysAuth || false,
-    options.basicAuth || false,
-    email,
-    loginRegistry,
-    token
-  );
 
   return 0;
 };
@@ -187,44 +194,18 @@ export const generateNpmrcLines = function (
 };
 
 /**
- * Write npm token to Unity.
- * @throws {Error} The specified authentication information was missing.
+ * Adds authentication information to an upm config.
  */
-const writeUnityToken = async function (
+const addAuthToConfig = async function (
   configDir: string,
-  _auth: Base64 | null,
-  alwaysAuth: boolean,
-  basicAuth: boolean,
-  email: string,
   registry: RegistryUrl,
-  token: string | null
+  auth: UpmAuth
 ) {
   // Read config file
   let config: UPMConfig = (await loadUpmConfig(configDir)) || {};
 
-  if (basicAuth) {
-    if (_auth === null) throw new Error("Auth is null");
-    config = addAuth(
-      registry,
-      {
-        email,
-        alwaysAuth,
-        _auth,
-      },
-      config
-    );
-  } else {
-    if (token === null) throw new Error("Token is null");
-    config = addAuth(
-      registry,
-      {
-        email,
-        alwaysAuth,
-        token,
-      },
-      config
-    );
-  }
+  config = addAuth(registry, auth, config);
+
   // Write config file
   await saveUpmConfig(config, configDir);
 };
