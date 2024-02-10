@@ -32,7 +32,7 @@ export type NpmClient = {
   /**
    * @throws {NpmClientError}
    */
-  adduser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
+  addUser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
 };
 
 export class NpmClientError extends Error {
@@ -141,7 +141,7 @@ export const getNpmClient = (): NpmClient => {
   return {
     // Promisified methods
     get: normalizeClientFunction(client, client.get),
-    adduser: normalizeClientFunction(client, client.adduser),
+    addUser: normalizeClientFunction(client, client.adduser),
   };
 };
 

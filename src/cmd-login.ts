@@ -92,7 +92,7 @@ const npmLogin = async function (
 ): Promise<LoginResult> {
   const client = getNpmClient();
   try {
-    const data = await client.adduser(registry, {
+    const data = await client.addUser(registry, {
       auth: {
         username,
         password,
