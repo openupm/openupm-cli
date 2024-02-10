@@ -15,6 +15,9 @@ import {
   tryResolve,
   tryResolveFromCache,
 } from "./packument-resolving";
+import npmSearch from "libnpmsearch";
+import { is404Error, isHttpError } from "./utils/error-type-guards";
+import npmFetch from "npm-registry-fetch";
 
 type AddUserResult =
   | {
@@ -22,6 +25,15 @@ type AddUserResult =
       token: string;
     }
   | { isSuccess: false; status: number; message: string };
+
+export type SearchedPackument = Omit<UnityPackument, "versions"> & {
+  versions: Record<SemanticVersion, "latest">;
+};
+
+type AllPackumentsResult = {
+  _updated: number;
+  [name: DomainName]: SearchedPackument;
+};
 
 /**
  * Abstraction over a regular npm client which is specialized for UPM purposes.
@@ -51,6 +63,13 @@ export interface NpmClient {
     email: string,
     password: string
   ): Promise<AddUserResult>;
+
+  trySearch(
+    registry: Registry,
+    keyword: string
+  ): Promise<SearchedPackument[] | null>;
+
+  getAll(registry: Registry): Promise<AllPackumentsResult | null>;
 }
 
 export type DependencyBase = {
@@ -101,6 +120,20 @@ type NameVersionPair = Readonly<{
 }>;
 
 /**
+ * Get npm fetch options.
+ * @param registry The registry for which to get the options.
+ */
+const getNpmFetchOptions = function (registry: Registry): npmSearch.Options {
+  const opts: npmSearch.Options = {
+    log,
+    registry: registry.url,
+  };
+  const auth = registry.auth;
+  if (auth !== null) Object.assign(opts, auth);
+  return opts;
+};
+
+/**
  * Return npm client.
  */
 export const getNpmClient = (): NpmClient => {
@@ -120,6 +153,7 @@ export const getNpmClient = (): NpmClient => {
         );
       });
     },
+
     addUser(registryUrl, username, email, password) {
       return new Promise((resolve) => {
         registryClient.adduser(
@@ -136,6 +170,34 @@ export const getNpmClient = (): NpmClient => {
           }
         );
       });
+    },
+
+    async trySearch(
+      registry: Registry,
+      keyword: string
+    ): Promise<SearchedPackument[] | null> {
+      try {
+        // NOTE: The results of the search will be Packument objects so we can change the type
+        return (await npmSearch(
+          keyword,
+          getNpmFetchOptions(registry)
+        )) as SearchedPackument[];
+      } catch (err) {
+        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
+        return null;
+      }
+    },
+
+    async getAll(registry: Registry): Promise<AllPackumentsResult | null> {
+      try {
+        return (await npmFetch.json(
+          "/-/all",
+          getNpmFetchOptions(registry)
+        )) as AllPackumentsResult;
+      } catch (err) {
+        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
+        return null;
+      }
     },
   };
 };
