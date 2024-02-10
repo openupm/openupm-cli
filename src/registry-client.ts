@@ -24,13 +24,22 @@ import {
   tryResolveFromCache,
 } from "./packument-resolving";
 
+/**
+ * Abstraction over a regular npm client which is specialized for UPM purposes.
+ */
 export interface NpmClient {
   /**
+   * Attempts to get a packument from a registry.
+   * @param uri The registry url.
+   * @param options Options to get a packument.
    * @throws {NpmClientError}
    */
   get(uri: string, options: GetParams): Promise<UnityPackument>;
 
   /**
+   * Attempts to add a user to a registry.
+   * @param uri The registry url.
+   * @param options Options to add a user.
    * @throws {NpmClientError}
    */
   addUser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
