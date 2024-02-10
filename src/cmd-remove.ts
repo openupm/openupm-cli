@@ -40,9 +40,7 @@ export const remove = async function (
     // dirty flag
     let dirty = false;
     // parse name
-    const split = splitPackageReference(pkg);
-    const name = split[0];
-    let version = split[1];
+    const [name, version] = splitPackageReference(pkg);
     if (version) {
       log.warn(
         "",
@@ -55,9 +53,12 @@ export const remove = async function (
     if (manifest === null) return { code: 1, dirty };
     // not found array
     const pkgsNotFound = Array.of<PackageReference>();
-    version = manifest.dependencies[name];
-    if (version) {
-      log.notice("manifest", `removed ${packageReference(name, version)}`);
+    const versionInManifest = manifest.dependencies[name];
+    if (versionInManifest) {
+      log.notice(
+        "manifest",
+        `removed ${packageReference(name, versionInManifest)}`
+      );
       removeDependency(manifest, name);
       dirty = true;
     } else pkgsNotFound.push(pkg);
