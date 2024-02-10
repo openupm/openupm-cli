@@ -1,14 +1,7 @@
-import { promisify } from "util";
-import RegClient, {
-  AddUserParams,
-  AddUserResponse,
-  ClientCallback,
-  NpmAuth,
-} from "another-npm-registry-client";
+import RegClient, { NpmAuth } from "another-npm-registry-client";
 import log from "./logger";
-import request from "request";
-import assert, { AssertionError } from "assert";
 import { UnityPackument } from "./types/packument";
+import assert from "assert";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { isSemanticVersion, SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
@@ -22,6 +15,13 @@ import {
   tryResolve,
   tryResolveFromCache,
 } from "./packument-resolving";
+
+type AddUserResult =
+  | {
+      isSuccess: true;
+      token: string;
+    }
+  | { isSuccess: false; status: number; message: string };
 
 /**
  * Abstraction over a regular npm client which is specialized for UPM purposes.
@@ -39,26 +39,18 @@ export interface NpmClient {
 
   /**
    * Attempts to add a user to a registry.
-   * @param uri The registry url.
-   * @param options Options to add a user.
-   * @throws {NpmClientError}
+   * @param registryUrl The url of the registry into which to login.
+   * @param username The username with which to login.
+   * @param email The email with which to login.
+   * @param password The password with which to login.
+   * @returns An authentication token or null if registration failed.
    */
-  addUser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
-}
-
-export class NpmClientError extends Error {
-  cause: Error;
-  response: request.Response;
-
-  constructor(cause: Error, response: request.Response) {
-    super(
-      cause?.message ??
-        "An error occurred while interacting with an Npm registry"
-    );
-    this.name = "NpmClientError";
-    this.cause = cause;
-    this.response = response;
-  }
+  addUser(
+    registryUrl: RegistryUrl,
+    username: string,
+    email: string,
+    password: string
+  ): Promise<AddUserResult>;
 }
 
 export type DependencyBase = {
@@ -109,41 +101,6 @@ type NameVersionPair = Readonly<{
 }>;
 
 /**
- * @throws {AssertionError} The given parameter is not a {@link NpmClientError}.
- */
-export function assertIsNpmClientError(
-  x: unknown
-): asserts x is NpmClientError {
-  if (!(x instanceof NpmClientError))
-    throw new AssertionError({
-      message: "Given object was not an NpmClientError",
-      actual: x,
-    });
-}
-
-/**
- * Normalizes a RegClient function. Specifically it merges it's multiple
- * callback arguments into a single NormalizedError object. This function
- * also takes care of binding and promisifying.
- */
-function normalizeClientFunction<TParam, TData>(
-  client: RegClient.Instance,
-  fn: (uri: string, params: TParam, cb: ClientCallback<TData>) => void
-): (uri: string, params: TParam) => Promise<TData> {
-  const bound = fn.bind(client);
-  const withNormalizedError = (
-    uri: string,
-    params: TParam,
-    cb: (error: NpmClientError | null, data: TData) => void
-  ) => {
-    return bound(uri, params, (error, data, raw, res) => {
-      cb(error !== null ? new NpmClientError(error, res) : null, data);
-    });
-  };
-  return promisify(withNormalizedError);
-}
-
-/**
  * Return npm client.
  */
 export const getNpmClient = (): NpmClient => {
@@ -163,7 +120,23 @@ export const getNpmClient = (): NpmClient => {
         );
       });
     },
-    addUser: normalizeClientFunction(registryClient, registryClient.adduser),
+    addUser(registryUrl, username, email, password) {
+      return new Promise((resolve) => {
+        registryClient.adduser(
+          registryUrl,
+          { auth: { username, email, password } },
+          (error, responseData, _, response) => {
+            if (error !== null || !responseData.ok)
+              resolve({
+                isSuccess: false,
+                status: response.statusCode,
+                message: response.statusMessage,
+              });
+            else resolve({ isSuccess: true, token: responseData.token });
+          }
+        );
+      });
+    },
   };
 };
 
