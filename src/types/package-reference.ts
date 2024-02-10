@@ -3,6 +3,7 @@ import { isSemanticVersion, SemanticVersion } from "./semantic-version";
 import { isPackageUrl, PackageUrl } from "./package-url";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import assert from "assert";
+import { registryUrl } from "./registry-url";
 
 /**
  * A string with the format of one of the supported version tags.
@@ -17,11 +18,16 @@ export type PackageTag = "latest";
 export type VersionReference = SemanticVersion | PackageUrl | PackageTag;
 
 /**
+ * A package reference that includes a version.
+ */
+export type ReferenceWithVersion = `${DomainName}@${VersionReference}`;
+
+/**
  * References a package. Could be just the name or a reference to a specific
  * version. Not as specific as a {@link PackageId} as other version-formats
  * besides semantic versions, such as "latest" are also allowed.
  */
-export type PackageReference = DomainName | `${DomainName}@${VersionReference}`;
+export type PackageReference = DomainName | ReferenceWithVersion;
 
 /**
  * Checks if a string is a version-reference.
@@ -71,4 +77,14 @@ export function packageReference(
     `"${version}" is valid version-reference`
   );
   return version !== undefined ? `${name}@${version}` : name;
+}
+
+/**
+ * Checks if the package-reference includes a version.
+ * @param reference The package-reference.
+ */
+export function hasVersion(
+  reference: PackageReference
+): reference is ReferenceWithVersion {
+  return reference.includes("@");
 }

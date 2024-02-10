@@ -5,9 +5,9 @@ import {
 } from "./utils/project-manifest-io";
 import { parseEnv } from "./utils/env";
 import {
+  hasVersion,
   packageReference,
   PackageReference,
-  splitPackageReference,
 } from "./types/package-reference";
 import { removeScope } from "./types/scoped-registry";
 import {
@@ -40,12 +40,8 @@ export const remove = async function (
     // dirty flag
     let dirty = false;
     // parse name
-    const [name, version] = splitPackageReference(pkg);
-    if (version) {
-      log.warn(
-        "",
-        `please replace '${packageReference(name, version)}' with '${name}'`
-      );
+    if (hasVersion(pkg)) {
+      log.warn("", `please do not specify a version (Write only '${pkg}').`);
       return { code: 1, dirty };
     }
     // load manifest
@@ -53,19 +49,19 @@ export const remove = async function (
     if (manifest === null) return { code: 1, dirty };
     // not found array
     const pkgsNotFound = Array.of<PackageReference>();
-    const versionInManifest = manifest.dependencies[name];
+    const versionInManifest = manifest.dependencies[pkg];
     if (versionInManifest) {
       log.notice(
         "manifest",
-        `removed ${packageReference(name, versionInManifest)}`
+        `removed ${packageReference(pkg, versionInManifest)}`
       );
-      removeDependency(manifest, name);
+      removeDependency(manifest, pkg);
       dirty = true;
     } else pkgsNotFound.push(pkg);
 
     const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
     if (entry !== null) {
-      const scopeWasRemoved = removeScope(entry, name);
+      const scopeWasRemoved = removeScope(entry, pkg);
       if (scopeWasRemoved) dirty = true;
     }
     // save manifest
