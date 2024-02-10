@@ -5,26 +5,38 @@ import { SemanticVersion } from "./types/semantic-version";
 import { UnityPackument, UnityPackumentVersion } from "./types/packument";
 import { recordKeys } from "./utils/record-utils";
 import { PackageUrl } from "./types/package-url";
+import { PackumentCache, tryGetFromCache } from "./packument-cache";
+import { RegistryUrl } from "./types/registry-url";
 
 /**
  * A version-reference that is resolvable.
  * Mostly this excludes {@link PackageUrl}s.
  */
-type ResolvableVersion = Exclude<VersionReference, PackageUrl> | undefined;
+export type ResolvableVersion =
+  | Exclude<VersionReference, PackageUrl>
+  | undefined;
 
 /**
  * A successfully resolved packument-version.
  */
-type ResolveSuccess = {
+interface ResolveSuccess {
   /**
    * Indicates success.
    */
   readonly isSuccess: true;
   /**
+   * The packument from which the version was resolved.
+   */
+  readonly packument: UnityPackument;
+  /**
    * The resolved packument-version.
    */
   readonly packumentVersion: UnityPackumentVersion;
-};
+  /**
+   * The source from which the packument was resolved.
+   */
+  readonly source: RegistryUrl;
+}
 
 interface FailureCase<TIssue extends string> {
   /**
@@ -74,16 +86,18 @@ type ResolveFailure =
 /**
  * The result of attempting to resolve a packument-version.
  */
-type ResolveResult = ResolveSuccess | ResolveFailure;
+export type ResolveResult = ResolveSuccess | ResolveFailure;
 
 /**
  * Attempts to resolve a specific version from a packument.
  * @param packument The packument to search.
  * @param requestedVersion The requested version.
+ * @param source The source from which the packument was resolved.
  */
 export function tryResolveFromPackument(
   packument: UnityPackument,
-  requestedVersion: ResolvableVersion
+  requestedVersion: ResolvableVersion,
+  source: RegistryUrl
 ): ResolveResult {
   const availableVersions = recordKeys(packument.versions);
   if (availableVersions.length === 0)
@@ -94,6 +108,8 @@ export function tryResolveFromPackument(
     const latestVersion = availableVersions.at(-1)!;
     return {
       isSuccess: true,
+      packument,
+      source,
       packumentVersion: packument.versions[latestVersion]!,
     };
   }
@@ -109,6 +125,8 @@ export function tryResolveFromPackument(
 
   return {
     isSuccess: true,
+    packument,
+    source,
     packumentVersion: packument.versions[requestedVersion]!,
   };
 }
@@ -118,17 +136,55 @@ export function tryResolveFromPackument(
  * @param npmClient An npm client to interact with the registry.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
- * @param registry The registry to resolve the packument from.
+ * @param source The registry to resolve the packument from.
  */
 export async function tryResolve(
   npmClient: NpmClient,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
-  registry: Registry
+  source: Registry
 ): Promise<ResolveResult> {
-  const packument = await fetchPackument(registry, packageName, npmClient);
+  const packument = await fetchPackument(source, packageName, npmClient);
   if (packument === undefined)
     return { isSuccess: false, issue: "PackumentNotFound" };
 
-  return tryResolveFromPackument(packument, requestedVersion);
+  return tryResolveFromPackument(packument, requestedVersion, source.url);
+}
+
+/**
+ * Attempts to resolve a packument-version from the cache.
+ * @param cache The cache to search.
+ * @param source The source from which to resolve.
+ * @param packumentName The name of the packument to resolve.
+ * @param requestedVersion The requested version.
+ */
+export function tryResolveFromCache(
+  cache: PackumentCache,
+  source: RegistryUrl,
+  packumentName: DomainName,
+  requestedVersion: ResolvableVersion
+): ResolveResult {
+  const cachedPackument = tryGetFromCache(cache, source, packumentName);
+  if (cachedPackument === null)
+    return { isSuccess: false, issue: "PackumentNotFound" };
+
+  return tryResolveFromPackument(cachedPackument, requestedVersion, source);
+}
+
+/**
+ * Compares two resolve-failures to check which is more fixable.
+ * @param a The first failure.
+ * @param b The second failure.
+ * @returns The more fixable failure.
+ */
+export function pickMostFixable(
+  a: ResolveFailure,
+  b: ResolveFailure
+): ResolveResult {
+  // Anything is more fixable than packument-not-found
+  if (a.issue === "PackumentNotFound" && b.issue !== "PackumentNotFound")
+    return b;
+  else if (b.issue === "PackumentNotFound" && a.issue !== "PackumentNotFound")
+    return a;
+  return a;
 }
