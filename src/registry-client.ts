@@ -24,16 +24,17 @@ import {
   tryResolveFromCache,
 } from "./packument-resolving";
 
-export type NpmClient = {
+export interface NpmClient {
   /**
    * @throws {NpmClientError}
    */
   get(uri: string, options: GetParams): Promise<UnityPackument>;
+
   /**
    * @throws {NpmClientError}
    */
   addUser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
-};
+}
 
 export class NpmClientError extends Error {
   cause: Error;
