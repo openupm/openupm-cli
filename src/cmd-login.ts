@@ -2,20 +2,9 @@ import fs from "fs";
 import path from "path";
 import { assertIsNpmClientError, getNpmClient } from "./registry-client";
 import log from "./logger";
-import {
-  getUpmConfigDir,
-  loadUpmConfig,
-  saveUpmConfig,
-} from "./utils/upm-config-io";
+import { addAuthToConfig, getUpmConfigDir } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
-import {
-  addAuth,
-  BasicAuth,
-  encodeBasicAuth,
-  TokenAuth,
-  UpmAuth,
-  UPMConfig,
-} from "./types/upm-config";
+import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
 import {
   promptEmail,
@@ -191,21 +180,4 @@ export const generateNpmrcLines = function (
   // Remove empty lines
   lines = lines.filter((l) => l);
   return lines;
-};
-
-/**
- * Adds authentication information to an upm config.
- */
-const addAuthToConfig = async function (
-  configDir: string,
-  registry: RegistryUrl,
-  auth: UpmAuth
-) {
-  // Read config file
-  let config: UPMConfig = (await loadUpmConfig(configDir)) || {};
-
-  config = addAuth(registry, auth, config);
-
-  // Write config file
-  await saveUpmConfig(config, configDir);
 };
