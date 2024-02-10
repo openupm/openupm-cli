@@ -119,10 +119,10 @@ export type Registry = {
   auth: NpmAuth | null;
 };
 
-type NameVersionPair = {
+type NameVersionPair = Readonly<{
   name: DomainName;
   version: SemanticVersion | "latest" | undefined;
-};
+}>;
 
 /**
  * @throws {AssertionError} The given parameter is not a {@link NpmClientError}.
@@ -225,8 +225,9 @@ export const fetchPackageDependencies = async function (
   while (pendingList.length > 0) {
     // NOTE: Guaranteed defined because of while loop logic
     const entry = pendingList.shift() as NameVersionPair;
+    let resolvedVersion = entry.version;
     const isProcessed = processedList.some(
-      (x) => x.name === entry.name && x.version === entry.version
+      (x) => x.name === entry.name && x.version === resolvedVersion
     );
     if (!isProcessed) {
       // add entry to processed list
@@ -266,7 +267,7 @@ export const fetchPackageDependencies = async function (
           log.warn("404", `package not found: ${entry.name}`);
           depsInvalid.push({
             name: entry.name,
-            version: entry.version,
+            version: resolvedVersion,
             self: isSelf,
             reason: "package404",
           });
@@ -274,13 +275,13 @@ export const fetchPackageDependencies = async function (
         }
         // verify version
         const versions = recordKeys(packument.versions);
-        if (!entry.version || entry.version === "latest") {
+        if (!resolvedVersion || resolvedVersion === "latest") {
           const latestVersion = tryGetLatestVersion(packument);
           assert(latestVersion !== undefined);
-          entry.version = latestVersion;
+          resolvedVersion = latestVersion;
         }
         // handle version not exist
-        if (!versions.find((x) => x === entry.version)) {
+        if (!versions.find((x) => x === resolvedVersion)) {
           log.warn(
             "404",
             `package ${packageReference(
@@ -290,7 +291,7 @@ export const fetchPackageDependencies = async function (
           );
           depsInvalid.push({
             name: entry.name,
-            version: entry.version,
+            version: resolvedVersion,
             self: isSelf,
             reason: "version404",
           });
@@ -299,7 +300,7 @@ export const fetchPackageDependencies = async function (
         // add dependencies to pending list
         if (isSelf || deep) {
           const deps = recordEntries(
-            packument.versions[entry.version]!["dependencies"] || {}
+            packument.versions[resolvedVersion]!["dependencies"] || {}
           ).map((x): NameVersionPair => {
             return {
               name: x[0],
@@ -313,14 +314,14 @@ export const fetchPackageDependencies = async function (
         name: entry.name,
         // We can safely cast here, because code-logic ensures that we only
         // get here with valid semantic versions.
-        version: entry.version as SemanticVersion,
+        version: resolvedVersion as SemanticVersion,
         internal: isInternal,
         upstream: isUpstream,
         self: isSelf,
       });
       log.verbose(
         "dependency",
-        `${packageReference(entry.name, entry.version)} ${
+        `${packageReference(entry.name, resolvedVersion)} ${
           isInternal ? "[internal] " : ""
         }${isUpstream ? "[upstream]" : ""}`
       );
