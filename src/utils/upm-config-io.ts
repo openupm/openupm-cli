@@ -5,7 +5,8 @@ import fs from "fs/promises";
 import log from "../logger";
 import isWsl from "is-wsl";
 import execute from "./process";
-import { UPMConfig } from "../types/upm-config";
+import { addAuth, UpmAuth, UPMConfig } from "../types/upm-config";
+import { RegistryUrl } from "../types/registry-url";
 
 const configFileName = ".upmconfig.toml";
 
@@ -86,4 +87,21 @@ export const saveUpmConfig = async (config: UPMConfig, configDir: string) => {
   const content = TOML.stringify(config);
   await fs.writeFile(configPath, content, "utf8");
   log.notice("config", "saved unity config at " + configPath);
+};
+
+/**
+ * Stores authentication information in the projects upm config.
+ */
+export const storeUpmAuth = async function (
+  configDir: string,
+  registry: RegistryUrl,
+  auth: UpmAuth
+) {
+  // Read config file
+  let config: UPMConfig = (await loadUpmConfig(configDir)) || {};
+
+  config = addAuth(registry, auth, config);
+
+  // Write config file
+  await saveUpmConfig(config, configDir);
 };
