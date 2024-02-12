@@ -17,6 +17,7 @@ export function registerRemotePackument(packument: UnityPackument) {
     .persist()
     .get(`/${packument.name}`)
     .reply(200, packument, { "Content-Type": "application/json" });
+  nock(unityRegistryUrl).persist().get(`/${packument.name}`).reply(404);
 }
 
 export function registerRemoteUpstreamPackument(packument: UnityPackument) {

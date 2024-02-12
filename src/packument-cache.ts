@@ -1,24 +1,17 @@
 import { DomainName } from "./types/domain-name";
 import { UnityPackument } from "./types/packument";
+import { RegistryUrl } from "./types/registry-url";
 
-/**
- * Represents a cached packument.
- */
-type CachedPackument = {
-  /**
-   * The packument.
-   */
-  packument: UnityPackument;
-  /**
-   * Whether it was originally resolved from the upstream registry.
-   */
-  upstream: boolean;
+type CachedRegistry = {
+  [name: DomainName]: UnityPackument;
 };
 
 /**
  * A cache that contains packuments that were already resolved.
  */
-export type PackumentCache = Record<DomainName, CachedPackument>;
+export type PackumentCache = {
+  [source: RegistryUrl]: CachedRegistry;
+};
 
 /**
  * An empty packument cache.
@@ -28,26 +21,29 @@ export const emptyPackumentCache: PackumentCache = {};
 /**
  * Attempts to get a cached packument from a cache.
  * @param cache The cache.
+ * @param source The source from which to resolve the packument.
  * @param packageName The name of the packument.
  */
 export function tryGetFromCache(
   cache: PackumentCache,
+  source: RegistryUrl,
   packageName: DomainName
-): CachedPackument | null {
-  return cache[packageName] ?? null;
+): UnityPackument | null {
+  return cache[source]?.[packageName] ?? null;
 }
 
 /**
  * Caches a packument.
  * @param cache The current state of the cache.
+ * @param source The packument source.
  * @param packument The packument.
- * @param upstream Whether the packument was resolved from the upstream registry.
  * @returns The new state of the cache.
  */
 export function addToCache(
   cache: PackumentCache,
-  packument: UnityPackument,
-  upstream: boolean
+  source: RegistryUrl,
+  packument: UnityPackument
 ): PackumentCache {
-  return { ...cache, [packument.name]: { packument, upstream } };
+  const registry = cache[source] ?? {};
+  return { ...cache, [source]: { ...registry, [packument.name]: packument } };
 }
