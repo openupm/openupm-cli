@@ -2,10 +2,9 @@ import nock from "nock";
 import { SearchEndpointResult } from "./types";
 import { isDomainName } from "../src/types/domain-name";
 import assert from "assert";
-import { registryUrl } from "../src/types/registry-url";
+import { registryUrl, unityRegistryUrl } from "../src/types/registry-url";
 import { UnityPackument } from "../src/types/packument";
 
-export const unityRegistryUrl = registryUrl("https://packages.unity.com");
 export const exampleRegistryUrl = registryUrl("http://example.com");
 
 export function startMockRegistry() {

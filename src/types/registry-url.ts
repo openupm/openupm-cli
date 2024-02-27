@@ -38,3 +38,5 @@ export function coerceRegistryUrl(s: string): RegistryUrl {
   s = removeTrailingSlash(s);
   return registryUrl(s);
 }
+
+export const unityRegistryUrl = registryUrl("https://packages.unity.com");
