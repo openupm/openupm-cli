@@ -10,7 +10,7 @@ import { login } from "./cmd-login";
 import log from "./logger";
 
 // update-notifier
-import pkg from "../../package.json";
+import pkg from "../package.json";
 import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
 import { isPackageReference } from "./types/package-reference";
 import { isDomainName } from "./types/domain-name";
