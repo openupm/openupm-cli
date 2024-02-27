@@ -1,3 +1,15 @@
+## [1.19.9](https://github.com/openupm/openupm-cli/compare/1.19.8...1.19.9) (2024-02-27)
+
+
+### Bug Fixes
+
+* avoid importing from test folder ([54e34cb](https://github.com/openupm/openupm-cli/commit/54e34cb3445d94b25ad70623baaae211a0ae7858))
+
+
+### Reverts
+
+* Revert "fix: change the main CLI path to lib/src/*" ([77be353](https://github.com/openupm/openupm-cli/commit/77be353f6bd8ae3c13303230a777ae95c532c3e9))
+
 ## [1.19.8](https://github.com/openupm/openupm-cli/compare/1.19.7...1.19.8) (2024-02-27)
 
 
