@@ -15,9 +15,9 @@
     "semantic-release": "semantic-release"
   },
   "bin": {
-    "openupm": "lib/index.js",
-    "openupm-cli": "lib/index.js",
-    "openupm-cn": "lib/index-cn.js"
+    "openupm": "lib/src/index.js",
+    "openupm-cli": "lib/src/index.js",
+    "openupm-cn": "lib/src/index-cn.js"
   },
   "repository": {
     "type": "git",
