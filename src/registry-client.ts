@@ -13,7 +13,7 @@ import { UnityPackument } from "./types/packument";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { isSemanticVersion, SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
-import { RegistryUrl } from "./types/registry-url";
+import { RegistryUrl, unityRegistryUrl } from "./types/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {
@@ -23,7 +23,6 @@ import {
   tryResolve,
   tryResolveFromCache,
 } from "./packument-resolving";
-import { unityRegistryUrl } from "../test/mock-registry";
 
 export type NpmClient = {
   /**
