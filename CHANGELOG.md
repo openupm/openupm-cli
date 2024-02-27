@@ -1,3 +1,10 @@
+## [1.19.8](https://github.com/openupm/openupm-cli/compare/1.19.7...1.19.8) (2024-02-27)
+
+
+### Bug Fixes
+
+* change the main CLI path to lib/src/* ([3fd2c01](https://github.com/openupm/openupm-cli/commit/3fd2c01576865ae833814407a670dc9540d8549f))
+
 ## [1.19.7](https://github.com/openupm/openupm-cli/compare/1.19.6...1.19.7) (2024-01-20)
 
 
