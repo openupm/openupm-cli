@@ -6,13 +6,20 @@ import {
 } from "../src/utils/project-manifest-io";
 import { describe } from "mocha";
 import { shouldNotHaveAnyDependencies } from "./project-manifest-assertions";
-import { domainName } from "../src/types/domain-name";
+import { DomainName, domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
-import { addDependency, manifestPathFor } from "../src/types/project-manifest";
+import {
+  addDependency,
+  manifestPathFor,
+  tryGetScopedRegistryByUrl,
+} from "../src/types/project-manifest";
 import should from "should";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
 import path from "path";
+import { buildProjectManifest } from "./data-project-manifest";
+import { removeScope } from "../src/types/scoped-registry";
+import { exampleRegistryUrl } from "./mock-registry";
 
 describe("project-manifest io", function () {
   let mockConsole: MockConsole = null!;
@@ -66,5 +73,25 @@ describe("project-manifest io", function () {
     const manifestPath = manifestPathFor("test-openupm-cli");
     const expected = path.join("test-openupm-cli", "Packages", "manifest.json");
     should(manifestPath).be.equal(expected);
+  });
+  it("should not save scoped-registry with empty scopes", async () => {
+    // Add and then remove a scope to force an empty scoped-registry
+    const testDomain = "test" as DomainName;
+    const initialManifest = buildProjectManifest((manifest) =>
+      manifest.addScope(testDomain)
+    );
+    const scopedRegistry = tryGetScopedRegistryByUrl(
+      initialManifest,
+      exampleRegistryUrl
+    )!;
+    removeScope(scopedRegistry, testDomain);
+
+    // Save and load manifest
+    (
+      await saveProjectManifest(mockProject.projectPath, initialManifest)
+    ).should.be.ok();
+    const savedManifest = await loadProjectManifest(mockProject.projectPath);
+
+    should(savedManifest?.scopedRegistries).be.empty();
   });
 });

@@ -12,6 +12,7 @@ import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { after } from "mocha";
+import should from "should";
 
 const packageA = domainName("com.example.package-a");
 const packageB = domainName("com.example.package-b");
@@ -109,6 +110,19 @@ describe("cmd-remove.ts", function () {
         .hasLineIncluding("out", "removed com.example.package-b")
         .should.be.ok();
       mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
+    });
+    it("should delete scoped-registry after removing all packages", async () => {
+      const options = {
+        _global: {
+          registry: exampleRegistryUrl,
+        },
+      };
+      const retCode = await remove([packageA, packageB], options);
+      retCode.should.equal(0);
+
+      await mockProject.tryAssertManifest((manifest) => {
+        should(manifest.scopedRegistries).be.empty();
+      });
     });
   });
 });
