@@ -1,3 +1,10 @@
+## [1.19.10](https://github.com/openupm/openupm-cli/compare/1.19.9...1.19.10) (2024-03-05)
+
+
+### Bug Fixes
+
+* empty scoped-registry after remove ([#157](https://github.com/openupm/openupm-cli/issues/157)) ([db0537e](https://github.com/openupm/openupm-cli/commit/db0537e90b5048df8140a5b07a17554682767369)), closes [#153](https://github.com/openupm/openupm-cli/issues/153)
+
 ## [1.19.9](https://github.com/openupm/openupm-cli/compare/1.19.8...1.19.9) (2024-02-27)
 
 
