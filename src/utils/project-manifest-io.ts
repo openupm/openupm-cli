@@ -3,6 +3,7 @@ import { assertIsError } from "./error-type-guards";
 import log from "../logger";
 import {
   manifestPathFor,
+  pruneManifest,
   UnityProjectManifest,
 } from "../types/project-manifest";
 import fse from "fs-extra";
@@ -34,14 +35,16 @@ export const loadProjectManifest = async function (
 /**
  * Saves a Unity project manifest.
  * @param projectPath The path to the projects root directory.
- * @param data The manifest to save.
+ * @param manifest The manifest to save.
  */
 export const saveProjectManifest = async function (
   projectPath: string,
-  data: UnityProjectManifest
+  manifest: UnityProjectManifest
 ) {
   const manifestPath = manifestPathFor(projectPath);
-  const json = JSON.stringify(data, null, 2);
+  // NOTE: This modifies the manifest that was passed to the function!
+  pruneManifest(manifest);
+  const json = JSON.stringify(manifest, null, 2);
   try {
     await fse.ensureDir(path.dirname(manifestPath));
     await fs.writeFile(manifestPath, json);
