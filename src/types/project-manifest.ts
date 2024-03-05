@@ -106,6 +106,25 @@ export function addScopedRegistry(
 }
 
 /**
+ * Removes a scoped-registry to the manifest.
+ * @param manifest The manifest.
+ * @param name The name of the scoped-registry to remove.
+ */
+export function removeScopedRegistry(
+  manifest: UnityProjectManifest,
+  name: string
+) {
+  if (manifest.scopedRegistries === undefined) return;
+
+  const removeIndex = manifest.scopedRegistries.findIndex(
+    (registry) => registry.name === name
+  );
+  if (removeIndex === -1) return;
+
+  manifest.scopedRegistries.splice(removeIndex, 1);
+}
+
+/**
  * Adds a testable to the manifest, if it is not already added.
  * @param manifest The manifest.
  * @param name The testable name.
@@ -123,4 +142,18 @@ export function addTestable(manifest: UnityProjectManifest, name: DomainName) {
  */
 export function manifestPathFor(projectPath: string): string {
   return path.join(projectPath, "Packages/manifest.json");
+}
+
+/**
+ * Prunes the manifest by performing the following operations:
+ *  - Remove scoped-registries without scopes.
+ * @param manifest The manifest to prune.
+ */
+export function pruneManifest(manifest: UnityProjectManifest) {
+  if (manifest.scopedRegistries !== undefined) {
+    manifest.scopedRegistries.forEach((registry) => {
+      if (registry.scopes.length === 0)
+        removeScopedRegistry(manifest, registry.name);
+    });
+  }
 }
