@@ -4,11 +4,7 @@ import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
 import { getNpmClient } from "./registry-client";
-import {
-  packageReference,
-  PackageReference,
-  splitPackageReference,
-} from "./types/package-reference";
+import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
 
@@ -26,20 +22,16 @@ export const view = async function (
   const client = getNpmClient();
 
   // parse name
-  const [name, version] = splitPackageReference(pkg);
-  if (version) {
-    log.warn(
-      "",
-      `please replace '${packageReference(name, version)}' with '${name}'`
-    );
+  if (hasVersion(pkg)) {
+    log.warn("", `please do not specify a version (Write only '${pkg}').`);
     return 1;
   }
   // verify name
-  let packument = await client.tryFetchPackument(env.registry, name);
+  let packument = await client.tryFetchPackument(env.registry, pkg);
   if (packument === null && env.upstream)
-    packument = await client.tryFetchPackument(env.upstreamRegistry, name);
+    packument = await client.tryFetchPackument(env.upstreamRegistry, pkg);
   if (packument === null) {
-    log.error("404", `package not found: ${name}`);
+    log.error("404", `package not found: ${pkg}`);
     return 1;
   }
   // print info
