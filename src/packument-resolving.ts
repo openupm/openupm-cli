@@ -1,5 +1,5 @@
 import { VersionReference } from "./types/package-reference";
-import { fetchPackument, NpmClient, Registry } from "./registry-client";
+import { NpmClient, Registry } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { UnityPackument, UnityPackumentVersion } from "./types/packument";
@@ -144,8 +144,8 @@ export async function tryResolve(
   requestedVersion: ResolvableVersion,
   source: Registry
 ): Promise<ResolveResult> {
-  const packument = await fetchPackument(source, packageName, npmClient);
-  if (packument === undefined)
+  const packument = await npmClient.tryFetchPackument(source, packageName);
+  if (packument === null)
     return { isSuccess: false, issue: "PackumentNotFound" };
 
   return tryResolveFromPackument(packument, requestedVersion, source.url);

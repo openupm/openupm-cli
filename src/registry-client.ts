@@ -1,15 +1,7 @@
-import { promisify } from "util";
-import RegClient, {
-  AddUserParams,
-  AddUserResponse,
-  ClientCallback,
-  GetParams,
-  NpmAuth,
-} from "another-npm-registry-client";
+import RegClient, { NpmAuth } from "another-npm-registry-client";
 import log from "./logger";
-import request from "request";
-import assert, { AssertionError } from "assert";
 import { UnityPackument } from "./types/packument";
+import assert from "assert";
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { isSemanticVersion, SemanticVersion } from "./types/semantic-version";
 import { packageReference } from "./types/package-reference";
@@ -23,31 +15,99 @@ import {
   tryResolve,
   tryResolveFromCache,
 } from "./packument-resolving";
+import npmSearch from "libnpmsearch";
+import { is404Error, isHttpError } from "./utils/error-type-guards";
+import npmFetch from "npm-registry-fetch";
 
-export type NpmClient = {
-  /**
-   * @throws {NpmClientError}
-   */
-  get(uri: string, options: GetParams): Promise<UnityPackument>;
-  /**
-   * @throws {NpmClientError}
-   */
-  adduser(uri: string, options: AddUserParams): Promise<AddUserResponse>;
+/**
+ * The result of adding a user.
+ */
+type AddUserResult =
+  | {
+      /**
+       * Indicates success.
+       */
+      isSuccess: true;
+      /**
+       * The authentication token retrieved by adding the user.
+       */
+      token: string;
+    }
+  | {
+      /**
+       * Indicates failure.
+       */
+      isSuccess: false;
+      /**
+       * The http status code returned by the server.
+       */
+      status: number;
+      /**
+       * The message returned by the server.
+       */
+      message: string;
+    };
+
+/**
+ * A type representing a searched packument. Instead of having all versions
+ * this type only includes the latest version.
+ */
+export type SearchedPackument = Omit<UnityPackument, "versions"> & {
+  versions: Record<SemanticVersion, "latest">;
 };
 
-export class NpmClientError extends Error {
-  cause: Error;
-  response: request.Response;
+/**
+ * The result of querying the /-/all endpoint.
+ */
+type AllPackumentsResult = {
+  _updated: number;
+  [name: DomainName]: SearchedPackument;
+};
 
-  constructor(cause: Error, response: request.Response) {
-    super(
-      cause?.message ??
-        "An error occurred while interacting with an Npm registry"
-    );
-    this.name = "NpmClientError";
-    this.cause = cause;
-    this.response = response;
-  }
+/**
+ * Abstraction over a regular npm client which is specialized for UPM purposes.
+ */
+export interface NpmClient {
+  /**
+   * Attempts to get a packument from a registry.
+   * @param registry The registry to get the packument from.
+   * @param name The name of the packument to get.
+   */
+  tryFetchPackument(
+    registry: Registry,
+    name: DomainName
+  ): Promise<UnityPackument | null>;
+
+  /**
+   * Attempts to add a user to a registry.
+   * @param registryUrl The url of the registry into which to login.
+   * @param username The username with which to login.
+   * @param email The email with which to login.
+   * @param password The password with which to login.
+   * @returns An authentication token or null if registration failed.
+   */
+  addUser(
+    registryUrl: RegistryUrl,
+    username: string,
+    email: string,
+    password: string
+  ): Promise<AddUserResult>;
+
+  /**
+   * Attempts to search a npm registry.
+   * @param registry The registry to search.
+   * @param keyword The keyword to search.
+   */
+  trySearch(
+    registry: Registry,
+    keyword: string
+  ): Promise<SearchedPackument[] | null>;
+
+  /**
+   * Attempts to query the /-/all endpoint.
+   * @param registry The registry to query.
+   */
+  tryGetAll(registry: Registry): Promise<AllPackumentsResult | null>;
 }
 
 export type DependencyBase = {
@@ -98,70 +158,86 @@ type NameVersionPair = Readonly<{
 }>;
 
 /**
- * @throws {AssertionError} The given parameter is not a {@link NpmClientError}.
+ * Get npm fetch options.
+ * @param registry The registry for which to get the options.
  */
-export function assertIsNpmClientError(
-  x: unknown
-): asserts x is NpmClientError {
-  if (!(x instanceof NpmClientError))
-    throw new AssertionError({
-      message: "Given object was not an NpmClientError",
-      actual: x,
-    });
-}
-
-/**
- * Normalizes a RegClient function. Specifically it merges it's multiple
- * callback arguments into a single NormalizedError object. This function
- * also takes care of binding and promisifying.
- */
-function normalizeClientFunction<TParam, TData>(
-  client: RegClient.Instance,
-  fn: (uri: string, params: TParam, cb: ClientCallback<TData>) => void
-): (uri: string, params: TParam) => Promise<TData> {
-  const bound = fn.bind(client);
-  const withNormalizedError = (
-    uri: string,
-    params: TParam,
-    cb: (error: NpmClientError | null, data: TData) => void
-  ) => {
-    return bound(uri, params, (error, data, raw, res) => {
-      cb(error !== null ? new NpmClientError(error, res) : null, data);
-    });
+const getNpmFetchOptions = function (registry: Registry): npmSearch.Options {
+  const opts: npmSearch.Options = {
+    log,
+    registry: registry.url,
   };
-  return promisify(withNormalizedError);
-}
+  const auth = registry.auth;
+  if (auth !== null) Object.assign(opts, auth);
+  return opts;
+};
 
 /**
  * Return npm client.
  */
 export const getNpmClient = (): NpmClient => {
   // create client
-  const client = new RegClient({ log });
+  const registryClient = new RegClient({ log });
   return {
-    // Promisified methods
-    get: normalizeClientFunction(client, client.get),
-    adduser: normalizeClientFunction(client, client.adduser),
-  };
-};
+    tryFetchPackument(registry, name) {
+      const url = `${registry.url}/${name}`;
+      return new Promise((resolve) => {
+        return registryClient.get(
+          url,
+          { auth: registry.auth || undefined },
+          (error, packument) => {
+            if (error !== null) resolve(null);
+            else resolve(packument);
+          }
+        );
+      });
+    },
 
-/**
- * Fetch package info json from registry.
- * @param registry The registry from which to get the packument.
- * @param name The name of the packument.
- * @param client The client to use for fetching.
- */
-export const fetchPackument = async function (
-  registry: Registry,
-  name: DomainName,
-  client: NpmClient
-): Promise<UnityPackument | undefined> {
-  const pkgPath = `${registry.url}/${name}`;
-  try {
-    return await client.get(pkgPath, { auth: registry.auth || undefined });
-  } catch (err) {
-    /* empty */
-  }
+    addUser(registryUrl, username, email, password) {
+      return new Promise((resolve) => {
+        registryClient.adduser(
+          registryUrl,
+          { auth: { username, email, password } },
+          (error, responseData, _, response) => {
+            if (error !== null || !responseData.ok)
+              resolve({
+                isSuccess: false,
+                status: response.statusCode,
+                message: response.statusMessage,
+              });
+            else resolve({ isSuccess: true, token: responseData.token });
+          }
+        );
+      });
+    },
+
+    async trySearch(
+      registry: Registry,
+      keyword: string
+    ): Promise<SearchedPackument[] | null> {
+      try {
+        // NOTE: The results of the search will be Packument objects so we can change the type
+        return (await npmSearch(
+          keyword,
+          getNpmFetchOptions(registry)
+        )) as SearchedPackument[];
+      } catch (err) {
+        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
+        return null;
+      }
+    },
+
+    async tryGetAll(registry: Registry): Promise<AllPackumentsResult | null> {
+      try {
+        return (await npmFetch.json(
+          "/-/all",
+          getNpmFetchOptions(registry)
+        )) as AllPackumentsResult;
+      } catch (err) {
+        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
+        return null;
+      }
+    },
+  };
 };
 
 /**

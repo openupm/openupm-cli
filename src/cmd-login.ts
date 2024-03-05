@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { assertIsNpmClientError, getNpmClient } from "./registry-client";
+import { getNpmClient } from "./registry-client";
 import log from "./logger";
 import { storeUpmAuth, getUpmConfigDir } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
@@ -91,30 +91,19 @@ const npmLogin = async function (
   registry: RegistryUrl
 ): Promise<LoginResult> {
   const client = getNpmClient();
-  try {
-    const data = await client.adduser(registry, {
-      auth: {
-        username,
-        password,
-        email,
-      },
-    });
-    if (data.ok) {
-      log.notice("auth", `you are authenticated as '${username}'`);
-      const token = data.token;
-      return { code: 0, token };
-    }
-    return { code: 1 };
-  } catch (err) {
-    assertIsNpmClientError(err);
+  const result = await client.addUser(registry, username, password, email);
 
-    if (err.response.statusCode === 401) {
-      log.warn("401", "Incorrect username or password");
-      return { code: 1 };
-    } else {
-      log.error(err.response.statusCode.toString(), err.message);
-      return { code: 1 };
-    }
+  if (result.isSuccess) {
+    log.notice("auth", `you are authenticated as '${username}'`);
+    return { code: 0, token: result.token };
+  }
+
+  if (result.status === 401) {
+    log.warn("401", "Incorrect username or password");
+    return { code: 1 };
+  } else {
+    log.error(result.status.toString(), result.message);
+    return { code: 1 };
   }
 };
 
