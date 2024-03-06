@@ -1,3 +1,10 @@
+## [1.19.11](https://github.com/openupm/openupm-cli/compare/1.19.10...1.19.11) (2024-03-06)
+
+
+### Bug Fixes
+
+* parse corrected latest version from Unity registry (close [#156](https://github.com/openupm/openupm-cli/issues/156)) ([62aaf2b](https://github.com/openupm/openupm-cli/commit/62aaf2b2779d914a7fed1c98fdf0523de463322d))
+
 ## [1.19.10](https://github.com/openupm/openupm-cli/compare/1.19.9...1.19.10) (2024-03-05)
 
 
