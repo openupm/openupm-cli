@@ -2,7 +2,11 @@ import { VersionReference } from "./types/package-reference";
 import { NpmClient, Registry } from "./registry-client";
 import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
-import { UnityPackument, UnityPackumentVersion } from "./types/packument";
+import {
+  tryGetLatestVersion,
+  UnityPackument,
+  UnityPackumentVersion,
+} from "./types/packument";
 import { recordKeys } from "./utils/record-utils";
 import { PackageUrl } from "./types/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
@@ -105,7 +109,8 @@ export function tryResolveFromPackument(
 
   // Find the latest version
   if (requestedVersion === undefined || requestedVersion === "latest") {
-    const latestVersion = availableVersions.at(-1)!;
+    let latestVersion = tryGetLatestVersion(packument);
+    if (latestVersion === undefined) latestVersion = availableVersions.at(-1)!;
     return {
       isSuccess: true,
       packument,
