@@ -10,7 +10,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import { fetchPackageDependencies, getNpmClient } from "./registry-client";
+import { makeNpmClient } from "./npm-client";
 import { DomainName } from "./types/domain-name";
 import {
   packageReference,
@@ -27,6 +27,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { tryResolve } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
+import { fetchPackageDependencies } from "./dependency-resolving";
 
 export type AddOptions = CmdOptions<{
   test?: boolean;
@@ -52,7 +53,7 @@ export const add = async function (
   const env = await parseEnv(options, true);
   if (env === null) return 1;
 
-  const client = getNpmClient();
+  const client = makeNpmClient();
 
   const addSingle = async function (pkg: PackageReference): Promise<AddResult> {
     // is upstream package flag

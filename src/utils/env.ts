@@ -8,7 +8,7 @@ import { coerceRegistryUrl, registryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
-import { Registry } from "../registry-client";
+import { Registry } from "../npm-client";
 
 export type Env = Readonly<{
   cwd: string;
@@ -80,11 +80,14 @@ export const parseEnv = async function (
   const upmConfig = await loadUpmConfig(configDir);
 
   if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
-    registry.auth = tryGetAuthForRegistry(upmConfig, registry.url);
-    upstreamRegistry.auth = tryGetAuthForRegistry(
-      upmConfig,
-      upstreamRegistry.url
-    );
+    registry = {
+      url: registry.url,
+      auth: tryGetAuthForRegistry(upmConfig, registry.url),
+    };
+    upstreamRegistry = {
+      url: upstreamRegistry.url,
+      auth: tryGetAuthForRegistry(upmConfig, upstreamRegistry.url),
+    };
   }
   // return if no need to check path
   if (!checkPath)

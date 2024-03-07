@@ -3,11 +3,11 @@ import * as os from "os";
 import { parseEnv } from "./utils/env";
 import { CmdOptions } from "./types/options";
 import {
-  getNpmClient,
+  makeNpmClient,
   NpmClient,
   Registry,
   SearchedPackument,
-} from "./registry-client";
+} from "./npm-client";
 import { formatAsTable } from "./output-formatting";
 
 type SearchResultCode = 0 | 1;
@@ -58,7 +58,7 @@ export async function search(
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
-  const npmClient = getNpmClient();
+  const npmClient = makeNpmClient();
 
   // search endpoint
   let results = await searchEndpoint(npmClient, env.registry, keyword);

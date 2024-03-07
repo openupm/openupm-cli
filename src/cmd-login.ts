@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { getNpmClient } from "./registry-client";
+import { makeNpmClient } from "./npm-client";
 import log from "./logger";
-import { storeUpmAuth, getUpmConfigDir } from "./utils/upm-config-io";
+import { getUpmConfigDir, storeUpmAuth } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
@@ -90,7 +90,7 @@ const npmLogin = async function (
   email: string,
   registry: RegistryUrl
 ): Promise<LoginResult> {
-  const client = getNpmClient();
+  const client = makeNpmClient();
   const result = await client.addUser(registry, username, password, email);
 
   if (result.isSuccess) {

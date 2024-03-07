@@ -11,13 +11,13 @@ import {
 import should from "should";
 import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
-import { getNpmClient } from "../src/registry-client";
+import { makeNpmClient } from "../src/npm-client";
 
 const packageA = domainName("package-a");
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
-    const client = getNpmClient();
+    const client = makeNpmClient();
 
     beforeEach(function () {
       startMockRegistry();

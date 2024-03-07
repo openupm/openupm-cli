@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies, getNpmClient } from "./registry-client";
+import { makeNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -9,6 +9,7 @@ import {
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { ResolveFailure } from "./packument-resolving";
+import { fetchPackageDependencies } from "./dependency-resolving";
 
 type DepsResultCode = 0 | 1;
 
@@ -33,7 +34,7 @@ export const deps = async function (
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
-  const client = getNpmClient();
+  const client = makeNpmClient();
 
   const [name, version] = splitPackageReference(pkg);
 
