@@ -35,7 +35,7 @@ export type UnityProjectManifest = {
    * Lists the names of packages whose tests you want to load in the
    * Unity Test Framework.
    */
-  testables?: DomainName[];
+  testables?: ReadonlyArray<DomainName>;
 };
 
 /**
@@ -130,9 +130,14 @@ export function removeScopedRegistry(
  * @param name The testable name.
  */
 export function addTestable(manifest: UnityProjectManifest, name: DomainName) {
-  if (!manifest.testables) manifest.testables = [];
-  if (manifest.testables.indexOf(name) === -1) manifest.testables.push(name);
-  manifest.testables.sort();
+  if (!manifest.testables) {
+    manifest.testables = [name];
+    return;
+  }
+
+  if (manifest.testables.indexOf(name) !== -1) return;
+
+  manifest.testables = [...manifest.testables, name].sort();
 }
 
 /**
