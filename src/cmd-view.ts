@@ -3,7 +3,7 @@ import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
-import { getNpmClient } from "./npm-client";
+import { makeNpmClient } from "./npm-client";
 import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
@@ -19,7 +19,7 @@ export const view = async function (
   // parse env
   const env = await parseEnv(options, false);
   if (env === null) return 1;
-  const client = getNpmClient();
+  const client = makeNpmClient();
 
   // parse name
   if (hasVersion(pkg)) {

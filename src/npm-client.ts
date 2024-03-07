@@ -172,9 +172,9 @@ const getNpmFetchOptions = function (registry: Registry): npmSearch.Options {
 };
 
 /**
- * Return npm client.
+ * Makes a new {@link NpmClient}.
  */
-export const getNpmClient = (): NpmClient => {
+export const makeNpmClient = (): NpmClient => {
   // create client
   const registryClient = new RegClient({ log });
   return {

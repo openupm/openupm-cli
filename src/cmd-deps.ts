@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies, getNpmClient } from "./npm-client";
+import { fetchPackageDependencies, makeNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -33,7 +33,7 @@ export const deps = async function (
   const env = await parseEnv(options, false);
   if (env === null) return 1;
 
-  const client = getNpmClient();
+  const client = makeNpmClient();
 
   const [name, version] = splitPackageReference(pkg);
 
