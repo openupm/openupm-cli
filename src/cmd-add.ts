@@ -17,11 +17,7 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import {
-  addScope,
-  ScopedRegistry,
-  scopedRegistry,
-} from "./types/scoped-registry";
+import { addScope, scopedRegistry } from "./types/scoped-registry";
 import {
   addDependency,
   addScopedRegistry,
@@ -65,7 +61,7 @@ export const add = async function (
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    const manifest = await loadProjectManifest(env.cwd);
+    let manifest = await loadProjectManifest(env.cwd);
     if (manifest === null) return { code: 1, dirty: false };
     // packages that added to scope registry
     const pkgsInScope = Array.of<DomainName>();
@@ -175,7 +171,8 @@ export const add = async function (
             depObj.reason.issue === "PackumentNotFound" ||
             depObj.reason.issue === "VersionNotFound"
           ) {
-            const resolvedVersion = manifest.dependencies[depObj.name];
+            // Not sure why it thinks the manifest can be null here.
+            const resolvedVersion = manifest!.dependencies[depObj.name];
             const wasResolved = Boolean(resolvedVersion);
             if (!wasResolved) {
               isAnyDependencyUnresolved = true;
@@ -207,7 +204,11 @@ export const add = async function (
     let dirty = false;
     // I am not sure why we need this assertion. I'm pretty sure
     // code-logic ensures the correct type.
-    addDependency(manifest, name, versionToAdd as PackageUrl | SemanticVersion);
+    manifest = addDependency(
+      manifest,
+      name,
+      versionToAdd as PackageUrl | SemanticVersion
+    );
     if (!oldVersion) {
       // Log the added package
       log.notice("manifest", `added ${packageReference(name, versionToAdd)}`);
@@ -224,17 +225,12 @@ export const add = async function (
       log.notice("manifest", `existed ${packageReference(name, versionToAdd)}`);
     }
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
-      // add to scopedRegistries
-      if (!manifest.scopedRegistries) {
-        manifest.scopedRegistries = Array.of<ScopedRegistry>();
-        dirty = true;
-      }
       let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
       if (entry === null) {
         const name = url.parse(env.registry.url).hostname;
         if (name === null) throw new Error("Could not resolve registry name");
         entry = scopedRegistry(name, env.registry.url);
-        addScopedRegistry(manifest, entry);
+        manifest = addScopedRegistry(manifest, entry);
         dirty = true;
       }
       pkgsInScope.forEach((name) => {
@@ -242,7 +238,7 @@ export const add = async function (
         if (wasAdded) dirty = true;
       });
     }
-    if (options.test) addTestable(manifest, name);
+    if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
       if (!(await saveProjectManifest(env.cwd, manifest)))

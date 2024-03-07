@@ -52,7 +52,7 @@ export type MockUnityProject = {
 
 const defaultVersion = "2020.2.1f1";
 
-const defaultManifest = emptyProjectManifest();
+const defaultManifest = emptyProjectManifest;
 
 const defaultUpmConfig = {} satisfies UPMConfig;
 

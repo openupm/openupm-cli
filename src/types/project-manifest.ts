@@ -11,7 +11,7 @@ import { removeRecordKey } from "../utils/record-utils";
  * The content of the project-manifest (manifest.json) of a Unity project.
  * @see https://docs.unity3d.com/Manual/upm-manifestPrj.html
  */
-export type UnityProjectManifest = {
+export type UnityProjectManifest = Readonly<{
   /**
    * Collection of packages required for your project. This includes only
    * direct dependencies. Each entry maps the package name to the minimum
@@ -37,14 +37,12 @@ export type UnityProjectManifest = {
    * Unity Test Framework.
    */
   testables?: ReadonlyArray<DomainName>;
-};
+}>;
 
 /**
  * Constructs an empty package-manifest.
  */
-export function emptyProjectManifest(): UnityProjectManifest {
-  return { dependencies: {} };
-}
+export const emptyProjectManifest: UnityProjectManifest = { dependencies: {} };
 
 /**
  * Adds a dependency to the manifest. If a dependency with that name already
@@ -57,9 +55,11 @@ export function addDependency(
   manifest: UnityProjectManifest,
   name: DomainName,
   version: SemanticVersion | PackageUrl
-) {
-  if (manifest.dependencies === undefined) manifest.dependencies = {};
-  manifest.dependencies = { ...manifest.dependencies, [name]: version };
+): UnityProjectManifest {
+  return {
+    ...manifest,
+    dependencies: { ...manifest.dependencies, [name]: version },
+  };
 }
 
 /**
@@ -70,10 +70,13 @@ export function addDependency(
 export function removeDependency(
   manifest: UnityProjectManifest,
   name: DomainName
-) {
-  if (manifest.dependencies === undefined) return;
+): UnityProjectManifest {
+  if (manifest.dependencies === undefined) return manifest;
 
-  manifest.dependencies = removeRecordKey(manifest.dependencies, name);
+  return {
+    ...manifest,
+    dependencies: removeRecordKey(manifest.dependencies, name),
+  };
 }
 
 /**
@@ -102,13 +105,11 @@ export function tryGetScopedRegistryByUrl(
 export function addScopedRegistry(
   manifest: UnityProjectManifest,
   scopedRegistry: ScopedRegistry
-) {
-  if (manifest.scopedRegistries === undefined) {
-    manifest.scopedRegistries = [scopedRegistry];
-    return;
-  }
-
-  manifest.scopedRegistries = [...manifest.scopedRegistries, scopedRegistry];
+): UnityProjectManifest {
+  return {
+    ...manifest,
+    scopedRegistries: [...(manifest.scopedRegistries ?? []), scopedRegistry],
+  };
 }
 
 /**
@@ -119,12 +120,15 @@ export function addScopedRegistry(
 export function removeScopedRegistry(
   manifest: UnityProjectManifest,
   name: string
-) {
-  if (manifest.scopedRegistries === undefined) return;
+): UnityProjectManifest {
+  if (manifest.scopedRegistries === undefined) return manifest;
 
-  manifest.scopedRegistries = manifest.scopedRegistries.filter(
-    (it) => it.name !== name
-  );
+  return {
+    ...manifest,
+    scopedRegistries: manifest.scopedRegistries.filter(
+      (it) => it.name !== name
+    ),
+  };
 }
 
 /**
@@ -132,15 +136,16 @@ export function removeScopedRegistry(
  * @param manifest The manifest.
  * @param name The testable name.
  */
-export function addTestable(manifest: UnityProjectManifest, name: DomainName) {
-  if (!manifest.testables) {
-    manifest.testables = [name];
-    return;
-  }
+export function addTestable(
+  manifest: UnityProjectManifest,
+  name: DomainName
+): UnityProjectManifest {
+  if (manifest.testables?.includes(name)) return manifest;
 
-  if (manifest.testables.indexOf(name) !== -1) return;
-
-  manifest.testables = [...manifest.testables, name].sort();
+  return {
+    ...manifest,
+    testables: [...(manifest.testables ?? []), name].sort(),
+  };
 }
 
 /**
@@ -157,11 +162,13 @@ export function manifestPathFor(projectPath: string): string {
  *  - Remove scoped-registries without scopes.
  * @param manifest The manifest to prune.
  */
-export function pruneManifest(manifest: UnityProjectManifest) {
-  if (manifest.scopedRegistries !== undefined) {
-    manifest.scopedRegistries.forEach((registry) => {
-      if (registry.scopes.length === 0)
-        removeScopedRegistry(manifest, registry.name);
-    });
-  }
+export function pruneManifest(
+  manifest: UnityProjectManifest
+): UnityProjectManifest {
+  return {
+    ...manifest,
+    scopedRegistries: manifest.scopedRegistries?.filter(
+      (it) => it.scopes.length > 0
+    ),
+  };
 }

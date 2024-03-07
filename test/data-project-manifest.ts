@@ -5,6 +5,7 @@ import { isSemanticVersion } from "../src/types/semantic-version";
 import { addScope, scopedRegistry } from "../src/types/scoped-registry";
 import {
   addDependency,
+  addScopedRegistry,
   addTestable,
   emptyProjectManifest,
   UnityProjectManifest,
@@ -14,10 +15,10 @@ import {
  * Builder class for {@link UnityProjectManifest}.
  */
 class UnityProjectManifestBuilder {
-  readonly manifest: UnityProjectManifest;
+  manifest: UnityProjectManifest;
 
   constructor() {
-    this.manifest = emptyProjectManifest();
+    this.manifest = emptyProjectManifest;
   }
 
   /**
@@ -28,9 +29,10 @@ class UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
 
     if (this.manifest.scopedRegistries === undefined)
-      this.manifest.scopedRegistries = [
-        scopedRegistry("example.com", exampleRegistryUrl),
-      ];
+      this.manifest = addScopedRegistry(
+        this.manifest,
+        scopedRegistry("example.com", exampleRegistryUrl)
+      );
 
     const registry = this.manifest.scopedRegistries![0]!;
     addScope(registry, name);
@@ -44,7 +46,7 @@ class UnityProjectManifestBuilder {
    */
   addTestable(name: string): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
-    addTestable(this.manifest, name);
+    this.manifest = addTestable(this.manifest, name);
     return this;
   }
 
@@ -65,7 +67,7 @@ class UnityProjectManifestBuilder {
     assert(isSemanticVersion(version), `${version} is semantic version`);
     if (withScope) this.addScope(name);
     if (testable) this.addTestable(name);
-    addDependency(this.manifest, name, version);
+    this.manifest = addDependency(this.manifest, name, version);
     return this;
   }
 }
