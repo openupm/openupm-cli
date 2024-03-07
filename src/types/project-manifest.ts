@@ -5,6 +5,7 @@ import { ScopedRegistry } from "./scoped-registry";
 import { RegistryUrl } from "./registry-url";
 import path from "path";
 import { removeTrailingSlash } from "../utils/string-utils";
+import { removeRecordKey } from "../utils/record-utils";
 
 /**
  * The content of the project-manifest (manifest.json) of a Unity project.
@@ -16,7 +17,7 @@ export type UnityProjectManifest = {
    * direct dependencies. Each entry maps the package name to the minimum
    * version required for the project.
    */
-  dependencies: Record<DomainName, SemanticVersion | PackageUrl>;
+  dependencies: Readonly<Record<DomainName, SemanticVersion | PackageUrl>>;
   /**
    * Enables a lock file to ensure that dependencies are resolved in a
    * deterministic manner.
@@ -58,7 +59,7 @@ export function addDependency(
   version: SemanticVersion | PackageUrl
 ) {
   if (manifest.dependencies === undefined) manifest.dependencies = {};
-  manifest.dependencies[name] = version;
+  manifest.dependencies = { ...manifest.dependencies, [name]: version };
 }
 
 /**
@@ -71,7 +72,8 @@ export function removeDependency(
   name: DomainName
 ) {
   if (manifest.dependencies === undefined) return;
-  delete manifest.dependencies[name];
+
+  manifest.dependencies = removeRecordKey(manifest.dependencies, name);
 }
 
 /**
