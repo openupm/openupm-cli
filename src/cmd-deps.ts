@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies, makeNpmClient } from "./npm-client";
+import { makeNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,
@@ -9,6 +9,7 @@ import {
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { ResolveFailure } from "./packument-resolving";
+import { fetchPackageDependencies } from "./dependency-resolving";
 
 type DepsResultCode = 0 | 1;
 

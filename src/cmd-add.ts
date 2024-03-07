@@ -10,7 +10,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import { fetchPackageDependencies, makeNpmClient } from "./npm-client";
+import { makeNpmClient } from "./npm-client";
 import { DomainName } from "./types/domain-name";
 import {
   packageReference,
@@ -31,6 +31,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { tryResolve } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
+import { fetchPackageDependencies } from "./dependency-resolving";
 
 export type AddOptions = CmdOptions<{
   test?: boolean;
