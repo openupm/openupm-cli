@@ -80,11 +80,14 @@ export const parseEnv = async function (
   const upmConfig = await loadUpmConfig(configDir);
 
   if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
-    registry.auth = tryGetAuthForRegistry(upmConfig, registry.url);
-    upstreamRegistry.auth = tryGetAuthForRegistry(
-      upmConfig,
-      upstreamRegistry.url
-    );
+    registry = {
+      url: registry.url,
+      auth: tryGetAuthForRegistry(upmConfig, registry.url),
+    };
+    upstreamRegistry = {
+      url: upstreamRegistry.url,
+      auth: tryGetAuthForRegistry(upmConfig, upstreamRegistry.url),
+    };
   }
   // return if no need to check path
   if (!checkPath)

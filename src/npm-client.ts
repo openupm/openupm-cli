@@ -11,7 +11,7 @@ import npmFetch from "npm-registry-fetch";
 /**
  * The result of adding a user.
  */
-type AddUserResult =
+type AddUserResult = Readonly<
   | {
       /**
        * Indicates success.
@@ -35,23 +35,26 @@ type AddUserResult =
        * The message returned by the server.
        */
       message: string;
-    };
+    }
+>;
 
 /**
  * A type representing a searched packument. Instead of having all versions
  * this type only includes the latest version.
  */
-export type SearchedPackument = Omit<UnityPackument, "versions"> & {
-  versions: Record<SemanticVersion, "latest">;
-};
+export type SearchedPackument = Readonly<
+  Omit<UnityPackument, "versions"> & {
+    versions: Readonly<Record<SemanticVersion, "latest">>;
+  }
+>;
 
 /**
  * The result of querying the /-/all endpoint.
  */
-type AllPackumentsResult = {
+type AllPackumentsResult = Readonly<{
   _updated: number;
   [name: DomainName]: SearchedPackument;
-};
+}>;
 
 /**
  * Abstraction over a regular npm client which is specialized for UPM purposes.
@@ -99,10 +102,10 @@ export interface NpmClient {
   tryGetAll(registry: Registry): Promise<AllPackumentsResult | null>;
 }
 
-export type Registry = {
+export type Registry = Readonly<{
   url: RegistryUrl;
   auth: NpmAuth | null;
-};
+}>;
 
 /**
  * Get npm fetch options.
