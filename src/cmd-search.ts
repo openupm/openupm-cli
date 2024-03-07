@@ -7,7 +7,7 @@ import {
   NpmClient,
   Registry,
   SearchedPackument,
-} from "./registry-client";
+} from "./npm-client";
 import { formatAsTable } from "./output-formatting";
 
 type SearchResultCode = 0 | 1;

@@ -3,7 +3,7 @@ import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
 import { parseEnv } from "./utils/env";
-import { getNpmClient } from "./registry-client";
+import { getNpmClient } from "./npm-client";
 import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";

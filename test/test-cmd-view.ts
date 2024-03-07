@@ -138,7 +138,9 @@ describe("cmd-view.ts", function () {
         options
       );
       retCode.should.equal(1);
-      mockConsole.hasLineIncluding("out", "do not specify a version").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "do not specify a version")
+        .should.be.ok();
     });
     it("view pkg-not-exist", async function () {
       const retCode = await view(packageMissing, options);

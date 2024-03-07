@@ -11,7 +11,7 @@ import {
 import should from "should";
 import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
-import { getNpmClient } from "../src/registry-client";
+import { getNpmClient } from "../src/npm-client";
 
 const packageA = domainName("package-a");
 

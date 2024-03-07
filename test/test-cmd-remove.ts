@@ -75,7 +75,9 @@ describe("cmd-remove.ts", function () {
       await mockProject.tryAssertManifest((manifest) => {
         manifest.should.deepEqual(defaultManifest);
       });
-      mockConsole.hasLineIncluding("out", "do not specify a version").should.be.ok();
+      mockConsole
+        .hasLineIncluding("out", "do not specify a version")
+        .should.be.ok();
     });
     it("remove pkg-not-exist", async function () {
       const options = {

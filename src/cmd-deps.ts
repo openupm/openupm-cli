@@ -1,6 +1,6 @@
 import log from "./logger";
 import { parseEnv } from "./utils/env";
-import { fetchPackageDependencies, getNpmClient } from "./registry-client";
+import { fetchPackageDependencies, getNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
   packageReference,

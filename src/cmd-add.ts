@@ -10,7 +10,7 @@ import {
   compareEditorVersion,
   tryParseEditorVersion,
 } from "./types/editor-version";
-import { fetchPackageDependencies, getNpmClient } from "./registry-client";
+import { fetchPackageDependencies, getNpmClient } from "./npm-client";
 import { DomainName } from "./types/domain-name";
 import {
   packageReference,

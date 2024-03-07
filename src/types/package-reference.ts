@@ -3,7 +3,6 @@ import { isSemanticVersion, SemanticVersion } from "./semantic-version";
 import { isPackageUrl, PackageUrl } from "./package-url";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import assert from "assert";
-import { registryUrl } from "./registry-url";
 
 /**
  * A string with the format of one of the supported version tags.
