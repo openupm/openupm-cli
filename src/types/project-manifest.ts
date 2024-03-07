@@ -30,7 +30,7 @@ export type UnityProjectManifest = {
    * Specify custom registries in addition to the default registry.
    * This allows you to host your own packages.
    */
-  scopedRegistries?: ScopedRegistry[];
+  scopedRegistries?: ReadonlyArray<ScopedRegistry>;
   /**
    * Lists the names of packages whose tests you want to load in the
    * Unity Test Framework.
@@ -101,8 +101,12 @@ export function addScopedRegistry(
   manifest: UnityProjectManifest,
   scopedRegistry: ScopedRegistry
 ) {
-  if (manifest.scopedRegistries === undefined) manifest.scopedRegistries = [];
-  manifest.scopedRegistries.push(scopedRegistry);
+  if (manifest.scopedRegistries === undefined) {
+    manifest.scopedRegistries = [scopedRegistry];
+    return;
+  }
+
+  manifest.scopedRegistries = [...manifest.scopedRegistries, scopedRegistry];
 }
 
 /**
@@ -116,12 +120,9 @@ export function removeScopedRegistry(
 ) {
   if (manifest.scopedRegistries === undefined) return;
 
-  const removeIndex = manifest.scopedRegistries.findIndex(
-    (registry) => registry.name === name
+  manifest.scopedRegistries = manifest.scopedRegistries.filter(
+    (it) => it.name !== name
   );
-  if (removeIndex === -1) return;
-
-  manifest.scopedRegistries.splice(removeIndex, 1);
 }
 
 /**
