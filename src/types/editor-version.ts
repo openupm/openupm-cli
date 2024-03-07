@@ -6,40 +6,40 @@ type RegularVersion = {
   /**
    * The major version. This is the release year.
    */
-  major: number;
+  readonly major: number;
   /**
    * The minor version. This is usually a number from 1 to 3.
    */
-  minor: number;
+  readonly minor: number;
 };
 
 type PatchVersion = RegularVersion & {
   /**
    * A patch.
    */
-  patch: number;
+  readonly patch: number;
 };
 
 type ReleaseVersion = PatchVersion & {
   /**
    * A flag describing a specific release.
    */
-  flag: ReleaseFlag;
+  readonly flag: ReleaseFlag;
   /**
    * A specific build.
    */
-  build: number;
+  readonly build: number;
 };
 
 type LocalVersion = ReleaseVersion & {
   /**
    * A flag describing a specific locale build.
    */
-  loc: LocaleCode;
+  readonly loc: LocaleCode;
   /**
    * The specific build for a locale.
    */
-  locBuild: number;
+  readonly locBuild: number;
 };
 
 /**
