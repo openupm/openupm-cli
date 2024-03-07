@@ -42,8 +42,7 @@ export const saveProjectManifest = async function (
   manifest: UnityProjectManifest
 ) {
   const manifestPath = manifestPathFor(projectPath);
-  // NOTE: This modifies the manifest that was passed to the function!
-  pruneManifest(manifest);
+  manifest = pruneManifest(manifest);
   const json = JSON.stringify(manifest, null, 2);
   try {
     await fse.ensureDir(path.dirname(manifestPath));

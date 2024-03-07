@@ -60,9 +60,13 @@ describe("project-manifest io", function () {
     mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
   it("saveManifest", async function () {
-    const manifest = (await loadProjectManifest(mockProject.projectPath))!;
+    let manifest = (await loadProjectManifest(mockProject.projectPath))!;
     shouldNotHaveAnyDependencies(manifest);
-    addDependency(manifest, domainName("some-pack"), semanticVersion("1.0.0"));
+    manifest = addDependency(
+      manifest,
+      domainName("some-pack"),
+      semanticVersion("1.0.0")
+    );
     (
       await saveProjectManifest(mockProject.projectPath, manifest)
     ).should.be.ok();
