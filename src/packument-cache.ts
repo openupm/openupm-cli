@@ -2,16 +2,16 @@ import { DomainName } from "./types/domain-name";
 import { UnityPackument } from "./types/packument";
 import { RegistryUrl } from "./types/registry-url";
 
-type CachedRegistry = {
+type CachedRegistry = Readonly<{
   [name: DomainName]: UnityPackument;
-};
+}>;
 
 /**
  * A cache that contains packuments that were already resolved.
  */
-export type PackumentCache = {
+export type PackumentCache = Readonly<{
   [source: RegistryUrl]: CachedRegistry;
-};
+}>;
 
 /**
  * An empty packument cache.
