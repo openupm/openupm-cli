@@ -12,10 +12,9 @@ import ErrnoException = NodeJS.ErrnoException;
  * @throws {AssertionError} The given parameter is not an error.
  */
 export function assertIsError(x: unknown): asserts x is ErrnoException {
-  if (!(x instanceof Error))
+  if (x === null || typeof x !== "object" || !("name" in x && "message" in x))
     throw new AssertionError({
       message: "Argument was not an error!",
-      actual: x,
     });
 }
 
