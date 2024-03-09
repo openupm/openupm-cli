@@ -42,7 +42,6 @@
     "@types/fs-extra": "^11.0.3",
     "@types/jest": "^29.5.12",
     "@types/libnpmsearch": "^2.0.4",
-    "@types/mocha": "^10.0.3",
     "@types/node": "^16.18.68",
     "@types/node-fetch": "^2.6.9",
     "@types/npmlog": "^4.1.4",
@@ -58,7 +57,6 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jsdoc": "^47.0.2",
     "jest": "^29.7.0",
-    "mocha": "^10.1.0",
     "nock": "^13.2.4",
     "prettier": "^2.8.8",
     "rimraf": "^5.0.5",
@@ -66,7 +64,6 @@
     "should": "^13.2.3",
     "test-console": "^2.0.0",
     "ts-jest": "^29.1.2",
-    "ts-mocha": "^10.0.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
