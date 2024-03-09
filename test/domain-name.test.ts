@@ -30,8 +30,9 @@ describe("domain-name", function () {
       "at.ac.my-school",
       "dev.comradevanti123",
     ].forEach((s) =>
-      it(`"${s}" should be domain-name`, () =>
-        should(isDomainName(s)).be.true())
+      it(`"${s}" should be domain-name`, () => {
+        should(isDomainName(s)).be.true();
+      })
     );
     [
       "",
@@ -45,8 +46,9 @@ describe("domain-name", function () {
       // No trailing hyphens
       "com.unity-",
     ].forEach((s) =>
-      it(`"${s}" should not be domain-name`, () =>
-        should(isDomainName(s)).be.false())
+      it(`"${s}" should not be domain-name`, () => {
+        should(isDomainName(s)).be.false();
+      })
     );
   });
   describe("internal package", function () {
