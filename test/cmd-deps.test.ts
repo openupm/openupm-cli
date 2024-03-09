@@ -43,7 +43,7 @@ describe("cmd-deps.ts", function () {
       (packument) => packument.addVersion("1.0.0")
     );
 
-    before(async function () {
+    beforeAll(async function () {
       mockProject = await setupUnityProject({});
     });
 
@@ -61,7 +61,7 @@ describe("cmd-deps.ts", function () {
       stopMockRegistry();
       mockConsole.detach();
     });
-    after(async function () {
+    afterAll(async function () {
       await mockProject.restore();
     });
 

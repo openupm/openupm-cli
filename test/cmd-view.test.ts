@@ -103,7 +103,7 @@ describe("cmd-view.ts", function () {
         )
     );
 
-    before(async function () {
+    beforeAll(async function () {
       mockProject = await setupUnityProject({});
     });
 
@@ -120,7 +120,7 @@ describe("cmd-view.ts", function () {
       mockConsole.detach();
     });
 
-    after(async function () {
+    afterAll(async function () {
       await mockProject.restore();
     });
 

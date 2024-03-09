@@ -28,7 +28,7 @@ describe("cmd-remove.ts", function () {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
-    before(async function () {
+    beforeAll(async function () {
       mockProject = await setupUnityProject({ manifest: defaultManifest });
     });
 
@@ -41,7 +41,7 @@ describe("cmd-remove.ts", function () {
       mockConsole.detach();
     });
 
-    after(async function () {
+    afterAll(async function () {
       await mockProject.restore();
     });
 

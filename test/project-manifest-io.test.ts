@@ -20,37 +20,37 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
 
-describe("project-manifest io", function () {
+describe("project-manifest io", () => {
   let mockConsole: MockConsole = null!;
   let mockProject: MockUnityProject = null!;
 
-  before(async function () {
+  beforeAll(async () => {
     mockProject = await setupUnityProject({});
   });
 
-  beforeEach(function () {
+  beforeEach(() => {
     mockConsole = attachMockConsole();
   });
 
-  afterEach(async function () {
+  afterEach(async () => {
     await mockProject.reset();
     mockConsole.detach();
   });
 
-  after(async function () {
+  afterAll(async () => {
     await mockProject.restore();
   });
 
-  it("loadManifest", async function () {
+  it("loadManifest", async () => {
     const manifest = await loadProjectManifest(mockProject.projectPath);
     should(manifest).be.deepEqual({ dependencies: {} });
   });
-  it("no manifest file", async function () {
+  it("no manifest file", async () => {
     const manifest = await loadProjectManifest("/invalid-path");
     should(manifest).be.null();
     mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
   });
-  it("wrong json content", async function () {
+  it("wrong json content", async () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
     fse.writeFileSync(manifestPath, "invalid data");
 
@@ -58,7 +58,7 @@ describe("project-manifest io", function () {
     should(manifest).be.null();
     mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
   });
-  it("saveManifest", async function () {
+  it("saveManifest", async () => {
     let manifest = (await loadProjectManifest(mockProject.projectPath))!;
     shouldNotHaveAnyDependencies(manifest);
     manifest = addDependency(
@@ -72,7 +72,7 @@ describe("project-manifest io", function () {
     const manifest2 = await loadProjectManifest(mockProject.projectPath);
     should(manifest2).be.deepEqual(manifest);
   });
-  it("manifest-path is correct", function () {
+  it("manifest-path is correct", () => {
     const manifestPath = manifestPathFor("test-openupm-cli");
     const expected = path.join("test-openupm-cli", "Packages", "manifest.json");
     should(manifestPath).be.equal(expected);

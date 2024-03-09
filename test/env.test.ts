@@ -28,7 +28,7 @@ describe("env", function () {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
-    before(async function () {
+    beforeAll(async function () {
       mockProject = await setupUnityProject({
         version: "2019.2.13f1",
         upmConfig: testUpmConfig,
@@ -44,7 +44,7 @@ describe("env", function () {
       await mockProject.reset();
     });
 
-    after(async function () {
+    afterAll(async function () {
       await mockProject.restore();
     });
 
