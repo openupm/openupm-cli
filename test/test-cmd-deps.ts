@@ -13,7 +13,6 @@ import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { before } from "mocha";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {

@@ -11,7 +11,6 @@ import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { after } from "mocha";
 import should from "should";
 
 const packageA = domainName("com.example.package-a");

@@ -1,4 +1,3 @@
-import { describe } from "mocha";
 import { runWithEnv } from "./mock-env";
 import { getUpmConfigDir } from "../src/utils/upm-config-io";
 import should from "should";

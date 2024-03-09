@@ -20,7 +20,6 @@ import { PackageUrl } from "../src/types/package-url";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { after } from "mocha";
 
 describe("cmd-add.ts", function () {
   const packageMissing = domainName("pkg-not-exist");

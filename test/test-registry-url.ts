@@ -1,4 +1,3 @@
-import { describe } from "mocha";
 import { coerceRegistryUrl, isRegistryUrl } from "../src/types/registry-url";
 import should from "should";
 

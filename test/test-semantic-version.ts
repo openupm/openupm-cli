@@ -1,4 +1,3 @@
-import { describe } from "mocha";
 import should from "should";
 import { isSemanticVersion } from "../src/types/semantic-version";
 

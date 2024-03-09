@@ -6,7 +6,6 @@ import { registryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { afterEach, before } from "mocha";
 import { manifestPathFor } from "../src/types/project-manifest";
 import fse from "fs-extra";
 

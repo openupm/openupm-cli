@@ -4,7 +4,6 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../src/utils/project-manifest-io";
-import { describe } from "mocha";
 import { shouldNotHaveAnyDependencies } from "./project-manifest-assertions";
 import { DomainName, domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";

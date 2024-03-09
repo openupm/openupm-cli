@@ -1,6 +1,5 @@
 import { tryGetLatestVersion } from "../src/types/packument";
 import "should";
-import { describe } from "mocha";
 import should from "should";
 import { semanticVersion } from "../src/types/semantic-version";
 
