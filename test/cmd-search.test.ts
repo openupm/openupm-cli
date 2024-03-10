@@ -86,14 +86,14 @@ describe("cmd-search.ts", function () {
     });
     it("simple", async function () {
       const retCode = await search("package-a", options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", "package-a");
       expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
       expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
     });
     it("pkg not exist", async function () {
       const retCode = await search("pkg-not-exist", options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", "No matches found");
     });
   });
@@ -136,7 +136,7 @@ describe("cmd-search.ts", function () {
         "Content-Type": "application/json",
       });
       const retCode = await search("package-a", options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "fast search endpoint is not available"
@@ -150,7 +150,7 @@ describe("cmd-search.ts", function () {
         "Content-Type": "application/json",
       });
       const retCode = await search("pkg-not-exist", options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", "No matches found");
     });
   });

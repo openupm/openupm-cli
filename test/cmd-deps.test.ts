@@ -67,7 +67,7 @@ describe("cmd-deps.ts", function () {
 
     it("deps pkg", async function () {
       const retCode = await deps(remotePackumentA.name, options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg --deep", async function () {
@@ -75,7 +75,7 @@ describe("cmd-deps.ts", function () {
         ...options,
         deep: true,
       });
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentUp.name);
     });
@@ -84,7 +84,7 @@ describe("cmd-deps.ts", function () {
         packageReference(remotePackumentA.name, "latest"),
         options
       );
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg@1.0.0", async function () {
@@ -92,7 +92,7 @@ describe("cmd-deps.ts", function () {
         packageReference(remotePackumentA.name, "1.0.0"),
         options
       );
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg@not-exist-version", async function () {
@@ -100,17 +100,17 @@ describe("cmd-deps.ts", function () {
         packageReference(remotePackumentA.name, "2.0.0"),
         options
       );
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
     });
     it("deps pkg-not-exist", async function () {
       const retCode = await deps(domainName("pkg-not-exist"), options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", "not found");
     });
     it("deps pkg upstream", async function () {
       const retCode = await deps(remotePackumentUp.name, options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
     });
   });
 });

@@ -12,7 +12,6 @@ import {
   manifestPathFor,
   tryGetScopedRegistryByUrl,
 } from "../src/types/project-manifest";
-import should from "should";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
 import path from "path";
@@ -43,11 +42,11 @@ describe("project-manifest io", () => {
 
   it("loadManifest", async () => {
     const manifest = await loadProjectManifest(mockProject.projectPath);
-    should(manifest).be.deepEqual({ dependencies: {} });
+    expect(manifest).toEqual({ dependencies: {} });
   });
   it("no manifest file", async () => {
     const manifest = await loadProjectManifest("/invalid-path");
-    should(manifest).be.null();
+    expect(manifest).toBeNull();
     expect(mockConsole).toHaveLineIncluding("out", "does not exist");
   });
   it("wrong json content", async () => {
@@ -55,7 +54,7 @@ describe("project-manifest io", () => {
     fse.writeFileSync(manifestPath, "invalid data");
 
     const manifest = await loadProjectManifest(mockProject.projectPath);
-    should(manifest).be.null();
+    expect(manifest).toBeNull();
     expect(mockConsole).toHaveLineIncluding("out", "failed to parse");
   });
   it("saveManifest", async () => {
@@ -66,16 +65,16 @@ describe("project-manifest io", () => {
       domainName("some-pack"),
       semanticVersion("1.0.0")
     );
-    (
+    expect(
       await saveProjectManifest(mockProject.projectPath, manifest)
-    ).should.be.ok();
+    ).toBeTruthy();
     const manifest2 = await loadProjectManifest(mockProject.projectPath);
-    should(manifest2).be.deepEqual(manifest);
+    expect(manifest2).toEqual(manifest);
   });
   it("manifest-path is correct", () => {
     const manifestPath = manifestPathFor("test-openupm-cli");
     const expected = path.join("test-openupm-cli", "Packages", "manifest.json");
-    should(manifestPath).be.equal(expected);
+    expect(manifestPath).toEqual(expected);
   });
   it("should not save scoped-registry with empty scopes", async () => {
     // Add and then remove a scope to force an empty scoped-registry
@@ -90,11 +89,11 @@ describe("project-manifest io", () => {
     removeScope(scopedRegistry, testDomain);
 
     // Save and load manifest
-    (
+    expect(
       await saveProjectManifest(mockProject.projectPath, initialManifest)
-    ).should.be.ok();
+    ).toBeTruthy();
     const savedManifest = await loadProjectManifest(mockProject.projectPath);
 
-    should(savedManifest?.scopedRegistries).be.empty();
+    expect(savedManifest?.scopedRegistries).toHaveLength(0);
   });
 });

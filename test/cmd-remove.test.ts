@@ -11,7 +11,6 @@ import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import should from "should";
 
 const packageA = domainName("com.example.package-a");
 const packageB = domainName("com.example.package-b");
@@ -52,7 +51,7 @@ describe("cmd-remove.ts", function () {
         },
       };
       const retCode = await remove(packageA, options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) => {
         shouldNotHaveDependency(manifest, packageA);
         shouldHaveRegistryWithScopes(manifest, [packageB]);
@@ -70,9 +69,9 @@ describe("cmd-remove.ts", function () {
         packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
-      retCode.should.equal(1);
+      expect(retCode).toEqual(1);
       await mockProject.tryAssertManifest((manifest) => {
-        manifest.should.deepEqual(defaultManifest);
+        expect(manifest).toEqual(defaultManifest);
       });
       expect(mockConsole).toHaveLineIncluding(
         "out",
@@ -86,9 +85,9 @@ describe("cmd-remove.ts", function () {
         },
       };
       const retCode = await remove(missingPackage, options);
-      retCode.should.equal(1);
+      expect(retCode).toEqual(1);
       await mockProject.tryAssertManifest((manifest) => {
-        manifest.should.deepEqual(defaultManifest);
+        expect(manifest).toEqual(defaultManifest);
       });
       expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
@@ -99,7 +98,7 @@ describe("cmd-remove.ts", function () {
         },
       };
       const retCode = await remove([packageA, packageB], options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
 
       await mockProject.tryAssertManifest((manifest) => {
         shouldNotHaveDependency(manifest, packageA);
@@ -122,10 +121,10 @@ describe("cmd-remove.ts", function () {
         },
       };
       const retCode = await remove([packageA, packageB], options);
-      retCode.should.equal(0);
+      expect(retCode).toEqual(0);
 
       await mockProject.tryAssertManifest((manifest) => {
-        should(manifest.scopedRegistries).be.empty();
+        expect(manifest.scopedRegistries).toHaveLength(0);
       });
     });
   });
