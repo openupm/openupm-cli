@@ -1,5 +1,5 @@
 import { tryGetLatestVersion } from "../src/types/packument";
-import "should";
+
 import { semanticVersion } from "../src/types/semantic-version";
 
 describe("packument", function () {

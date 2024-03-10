@@ -1,4 +1,3 @@
-import "should";
 import { view, ViewOptions } from "../src/cmd-view";
 import {
   exampleRegistryUrl,

@@ -1,4 +1,3 @@
-import "should";
 import { deps, DepsOptions } from "../src/cmd-deps";
 import {
   exampleRegistryUrl,

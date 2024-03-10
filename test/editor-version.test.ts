@@ -2,7 +2,7 @@ import {
   tryCompareEditorVersion,
   tryParseEditorVersion,
 } from "../src/types/editor-version";
-import "should";
+
 import assert from "assert";
 
 describe("editor-version", function () {

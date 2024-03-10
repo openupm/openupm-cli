@@ -1,5 +1,5 @@
 import "assert";
-import "should";
+
 import { parseEnv } from "../src/utils/env";
 import {
   exampleRegistryUrl,

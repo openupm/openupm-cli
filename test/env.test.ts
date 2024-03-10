@@ -1,4 +1,3 @@
-import "should";
 import { parseEnv } from "../src/utils/env";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { registryUrl } from "../src/types/registry-url";

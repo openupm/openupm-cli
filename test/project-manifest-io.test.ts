@@ -1,5 +1,5 @@
 import { attachMockConsole, MockConsole } from "./mock-console";
-import "should";
+
 import {
   loadProjectManifest,
   saveProjectManifest,

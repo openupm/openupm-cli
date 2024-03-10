@@ -1,4 +1,3 @@
-import "should";
 import { add, AddOptions } from "../src/cmd-add";
 import {
   exampleRegistryUrl,

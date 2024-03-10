@@ -1,4 +1,3 @@
-import "should";
 import { remove } from "../src/cmd-remove";
 import { exampleRegistryUrl } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
