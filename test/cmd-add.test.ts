@@ -8,10 +8,6 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import {
-  shouldHaveDependency,
-  shouldNotHaveRegistries,
-} from "./project-manifest-assertions";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { domainName } from "../src/types/domain-name";
@@ -243,10 +239,10 @@ describe("cmd-add.ts", function () {
       const retCode = await add(packageReference(packageA, gitUrl), options);
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
-        shouldHaveDependency(manifest, packageA, gitUrl)
+        expect(manifest).toHaveDependency(packageA, gitUrl)
       );
       await mockProject.tryAssertManifest((manifest) =>
-        shouldNotHaveRegistries(manifest)
+        expect(manifest).not.toHaveScopedRegistries()
       );
       expect(mockConsole).toHaveLineIncluding("out", "added");
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
@@ -256,10 +252,10 @@ describe("cmd-add.ts", function () {
       const retCode = await add(packageReference(packageA, gitUrl), options);
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
-        shouldHaveDependency(manifest, packageA, gitUrl)
+        expect(manifest).toHaveDependency(packageA, gitUrl)
       );
       await mockProject.tryAssertManifest((manifest) =>
-        shouldNotHaveRegistries(manifest)
+        expect(manifest).not.toHaveScopedRegistries()
       );
       expect(mockConsole).toHaveLineIncluding("out", "added");
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
@@ -269,10 +265,10 @@ describe("cmd-add.ts", function () {
       const retCode = await add(packageReference(packageA, fileUrl), options);
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
-        shouldHaveDependency(manifest, packageA, fileUrl)
+        expect(manifest).toHaveDependency(packageA, fileUrl)
       );
       await mockProject.tryAssertManifest((manifest) =>
-        shouldNotHaveRegistries(manifest)
+        expect(manifest).not.toHaveScopedRegistries()
       );
       expect(mockConsole).toHaveLineIncluding("out", "added");
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");

@@ -3,6 +3,7 @@ module.exports = {
   testEnvironment: "node",
   verbose: true,
   setupFilesAfterEnv: [
-      "./test/mock-console-assertions.ts"
+      "./test/mock-console-assertions.ts",
+      "./test/project-manifest-assertions.ts"
   ]
 };

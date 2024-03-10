@@ -1,10 +1,6 @@
 import { remove } from "../src/cmd-remove";
 import { exampleRegistryUrl } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import {
-  shouldHaveRegistryWithScopes,
-  shouldNotHaveDependency,
-} from "./project-manifest-assertions";
 import { buildProjectManifest } from "./data-project-manifest";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
@@ -52,8 +48,8 @@ describe("cmd-remove.ts", function () {
       const retCode = await remove(packageA, options);
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) => {
-        shouldNotHaveDependency(manifest, packageA);
-        shouldHaveRegistryWithScopes(manifest, [packageB]);
+        expect(manifest).not.toHaveDependency(packageA);
+        expect(manifest).toHaveScope(packageB);
       });
       expect(mockConsole).toHaveLineIncluding("out", "removed ");
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
@@ -100,8 +96,8 @@ describe("cmd-remove.ts", function () {
       expect(retCode).toEqual(0);
 
       await mockProject.tryAssertManifest((manifest) => {
-        shouldNotHaveDependency(manifest, packageA);
-        shouldNotHaveDependency(manifest, packageB);
+        expect(manifest).not.toHaveDependency(packageA);
+        expect(manifest).not.toHaveDependency(packageB);
       });
       expect(mockConsole).toHaveLineIncluding(
         "out",

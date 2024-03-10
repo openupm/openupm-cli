@@ -4,7 +4,6 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../src/utils/project-manifest-io";
-import { shouldNotHaveAnyDependencies } from "./project-manifest-assertions";
 import { DomainName, domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import {
@@ -59,7 +58,7 @@ describe("project-manifest io", () => {
   });
   it("saveManifest", async () => {
     let manifest = (await loadProjectManifest(mockProject.projectPath))!;
-    shouldNotHaveAnyDependencies(manifest);
+    expect(manifest).not.toHaveDependencies();
     manifest = addDependency(
       manifest,
       domainName("some-pack"),
