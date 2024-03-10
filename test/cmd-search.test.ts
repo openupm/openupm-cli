@@ -12,7 +12,6 @@ import { attachMockConsole, MockConsole } from "./mock-console";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { before } from "mocha";
 
 describe("cmd-search.ts", function () {
   let mockConsole: MockConsole = null!;
@@ -25,7 +24,7 @@ describe("cmd-search.ts", function () {
     },
   };
 
-  before(async function () {
+  beforeAll(async function () {
     mockProject = await setupUnityProject({});
   });
 
@@ -38,7 +37,7 @@ describe("cmd-search.ts", function () {
     mockConsole.detach();
   });
 
-  after(async function () {
+  afterAll(async function () {
     await mockProject.restore();
   });
 

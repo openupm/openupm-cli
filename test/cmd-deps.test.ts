@@ -13,7 +13,6 @@ import { buildPackument } from "./data-packument";
 import { domainName } from "../src/types/domain-name";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { before } from "mocha";
 
 describe("cmd-deps.ts", function () {
   const options: DepsOptions = {
@@ -44,7 +43,7 @@ describe("cmd-deps.ts", function () {
       (packument) => packument.addVersion("1.0.0")
     );
 
-    before(async function () {
+    beforeAll(async function () {
       mockProject = await setupUnityProject({});
     });
 
@@ -62,7 +61,7 @@ describe("cmd-deps.ts", function () {
       stopMockRegistry();
       mockConsole.detach();
     });
-    after(async function () {
+    afterAll(async function () {
       await mockProject.restore();
     });
 

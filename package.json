@@ -7,8 +7,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "test:quick": "cross-env NODE_ENV=test ts-mocha test/**/test-*.ts",
-    "test:full": "cross-env NODE_ENV=test ts-mocha test/**/test-*.ts --type-check",
+    "test:full": "cross-env NODE_ENV=test jest --runInBand",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
@@ -41,8 +40,8 @@
     "@semantic-release/git": "^10.0.1",
     "@types/cli-table": "^0.3.2",
     "@types/fs-extra": "^11.0.3",
+    "@types/jest": "^29.5.12",
     "@types/libnpmsearch": "^2.0.4",
-    "@types/mocha": "^10.0.3",
     "@types/node": "^16.18.68",
     "@types/node-fetch": "^2.6.9",
     "@types/npmlog": "^4.1.4",
@@ -57,14 +56,14 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jsdoc": "^47.0.2",
-    "mocha": "^10.1.0",
+    "jest": "^29.7.0",
     "nock": "^13.2.4",
     "prettier": "^2.8.8",
     "rimraf": "^5.0.5",
     "semantic-release": "^19.0.3",
     "should": "^13.2.3",
     "test-console": "^2.0.0",
-    "ts-mocha": "^10.0.0",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.2.2"
   },
   "dependencies": {

@@ -6,7 +6,6 @@ import { registryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { afterEach, before } from "mocha";
 import { manifestPathFor } from "../src/types/project-manifest";
 import fse from "fs-extra";
 
@@ -29,7 +28,7 @@ describe("env", function () {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
-    before(async function () {
+    beforeAll(async function () {
       mockProject = await setupUnityProject({
         version: "2019.2.13f1",
         upmConfig: testUpmConfig,
@@ -45,7 +44,7 @@ describe("env", function () {
       await mockProject.reset();
     });
 
-    after(async function () {
+    afterAll(async function () {
       await mockProject.restore();
     });
 
