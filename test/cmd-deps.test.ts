@@ -68,7 +68,7 @@ describe("cmd-deps.ts", function () {
     it("deps pkg", async function () {
       const retCode = await deps(remotePackumentA.name, options);
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg --deep", async function () {
       const retCode = await deps(remotePackumentA.name, {
@@ -76,10 +76,8 @@ describe("cmd-deps.ts", function () {
         deep: true,
       });
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
-      mockConsole
-        .hasLineIncluding("out", remotePackumentUp.name)
-        .should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
+      expect(mockConsole).toHaveLineIncluding("out", remotePackumentUp.name);
     });
     it("deps pkg@latest", async function () {
       const retCode = await deps(
@@ -87,7 +85,7 @@ describe("cmd-deps.ts", function () {
         options
       );
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps(
@@ -95,7 +93,7 @@ describe("cmd-deps.ts", function () {
         options
       );
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", remotePackumentB.name).should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps(
@@ -103,14 +101,12 @@ describe("cmd-deps.ts", function () {
         options
       );
       retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "is not a valid choice")
-        .should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
     });
     it("deps pkg-not-exist", async function () {
       const retCode = await deps(domainName("pkg-not-exist"), options);
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", "not found").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "not found");
     });
     it("deps pkg upstream", async function () {
       const retCode = await deps(remotePackumentUp.name, options);

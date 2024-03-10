@@ -69,9 +69,7 @@ describe("env", function () {
         true
       );
       should(env).be.null();
-      mockConsole
-        .hasLineIncluding("out", "can not resolve path")
-        .should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "can not resolve path");
     });
 
     it("can not locate manifest.json", async function () {
@@ -81,9 +79,10 @@ describe("env", function () {
 
       const env = await parseEnv({ _global: {} }, true);
       should(env).be.null();
-      mockConsole
-        .hasLineIncluding("out", "can not locate manifest.json")
-        .should.be.ok();
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "can not locate manifest.json"
+      );
     });
     it("custom registry", async function () {
       const env = await parseEnv(

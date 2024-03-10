@@ -48,7 +48,7 @@ describe("project-manifest io", () => {
   it("no manifest file", async () => {
     const manifest = await loadProjectManifest("/invalid-path");
     should(manifest).be.null();
-    mockConsole.hasLineIncluding("out", "does not exist").should.be.ok();
+    expect(mockConsole).toHaveLineIncluding("out", "does not exist");
   });
   it("wrong json content", async () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
@@ -56,7 +56,7 @@ describe("project-manifest io", () => {
 
     const manifest = await loadProjectManifest(mockProject.projectPath);
     should(manifest).be.null();
-    mockConsole.hasLineIncluding("out", "failed to parse").should.be.ok();
+    expect(mockConsole).toHaveLineIncluding("out", "failed to parse");
   });
   it("saveManifest", async () => {
     let manifest = (await loadProjectManifest(mockProject.projectPath))!;

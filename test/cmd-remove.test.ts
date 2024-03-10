@@ -57,8 +57,8 @@ describe("cmd-remove.ts", function () {
         shouldNotHaveDependency(manifest, packageA);
         shouldHaveRegistryWithScopes(manifest, [packageB]);
       });
-      mockConsole.hasLineIncluding("out", "removed ").should.be.ok();
-      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "removed ");
+      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("remove pkg@1.0.0", async function () {
       const options = {
@@ -74,9 +74,10 @@ describe("cmd-remove.ts", function () {
       await mockProject.tryAssertManifest((manifest) => {
         manifest.should.deepEqual(defaultManifest);
       });
-      mockConsole
-        .hasLineIncluding("out", "do not specify a version")
-        .should.be.ok();
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "do not specify a version"
+      );
     });
     it("remove pkg-not-exist", async function () {
       const options = {
@@ -89,7 +90,7 @@ describe("cmd-remove.ts", function () {
       await mockProject.tryAssertManifest((manifest) => {
         manifest.should.deepEqual(defaultManifest);
       });
-      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
     it("remove more than one pkgs", async function () {
       const options = {
@@ -104,13 +105,15 @@ describe("cmd-remove.ts", function () {
         shouldNotHaveDependency(manifest, packageA);
         shouldNotHaveDependency(manifest, packageB);
       });
-      mockConsole
-        .hasLineIncluding("out", "removed com.example.package-a")
-        .should.be.ok();
-      mockConsole
-        .hasLineIncluding("out", "removed com.example.package-b")
-        .should.be.ok();
-      mockConsole.hasLineIncluding("out", "open Unity").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "removed com.example.package-a"
+      );
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "removed com.example.package-b"
+      );
+      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("should delete scoped-registry after removing all packages", async () => {
       const options = {

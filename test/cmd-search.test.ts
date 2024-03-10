@@ -87,14 +87,14 @@ describe("cmd-search.ts", function () {
     it("simple", async function () {
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", "package-a").should.be.ok();
-      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
-      mockConsole.hasLineIncluding("out", "2019-10-02").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "package-a");
+      expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
+      expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
     });
     it("pkg not exist", async function () {
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", "No matches found").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "No matches found");
     });
   });
 
@@ -137,12 +137,13 @@ describe("cmd-search.ts", function () {
       });
       const retCode = await search("package-a", options);
       retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "fast search endpoint is not available")
-        .should.be.ok();
-      mockConsole.hasLineIncluding("out", "package-a").should.be.ok();
-      mockConsole.hasLineIncluding("out", "1.0.0").should.be.ok();
-      mockConsole.hasLineIncluding("out", "2019-10-02").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "fast search endpoint is not available"
+      );
+      expect(mockConsole).toHaveLineIncluding("out", "package-a");
+      expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
+      expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
     });
     it("pkg not exist", async function () {
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
@@ -150,7 +151,7 @@ describe("cmd-search.ts", function () {
       });
       const retCode = await search("pkg-not-exist", options);
       retCode.should.equal(0);
-      mockConsole.hasLineIncluding("out", "No matches found").should.be.ok();
+      expect(mockConsole).toHaveLineIncluding("out", "No matches found");
     });
   });
 });
