@@ -1,6 +1,5 @@
 import { runWithEnv } from "./mock-env";
 import { getUpmConfigDir } from "../src/utils/upm-config-io";
-import should from "should";
 
 describe("upm-config-io", function () {
   describe("get directory", function () {
@@ -15,7 +14,7 @@ describe("upm-config-io", function () {
           () => getUpmConfigDir(false, false)
         );
 
-        should(actual).be.equal(expected);
+        expect(actual).toEqual(expected);
       });
       it("should be HOME if defined and USERPROFILE is undefined", async function () {
         const expected = "user/dir";
@@ -27,12 +26,12 @@ describe("upm-config-io", function () {
           () => getUpmConfigDir(false, false)
         );
 
-        should(actual).be.equal(expected);
+        expect(actual).toEqual(expected);
       });
       it("should fail if HOME and USERPROFILE and undefined", async function () {
-        await should(
+        await expect(
           runWithEnv({}, () => getUpmConfigDir(false, false))
-        ).rejected();
+        ).rejects.toEqual(expect.any(Error));
       });
     });
   });

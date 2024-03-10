@@ -1,6 +1,6 @@
 import testConsole from "test-console";
 
-type Stream = "out" | "error";
+export type Stream = "out" | "error";
 
 export type MockConsole = {
   hasLineIncluding(stream: Stream, text: string): boolean;

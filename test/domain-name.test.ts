@@ -4,7 +4,6 @@ import {
   isInternalPackage,
   namespaceFor,
 } from "../src/types/domain-name";
-import should from "should";
 
 describe("domain-name", function () {
   describe("namespace", function () {
@@ -18,7 +17,7 @@ describe("domain-name", function () {
     ).forEach(([hostName, expected]) =>
       it(`"${hostName}" should become "${expected}"`, function () {
         const actual = namespaceFor(hostName);
-        should(actual).be.equal(expected);
+        expect(actual).toEqual(expected);
       })
     );
   });
@@ -31,7 +30,7 @@ describe("domain-name", function () {
       "dev.comradevanti123",
     ].forEach((s) =>
       it(`"${s}" should be domain-name`, () => {
-        should(isDomainName(s)).be.true();
+        expect(isDomainName(s)).toBeTruthy();
       })
     );
     [
@@ -47,19 +46,23 @@ describe("domain-name", function () {
       "com.unity-",
     ].forEach((s) =>
       it(`"${s}" should not be domain-name`, () => {
-        should(isDomainName(s)).be.false();
+        expect(isDomainName(s)).toBeFalsy();
       })
     );
   });
   describe("internal package", function () {
     it("test com.otherorg.software", function () {
-      isInternalPackage(domainName("com.otherorg.software")).should.not.be.ok();
+      expect(
+        isInternalPackage(domainName("com.otherorg.software"))
+      ).not.toBeTruthy();
     });
     it("test com.unity.ugui", function () {
-      isInternalPackage(domainName("com.unity.ugui")).should.be.ok();
+      expect(isInternalPackage(domainName("com.unity.ugui"))).toBeTruthy();
     });
     it("test com.unity.modules.tilemap", function () {
-      isInternalPackage(domainName("com.unity.modules.tilemap")).should.be.ok();
+      expect(
+        isInternalPackage(domainName("com.unity.modules.tilemap"))
+      ).toBeTruthy();
     });
   });
 });

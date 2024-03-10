@@ -1,12 +1,11 @@
 import { coerceRegistryUrl, isRegistryUrl } from "../src/types/registry-url";
-import should from "should";
 
 describe("registry-url", function () {
   describe("validation", function () {
     ["http://registry.npmjs.org", "https://registry.npmjs.org"].forEach(
       (input) =>
         it(`"${input}" should be registry-url`, function () {
-          should(isRegistryUrl(input)).be.ok();
+          expect(isRegistryUrl(input)).toBeTruthy();
         })
     );
     [
@@ -16,16 +15,16 @@ describe("registry-url", function () {
       "http://registry.npmjs.org/",
     ].forEach((input) =>
       it(`"${input}" should not be registry-url`, function () {
-        should(isRegistryUrl(input)).not.be.ok();
+        expect(isRegistryUrl(input)).not.toBeTruthy();
       })
     );
   });
   describe("coerce", function () {
     it("should coerce urls without protocol", () => {
-      should(coerceRegistryUrl("test.com")).be.equal("http://test.com");
+      expect(coerceRegistryUrl("test.com")).toEqual("http://test.com");
     });
     it("should remove trailing slash", () => {
-      should(coerceRegistryUrl("http://test.com/")).be.equal("http://test.com");
+      expect(coerceRegistryUrl("http://test.com/")).toEqual("http://test.com");
     });
   });
 });

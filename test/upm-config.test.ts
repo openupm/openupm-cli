@@ -11,7 +11,6 @@ import {
   UpmAuth,
   UPMConfig,
 } from "../src/types/upm-config";
-import should from "should";
 import { Base64 } from "../src/types/base64";
 import { registryUrl, RegistryUrl } from "../src/types/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
@@ -27,7 +26,7 @@ describe("upm-config", function () {
           _auth: encodeBasicAuth("user", "pass"),
         };
         const config = addAuth(registry, auth, {});
-        should(tryGetAuthForRegistry(config, registry)).be.deepEqual(
+        expect(tryGetAuthForRegistry(config, registry)).toEqual(
           tryToNpmAuth(auth)
         );
       });
@@ -40,7 +39,7 @@ describe("upm-config", function () {
           // Not a real base64 string, but we don't care in this test
           _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
-        should(isBasicAuth(auth)).be.true();
+        expect(isBasicAuth(auth)).toBeTruthy();
       });
       it("should be token auth if it has token property", () => {
         const auth: UpmAuth = {
@@ -49,7 +48,7 @@ describe("upm-config", function () {
           // Not a real token, but we don't care in this test
           token: "h8gz8s9zgseihgisejf",
         };
-        should(isTokenAuth(auth)).be.true();
+        expect(isTokenAuth(auth)).toBeTruthy();
       });
     });
     describe("encode/decode", function () {
@@ -58,13 +57,13 @@ describe("upm-config", function () {
         const expectedPassword = "123pass";
         const encoded = encodeBasicAuth(expectedUsername, expectedPassword);
         const [actualUsername, actualPassword] = tryDecodeBasicAuth(encoded)!;
-        should(actualUsername).be.equal(expectedUsername);
-        should(actualPassword).be.equal(expectedPassword);
+        expect(actualUsername).toEqual(expectedUsername);
+        expect(actualPassword).toEqual(expectedPassword);
       });
       it("should not decode invalid data", () => {
         const encoded = "This is not valid data" as Base64;
         const decoded = tryDecodeBasicAuth(encoded)!;
-        should(decoded).be.null();
+        expect(decoded).toBeNull();
       });
     });
     describe("always-auth", function () {
@@ -75,7 +74,7 @@ describe("upm-config", function () {
           // Not a real base64 string, but we don't care in this test
           _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
-        should(shouldAlwaysAuth(auth)).be.true();
+        expect(shouldAlwaysAuth(auth)).toBeTruthy();
       });
       it("should not always-auth when prop is false", () => {
         const auth: UpmAuth = {
@@ -84,7 +83,7 @@ describe("upm-config", function () {
           // Not a real base64 string, but we don't care in this test
           _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
-        should(shouldAlwaysAuth(auth)).be.false();
+        expect(shouldAlwaysAuth(auth)).toBeFalsy();
       });
       it("should not always-auth when prop is missing", () => {
         const auth: UpmAuth = {
@@ -92,7 +91,7 @@ describe("upm-config", function () {
           // Not a real base64 string, but we don't care in this test
           _auth: "h8gz8s9zgseihgisejf" as Base64,
         };
-        should(shouldAlwaysAuth(auth)).be.false();
+        expect(shouldAlwaysAuth(auth)).toBeFalsy();
       });
     });
     describe("get auth for registry", function () {
@@ -113,7 +112,7 @@ describe("upm-config", function () {
         };
 
         const actual = tryGetAuthForRegistry(config, url);
-        should(actual).be.deepEqual(expected);
+        expect(actual).toEqual(expected);
       });
       it("should find auth for url with trailing slash", function () {
         const url = "http://registry.npmjs.com/" as RegistryUrl;
@@ -132,7 +131,7 @@ describe("upm-config", function () {
         };
 
         const actual = tryGetAuthForRegistry(config, url);
-        should(actual).be.deepEqual(expected);
+        expect(actual).toEqual(expected);
       });
       it("should not find auth for url that does not exist", function () {
         const config: UPMConfig = {
@@ -149,7 +148,7 @@ describe("upm-config", function () {
           config,
           registryUrl("http://registryB.com")
         );
-        should(actual).be.null();
+        expect(actual).toBeNull();
       });
     });
   });

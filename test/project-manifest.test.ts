@@ -8,7 +8,6 @@ import {
 } from "../src/types/project-manifest";
 import { domainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
-import should from "should";
 import { scopedRegistry } from "../src/types/scoped-registry";
 import { registryUrl } from "../src/types/registry-url";
 
@@ -23,7 +22,7 @@ describe("project-manifest", function () {
         semanticVersion("1.2.3")
       );
 
-      should(manifest.dependencies).deepEqual({ test: "1.2.3" });
+      expect(manifest.dependencies).toEqual({ test: "1.2.3" });
     });
     it("should overwrite dependency when adding second time", () => {
       let manifest = emptyProjectManifest;
@@ -39,7 +38,7 @@ describe("project-manifest", function () {
         semanticVersion("2.3.4")
       );
 
-      should(manifest.dependencies).deepEqual({ test: "2.3.4" });
+      expect(manifest.dependencies).toEqual({ test: "2.3.4" });
     });
     it("should remove existing dependency", () => {
       let manifest = emptyProjectManifest;
@@ -51,14 +50,14 @@ describe("project-manifest", function () {
       );
       manifest = removeDependency(manifest, domainName("test"));
 
-      should(manifest.dependencies).deepEqual({});
+      expect(manifest.dependencies).toEqual({});
     });
     it("should do nothing when dependency does not exist", () => {
       let manifest = emptyProjectManifest;
 
       manifest = removeDependency(manifest, domainName("test"));
 
-      should(manifest.dependencies).deepEqual({});
+      expect(manifest.dependencies).toEqual({});
     });
   });
   describe("scoped-registry", function () {
@@ -69,7 +68,7 @@ describe("project-manifest", function () {
 
       manifest = addScopedRegistry(manifest, expected);
 
-      should(tryGetScopedRegistryByUrl(manifest, url)).be.deepEqual(expected);
+      expect(tryGetScopedRegistryByUrl(manifest, url)).toEqual(expected);
     });
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
@@ -78,7 +77,7 @@ describe("project-manifest", function () {
 
       manifest = addScopedRegistry(manifest, expected);
 
-      should(tryGetScopedRegistryByUrl(manifest, url)).be.null();
+      expect(tryGetScopedRegistryByUrl(manifest, url)).toBeNull();
     });
   });
   describe("testables", function () {
@@ -88,7 +87,7 @@ describe("project-manifest", function () {
       manifest = addTestable(manifest, domainName("a"));
       manifest = addTestable(manifest, domainName("a"));
 
-      should(manifest.testables).deepEqual(["a"]);
+      expect(manifest.testables).toEqual(["a"]);
     });
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
@@ -96,7 +95,7 @@ describe("project-manifest", function () {
       manifest = addTestable(manifest, domainName("b"));
       manifest = addTestable(manifest, domainName("a"));
 
-      should(manifest.testables).deepEqual(["a", "b"]);
+      expect(manifest.testables).toEqual(["a", "b"]);
     });
   });
 });

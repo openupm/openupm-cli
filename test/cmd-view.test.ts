@@ -1,4 +1,3 @@
-import "should";
 import { view, ViewOptions } from "../src/cmd-view";
 import {
   exampleRegistryUrl,
@@ -126,37 +125,40 @@ describe("cmd-view.ts", function () {
 
     it("view pkg", async function () {
       const retCode = await view(packageA, options);
-      retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-a@1.0.0")
-        .should.be.ok();
+      expect(retCode).toEqual(0);
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "com.example.package-a@1.0.0"
+      );
     });
     it("view pkg@1.0.0", async function () {
       const retCode = await view(
         packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
-      retCode.should.equal(1);
-      mockConsole
-        .hasLineIncluding("out", "do not specify a version")
-        .should.be.ok();
+      expect(retCode).toEqual(1);
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "do not specify a version"
+      );
     });
     it("view pkg-not-exist", async function () {
       const retCode = await view(packageMissing, options);
-      retCode.should.equal(1);
-      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
+      expect(retCode).toEqual(1);
+      expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
     it("view pkg from upstream", async function () {
       const retCode = await view(packageUp, upstreamOptions);
-      retCode.should.equal(0);
-      mockConsole
-        .hasLineIncluding("out", "com.example.package-up@1.0.0")
-        .should.be.ok();
+      expect(retCode).toEqual(0);
+      expect(mockConsole).toHaveLineIncluding(
+        "out",
+        "com.example.package-up@1.0.0"
+      );
     });
     it("view pkg-not-exist from upstream", async function () {
       const retCode = await view(packageMissing, upstreamOptions);
-      retCode.should.equal(1);
-      mockConsole.hasLineIncluding("out", "package not found").should.be.ok();
+      expect(retCode).toEqual(1);
+      expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
   });
 });

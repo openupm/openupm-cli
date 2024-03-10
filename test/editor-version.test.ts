@@ -2,21 +2,20 @@ import {
   tryCompareEditorVersion,
   tryParseEditorVersion,
 } from "../src/types/editor-version";
-import "should";
+
 import assert from "assert";
-import should from "should";
 
 describe("editor-version", function () {
   describe("parseEditorVersion", function () {
     it("test x.y", function () {
       const version = tryParseEditorVersion("2019.2");
       assert(version !== null);
-      version.should.deepEqual({ major: 2019, minor: 2 });
+      expect(version).toEqual({ major: 2019, minor: 2 });
     });
     it("test x.y.z", function () {
       const version = tryParseEditorVersion("2019.2.1");
       assert(version !== null);
-      version.should.deepEqual({
+      expect(version).toEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -25,7 +24,7 @@ describe("editor-version", function () {
     it("test x.y.zan", function () {
       const version = tryParseEditorVersion("2019.2.1a5");
       assert(version !== null);
-      version.should.deepEqual({
+      expect(version).toEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -36,7 +35,7 @@ describe("editor-version", function () {
     it("test x.y.zbn", function () {
       const version = tryParseEditorVersion("2019.2.1b5");
       assert(version !== null);
-      version.should.deepEqual({
+      expect(version).toEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -47,7 +46,7 @@ describe("editor-version", function () {
     it("test x.y.zfn", function () {
       const version = tryParseEditorVersion("2019.2.1f5");
       assert(version !== null);
-      version.should.deepEqual({
+      expect(version).toEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -58,7 +57,7 @@ describe("editor-version", function () {
     it("test x.y.zcn", function () {
       const version = tryParseEditorVersion("2019.2.1f1c5");
       assert(version !== null);
-      version.should.deepEqual({
+      expect(version).toEqual({
         major: 2019,
         minor: 2,
         patch: 1,
@@ -69,7 +68,7 @@ describe("editor-version", function () {
       });
     });
     it("test invalid version", function () {
-      (tryParseEditorVersion("2019") === null).should.be.ok();
+      expect(tryParseEditorVersion("2019") === null).toBeTruthy();
     });
   });
 
@@ -81,7 +80,7 @@ describe("editor-version", function () {
       ["2019.1.1f1c1", "2019.1.1f1c1"]
     ).forEach(([a, b]) =>
       it(`${a} == ${b}`, function () {
-        should(tryCompareEditorVersion(a, b)).equal(0);
+        expect(tryCompareEditorVersion(a, b)).toEqual(0);
       })
     );
     Array.of<[string, string]>(
@@ -89,7 +88,7 @@ describe("editor-version", function () {
       ["2020.1", "2019.1"]
     ).forEach(([a, b]) =>
       it(`${a} > ${b}`, function () {
-        should(tryCompareEditorVersion(a, b)).equal(1);
+        expect(tryCompareEditorVersion(a, b)).toEqual(1);
       })
     );
     Array.of<[string, string]>(
@@ -102,7 +101,7 @@ describe("editor-version", function () {
       ["2019.1.1f1", "2020.1.1f1c1"]
     ).forEach(([a, b]) =>
       it(`${a} < ${b}`, function () {
-        should(tryCompareEditorVersion(a, b)).equal(-1);
+        expect(tryCompareEditorVersion(a, b)).toEqual(-1);
       })
     );
 
@@ -111,7 +110,7 @@ describe("editor-version", function () {
       ["not-a-version", "2020.1"]
     ).forEach(([a, b]) =>
       it(`should not be able to compare ${a} and ${b}`, function () {
-        should(tryCompareEditorVersion(a, b)).be.null();
+        expect(tryCompareEditorVersion(a, b)).toBeNull();
       })
     );
   });
