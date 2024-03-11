@@ -31,8 +31,10 @@ describe("registry-client", function () {
 
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
-      const info = await client.tryFetchPackument(env.registry, packageA);
-      expect(info).toEqual(packumentRemote);
+      const result = await client.tryFetchPackument(env.registry, packageA);
+      expect(result).toBeOk((packument) =>
+        expect(packument).toEqual(packumentRemote)
+      );
     });
     it("404", async function () {
       const env = (
@@ -40,8 +42,8 @@ describe("registry-client", function () {
       ).unwrap();
 
       registerMissingPackument(packageA);
-      const info = await client.tryFetchPackument(env.registry, packageA);
-      expect(info).toBeNull();
+      const result = await client.tryFetchPackument(env.registry, packageA);
+      expect(result).toBeOk((packument) => expect(packument).toBeNull());
     });
   });
 });

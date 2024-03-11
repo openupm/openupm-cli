@@ -5,8 +5,12 @@ import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { RegistryUrl } from "./types/registry-url";
 import npmSearch from "libnpmsearch";
-import { is404Error, isHttpError } from "./utils/error-type-guards";
-import npmFetch from "npm-registry-fetch";
+import {
+  assertIsHttpError,
+  is404Error,
+  isHttpError,
+} from "./utils/error-type-guards";
+import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
 
@@ -65,7 +69,7 @@ export interface NpmClient {
   tryFetchPackument(
     registry: Registry,
     name: DomainName
-  ): Promise<UnityPackument | null>;
+  ): Promise<Result<UnityPackument | null, HttpErrorBase>>;
 
   /**
    * Attempts to add a user to a registry.
@@ -132,8 +136,11 @@ export const makeNpmClient = (): NpmClient => {
           url,
           { auth: registry.auth || undefined },
           (error, packument) => {
-            if (error !== null) resolve(null);
-            else resolve(packument);
+            if (error !== null) {
+              assertIsHttpError(error);
+              if (error.statusCode === 404) resolve(Ok(null));
+              else resolve(Err(error));
+            } else resolve(Ok(packument));
           }
         );
       });

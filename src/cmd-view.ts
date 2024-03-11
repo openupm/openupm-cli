@@ -7,6 +7,7 @@ import { makeNpmClient } from "./npm-client";
 import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
+import { AsyncResult, Ok } from "ts-results-es";
 
 export type ViewOptions = CmdOptions;
 
@@ -29,16 +30,24 @@ export const view = async function (
     return 1;
   }
   // verify name
-  let packument = await client.tryFetchPackument(env.registry, pkg);
-  if (packument === null && env.upstream)
-    packument = await client.tryFetchPackument(env.upstreamRegistry, pkg);
-  if (packument === null) {
-    log.error("404", `package not found: ${pkg}`);
-    return 1;
-  }
-  // print info
-  printInfo(packument);
-  return 0;
+  return (
+    await new AsyncResult(client.tryFetchPackument(env.registry, pkg))
+      .andThen(async (packument) => {
+        if (packument === null && env.upstream)
+          return await client.tryFetchPackument(env.upstreamRegistry, pkg);
+        return Ok(packument);
+      })
+      .map((packument) => {
+        if (packument === null) {
+          log.error("404", `package not found: ${pkg}`);
+          return 1;
+        }
+        // print info
+        printInfo(packument);
+        return 0;
+      })
+      .orElse(() => Ok(1)).promise
+  ).unwrap();
 };
 
 const printInfo = function (packument: UnityPackument) {

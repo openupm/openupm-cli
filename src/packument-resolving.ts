@@ -13,6 +13,7 @@ import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./types/registry-url";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
+import { HttpErrorBase } from "npm-registry-fetch";
 
 /**
  * A version-reference that is resolvable.
@@ -82,6 +83,7 @@ export class VersionNotFoundError extends CustomError {
  * A failed attempt at resolving a packument-version.
  */
 export type PackumentResolveError =
+  | HttpErrorBase
   | PackumentNotFoundError
   | NoVersionsError
   | VersionNotFoundError;
@@ -140,10 +142,12 @@ export async function tryResolve(
   requestedVersion: ResolvableVersion,
   source: Registry
 ): Promise<ResolveResult> {
-  const packument = await npmClient.tryFetchPackument(source, packageName);
-  if (packument === null) return Err(new PackumentNotFoundError());
-
-  return tryResolveFromPackument(packument, requestedVersion, source.url);
+  return (await npmClient.tryFetchPackument(source, packageName)).andThen(
+    (packument) => {
+      if (packument === null) return Err(new PackumentNotFoundError());
+      return tryResolveFromPackument(packument, requestedVersion, source.url);
+    }
+  );
 }
 
 /**
