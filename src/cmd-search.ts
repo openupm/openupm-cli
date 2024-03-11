@@ -31,7 +31,7 @@ const searchOld = async function (
   registry: Registry,
   keyword: string
 ): Promise<SearchedPackument[] | null> {
-  const results = await npmClient.tryGetAll(registry);
+  const results = (await npmClient.tryGetAll(registry)).unwrapOr(null);
   let packuments = Array.of<SearchedPackument>();
 
   if (results === null) return null;

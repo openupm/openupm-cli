@@ -5,11 +5,7 @@ import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { RegistryUrl } from "./types/registry-url";
 import npmSearch from "libnpmsearch";
-import {
-  assertIsHttpError,
-  is404Error,
-  isHttpError,
-} from "./utils/error-type-guards";
+import { assertIsHttpError, is404Error } from "./utils/error-type-guards";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
@@ -95,7 +91,9 @@ export interface NpmClient {
    * Attempts to query the /-/all endpoint.
    * @param registry The registry to query.
    */
-  tryGetAll(registry: Registry): Promise<AllPackumentsResult | null>;
+  tryGetAll(
+    registry: Registry
+  ): Promise<Result<AllPackumentsResult | null, HttpErrorBase>>;
 }
 
 export type Registry = Readonly<{
@@ -176,15 +174,17 @@ export const makeNpmClient = (): NpmClient => {
       }
     },
 
-    async tryGetAll(registry: Registry): Promise<AllPackumentsResult | null> {
+    async tryGetAll(registry) {
       try {
-        return (await npmFetch.json(
+        const result = (await npmFetch.json(
           "/-/all",
           getNpmFetchOptions(registry)
         )) as AllPackumentsResult;
-      } catch (err) {
-        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
-        return null;
+        return Ok(result);
+      } catch (error) {
+        assertIsHttpError(error);
+        if (is404Error(error)) return Ok(null);
+        return Err(error);
       }
     },
   };
