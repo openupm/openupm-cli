@@ -116,7 +116,7 @@ export const trySaveUpmConfig = async (
 /**
  * Stores authentication information in the projects upm config.
  */
-export const storeUpmAuth = async function (
+export const tryStoreUpmAuth = async function (
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth

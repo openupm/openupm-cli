@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { makeNpmClient } from "./npm-client";
 import log from "./logger";
-import { storeUpmAuth, tryGetUpmConfigDir } from "./utils/upm-config-io";
+import { tryStoreUpmAuth, tryGetUpmConfigDir } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
@@ -53,7 +53,7 @@ export const login = async function (
   if (options.basicAuth) {
     // basic auth
     const _auth = encodeBasicAuth(username, password);
-    const result = await storeUpmAuth(configDir, loginRegistry, {
+    const result = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
       _auth,
@@ -70,7 +70,7 @@ export const login = async function (
     const token = result.token;
     // write npm token
     await writeNpmToken(loginRegistry, result.token);
-    const storeResult = await storeUpmAuth(configDir, loginRegistry, {
+    const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
       token,
