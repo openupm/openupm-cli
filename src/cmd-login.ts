@@ -31,8 +31,9 @@ export const login = async function (
   options: LoginOptions
 ): Promise<LoginResultCode> {
   // parse env
-  const env = await parseEnv(options, false);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (!envResult.isOk) return 1;
+  const env = envResult.value;
   // query parameters
   const username = options.username ?? (await promptUsername());
   const password = options.password ?? (await promptPassword());

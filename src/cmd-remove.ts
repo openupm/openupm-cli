@@ -31,8 +31,9 @@ export const remove = async function (
 ): Promise<RemoveResultCode> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const env = await parseEnv(options, true);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (!envResult.isOk) return 1;
+  const env = envResult.value;
 
   const removeSingle = async function (
     pkg: PackageReference

@@ -36,8 +36,9 @@ export const deps = async function (
   options: DepsOptions
 ): Promise<DepsResultCode> {
   // parse env
-  const env = await parseEnv(options, false);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (!envResult.isOk) return 1;
+  const env = envResult.value;
 
   const client = makeNpmClient();
 

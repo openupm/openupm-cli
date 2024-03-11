@@ -9,6 +9,10 @@ import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../npm-client";
+import { Result } from "@badrap/result";
+import { CustomError } from "ts-custom-error";
+import ok = Result.ok;
+import err = Result.err;
 
 export type Env = Readonly<{
   cwd: string;
@@ -20,14 +24,21 @@ export type Env = Readonly<{
   editorVersion: string | null;
 }>;
 
+export class CwdNotFoundError extends CustomError {}
+
+export class ManifestNotFoundError extends CustomError {}
+
+export type EnvParseError = CwdNotFoundError;
+
+export type EnvParseResult = Result<Env, EnvParseError>;
+
 /**
- * Parse env.
- * @throws {Error} An unhandled error occurred.
+ * Attempts to parse env.
  */
 export const parseEnv = async function (
   options: CmdOptions,
   checkPath: boolean
-): Promise<Env | null> {
+): Promise<EnvParseResult> {
   // set defaults
   let registry: Registry = {
     url: registryUrl("https://package.openupm.com"),
@@ -91,7 +102,7 @@ export const parseEnv = async function (
   }
   // return if no need to check path
   if (!checkPath)
-    return {
+    return ok({
       cwd,
       editorVersion,
       registry,
@@ -99,13 +110,13 @@ export const parseEnv = async function (
       upstream,
       upstreamRegistry,
       wsl,
-    };
+    });
   // cwd
   if (options._global.chdir) {
     cwd = path.resolve(options._global.chdir);
     if (!fs.existsSync(cwd)) {
       log.error("env", `can not resolve path ${cwd}`);
-      return null;
+      return err(new CwdNotFoundError());
     }
   } else cwd = process.cwd();
   // manifest path
@@ -115,7 +126,7 @@ export const parseEnv = async function (
       "manifest",
       `can not locate manifest.json at path ${manifestPath}`
     );
-    return null;
+    return err(new ManifestNotFoundError());
   }
 
   // editor version
@@ -147,7 +158,7 @@ export const parseEnv = async function (
     editorVersion = projectVersionContent.m_EditorVersion;
   }
   // return
-  return {
+  return ok({
     cwd,
     editorVersion,
     registry,
@@ -155,5 +166,5 @@ export const parseEnv = async function (
     upstream,
     upstreamRegistry,
     wsl,
-  };
+  });
 };
