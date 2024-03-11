@@ -6,8 +6,8 @@ import path from "path";
 import os from "os";
 import fse from "fs-extra";
 import {
-  tryLoadProjectManifest,
   ManifestLoadResult,
+  tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../../src/utils/project-manifest-io";
 import assert from "assert";
@@ -107,7 +107,7 @@ export async function setupUnityProject(
     // Upmconfig
     const upmConfig = config.upmConfig ?? defaultUpmConfig;
     const saveResult = await trySaveUpmConfig(upmConfig, rootPath);
-    if (!saveResult.isOk) throw saveResult.error;
+    if (!saveResult.isOk()) throw saveResult.error;
 
     // Editor-version
     const version = config.version ?? defaultVersion;
@@ -115,7 +115,7 @@ export async function setupUnityProject(
       projectPath,
       version
     );
-    if (!projectVersionResult.isOk) throw projectVersionResult.error;
+    if (!projectVersionResult.isOk()) throw projectVersionResult.error;
 
     // Project manifest
     if (config.manifest !== false) {
@@ -124,7 +124,7 @@ export async function setupUnityProject(
         projectPath,
         manifest
       );
-      if (!manifestResult.isOk) throw manifestResult.error;
+      if (!manifestResult.isOk()) throw manifestResult.error;
     }
   }
 
@@ -133,7 +133,7 @@ export async function setupUnityProject(
 
     await fse.rm(rootPath, { recursive: true, force: true });
 
-    envSession?.unhook();
+    envSession?.unhoOk();
   }
 
   function tryGetManifest() {
@@ -144,7 +144,7 @@ export async function setupUnityProject(
     assertFn: (manifest: UnityProjectManifest) => void
   ) {
     const manifestResult = await tryGetManifest();
-    assert(manifestResult.isOk);
+    assert(manifestResult.isOk());
     assertFn(manifestResult.value);
   }
 

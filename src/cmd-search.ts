@@ -56,7 +56,7 @@ export async function search(
 ): Promise<SearchResultCode> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk) return 1;
+  if (!envResult.isOk()) return 1;
   const env = envResult.value;
 
   const npmClient = makeNpmClient();

@@ -1,8 +1,8 @@
 import log from "../logger";
 import chalk from "chalk";
 import {
-  tryGetUpmConfigDir,
   GetUpmConfigDirError,
+  tryGetUpmConfigDir,
   tryLoadUpmConfig,
 } from "./upm-config-io";
 import path from "path";
@@ -13,11 +13,9 @@ import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../npm-client";
-import { Result } from "@badrap/result";
 import { CustomError } from "ts-custom-error";
-import ok = Result.ok;
-import err = Result.err;
 import { RequiredFileNotFoundError } from "../common-errors";
+import { Err, Ok, Result } from "ts-results-es";
 
 export type Env = Readonly<{
   cwd: string;
@@ -92,7 +90,7 @@ export const parseEnv = async function (
   if (options._global.wsl) wsl = true;
 
   const configDirResult = await tryGetUpmConfigDir(wsl, systemUser);
-  if (!configDirResult.isOk) return err(configDirResult.error);
+  if (!configDirResult.isOk()) return Err(configDirResult.error);
   const configDir = configDirResult.value;
 
   const upmConfig = await tryLoadUpmConfig(configDir);
@@ -109,7 +107,7 @@ export const parseEnv = async function (
   }
   // return if no need to check path
   if (!checkPath)
-    return ok({
+    return Ok({
       cwd,
       editorVersion,
       registry,
@@ -123,7 +121,7 @@ export const parseEnv = async function (
     cwd = path.resolve(options._global.chdir);
     if (!fs.existsSync(cwd)) {
       log.error("env", `can not resolve path ${cwd}`);
-      return err(new CwdNotFoundError());
+      return Err(new CwdNotFoundError());
     }
   } else cwd = process.cwd();
   // manifest path
@@ -133,7 +131,7 @@ export const parseEnv = async function (
       "manifest",
       `can not locate manifest.json at path ${manifestPath}`
     );
-    return err(new RequiredFileNotFoundError(manifestPath));
+    return Err(new RequiredFileNotFoundError(manifestPath));
   }
 
   // editor version
@@ -165,7 +163,7 @@ export const parseEnv = async function (
     editorVersion = projectVersionContent.m_EditorVersion;
   }
   // return
-  return ok({
+  return Ok({
     cwd,
     editorVersion,
     registry,

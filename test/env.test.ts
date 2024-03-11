@@ -64,7 +64,7 @@ describe("env", function () {
         { _global: { chdir: "/path-not-exist" } },
         true
       );
-      expect(envResult.isOk).toBeFalsy();
+      expect(envResult.isOk()).toBeFalsy();
       expect(mockConsole).toHaveLineIncluding("out", "can not resolve path");
     });
 
@@ -74,7 +74,7 @@ describe("env", function () {
       fse.rmSync(manifestPath);
 
       const envResult = await parseEnv({ _global: {} }, true);
-      expect(envResult.isOk).toBeFalsy();
+      expect(envResult.isOk()).toBeFalsy();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "can not locate manifest.json"

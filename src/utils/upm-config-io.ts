@@ -8,11 +8,9 @@ import execute from "./process";
 import { addAuth, UpmAuth, UPMConfig } from "../types/upm-config";
 import { RegistryUrl } from "../types/registry-url";
 import { CustomError } from "ts-custom-error";
-import { Result } from "@badrap/result";
 import { IOError } from "../common-errors";
 import { assertIsError } from "./error-type-guards";
-import err = Result.err;
-import ok = Result.ok;
+import { Err, Ok, Result } from "ts-results-es";
 
 const configFileName = ".upmconfig.toml";
 
@@ -45,15 +43,15 @@ export const tryGetUpmConfigDir = async (
 ): Promise<Result<string, GetUpmConfigDirError>> => {
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (wsl) {
-    if (!isWsl) return err(new NoWslError());
+    if (!isWsl) return Err(new NoWslError());
     if (systemUser) {
       const allUserProfilePath = await execute(
         'wslpath "$(wslvar ALLUSERSPROFILE)"',
         { trim: true }
       );
-      return ok(path.join(allUserProfilePath, systemUserSubPath));
+      return Ok(path.join(allUserProfilePath, systemUserSubPath));
     } else {
-      return ok(
+      return Ok(
         await execute('wslpath "$(wslvar USERPROFILE)"', {
           trim: true,
         })
@@ -61,13 +59,13 @@ export const tryGetUpmConfigDir = async (
     }
   } else if (systemUser) {
     if (!process.env.ALLUSERSPROFILE)
-      return err(new RequiredEnvMissingError("ALLUSERSPROFILE"));
-    return ok(path.join(process.env.ALLUSERSPROFILE, systemUserSubPath));
+      return Err(new RequiredEnvMissingError("ALLUSERSPROFILE"));
+    return Ok(path.join(process.env.ALLUSERSPROFILE, systemUserSubPath));
   } else {
     const dirName = process.env.USERPROFILE ?? process.env.HOME;
     if (dirName === undefined)
-      return err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
-    return ok(dirName);
+      return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
+    return Ok(dirName);
   }
 };
 
@@ -106,10 +104,10 @@ export const trySaveUpmConfig = async (
     const content = TOML.stringify(config);
     await fs.writeFile(configPath, content, "utf8");
     log.notice("config", "saved unity config at " + configPath);
-    return ok(undefined);
+    return Ok(undefined);
   } catch (error) {
     assertIsError(error);
-    return err(error);
+    return Err(error);
   }
 };
 

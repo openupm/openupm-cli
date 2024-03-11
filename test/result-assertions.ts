@@ -1,8 +1,8 @@
-import { Result } from "@badrap/result";
+import { Result } from "ts-results-es";
 
 expect.extend({
   toBeOk<T>(result: Result<T, Error>, valueAsserter?: (value: T) => void) {
-    if (!result.isOk)
+    if (!result.isOk())
       return {
         pass: false,
         message: () =>
@@ -18,7 +18,7 @@ expect.extend({
     result: Result<unknown, T>,
     errorAsserter?: (error: T) => void
   ) {
-    if (result.isOk)
+    if (result.isOk())
       return {
         pass: false,
         message: () =>

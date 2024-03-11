@@ -1,9 +1,8 @@
 import { runWithEnv } from "./mock-env";
 import {
-  tryGetUpmConfigDir,
   RequiredEnvMissingError,
+  tryGetUpmConfigDir,
 } from "../src/utils/upm-config-io";
-import { Result } from "@badrap/result";
 
 describe("upm-config-io", function () {
   describe("get directory", function () {

@@ -11,11 +11,8 @@ import { recordKeys } from "./utils/record-utils";
 import { PackageUrl } from "./types/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./types/registry-url";
-import { Result } from "@badrap/result";
 import { CustomError } from "ts-custom-error";
-import err = Result.err;
-import ok = Result.ok;
-import Err = Result.Err;
+import { Err, Ok, Result } from "ts-results-es";
 
 /**
  * A version-reference that is resolvable.
@@ -106,13 +103,13 @@ export function tryResolveFromPackument(
   source: RegistryUrl
 ): ResolveResult {
   const availableVersions = recordKeys(packument.versions);
-  if (availableVersions.length === 0) return err(new NoVersionsError());
+  if (availableVersions.length === 0) return Err(new NoVersionsError());
 
   // Find the latest version
   if (requestedVersion === undefined || requestedVersion === "latest") {
     let latestVersion = tryGetLatestVersion(packument);
     if (latestVersion === undefined) latestVersion = availableVersions.at(-1)!;
-    return ok({
+    return Ok({
       packument,
       source,
       packumentVersion: packument.versions[latestVersion]!,
@@ -121,9 +118,9 @@ export function tryResolveFromPackument(
 
   // Find a specific version
   if (!availableVersions.includes(requestedVersion))
-    return err(new VersionNotFoundError(requestedVersion, availableVersions));
+    return Err(new VersionNotFoundError(requestedVersion, availableVersions));
 
-  return ok({
+  return Ok({
     packument,
     source,
     packumentVersion: packument.versions[requestedVersion]!,
@@ -144,7 +141,7 @@ export async function tryResolve(
   source: Registry
 ): Promise<ResolveResult> {
   const packument = await npmClient.tryFetchPackument(source, packageName);
-  if (packument === null) return err(new PackumentNotFoundError());
+  if (packument === null) return Err(new PackumentNotFoundError());
 
   return tryResolveFromPackument(packument, requestedVersion, source.url);
 }
@@ -163,7 +160,7 @@ export function tryResolveFromCache(
   requestedVersion: ResolvableVersion
 ): ResolveResult {
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
-  if (cachedPackument === null) return err(new PackumentNotFoundError());
+  if (cachedPackument === null) return Err(new PackumentNotFoundError());
 
   return tryResolveFromPackument(cachedPackument, requestedVersion, source);
 }
@@ -174,10 +171,10 @@ export function tryResolveFromCache(
  * @param b The second failure.
  * @returns The more fixable failure.
  */
-export function pickMostFixable<T>(
-  a: Err<T, PackumentResolveError>,
-  b: Err<T, PackumentResolveError>
-): Err<T, PackumentResolveError> {
+export function pickMostFixable(
+  a: Err<PackumentResolveError>,
+  b: Err<PackumentResolveError>
+): Err<PackumentResolveError> {
   // Anything is more fixable than packument-not-found
   if (
     a.error instanceof PackumentNotFoundError &&

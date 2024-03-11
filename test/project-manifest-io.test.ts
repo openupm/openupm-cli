@@ -1,8 +1,8 @@
 import { attachMockConsole, MockConsole } from "./mock-console";
 
 import {
-  tryLoadProjectManifest,
   ManifestParseError,
+  tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../src/utils/project-manifest-io";
 import { DomainName, domainName } from "../src/types/domain-name";
@@ -18,7 +18,7 @@ import path from "path";
 import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
-import {RequiredFileNotFoundError} from "../src/common-errors";
+import { RequiredFileNotFoundError } from "../src/common-errors";
 
 describe("project-manifest io", () => {
   let mockConsole: MockConsole = null!;

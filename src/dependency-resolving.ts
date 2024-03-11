@@ -103,7 +103,7 @@ export const fetchPackageDependencies = async function (
       version
     );
     // Then registry
-    if (!resolveResult.isOk) {
+    if (!resolveResult.isOk()) {
       resolveResult = await tryResolve(
         client,
         packumentName,
@@ -136,18 +136,18 @@ export const fetchPackageDependencies = async function (
           entry.version
         );
         // Then upstream registry
-        if (!resolveResult.isOk) {
+        if (!resolveResult.isOk()) {
           const upstreamResult = await tryResolveFromRegistry(
             upstreamRegistry,
             entry.name,
             entry.version
           );
-          if (upstreamResult.isOk) resolveResult = upstreamResult;
+          if (upstreamResult.isOk()) resolveResult = upstreamResult;
           else resolveResult = pickMostFixable(resolveResult, upstreamResult);
         }
 
         // If none resolved successfully, log the most fixable failure
-        if (!resolveResult.isOk) {
+        if (!resolveResult.isOk()) {
           if (resolveResult.error instanceof PackumentNotFoundError) {
             log.warn("404", `package not found: ${entry.name}`);
           } else if (resolveResult.error instanceof VersionNotFoundError) {

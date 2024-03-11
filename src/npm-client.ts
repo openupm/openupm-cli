@@ -8,9 +8,7 @@ import npmSearch from "libnpmsearch";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import npmFetch from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { Result } from "@badrap/result";
-import err = Result.err;
-import ok = Result.ok;
+import { Err, Ok, Result } from "ts-results-es";
 
 /**
  * Error for when authentication failed.
@@ -149,14 +147,14 @@ export const makeNpmClient = (): NpmClient => {
           (error, responseData, _, response) => {
             if (error !== null || !responseData.ok)
               resolve(
-                err(
+                Err(
                   new AuthenticationError(
                     response.statusCode,
                     response.statusMessage
                   )
                 )
               );
-            else resolve(ok(responseData.token));
+            else resolve(Ok(responseData.token));
           }
         );
       });

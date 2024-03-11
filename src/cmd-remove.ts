@@ -32,7 +32,7 @@ export const remove = async function (
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk) return 1;
+  if (!envResult.isOk()) return 1;
   const env = envResult.value;
 
   const removeSingle = async function (
@@ -47,7 +47,7 @@ export const remove = async function (
     }
     // load manifest
     const manifestResult = await tryLoadProjectManifest(env.cwd);
-    if (!manifestResult.isOk) return { code: 1, dirty };
+    if (!manifestResult.isOk()) return { code: 1, dirty };
     let manifest = manifestResult.value;
 
     // not found array
@@ -69,7 +69,7 @@ export const remove = async function (
     }
     // save manifest
     if (dirty) {
-      if (!(await trySaveProjectManifest(env.cwd, manifest)).isOk)
+      if (!(await trySaveProjectManifest(env.cwd, manifest)).isOk())
         return { code: 1, dirty };
     }
     if (pkgsNotFound.length) {

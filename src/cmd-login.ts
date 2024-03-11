@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { makeNpmClient } from "./npm-client";
 import log from "./logger";
-import { tryStoreUpmAuth, tryGetUpmConfigDir } from "./utils/upm-config-io";
+import { tryGetUpmConfigDir, tryStoreUpmAuth } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
@@ -32,7 +32,7 @@ export const login = async function (
 ): Promise<LoginResultCode> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk) return 1;
+  if (!envResult.isOk()) return 1;
   const env = envResult.value;
   // query parameters
   const username = options.username ?? (await promptUsername());
@@ -47,7 +47,7 @@ export const login = async function (
   const alwaysAuth = options.alwaysAuth || false;
 
   const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
-  if (!configDirResult.isOk) return 1;
+  if (!configDirResult.isOk()) return 1;
   const configDir = configDirResult.value;
 
   if (options.basicAuth) {
@@ -58,7 +58,7 @@ export const login = async function (
       alwaysAuth,
       _auth,
     } satisfies BasicAuth);
-    if (result.isErr) return 1;
+    if (result.isErr()) return 1;
   } else {
     // npm login
     const result = await npmLogin(username, password, email, loginRegistry);
@@ -75,7 +75,7 @@ export const login = async function (
       alwaysAuth,
       token,
     } satisfies TokenAuth);
-    if (storeResult.isErr) return 1;
+    if (storeResult.isErr()) return 1;
   }
 
   return 0;
@@ -98,7 +98,7 @@ const npmLogin = async function (
   const client = makeNpmClient();
   const result = await client.addUser(registry, username, password, email);
 
-  if (result.isOk) {
+  if (result.isOk()) {
     log.notice("auth", `you are authenticated as '${username}'`);
     return { code: 0, token: result.value };
   }

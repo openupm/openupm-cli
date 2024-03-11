@@ -1,9 +1,7 @@
 import path from "path";
 import fse from "fs-extra";
-import { Result } from "@badrap/result";
 import { assertIsError } from "./error-type-guards";
-import ok = Result.ok;
-import err = Result.err;
+import { Err, Ok, Result } from "ts-results-es";
 
 /**
  * Creates a ProjectVersion.txt file for a Unity project.
@@ -23,9 +21,9 @@ export async function tryCreateProjectVersionTxt(
       path.join(projectSettingsDir, "ProjectVersion.txt"),
       data
     );
-    return ok(undefined);
+    return Ok(undefined);
   } catch (error) {
     assertIsError(error);
-    return err(error);
+    return Err(error);
   }
 }
