@@ -93,16 +93,16 @@ const npmLogin = async function (
   const client = makeNpmClient();
   const result = await client.addUser(registry, username, password, email);
 
-  if (result.isSuccess) {
+  if (result.isOk) {
     log.notice("auth", `you are authenticated as '${username}'`);
-    return { code: 0, token: result.token };
+    return { code: 0, token: result.value };
   }
 
-  if (result.status === 401) {
+  if (result.error.status === 401) {
     log.warn("401", "Incorrect username or password");
     return { code: 1 };
   } else {
-    log.error(result.status.toString(), result.message);
+    log.error(result.error.status.toString(), result.error.message);
     return { code: 1 };
   }
 };

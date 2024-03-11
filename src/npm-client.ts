@@ -7,36 +7,35 @@ import { RegistryUrl } from "./types/registry-url";
 import npmSearch from "libnpmsearch";
 import { is404Error, isHttpError } from "./utils/error-type-guards";
 import npmFetch from "npm-registry-fetch";
+import { CustomError } from "ts-custom-error";
+import { Result } from "@badrap/result";
+import err = Result.err;
+import ok = Result.ok;
+
+/**
+ * Error for when authentication failed.
+ */
+export class AuthenticationError extends CustomError {
+  constructor(
+    /**
+     * The http-response code returned by the server.
+     */
+    readonly status: number,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+/**
+ * A token authenticating a user.
+ */
+type AuthenticationToken = string;
 
 /**
  * The result of adding a user.
  */
-type AddUserResult = Readonly<
-  | {
-      /**
-       * Indicates success.
-       */
-      isSuccess: true;
-      /**
-       * The authentication token retrieved by adding the user.
-       */
-      token: string;
-    }
-  | {
-      /**
-       * Indicates failure.
-       */
-      isSuccess: false;
-      /**
-       * The http status code returned by the server.
-       */
-      status: number;
-      /**
-       * The message returned by the server.
-       */
-      message: string;
-    }
->;
+type AddUserResult = Result<AuthenticationToken, AuthenticationError>;
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -149,12 +148,15 @@ export const makeNpmClient = (): NpmClient => {
           { auth: { username, email, password } },
           (error, responseData, _, response) => {
             if (error !== null || !responseData.ok)
-              resolve({
-                isSuccess: false,
-                status: response.statusCode,
-                message: response.statusMessage,
-              });
-            else resolve({ isSuccess: true, token: responseData.token });
+              resolve(
+                err(
+                  new AuthenticationError(
+                    response.statusCode,
+                    response.statusMessage
+                  )
+                )
+              );
+            else resolve(ok(responseData.token));
           }
         );
       });
