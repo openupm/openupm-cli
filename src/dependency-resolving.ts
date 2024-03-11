@@ -4,11 +4,13 @@ import log from "./logger";
 import { packageReference } from "./types/package-reference";
 import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {
+  PackumentNotFoundError,
+  PackumentResolveError,
   pickMostFixable,
   ResolvableVersion,
-  ResolveFailure,
   tryResolve,
   tryResolveFromCache,
+  VersionNotFoundError,
 } from "./packument-resolving";
 import { unityRegistryUrl } from "./types/registry-url";
 import { recordEntries } from "./utils/record-utils";
@@ -49,7 +51,7 @@ export interface ValidDependency extends DependencyBase {
  * A dependency that could not be resolved.
  */
 export interface InvalidDependency extends DependencyBase {
-  reason: ResolveFailure;
+  reason: PackumentResolveError;
 }
 
 type NameVersionPair = Readonly<{
@@ -101,7 +103,7 @@ export const fetchPackageDependencies = async function (
       version
     );
     // Then registry
-    if (!resolveResult.isSuccess) {
+    if (!resolveResult.isOk) {
       resolveResult = await tryResolve(
         client,
         packumentName,
@@ -134,50 +136,50 @@ export const fetchPackageDependencies = async function (
           entry.version
         );
         // Then upstream registry
-        if (!resolveResult.isSuccess) {
+        if (!resolveResult.isOk) {
           const upstreamResult = await tryResolveFromRegistry(
             upstreamRegistry,
             entry.name,
             entry.version
           );
-          if (upstreamResult.isSuccess) resolveResult = upstreamResult;
+          if (upstreamResult.isOk) resolveResult = upstreamResult;
           else resolveResult = pickMostFixable(resolveResult, upstreamResult);
         }
 
         // If none resolved successfully, log the most fixable failure
-        if (!resolveResult.isSuccess) {
-          if (resolveResult.issue === "PackumentNotFound") {
+        if (!resolveResult.isOk) {
+          if (resolveResult.error instanceof PackumentNotFoundError) {
             log.warn("404", `package not found: ${entry.name}`);
-          } else if (resolveResult.issue === "VersionNotFound") {
-            const versionList = [...resolveResult.availableVersions]
+          } else if (resolveResult.error instanceof VersionNotFoundError) {
+            const versionList = [...resolveResult.error.availableVersions]
               .reverse()
               .join(", ");
             log.warn(
               "404",
-              `version ${resolveResult.requestedVersion} is not a valid choice of ${versionList}`
+              `version ${resolveResult.error.requestedVersion} is not a valid choice of ${versionList}`
             );
           }
           depsInvalid.push({
             name: entry.name,
             self: isSelf,
-            reason: resolveResult,
+            reason: resolveResult.error,
           });
           continue;
         }
 
         // Packument was resolved successfully
-        isUpstream = resolveResult.source === unityRegistryUrl;
-        resolvedVersion = resolveResult.packumentVersion.version;
+        isUpstream = resolveResult.value.source === unityRegistryUrl;
+        resolvedVersion = resolveResult.value.packumentVersion.version;
         packumentCache = addToCache(
           packumentCache,
-          resolveResult.source,
-          resolveResult.packument
+          resolveResult.value.source,
+          resolveResult.value.packument
         );
 
         // add dependencies to pending list
         if (isSelf || deep) {
           const deps = recordEntries(
-            resolveResult.packumentVersion["dependencies"] || {}
+            resolveResult.value.packumentVersion["dependencies"] || {}
           ).map((x): NameVersionPair => {
             return {
               name: x[0],

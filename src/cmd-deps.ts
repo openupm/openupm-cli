@@ -8,7 +8,11 @@ import {
   splitPackageReference,
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
-import { ResolveFailure } from "./packument-resolving";
+import {
+  PackumentNotFoundError,
+  PackumentResolveError,
+  VersionNotFoundError,
+} from "./packument-resolving";
 import { fetchPackageDependencies } from "./dependency-resolving";
 
 type DepsResultCode = 0 | 1;
@@ -17,9 +21,10 @@ export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
 
-function errorPrefixForIssue(issue: ResolveFailure["issue"]): string {
-  if (issue === "PackumentNotFound") return "missing dependency";
-  else if (issue === "VersionNotFound") return "missing dependency version";
+function errorPrefixForError(error: PackumentResolveError): string {
+  if (error instanceof PackumentNotFoundError) return "missing dependency";
+  else if (error instanceof VersionNotFoundError)
+    return "missing dependency version";
   return "unknown";
 }
 
@@ -57,7 +62,7 @@ export const deps = async function (
   depsInvalid
     .filter((x) => !x.self)
     .forEach((x) => {
-      const prefix = errorPrefixForIssue(x.reason.issue);
+      const prefix = errorPrefixForError(x.reason);
       log.warn(prefix, x.name);
     });
 

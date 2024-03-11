@@ -25,7 +25,11 @@ import {
   tryGetScopedRegistryByUrl,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
-import { tryResolve } from "./packument-resolving";
+import {
+  PackumentNotFoundError,
+  tryResolve,
+  VersionNotFoundError,
+} from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
 
@@ -74,32 +78,32 @@ export const add = async function (
         requestedVersion,
         env.registry
       );
-      if (!resolveResult.isSuccess && env.upstream) {
+      if (!resolveResult.isOk && env.upstream) {
         resolveResult = await tryResolve(
           client,
           name,
           requestedVersion,
           env.upstreamRegistry
         );
-        if (resolveResult.isSuccess) isUpstreamPackage = true;
+        if (resolveResult.isOk) isUpstreamPackage = true;
       }
 
-      if (!resolveResult.isSuccess) {
-        if (resolveResult.issue === "PackumentNotFound")
+      if (!resolveResult.isOk) {
+        if (resolveResult.error instanceof PackumentNotFoundError)
           log.error("404", `package not found: ${name}`);
-        else if (resolveResult.issue === "VersionNotFound") {
-          const versionList = [...resolveResult.availableVersions]
+        else if (resolveResult.error instanceof VersionNotFoundError) {
+          const versionList = [...resolveResult.error.availableVersions]
             .reverse()
             .join(", ");
           log.warn(
             "404",
-            `version ${resolveResult.requestedVersion} is not a valid choice of: ${versionList}`
+            `version ${resolveResult.error.requestedVersion} is not a valid choice of: ${versionList}`
           );
         }
         return { code: 1, dirty: false };
       }
 
-      const packumentVersion = resolveResult.packumentVersion;
+      const packumentVersion = resolveResult.value.packumentVersion;
       versionToAdd = packumentVersion.version;
 
       // verify editor version
@@ -169,15 +173,15 @@ export const add = async function (
         let isAnyDependencyUnresolved = false;
         depsInvalid.forEach((depObj) => {
           if (
-            depObj.reason.issue === "PackumentNotFound" ||
-            depObj.reason.issue === "VersionNotFound"
+            depObj.reason instanceof PackumentNotFoundError ||
+            depObj.reason instanceof VersionNotFoundError
           ) {
             // Not sure why it thinks the manifest can be null here.
             const resolvedVersion = manifest!.dependencies[depObj.name];
             const wasResolved = Boolean(resolvedVersion);
             if (!wasResolved) {
               isAnyDependencyUnresolved = true;
-              if (depObj.reason.issue === "VersionNotFound")
+              if (depObj.reason instanceof VersionNotFoundError)
                 log.notice(
                   "suggest",
                   `to install ${packageReference(
