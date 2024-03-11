@@ -1,5 +1,9 @@
 import path from "path";
 import fse from "fs-extra";
+import { Result } from "@badrap/result";
+import { assertIsError } from "./error-type-guards";
+import ok = Result.ok;
+import err = Result.err;
 
 /**
  * Creates a ProjectVersion.txt file for a Unity project.
@@ -10,12 +14,18 @@ import fse from "fs-extra";
 export async function createProjectVersionTxt(
   projectDirPath: string,
   version: string
-) {
-  const projectSettingsDir = path.join(projectDirPath, "ProjectSettings");
-  await fse.mkdirp(projectSettingsDir);
-  const data = `m_EditorVersion: ${version}`;
-  await fse.writeFile(
-    path.join(projectSettingsDir, "ProjectVersion.txt"),
-    data
-  );
+): Promise<Result<void, Error>> {
+  try {
+    const projectSettingsDir = path.join(projectDirPath, "ProjectSettings");
+    await fse.mkdirp(projectSettingsDir);
+    const data = `m_EditorVersion: ${version}`;
+    await fse.writeFile(
+      path.join(projectSettingsDir, "ProjectVersion.txt"),
+      data
+    );
+    return ok(undefined);
+  } catch (error) {
+    assertIsError(error);
+    return err(error);
+  }
 }

@@ -110,7 +110,11 @@ export async function setupUnityProject(
 
     // Editor-version
     const version = config.version ?? defaultVersion;
-    await createProjectVersionTxt(projectPath, version);
+    const projectVersionResult = await createProjectVersionTxt(
+      projectPath,
+      version
+    );
+    if (!projectVersionResult.isOk) throw projectVersionResult.error;
 
     // Project manifest
     if (config.manifest !== false) {
