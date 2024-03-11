@@ -1,7 +1,7 @@
 import log from "./logger";
 import {
-  loadProjectManifest,
-  saveProjectManifest,
+  tryLoadProjectManifest,
+  trySaveProjectManifest,
 } from "./utils/project-manifest-io";
 import { parseEnv } from "./utils/env";
 import {
@@ -46,7 +46,7 @@ export const remove = async function (
       return { code: 1, dirty };
     }
     // load manifest
-    const manifestResult = await loadProjectManifest(env.cwd);
+    const manifestResult = await tryLoadProjectManifest(env.cwd);
     if (!manifestResult.isOk) return { code: 1, dirty };
     let manifest = manifestResult.value;
 
@@ -69,7 +69,7 @@ export const remove = async function (
     }
     // save manifest
     if (dirty) {
-      if (!(await saveProjectManifest(env.cwd, manifest)).isOk)
+      if (!(await trySaveProjectManifest(env.cwd, manifest)).isOk)
         return { code: 1, dirty };
     }
     if (pkgsNotFound.length) {

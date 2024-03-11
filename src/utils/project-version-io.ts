@@ -11,7 +11,7 @@ import err = Result.err;
  * @param projectDirPath The projects root folder.
  * @param version The editor-version to use.
  */
-export async function createProjectVersionTxt(
+export async function tryCreateProjectVersionTxt(
   projectDirPath: string,
   version: string
 ): Promise<Result<void, Error>> {

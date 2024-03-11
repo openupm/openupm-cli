@@ -6,15 +6,15 @@ import path from "path";
 import os from "os";
 import fse from "fs-extra";
 import {
-  loadProjectManifest,
+  tryLoadProjectManifest,
   ManifestLoadResult,
-  saveProjectManifest,
+  trySaveProjectManifest,
 } from "../../src/utils/project-manifest-io";
 import assert from "assert";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
 import { saveUpmConfig } from "../../src/utils/upm-config-io";
-import { createProjectVersionTxt } from "../../src/utils/project-version-io";
+import { tryCreateProjectVersionTxt } from "../../src/utils/project-version-io";
 
 /**
  * A mock Unity project for testing.
@@ -110,7 +110,7 @@ export async function setupUnityProject(
 
     // Editor-version
     const version = config.version ?? defaultVersion;
-    const projectVersionResult = await createProjectVersionTxt(
+    const projectVersionResult = await tryCreateProjectVersionTxt(
       projectPath,
       version
     );
@@ -119,7 +119,10 @@ export async function setupUnityProject(
     // Project manifest
     if (config.manifest !== false) {
       const manifest = config.manifest ?? defaultManifest;
-      const manifestResult = await saveProjectManifest(projectPath, manifest);
+      const manifestResult = await trySaveProjectManifest(
+        projectPath,
+        manifest
+      );
       if (!manifestResult.isOk) throw manifestResult.error;
     }
   }
@@ -133,7 +136,7 @@ export async function setupUnityProject(
   }
 
   function tryGetManifest() {
-    return loadProjectManifest(projectPath);
+    return tryLoadProjectManifest(projectPath);
   }
 
   async function tryAssertManifest(

@@ -2,8 +2,8 @@ import log from "./logger";
 import url from "url";
 import { isPackageUrl, PackageUrl } from "./types/package-url";
 import {
-  loadProjectManifest,
-  saveProjectManifest,
+  tryLoadProjectManifest,
+  trySaveProjectManifest,
 } from "./utils/project-manifest-io";
 import { parseEnv } from "./utils/env";
 import {
@@ -67,7 +67,7 @@ export const add = async function (
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    const manifestResult = await loadProjectManifest(env.cwd);
+    const manifestResult = await tryLoadProjectManifest(env.cwd);
     if (!manifestResult.isOk) return { code: 1, dirty: false };
     let manifest = manifestResult.value;
 
@@ -249,7 +249,7 @@ export const add = async function (
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      if (!(await saveProjectManifest(env.cwd, manifest)).isOk)
+      if (!(await trySaveProjectManifest(env.cwd, manifest)).isOk)
         return { code: 1, dirty };
     }
     return { code: 0, dirty };

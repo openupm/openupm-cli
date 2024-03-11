@@ -25,22 +25,20 @@ describe("registry-client", function () {
       stopMockRegistry();
     });
     it("simple", async function () {
-      const env = (await parseEnv(
-        { _global: { registry: exampleRegistryUrl } },
-        false
-      )).unwrap();
-      
+      const env = (
+        await parseEnv({ _global: { registry: exampleRegistryUrl } }, false)
+      ).unwrap();
+
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
       const info = await client.tryFetchPackument(env.registry, packageA);
       expect(info).toEqual(packumentRemote);
     });
     it("404", async function () {
-      const env = (await parseEnv(
-        { _global: { registry: exampleRegistryUrl } },
-        false
-      )).unwrap();
-      
+      const env = (
+        await parseEnv({ _global: { registry: exampleRegistryUrl } }, false)
+      ).unwrap();
+
       registerMissingPackument(packageA);
       const info = await client.tryFetchPackument(env.registry, packageA);
       expect(info).toBeNull();

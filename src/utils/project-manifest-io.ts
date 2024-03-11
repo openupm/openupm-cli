@@ -32,7 +32,7 @@ export type ManifestSaveResult = Result<void, ManifestSaveError>;
  * Attempts to load the manifest for a Unity project.
  * @param projectPath The path to the root of the project.
  */
-export const loadProjectManifest = async function (
+export const tryLoadProjectManifest = async function (
   projectPath: string
 ): Promise<ManifestLoadResult> {
   const manifestPath = manifestPathFor(projectPath);
@@ -58,7 +58,7 @@ export const loadProjectManifest = async function (
  * @param projectPath The path to the projects root directory.
  * @param manifest The manifest to save.
  */
-export const saveProjectManifest = async function (
+export const trySaveProjectManifest = async function (
   projectPath: string,
   manifest: UnityProjectManifest
 ): Promise<ManifestSaveResult> {
