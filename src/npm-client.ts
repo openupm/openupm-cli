@@ -35,11 +35,6 @@ export class AuthenticationError extends CustomError {
 type AuthenticationToken = string;
 
 /**
- * The result of adding a user.
- */
-type AddUserResult = Result<AuthenticationToken, AuthenticationError>;
-
-/**
  * A type representing a searched packument. Instead of having all versions
  * this type only includes the latest version.
  */
@@ -84,7 +79,7 @@ export interface NpmClient {
     username: string,
     email: string,
     password: string
-  ): Promise<AddUserResult>;
+  ): Promise<Result<AuthenticationToken, AuthenticationError>>;
 
   /**
    * Attempts to search a npm registry.
