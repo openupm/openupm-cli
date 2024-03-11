@@ -13,7 +13,7 @@ import {
 import assert from "assert";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
-import { saveUpmConfig } from "../../src/utils/upm-config-io";
+import { trySaveUpmConfig } from "../../src/utils/upm-config-io";
 import { tryCreateProjectVersionTxt } from "../../src/utils/project-version-io";
 
 /**
@@ -106,7 +106,7 @@ export async function setupUnityProject(
 
     // Upmconfig
     const upmConfig = config.upmConfig ?? defaultUpmConfig;
-    const saveResult = await saveUpmConfig(upmConfig, rootPath);
+    const saveResult = await trySaveUpmConfig(upmConfig, rootPath);
     if (!saveResult.isOk) throw saveResult.error;
 
     // Editor-version

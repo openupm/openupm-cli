@@ -96,7 +96,7 @@ export const tryLoadUpmConfig = async (
  * @param config The config to save.
  * @param configDir The directory in which to save the config.
  */
-export const saveUpmConfig = async (
+export const trySaveUpmConfig = async (
   config: UPMConfig,
   configDir: string
 ): Promise<Result<void, IOError>> => {
@@ -127,5 +127,5 @@ export const storeUpmAuth = async function (
   config = addAuth(registry, auth, config);
 
   // Write config file
-  (await saveUpmConfig(config, configDir)).unwrap();
+  (await trySaveUpmConfig(config, configDir)).unwrap();
 };
