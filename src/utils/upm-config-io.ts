@@ -74,7 +74,7 @@ export const tryGetUpmConfigDir = async (
  * @param configDir The directory from which to load the config.
  * @returns The config or null if not found.
  */
-export const loadUpmConfig = async (
+export const tryLoadUpmConfig = async (
   configDir: string
 ): Promise<UPMConfig | null> => {
   const configPath = path.join(configDir, configFileName);
@@ -115,7 +115,7 @@ export const storeUpmAuth = async function (
   auth: UpmAuth
 ) {
   // Read config file
-  let config: UPMConfig = (await loadUpmConfig(configDir)) || {};
+  let config: UPMConfig = (await tryLoadUpmConfig(configDir)) || {};
 
   config = addAuth(registry, auth, config);
 

@@ -3,7 +3,7 @@ import chalk from "chalk";
 import {
   tryGetUpmConfigDir,
   GetUpmConfigDirError,
-  loadUpmConfig,
+  tryLoadUpmConfig,
 } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
@@ -95,7 +95,7 @@ export const parseEnv = async function (
   if (!configDirResult.isOk) return err(configDirResult.error);
   const configDir = configDirResult.value;
 
-  const upmConfig = await loadUpmConfig(configDir);
+  const upmConfig = await tryLoadUpmConfig(configDir);
 
   if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
     registry = {
