@@ -7,50 +7,66 @@ import isWsl from "is-wsl";
 import execute from "./process";
 import { addAuth, UpmAuth, UPMConfig } from "../types/upm-config";
 import { RegistryUrl } from "../types/registry-url";
+import { CustomError } from "ts-custom-error";
+import { Result } from "@badrap/result";
+import err = Result.err;
+import ok = Result.ok;
 
 const configFileName = ".upmconfig.toml";
+
+export class NoWslError extends CustomError {
+  constructor() {
+    super("No WSL detected.");
+  }
+}
+
+export class RequiredEnvMissingError extends CustomError {
+  constructor(...keyNames: string[]) {
+    super(
+      `Env was required to contain a value for one of the following keys, but all were missing: ${keyNames
+        .map((keyName) => `"${keyName}"`)
+        .join(", ")}.`
+    );
+  }
+}
+
+export type GetUpmConfigDirError = NoWslError | RequiredEnvMissingError;
 
 /**
  * Gets the path to directory in which the upm config is stored.
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
- * @throws {Error} Could not determine upm config directory.
  */
 export const getUpmConfigDir = async (
   wsl: boolean,
   systemUser: boolean
-): Promise<string> => {
-  let dirPath: string | undefined = "";
+): Promise<Result<string, GetUpmConfigDirError>> => {
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (wsl) {
-    if (!isWsl) {
-      throw new Error("no WSL detected");
-    }
+    if (!isWsl) return err(new NoWslError());
     if (systemUser) {
       const allUserProfilePath = await execute(
         'wslpath "$(wslvar ALLUSERSPROFILE)"',
         { trim: true }
       );
-      dirPath = path.join(allUserProfilePath, systemUserSubPath);
+      return ok(path.join(allUserProfilePath, systemUserSubPath));
     } else {
-      dirPath = await execute('wslpath "$(wslvar USERPROFILE)"', {
-        trim: true,
-      });
+      return ok(
+        await execute('wslpath "$(wslvar USERPROFILE)"', {
+          trim: true,
+        })
+      );
     }
+  } else if (systemUser) {
+    if (!process.env.ALLUSERSPROFILE)
+      return err(new RequiredEnvMissingError("ALLUSERSPROFILE"));
+    return ok(path.join(process.env.ALLUSERSPROFILE, systemUserSubPath));
   } else {
-    dirPath = process.env.USERPROFILE
-      ? process.env.USERPROFILE
-      : process.env.HOME;
-    if (systemUser) {
-      if (!process.env.ALLUSERSPROFILE) {
-        throw new Error("env ALLUSERSPROFILE is empty");
-      }
-      dirPath = path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
-    }
+    const dirName = process.env.USERPROFILE ?? process.env.HOME;
+    if (dirName === undefined)
+      return err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
+    return ok(dirName);
   }
-  if (dirPath === undefined)
-    throw new Error("Could not resolve upm-config dir-path");
-  return dirPath;
 };
 
 /**

@@ -1,6 +1,10 @@
 import log from "../logger";
 import chalk from "chalk";
-import { getUpmConfigDir, loadUpmConfig } from "./upm-config-io";
+import {
+  getUpmConfigDir,
+  GetUpmConfigDirError,
+  loadUpmConfig,
+} from "./upm-config-io";
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
@@ -27,7 +31,7 @@ export type Env = Readonly<{
 
 export class CwdNotFoundError extends CustomError {}
 
-export type EnvParseError = CwdNotFoundError;
+export type EnvParseError = CwdNotFoundError | GetUpmConfigDirError;
 
 export type EnvParseResult = Result<Env, EnvParseError>;
 
@@ -86,7 +90,11 @@ export const parseEnv = async function (
   // auth
   if (options._global.systemUser) systemUser = true;
   if (options._global.wsl) wsl = true;
-  const configDir = await getUpmConfigDir(wsl, systemUser);
+
+  const configDirResult = await getUpmConfigDir(wsl, systemUser);
+  if (!configDirResult.isOk) return err(configDirResult.error);
+  const configDir = configDirResult.value;
+
   const upmConfig = await loadUpmConfig(configDir);
 
   if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {

@@ -46,7 +46,9 @@ export const login = async function (
 
   const alwaysAuth = options.alwaysAuth || false;
 
-  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  const configDirResult = await getUpmConfigDir(env.wsl, env.systemUser);
+  if (!configDirResult.isOk) return 1;
+  const configDir = configDirResult.value;
 
   if (options.basicAuth) {
     // basic auth
