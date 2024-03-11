@@ -120,12 +120,12 @@ export const storeUpmAuth = async function (
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
-) {
+): Promise<Result<void, IOError>> {
   // Read config file
-  let config: UPMConfig = (await tryLoadUpmConfig(configDir)) || {};
+  let config = (await tryLoadUpmConfig(configDir)) || {};
 
   config = addAuth(registry, auth, config);
 
   // Write config file
-  (await trySaveUpmConfig(config, configDir)).unwrap();
+  return await trySaveUpmConfig(config, configDir);
 };
