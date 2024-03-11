@@ -89,7 +89,7 @@ export interface NpmClient {
   trySearch(
     registry: Registry,
     keyword: string
-  ): Promise<SearchedPackument[] | null>;
+  ): Promise<Result<SearchedPackument[], HttpErrorBase>>;
 
   /**
    * Attempts to query the /-/all endpoint.
@@ -162,19 +162,17 @@ export const makeNpmClient = (): NpmClient => {
       });
     },
 
-    async trySearch(
-      registry: Registry,
-      keyword: string
-    ): Promise<SearchedPackument[] | null> {
+    async trySearch(registry, keyword) {
       try {
         // NOTE: The results of the search will be Packument objects so we can change the type
-        return (await npmSearch(
+        const packuments = (await npmSearch(
           keyword,
           getNpmFetchOptions(registry)
         )) as SearchedPackument[];
-      } catch (err) {
-        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
-        return null;
+        return Ok(packuments);
+      } catch (error) {
+        assertIsHttpError(error);
+        return Err(error);
       }
     },
 

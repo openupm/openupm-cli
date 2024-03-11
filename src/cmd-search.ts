@@ -21,9 +21,9 @@ const searchEndpoint = async function (
 ): Promise<SearchedPackument[] | null> {
   const results = await npmClient.trySearch(registry, keyword);
 
-  if (results !== null) log.verbose("npmsearch", results.join(os.EOL));
+  if (results.isOk()) log.verbose("npmsearch", results.value.join(os.EOL));
 
-  return results;
+  return results.unwrapOr(null);
 };
 
 const searchOld = async function (
