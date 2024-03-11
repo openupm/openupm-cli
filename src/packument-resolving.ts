@@ -26,7 +26,7 @@ export type ResolvableVersion =
 /**
  * A successfully resolved packument-version.
  */
-interface ResolveSuccess {
+interface ResolvedPackument {
   /**
    * The packument from which the version was resolved.
    */
@@ -83,15 +83,9 @@ export class VersionNotFoundError extends CustomError {
  * A failed attempt at resolving a packument-version.
  */
 export type PackumentResolveError =
-  | HttpErrorBase
   | PackumentNotFoundError
   | NoVersionsError
   | VersionNotFoundError;
-
-/**
- * The result of attempting to resolve a packument-version.
- */
-export type ResolveResult = Result<ResolveSuccess, PackumentResolveError>;
 
 /**
  * Attempts to resolve a specific version from a packument.
@@ -103,7 +97,7 @@ export function tryResolveFromPackument(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion,
   source: RegistryUrl
-): ResolveResult {
+): Result<ResolvedPackument, PackumentResolveError> {
   const availableVersions = recordKeys(packument.versions);
   if (availableVersions.length === 0) return Err(new NoVersionsError());
 
@@ -115,7 +109,7 @@ export function tryResolveFromPackument(
       packument,
       source,
       packumentVersion: packument.versions[latestVersion]!,
-    } satisfies ResolveSuccess);
+    } satisfies ResolvedPackument);
   }
 
   // Find a specific version
@@ -126,7 +120,7 @@ export function tryResolveFromPackument(
     packument,
     source,
     packumentVersion: packument.versions[requestedVersion]!,
-  } satisfies ResolveSuccess);
+  } satisfies ResolvedPackument);
 }
 
 /**
@@ -141,7 +135,7 @@ export async function tryResolve(
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-): Promise<ResolveResult> {
+): Promise<Result<ResolvedPackument, PackumentResolveError | HttpErrorBase>> {
   return (await npmClient.tryFetchPackument(source, packageName)).andThen(
     (packument) => {
       if (packument === null) return Err(new PackumentNotFoundError());
@@ -162,7 +156,7 @@ export function tryResolveFromCache(
   source: RegistryUrl,
   packumentName: DomainName,
   requestedVersion: ResolvableVersion
-): ResolveResult {
+): Result<ResolvedPackument, PackumentResolveError> {
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
   if (cachedPackument === null) return Err(new PackumentNotFoundError());
 
