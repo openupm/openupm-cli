@@ -106,7 +106,8 @@ export async function setupUnityProject(
 
     // Upmconfig
     const upmConfig = config.upmConfig ?? defaultUpmConfig;
-    await saveUpmConfig(upmConfig, rootPath);
+    const saveResult = await saveUpmConfig(upmConfig, rootPath);
+    if (!saveResult.isOk) throw saveResult.error;
 
     // Editor-version
     const version = config.version ?? defaultVersion;
