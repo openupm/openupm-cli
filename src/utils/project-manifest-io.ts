@@ -8,6 +8,21 @@ import {
 } from "../types/project-manifest";
 import fse from "fs-extra";
 import path from "path";
+import { Result } from "@badrap/result";
+import { CustomError } from "ts-custom-error";
+import err = Result.err;
+import ok = Result.ok;
+
+export class ManifestNotFoundError extends CustomError {}
+
+export class ManifestParseError extends CustomError {}
+
+export type ManifestLoadError = ManifestNotFoundError | ManifestParseError;
+
+export type ManifestLoadResult = Result<
+  UnityProjectManifest,
+  ManifestLoadError
+>;
 
 /**
  * Attempts to load the manifest for a Unity project.
@@ -15,20 +30,22 @@ import path from "path";
  */
 export const loadProjectManifest = async function (
   projectPath: string
-): Promise<UnityProjectManifest | null> {
+): Promise<ManifestLoadResult> {
   const manifestPath = manifestPathFor(projectPath);
   try {
     const text = await fs.readFile(manifestPath, { encoding: "utf8" });
-    return JSON.parse(text);
-  } catch (err) {
-    assertIsError(err);
-    if (err.code === "ENOENT")
+    // TODO: Actually validate the content of the file
+    return ok(JSON.parse(text) as UnityProjectManifest);
+  } catch (error) {
+    assertIsError(error);
+    if (error.code === "ENOENT") {
       log.error("manifest", `manifest at ${manifestPath} does not exist`);
-    else {
+      return err(new ManifestNotFoundError());
+    } else {
       log.error("manifest", `failed to parse manifest at ${manifestPath}`);
-      log.error("manifest", err.message);
+      log.error("manifest", error.message);
+      return err(new ManifestParseError());
     }
-    return null;
   }
 };
 

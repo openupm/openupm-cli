@@ -7,6 +7,7 @@ import os from "os";
 import fse from "fs-extra";
 import {
   loadProjectManifest,
+  ManifestLoadResult,
   saveProjectManifest,
 } from "../../src/utils/project-manifest-io";
 import assert from "assert";
@@ -26,9 +27,8 @@ export type MockUnityProject = {
 
   /**
    * Attempts to load the project manifest for the project.
-   * Null if not found.
    */
-  tryGetManifest(): Promise<UnityProjectManifest | null>;
+  tryGetManifest(): Promise<ManifestLoadResult>;
 
   /**
    * Runs an assertion function on the project manifest.
@@ -127,16 +127,16 @@ export async function setupUnityProject(
     envSession?.unhook();
   }
 
-  function tryGetManifest(): Promise<UnityProjectManifest | null> {
+  function tryGetManifest() {
     return loadProjectManifest(projectPath);
   }
 
   async function tryAssertManifest(
     assertFn: (manifest: UnityProjectManifest) => void
   ) {
-    const manifest = await tryGetManifest();
-    assert(manifest !== null);
-    assertFn(manifest);
+    const manifestResult = await tryGetManifest();
+    assert(manifestResult.isOk);
+    assertFn(manifestResult.value);
   }
 
   async function reset() {

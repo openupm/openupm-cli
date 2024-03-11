@@ -67,8 +67,10 @@ export const add = async function (
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    let manifest = await loadProjectManifest(env.cwd);
-    if (manifest === null) return { code: 1, dirty: false };
+    const manifestResult = await loadProjectManifest(env.cwd);
+    if (!manifestResult.isOk) return { code: 1, dirty: false };
+    let manifest = manifestResult.value;
+
     // packages that added to scope registry
     const pkgsInScope = Array.of<DomainName>();
     let versionToAdd = requestedVersion;
@@ -178,7 +180,7 @@ export const add = async function (
             depObj.reason instanceof VersionNotFoundError
           ) {
             // Not sure why it thinks the manifest can be null here.
-            const resolvedVersion = manifest!.dependencies[depObj.name];
+            const resolvedVersion = manifest.dependencies[depObj.name];
             const wasResolved = Boolean(resolvedVersion);
             if (!wasResolved) {
               isAnyDependencyUnresolved = true;

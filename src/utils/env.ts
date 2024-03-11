@@ -11,6 +11,7 @@ import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../npm-client";
 import { Result } from "@badrap/result";
 import { CustomError } from "ts-custom-error";
+import { ManifestNotFoundError } from "./project-manifest-io";
 import ok = Result.ok;
 import err = Result.err;
 
@@ -25,8 +26,6 @@ export type Env = Readonly<{
 }>;
 
 export class CwdNotFoundError extends CustomError {}
-
-export class ManifestNotFoundError extends CustomError {}
 
 export type EnvParseError = CwdNotFoundError;
 

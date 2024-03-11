@@ -46,8 +46,10 @@ export const remove = async function (
       return { code: 1, dirty };
     }
     // load manifest
-    let manifest = await loadProjectManifest(env.cwd);
-    if (manifest === null) return { code: 1, dirty };
+    const manifestResult = await loadProjectManifest(env.cwd);
+    if (!manifestResult.isOk) return { code: 1, dirty };
+    let manifest = manifestResult.value;
+
     // not found array
     const pkgsNotFound = Array.of<PackageReference>();
     const versionInManifest = manifest.dependencies[pkg];
