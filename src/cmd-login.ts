@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { makeNpmClient } from "./npm-client";
 import log from "./logger";
-import { getUpmConfigDir, storeUpmAuth } from "./utils/upm-config-io";
+import { tryGetUpmConfigDir, storeUpmAuth } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
@@ -46,7 +46,7 @@ export const login = async function (
 
   const alwaysAuth = options.alwaysAuth || false;
 
-  const configDirResult = await getUpmConfigDir(env.wsl, env.systemUser);
+  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
   if (!configDirResult.isOk) return 1;
   const configDir = configDirResult.value;
 

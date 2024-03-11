@@ -37,7 +37,7 @@ export type GetUpmConfigDirError = NoWslError | RequiredEnvMissingError;
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
  */
-export const getUpmConfigDir = async (
+export const tryGetUpmConfigDir = async (
   wsl: boolean,
   systemUser: boolean
 ): Promise<Result<string, GetUpmConfigDirError>> => {

@@ -1,7 +1,7 @@
 import log from "../logger";
 import chalk from "chalk";
 import {
-  getUpmConfigDir,
+  tryGetUpmConfigDir,
   GetUpmConfigDirError,
   loadUpmConfig,
 } from "./upm-config-io";
@@ -91,7 +91,7 @@ export const parseEnv = async function (
   if (options._global.systemUser) systemUser = true;
   if (options._global.wsl) wsl = true;
 
-  const configDirResult = await getUpmConfigDir(wsl, systemUser);
+  const configDirResult = await tryGetUpmConfigDir(wsl, systemUser);
   if (!configDirResult.isOk) return err(configDirResult.error);
   const configDir = configDirResult.value;
 

@@ -1,6 +1,6 @@
 import { runWithEnv } from "./mock-env";
 import {
-  getUpmConfigDir,
+  tryGetUpmConfigDir,
   RequiredEnvMissingError,
 } from "../src/utils/upm-config-io";
 import { Result } from "@badrap/result";
@@ -15,7 +15,7 @@ describe("upm-config-io", function () {
           {
             USERPROFILE: expected,
           },
-          () => getUpmConfigDir(false, false)
+          () => tryGetUpmConfigDir(false, false)
         );
 
         expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
@@ -27,14 +27,14 @@ describe("upm-config-io", function () {
           {
             HOME: expected,
           },
-          () => getUpmConfigDir(false, false)
+          () => tryGetUpmConfigDir(false, false)
         );
 
         expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
       });
       it("should fail if HOME and USERPROFILE and undefined", async function () {
         const result = await runWithEnv({}, () =>
-          getUpmConfigDir(false, false)
+          tryGetUpmConfigDir(false, false)
         );
 
         expect(result).toBeError((error) =>
