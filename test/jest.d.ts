@@ -18,6 +18,10 @@ declare global {
       toHaveScope(scope: DomainName): R;
 
       toHaveScopedRegistries(): R;
+
+      toBeOk(valueAsserter?: (value: unknown) => void): R;
+
+      toBeError(errorAsserter?: (error: Error) => void): R;
     }
   }
 }
