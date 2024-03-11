@@ -15,9 +15,9 @@ import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../npm-client";
 import { Result } from "@badrap/result";
 import { CustomError } from "ts-custom-error";
-import { ManifestNotFoundError } from "./project-manifest-io";
 import ok = Result.ok;
 import err = Result.err;
+import {RequiredFileNotFoundError} from "../common-errors";
 
 export type Env = Readonly<{
   cwd: string;
@@ -133,7 +133,7 @@ export const parseEnv = async function (
       "manifest",
       `can not locate manifest.json at path ${manifestPath}`
     );
-    return err(new ManifestNotFoundError());
+    return err(new RequiredFileNotFoundError(manifestPath));
   }
 
   // editor version

@@ -10,14 +10,13 @@ import fse from "fs-extra";
 import path from "path";
 import { Result } from "@badrap/result";
 import { CustomError } from "ts-custom-error";
+import { RequiredFileNotFoundError } from "../common-errors";
 import err = Result.err;
 import ok = Result.ok;
 
-export class ManifestNotFoundError extends CustomError {}
-
 export class ManifestParseError extends CustomError {}
 
-export type ManifestLoadError = ManifestNotFoundError | ManifestParseError;
+export type ManifestLoadError = RequiredFileNotFoundError | ManifestParseError;
 
 export type ManifestSaveError = Error;
 
@@ -44,7 +43,7 @@ export const tryLoadProjectManifest = async function (
     assertIsError(error);
     if (error.code === "ENOENT") {
       log.error("manifest", `manifest at ${manifestPath} does not exist`);
-      return err(new ManifestNotFoundError());
+      return err(new RequiredFileNotFoundError(manifestPath));
     } else {
       log.error("manifest", `failed to parse manifest at ${manifestPath}`);
       log.error("manifest", error.message);

@@ -2,7 +2,6 @@ import { attachMockConsole, MockConsole } from "./mock-console";
 
 import {
   tryLoadProjectManifest,
-  ManifestNotFoundError,
   ManifestParseError,
   trySaveProjectManifest,
 } from "../src/utils/project-manifest-io";
@@ -19,6 +18,7 @@ import path from "path";
 import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
+import {RequiredFileNotFoundError} from "../src/common-errors";
 
 describe("project-manifest io", () => {
   let mockConsole: MockConsole = null!;
@@ -54,7 +54,7 @@ describe("project-manifest io", () => {
     const manifestResult = await tryLoadProjectManifest("/invalid-path");
 
     expect(manifestResult).toBeError((error) =>
-      expect(error).toBeInstanceOf(ManifestNotFoundError)
+      expect(error).toBeInstanceOf(RequiredFileNotFoundError)
     );
     expect(mockConsole).toHaveLineIncluding("out", "does not exist");
   });
