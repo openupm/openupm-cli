@@ -249,7 +249,7 @@ export const add = async function (
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      if (!(await saveProjectManifest(env.cwd, manifest)))
+      if (!(await saveProjectManifest(env.cwd, manifest)).isOk)
         return { code: 1, dirty };
     }
     return { code: 0, dirty };

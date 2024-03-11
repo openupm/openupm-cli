@@ -69,7 +69,7 @@ export const remove = async function (
     }
     // save manifest
     if (dirty) {
-      if (!(await saveProjectManifest(env.cwd, manifest)))
+      if (!(await saveProjectManifest(env.cwd, manifest)).isOk)
         return { code: 1, dirty };
     }
     if (pkgsNotFound.length) {

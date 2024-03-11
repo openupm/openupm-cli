@@ -78,7 +78,7 @@ describe("project-manifest io", () => {
     );
     expect(
       await saveProjectManifest(mockProject.projectPath, manifest)
-    ).toBeTruthy();
+    ).toBeOk();
     const manifest2 = (
       await loadProjectManifest(mockProject.projectPath)
     ).unwrap();
@@ -104,7 +104,7 @@ describe("project-manifest io", () => {
     // Save and load manifest
     expect(
       await saveProjectManifest(mockProject.projectPath, initialManifest)
-    ).toBeTruthy();
+    ).toBeOk();
     const savedManifest = (
       await loadProjectManifest(mockProject.projectPath)
     ).unwrap();

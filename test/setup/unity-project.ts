@@ -115,7 +115,8 @@ export async function setupUnityProject(
     // Project manifest
     if (config.manifest !== false) {
       const manifest = config.manifest ?? defaultManifest;
-      await saveProjectManifest(projectPath, manifest);
+      const manifestResult = await saveProjectManifest(projectPath, manifest);
+      if (!manifestResult.isOk) throw manifestResult.error;
     }
   }
 

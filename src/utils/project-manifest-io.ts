@@ -19,10 +19,14 @@ export class ManifestParseError extends CustomError {}
 
 export type ManifestLoadError = ManifestNotFoundError | ManifestParseError;
 
+export type ManifestSaveError = Error;
+
 export type ManifestLoadResult = Result<
   UnityProjectManifest,
   ManifestLoadError
 >;
+
+export type ManifestSaveResult = Result<void, ManifestSaveError>;
 
 /**
  * Attempts to load the manifest for a Unity project.
@@ -57,18 +61,18 @@ export const loadProjectManifest = async function (
 export const saveProjectManifest = async function (
   projectPath: string,
   manifest: UnityProjectManifest
-) {
+): Promise<ManifestSaveResult> {
   const manifestPath = manifestPathFor(projectPath);
   manifest = pruneManifest(manifest);
   const json = JSON.stringify(manifest, null, 2);
   try {
     await fse.ensureDir(path.dirname(manifestPath));
     await fs.writeFile(manifestPath, json);
-    return true;
-  } catch (err) {
-    assertIsError(err);
+    return ok(undefined);
+  } catch (error) {
+    assertIsError(error);
     log.error("manifest", "can not write manifest json file");
-    log.error("manifest", err.message);
-    return false;
+    log.error("manifest", error.message);
+    return err(error);
   }
 };
