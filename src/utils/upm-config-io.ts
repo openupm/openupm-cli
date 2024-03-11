@@ -72,10 +72,11 @@ export const tryGetUpmConfigDir = async (
 /**
  * Attempts to load the upm config.
  * @param configDir The directory from which to load the config.
+ * @returns The config or null if not found.
  */
 export const loadUpmConfig = async (
   configDir: string
-): Promise<UPMConfig | undefined> => {
+): Promise<UPMConfig | null> => {
   const configPath = path.join(configDir, configFileName);
   try {
     const content = await fs.readFile(configPath, "utf8");
@@ -84,7 +85,7 @@ export const loadUpmConfig = async (
     // NOTE: We assume correct format
     return config as UPMConfig;
   } catch {
-    return undefined;
+    return null;
   }
 };
 

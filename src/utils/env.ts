@@ -17,7 +17,7 @@ import { Result } from "@badrap/result";
 import { CustomError } from "ts-custom-error";
 import ok = Result.ok;
 import err = Result.err;
-import {RequiredFileNotFoundError} from "../common-errors";
+import { RequiredFileNotFoundError } from "../common-errors";
 
 export type Env = Readonly<{
   cwd: string;
@@ -97,7 +97,7 @@ export const parseEnv = async function (
 
   const upmConfig = await loadUpmConfig(configDir);
 
-  if (upmConfig !== undefined && upmConfig.npmAuth !== undefined) {
+  if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
     registry = {
       url: registry.url,
       auth: tryGetAuthForRegistry(upmConfig, registry.url),
