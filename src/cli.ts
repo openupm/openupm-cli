@@ -134,8 +134,8 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    const retCode = await deps(pkg, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const depsResult = await deps(pkg, makeCmdOptions(options));
+    if (depsResult.isErr()) process.exit(1);
   });
 
 program

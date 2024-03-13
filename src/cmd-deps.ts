@@ -1,5 +1,5 @@
 import log from "./logger";
-import { parseEnv } from "./utils/env";
+import { EnvParseError, parseEnv } from "./utils/env";
 import { makeNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
@@ -13,9 +13,10 @@ import {
   VersionNotFoundError,
 } from "./packument-resolving";
 import { fetchPackageDependencies } from "./dependency-resolving";
-import {PackumentNotFoundError} from "./common-errors";
+import { PackumentNotFoundError } from "./common-errors";
+import { Ok, Result } from "ts-results-es";
 
-type DepsResultCode = 0 | 1;
+export type DepsError = EnvParseError;
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -34,10 +35,10 @@ function errorPrefixForError(error: PackumentResolveError): string {
 export const deps = async function (
   pkg: PackageReference,
   options: DepsOptions
-): Promise<DepsResultCode> {
+): Promise<Result<void, DepsError>> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return 1;
+  if (!envResult.isOk()) return envResult;
   const env = envResult.value;
 
   const client = makeNpmClient();
@@ -67,5 +68,5 @@ export const deps = async function (
       log.warn(prefix, x.name);
     });
 
-  return 0;
+  return Ok(undefined);
 };
