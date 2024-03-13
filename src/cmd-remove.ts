@@ -51,16 +51,18 @@ export const remove = async function (
     let manifest = manifestResult.value;
 
     // not found array
-    const pkgsNotFound = Array.of<PackageReference>();
     const versionInManifest = manifest.dependencies[pkg];
-    if (versionInManifest) {
-      log.notice(
-        "manifest",
-        `removed ${packageReference(pkg, versionInManifest)}`
-      );
-      manifest = removeDependency(manifest, pkg);
-      dirty = true;
-    } else pkgsNotFound.push(pkg);
+    if (versionInManifest === undefined) {
+      log.error("404", `package not found: ${pkg}`);
+      return { code: 1, dirty };
+    }
+
+    log.notice(
+      "manifest",
+      `removed ${packageReference(pkg, versionInManifest)}`
+    );
+    manifest = removeDependency(manifest, pkg);
+    dirty = true;
 
     const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
     if (entry !== null) {
@@ -72,10 +74,7 @@ export const remove = async function (
       if (!(await trySaveProjectManifest(env.cwd, manifest)).isOk())
         return { code: 1, dirty };
     }
-    if (pkgsNotFound.length) {
-      log.error("404", `package not found: ${pkgsNotFound.join(", ")}`);
-      return { code: 1, dirty };
-    }
+
     return { code: 0, dirty };
   };
 
