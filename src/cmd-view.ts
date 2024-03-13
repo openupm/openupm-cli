@@ -8,17 +8,11 @@ import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { CustomError } from "ts-custom-error";
 
-import { PackumentNotFoundError } from "./common-errors";
-
-export class PackageWithVersionError extends CustomError {
-  constructor() {
-    super(
-      "A package-reference including a version was specified when only a name was expected."
-    );
-  }
-}
+import {
+  PackageWithVersionError,
+  PackumentNotFoundError,
+} from "./common-errors";
 
 export type ViewOptions = CmdOptions;
 

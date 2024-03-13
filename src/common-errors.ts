@@ -23,3 +23,11 @@ export class PackumentNotFoundError extends CustomError {
     super("A packument was not found.");
   }
 }
+
+export class PackageWithVersionError extends CustomError {
+  constructor() {
+    super(
+      "A package-reference including a version was specified when only a name was expected."
+    );
+  }
+}

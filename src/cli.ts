@@ -99,8 +99,8 @@ program
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const retCode = await remove(pkgs, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const removeResult = await remove(pkgs, makeCmdOptions(options));
+    if (removeResult.isErr()) process.exit(1);
   });
 
 program

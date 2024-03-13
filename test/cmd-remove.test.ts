@@ -45,8 +45,8 @@ describe("cmd-remove.ts", function () {
           registry: exampleRegistryUrl,
         },
       };
-      const retCode = await remove(packageA, options);
-      expect(retCode).toEqual(0);
+      const removeResult = await remove(packageA, options);
+      expect(removeResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) => {
         expect(manifest).not.toHaveDependency(packageA);
         expect(manifest).toHaveScope(packageB);
@@ -60,11 +60,11 @@ describe("cmd-remove.ts", function () {
           registry: exampleRegistryUrl,
         },
       };
-      const retCode = await remove(
+      const removeResult = await remove(
         packageReference(packageA, semanticVersion("1.0.0")),
         options
       );
-      expect(retCode).toEqual(1);
+      expect(removeResult).toBeError();
       await mockProject.tryAssertManifest((manifest) => {
         expect(manifest).toEqual(defaultManifest);
       });
@@ -79,8 +79,8 @@ describe("cmd-remove.ts", function () {
           registry: exampleRegistryUrl,
         },
       };
-      const retCode = await remove(missingPackage, options);
-      expect(retCode).toEqual(1);
+      const removeResult = await remove(missingPackage, options);
+      expect(removeResult).toBeError();
       await mockProject.tryAssertManifest((manifest) => {
         expect(manifest).toEqual(defaultManifest);
       });
@@ -92,8 +92,8 @@ describe("cmd-remove.ts", function () {
           registry: exampleRegistryUrl,
         },
       };
-      const retCode = await remove([packageA, packageB], options);
-      expect(retCode).toEqual(0);
+      const removeResult = await remove([packageA, packageB], options);
+      expect(removeResult).toBeOk();
 
       await mockProject.tryAssertManifest((manifest) => {
         expect(manifest).not.toHaveDependency(packageA);
@@ -115,8 +115,8 @@ describe("cmd-remove.ts", function () {
           registry: exampleRegistryUrl,
         },
       };
-      const retCode = await remove([packageA, packageB], options);
-      expect(retCode).toEqual(0);
+      const removeResult = await remove([packageA, packageB], options);
+      expect(removeResult).toBeOk();
 
       await mockProject.tryAssertManifest((manifest) => {
         expect(manifest.scopedRegistries).toHaveLength(0);
