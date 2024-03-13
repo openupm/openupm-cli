@@ -1,6 +1,6 @@
 import log from "./logger";
 import * as os from "os";
-import { parseEnv } from "./utils/env";
+import { EnvParseError, parseEnv } from "./utils/env";
 import { CmdOptions } from "./types/options";
 import {
   makeNpmClient,
@@ -9,10 +9,10 @@ import {
   SearchedPackument,
 } from "./npm-client";
 import { formatAsTable } from "./output-formatting";
-import { Result } from "ts-results-es";
+import { Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 
-type SearchResultCode = 0 | 1;
+export type SearchError = EnvParseError | HttpErrorBase;
 
 export type SearchOptions = CmdOptions;
 
@@ -52,10 +52,10 @@ const searchOld = async function (
 export async function search(
   keyword: string,
   options: SearchOptions
-): Promise<SearchResultCode> {
+): Promise<Result<void, SearchError>> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return 1;
+  if (!envResult.isOk()) return envResult;
   const env = envResult.value;
 
   const npmClient = makeNpmClient();
@@ -70,16 +70,16 @@ export async function search(
   }
   if (result.isErr()) {
     log.warn("", "/-/all endpoint is not available");
-    return 1;
+    return result;
   }
 
   const results = result.value;
 
   if (results.length === 0) {
     log.notice("", `No matches found for "${keyword}"`);
-    return 0;
+    return Ok(undefined);
   }
 
   console.log(formatAsTable(results));
-  return 0;
+  return Ok(undefined);
 }
