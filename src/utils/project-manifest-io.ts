@@ -18,20 +18,13 @@ export type ManifestLoadError = RequiredFileNotFoundError | ManifestParseError;
 
 export type ManifestSaveError = Error;
 
-export type ManifestLoadResult = Result<
-  UnityProjectManifest,
-  ManifestLoadError
->;
-
-export type ManifestSaveResult = Result<void, ManifestSaveError>;
-
 /**
  * Attempts to load the manifest for a Unity project.
  * @param projectPath The path to the root of the project.
  */
 export const tryLoadProjectManifest = async function (
   projectPath: string
-): Promise<ManifestLoadResult> {
+): Promise<Result<UnityProjectManifest, ManifestLoadError>> {
   const manifestPath = manifestPathFor(projectPath);
   try {
     const text = await fs.readFile(manifestPath, { encoding: "utf8" });
@@ -58,7 +51,7 @@ export const tryLoadProjectManifest = async function (
 export const trySaveProjectManifest = async function (
   projectPath: string,
   manifest: UnityProjectManifest
-): Promise<ManifestSaveResult> {
+): Promise<Result<void, ManifestSaveError>> {
   const manifestPath = manifestPathFor(projectPath);
   manifest = pruneManifest(manifest);
   const json = JSON.stringify(manifest, null, 2);

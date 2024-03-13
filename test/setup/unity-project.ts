@@ -6,7 +6,7 @@ import path from "path";
 import os from "os";
 import fse from "fs-extra";
 import {
-  ManifestLoadResult,
+  ManifestLoadError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../../src/utils/project-manifest-io";
@@ -15,6 +15,7 @@ import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
 import { trySaveUpmConfig } from "../../src/utils/upm-config-io";
 import { tryCreateProjectVersionTxt } from "../../src/utils/project-version-io";
+import { Result } from "ts-results-es";
 
 /**
  * A mock Unity project for testing.
@@ -28,7 +29,7 @@ export type MockUnityProject = {
   /**
    * Attempts to load the project manifest for the project.
    */
-  tryGetManifest(): Promise<ManifestLoadResult>;
+  tryGetManifest(): Promise<Result<UnityProjectManifest, ManifestLoadError>>;
 
   /**
    * Runs an assertion function on the project manifest.

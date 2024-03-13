@@ -31,15 +31,13 @@ export class CwdNotFoundError extends CustomError {}
 
 export type EnvParseError = CwdNotFoundError | GetUpmConfigDirError;
 
-export type EnvParseResult = Result<Env, EnvParseError>;
-
 /**
  * Attempts to parse env.
  */
 export const parseEnv = async function (
   options: CmdOptions,
   checkPath: boolean
-): Promise<EnvParseResult> {
+): Promise<Result<Env, EnvParseError>> {
   // set defaults
   let registry: Registry = {
     url: registryUrl("https://package.openupm.com"),
