@@ -9,11 +9,11 @@ import {
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import {
-  PackumentNotFoundError,
   PackumentResolveError,
   VersionNotFoundError,
 } from "./packument-resolving";
 import { fetchPackageDependencies } from "./dependency-resolving";
+import {PackumentNotFoundError} from "./common-errors";
 
 type DepsResultCode = 0 | 1;
 

@@ -4,7 +4,6 @@ import log from "./logger";
 import { packageReference } from "./types/package-reference";
 import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {
-  PackumentNotFoundError,
   PackumentResolveError,
   pickMostFixable,
   ResolvableVersion,
@@ -16,6 +15,7 @@ import { unityRegistryUrl } from "./types/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import assert from "assert";
 import { NpmClient, Registry } from "./npm-client";
+import {PackumentNotFoundError} from "./common-errors";
 
 export type DependencyBase = {
   /**

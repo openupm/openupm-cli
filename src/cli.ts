@@ -119,8 +119,8 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    const retCode = await view(pkg, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const result = await view(pkg, makeCmdOptions(options));
+    if (!result.isOk()) process.exit(1);
   });
 
 program

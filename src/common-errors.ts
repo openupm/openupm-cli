@@ -14,3 +14,12 @@ export class IOError extends CustomError {
     super("An interaction with the file-system caused an error.", { cause });
   }
 }
+
+/**
+ * Error for when the packument was not found.
+ */
+export class PackumentNotFoundError extends CustomError {
+  constructor() {
+    super("A packument was not found.");
+  }
+}

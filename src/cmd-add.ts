@@ -26,12 +26,12 @@ import {
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 import {
-  PackumentNotFoundError,
   tryResolve,
   VersionNotFoundError,
 } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
+import {PackumentNotFoundError} from "./common-errors";
 
 export type AddOptions = CmdOptions<{
   test?: boolean;

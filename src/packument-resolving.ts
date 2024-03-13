@@ -1,19 +1,20 @@
-import { VersionReference } from "./types/package-reference";
-import { NpmClient, Registry } from "./npm-client";
-import { DomainName } from "./types/domain-name";
-import { SemanticVersion } from "./types/semantic-version";
+import {VersionReference} from "./types/package-reference";
+import {NpmClient, Registry} from "./npm-client";
+import {DomainName} from "./types/domain-name";
+import {SemanticVersion} from "./types/semantic-version";
 import {
   tryGetLatestVersion,
   UnityPackument,
   UnityPackumentVersion,
 } from "./types/packument";
-import { recordKeys } from "./utils/record-utils";
-import { PackageUrl } from "./types/package-url";
-import { PackumentCache, tryGetFromCache } from "./packument-cache";
-import { RegistryUrl } from "./types/registry-url";
-import { CustomError } from "ts-custom-error";
-import { Err, Ok, Result } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch";
+import {recordKeys} from "./utils/record-utils";
+import {PackageUrl} from "./types/package-url";
+import {PackumentCache, tryGetFromCache} from "./packument-cache";
+import {RegistryUrl} from "./types/registry-url";
+import {CustomError} from "ts-custom-error";
+import {Err, Ok, Result} from "ts-results-es";
+import {HttpErrorBase} from "npm-registry-fetch";
+import {PackumentNotFoundError} from "./common-errors";
 
 /**
  * A version-reference that is resolvable.
@@ -39,15 +40,6 @@ interface ResolvedPackument {
    * The source from which the packument was resolved.
    */
   readonly source: RegistryUrl;
-}
-
-/**
- * Error for when the packument was not found on the searched registry.
- */
-export class PackumentNotFoundError extends CustomError {
-  constructor() {
-    super("A packument was not found on a registry.");
-  }
 }
 
 /**
