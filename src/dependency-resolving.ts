@@ -96,22 +96,16 @@ export const fetchPackageDependencies = async function (
     version: ResolvableVersion
   ) {
     // First try cache
-    let resolveResult = tryResolveFromCache(
+    const cacheResult = tryResolveFromCache(
       packumentCache,
       registry.url,
       packumentName,
       version
     );
+    if (cacheResult.isOk()) return cacheResult;
+
     // Then registry
-    if (!resolveResult.isOk()) {
-      resolveResult = await tryResolve(
-        client,
-        packumentName,
-        version,
-        registry
-      );
-    }
-    return resolveResult;
+    return await tryResolve(client, packumentName, version, registry);
   }
 
   while (pendingList.length > 0) {
