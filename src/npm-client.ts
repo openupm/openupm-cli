@@ -5,7 +5,7 @@ import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { RegistryUrl } from "./types/registry-url";
 import npmSearch from "libnpmsearch";
-import { assertIsHttpError, is404Error } from "./utils/error-type-guards";
+import { assertIsHttpError } from "./utils/error-type-guards";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
@@ -93,7 +93,7 @@ export interface NpmClient {
    */
   tryGetAll(
     registry: Registry
-  ): Promise<Result<AllPackumentsResult | null, HttpErrorBase>>;
+  ): Promise<Result<AllPackumentsResult, HttpErrorBase>>;
 }
 
 export type Registry = Readonly<{
@@ -183,7 +183,6 @@ export const makeNpmClient = (): NpmClient => {
         return Ok(result);
       } catch (error) {
         assertIsHttpError(error);
-        if (is404Error(error)) return Ok(null);
         return Err(error);
       }
     },
