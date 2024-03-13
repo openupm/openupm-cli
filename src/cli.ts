@@ -151,8 +151,8 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(async function (options) {
-    const retCode = await login(makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const loginResult = await login(makeCmdOptions(options));
+    if (loginResult.isErr()) process.exit(1);
   });
 
 // prompt for invalid command

@@ -2,8 +2,12 @@ import fs from "fs";
 import path from "path";
 import { AuthenticationError, makeNpmClient } from "./npm-client";
 import log from "./logger";
-import { tryGetUpmConfigDir, tryStoreUpmAuth } from "./utils/upm-config-io";
-import { parseEnv } from "./utils/env";
+import {
+  GetUpmConfigDirError,
+  tryGetUpmConfigDir,
+  tryStoreUpmAuth,
+} from "./utils/upm-config-io";
+import { EnvParseError, parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
 import {
@@ -13,7 +17,14 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
-import { Result } from "ts-results-es";
+import { Ok, Result } from "ts-results-es";
+import { IOError } from "./common-errors";
+
+export type LoginError =
+  | EnvParseError
+  | GetUpmConfigDirError
+  | IOError
+  | AuthenticationError;
 
 export type LoginOptions = CmdOptions<{
   username?: string;
@@ -23,18 +34,17 @@ export type LoginOptions = CmdOptions<{
   alwaysAuth?: boolean;
 }>;
 
-type LoginResultCode = 0 | 1;
-
 /**
  * @throws {Error} An unhandled error occurred.
  */
 export const login = async function (
   options: LoginOptions
-): Promise<LoginResultCode> {
+): Promise<Result<void, LoginError>> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return 1;
+  if (!envResult.isOk()) return envResult;
   const env = envResult.value;
+
   // query parameters
   const username = options.username ?? (await promptUsername());
   const password = options.password ?? (await promptPassword());
@@ -48,7 +58,7 @@ export const login = async function (
   const alwaysAuth = options.alwaysAuth || false;
 
   const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
-  if (!configDirResult.isOk()) return 1;
+  if (!configDirResult.isOk()) return configDirResult;
   const configDir = configDirResult.value;
 
   if (options.basicAuth) {
@@ -59,11 +69,11 @@ export const login = async function (
       alwaysAuth,
       _auth,
     } satisfies BasicAuth);
-    if (result.isErr()) return 1;
+    if (result.isErr()) return result;
   } else {
     // npm login
     const result = await npmLogin(username, password, email, loginRegistry);
-    if (result.isErr()) return 1;
+    if (result.isErr()) return result;
     const token = result.value;
 
     // write npm token
@@ -73,10 +83,10 @@ export const login = async function (
       alwaysAuth,
       token,
     } satisfies TokenAuth);
-    if (storeResult.isErr()) return 1;
+    if (storeResult.isErr()) return storeResult;
   }
 
-  return 0;
+  return Ok(undefined);
 };
 
 /**
