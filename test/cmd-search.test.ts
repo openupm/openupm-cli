@@ -79,7 +79,7 @@ describe("cmd-search.ts", function () {
     beforeEach(function () {
       startMockRegistry();
       registerSearchResult("package-a", searchEndpointResult);
-      registerSearchResult("pkg-not-exit", searchEndpointEmptyResult);
+      registerSearchResult("pkg-not-exist", searchEndpointEmptyResult);
     });
     afterEach(function () {
       stopMockRegistry();
