@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { makeNpmClient } from "./npm-client";
+import { AuthenticationError, makeNpmClient } from "./npm-client";
 import log from "./logger";
 import { tryGetUpmConfigDir, tryStoreUpmAuth } from "./utils/upm-config-io";
 import { parseEnv } from "./utils/env";
@@ -13,6 +13,7 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
+import { Result } from "ts-results-es";
 
 export type LoginOptions = CmdOptions<{
   username?: string;
@@ -62,14 +63,11 @@ export const login = async function (
   } else {
     // npm login
     const result = await npmLogin(username, password, email, loginRegistry);
-    if (result.code === 1) return result.code;
-    if (!result.token) {
-      log.error("auth", "can not find token from server response");
-      return 1;
-    }
-    const token = result.token;
+    if (result.isErr()) return 1;
+    const token = result.value;
+
     // write npm token
-    await writeNpmToken(loginRegistry, result.token);
+    await writeNpmToken(loginRegistry, token);
     const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
@@ -82,11 +80,6 @@ export const login = async function (
 };
 
 /**
- * The result of a login attempt. Either success with the token, or failure.
- */
-type LoginResult = { code: 0; token: string } | { code: 1 };
-
-/**
  * Return npm login token.
  */
 const npmLogin = async function (
@@ -94,22 +87,20 @@ const npmLogin = async function (
   password: string,
   email: string,
   registry: RegistryUrl
-): Promise<LoginResult> {
+): Promise<Result<string, AuthenticationError>> {
   const client = makeNpmClient();
   const result = await client.addUser(registry, username, password, email);
 
   if (result.isOk()) {
     log.notice("auth", `you are authenticated as '${username}'`);
-    return { code: 0, token: result.value };
+    return result;
   }
 
-  if (result.error.status === 401) {
+  if (result.error.status === 401)
     log.warn("401", "Incorrect username or password");
-    return { code: 1 };
-  } else {
-    log.error(result.error.status.toString(), result.error.message);
-    return { code: 1 };
-  }
+  else log.error(result.error.status.toString(), result.error.message);
+
+  return result;
 };
 
 /**
