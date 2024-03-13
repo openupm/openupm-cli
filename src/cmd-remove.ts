@@ -40,7 +40,7 @@ export const remove = async function (
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return Err([envResult.error]);
+  if (envResult.isErr()) return Err([envResult.error]);
   const env = envResult.value;
 
   const removeSingle = async function (
@@ -53,7 +53,7 @@ export const remove = async function (
     }
     // load manifest
     const manifestResult = await tryLoadProjectManifest(env.cwd);
-    if (!manifestResult.isOk()) return manifestResult;
+    if (manifestResult.isErr()) return manifestResult;
     let manifest = manifestResult.value;
 
     // not found array

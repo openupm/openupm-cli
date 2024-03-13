@@ -15,7 +15,7 @@ import { unityRegistryUrl } from "./types/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import assert from "assert";
 import { NpmClient, Registry } from "./npm-client";
-import {PackumentNotFoundError} from "./common-errors";
+import { PackumentNotFoundError } from "./common-errors";
 
 export type DependencyBase = {
   /**
@@ -130,7 +130,7 @@ export const fetchPackageDependencies = async function (
           entry.version
         );
         // Then upstream registry
-        if (!resolveResult.isOk()) {
+        if (resolveResult.isErr()) {
           const upstreamResult = await tryResolveFromRegistry(
             upstreamRegistry,
             entry.name,
@@ -141,7 +141,7 @@ export const fetchPackageDependencies = async function (
         }
 
         // If none resolved successfully, log the most fixable failure
-        if (!resolveResult.isOk()) {
+        if (resolveResult.isErr()) {
           if (resolveResult.error instanceof PackumentNotFoundError) {
             log.warn("404", `package not found: ${entry.name}`);
           } else if (resolveResult.error instanceof VersionNotFoundError) {

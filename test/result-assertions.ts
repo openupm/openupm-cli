@@ -2,7 +2,7 @@ import { Result } from "ts-results-es";
 
 expect.extend({
   toBeOk<T>(result: Result<T, Error>, valueAsserter?: (value: T) => void) {
-    if (!result.isOk())
+    if (result.isErr())
       return {
         pass: false,
         message: () =>

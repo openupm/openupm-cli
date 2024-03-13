@@ -107,7 +107,7 @@ export async function setupUnityProject(
     // Upmconfig
     const upmConfig = config.upmConfig ?? defaultUpmConfig;
     const saveResult = await trySaveUpmConfig(upmConfig, rootPath);
-    if (!saveResult.isOk()) throw saveResult.error;
+    if (saveResult.isErr()) throw saveResult.error;
 
     // Editor-version
     const version = config.version ?? defaultVersion;
@@ -115,7 +115,7 @@ export async function setupUnityProject(
       projectPath,
       version
     );
-    if (!projectVersionResult.isOk()) throw projectVersionResult.error;
+    if (projectVersionResult.isErr()) throw projectVersionResult.error;
 
     // Project manifest
     if (config.manifest !== false) {
@@ -124,7 +124,7 @@ export async function setupUnityProject(
         projectPath,
         manifest
       );
-      if (!manifestResult.isOk()) throw manifestResult.error;
+      if (manifestResult.isErr()) throw manifestResult.error;
     }
   }
 

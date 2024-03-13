@@ -84,7 +84,7 @@ export const add = async function (
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return Err([envResult.error]);
+  if (envResult.isErr()) return Err([envResult.error]);
   const env = envResult.value;
 
   const client = makeNpmClient();
@@ -99,7 +99,7 @@ export const add = async function (
 
     // load manifest
     const loadResult = await tryLoadProjectManifest(env.cwd);
-    if (!loadResult.isOk()) return loadResult;
+    if (loadResult.isErr()) return loadResult;
     let manifest = loadResult.value;
 
     // packages that added to scope registry
@@ -112,7 +112,7 @@ export const add = async function (
         requestedVersion,
         env.registry
       );
-      if (!resolveResult.isOk() && env.upstream) {
+      if (resolveResult.isErr() && env.upstream) {
         resolveResult = await tryResolve(
           client,
           name,
@@ -122,7 +122,7 @@ export const add = async function (
         if (resolveResult.isOk()) isUpstreamPackage = true;
       }
 
-      if (!resolveResult.isOk()) {
+      if (resolveResult.isErr()) {
         if (resolveResult.error instanceof PackumentNotFoundError)
           log.error("404", `package not found: ${name}`);
         else if (resolveResult.error instanceof VersionNotFoundError) {

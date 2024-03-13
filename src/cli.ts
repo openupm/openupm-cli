@@ -120,7 +120,7 @@ program
   .description("view package information")
   .action(async function (pkg, options) {
     const result = await view(pkg, makeCmdOptions(options));
-    if (!result.isOk()) process.exit(1);
+    if (result.isErr()) process.exit(1);
   });
 
 program

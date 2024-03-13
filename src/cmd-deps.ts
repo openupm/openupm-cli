@@ -38,7 +38,7 @@ export const deps = async function (
 ): Promise<Result<void, DepsError>> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return envResult;
+  if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
   const client = makeNpmClient();

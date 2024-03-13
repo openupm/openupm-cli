@@ -42,7 +42,7 @@ export const login = async function (
 ): Promise<Result<void, LoginError>> {
   // parse env
   const envResult = await parseEnv(options, true);
-  if (!envResult.isOk()) return envResult;
+  if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
   // query parameters
@@ -58,7 +58,7 @@ export const login = async function (
   const alwaysAuth = options.alwaysAuth || false;
 
   const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
-  if (!configDirResult.isOk()) return configDirResult;
+  if (configDirResult.isErr()) return configDirResult;
   const configDir = configDirResult.value;
 
   if (options.basicAuth) {

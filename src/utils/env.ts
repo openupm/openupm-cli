@@ -90,7 +90,7 @@ export const parseEnv = async function (
   if (options._global.wsl) wsl = true;
 
   const configDirResult = await tryGetUpmConfigDir(wsl, systemUser);
-  if (!configDirResult.isOk()) return Err(configDirResult.error);
+  if (configDirResult.isErr()) return Err(configDirResult.error);
   const configDir = configDirResult.value;
 
   const upmConfig = await tryLoadUpmConfig(configDir);
