@@ -5,7 +5,7 @@ export type MockEnvSession = {
   /**
    * Stops this mock-env session and revert to the original {@link process.env}.
    */
-  unhoOk(): void;
+  unhook(): void;
 };
 
 /**
@@ -23,7 +23,7 @@ export function mockEnv(env: object): MockEnvSession {
     );
   process.env = { ...env, IS_MOCK: "TRUE" };
   return {
-    unhoOk() {
+    unhook() {
       process.env = originalEnv;
     },
   };
@@ -43,6 +43,6 @@ export function runWithEnv<T>(env: object, func: () => T): T {
   try {
     return func();
   } finally {
-    envSession.unhoOk();
+    envSession.unhook();
   }
 }

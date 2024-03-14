@@ -134,7 +134,7 @@ export async function setupUnityProject(
 
     await fse.rm(rootPath, { recursive: true, force: true });
 
-    envSession?.unhoOk();
+    envSession?.unhook();
   }
 
   function tryGetManifest() {
