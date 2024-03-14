@@ -3,7 +3,7 @@ import { parseEnv } from "./utils/env";
 import { makeNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
-  packageReference,
+  makePackageReference,
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
@@ -52,7 +52,7 @@ export const deps = async function (
   depsValid
     .filter((x) => !x.self)
     .forEach((x) =>
-      log.notice("dependency", `${packageReference(x.name, x.version)}`)
+      log.notice("dependency", `${makePackageReference(x.name, x.version)}`)
     );
   depsInvalid
     .filter((x) => !x.self)

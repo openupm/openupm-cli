@@ -13,7 +13,7 @@ import {
 import { makeNpmClient } from "./npm-client";
 import { DomainName } from "./types/domain-name";
 import {
-  packageReference,
+  makePackageReference,
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
@@ -180,7 +180,7 @@ export const add = async function (
               if (depObj.reason.issue === "VersionNotFound")
                 log.notice(
                   "suggest",
-                  `to install ${packageReference(
+                  `to install ${makePackageReference(
                     depObj.name,
                     depObj.reason.requestedVersion
                   )} or a replaceable version manually`
@@ -212,7 +212,10 @@ export const add = async function (
     );
     if (!oldVersion) {
       // Log the added package
-      log.notice("manifest", `added ${packageReference(name, versionToAdd)}`);
+      log.notice(
+        "manifest",
+        `added ${makePackageReference(name, versionToAdd)}`
+      );
       dirty = true;
     } else if (oldVersion !== versionToAdd) {
       // Log the modified package version
@@ -223,7 +226,10 @@ export const add = async function (
       dirty = true;
     } else {
       // Log the existed package
-      log.notice("manifest", `existed ${packageReference(name, versionToAdd)}`);
+      log.notice(
+        "manifest",
+        `existed ${makePackageReference(name, versionToAdd)}`
+      );
     }
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
       let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);

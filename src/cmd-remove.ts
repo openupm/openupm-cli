@@ -6,7 +6,7 @@ import {
 import { parseEnv } from "./utils/env";
 import {
   hasVersion,
-  packageReference,
+  makePackageReference,
   PackageReference,
 } from "./types/package-reference";
 import { removeScope } from "./types/scoped-registry";
@@ -53,7 +53,7 @@ export const remove = async function (
     if (versionInManifest) {
       log.notice(
         "manifest",
-        `removed ${packageReference(pkg, versionInManifest)}`
+        `removed ${makePackageReference(pkg, versionInManifest)}`
       );
       manifest = removeDependency(manifest, pkg);
       dirty = true;

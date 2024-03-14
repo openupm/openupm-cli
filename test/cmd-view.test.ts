@@ -11,7 +11,7 @@ import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
-import { packageReference } from "../src/types/package-reference";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 const packageA = makeDomainName("com.example.package-a");
@@ -133,7 +133,7 @@ describe("cmd-view.ts", function () {
     });
     it("view pkg@1.0.0", async function () {
       const retCode = await view(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       expect(retCode).toEqual(1);

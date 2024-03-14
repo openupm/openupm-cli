@@ -13,7 +13,7 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
 import { semanticVersion } from "../src/types/semantic-version";
-import { packageReference } from "../src/types/package-reference";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-add.ts", function () {
@@ -165,7 +165,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@1.0.0", async function () {
       const retCode = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       expect(retCode).toEqual(0);
@@ -176,7 +176,10 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg@latest", async function () {
-      const retCode = await add(packageReference(packageA, "latest"), options);
+      const retCode = await add(
+        makePackageReference(packageA, "latest"),
+        options
+      );
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
@@ -186,12 +189,12 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
       const retCode1 = await add(
-        packageReference(packageA, semanticVersion("0.1.0")),
+        makePackageReference(packageA, semanticVersion("0.1.0")),
         options
       );
       expect(retCode1).toEqual(0);
       const retCode2 = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       expect(retCode2).toEqual(0);
@@ -203,12 +206,12 @@ describe("cmd-add.ts", function () {
     });
     it("add exited pkg version", async function () {
       const retCode1 = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       expect(retCode1).toEqual(0);
       const retCode2 = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, semanticVersion("1.0.0")),
         options
       );
       expect(retCode2).toEqual(0);
@@ -220,7 +223,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@not-exist-version", async function () {
       const retCode = await add(
-        packageReference(packageA, semanticVersion("2.0.0")),
+        makePackageReference(packageA, semanticVersion("2.0.0")),
         options
       );
       expect(retCode).toEqual(1);
@@ -236,7 +239,10 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@http", async function () {
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(packageReference(packageA, gitUrl), options);
+      const retCode = await add(
+        makePackageReference(packageA, gitUrl),
+        options
+      );
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
@@ -249,7 +255,10 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@git", async function () {
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(packageReference(packageA, gitUrl), options);
+      const retCode = await add(
+        makePackageReference(packageA, gitUrl),
+        options
+      );
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
@@ -262,7 +271,10 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@file", async function () {
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(packageReference(packageA, fileUrl), options);
+      const retCode = await add(
+        makePackageReference(packageA, fileUrl),
+        options
+      );
       expect(retCode).toEqual(0);
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, fileUrl)
@@ -319,7 +331,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg with nested dependencies", async function () {
       const retCode = await add(
-        packageReference(packageC, "latest"),
+        makePackageReference(packageC, "latest"),
         upstreamOptions
       );
       expect(retCode).toEqual(0);

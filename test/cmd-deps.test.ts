@@ -10,7 +10,7 @@ import {
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/types/domain-name";
-import { packageReference } from "../src/types/package-reference";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-deps.ts", function () {
@@ -80,7 +80,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@latest", async function () {
       const retCode = await deps(
-        packageReference(remotePackumentA.name, "latest"),
+        makePackageReference(remotePackumentA.name, "latest"),
         options
       );
       expect(retCode).toEqual(0);
@@ -88,7 +88,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@1.0.0", async function () {
       const retCode = await deps(
-        packageReference(remotePackumentA.name, "1.0.0"),
+        makePackageReference(remotePackumentA.name, "1.0.0"),
         options
       );
       expect(retCode).toEqual(0);
@@ -96,7 +96,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@not-exist-version", async function () {
       const retCode = await deps(
-        packageReference(remotePackumentA.name, "2.0.0"),
+        makePackageReference(remotePackumentA.name, "2.0.0"),
         options
       );
       expect(retCode).toEqual(0);
