@@ -36,6 +36,15 @@ export function scopedRegistry(
 }
 
 /**
+ * Checks if a registry has a specific scope.
+ * @param registry The registry.
+ * @param scope The scope.
+ */
+export function hasScope(registry: ScopedRegistry, scope: DomainName): boolean {
+  return registry.scopes.includes(scope);
+}
+
+/**
  * Adds a scope to a registry if it is not already in the list. The scopes will
  * also be sorted alphabetically.
  * @param registry The registry.
@@ -43,19 +52,10 @@ export function scopedRegistry(
  * @returns Boolean whether the scope was added successfully.
  */
 export function addScope(registry: ScopedRegistry, scope: DomainName): boolean {
-  if (registry.scopes.includes(scope)) return false;
+  if (hasScope(registry, scope)) return false;
 
   registry.scopes = [...registry.scopes, scope].sort();
   return true;
-}
-
-/**
- * Checks if a registry has a specific scope.
- * @param registry The registry.
- * @param scope The scope.
- */
-export function hasScope(registry: ScopedRegistry, scope: DomainName): boolean {
-  return registry.scopes.includes(scope);
 }
 
 /**
