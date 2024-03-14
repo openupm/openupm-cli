@@ -141,25 +141,6 @@ export function addScopedRegistry(
 }
 
 /**
- * Removes a scoped-registry to the manifest.
- * @param manifest The manifest.
- * @param name The name of the scoped-registry to remove.
- */
-export function removeScopedRegistry(
-  manifest: UnityProjectManifest,
-  name: string
-): UnityProjectManifest {
-  if (manifest.scopedRegistries === undefined) return manifest;
-
-  return {
-    ...manifest,
-    scopedRegistries: manifest.scopedRegistries.filter(
-      (it) => it.name !== name
-    ),
-  };
-}
-
-/**
  * Adds a testable to the manifest, if it is not already added.
  * @param manifest The manifest.
  * @param name The testable name.
