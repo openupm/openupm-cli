@@ -17,7 +17,7 @@ import {
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import { addScope, scopedRegistry } from "./types/scoped-registry";
+import { addScope, makeScopedRegistry } from "./types/scoped-registry";
 import {
   addDependency,
   addScopedRegistry,
@@ -236,7 +236,7 @@ export const add = async function (
       if (entry === null) {
         const name = url.parse(env.registry.url).hostname;
         if (name === null) throw new Error("Could not resolve registry name");
-        entry = scopedRegistry(name, env.registry.url);
+        entry = makeScopedRegistry(name, env.registry.url);
         manifest = addScopedRegistry(manifest, entry);
         dirty = true;
       }
