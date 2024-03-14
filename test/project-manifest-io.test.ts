@@ -5,7 +5,7 @@ import {
   saveProjectManifest,
 } from "../src/utils/project-manifest-io";
 import { DomainName, makeDomainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 import {
   addDependency,
   manifestPathFor,
@@ -62,7 +62,7 @@ describe("project-manifest io", () => {
     manifest = addDependency(
       manifest,
       makeDomainName("some-pack"),
-      semanticVersion("1.0.0")
+      makeSemanticVersion("1.0.0")
     );
     expect(
       await saveProjectManifest(mockProject.projectPath, manifest)

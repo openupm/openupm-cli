@@ -7,7 +7,7 @@ import {
   tryGetScopedRegistryByUrl,
 } from "../src/types/project-manifest";
 import { makeDomainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 import { makeScopedRegistry } from "../src/types/scoped-registry";
 import { makeRegistryUrl } from "../src/types/registry-url";
 
@@ -19,7 +19,7 @@ describe("project-manifest", function () {
       manifest = addDependency(
         manifest,
         makeDomainName("test"),
-        semanticVersion("1.2.3")
+        makeSemanticVersion("1.2.3")
       );
 
       expect(manifest.dependencies).toEqual({ test: "1.2.3" });
@@ -30,12 +30,12 @@ describe("project-manifest", function () {
       manifest = addDependency(
         manifest,
         makeDomainName("test"),
-        semanticVersion("1.2.3")
+        makeSemanticVersion("1.2.3")
       );
       manifest = addDependency(
         manifest,
         makeDomainName("test"),
-        semanticVersion("2.3.4")
+        makeSemanticVersion("2.3.4")
       );
 
       expect(manifest.dependencies).toEqual({ test: "2.3.4" });
@@ -46,7 +46,7 @@ describe("project-manifest", function () {
       manifest = addDependency(
         manifest,
         makeDomainName("test"),
-        semanticVersion("1.2.3")
+        makeSemanticVersion("1.2.3")
       );
       manifest = removeDependency(manifest, makeDomainName("test"));
 

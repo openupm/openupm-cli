@@ -20,7 +20,7 @@ export function isSemanticVersion(s: string): s is SemanticVersion {
  * Constructs a semantic version from a string.
  * @param s The string. Will be validated.
  */
-export function semanticVersion(s: string): SemanticVersion {
+export function makeSemanticVersion(s: string): SemanticVersion {
   assert(isSemanticVersion(s), `"${s}" is a semantic version`);
   return s;
 }

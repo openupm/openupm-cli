@@ -3,7 +3,7 @@ import { exampleRegistryUrl } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
@@ -61,7 +61,7 @@ describe("cmd-remove.ts", function () {
         },
       };
       const retCode = await remove(
-        makePackageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(retCode).toEqual(1);

@@ -12,7 +12,7 @@ import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
-import { semanticVersion } from "../src/types/semantic-version";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
@@ -165,7 +165,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@1.0.0", async function () {
       const retCode = await add(
-        makePackageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(retCode).toEqual(0);
@@ -189,12 +189,12 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
       const retCode1 = await add(
-        makePackageReference(packageA, semanticVersion("0.1.0")),
+        makePackageReference(packageA, makeSemanticVersion("0.1.0")),
         options
       );
       expect(retCode1).toEqual(0);
       const retCode2 = await add(
-        makePackageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(retCode2).toEqual(0);
@@ -206,12 +206,12 @@ describe("cmd-add.ts", function () {
     });
     it("add exited pkg version", async function () {
       const retCode1 = await add(
-        makePackageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(retCode1).toEqual(0);
       const retCode2 = await add(
-        makePackageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(retCode2).toEqual(0);
@@ -223,7 +223,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@not-exist-version", async function () {
       const retCode = await add(
-        makePackageReference(packageA, semanticVersion("2.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("2.0.0")),
         options
       );
       expect(retCode).toEqual(1);
