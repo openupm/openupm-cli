@@ -10,11 +10,9 @@ import {
   PackageReference,
 } from "./types/package-reference";
 import { removeScope } from "./types/scoped-registry";
-import {
-  removeDependency,
-  tryGetScopedRegistryByUrl,
-} from "./types/project-manifest";
+import { mapScopedRegistry, removeDependency } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
+import { areArraysEqual } from "./utils/array-utils";
 
 export type RemoveOptions = CmdOptions;
 
@@ -59,11 +57,14 @@ export const remove = async function (
       dirty = true;
     } else pkgsNotFound.push(pkg);
 
-    const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-    if (entry !== null) {
-      const scopeWasRemoved = removeScope(entry, pkg);
-      if (scopeWasRemoved) dirty = true;
-    }
+    manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
+      if (initial === null) return null;
+
+      const updated = removeScope(initial, pkg);
+      dirty = !areArraysEqual(updated.scopes, initial.scopes) || dirty;
+      return updated;
+    });
+
     // save manifest
     if (dirty) {
       if (!(await saveProjectManifest(env.cwd, manifest)))

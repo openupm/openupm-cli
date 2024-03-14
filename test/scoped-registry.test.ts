@@ -48,25 +48,31 @@ describe("scoped-registry", function () {
   });
   describe("remove scope", function () {
     it("should not have scope after removing it", () => {
-      const registry = scopedRegistry("test", exampleRegistryUrl, [
+      let registry = scopedRegistry("test", exampleRegistryUrl, [
         domainName("a"),
       ]);
-      expect(removeScope(registry, domainName("a"))).toBeTruthy();
+
+      registry = removeScope(registry, domainName("a"));
+
       expect(hasScope(registry, domainName("a"))).toBeFalsy();
     });
     it("should not do nothing if scope does not exist", () => {
-      const registry = scopedRegistry("test", exampleRegistryUrl, [
+      let registry = scopedRegistry("test", exampleRegistryUrl, [
         domainName("a"),
       ]);
-      expect(removeScope(registry, domainName("b"))).toBeFalsy();
+
+      registry = removeScope(registry, domainName("b"));
+
       expect(hasScope(registry, domainName("a"))).toBeTruthy();
     });
     it("should remove duplicate scopes", () => {
-      const registry = scopedRegistry("test", exampleRegistryUrl, [
+      let registry = scopedRegistry("test", exampleRegistryUrl, [
         domainName("a"),
         domainName("a"),
       ]);
-      expect(removeScope(registry, domainName("a"))).toBeTruthy();
+
+      registry = removeScope(registry, domainName("a"));
+
       expect(registry.scopes).toHaveLength(0);
     });
   });

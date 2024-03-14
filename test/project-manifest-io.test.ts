@@ -9,7 +9,7 @@ import { semanticVersion } from "../src/types/semantic-version";
 import {
   addDependency,
   manifestPathFor,
-  tryGetScopedRegistryByUrl,
+  mapScopedRegistry,
 } from "../src/types/project-manifest";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
@@ -78,14 +78,16 @@ describe("project-manifest io", () => {
   it("should not save scoped-registry with empty scopes", async () => {
     // Add and then remove a scope to force an empty scoped-registry
     const testDomain = "test" as DomainName;
-    const initialManifest = buildProjectManifest((manifest) =>
+    let initialManifest = buildProjectManifest((manifest) =>
       manifest.addScope(testDomain)
     );
-    const scopedRegistry = tryGetScopedRegistryByUrl(
+    initialManifest = mapScopedRegistry(
       initialManifest,
-      exampleRegistryUrl
-    )!;
-    removeScope(scopedRegistry, testDomain);
+      exampleRegistryUrl,
+      (registry) => {
+        return removeScope(registry!, testDomain);
+      }
+    );
 
     // Save and load manifest
     expect(
