@@ -172,3 +172,34 @@ export function pruneManifest(
     ),
   };
 }
+
+/**
+ * Updates a scoped-registry in a manifest by applying a mapping-function to it.
+ * @param manifest The manifest.
+ * @param registryUrl The url of the scoped-registry that should be mapped.
+ * @param mapF The mapping function. Gets the scoped-registry with the given
+ * registry-url as input, or null if the manifest has no scoped-registry with
+ * that url. The scoped-registry returned by the function will be written back
+ * to the manifest. If the function returns null the scoped-registry will be
+ * removed from the manifest.
+ * @returns The updated manifest.
+ */
+export function mapScopedRegistry(
+  manifest: UnityProjectManifest,
+  registryUrl: RegistryUrl,
+  mapF: (scopedRegistry: ScopedRegistry | null) => ScopedRegistry | null
+): UnityProjectManifest {
+  const updated = mapF(tryGetScopedRegistryByUrl(manifest, registryUrl));
+
+  let newScopedRegistries = manifest.scopedRegistries?.filter(
+    (it) => it.url !== (updated?.url ?? registryUrl)
+  );
+
+  if (updated !== null)
+    newScopedRegistries = [...(newScopedRegistries ?? []), updated];
+
+  return {
+    ...manifest,
+    scopedRegistries: newScopedRegistries,
+  };
+}
