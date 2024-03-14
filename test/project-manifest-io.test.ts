@@ -4,7 +4,7 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../src/utils/project-manifest-io";
-import { DomainName, domainName } from "../src/types/domain-name";
+import { DomainName, makeDomainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import {
   addDependency,
@@ -61,7 +61,7 @@ describe("project-manifest io", () => {
     expect(manifest).not.toHaveDependencies();
     manifest = addDependency(
       manifest,
-      domainName("some-pack"),
+      makeDomainName("some-pack"),
       semanticVersion("1.0.0")
     );
     expect(

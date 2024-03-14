@@ -1,5 +1,5 @@
 import {
-  domainName,
+  makeDomainName,
   isDomainName,
   isInternalPackage,
   namespaceFor,
@@ -53,15 +53,15 @@ describe("domain-name", function () {
   describe("internal package", function () {
     it("test com.otherorg.software", function () {
       expect(
-        isInternalPackage(domainName("com.otherorg.software"))
+        isInternalPackage(makeDomainName("com.otherorg.software"))
       ).not.toBeTruthy();
     });
     it("test com.unity.ugui", function () {
-      expect(isInternalPackage(domainName("com.unity.ugui"))).toBeTruthy();
+      expect(isInternalPackage(makeDomainName("com.unity.ugui"))).toBeTruthy();
     });
     it("test com.unity.modules.tilemap", function () {
       expect(
-        isInternalPackage(domainName("com.unity.modules.tilemap"))
+        isInternalPackage(makeDomainName("com.unity.modules.tilemap"))
       ).toBeTruthy();
     });
   });

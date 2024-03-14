@@ -9,14 +9,14 @@ import {
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
-import { domainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
-const packageA = domainName("com.example.package-a");
-const packageUp = domainName("com.example.package-up");
-const packageMissing = domainName("pkg-not-exist");
+const packageA = makeDomainName("com.example.package-a");
+const packageUp = makeDomainName("com.example.package-up");
+const packageMissing = makeDomainName("pkg-not-exist");
 
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {

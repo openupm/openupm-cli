@@ -9,7 +9,7 @@ import {
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
-import { domainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/types/domain-name";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
@@ -103,7 +103,7 @@ describe("cmd-deps.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
     });
     it("deps pkg-not-exist", async function () {
-      const retCode = await deps(domainName("pkg-not-exist"), options);
+      const retCode = await deps(makeDomainName("pkg-not-exist"), options);
       expect(retCode).toEqual(0);
       expect(mockConsole).toHaveLineIncluding("out", "not found");
     });

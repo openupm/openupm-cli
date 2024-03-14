@@ -75,7 +75,7 @@ export const isInternalPackage = (name: DomainName): boolean => {
  * @param s The string.
  * @throws {assert.AssertionError} If string is not in valid format.
  */
-export function domainName(s: string): DomainName {
+export function makeDomainName(s: string): DomainName {
   assert(isDomainName(s), `"${s}" is a domain name`);
   return s;
 }

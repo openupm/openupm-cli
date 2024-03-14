@@ -6,7 +6,7 @@ import {
   removeDependency,
   tryGetScopedRegistryByUrl,
 } from "../src/types/project-manifest";
-import { domainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { scopedRegistry } from "../src/types/scoped-registry";
 import { registryUrl } from "../src/types/registry-url";
@@ -18,7 +18,7 @@ describe("project-manifest", function () {
 
       manifest = addDependency(
         manifest,
-        domainName("test"),
+        makeDomainName("test"),
         semanticVersion("1.2.3")
       );
 
@@ -29,12 +29,12 @@ describe("project-manifest", function () {
 
       manifest = addDependency(
         manifest,
-        domainName("test"),
+        makeDomainName("test"),
         semanticVersion("1.2.3")
       );
       manifest = addDependency(
         manifest,
-        domainName("test"),
+        makeDomainName("test"),
         semanticVersion("2.3.4")
       );
 
@@ -45,17 +45,17 @@ describe("project-manifest", function () {
 
       manifest = addDependency(
         manifest,
-        domainName("test"),
+        makeDomainName("test"),
         semanticVersion("1.2.3")
       );
-      manifest = removeDependency(manifest, domainName("test"));
+      manifest = removeDependency(manifest, makeDomainName("test"));
 
       expect(manifest.dependencies).toEqual({});
     });
     it("should do nothing when dependency does not exist", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = removeDependency(manifest, domainName("test"));
+      manifest = removeDependency(manifest, makeDomainName("test"));
 
       expect(manifest.dependencies).toEqual({});
     });
@@ -84,16 +84,16 @@ describe("project-manifest", function () {
     it("should not add testables which already exist", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, domainName("a"));
-      manifest = addTestable(manifest, domainName("a"));
+      manifest = addTestable(manifest, makeDomainName("a"));
+      manifest = addTestable(manifest, makeDomainName("a"));
 
       expect(manifest.testables).toEqual(["a"]);
     });
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, domainName("b"));
-      manifest = addTestable(manifest, domainName("a"));
+      manifest = addTestable(manifest, makeDomainName("b"));
+      manifest = addTestable(manifest, makeDomainName("a"));
 
       expect(manifest.testables).toEqual(["a", "b"]);
     });

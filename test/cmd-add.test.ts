@@ -10,26 +10,26 @@ import {
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
-import { domainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
 import { semanticVersion } from "../src/types/semantic-version";
 import { packageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-add.ts", function () {
-  const packageMissing = domainName("pkg-not-exist");
-  const packageA = domainName("com.base.package-a");
-  const packageB = domainName("com.base.package-b");
-  const packageC = domainName("com.base.package-c");
-  const packageD = domainName("com.base.package-d");
-  const packageUp = domainName("com.upstream.package-up");
-  const packageLowerEditor = domainName(
+  const packageMissing = makeDomainName("pkg-not-exist");
+  const packageA = makeDomainName("com.base.package-a");
+  const packageB = makeDomainName("com.base.package-b");
+  const packageC = makeDomainName("com.base.package-c");
+  const packageD = makeDomainName("com.base.package-d");
+  const packageUp = makeDomainName("com.upstream.package-up");
+  const packageLowerEditor = makeDomainName(
     "com.base.package-with-lower-editor-version"
   );
-  const packageHigherEditor = domainName(
+  const packageHigherEditor = makeDomainName(
     "com.base.package-with-higher-editor-version"
   );
-  const packageWrongEditor = domainName(
+  const packageWrongEditor = makeDomainName(
     "com.base.package-with-wrong-editor-version"
   );
 
