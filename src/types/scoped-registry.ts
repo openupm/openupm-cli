@@ -5,7 +5,7 @@ import { DomainName } from "./domain-name";
  * Contains information about a scoped registry.
  * @see https://docs.unity3d.com/Manual/upm-scoped.html
  */
-export type ScopedRegistry = {
+export type ScopedRegistry = Readonly<{
   /**
    * The scope name as it appears in the user interface.
    */
@@ -19,7 +19,7 @@ export type ScopedRegistry = {
    * on the package name, or as a namespace.
    */
   scopes: ReadonlyArray<DomainName>;
-};
+}>;
 
 /**
  * Constructs a scoped registry.
