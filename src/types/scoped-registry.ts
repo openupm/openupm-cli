@@ -18,7 +18,7 @@ export type ScopedRegistry = {
    * Array of scopes that you can map to a package name, either as an exact match
    * on the package name, or as a namespace.
    */
-  scopes: DomainName[];
+  scopes: ReadonlyArray<DomainName>;
 };
 
 /**
@@ -45,8 +45,7 @@ export function scopedRegistry(
 export function addScope(registry: ScopedRegistry, scope: DomainName): boolean {
   if (registry.scopes.includes(scope)) return false;
 
-  registry.scopes.push(scope);
-  registry.scopes.sort();
+  registry.scopes = [...registry.scopes, scope].sort();
   return true;
 }
 
