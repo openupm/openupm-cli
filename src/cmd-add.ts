@@ -226,16 +226,19 @@ export const add = async function (
       log.notice("manifest", `existed ${packageReference(name, versionToAdd)}`);
     }
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
-      let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-      if (entry === null) {
+      let targetScopedRegistry = tryGetScopedRegistryByUrl(
+        manifest,
+        env.registry.url
+      );
+      if (targetScopedRegistry === null) {
         const name = url.parse(env.registry.url).hostname;
         if (name === null) throw new Error("Could not resolve registry name");
-        entry = scopedRegistry(name, env.registry.url);
-        manifest = addScopedRegistry(manifest, entry);
+        targetScopedRegistry = scopedRegistry(name, env.registry.url);
+        manifest = addScopedRegistry(manifest, targetScopedRegistry);
         dirty = true;
       }
       pkgsInScope.forEach((name) => {
-        const wasAdded = addScope(entry!, name);
+        const wasAdded = addScope(targetScopedRegistry!, name);
         if (wasAdded) dirty = true;
       });
     }
