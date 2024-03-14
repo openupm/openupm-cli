@@ -2,10 +2,10 @@ import nock from "nock";
 import { SearchEndpointResult } from "./types";
 import { isDomainName } from "../src/types/domain-name";
 import assert from "assert";
-import { registryUrl, unityRegistryUrl } from "../src/types/registry-url";
+import { makeRegistryUrl, unityRegistryUrl } from "../src/types/registry-url";
 import { UnityPackument } from "../src/types/packument";
 
-export const exampleRegistryUrl = registryUrl("http://example.com");
+export const exampleRegistryUrl = makeRegistryUrl("http://example.com");
 
 export function startMockRegistry() {
   if (!nock.isActive()) nock.activate();

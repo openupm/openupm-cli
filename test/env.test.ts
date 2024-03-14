@@ -1,6 +1,6 @@
 import { parseEnv } from "../src/utils/env";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { registryUrl } from "../src/types/registry-url";
+import { makeRegistryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
@@ -18,7 +18,7 @@ const testNpmAuth: NpmAuth = {
 };
 
 const testUpmConfig: UPMConfig = {
-  npmAuth: { [registryUrl("http://registry.npmjs.org")]: testUpmAuth },
+  npmAuth: { [makeRegistryUrl("http://registry.npmjs.org")]: testUpmAuth },
 };
 
 describe("env", function () {

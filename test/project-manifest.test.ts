@@ -9,7 +9,7 @@ import {
 import { makeDomainName } from "../src/types/domain-name";
 import { semanticVersion } from "../src/types/semantic-version";
 import { scopedRegistry } from "../src/types/scoped-registry";
-import { registryUrl } from "../src/types/registry-url";
+import { makeRegistryUrl } from "../src/types/registry-url";
 
 describe("project-manifest", function () {
   describe("dependency", function () {
@@ -63,7 +63,7 @@ describe("project-manifest", function () {
   describe("scoped-registry", function () {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
-      const url = registryUrl("https://test.com");
+      const url = makeRegistryUrl("https://test.com");
       const expected = scopedRegistry("test", url);
 
       manifest = addScopedRegistry(manifest, expected);
@@ -72,8 +72,11 @@ describe("project-manifest", function () {
     });
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
-      const url = registryUrl("https://test.com");
-      const expected = scopedRegistry("test", registryUrl("https://test2.com"));
+      const url = makeRegistryUrl("https://test.com");
+      const expected = scopedRegistry(
+        "test",
+        makeRegistryUrl("https://test2.com")
+      );
 
       manifest = addScopedRegistry(manifest, expected);
 

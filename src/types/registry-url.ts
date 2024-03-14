@@ -21,7 +21,7 @@ export function isRegistryUrl(s: string): s is RegistryUrl {
  * @param s The string.
  * @throws {assert.AssertionError} If string does not have valid format.
  */
-export function registryUrl(s: string): RegistryUrl {
+export function makeRegistryUrl(s: string): RegistryUrl {
   assert(isRegistryUrl(s), `"${s}" is url`);
   return s;
 }
@@ -36,7 +36,7 @@ export function registryUrl(s: string): RegistryUrl {
 export function coerceRegistryUrl(s: string): RegistryUrl {
   if (!s.toLowerCase().startsWith("http")) s = "http://" + s;
   s = removeTrailingSlash(s);
-  return registryUrl(s);
+  return makeRegistryUrl(s);
 }
 
-export const unityRegistryUrl = registryUrl("https://packages.unity.com");
+export const unityRegistryUrl = makeRegistryUrl("https://packages.unity.com");
