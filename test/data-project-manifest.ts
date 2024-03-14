@@ -5,9 +5,9 @@ import { isSemanticVersion } from "../src/types/semantic-version";
 import { addScope, scopedRegistry } from "../src/types/scoped-registry";
 import {
   addDependency,
-  addScopedRegistry,
   addTestable,
   emptyProjectManifest,
+  mapScopedRegistry,
   UnityProjectManifest,
 } from "../src/types/project-manifest";
 
@@ -28,14 +28,15 @@ class UnityProjectManifestBuilder {
   addScope(name: string): UnityProjectManifestBuilder {
     assert(isDomainName(name), `${name} is domain name`);
 
-    if (this.manifest.scopedRegistries === undefined)
-      this.manifest = addScopedRegistry(
-        this.manifest,
-        scopedRegistry("example.com", exampleRegistryUrl)
-      );
-
-    const registry = this.manifest.scopedRegistries![0]!;
-    addScope(registry, name);
+    this.manifest = mapScopedRegistry(
+      this.manifest,
+      exampleRegistryUrl,
+      (registry) => {
+        if (registry === null)
+          registry = scopedRegistry("example.com", exampleRegistryUrl);
+        return addScope(registry, name);
+      }
+    );
 
     return this;
   }

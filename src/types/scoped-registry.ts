@@ -1,5 +1,5 @@
-import { RegistryUrl } from "./registry-url";
-import { DomainName } from "./domain-name";
+import {RegistryUrl} from "./registry-url";
+import {DomainName} from "./domain-name";
 
 /**
  * Contains information about a scoped registry.
@@ -49,13 +49,14 @@ export function hasScope(registry: ScopedRegistry, scope: DomainName): boolean {
  * also be sorted alphabetically.
  * @param registry The registry.
  * @param scope The scope.
- * @returns Boolean whether the scope was added successfully.
  */
-export function addScope(registry: ScopedRegistry, scope: DomainName): boolean {
-  if (hasScope(registry, scope)) return false;
+export function addScope(
+  registry: ScopedRegistry,
+  scope: DomainName
+): ScopedRegistry {
+  if (hasScope(registry, scope)) return registry;
 
-  registry.scopes = [...registry.scopes, scope].sort();
-  return true;
+  return { ...registry, scopes: [...registry.scopes, scope].sort() };
 }
 
 /**

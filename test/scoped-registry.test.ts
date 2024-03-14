@@ -16,26 +16,33 @@ describe("scoped-registry", function () {
   });
   describe("add scope", function () {
     it("should keep scope-list alphabetical", () => {
-      const registry = scopedRegistry("test", exampleRegistryUrl);
-      expect(addScope(registry, domainName("b"))).toBeTruthy();
-      expect(addScope(registry, domainName("a"))).toBeTruthy();
+      let registry = scopedRegistry("test", exampleRegistryUrl);
+
+      registry = addScope(registry, domainName("b"));
+      registry = addScope(registry, domainName("a"));
+
       expect(registry.scopes).toEqual(["a", "b"]);
     });
     it("should filter duplicates", () => {
-      const registry = scopedRegistry("test", exampleRegistryUrl);
-      expect(addScope(registry, domainName("a"))).toBeTruthy();
-      expect(addScope(registry, domainName("a"))).toBeFalsy();
+      let registry = scopedRegistry("test", exampleRegistryUrl);
+
+      registry = addScope(registry, domainName("a"));
+      registry = addScope(registry, domainName("a"));
+
       expect(registry.scopes).toEqual(["a"]);
     });
   });
   describe("has scope", function () {
     it("should have scope that was added", () => {
-      const registry = scopedRegistry("test", exampleRegistryUrl);
-      addScope(registry, domainName("a"));
+      let registry = scopedRegistry("test", exampleRegistryUrl);
+
+      registry = addScope(registry, domainName("a"));
+
       expect(hasScope(registry, domainName("a"))).toBeTruthy();
     });
     it("should not have scope that was not added", () => {
       const registry = scopedRegistry("test", exampleRegistryUrl);
+
       expect(hasScope(registry, domainName("a"))).toBeFalsy();
     });
   });

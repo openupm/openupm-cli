@@ -119,8 +119,7 @@ describe("project-manifest", function () {
     it("should not updated scoped-registry after returning it", () => {
       let manifest = emptyProjectManifest;
       const initial = scopedRegistry("test", exampleRegistryUrl);
-      const expected = { ...initial };
-      addScope(expected, domainName("wow"));
+      const expected = addScope(initial, domainName("wow"));
       manifest = addScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(
