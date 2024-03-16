@@ -1,5 +1,3 @@
-import { attachMockConsole, MockConsole } from "./mock-console";
-
 import {
   ManifestParseError,
   tryLoadProjectManifest,
@@ -21,20 +19,14 @@ import { exampleRegistryUrl } from "./mock-registry";
 import { RequiredFileNotFoundError } from "../src/common-errors";
 
 describe("project-manifest io", () => {
-  let mockConsole: MockConsole = null!;
   let mockProject: MockUnityProject = null!;
 
   beforeAll(async () => {
     mockProject = await setupUnityProject({});
   });
 
-  beforeEach(() => {
-    mockConsole = attachMockConsole();
-  });
-
   afterEach(async () => {
     await mockProject.reset();
-    mockConsole.detach();
   });
 
   afterAll(async () => {
