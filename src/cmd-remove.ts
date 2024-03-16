@@ -20,6 +20,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "./common-errors";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export type RemoveError =
   | EnvParseError
@@ -50,7 +51,10 @@ export const remove = async function (
     }
     // load manifest
     const manifestResult = await tryLoadProjectManifest(env.cwd);
-    if (manifestResult.isErr()) return manifestResult;
+    if (manifestResult.isErr()) {
+      logManifestLoadError(manifestResult.error);
+      return manifestResult;
+    }
     let manifest = manifestResult.value;
 
     // not found array
@@ -69,7 +73,10 @@ export const remove = async function (
 
     // save manifest
     const saveResult = await trySaveProjectManifest(env.cwd, manifest);
-    if (saveResult.isErr()) return saveResult;
+    if (saveResult.isErr()) {
+      logManifestSaveError(saveResult.error);
+      return saveResult;
+    }
 
     log.notice(
       "manifest",

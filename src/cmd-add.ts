@@ -39,6 +39,7 @@ import { PackumentNotFoundError } from "./common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   constructor(readonly issue: string) {
@@ -106,7 +107,11 @@ export const add = async function (
 
     // load manifest
     const loadResult = await tryLoadProjectManifest(env.cwd);
-    if (loadResult.isErr()) return loadResult;
+    if (loadResult.isErr()) {
+      logManifestLoadError(loadResult.error);
+
+      return loadResult;
+    }
     let manifest = loadResult.value;
 
     // packages that added to scope registry
@@ -288,7 +293,10 @@ export const add = async function (
     // save manifest
     if (dirty) {
       const saveResult = await trySaveProjectManifest(env.cwd, manifest);
-      if (saveResult.isErr()) return saveResult;
+      if (saveResult.isErr()) {
+        logManifestSaveError(saveResult.error);
+        return saveResult;
+      }
     }
     return Ok(dirty);
   };

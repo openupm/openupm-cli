@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import { assertIsError } from "./error-type-guards";
-import log from "../logger";
 import {
   manifestPathFor,
   pruneManifest,
@@ -12,7 +11,11 @@ import { CustomError } from "ts-custom-error";
 import { RequiredFileNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 
-export class ManifestParseError extends CustomError {}
+export class ManifestParseError extends CustomError {
+  constructor(readonly path: string, readonly cause: Error) {
+    super("A project-manifest could not be parsed");
+  }
+}
 
 export type ManifestLoadError = RequiredFileNotFoundError | ManifestParseError;
 
@@ -32,14 +35,9 @@ export const tryLoadProjectManifest = async function (
     return Ok(JSON.parse(text) as UnityProjectManifest);
   } catch (error) {
     assertIsError(error);
-    if (error.code === "ENOENT") {
-      log.error("manifest", `manifest at ${manifestPath} does not exist`);
+    if (error.code === "ENOENT")
       return Err(new RequiredFileNotFoundError(manifestPath));
-    } else {
-      log.error("manifest", `failed to parse manifest at ${manifestPath}`);
-      log.error("manifest", error.message);
-      return Err(new ManifestParseError());
-    }
+    else return Err(new ManifestParseError(manifestPath, error));
   }
 };
 
@@ -61,8 +59,6 @@ export const trySaveProjectManifest = async function (
     return Ok(undefined);
   } catch (error) {
     assertIsError(error);
-    log.error("manifest", "can not write manifest json file");
-    log.error("manifest", error.message);
     return Err(error);
   }
 };
