@@ -23,7 +23,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "./common-errors";
-import { logManifestLoadError } from "./error-logging";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export type RemoveError =
   | EnvParseError
@@ -75,8 +75,7 @@ export const remove = async function (
     // save manifest
     const saveResult = await trySaveProjectManifest(env.cwd, manifest);
     if (saveResult.isErr()) {
-      log.error("manifest", "can not write manifest json file");
-      log.error("manifest", saveResult.error.message);
+      logManifestSaveError(saveResult.error);
       return saveResult;
     }
 

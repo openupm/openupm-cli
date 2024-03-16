@@ -1,5 +1,8 @@
 import log from "./logger";
-import { ManifestLoadError } from "./utils/project-manifest-io";
+import {
+  ManifestLoadError,
+  ManifestSaveError,
+} from "./utils/project-manifest-io";
 import { RequiredFileNotFoundError } from "./common-errors";
 
 /**
@@ -14,4 +17,14 @@ export function logManifestLoadError(error: ManifestLoadError) {
     log.error(prefix, `failed to parse manifest at ${error.path}`);
     log.error(prefix, error.cause.message);
   }
+}
+
+/**
+ * Logs a {@link ManifestSaveError} to the console.
+ * @param error The error to log.
+ */
+export function logManifestSaveError(error: ManifestSaveError) {
+  const prefix = "manifest";
+  log.error(prefix, "can not write manifest json file");
+  log.error(prefix, error.message);
 }

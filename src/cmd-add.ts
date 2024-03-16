@@ -3,7 +3,6 @@ import url from "url";
 import { isPackageUrl, PackageUrl } from "./types/package-url";
 import {
   ManifestLoadError,
-  ManifestParseError,
   ManifestSaveError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
@@ -35,14 +34,11 @@ import {
 } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
-import {
-  PackumentNotFoundError,
-  RequiredFileNotFoundError,
-} from "./common-errors";
+import { PackumentNotFoundError } from "./common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { logManifestLoadError } from "./error-logging";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   constructor(readonly issue: string) {
@@ -293,8 +289,7 @@ export const add = async function (
     if (dirty) {
       const saveResult = await trySaveProjectManifest(env.cwd, manifest);
       if (saveResult.isErr()) {
-        log.error("manifest", "can not write manifest json file");
-        log.error("manifest", saveResult.error.message);
+        logManifestSaveError(saveResult.error);
         return saveResult;
       }
     }
