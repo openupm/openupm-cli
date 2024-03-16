@@ -34,7 +34,10 @@ import {
 } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
-import { PackumentNotFoundError } from "./common-errors";
+import {
+  PackumentNotFoundError,
+  RequiredFileNotFoundError,
+} from "./common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
@@ -99,7 +102,14 @@ export const add = async function (
 
     // load manifest
     const loadResult = await tryLoadProjectManifest(env.cwd);
-    if (loadResult.isErr()) return loadResult;
+    if (loadResult.isErr()) {
+      if (loadResult.error instanceof RequiredFileNotFoundError)
+        log.error(
+          "manifest",
+          `manifest at ${loadResult.error.path} does not exist`
+        );
+      return loadResult;
+    }
     let manifest = loadResult.value;
 
     // packages that added to scope registry

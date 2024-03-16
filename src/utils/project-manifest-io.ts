@@ -32,10 +32,9 @@ export const tryLoadProjectManifest = async function (
     return Ok(JSON.parse(text) as UnityProjectManifest);
   } catch (error) {
     assertIsError(error);
-    if (error.code === "ENOENT") {
-      log.error("manifest", `manifest at ${manifestPath} does not exist`);
+    if (error.code === "ENOENT")
       return Err(new RequiredFileNotFoundError(manifestPath));
-    } else {
+    else {
       log.error("manifest", `failed to parse manifest at ${manifestPath}`);
       log.error("manifest", error.message);
       return Err(new ManifestParseError());

@@ -22,6 +22,7 @@ import { Err, Ok, Result } from "ts-results-es";
 import {
   PackageWithVersionError,
   PackumentNotFoundError,
+  RequiredFileNotFoundError,
 } from "./common-errors";
 
 export type RemoveError =
@@ -53,7 +54,14 @@ export const remove = async function (
     }
     // load manifest
     const manifestResult = await tryLoadProjectManifest(env.cwd);
-    if (manifestResult.isErr()) return manifestResult;
+    if (manifestResult.isErr()) {
+      if (manifestResult.error instanceof RequiredFileNotFoundError)
+        log.error(
+          "manifest",
+          `manifest at ${manifestResult.error.path} does not exist`
+        );
+      return manifestResult;
+    }
     let manifest = manifestResult.value;
 
     // not found array

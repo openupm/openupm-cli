@@ -56,7 +56,6 @@ describe("project-manifest io", () => {
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(RequiredFileNotFoundError)
     );
-    expect(mockConsole).toHaveLineIncluding("out", "does not exist");
   });
   it("wrong json content", async () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
