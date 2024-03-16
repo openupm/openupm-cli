@@ -42,6 +42,7 @@ import {
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
+import { logManifestLoadError } from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   constructor(readonly issue: string) {
@@ -104,18 +105,8 @@ export const add = async function (
     // load manifest
     const loadResult = await tryLoadProjectManifest(env.cwd);
     if (loadResult.isErr()) {
-      if (loadResult.error instanceof RequiredFileNotFoundError)
-        log.error(
-          "manifest",
-          `manifest at ${loadResult.error.path} does not exist`
-        );
-      else if (loadResult.error instanceof ManifestParseError) {
-        log.error(
-          "manifest",
-          `failed to parse manifest at ${loadResult.error.path}`
-        );
-        log.error("manifest", loadResult.error.message);
-      }
+      logManifestLoadError(loadResult.error);
+
       return loadResult;
     }
     let manifest = loadResult.value;

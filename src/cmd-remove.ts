@@ -1,7 +1,6 @@
 import log from "./logger";
 import {
   ManifestLoadError,
-  ManifestParseError,
   ManifestSaveError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
@@ -23,8 +22,8 @@ import { Err, Ok, Result } from "ts-results-es";
 import {
   PackageWithVersionError,
   PackumentNotFoundError,
-  RequiredFileNotFoundError,
 } from "./common-errors";
+import { logManifestLoadError } from "./error-logging";
 
 export type RemoveError =
   | EnvParseError
@@ -56,18 +55,7 @@ export const remove = async function (
     // load manifest
     const manifestResult = await tryLoadProjectManifest(env.cwd);
     if (manifestResult.isErr()) {
-      if (manifestResult.error instanceof RequiredFileNotFoundError)
-        log.error(
-          "manifest",
-          `manifest at ${manifestResult.error.path} does not exist`
-        );
-      else if (manifestResult.error instanceof ManifestParseError) {
-        log.error(
-          "manifest",
-          `failed to parse manifest at ${manifestResult.error.path}`
-        );
-        log.error("manifest", manifestResult.error.message);
-      }
+      logManifestLoadError(manifestResult.error);
       return manifestResult;
     }
     let manifest = manifestResult.value;

@@ -12,8 +12,8 @@ import { RequiredFileNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 
 export class ManifestParseError extends CustomError {
-  constructor(readonly path: string, cause: Error) {
-    super("A project-manifest could not be parsed", { cause });
+  constructor(readonly path: string, readonly cause: Error) {
+    super("A project-manifest could not be parsed");
   }
 }
 
