@@ -60,8 +60,6 @@ export const trySaveProjectManifest = async function (
     return Ok(undefined);
   } catch (error) {
     assertIsError(error);
-    log.error("manifest", "can not write manifest json file");
-    log.error("manifest", error.message);
     return Err(error);
   }
 };

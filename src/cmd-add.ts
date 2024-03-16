@@ -301,7 +301,11 @@ export const add = async function (
     // save manifest
     if (dirty) {
       const saveResult = await trySaveProjectManifest(env.cwd, manifest);
-      if (saveResult.isErr()) return saveResult;
+      if (saveResult.isErr()) {
+        log.error("manifest", "can not write manifest json file");
+        log.error("manifest", saveResult.error.message);
+        return saveResult;
+      }
     }
     return Ok(dirty);
   };
