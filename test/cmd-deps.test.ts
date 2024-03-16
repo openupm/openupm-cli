@@ -65,51 +65,51 @@ describe("cmd-deps.ts", function () {
     });
 
     it("deps pkg", async function () {
-      const retCode = await deps(remotePackumentA.name, options);
-      expect(retCode).toEqual(0);
+      const depsResult = await deps(remotePackumentA.name, options);
+      expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg --deep", async function () {
-      const retCode = await deps(remotePackumentA.name, {
+      const depsResult = await deps(remotePackumentA.name, {
         ...options,
         deep: true,
       });
-      expect(retCode).toEqual(0);
+      expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentUp.name);
     });
     it("deps pkg@latest", async function () {
-      const retCode = await deps(
+      const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "latest"),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg@1.0.0", async function () {
-      const retCode = await deps(
+      const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "1.0.0"),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
     it("deps pkg@not-exist-version", async function () {
-      const retCode = await deps(
+      const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "2.0.0"),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
     });
     it("deps pkg-not-exist", async function () {
-      const retCode = await deps(makeDomainName("pkg-not-exist"), options);
-      expect(retCode).toEqual(0);
+      const depsResult = await deps(makeDomainName("pkg-not-exist"), options);
+      expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "not found");
     });
     it("deps pkg upstream", async function () {
-      const retCode = await deps(remotePackumentUp.name, options);
-      expect(retCode).toEqual(0);
+      const depsResult = await deps(remotePackumentUp.name, options);
+      expect(depsResult).toBeOk();
     });
   });
 });

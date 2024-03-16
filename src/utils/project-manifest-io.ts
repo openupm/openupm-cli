@@ -8,27 +8,38 @@ import {
 } from "../types/project-manifest";
 import fse from "fs-extra";
 import path from "path";
+import { CustomError } from "ts-custom-error";
+import { RequiredFileNotFoundError } from "../common-errors";
+import { Err, Ok, Result } from "ts-results-es";
+
+export class ManifestParseError extends CustomError {}
+
+export type ManifestLoadError = RequiredFileNotFoundError | ManifestParseError;
+
+export type ManifestSaveError = Error;
 
 /**
  * Attempts to load the manifest for a Unity project.
  * @param projectPath The path to the root of the project.
  */
-export const loadProjectManifest = async function (
+export const tryLoadProjectManifest = async function (
   projectPath: string
-): Promise<UnityProjectManifest | null> {
+): Promise<Result<UnityProjectManifest, ManifestLoadError>> {
   const manifestPath = manifestPathFor(projectPath);
   try {
     const text = await fs.readFile(manifestPath, { encoding: "utf8" });
-    return JSON.parse(text);
-  } catch (err) {
-    assertIsError(err);
-    if (err.code === "ENOENT")
+    // TODO: Actually validate the content of the file
+    return Ok(JSON.parse(text) as UnityProjectManifest);
+  } catch (error) {
+    assertIsError(error);
+    if (error.code === "ENOENT") {
       log.error("manifest", `manifest at ${manifestPath} does not exist`);
-    else {
+      return Err(new RequiredFileNotFoundError(manifestPath));
+    } else {
       log.error("manifest", `failed to parse manifest at ${manifestPath}`);
-      log.error("manifest", err.message);
+      log.error("manifest", error.message);
+      return Err(new ManifestParseError());
     }
-    return null;
   }
 };
 
@@ -37,21 +48,21 @@ export const loadProjectManifest = async function (
  * @param projectPath The path to the projects root directory.
  * @param manifest The manifest to save.
  */
-export const saveProjectManifest = async function (
+export const trySaveProjectManifest = async function (
   projectPath: string,
   manifest: UnityProjectManifest
-) {
+): Promise<Result<void, ManifestSaveError>> {
   const manifestPath = manifestPathFor(projectPath);
   manifest = pruneManifest(manifest);
   const json = JSON.stringify(manifest, null, 2);
   try {
     await fse.ensureDir(path.dirname(manifestPath));
     await fs.writeFile(manifestPath, json);
-    return true;
-  } catch (err) {
-    assertIsError(err);
+    return Ok(undefined);
+  } catch (error) {
+    assertIsError(error);
     log.error("manifest", "can not write manifest json file");
-    log.error("manifest", err.message);
-    return false;
+    log.error("manifest", error.message);
+    return Err(error);
   }
 };

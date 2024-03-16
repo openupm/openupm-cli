@@ -10,11 +10,11 @@ import {
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
-import { makeDomainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
-import { makeSemanticVersion } from "../src/types/semantic-version";
 import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 
 describe("cmd-add.ts", function () {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -155,8 +155,8 @@ describe("cmd-add.ts", function () {
     });
 
     it("add pkg", async function () {
-      const retCode = await add(packageA, options);
-      expect(retCode).toEqual(0);
+      const addResult = await add(packageA, options);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
@@ -164,11 +164,11 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg@1.0.0", async function () {
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
@@ -176,11 +176,11 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg@latest", async function () {
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageA, "latest"),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
@@ -188,16 +188,16 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
-      const retCode1 = await add(
+      const addResult1 = await add(
         makePackageReference(packageA, makeSemanticVersion("0.1.0")),
         options
       );
-      expect(retCode1).toEqual(0);
-      const retCode2 = await add(
+      expect(addResult1).toBeOk();
+      const addResult2 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      expect(retCode2).toEqual(0);
+      expect(addResult2).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
@@ -205,16 +205,16 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add exited pkg version", async function () {
-      const retCode1 = await add(
+      const addResult1 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      expect(retCode1).toEqual(0);
-      const retCode2 = await add(
+      expect(addResult1).toBeOk();
+      const addResult2 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      expect(retCode2).toEqual(0);
+      expect(addResult2).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
@@ -222,11 +222,11 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg@not-exist-version", async function () {
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("2.0.0")),
         options
       );
-      expect(retCode).toEqual(1);
+      expect(addResult).toBeError();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(defaultManifest)
       );
@@ -239,11 +239,11 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@http", async function () {
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageA, gitUrl),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
       );
@@ -255,11 +255,11 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@git", async function () {
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageA, gitUrl),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
       );
@@ -271,11 +271,11 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@file", async function () {
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageA, fileUrl),
         options
       );
-      expect(retCode).toEqual(0);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, fileUrl)
       );
@@ -286,16 +286,16 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg-not-exist", async function () {
-      const retCode = await add(packageMissing, options);
-      expect(retCode).toEqual(1);
+      const addResult = await add(packageMissing, options);
+      expect(addResult).toBeError();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(defaultManifest)
       );
       expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
     it("add more than one pkgs", async function () {
-      const retCode = await add([packageA, packageB], options);
-      expect(retCode).toEqual(0);
+      const addResult = await add([packageA, packageB], options);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestAB)
       );
@@ -310,8 +310,8 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg from upstream", async function () {
-      const retCode = await add(packageUp, upstreamOptions);
-      expect(retCode).toEqual(0);
+      const addResult = await add(packageUp, upstreamOptions);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestUpstream)
       );
@@ -322,19 +322,19 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg-not-exist from upstream", async function () {
-      const retCode = await add(packageMissing, upstreamOptions);
-      expect(retCode).toEqual(1);
+      const addResult = await add(packageMissing, upstreamOptions);
+      expect(addResult).toBeError();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(defaultManifest)
       );
       expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
     it("add pkg with nested dependencies", async function () {
-      const retCode = await add(
+      const addResult = await add(
         makePackageReference(packageC, "latest"),
         upstreamOptions
       );
-      expect(retCode).toEqual(0);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestC)
       );
@@ -342,8 +342,8 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg with tests", async function () {
-      const retCode = await add(packageA, testableOptions);
-      expect(retCode).toEqual(0);
+      const addResult = await add(packageA, testableOptions);
+      expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestTestable)
       );
@@ -351,35 +351,35 @@ describe("cmd-add.ts", function () {
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg with lower editor version", async function () {
-      const retCode = await add(packageLowerEditor, testableOptions);
-      expect(retCode).toEqual(0);
+      const addResult = await add(packageLowerEditor, testableOptions);
+      expect(addResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "added");
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
     it("add pkg with higher editor version", async function () {
-      const retCode = await add(packageHigherEditor, testableOptions);
-      expect(retCode).toEqual(1);
+      const addResult = await add(packageHigherEditor, testableOptions);
+      expect(addResult).toBeError();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "requires 2020.2 but found 2019.2.13f1"
       );
     });
     it("force add pkg with higher editor version", async function () {
-      const retCode = await add(packageHigherEditor, forceOptions);
-      expect(retCode).toEqual(0);
+      const addResult = await add(packageHigherEditor, forceOptions);
+      expect(addResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "requires 2020.2 but found 2019.2.13f1"
       );
     });
     it("add pkg with wrong editor version", async function () {
-      const retCode = await add(packageWrongEditor, testableOptions);
-      expect(retCode).toEqual(1);
+      const addResult = await add(packageWrongEditor, testableOptions);
+      expect(addResult).toBeError();
       expect(mockConsole).toHaveLineIncluding("out", "2020 is not valid");
     });
     it("force add pkg with wrong editor version", async function () {
-      const retCode = await add(packageWrongEditor, forceOptions);
-      expect(retCode).toEqual(0);
+      const addResult = await add(packageWrongEditor, forceOptions);
+      expect(addResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "2020 is not valid");
     });
   });

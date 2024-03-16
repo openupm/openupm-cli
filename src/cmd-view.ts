@@ -2,41 +2,56 @@ import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "./types/packument";
-import { parseEnv } from "./utils/env";
+import { EnvParseError, parseEnv } from "./utils/env";
 import { makeNpmClient } from "./npm-client";
 import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+
+import {
+  PackageWithVersionError,
+  PackumentNotFoundError,
+} from "./common-errors";
 
 export type ViewOptions = CmdOptions;
 
-type ViewResultCode = 0 | 1;
+export type ViewError = EnvParseError | PackageWithVersionError;
 
 export const view = async function (
   pkg: PackageReference,
   options: ViewOptions
-): Promise<ViewResultCode> {
+): Promise<Result<void, ViewError>> {
   // parse env
-  const env = await parseEnv(options, false);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (envResult.isErr()) return envResult;
+  const env = envResult.value;
+
   const client = makeNpmClient();
 
   // parse name
   if (hasVersion(pkg)) {
     log.warn("", `please do not specify a version (Write only '${pkg}').`);
-    return 1;
+    return Err(new PackageWithVersionError());
   }
   // verify name
-  let packument = await client.tryFetchPackument(env.registry, pkg);
-  if (packument === null && env.upstream)
-    packument = await client.tryFetchPackument(env.upstreamRegistry, pkg);
-  if (packument === null) {
-    log.error("404", `package not found: ${pkg}`);
-    return 1;
-  }
-  // print info
-  printInfo(packument);
-  return 0;
+  return await new AsyncResult(client.tryFetchPackument(env.registry, pkg))
+    .andThen(async (packument) => {
+      if (packument === null && env.upstream)
+        return await client.tryFetchPackument(env.upstreamRegistry, pkg);
+      return Ok(packument);
+    })
+    .andThen((packument) => {
+      if (packument === null) {
+        log.error("404", `package not found: ${pkg}`);
+        return Err(new PackumentNotFoundError());
+      }
+      return Ok(packument);
+    })
+    .map((packument) => {
+      // print info
+      printInfo(packument);
+    }).promise;
 };
 
 const printInfo = function (packument: UnityPackument) {

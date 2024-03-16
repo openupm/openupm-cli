@@ -1,9 +1,11 @@
 import log from "./logger";
 import {
-  loadProjectManifest,
-  saveProjectManifest,
+  ManifestLoadError,
+  ManifestSaveError,
+  tryLoadProjectManifest,
+  trySaveProjectManifest,
 } from "./utils/project-manifest-io";
-import { parseEnv } from "./utils/env";
+import { EnvParseError, parseEnv } from "./utils/env";
 import {
   hasVersion,
   makePackageReference,
@@ -15,76 +17,78 @@ import {
   tryGetScopedRegistryByUrl,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
+import { Err, Ok, Result } from "ts-results-es";
+
+import {
+  PackageWithVersionError,
+  PackumentNotFoundError,
+} from "./common-errors";
+
+export type RemoveError =
+  | EnvParseError
+  | PackageWithVersionError
+  | PackumentNotFoundError
+  | ManifestLoadError
+  | ManifestSaveError;
 
 export type RemoveOptions = CmdOptions;
-
-type RemoveResultCode = 0 | 1;
-
-type RemoveResult = {
-  code: RemoveResultCode;
-  dirty: boolean;
-};
 
 export const remove = async function (
   pkgs: PackageReference[] | PackageReference,
   options: RemoveOptions
-): Promise<RemoveResultCode> {
+): Promise<Result<void, RemoveError[]>> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const env = await parseEnv(options, true);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (envResult.isErr()) return Err([envResult.error]);
+  const env = envResult.value;
 
   const removeSingle = async function (
     pkg: PackageReference
-  ): Promise<RemoveResult> {
-    // dirty flag
-    let dirty = false;
+  ): Promise<Result<void, RemoveError>> {
     // parse name
     if (hasVersion(pkg)) {
       log.warn("", `please do not specify a version (Write only '${pkg}').`);
-      return { code: 1, dirty };
+      return Err(new PackageWithVersionError());
     }
     // load manifest
-    let manifest = await loadProjectManifest(env.cwd);
-    if (manifest === null) return { code: 1, dirty };
+    const manifestResult = await tryLoadProjectManifest(env.cwd);
+    if (manifestResult.isErr()) return manifestResult;
+    let manifest = manifestResult.value;
+
     // not found array
-    const pkgsNotFound = Array.of<PackageReference>();
     const versionInManifest = manifest.dependencies[pkg];
-    if (versionInManifest) {
-      log.notice(
-        "manifest",
-        `removed ${makePackageReference(pkg, versionInManifest)}`
-      );
-      manifest = removeDependency(manifest, pkg);
-      dirty = true;
-    } else pkgsNotFound.push(pkg);
+    if (versionInManifest === undefined) {
+      log.error("404", `package not found: ${pkg}`);
+      return Err(new PackumentNotFoundError());
+    }
+
+    manifest = removeDependency(manifest, pkg);
 
     const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-    if (entry !== null) {
-      const scopeWasRemoved = removeScope(entry, pkg);
-      if (scopeWasRemoved) dirty = true;
-    }
-    // save manifest
-    if (dirty) {
-      if (!(await saveProjectManifest(env.cwd, manifest)))
-        return { code: 1, dirty };
-    }
-    if (pkgsNotFound.length) {
-      log.error("404", `package not found: ${pkgsNotFound.join(", ")}`);
-      return { code: 1, dirty };
-    }
-    return { code: 0, dirty };
-  };
+    if (entry !== null) removeScope(entry, pkg);
 
-  // remove
-  const results = Array.of<RemoveResult>();
-  for (const pkg of pkgs) results.push(await removeSingle(pkg));
-  const result: RemoveResult = {
-    code: results.filter((x) => x.code !== 0).length > 0 ? 1 : 0,
-    dirty: results.filter((x) => x.dirty).length > 0,
+    // save manifest
+    const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+    if (saveResult.isErr()) return saveResult;
+
+    log.notice(
+      "manifest",
+      `removed ${makePackageReference(pkg, versionInManifest)}`
+    );
+    return Ok(undefined);
   };
+  // remove
+  const results = Array.of<Result<void, RemoveError>>();
+  for (const pkg of pkgs) results.push(await removeSingle(pkg));
+
+  const errors = results.reduce((errors, result) => {
+    if (result.isErr()) return [...errors, result.error];
+    return errors;
+  }, Array.of<RemoveError>());
+
   // print manifest notice
-  if (result.dirty)
-    log.notice("", "please open Unity project to apply changes");
-  return result.code;
+  log.notice("", "please open Unity project to apply changes");
+
+  return errors.length > 0 ? Err(errors) : Ok(undefined);
 };

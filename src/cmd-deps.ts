@@ -1,5 +1,5 @@
 import log from "./logger";
-import { parseEnv } from "./utils/env";
+import { EnvParseError, parseEnv } from "./utils/env";
 import { makeNpmClient } from "./npm-client";
 import { isPackageUrl } from "./types/package-url";
 import {
@@ -8,18 +8,24 @@ import {
   splitPackageReference,
 } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
-import { ResolveFailure } from "./packument-resolving";
+import {
+  PackumentResolveError,
+  VersionNotFoundError,
+} from "./packument-resolving";
 import { fetchPackageDependencies } from "./dependency-resolving";
+import { PackumentNotFoundError } from "./common-errors";
+import { Ok, Result } from "ts-results-es";
 
-type DepsResultCode = 0 | 1;
+export type DepsError = EnvParseError;
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
 
-function errorPrefixForIssue(issue: ResolveFailure["issue"]): string {
-  if (issue === "PackumentNotFound") return "missing dependency";
-  else if (issue === "VersionNotFound") return "missing dependency version";
+function errorPrefixForError(error: PackumentResolveError): string {
+  if (error instanceof PackumentNotFoundError) return "missing dependency";
+  else if (error instanceof VersionNotFoundError)
+    return "missing dependency version";
   return "unknown";
 }
 
@@ -29,10 +35,11 @@ function errorPrefixForIssue(issue: ResolveFailure["issue"]): string {
 export const deps = async function (
   pkg: PackageReference,
   options: DepsOptions
-): Promise<DepsResultCode> {
+): Promise<Result<void, DepsError>> {
   // parse env
-  const env = await parseEnv(options, false);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (envResult.isErr()) return envResult;
+  const env = envResult.value;
 
   const client = makeNpmClient();
 
@@ -57,9 +64,9 @@ export const deps = async function (
   depsInvalid
     .filter((x) => !x.self)
     .forEach((x) => {
-      const prefix = errorPrefixForIssue(x.reason.issue);
+      const prefix = errorPrefixForError(x.reason);
       log.warn(prefix, x.name);
     });
 
-  return 0;
+  return Ok(undefined);
 };

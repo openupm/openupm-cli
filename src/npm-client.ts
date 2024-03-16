@@ -5,38 +5,30 @@ import { DomainName } from "./types/domain-name";
 import { SemanticVersion } from "./types/semantic-version";
 import { RegistryUrl } from "./types/registry-url";
 import npmSearch from "libnpmsearch";
-import { is404Error, isHttpError } from "./utils/error-type-guards";
-import npmFetch from "npm-registry-fetch";
+import { assertIsHttpError } from "./utils/error-type-guards";
+import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
+import { CustomError } from "ts-custom-error";
+import { Err, Ok, Result } from "ts-results-es";
 
 /**
- * The result of adding a user.
+ * Error for when authentication failed.
  */
-type AddUserResult = Readonly<
-  | {
-      /**
-       * Indicates success.
-       */
-      isSuccess: true;
-      /**
-       * The authentication token retrieved by adding the user.
-       */
-      token: string;
-    }
-  | {
-      /**
-       * Indicates failure.
-       */
-      isSuccess: false;
-      /**
-       * The http status code returned by the server.
-       */
-      status: number;
-      /**
-       * The message returned by the server.
-       */
-      message: string;
-    }
->;
+export class AuthenticationError extends CustomError {
+  constructor(
+    /**
+     * The http-response code returned by the server.
+     */
+    readonly status: number,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+/**
+ * A token authenticating a user.
+ */
+type AuthenticationToken = string;
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -68,7 +60,7 @@ export interface NpmClient {
   tryFetchPackument(
     registry: Registry,
     name: DomainName
-  ): Promise<UnityPackument | null>;
+  ): Promise<Result<UnityPackument | null, HttpErrorBase>>;
 
   /**
    * Attempts to add a user to a registry.
@@ -83,7 +75,7 @@ export interface NpmClient {
     username: string,
     email: string,
     password: string
-  ): Promise<AddUserResult>;
+  ): Promise<Result<AuthenticationToken, AuthenticationError>>;
 
   /**
    * Attempts to search a npm registry.
@@ -93,13 +85,15 @@ export interface NpmClient {
   trySearch(
     registry: Registry,
     keyword: string
-  ): Promise<SearchedPackument[] | null>;
+  ): Promise<Result<SearchedPackument[], HttpErrorBase>>;
 
   /**
    * Attempts to query the /-/all endpoint.
    * @param registry The registry to query.
    */
-  tryGetAll(registry: Registry): Promise<AllPackumentsResult | null>;
+  tryGetAll(
+    registry: Registry
+  ): Promise<Result<AllPackumentsResult, HttpErrorBase>>;
 }
 
 export type Registry = Readonly<{
@@ -135,8 +129,11 @@ export const makeNpmClient = (): NpmClient => {
           url,
           { auth: registry.auth || undefined },
           (error, packument) => {
-            if (error !== null) resolve(null);
-            else resolve(packument);
+            if (error !== null) {
+              assertIsHttpError(error);
+              if (error.statusCode === 404) resolve(Ok(null));
+              else resolve(Err(error));
+            } else resolve(Ok(packument));
           }
         );
       });
@@ -149,42 +146,44 @@ export const makeNpmClient = (): NpmClient => {
           { auth: { username, email, password } },
           (error, responseData, _, response) => {
             if (error !== null || !responseData.ok)
-              resolve({
-                isSuccess: false,
-                status: response.statusCode,
-                message: response.statusMessage,
-              });
-            else resolve({ isSuccess: true, token: responseData.token });
+              resolve(
+                Err(
+                  new AuthenticationError(
+                    response.statusCode,
+                    response.statusMessage
+                  )
+                )
+              );
+            else resolve(Ok(responseData.token));
           }
         );
       });
     },
 
-    async trySearch(
-      registry: Registry,
-      keyword: string
-    ): Promise<SearchedPackument[] | null> {
+    async trySearch(registry, keyword) {
       try {
         // NOTE: The results of the search will be Packument objects so we can change the type
-        return (await npmSearch(
+        const packuments = (await npmSearch(
           keyword,
           getNpmFetchOptions(registry)
         )) as SearchedPackument[];
-      } catch (err) {
-        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
-        return null;
+        return Ok(packuments);
+      } catch (error) {
+        assertIsHttpError(error);
+        return Err(error);
       }
     },
 
-    async tryGetAll(registry: Registry): Promise<AllPackumentsResult | null> {
+    async tryGetAll(registry) {
       try {
-        return (await npmFetch.json(
+        const result = (await npmFetch.json(
           "/-/all",
           getNpmFetchOptions(registry)
         )) as AllPackumentsResult;
-      } catch (err) {
-        if (isHttpError(err) && !is404Error(err)) log.error("", err.message);
-        return null;
+        return Ok(result);
+      } catch (error) {
+        assertIsHttpError(error);
+        return Err(error);
       }
     },
   };

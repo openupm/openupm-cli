@@ -124,40 +124,40 @@ describe("cmd-view.ts", function () {
     });
 
     it("view pkg", async function () {
-      const retCode = await view(packageA, options);
-      expect(retCode).toEqual(0);
+      const viewResult = await view(packageA, options);
+      expect(viewResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "com.example.package-a@1.0.0"
       );
     });
     it("view pkg@1.0.0", async function () {
-      const retCode = await view(
+      const viewResult = await view(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      expect(retCode).toEqual(1);
+      expect(viewResult).toBeError();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "do not specify a version"
       );
     });
     it("view pkg-not-exist", async function () {
-      const retCode = await view(packageMissing, options);
-      expect(retCode).toEqual(1);
+      const viewResult = await view(packageMissing, options);
+      expect(viewResult).toBeError();
       expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
     it("view pkg from upstream", async function () {
-      const retCode = await view(packageUp, upstreamOptions);
-      expect(retCode).toEqual(0);
+      const viewResult = await view(packageUp, upstreamOptions);
+      expect(viewResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "com.example.package-up@1.0.0"
       );
     });
     it("view pkg-not-exist from upstream", async function () {
-      const retCode = await view(packageMissing, upstreamOptions);
-      expect(retCode).toEqual(1);
+      const viewResult = await view(packageMissing, upstreamOptions);
+      expect(viewResult).toBeError();
       expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
   });
