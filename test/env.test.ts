@@ -47,26 +47,24 @@ describe("env", function () {
     });
 
     it("defaults", async function () {
-      const env = await parseEnv({ _global: {} }, false);
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://package.openupm.com");
-      expect(env!.upstream).toBeTruthy();
-      expect(env!.upstreamRegistry.url).toEqual("https://packages.unity.com");
-      expect(env!.cwd).toEqual("");
-      expect(env!.editorVersion === null).toBeTruthy();
+      const env = (await parseEnv({ _global: {} }, false)).unwrap();
+      expect(env.registry.url).toEqual("https://package.openupm.com");
+      expect(env.upstream).toBeTruthy();
+      expect(env.upstreamRegistry.url).toEqual("https://packages.unity.com");
+      expect(env.cwd).toEqual("");
+      expect(env.editorVersion === null).toBeTruthy();
     });
 
     it("check path", async function () {
-      const env = await parseEnv({ _global: {} }, true);
-      expect(env).not.toBeNull();
-      expect(env!.cwd).toEqual(mockProject.projectPath);
+      const env = (await parseEnv({ _global: {} }, true)).unwrap();
+      expect(env.cwd).toEqual(mockProject.projectPath);
     });
     it("can not resolve path", async function () {
-      const env = await parseEnv(
+      const envResult = await parseEnv(
         { _global: { chdir: "/path-not-exist" } },
         true
       );
-      expect(env).toBeNull();
+      expect(envResult.isOk()).toBeFalsy();
       expect(mockConsole).toHaveLineIncluding("out", "can not resolve path");
     });
 
@@ -75,132 +73,151 @@ describe("env", function () {
       const manifestPath = manifestPathFor(mockProject.projectPath);
       fse.rmSync(manifestPath);
 
-      const env = await parseEnv({ _global: {} }, true);
-      expect(env).toBeNull();
+      const envResult = await parseEnv({ _global: {} }, true);
+      expect(envResult.isOk()).toBeFalsy();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "can not locate manifest.json"
       );
     });
     it("custom registry", async function () {
-      const env = await parseEnv(
-        { _global: { registry: "https://registry.npmjs.org" } },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://registry.npmjs.org");
+      const env = (
+        await parseEnv(
+          { _global: { registry: "https://registry.npmjs.org" } },
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("https://registry.npmjs.org");
     });
     it("custom registry with splash", async function () {
-      const env = await parseEnv(
-        { _global: { registry: "https://registry.npmjs.org/" } },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://registry.npmjs.org");
+      const env = (
+        await parseEnv(
+          { _global: { registry: "https://registry.npmjs.org/" } },
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("https://registry.npmjs.org");
     });
     it("custom registry with extra path", async function () {
-      const env = await parseEnv(
-        {
-          _global: {
-            registry: "https://registry.npmjs.org/some",
+      const env = (
+        await parseEnv(
+          {
+            _global: {
+              registry: "https://registry.npmjs.org/some",
+            },
           },
-        },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://registry.npmjs.org/some");
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("https://registry.npmjs.org/some");
     });
     it("custom registry with extra path and splash", async function () {
-      const env = await parseEnv(
-        {
-          _global: {
-            registry: "https://registry.npmjs.org/some/",
+      const env = (
+        await parseEnv(
+          {
+            _global: {
+              registry: "https://registry.npmjs.org/some/",
+            },
           },
-        },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://registry.npmjs.org/some");
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("https://registry.npmjs.org/some");
     });
     it("custom registry without http", async function () {
-      const env = await parseEnv(
-        { _global: { registry: "registry.npmjs.org" } },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("http://registry.npmjs.org");
+      const env = (
+        await parseEnv({ _global: { registry: "registry.npmjs.org" } }, false)
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("http://registry.npmjs.org");
     });
     it("custom registry with ipv4+port", async function () {
-      const env = await parseEnv(
-        { _global: { registry: "http://127.0.0.1:4873" } },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("http://127.0.0.1:4873");
+      const env = (
+        await parseEnv(
+          { _global: { registry: "http://127.0.0.1:4873" } },
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("http://127.0.0.1:4873");
     });
     it("custom registry with ipv6+port", async function () {
-      const env = await parseEnv(
-        {
-          _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" },
-        },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("http://[1:2:3:4:5:6:7:8]:4873");
+      const env = (
+        await parseEnv(
+          {
+            _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" },
+          },
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("http://[1:2:3:4:5:6:7:8]:4873");
     });
     it("should have registry auth if specified", async function () {
-      const env = await parseEnv(
-        {
-          _global: {
-            registry: "registry.npmjs.org",
+      const env = (
+        await parseEnv(
+          {
+            _global: {
+              registry: "registry.npmjs.org",
+            },
           },
-        },
-        true
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.auth).toEqual(testNpmAuth);
+          true
+        )
+      ).unwrap();
+
+      expect(env.registry.auth).toEqual(testNpmAuth);
     });
     it("should not have unspecified registry auth", async function () {
-      const env = await parseEnv(
-        {
-          _global: {
-            registry: "registry.other.org",
+      const env = (
+        await parseEnv(
+          {
+            _global: {
+              registry: "registry.other.org",
+            },
           },
-        },
-        true
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.auth).toBeNull();
+          true
+        )
+      ).unwrap();
+
+      expect(env.registry.auth).toBeNull();
     });
     it("upstream", async function () {
-      const env = await parseEnv({ _global: { upstream: false } }, false);
-      expect(env).not.toBeNull();
-      expect(env!.upstream).not.toBeTruthy();
+      const env = (
+        await parseEnv({ _global: { upstream: false } }, false)
+      ).unwrap();
+
+      expect(env.upstream).not.toBeTruthy();
     });
     it("editorVersion", async function () {
-      const env = await parseEnv({ _global: {} }, true);
-      expect(env).not.toBeNull();
-      expect(env!.editorVersion).toEqual("2019.2.13f1");
+      const env = (await parseEnv({ _global: {} }, true)).unwrap();
+
+      expect(env.editorVersion).toEqual("2019.2.13f1");
     });
     it("region cn", async function () {
-      const env = await parseEnv({ _global: { cn: true } }, false);
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://package.openupm.cn");
-      expect(env!.upstreamRegistry.url).toEqual("https://packages.unity.cn");
+      const env = (await parseEnv({ _global: { cn: true } }, false)).unwrap();
+
+      expect(env.registry.url).toEqual("https://package.openupm.cn");
+      expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn");
     });
     it("region cn with a custom registry", async function () {
-      const env = await parseEnv(
-        {
-          _global: {
-            cn: true,
-            registry: "https://reg.custom-package.com",
+      const env = (
+        await parseEnv(
+          {
+            _global: {
+              cn: true,
+              registry: "https://reg.custom-package.com",
+            },
           },
-        },
-        false
-      );
-      expect(env).not.toBeNull();
-      expect(env!.registry.url).toEqual("https://reg.custom-package.com");
-      expect(env!.upstreamRegistry.url).toEqual("https://packages.unity.cn");
+          false
+        )
+      ).unwrap();
+
+      expect(env.registry.url).toEqual("https://reg.custom-package.com");
+      expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn");
     });
   });
 });

@@ -1,9 +1,13 @@
 import fs from "fs";
 import path from "path";
-import { makeNpmClient } from "./npm-client";
+import { AuthenticationError, makeNpmClient } from "./npm-client";
 import log from "./logger";
-import { getUpmConfigDir, storeUpmAuth } from "./utils/upm-config-io";
-import { parseEnv } from "./utils/env";
+import {
+  GetUpmConfigDirError,
+  tryGetUpmConfigDir,
+  tryStoreUpmAuth,
+} from "./utils/upm-config-io";
+import { EnvParseError, parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
 import {
@@ -13,6 +17,14 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
+import { Ok, Result } from "ts-results-es";
+import { IOError } from "./common-errors";
+
+export type LoginError =
+  | EnvParseError
+  | GetUpmConfigDirError
+  | IOError
+  | AuthenticationError;
 
 export type LoginOptions = CmdOptions<{
   username?: string;
@@ -22,17 +34,17 @@ export type LoginOptions = CmdOptions<{
   alwaysAuth?: boolean;
 }>;
 
-type LoginResultCode = 0 | 1;
-
 /**
  * @throws {Error} An unhandled error occurred.
  */
 export const login = async function (
   options: LoginOptions
-): Promise<LoginResultCode> {
+): Promise<Result<void, LoginError>> {
   // parse env
-  const env = await parseEnv(options, false);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (envResult.isErr()) return envResult;
+  const env = envResult.value;
+
   // query parameters
   const username = options.username ?? (await promptUsername());
   const password = options.password ?? (await promptPassword());
@@ -45,41 +57,37 @@ export const login = async function (
 
   const alwaysAuth = options.alwaysAuth || false;
 
-  const configDir = await getUpmConfigDir(env.wsl, env.systemUser);
+  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
+  if (configDirResult.isErr()) return configDirResult;
+  const configDir = configDirResult.value;
 
   if (options.basicAuth) {
     // basic auth
     const _auth = encodeBasicAuth(username, password);
-    await storeUpmAuth(configDir, loginRegistry, {
+    const result = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
       _auth,
     } satisfies BasicAuth);
+    if (result.isErr()) return result;
   } else {
     // npm login
     const result = await npmLogin(username, password, email, loginRegistry);
-    if (result.code === 1) return result.code;
-    if (!result.token) {
-      log.error("auth", "can not find token from server response");
-      return 1;
-    }
-    const token = result.token;
+    if (result.isErr()) return result;
+    const token = result.value;
+
     // write npm token
-    await writeNpmToken(loginRegistry, result.token);
-    await storeUpmAuth(configDir, loginRegistry, {
+    await writeNpmToken(loginRegistry, token);
+    const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
       token,
     } satisfies TokenAuth);
+    if (storeResult.isErr()) return storeResult;
   }
 
-  return 0;
+  return Ok(undefined);
 };
-
-/**
- * The result of a login attempt. Either success with the token, or failure.
- */
-type LoginResult = { code: 0; token: string } | { code: 1 };
 
 /**
  * Return npm login token.
@@ -89,22 +97,20 @@ const npmLogin = async function (
   password: string,
   email: string,
   registry: RegistryUrl
-): Promise<LoginResult> {
+): Promise<Result<string, AuthenticationError>> {
   const client = makeNpmClient();
   const result = await client.addUser(registry, username, password, email);
 
-  if (result.isSuccess) {
+  if (result.isOk()) {
     log.notice("auth", `you are authenticated as '${username}'`);
-    return { code: 0, token: result.token };
+    return result;
   }
 
-  if (result.status === 401) {
+  if (result.error.status === 401)
     log.warn("401", "Incorrect username or password");
-    return { code: 1 };
-  } else {
-    log.error(result.status.toString(), result.message);
-    return { code: 1 };
-  }
+  else log.error(result.error.status.toString(), result.error.message);
+
+  return result;
 };
 
 /**

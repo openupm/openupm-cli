@@ -2,10 +2,12 @@ import log from "./logger";
 import url from "url";
 import { isPackageUrl, PackageUrl } from "./types/package-url";
 import {
-  loadProjectManifest,
-  saveProjectManifest,
+  ManifestLoadError,
+  ManifestSaveError,
+  tryLoadProjectManifest,
+  trySaveProjectManifest,
 } from "./utils/project-manifest-io";
-import { parseEnv } from "./utils/env";
+import { EnvParseError, parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
@@ -24,23 +26,54 @@ import {
   mapScopedRegistry,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
-import { tryResolve } from "./packument-resolving";
+import {
+  PackumentResolveError,
+  tryResolve,
+  VersionNotFoundError,
+} from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
 import { areArraysEqual } from "./utils/array-utils";
 import { RegistryUrl } from "./types/registry-url";
+import { PackumentNotFoundError } from "./common-errors";
+import { Err, Ok, Result } from "ts-results-es";
+import { HttpErrorBase } from "npm-registry-fetch";
+import { CustomError } from "ts-custom-error";
+
+export class InvalidPackumentDataError extends CustomError {
+  constructor(readonly issue: string) {
+    super("A packument object was malformed.");
+  }
+}
+
+export class EditorIncompatibleError extends CustomError {
+  constructor() {
+    super(
+      "A packuments target editor-version was not compatible with the installed editor-version."
+    );
+  }
+}
+
+export class UnresolvedDependencyError extends CustomError {
+  constructor() {
+    super("A packuments dependency could not be resolved.");
+  }
+}
 
 export type AddOptions = CmdOptions<{
   test?: boolean;
   force?: boolean;
 }>;
 
-type AddResultCode = 0 | 1;
-
-type AddResult = {
-  dirty: boolean;
-  code: AddResultCode;
-};
+export type AddError =
+  | EnvParseError
+  | ManifestLoadError
+  | PackumentResolveError
+  | HttpErrorBase
+  | InvalidPackumentDataError
+  | EditorIncompatibleError
+  | UnresolvedDependencyError
+  | ManifestSaveError;
 
 /**
  * @throws {Error} An unhandled error occurred.
@@ -48,11 +81,12 @@ type AddResult = {
 export const add = async function (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
-): Promise<AddResultCode> {
+): Promise<Result<void, AddError[]>> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const env = await parseEnv(options, true);
-  if (env === null) return 1;
+  const envResult = await parseEnv(options, true);
+  if (envResult.isErr()) return Err([envResult.error]);
+  const env = envResult.value;
 
   const client = makeNpmClient();
 
@@ -62,15 +96,19 @@ export const add = async function (
     return scopedRegistry(name, registryUrl);
   };
 
-  const addSingle = async function (pkg: PackageReference): Promise<AddResult> {
+  const addSingle = async function (
+    pkg: PackageReference
+  ): Promise<Result<boolean, AddError>> {
     // is upstream package flag
     let isUpstreamPackage = false;
     // parse name
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    let manifest = await loadProjectManifest(env.cwd);
-    if (manifest === null) return { code: 1, dirty: false };
+    const loadResult = await tryLoadProjectManifest(env.cwd);
+    if (loadResult.isErr()) return loadResult;
+    let manifest = loadResult.value;
+
     // packages that added to scope registry
     const pkgsInScope = Array.of<DomainName>();
     let versionToAdd = requestedVersion;
@@ -81,32 +119,32 @@ export const add = async function (
         requestedVersion,
         env.registry
       );
-      if (!resolveResult.isSuccess && env.upstream) {
+      if (resolveResult.isErr() && env.upstream) {
         resolveResult = await tryResolve(
           client,
           name,
           requestedVersion,
           env.upstreamRegistry
         );
-        if (resolveResult.isSuccess) isUpstreamPackage = true;
+        if (resolveResult.isOk()) isUpstreamPackage = true;
       }
 
-      if (!resolveResult.isSuccess) {
-        if (resolveResult.issue === "PackumentNotFound")
+      if (resolveResult.isErr()) {
+        if (resolveResult.error instanceof PackumentNotFoundError)
           log.error("404", `package not found: ${name}`);
-        else if (resolveResult.issue === "VersionNotFound") {
-          const versionList = [...resolveResult.availableVersions]
+        else if (resolveResult.error instanceof VersionNotFoundError) {
+          const versionList = [...resolveResult.error.availableVersions]
             .reverse()
             .join(", ");
           log.warn(
             "404",
-            `version ${resolveResult.requestedVersion} is not a valid choice of: ${versionList}`
+            `version ${resolveResult.error.requestedVersion} is not a valid choice of: ${versionList}`
           );
         }
-        return { code: 1, dirty: false };
+        return resolveResult;
       }
 
-      const packumentVersion = resolveResult.packumentVersion;
+      const packumentVersion = resolveResult.value.packumentVersion;
       versionToAdd = packumentVersion.version;
 
       // verify editor version
@@ -132,7 +170,9 @@ export const add = async function (
                 "suggest",
                 "contact the package author to fix the issue, or run with option -f to ignore the warning"
               );
-              return { code: 1, dirty: false };
+              return Err(
+                new InvalidPackumentDataError("Editor-version not valid.")
+              );
             }
           }
           if (
@@ -152,7 +192,7 @@ export const add = async function (
                 "suggest",
                 `upgrade the editor to ${requiredEditorVersion}, or run with option -f to ignore the warning`
               );
-              return { code: 1, dirty: false };
+              return Err(new EditorIncompatibleError());
             }
           }
         }
@@ -176,15 +216,15 @@ export const add = async function (
         let isAnyDependencyUnresolved = false;
         depsInvalid.forEach((depObj) => {
           if (
-            depObj.reason.issue === "PackumentNotFound" ||
-            depObj.reason.issue === "VersionNotFound"
+            depObj.reason instanceof PackumentNotFoundError ||
+            depObj.reason instanceof VersionNotFoundError
           ) {
             // Not sure why it thinks the manifest can be null here.
-            const resolvedVersion = manifest!.dependencies[depObj.name];
+            const resolvedVersion = manifest.dependencies[depObj.name];
             const wasResolved = Boolean(resolvedVersion);
             if (!wasResolved) {
               isAnyDependencyUnresolved = true;
-              if (depObj.reason.issue === "VersionNotFound")
+              if (depObj.reason instanceof VersionNotFoundError)
                 log.notice(
                   "suggest",
                   `to install ${packageReference(
@@ -201,7 +241,7 @@ export const add = async function (
               "missing dependencies",
               "please resolve the issue or run with option -f to ignore the warning"
             );
-            return { code: 1, dirty: false };
+            return Err(new UnresolvedDependencyError());
           }
         }
       } else pkgsInScope.push(name);
@@ -238,7 +278,8 @@ export const add = async function (
         let updated = initial ?? makeEmptyScopedRegistryFor(env.registry.url);
 
         updated = pkgsInScope.reduce(addScope, updated!);
-        dirty = !areArraysEqual(updated!.scopes, initial?.scopes ?? []) || dirty;
+        dirty =
+          !areArraysEqual(updated!.scopes, initial?.scopes ?? []) || dirty;
 
         return updated;
       });
@@ -246,21 +287,26 @@ export const add = async function (
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      if (!(await saveProjectManifest(env.cwd, manifest)))
-        return { code: 1, dirty };
+      const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+      if (saveResult.isErr()) return saveResult;
     }
-    return { code: 0, dirty };
+    return Ok(dirty);
   };
 
   // add
-  const results = Array.of<AddResult>();
+  const results = Array.of<Result<boolean, AddError>>();
   for (const pkg of pkgs) results.push(await addSingle(pkg));
-  const result: AddResult = {
-    code: results.filter((x) => x.code !== 0).length > 0 ? 1 : 0,
-    dirty: results.filter((x) => x.dirty).length > 0,
-  };
+
+  const [errors, dirty] = results.reduce(
+    ([errors, dirty], result) => {
+      if (result.isErr()) return [[...errors, result.error], dirty];
+      return [errors, result.value || dirty];
+    },
+    [Array.of<AddError>(), false]
+  );
+
   // print manifest notice
-  if (result.dirty)
-    log.notice("", "please open Unity project to apply changes");
-  return result.code;
+  if (dirty) log.notice("", "please open Unity project to apply changes");
+
+  return errors.length === 0 ? Ok(undefined) : Err(errors);
 };

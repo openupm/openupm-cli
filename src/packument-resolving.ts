@@ -11,6 +11,10 @@ import { recordKeys } from "./utils/record-utils";
 import { PackageUrl } from "./types/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./types/registry-url";
+import { CustomError } from "ts-custom-error";
+import { Err, Ok, Result } from "ts-results-es";
+import { HttpErrorBase } from "npm-registry-fetch";
+import { PackumentNotFoundError } from "./common-errors";
 
 /**
  * A version-reference that is resolvable.
@@ -23,11 +27,7 @@ export type ResolvableVersion =
 /**
  * A successfully resolved packument-version.
  */
-interface ResolveSuccess {
-  /**
-   * Indicates success.
-   */
-  readonly isSuccess: true;
+interface ResolvedPackument {
   /**
    * The packument from which the version was resolved.
    */
@@ -42,55 +42,42 @@ interface ResolveSuccess {
   readonly source: RegistryUrl;
 }
 
-interface FailureCase<TIssue extends string> {
-  /**
-   * Indicates failure.
-   */
-  readonly isSuccess: false;
-  /**
-   * Identifies the issue that caused the failure.
-   */
-  readonly issue: TIssue;
+/**
+ * Error for when a packument with the searched name was found, but it
+ * had no versions.
+ */
+export class NoVersionsError extends CustomError {
+  constructor() {
+    super("A packument contained no versions");
+  }
 }
 
 /**
- * Failure for when the packument was not found on the searched registry.
- */
-interface PackumentNotFoundFailure extends FailureCase<"PackumentNotFound"> {}
-
-/**
- * Failure for when a packument with the searched name was found, but it
- * had no versions.
- */
-interface NoVersionsFailure extends FailureCase<"NoVersions"> {}
-
-/**
- * Failure for when a packument with the searched name was found, but a specific
+ * Error for when a packument with the searched name was found, but a specific
  * requested version did not exist.
  */
-interface VersionNotFoundFailure extends FailureCase<"VersionNotFound"> {
-  /**
-   * The version that was requested.
-   */
-  readonly requestedVersion: SemanticVersion;
-  /**
-   * A list of available versions.
-   */
-  readonly availableVersions: ReadonlyArray<SemanticVersion>;
+export class VersionNotFoundError extends CustomError {
+  constructor(
+    /**
+     * The version that was requested.
+     */
+    readonly requestedVersion: SemanticVersion,
+    /**
+     * A list of available versions.
+     */
+    readonly availableVersions: ReadonlyArray<SemanticVersion>
+  ) {
+    super("The requested version was not in the packument.");
+  }
 }
 
 /**
  * A failed attempt at resolving a packument-version.
  */
-export type ResolveFailure =
-  | PackumentNotFoundFailure
-  | NoVersionsFailure
-  | VersionNotFoundFailure;
-
-/**
- * The result of attempting to resolve a packument-version.
- */
-export type ResolveResult = ResolveSuccess | ResolveFailure;
+export type PackumentResolveError =
+  | PackumentNotFoundError
+  | NoVersionsError
+  | VersionNotFoundError;
 
 /**
  * Attempts to resolve a specific version from a packument.
@@ -102,38 +89,30 @@ export function tryResolveFromPackument(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion,
   source: RegistryUrl
-): ResolveResult {
+): Result<ResolvedPackument, PackumentResolveError> {
   const availableVersions = recordKeys(packument.versions);
-  if (availableVersions.length === 0)
-    return { isSuccess: false, issue: "NoVersions" };
+  if (availableVersions.length === 0) return Err(new NoVersionsError());
 
   // Find the latest version
   if (requestedVersion === undefined || requestedVersion === "latest") {
     let latestVersion = tryGetLatestVersion(packument);
     if (latestVersion === undefined) latestVersion = availableVersions.at(-1)!;
-    return {
-      isSuccess: true,
+    return Ok({
       packument,
       source,
       packumentVersion: packument.versions[latestVersion]!,
-    };
+    } satisfies ResolvedPackument);
   }
 
   // Find a specific version
   if (!availableVersions.includes(requestedVersion))
-    return {
-      isSuccess: false,
-      issue: "VersionNotFound",
-      requestedVersion,
-      availableVersions,
-    };
+    return Err(new VersionNotFoundError(requestedVersion, availableVersions));
 
-  return {
-    isSuccess: true,
+  return Ok({
     packument,
     source,
     packumentVersion: packument.versions[requestedVersion]!,
-  };
+  } satisfies ResolvedPackument);
 }
 
 /**
@@ -148,12 +127,13 @@ export async function tryResolve(
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-): Promise<ResolveResult> {
-  const packument = await npmClient.tryFetchPackument(source, packageName);
-  if (packument === null)
-    return { isSuccess: false, issue: "PackumentNotFound" };
-
-  return tryResolveFromPackument(packument, requestedVersion, source.url);
+): Promise<Result<ResolvedPackument, PackumentResolveError | HttpErrorBase>> {
+  return (await npmClient.tryFetchPackument(source, packageName)).andThen(
+    (packument) => {
+      if (packument === null) return Err(new PackumentNotFoundError());
+      return tryResolveFromPackument(packument, requestedVersion, source.url);
+    }
+  );
 }
 
 /**
@@ -168,10 +148,9 @@ export function tryResolveFromCache(
   source: RegistryUrl,
   packumentName: DomainName,
   requestedVersion: ResolvableVersion
-): ResolveResult {
+): Result<ResolvedPackument, PackumentResolveError> {
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
-  if (cachedPackument === null)
-    return { isSuccess: false, issue: "PackumentNotFound" };
+  if (cachedPackument === null) return Err(new PackumentNotFoundError());
 
   return tryResolveFromPackument(cachedPackument, requestedVersion, source);
 }
@@ -183,13 +162,19 @@ export function tryResolveFromCache(
  * @returns The more fixable failure.
  */
 export function pickMostFixable(
-  a: ResolveFailure,
-  b: ResolveFailure
-): ResolveResult {
+  a: Err<PackumentResolveError>,
+  b: Err<PackumentResolveError>
+): Err<PackumentResolveError> {
   // Anything is more fixable than packument-not-found
-  if (a.issue === "PackumentNotFound" && b.issue !== "PackumentNotFound")
+  if (
+    a.error instanceof PackumentNotFoundError &&
+    !(b.error instanceof PackumentNotFoundError)
+  )
     return b;
-  else if (b.issue === "PackumentNotFound" && a.issue !== "PackumentNotFound")
+  else if (
+    b.error instanceof PackumentNotFoundError &&
+    !(a.error instanceof PackumentNotFoundError)
+  )
     return a;
   return a;
 }

@@ -79,21 +79,21 @@ describe("cmd-search.ts", function () {
     beforeEach(function () {
       startMockRegistry();
       registerSearchResult("package-a", searchEndpointResult);
-      registerSearchResult("pkg-not-exit", searchEndpointEmptyResult);
+      registerSearchResult("pkg-not-exist", searchEndpointEmptyResult);
     });
     afterEach(function () {
       stopMockRegistry();
     });
     it("simple", async function () {
-      const retCode = await search("package-a", options);
-      expect(retCode).toEqual(0);
+      const searchResult = await search("package-a", options);
+      expect(searchResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "package-a");
       expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
       expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
     });
     it("pkg not exist", async function () {
-      const retCode = await search("pkg-not-exist", options);
-      expect(retCode).toEqual(0);
+      const searchResult = await search("pkg-not-exist", options);
+      expect(searchResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "No matches found");
     });
   });
@@ -135,8 +135,8 @@ describe("cmd-search.ts", function () {
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
-      const retCode = await search("package-a", options);
-      expect(retCode).toEqual(0);
+      const searchResult = await search("package-a", options);
+      expect(searchResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding(
         "out",
         "fast search endpoint is not available"
@@ -149,8 +149,8 @@ describe("cmd-search.ts", function () {
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
-      const retCode = await search("pkg-not-exist", options);
-      expect(retCode).toEqual(0);
+      const searchResult = await search("pkg-not-exist", options);
+      expect(searchResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "No matches found");
     });
   });

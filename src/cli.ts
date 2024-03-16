@@ -83,8 +83,8 @@ openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const retCode = await add(pkgs, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const addResult = await add(pkgs, makeCmdOptions(options));
+    if (addResult.isErr()) process.exit(1);
   });
 
 program
@@ -99,8 +99,8 @@ program
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const retCode = await remove(pkgs, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const removeResult = await remove(pkgs, makeCmdOptions(options));
+    if (removeResult.isErr()) process.exit(1);
   });
 
 program
@@ -109,8 +109,8 @@ program
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
-    const retCode = await search(keyword, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const searchResult = await search(keyword, makeCmdOptions(options));
+    if (searchResult.isErr()) process.exit(1);
   });
 
 program
@@ -119,8 +119,8 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    const retCode = await view(pkg, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const result = await view(pkg, makeCmdOptions(options));
+    if (result.isErr()) process.exit(1);
   });
 
 program
@@ -134,8 +134,8 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    const retCode = await deps(pkg, makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const depsResult = await deps(pkg, makeCmdOptions(options));
+    if (depsResult.isErr()) process.exit(1);
   });
 
 program
@@ -151,8 +151,8 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(async function (options) {
-    const retCode = await login(makeCmdOptions(options));
-    if (retCode !== 0) process.exit(retCode);
+    const loginResult = await login(makeCmdOptions(options));
+    if (loginResult.isErr()) process.exit(1);
   });
 
 // prompt for invalid command

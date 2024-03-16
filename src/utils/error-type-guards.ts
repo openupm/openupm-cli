@@ -18,6 +18,12 @@ export function assertIsError(x: unknown): asserts x is ErrnoException {
     });
 }
 
+export function assertIsHttpError(x: unknown): asserts x is HttpErrorBase {
+  assertIsError(x);
+  if (!("statusCode" in x))
+    throw new AssertionError({ message: "Argument was not an HTTP-error." });
+}
+
 export const isHttpError = (x: unknown): x is HttpErrorBase => {
   return x instanceof Error && "statusCode" in x;
 };
