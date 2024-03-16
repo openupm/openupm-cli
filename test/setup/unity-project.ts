@@ -6,14 +6,16 @@ import path from "path";
 import os from "os";
 import fse from "fs-extra";
 import {
-  loadProjectManifest,
-  saveProjectManifest,
+  ManifestLoadError,
+  tryLoadProjectManifest,
+  trySaveProjectManifest,
 } from "../../src/utils/project-manifest-io";
 import assert from "assert";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
-import { saveUpmConfig } from "../../src/utils/upm-config-io";
-import { createProjectVersionTxt } from "../../src/utils/project-version-io";
+import { trySaveUpmConfig } from "../../src/utils/upm-config-io";
+import { tryCreateProjectVersionTxt } from "../../src/utils/project-version-io";
+import { Result } from "ts-results-es";
 
 /**
  * A mock Unity project for testing.
@@ -26,9 +28,8 @@ export type MockUnityProject = {
 
   /**
    * Attempts to load the project manifest for the project.
-   * Null if not found.
    */
-  tryGetManifest(): Promise<UnityProjectManifest | null>;
+  tryGetManifest(): Promise<Result<UnityProjectManifest, ManifestLoadError>>;
 
   /**
    * Runs an assertion function on the project manifest.
@@ -106,16 +107,25 @@ export async function setupUnityProject(
 
     // Upmconfig
     const upmConfig = config.upmConfig ?? defaultUpmConfig;
-    await saveUpmConfig(upmConfig, rootPath);
+    const saveResult = await trySaveUpmConfig(upmConfig, rootPath);
+    if (saveResult.isErr()) throw saveResult.error;
 
     // Editor-version
     const version = config.version ?? defaultVersion;
-    await createProjectVersionTxt(projectPath, version);
+    const projectVersionResult = await tryCreateProjectVersionTxt(
+      projectPath,
+      version
+    );
+    if (projectVersionResult.isErr()) throw projectVersionResult.error;
 
     // Project manifest
     if (config.manifest !== false) {
       const manifest = config.manifest ?? defaultManifest;
-      await saveProjectManifest(projectPath, manifest);
+      const manifestResult = await trySaveProjectManifest(
+        projectPath,
+        manifest
+      );
+      if (manifestResult.isErr()) throw manifestResult.error;
     }
   }
 
@@ -127,16 +137,16 @@ export async function setupUnityProject(
     envSession?.unhook();
   }
 
-  function tryGetManifest(): Promise<UnityProjectManifest | null> {
-    return loadProjectManifest(projectPath);
+  function tryGetManifest() {
+    return tryLoadProjectManifest(projectPath);
   }
 
   async function tryAssertManifest(
     assertFn: (manifest: UnityProjectManifest) => void
   ) {
-    const manifest = await tryGetManifest();
-    assert(manifest !== null);
-    assertFn(manifest);
+    const manifestResult = await tryGetManifest();
+    assert(manifestResult.isOk());
+    assertFn(manifestResult.value);
   }
 
   async function reset() {
