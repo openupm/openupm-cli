@@ -22,9 +22,8 @@ import {
 import { addScope, scopedRegistry } from "./types/scoped-registry";
 import {
   addDependency,
-  addScopedRegistry,
   addTestable,
-  tryGetScopedRegistryByUrl,
+  mapScopedRegistry,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 import {
@@ -34,6 +33,8 @@ import {
 } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
+import { areArraysEqual } from "./utils/array-utils";
+import { RegistryUrl } from "./types/registry-url";
 import { PackumentNotFoundError } from "./common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
@@ -88,6 +89,12 @@ export const add = async function (
   const env = envResult.value;
 
   const client = makeNpmClient();
+
+  const makeEmptyScopedRegistryFor = (registryUrl: RegistryUrl) => {
+    const name = url.parse(registryUrl).hostname;
+    if (name === null) throw new Error("Could not resolve registry name");
+    return scopedRegistry(name, registryUrl);
+  };
 
   const addSingle = async function (
     pkg: PackageReference
@@ -265,18 +272,16 @@ export const add = async function (
       // Log the existed package
       log.notice("manifest", `existed ${packageReference(name, versionToAdd)}`);
     }
+
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
-      let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-      if (entry === null) {
-        const name = url.parse(env.registry.url).hostname;
-        if (name === null) throw new Error("Could not resolve registry name");
-        entry = scopedRegistry(name, env.registry.url);
-        manifest = addScopedRegistry(manifest, entry);
-        dirty = true;
-      }
-      pkgsInScope.forEach((name) => {
-        const wasAdded = addScope(entry!, name);
-        if (wasAdded) dirty = true;
+      manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
+        let updated = initial ?? makeEmptyScopedRegistryFor(env.registry.url);
+
+        updated = pkgsInScope.reduce(addScope, updated!);
+        dirty =
+          !areArraysEqual(updated!.scopes, initial?.scopes ?? []) || dirty;
+
+        return updated;
       });
     }
     if (options.test) manifest = addTestable(manifest, name);

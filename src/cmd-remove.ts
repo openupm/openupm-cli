@@ -12,10 +12,7 @@ import {
   PackageReference,
 } from "./types/package-reference";
 import { removeScope } from "./types/scoped-registry";
-import {
-  removeDependency,
-  tryGetScopedRegistryByUrl,
-} from "./types/project-manifest";
+import { mapScopedRegistry, removeDependency } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 import { Err, Ok, Result } from "ts-results-es";
 
@@ -65,8 +62,10 @@ export const remove = async function (
 
     manifest = removeDependency(manifest, pkg);
 
-    const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-    if (entry !== null) removeScope(entry, pkg);
+    manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
+      if (initial === null) return null;
+      return removeScope(initial, pkg);
+    });
 
     // save manifest
     const saveResult = await trySaveProjectManifest(env.cwd, manifest);
