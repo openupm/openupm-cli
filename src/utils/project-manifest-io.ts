@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import { assertIsError } from "./error-type-guards";
-import log from "../logger";
 import {
   manifestPathFor,
   pruneManifest,
