@@ -1,6 +1,7 @@
 import log from "./logger";
 import {
   ManifestLoadError,
+  ManifestParseError,
   ManifestSaveError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
@@ -60,6 +61,13 @@ export const remove = async function (
           "manifest",
           `manifest at ${manifestResult.error.path} does not exist`
         );
+      else if (manifestResult.error instanceof ManifestParseError) {
+        log.error(
+          "manifest",
+          `failed to parse manifest at ${manifestResult.error.path}`
+        );
+        log.error("manifest", manifestResult.error.message);
+      }
       return manifestResult;
     }
     let manifest = manifestResult.value;

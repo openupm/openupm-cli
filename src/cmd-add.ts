@@ -3,6 +3,7 @@ import url from "url";
 import { isPackageUrl, PackageUrl } from "./types/package-url";
 import {
   ManifestLoadError,
+  ManifestParseError,
   ManifestSaveError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
@@ -108,6 +109,13 @@ export const add = async function (
           "manifest",
           `manifest at ${loadResult.error.path} does not exist`
         );
+      else if (loadResult.error instanceof ManifestParseError) {
+        log.error(
+          "manifest",
+          `failed to parse manifest at ${loadResult.error.path}`
+        );
+        log.error("manifest", loadResult.error.message);
+      }
       return loadResult;
     }
     let manifest = loadResult.value;

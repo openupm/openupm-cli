@@ -67,7 +67,6 @@ describe("project-manifest io", () => {
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(ManifestParseError)
     );
-    expect(mockConsole).toHaveLineIncluding("out", "failed to parse");
   });
   it("saveManifest", async () => {
     let manifest = (

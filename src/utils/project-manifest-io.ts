@@ -12,7 +12,11 @@ import { CustomError } from "ts-custom-error";
 import { RequiredFileNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 
-export class ManifestParseError extends CustomError {}
+export class ManifestParseError extends CustomError {
+  constructor(readonly path: string, cause: Error) {
+    super("A project-manifest could not be parsed", { cause });
+  }
+}
 
 export type ManifestLoadError = RequiredFileNotFoundError | ManifestParseError;
 
@@ -34,11 +38,7 @@ export const tryLoadProjectManifest = async function (
     assertIsError(error);
     if (error.code === "ENOENT")
       return Err(new RequiredFileNotFoundError(manifestPath));
-    else {
-      log.error("manifest", `failed to parse manifest at ${manifestPath}`);
-      log.error("manifest", error.message);
-      return Err(new ManifestParseError());
-    }
+    else return Err(new ManifestParseError(manifestPath, error));
   }
 };
 
