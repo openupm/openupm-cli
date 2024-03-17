@@ -99,7 +99,8 @@ const npmLogin = async function (
   registry: RegistryUrl
 ): Promise<Result<string, AuthenticationError>> {
   const client = makeNpmClient();
-  const result = await client.addUser(registry, username, password, email);
+  const result = await client.addUser(registry, username, password, email)
+    .promise;
 
   if (result.isOk()) {
     log.notice("auth", `you are authenticated as '${username}'`);

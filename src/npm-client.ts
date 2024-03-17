@@ -75,7 +75,7 @@ export interface NpmClient {
     username: string,
     email: string,
     password: string
-  ): Promise<Result<AuthenticationToken, AuthenticationError>>;
+  ): AsyncResult<AuthenticationToken, AuthenticationError>;
 
   /**
    * Attempts to search a npm registry.
@@ -142,24 +142,26 @@ export const makeNpmClient = (): NpmClient => {
     },
 
     addUser(registryUrl, username, email, password) {
-      return new Promise((resolve) => {
-        registryClient.adduser(
-          registryUrl,
-          { auth: { username, email, password } },
-          (error, responseData, _, response) => {
-            if (error !== null || !responseData.ok)
-              resolve(
-                Err(
-                  new AuthenticationError(
-                    response.statusCode,
-                    response.statusMessage
+      return new AsyncResult(
+        new Promise((resolve) => {
+          registryClient.adduser(
+            registryUrl,
+            { auth: { username, email, password } },
+            (error, responseData, _, response) => {
+              if (error !== null || !responseData.ok)
+                resolve(
+                  Err(
+                    new AuthenticationError(
+                      response.statusCode,
+                      response.statusMessage
+                    )
                   )
-                )
-              );
-            else resolve(Ok(responseData.token));
-          }
-        );
-      });
+                );
+              else resolve(Ok(responseData.token));
+            }
+          );
+        })
+      );
     },
 
     async trySearch(registry, keyword) {
