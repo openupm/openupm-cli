@@ -66,7 +66,7 @@ export function splitPackageReference(
  * @param version Optional version-reference. Will be validated to be a
  * {@link VersionReference}.
  */
-export function packageReference(
+export function makePackageReference(
   name: string,
   version?: string
 ): PackageReference {

@@ -9,14 +9,14 @@ import {
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
-import { domainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
-import { packageReference } from "../src/types/package-reference";
+import { makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
-const packageA = domainName("com.example.package-a");
-const packageUp = domainName("com.example.package-up");
-const packageMissing = domainName("pkg-not-exist");
+const packageA = makeDomainName("com.example.package-a");
+const packageUp = makeDomainName("com.example.package-up");
+const packageMissing = makeDomainName("pkg-not-exist");
 
 describe("cmd-view.ts", function () {
   const options: ViewOptions = {
@@ -41,7 +41,7 @@ describe("cmd-view.ts", function () {
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
-          [semanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
+          [makeSemanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
         })
         .set("_rev", "3-418f950115c32bd0")
         .set("readme", "A demo package")
@@ -73,7 +73,7 @@ describe("cmd-view.ts", function () {
         .set("time", {
           modified: "2019-11-28T18:51:58.123Z",
           created: "2019-11-28T18:51:58.123Z",
-          [semanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
+          [makeSemanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
         })
         .set("_rev", "3-418f950115c32bd0")
         .set("readme", "A demo package")
@@ -133,7 +133,7 @@ describe("cmd-view.ts", function () {
     });
     it("view pkg@1.0.0", async function () {
       const viewResult = await view(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(viewResult).toBeError();

@@ -1,6 +1,6 @@
 import {
   isPackageReference,
-  packageReference,
+  makePackageReference,
   splitPackageReference,
 } from "../src/types/package-reference";
 
@@ -29,7 +29,7 @@ describe("package-reference", function () {
   describe("split", function () {
     function shouldSplitCorrectly(name: string, version?: string) {
       const [actualName, actualVersion] = splitPackageReference(
-        packageReference(name, version)
+        makePackageReference(name, version)
       );
       expect(actualName).toEqual(name);
       expect(actualVersion).toEqual(version);

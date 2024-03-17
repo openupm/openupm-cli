@@ -4,7 +4,7 @@ import {
   isSemanticVersion,
   SemanticVersion,
 } from "../src/types/semantic-version";
-import { packageId } from "../src/types/package-id";
+import { makePackageId } from "../src/types/package-id";
 import { UnityPackument, UnityPackumentVersion } from "../src/types/packument";
 
 /**
@@ -16,7 +16,7 @@ class UnityPackumentVersionBuilder {
   constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
       name,
-      _id: packageId(name, version),
+      _id: makePackageId(name, version),
       version,
       dependencies: {},
       contributors: [],

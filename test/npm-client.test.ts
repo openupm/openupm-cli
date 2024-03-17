@@ -9,10 +9,10 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { buildPackument } from "./data-packument";
-import { domainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/types/domain-name";
 import { makeNpmClient } from "../src/npm-client";
 
-const packageA = domainName("package-a");
+const packageA = makeDomainName("package-a");
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {

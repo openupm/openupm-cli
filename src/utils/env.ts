@@ -8,7 +8,7 @@ import {
 import path from "path";
 import fs from "fs";
 import yaml from "yaml";
-import { coerceRegistryUrl, registryUrl } from "../types/registry-url";
+import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
@@ -40,13 +40,13 @@ export const parseEnv = async function (
 ): Promise<Result<Env, EnvParseError>> {
   // set defaults
   let registry: Registry = {
-    url: registryUrl("https://package.openupm.com"),
+    url: makeRegistryUrl("https://package.openupm.com"),
     auth: null,
   };
   let cwd = "";
   let upstream = true;
   let upstreamRegistry: Registry = {
-    url: registryUrl("https://packages.unity.com"),
+    url: makeRegistryUrl("https://packages.unity.com"),
     auth: null,
   };
   let systemUser = false;
@@ -66,11 +66,11 @@ export const parseEnv = async function (
   // region cn
   if (options._global.cn === true) {
     registry = {
-      url: registryUrl("https://package.openupm.cn"),
+      url: makeRegistryUrl("https://package.openupm.cn"),
       auth: null,
     };
     upstreamRegistry = {
-      url: registryUrl("https://packages.unity.cn"),
+      url: makeRegistryUrl("https://packages.unity.cn"),
       auth: null,
     };
     log.notice("region", "cn");
