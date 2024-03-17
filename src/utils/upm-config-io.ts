@@ -10,7 +10,7 @@ import { RegistryUrl } from "../types/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { assertIsError } from "./error-type-guards";
-import { Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 
 const configFileName = ".upmconfig.toml";
 
@@ -37,36 +37,38 @@ export type GetUpmConfigDirError = NoWslError | RequiredEnvMissingError;
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
  */
-export const tryGetUpmConfigDir = async (
+export const tryGetUpmConfigDir = (
   wsl: boolean,
   systemUser: boolean
-): Promise<Result<string, GetUpmConfigDirError>> => {
-  const systemUserSubPath = "Unity/config/ServiceAccounts";
-  if (wsl) {
-    if (!isWsl) return Err(new NoWslError());
-    if (systemUser) {
-      const allUserProfilePath = await execute(
-        'wslpath "$(wslvar ALLUSERSPROFILE)"',
-        { trim: true }
-      );
-      return Ok(path.join(allUserProfilePath, systemUserSubPath));
-    } else {
-      return Ok(
-        await execute('wslpath "$(wslvar USERPROFILE)"', {
-          trim: true,
-        })
-      );
-    }
-  } else if (systemUser) {
-    if (!process.env.ALLUSERSPROFILE)
-      return Err(new RequiredEnvMissingError("ALLUSERSPROFILE"));
-    return Ok(path.join(process.env.ALLUSERSPROFILE, systemUserSubPath));
-  } else {
-    const dirName = process.env.USERPROFILE ?? process.env.HOME;
-    if (dirName === undefined)
-      return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
-    return Ok(dirName);
-  }
+): AsyncResult<string, GetUpmConfigDirError> => {
+  return new AsyncResult(
+    Result.wrapAsync(async () => {
+      const systemUserSubPath = "Unity/config/ServiceAccounts";
+      if (wsl) {
+        if (!isWsl) throw new NoWslError();
+        if (systemUser) {
+          const allUserProfilePath = await execute(
+            'wslpath "$(wslvar ALLUSERSPROFILE)"',
+            { trim: true }
+          );
+          return path.join(allUserProfilePath, systemUserSubPath);
+        } else {
+          return await execute('wslpath "$(wslvar USERPROFILE)"', {
+            trim: true,
+          });
+        }
+      } else if (systemUser) {
+        if (!process.env.ALLUSERSPROFILE)
+          throw new RequiredEnvMissingError("ALLUSERSPROFILE");
+        return path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
+      } else {
+        const dirName = process.env.USERPROFILE ?? process.env.HOME;
+        if (dirName === undefined)
+          throw new RequiredEnvMissingError("USERPROFILE", "HOME");
+        return dirName;
+      }
+    })
+  );
 };
 
 /**

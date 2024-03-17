@@ -57,7 +57,8 @@ export const login = async function (
 
   const alwaysAuth = options.alwaysAuth || false;
 
-  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
+  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser)
+    .promise;
   if (configDirResult.isErr()) return configDirResult;
   const configDir = configDirResult.value;
 
