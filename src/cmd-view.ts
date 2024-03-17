@@ -7,7 +7,7 @@ import { makeNpmClient } from "./npm-client";
 import { hasVersion, PackageReference } from "./types/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { Err, Ok, Result } from "ts-results-es";
 
 import {
   PackageWithVersionError,
@@ -35,10 +35,12 @@ export const view = async function (
     return Err(new PackageWithVersionError());
   }
   // verify name
-  return await new AsyncResult(client.tryFetchPackument(env.registry, pkg))
+  return await client
+    .tryFetchPackument(env.registry, pkg)
     .andThen(async (packument) => {
       if (packument === null && env.upstream)
-        return await client.tryFetchPackument(env.upstreamRegistry, pkg);
+        return await client.tryFetchPackument(env.upstreamRegistry, pkg)
+          .promise;
       return Ok(packument);
     })
     .andThen((packument) => {

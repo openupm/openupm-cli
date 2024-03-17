@@ -21,7 +21,7 @@ const searchEndpoint = async function (
   registry: Registry,
   keyword: string
 ): Promise<Result<SearchedPackument[], HttpErrorBase>> {
-  const results = await npmClient.trySearch(registry, keyword);
+  const results = await npmClient.trySearch(registry, keyword).promise;
 
   if (results.isOk()) log.verbose("npmsearch", results.value.join(os.EOL));
 
@@ -33,7 +33,7 @@ const searchOld = async function (
   registry: Registry,
   keyword: string
 ): Promise<Result<SearchedPackument[], HttpErrorBase>> {
-  return (await npmClient.tryGetAll(registry)).map((allPackuments) => {
+  return (await npmClient.tryGetAll(registry).promise).map((allPackuments) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _updated, ...packumentEntries } = allPackuments;
     const packuments = Object.values(packumentEntries);

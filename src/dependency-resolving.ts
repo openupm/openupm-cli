@@ -105,7 +105,7 @@ export const fetchPackageDependencies = async function (
     if (cacheResult.isOk()) return cacheResult;
 
     // Then registry
-    return await tryResolve(client, packumentName, version, registry);
+    return await tryResolve(client, packumentName, version, registry).promise;
   }
 
   while (pendingList.length > 0) {

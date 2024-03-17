@@ -106,7 +106,7 @@ export const add = async function (
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    const loadResult = await tryLoadProjectManifest(env.cwd);
+    const loadResult = await tryLoadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
       logManifestLoadError(loadResult.error);
 
@@ -123,14 +123,14 @@ export const add = async function (
         name,
         requestedVersion,
         env.registry
-      );
+      ).promise;
       if (resolveResult.isErr() && env.upstream) {
         resolveResult = await tryResolve(
           client,
           name,
           requestedVersion,
           env.upstreamRegistry
-        );
+        ).promise;
         if (resolveResult.isOk()) isUpstreamPackage = true;
       }
 
@@ -298,7 +298,8 @@ export const add = async function (
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+      const saveResult = await trySaveProjectManifest(env.cwd, manifest)
+        .promise;
       if (saveResult.isErr()) {
         logManifestSaveError(saveResult.error);
         return saveResult;

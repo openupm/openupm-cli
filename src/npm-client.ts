@@ -8,7 +8,7 @@ import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "./utils/error-type-guards";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok } from "ts-results-es";
 
 /**
  * Error for when authentication failed.
@@ -60,7 +60,7 @@ export interface NpmClient {
   tryFetchPackument(
     registry: Registry,
     name: DomainName
-  ): Promise<Result<UnityPackument | null, HttpErrorBase>>;
+  ): AsyncResult<UnityPackument | null, HttpErrorBase>;
 
   /**
    * Attempts to add a user to a registry.
@@ -75,7 +75,7 @@ export interface NpmClient {
     username: string,
     email: string,
     password: string
-  ): Promise<Result<AuthenticationToken, AuthenticationError>>;
+  ): AsyncResult<AuthenticationToken, AuthenticationError>;
 
   /**
    * Attempts to search a npm registry.
@@ -85,7 +85,7 @@ export interface NpmClient {
   trySearch(
     registry: Registry,
     keyword: string
-  ): Promise<Result<SearchedPackument[], HttpErrorBase>>;
+  ): AsyncResult<SearchedPackument[], HttpErrorBase>;
 
   /**
    * Attempts to query the /-/all endpoint.
@@ -93,7 +93,7 @@ export interface NpmClient {
    */
   tryGetAll(
     registry: Registry
-  ): Promise<Result<AllPackumentsResult, HttpErrorBase>>;
+  ): AsyncResult<AllPackumentsResult, HttpErrorBase>;
 }
 
 export type Registry = Readonly<{
@@ -124,67 +124,68 @@ export const makeNpmClient = (): NpmClient => {
   return {
     tryFetchPackument(registry, name) {
       const url = `${registry.url}/${name}`;
-      return new Promise((resolve) => {
-        return registryClient.get(
-          url,
-          { auth: registry.auth || undefined },
-          (error, packument) => {
-            if (error !== null) {
-              assertIsHttpError(error);
-              if (error.statusCode === 404) resolve(Ok(null));
-              else resolve(Err(error));
-            } else resolve(Ok(packument));
-          }
-        );
-      });
+      return new AsyncResult(
+        new Promise((resolve) => {
+          return registryClient.get(
+            url,
+            { auth: registry.auth || undefined },
+            (error, packument) => {
+              if (error !== null) {
+                assertIsHttpError(error);
+                if (error.statusCode === 404) resolve(Ok(null));
+                else resolve(Err(error));
+              } else resolve(Ok(packument));
+            }
+          );
+        })
+      );
     },
 
     addUser(registryUrl, username, email, password) {
-      return new Promise((resolve) => {
-        registryClient.adduser(
-          registryUrl,
-          { auth: { username, email, password } },
-          (error, responseData, _, response) => {
-            if (error !== null || !responseData.ok)
-              resolve(
-                Err(
-                  new AuthenticationError(
-                    response.statusCode,
-                    response.statusMessage
+      return new AsyncResult(
+        new Promise((resolve) => {
+          registryClient.adduser(
+            registryUrl,
+            { auth: { username, email, password } },
+            (error, responseData, _, response) => {
+              if (error !== null || !responseData.ok)
+                resolve(
+                  Err(
+                    new AuthenticationError(
+                      response.statusCode,
+                      response.statusMessage
+                    )
                   )
-                )
-              );
-            else resolve(Ok(responseData.token));
-          }
-        );
-      });
+                );
+              else resolve(Ok(responseData.token));
+            }
+          );
+        })
+      );
     },
 
-    async trySearch(registry, keyword) {
-      try {
-        // NOTE: The results of the search will be Packument objects so we can change the type
-        const packuments = (await npmSearch(
-          keyword,
-          getNpmFetchOptions(registry)
-        )) as SearchedPackument[];
-        return Ok(packuments);
-      } catch (error) {
-        assertIsHttpError(error);
-        return Err(error);
-      }
+    trySearch(registry, keyword) {
+      return new AsyncResult(
+        npmSearch(keyword, getNpmFetchOptions(registry))
+          // NOTE: The results of the search will be Packument objects so we can change the type
+          .then((results) => Ok(results as SearchedPackument[]))
+          .catch((error) => {
+            assertIsHttpError(error);
+            return Err(error);
+          })
+      );
     },
 
-    async tryGetAll(registry) {
-      try {
-        const result = (await npmFetch.json(
-          "/-/all",
-          getNpmFetchOptions(registry)
-        )) as AllPackumentsResult;
-        return Ok(result);
-      } catch (error) {
-        assertIsHttpError(error);
-        return Err(error);
-      }
+    tryGetAll(registry) {
+      return new AsyncResult(
+        npmFetch
+          .json("/-/all", getNpmFetchOptions(registry))
+          .then((result) => Ok(result as AllPackumentsResult))
+          .catch((error) => {
+            assertIsHttpError(error);
+            return Err(error);
+          })
+      );
     },
   };
 };

@@ -12,7 +12,7 @@ import { PackageUrl } from "./types/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./types/registry-url";
 import { CustomError } from "ts-custom-error";
-import { Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "./common-errors";
 
@@ -122,18 +122,21 @@ export function tryResolveFromPackument(
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
-export async function tryResolve(
+export function tryResolve(
   npmClient: NpmClient,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-): Promise<Result<ResolvedPackument, PackumentResolveError | HttpErrorBase>> {
-  return (await npmClient.tryFetchPackument(source, packageName)).andThen(
-    (packument) => {
-      if (packument === null) return Err(new PackumentNotFoundError());
-      return tryResolveFromPackument(packument, requestedVersion, source.url);
-    }
-  );
+): AsyncResult<ResolvedPackument, PackumentResolveError | HttpErrorBase> {
+  return npmClient
+    .tryFetchPackument(source, packageName)
+    .andThen((maybePackument) => {
+      if (maybePackument === null) return Err(new PackumentNotFoundError());
+      return Ok(maybePackument);
+    })
+    .andThen((packument) =>
+      tryResolveFromPackument(packument, requestedVersion, source.url)
+    );
 }
 
 /**

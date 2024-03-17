@@ -9,8 +9,8 @@ import { addAuth, UpmAuth, UPMConfig } from "../types/upm-config";
 import { RegistryUrl } from "../types/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
+import { AsyncResult, Result } from "ts-results-es";
 import { assertIsError } from "./error-type-guards";
-import { Err, Ok, Result } from "ts-results-es";
 
 const configFileName = ".upmconfig.toml";
 
@@ -37,36 +37,38 @@ export type GetUpmConfigDirError = NoWslError | RequiredEnvMissingError;
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
  */
-export const tryGetUpmConfigDir = async (
+export const tryGetUpmConfigDir = (
   wsl: boolean,
   systemUser: boolean
-): Promise<Result<string, GetUpmConfigDirError>> => {
-  const systemUserSubPath = "Unity/config/ServiceAccounts";
-  if (wsl) {
-    if (!isWsl) return Err(new NoWslError());
-    if (systemUser) {
-      const allUserProfilePath = await execute(
-        'wslpath "$(wslvar ALLUSERSPROFILE)"',
-        { trim: true }
-      );
-      return Ok(path.join(allUserProfilePath, systemUserSubPath));
-    } else {
-      return Ok(
-        await execute('wslpath "$(wslvar USERPROFILE)"', {
-          trim: true,
-        })
-      );
-    }
-  } else if (systemUser) {
-    if (!process.env.ALLUSERSPROFILE)
-      return Err(new RequiredEnvMissingError("ALLUSERSPROFILE"));
-    return Ok(path.join(process.env.ALLUSERSPROFILE, systemUserSubPath));
-  } else {
-    const dirName = process.env.USERPROFILE ?? process.env.HOME;
-    if (dirName === undefined)
-      return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
-    return Ok(dirName);
-  }
+): AsyncResult<string, GetUpmConfigDirError> => {
+  return new AsyncResult(
+    Result.wrapAsync(async () => {
+      const systemUserSubPath = "Unity/config/ServiceAccounts";
+      if (wsl) {
+        if (!isWsl) throw new NoWslError();
+        if (systemUser) {
+          const allUserProfilePath = await execute(
+            'wslpath "$(wslvar ALLUSERSPROFILE)"',
+            { trim: true }
+          );
+          return path.join(allUserProfilePath, systemUserSubPath);
+        } else {
+          return await execute('wslpath "$(wslvar USERPROFILE)"', {
+            trim: true,
+          });
+        }
+      } else if (systemUser) {
+        if (!process.env.ALLUSERSPROFILE)
+          throw new RequiredEnvMissingError("ALLUSERSPROFILE");
+        return path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
+      } else {
+        const dirName = process.env.USERPROFILE ?? process.env.HOME;
+        if (dirName === undefined)
+          throw new RequiredEnvMissingError("USERPROFILE", "HOME");
+        return dirName;
+      }
+    })
+  );
 };
 
 /**
@@ -94,36 +96,35 @@ export const tryLoadUpmConfig = async (
  * @param config The config to save.
  * @param configDir The directory in which to save the config.
  */
-export const trySaveUpmConfig = async (
+export const trySaveUpmConfig = (
   config: UPMConfig,
   configDir: string
-): Promise<Result<void, IOError>> => {
-  try {
-    await mkdirp(configDir);
-    const configPath = path.join(configDir, configFileName);
-    const content = TOML.stringify(config);
-    await fs.writeFile(configPath, content, "utf8");
-    log.notice("config", "saved unity config at " + configPath);
-    return Ok(undefined);
-  } catch (error) {
-    assertIsError(error);
-    return Err(error);
-  }
+): AsyncResult<void, IOError> => {
+  return new AsyncResult(
+    Result.wrapAsync(async () => {
+      await mkdirp(configDir);
+      const configPath = path.join(configDir, configFileName);
+      const content = TOML.stringify(config);
+      await fs.writeFile(configPath, content, "utf8");
+      log.notice("config", "saved unity config at " + configPath);
+    })
+  );
 };
 
 /**
  * Stores authentication information in the projects upm config.
  */
-export const tryStoreUpmAuth = async function (
+export const tryStoreUpmAuth = function (
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
-): Promise<Result<void, IOError>> {
-  // Read config file
-  let config = (await tryLoadUpmConfig(configDir)) || {};
-
-  config = addAuth(registry, auth, config);
-
-  // Write config file
-  return await trySaveUpmConfig(config, configDir);
+): AsyncResult<void, IOError> {
+  return new AsyncResult(Result.wrapAsync(() => tryLoadUpmConfig(configDir)))
+    .mapErr((error) => {
+      assertIsError(error);
+      return error;
+    })
+    .map((maybeConfig) => maybeConfig || {})
+    .map((config) => addAuth(registry, auth, config))
+    .andThen((config) => trySaveUpmConfig(config, configDir));
 };
