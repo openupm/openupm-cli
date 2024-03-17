@@ -21,7 +21,7 @@ const searchEndpoint = async function (
   registry: Registry,
   keyword: string
 ): Promise<Result<SearchedPackument[], HttpErrorBase>> {
-  const results = await npmClient.trySearch(registry, keyword);
+  const results = await npmClient.trySearch(registry, keyword).promise;
 
   if (results.isOk()) log.verbose("npmsearch", results.value.join(os.EOL));
 

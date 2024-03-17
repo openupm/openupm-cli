@@ -85,7 +85,7 @@ export interface NpmClient {
   trySearch(
     registry: Registry,
     keyword: string
-  ): Promise<Result<SearchedPackument[], HttpErrorBase>>;
+  ): AsyncResult<SearchedPackument[], HttpErrorBase>;
 
   /**
    * Attempts to query the /-/all endpoint.
@@ -164,18 +164,16 @@ export const makeNpmClient = (): NpmClient => {
       );
     },
 
-    async trySearch(registry, keyword) {
-      try {
-        // NOTE: The results of the search will be Packument objects so we can change the type
-        const packuments = (await npmSearch(
-          keyword,
-          getNpmFetchOptions(registry)
-        )) as SearchedPackument[];
-        return Ok(packuments);
-      } catch (error) {
-        assertIsHttpError(error);
-        return Err(error);
-      }
+    trySearch(registry, keyword) {
+      return new AsyncResult(
+        npmSearch(keyword, getNpmFetchOptions(registry))
+          // NOTE: The results of the search will be Packument objects so we can change the type
+          .then((results) => Ok(results as SearchedPackument[]))
+          .catch((error) => {
+            assertIsHttpError(error);
+            return Err(error);
+          })
+      );
     },
 
     async tryGetAll(registry) {
