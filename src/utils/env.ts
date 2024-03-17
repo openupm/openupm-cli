@@ -7,15 +7,18 @@ import {
 } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
-import yaml from "yaml";
 import { coerceRegistryUrl, registryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../npm-client";
 import { CustomError } from "ts-custom-error";
-import { RequiredFileNotFoundError } from "../common-errors";
+import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
+import {
+  ProjectVersionLoadError,
+  tryLoadProjectVersion,
+} from "./project-version-io";
 
 export type Env = Readonly<{
   cwd: string;
@@ -29,7 +32,10 @@ export type Env = Readonly<{
 
 export class CwdNotFoundError extends CustomError {}
 
-export type EnvParseError = CwdNotFoundError | GetUpmConfigDirError;
+export type EnvParseError =
+  | CwdNotFoundError
+  | GetUpmConfigDirError
+  | ProjectVersionLoadError;
 
 /**
  * Attempts to parse env.
@@ -133,33 +139,22 @@ export const parseEnv = async function (
   }
 
   // editor version
-  const projectVersionPath = path.join(
-    cwd,
-    "ProjectSettings/ProjectVersion.txt"
-  );
-  if (!fs.existsSync(projectVersionPath)) {
-    log.warn(
-      "ProjectVersion",
-      `can not locate ProjectVersion.text at path ${projectVersionPath}`
-    );
-  } else {
-    const projectVersionData = fs.readFileSync(projectVersionPath, "utf8");
-    const projectVersionContent = yaml.parse(projectVersionData) as unknown;
-
-    if (
-      !(
-        typeof projectVersionContent === "object" &&
-        projectVersionContent !== null &&
-        "m_EditorVersion" in projectVersionContent &&
-        typeof projectVersionContent.m_EditorVersion === "string"
-      )
-    )
-      throw new Error(
+  const projectVersionLoadResult = await tryLoadProjectVersion(cwd);
+  if (projectVersionLoadResult.isErr()) {
+    if (projectVersionLoadResult.error instanceof RequiredFileNotFoundError)
+      log.warn(
+        "ProjectVersion",
+        `can not locate ProjectVersion.text at path ${projectVersionLoadResult.error.path}`
+      );
+    else if (projectVersionLoadResult.error instanceof FileParseError)
+      log.error(
+        "ProjectVersion",
         "ProjectVersion.txt could not be parsed for editor-version!"
       );
-
-    editorVersion = projectVersionContent.m_EditorVersion;
+    return projectVersionLoadResult;
   }
+  editorVersion = projectVersionLoadResult.value;
+
   // return
   return Ok({
     cwd,
