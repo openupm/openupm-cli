@@ -50,7 +50,7 @@ export const remove = async function (
       return Err(new PackageWithVersionError());
     }
     // load manifest
-    const manifestResult = await tryLoadProjectManifest(env.cwd);
+    const manifestResult = await tryLoadProjectManifest(env.cwd).promise;
     if (manifestResult.isErr()) {
       logManifestLoadError(manifestResult.error);
       return manifestResult;

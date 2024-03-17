@@ -9,7 +9,7 @@ import fse from "fs-extra";
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import { RequiredFileNotFoundError } from "../common-errors";
-import { Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 
 export class ManifestParseError extends CustomError {
   constructor(readonly path: string, readonly cause: Error) {
@@ -25,20 +25,25 @@ export type ManifestSaveError = Error;
  * Attempts to load the manifest for a Unity project.
  * @param projectPath The path to the root of the project.
  */
-export const tryLoadProjectManifest = async function (
+export const tryLoadProjectManifest = function (
   projectPath: string
-): Promise<Result<UnityProjectManifest, ManifestLoadError>> {
+): AsyncResult<UnityProjectManifest, ManifestLoadError> {
   const manifestPath = manifestPathFor(projectPath);
-  try {
-    const text = await fs.readFile(manifestPath, { encoding: "utf8" });
-    // TODO: Actually validate the content of the file
-    return Ok(JSON.parse(text) as UnityProjectManifest);
-  } catch (error) {
-    assertIsError(error);
-    if (error.code === "ENOENT")
-      return Err(new RequiredFileNotFoundError(manifestPath));
-    else return Err(new ManifestParseError(manifestPath, error));
-  }
+  return (
+    new AsyncResult(
+      Result.wrapAsync(() => fs.readFile(manifestPath, { encoding: "utf8" }))
+    )
+      // TODO: Actually validate the content of the file
+      .andThen((text) =>
+        Result.wrap(() => JSON.parse(text) as UnityProjectManifest)
+      )
+      .mapErr((error) => {
+        assertIsError(error);
+        if (error.code === "ENOENT")
+          return new RequiredFileNotFoundError(manifestPath);
+        else return new ManifestParseError(manifestPath, error);
+      })
+  );
 };
 
 /**

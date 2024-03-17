@@ -34,16 +34,16 @@ describe("project-manifest io", () => {
   });
 
   it("loadManifest", async () => {
-    const manifestResult = await tryLoadProjectManifest(
-      mockProject.projectPath
-    );
+    const manifestResult = await tryLoadProjectManifest(mockProject.projectPath)
+      .promise;
 
     expect(manifestResult).toBeOk((manifest) =>
       expect(manifest).toEqual({ dependencies: {} })
     );
   });
   it("no manifest file", async () => {
-    const manifestResult = await tryLoadProjectManifest("/invalid-path");
+    const manifestResult = await tryLoadProjectManifest("/invalid-path")
+      .promise;
 
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(RequiredFileNotFoundError)
@@ -53,16 +53,15 @@ describe("project-manifest io", () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
     fse.writeFileSync(manifestPath, "invalid data");
 
-    const manifestResult = await tryLoadProjectManifest(
-      mockProject.projectPath
-    );
+    const manifestResult = await tryLoadProjectManifest(mockProject.projectPath)
+      .promise;
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(ManifestParseError)
     );
   });
   it("saveManifest", async () => {
     let manifest = (
-      await tryLoadProjectManifest(mockProject.projectPath)
+      await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
     expect(manifest).not.toHaveDependencies();
     manifest = addDependency(
@@ -74,7 +73,7 @@ describe("project-manifest io", () => {
       await trySaveProjectManifest(mockProject.projectPath, manifest)
     ).toBeOk();
     const manifest2 = (
-      await tryLoadProjectManifest(mockProject.projectPath)
+      await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
     expect(manifest2).toEqual(manifest);
   });
@@ -102,7 +101,7 @@ describe("project-manifest io", () => {
       await trySaveProjectManifest(mockProject.projectPath, initialManifest)
     ).toBeOk();
     const savedManifest = (
-      await tryLoadProjectManifest(mockProject.projectPath)
+      await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
 
     expect(savedManifest.scopedRegistries).toHaveLength(0);

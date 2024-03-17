@@ -138,7 +138,7 @@ export async function setupUnityProject(
   }
 
   function tryGetManifest() {
-    return tryLoadProjectManifest(projectPath);
+    return tryLoadProjectManifest(projectPath).promise;
   }
 
   async function tryAssertManifest(

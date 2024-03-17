@@ -106,7 +106,7 @@ export const add = async function (
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    const loadResult = await tryLoadProjectManifest(env.cwd);
+    const loadResult = await tryLoadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
       logManifestLoadError(loadResult.error);
 
