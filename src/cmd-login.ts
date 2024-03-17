@@ -69,7 +69,7 @@ export const login = async function (
       email,
       alwaysAuth,
       _auth,
-    } satisfies BasicAuth);
+    } satisfies BasicAuth).promise;
     if (result.isErr()) return result;
   } else {
     // npm login
@@ -83,7 +83,7 @@ export const login = async function (
       email,
       alwaysAuth,
       token,
-    } satisfies TokenAuth);
+    } satisfies TokenAuth).promise;
     if (storeResult.isErr()) return storeResult;
   }
 

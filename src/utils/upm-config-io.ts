@@ -10,6 +10,7 @@ import { RegistryUrl } from "../types/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
+import { assertIsError } from "./error-type-guards";
 
 const configFileName = ".upmconfig.toml";
 
@@ -113,16 +114,17 @@ export const trySaveUpmConfig = (
 /**
  * Stores authentication information in the projects upm config.
  */
-export const tryStoreUpmAuth = async function (
+export const tryStoreUpmAuth = function (
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
-): Promise<Result<void, IOError>> {
-  // Read config file
-  let config = (await tryLoadUpmConfig(configDir)) || {};
-
-  config = addAuth(registry, auth, config);
-
-  // Write config file
-  return await trySaveUpmConfig(config, configDir).promise;
+): AsyncResult<void, IOError> {
+  return new AsyncResult(Result.wrapAsync(() => tryLoadUpmConfig(configDir)))
+    .mapErr((error) => {
+      assertIsError(error);
+      return error;
+    })
+    .map((maybeConfig) => maybeConfig || {})
+    .map((config) => addAuth(registry, auth, config))
+    .andThen((config) => trySaveUpmConfig(config, configDir));
 };
