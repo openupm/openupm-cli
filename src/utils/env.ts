@@ -87,11 +87,11 @@ export const parseEnv = async function (
   if (options._global.systemUser) systemUser = true;
   if (options._global.wsl) wsl = true;
 
-  const configDirResult = await tryGetUpmConfigDir(wsl, systemUser).promise;
-  if (configDirResult.isErr()) return Err(configDirResult.error);
-  const configDir = configDirResult.value;
-
-  const upmConfig = await tryLoadUpmConfig(configDir);
+  const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
+    tryLoadUpmConfig
+  ).promise;
+  if (upmConfigResult.isErr()) return upmConfigResult;
+  const upmConfig = upmConfigResult.value;
 
   if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
     registry = {
