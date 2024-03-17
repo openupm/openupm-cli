@@ -1,5 +1,4 @@
 import {
-  ManifestParseError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../src/utils/project-manifest-io";
@@ -16,7 +15,10 @@ import path from "path";
 import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
-import { RequiredFileNotFoundError } from "../src/common-errors";
+import {
+    FileParseError,
+    RequiredFileNotFoundError
+} from "../src/common-errors";
 
 describe("project-manifest io", () => {
   let mockProject: MockUnityProject = null!;
@@ -57,7 +59,7 @@ describe("project-manifest io", () => {
       mockProject.projectPath
     );
     expect(manifestResult).toBeError((error) =>
-      expect(error).toBeInstanceOf(ManifestParseError)
+      expect(error).toBeInstanceOf(FileParseError)
     );
   });
   it("saveManifest", async () => {
