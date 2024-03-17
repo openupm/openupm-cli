@@ -3,6 +3,10 @@ import fse from "fs-extra";
 import { assertIsError } from "./error-type-guards";
 import { Err, Ok, Result } from "ts-results-es";
 
+function projectVersionTxtPathFor(projectDirPath: string) {
+  return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
+}
+
 /**
  * Creates a ProjectVersion.txt file for a Unity project.
  * Nothing besides m_EditorVersion is specified.
@@ -14,13 +18,10 @@ export async function tryCreateProjectVersionTxt(
   version: string
 ): Promise<Result<void, Error>> {
   try {
-    const projectSettingsDir = path.join(projectDirPath, "ProjectSettings");
-    await fse.mkdirp(projectSettingsDir);
+    const filePath = projectVersionTxtPathFor(projectDirPath);
+    await fse.ensureDir(path.dirname(filePath));
     const data = `m_EditorVersion: ${version}`;
-    await fse.writeFile(
-      path.join(projectSettingsDir, "ProjectVersion.txt"),
-      data
-    );
+    await fse.writeFile(filePath, data);
     return Ok(undefined);
   } catch (error) {
     assertIsError(error);
