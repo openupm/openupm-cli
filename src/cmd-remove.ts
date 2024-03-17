@@ -12,10 +12,7 @@ import {
   PackageReference,
 } from "./types/package-reference";
 import { removeScope } from "./types/scoped-registry";
-import {
-  removeDependency,
-  tryGetScopedRegistryByUrl,
-} from "./types/project-manifest";
+import { mapScopedRegistry, removeDependency } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 import { Err, Ok, Result } from "ts-results-es";
 
@@ -23,6 +20,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "./common-errors";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export type RemoveError =
   | EnvParseError
@@ -53,7 +51,10 @@ export const remove = async function (
     }
     // load manifest
     const manifestResult = await tryLoadProjectManifest(env.cwd);
-    if (manifestResult.isErr()) return manifestResult;
+    if (manifestResult.isErr()) {
+      logManifestLoadError(manifestResult.error);
+      return manifestResult;
+    }
     let manifest = manifestResult.value;
 
     // not found array
@@ -65,12 +66,17 @@ export const remove = async function (
 
     manifest = removeDependency(manifest, pkg);
 
-    const entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-    if (entry !== null) removeScope(entry, pkg);
+    manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
+      if (initial === null) return null;
+      return removeScope(initial, pkg);
+    });
 
     // save manifest
     const saveResult = await trySaveProjectManifest(env.cwd, manifest);
-    if (saveResult.isErr()) return saveResult;
+    if (saveResult.isErr()) {
+      logManifestSaveError(saveResult.error);
+      return saveResult;
+    }
 
     log.notice(
       "manifest",

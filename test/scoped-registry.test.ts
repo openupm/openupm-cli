@@ -1,8 +1,8 @@
 import {
   addScope,
   hasScope,
-  removeScope,
   makeScopedRegistry,
+  removeScope,
 } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/types/domain-name";
@@ -16,50 +16,64 @@ describe("scoped-registry", function () {
   });
   describe("add scope", function () {
     it("should keep scope-list alphabetical", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl);
-      expect(addScope(registry, makeDomainName("b"))).toBeTruthy();
-      expect(addScope(registry, makeDomainName("a"))).toBeTruthy();
+      let registry = makeScopedRegistry("test", exampleRegistryUrl);
+
+      registry = addScope(registry, makeDomainName("b"));
+      registry = addScope(registry, makeDomainName("a"));
+
       expect(registry.scopes).toEqual(["a", "b"]);
     });
+
     it("should filter duplicates", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl);
-      expect(addScope(registry, makeDomainName("a"))).toBeTruthy();
-      expect(addScope(registry, makeDomainName("a"))).toBeFalsy();
+      let registry = makeScopedRegistry("test", exampleRegistryUrl);
+
+      registry = addScope(registry, makeDomainName("a"));
+      registry = addScope(registry, makeDomainName("a"));
+
       expect(registry.scopes).toEqual(["a"]);
     });
   });
   describe("has scope", function () {
     it("should have scope that was added", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl);
-      addScope(registry, makeDomainName("a"));
+      let registry = makeScopedRegistry("test", exampleRegistryUrl);
+
+      registry = addScope(registry, makeDomainName("a"));
+
       expect(hasScope(registry, makeDomainName("a"))).toBeTruthy();
     });
     it("should not have scope that was not added", () => {
       const registry = makeScopedRegistry("test", exampleRegistryUrl);
+
       expect(hasScope(registry, makeDomainName("a"))).toBeFalsy();
     });
   });
   describe("remove scope", function () {
     it("should not have scope after removing it", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl, [
+      let registry = makeScopedRegistry("test", exampleRegistryUrl, [
         makeDomainName("a"),
       ]);
-      expect(removeScope(registry, makeDomainName("a"))).toBeTruthy();
+
+      registry = removeScope(registry, makeDomainName("a"));
+
       expect(hasScope(registry, makeDomainName("a"))).toBeFalsy();
     });
     it("should not do nothing if scope does not exist", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl, [
+      let registry = makeScopedRegistry("test", exampleRegistryUrl, [
         makeDomainName("a"),
       ]);
-      expect(removeScope(registry, makeDomainName("b"))).toBeFalsy();
+
+      registry = removeScope(registry, makeDomainName("b"));
+
       expect(hasScope(registry, makeDomainName("a"))).toBeTruthy();
     });
     it("should remove duplicate scopes", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl, [
+      let registry = makeScopedRegistry("test", exampleRegistryUrl, [
         makeDomainName("a"),
         makeDomainName("a"),
       ]);
-      expect(removeScope(registry, makeDomainName("a"))).toBeTruthy();
+
+      registry = removeScope(registry, makeDomainName("a"));
+
       expect(registry.scopes).toHaveLength(0);
     });
   });

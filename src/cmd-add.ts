@@ -22,9 +22,8 @@ import {
 import { addScope, makeScopedRegistry } from "./types/scoped-registry";
 import {
   addDependency,
-  addScopedRegistry,
   addTestable,
-  tryGetScopedRegistryByUrl,
+  mapScopedRegistry,
 } from "./types/project-manifest";
 import { CmdOptions } from "./types/options";
 import {
@@ -34,10 +33,13 @@ import {
 } from "./packument-resolving";
 import { SemanticVersion } from "./types/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
+import { areArraysEqual } from "./utils/array-utils";
+import { RegistryUrl } from "./types/registry-url";
 import { PackumentNotFoundError } from "./common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   constructor(readonly issue: string) {
@@ -89,6 +91,12 @@ export const add = async function (
 
   const client = makeNpmClient();
 
+  const makeEmptyScopedRegistryFor = (registryUrl: RegistryUrl) => {
+    const name = url.parse(registryUrl).hostname;
+    if (name === null) throw new Error("Could not resolve registry name");
+    return makeScopedRegistry(name, registryUrl);
+  };
+
   const addSingle = async function (
     pkg: PackageReference
   ): Promise<Result<boolean, AddError>> {
@@ -99,7 +107,11 @@ export const add = async function (
 
     // load manifest
     const loadResult = await tryLoadProjectManifest(env.cwd);
-    if (loadResult.isErr()) return loadResult;
+    if (loadResult.isErr()) {
+      logManifestLoadError(loadResult.error);
+
+      return loadResult;
+    }
     let manifest = loadResult.value;
 
     // packages that added to scope registry
@@ -271,25 +283,26 @@ export const add = async function (
         `existed ${makePackageReference(name, versionToAdd)}`
       );
     }
+
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
-      let entry = tryGetScopedRegistryByUrl(manifest, env.registry.url);
-      if (entry === null) {
-        const name = url.parse(env.registry.url).hostname;
-        if (name === null) throw new Error("Could not resolve registry name");
-        entry = makeScopedRegistry(name, env.registry.url);
-        manifest = addScopedRegistry(manifest, entry);
-        dirty = true;
-      }
-      pkgsInScope.forEach((name) => {
-        const wasAdded = addScope(entry!, name);
-        if (wasAdded) dirty = true;
+      manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
+        let updated = initial ?? makeEmptyScopedRegistryFor(env.registry.url);
+
+        updated = pkgsInScope.reduce(addScope, updated!);
+        dirty =
+          !areArraysEqual(updated!.scopes, initial?.scopes ?? []) || dirty;
+
+        return updated;
       });
     }
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
       const saveResult = await trySaveProjectManifest(env.cwd, manifest);
-      if (saveResult.isErr()) return saveResult;
+      if (saveResult.isErr()) {
+        logManifestSaveError(saveResult.error);
+        return saveResult;
+      }
     }
     return Ok(dirty);
   };

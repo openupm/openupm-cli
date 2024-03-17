@@ -1,5 +1,3 @@
-import { attachMockConsole, MockConsole } from "./mock-console";
-
 import {
   ManifestParseError,
   tryLoadProjectManifest,
@@ -10,7 +8,7 @@ import { makeSemanticVersion } from "../src/types/semantic-version";
 import {
   addDependency,
   manifestPathFor,
-  tryGetScopedRegistryByUrl,
+  mapScopedRegistry,
 } from "../src/types/project-manifest";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
@@ -21,20 +19,14 @@ import { exampleRegistryUrl } from "./mock-registry";
 import { RequiredFileNotFoundError } from "../src/common-errors";
 
 describe("project-manifest io", () => {
-  let mockConsole: MockConsole = null!;
   let mockProject: MockUnityProject = null!;
 
   beforeAll(async () => {
     mockProject = await setupUnityProject({});
   });
 
-  beforeEach(() => {
-    mockConsole = attachMockConsole();
-  });
-
   afterEach(async () => {
     await mockProject.reset();
-    mockConsole.detach();
   });
 
   afterAll(async () => {
@@ -56,7 +48,6 @@ describe("project-manifest io", () => {
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(RequiredFileNotFoundError)
     );
-    expect(mockConsole).toHaveLineIncluding("out", "does not exist");
   });
   it("wrong json content", async () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
@@ -68,7 +59,6 @@ describe("project-manifest io", () => {
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(ManifestParseError)
     );
-    expect(mockConsole).toHaveLineIncluding("out", "failed to parse");
   });
   it("saveManifest", async () => {
     let manifest = (
@@ -96,14 +86,16 @@ describe("project-manifest io", () => {
   it("should not save scoped-registry with empty scopes", async () => {
     // Add and then remove a scope to force an empty scoped-registry
     const testDomain = "test" as DomainName;
-    const initialManifest = buildProjectManifest((manifest) =>
+    let initialManifest = buildProjectManifest((manifest) =>
       manifest.addScope(testDomain)
     );
-    const scopedRegistry = tryGetScopedRegistryByUrl(
+    initialManifest = mapScopedRegistry(
       initialManifest,
-      exampleRegistryUrl
-    )!;
-    removeScope(scopedRegistry, testDomain);
+      exampleRegistryUrl,
+      (registry) => {
+        return removeScope(registry!, testDomain);
+      }
+    );
 
     // Save and load manifest
     expect(

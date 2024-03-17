@@ -3,13 +3,15 @@ import {
   addScopedRegistry,
   addTestable,
   emptyProjectManifest,
+  mapScopedRegistry,
   removeDependency,
   tryGetScopedRegistryByUrl,
 } from "../src/types/project-manifest";
 import { makeDomainName } from "../src/types/domain-name";
 import { makeSemanticVersion } from "../src/types/semantic-version";
-import { makeScopedRegistry } from "../src/types/scoped-registry";
+import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
 import { makeRegistryUrl } from "../src/types/registry-url";
+import { exampleRegistryUrl } from "./mock-registry";
 
 describe("project-manifest", function () {
   describe("dependency", function () {
@@ -60,7 +62,7 @@ describe("project-manifest", function () {
       expect(manifest.dependencies).toEqual({});
     });
   });
-  describe("scoped-registry", function () {
+  describe("get scoped-registry", function () {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
       const url = makeRegistryUrl("https://test.com");
@@ -81,6 +83,56 @@ describe("project-manifest", function () {
       manifest = addScopedRegistry(manifest, expected);
 
       expect(tryGetScopedRegistryByUrl(manifest, url)).toBeNull();
+    });
+  });
+  describe("map scoped-registry", function () {
+    it("should have null as mapping input if manifest does not have scoped-registry", () => {
+      const manifest = emptyProjectManifest;
+
+      expect.assertions(1);
+      mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
+        expect(registry).toBeNull();
+        return registry;
+      });
+    });
+
+    it("should have scoped-registry as input if found", () => {
+      let manifest = emptyProjectManifest;
+      const expected = makeScopedRegistry("test", exampleRegistryUrl);
+      manifest = addScopedRegistry(manifest, expected);
+
+      expect.assertions(1);
+      mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
+        expect(registry).toEqual(expected);
+        return registry;
+      });
+    });
+
+    it("should not have scoped-registry after returning null", () => {
+      let manifest = emptyProjectManifest;
+      const initial = makeScopedRegistry("test", exampleRegistryUrl);
+      manifest = addScopedRegistry(manifest, initial);
+
+      manifest = mapScopedRegistry(manifest, exampleRegistryUrl, () => null);
+
+      const actual = tryGetScopedRegistryByUrl(manifest, exampleRegistryUrl);
+      expect(actual).toBeNull();
+    });
+
+    it("should not updated scoped-registry after returning it", () => {
+      let manifest = emptyProjectManifest;
+      const initial = makeScopedRegistry("test", exampleRegistryUrl);
+      const expected = addScope(initial, makeDomainName("wow"));
+      manifest = addScopedRegistry(manifest, initial);
+
+      manifest = mapScopedRegistry(
+        manifest,
+        exampleRegistryUrl,
+        () => expected
+      );
+
+      const actual = tryGetScopedRegistryByUrl(manifest, exampleRegistryUrl);
+      expect(actual).toEqual(expected);
     });
   });
   describe("testables", function () {

@@ -5,7 +5,7 @@ import { DomainName } from "./domain-name";
  * Contains information about a scoped registry.
  * @see https://docs.unity3d.com/Manual/upm-scoped.html
  */
-export type ScopedRegistry = {
+export type ScopedRegistry = Readonly<{
   /**
    * The scope name as it appears in the user interface.
    */
@@ -18,8 +18,8 @@ export type ScopedRegistry = {
    * Array of scopes that you can map to a package name, either as an exact match
    * on the package name, or as a namespace.
    */
-  scopes: DomainName[];
-};
+  scopes: ReadonlyArray<DomainName>;
+}>;
 
 /**
  * Constructs a scoped registry.
@@ -36,21 +36,6 @@ export function makeScopedRegistry(
 }
 
 /**
- * Adds a scope to a registry if it is not already in the list. The scopes will
- * also be sorted alphabetically.
- * @param registry The registry.
- * @param scope The scope.
- * @returns Boolean whether the scope was added successfully.
- */
-export function addScope(registry: ScopedRegistry, scope: DomainName): boolean {
-  if (registry.scopes.includes(scope)) return false;
-
-  registry.scopes.push(scope);
-  registry.scopes.sort();
-  return true;
-}
-
-/**
  * Checks if a registry has a specific scope.
  * @param registry The registry.
  * @param scope The scope.
@@ -60,16 +45,28 @@ export function hasScope(registry: ScopedRegistry, scope: DomainName): boolean {
 }
 
 /**
+ * Adds a scope to a registry if it is not already in the list. The scopes will
+ * also be sorted alphabetically.
+ * @param registry The registry.
+ * @param scope The scope.
+ */
+export function addScope(
+  registry: ScopedRegistry,
+  scope: DomainName
+): ScopedRegistry {
+  if (hasScope(registry, scope)) return registry;
+
+  return { ...registry, scopes: [...registry.scopes, scope].sort() };
+}
+
+/**
  * Removes a scope from a registry.
  * @param registry The registry.
  * @param scope The scope.
- * @returns Boolean indicating whether a scope was actually removed.
  */
 export function removeScope(
   registry: ScopedRegistry,
   scope: DomainName
-): boolean {
-  const prevCount = registry.scopes.length;
-  registry.scopes = registry.scopes.filter((it) => it !== scope);
-  return registry.scopes.length !== prevCount;
+): ScopedRegistry {
+  return { ...registry, scopes: registry.scopes.filter((it) => it !== scope) };
 }
