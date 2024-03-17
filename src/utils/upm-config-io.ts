@@ -9,8 +9,7 @@ import { addAuth, UpmAuth, UPMConfig } from "../types/upm-config";
 import { RegistryUrl } from "../types/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
-import { assertIsError } from "./error-type-guards";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 
 const configFileName = ".upmconfig.toml";
 
@@ -96,21 +95,19 @@ export const tryLoadUpmConfig = async (
  * @param config The config to save.
  * @param configDir The directory in which to save the config.
  */
-export const trySaveUpmConfig = async (
+export const trySaveUpmConfig = (
   config: UPMConfig,
   configDir: string
-): Promise<Result<void, IOError>> => {
-  try {
-    await mkdirp(configDir);
-    const configPath = path.join(configDir, configFileName);
-    const content = TOML.stringify(config);
-    await fs.writeFile(configPath, content, "utf8");
-    log.notice("config", "saved unity config at " + configPath);
-    return Ok(undefined);
-  } catch (error) {
-    assertIsError(error);
-    return Err(error);
-  }
+): AsyncResult<void, IOError> => {
+  return new AsyncResult(
+    Result.wrapAsync(async () => {
+      await mkdirp(configDir);
+      const configPath = path.join(configDir, configFileName);
+      const content = TOML.stringify(config);
+      await fs.writeFile(configPath, content, "utf8");
+      log.notice("config", "saved unity config at " + configPath);
+    })
+  );
 };
 
 /**
@@ -127,5 +124,5 @@ export const tryStoreUpmAuth = async function (
   config = addAuth(registry, auth, config);
 
   // Write config file
-  return await trySaveUpmConfig(config, configDir);
+  return await trySaveUpmConfig(config, configDir).promise;
 };
