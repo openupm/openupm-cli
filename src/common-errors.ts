@@ -49,7 +49,7 @@ export class FileParseError extends CustomError {
     /**
      * The error that caused this one.
      */
-    readonly cause: Error
+    readonly cause?: Error
   ) {
     super("A file could not be parsed into a specific target type.");
   }
