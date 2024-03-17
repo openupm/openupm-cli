@@ -8,7 +8,7 @@ import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "./utils/error-type-guards";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 
 /**
  * Error for when authentication failed.
@@ -60,7 +60,7 @@ export interface NpmClient {
   tryFetchPackument(
     registry: Registry,
     name: DomainName
-  ): Promise<Result<UnityPackument | null, HttpErrorBase>>;
+  ): AsyncResult<UnityPackument | null, HttpErrorBase>;
 
   /**
    * Attempts to add a user to a registry.
@@ -124,19 +124,21 @@ export const makeNpmClient = (): NpmClient => {
   return {
     tryFetchPackument(registry, name) {
       const url = `${registry.url}/${name}`;
-      return new Promise((resolve) => {
-        return registryClient.get(
-          url,
-          { auth: registry.auth || undefined },
-          (error, packument) => {
-            if (error !== null) {
-              assertIsHttpError(error);
-              if (error.statusCode === 404) resolve(Ok(null));
-              else resolve(Err(error));
-            } else resolve(Ok(packument));
-          }
-        );
-      });
+      return new AsyncResult(
+        new Promise((resolve) => {
+          return registryClient.get(
+            url,
+            { auth: registry.auth || undefined },
+            (error, packument) => {
+              if (error !== null) {
+                assertIsHttpError(error);
+                if (error.statusCode === 404) resolve(Ok(null));
+                else resolve(Err(error));
+              } else resolve(Ok(packument));
+            }
+          );
+        })
+      );
     },
 
     addUser(registryUrl, username, email, password) {

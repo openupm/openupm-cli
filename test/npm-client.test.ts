@@ -31,7 +31,8 @@ describe("registry-client", function () {
 
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
-      const result = await client.tryFetchPackument(env.registry, packageA);
+      const result = await client.tryFetchPackument(env.registry, packageA)
+        .promise;
       expect(result).toBeOk((packument) =>
         expect(packument).toEqual(packumentRemote)
       );
@@ -42,7 +43,8 @@ describe("registry-client", function () {
       ).unwrap();
 
       registerMissingPackument(packageA);
-      const result = await client.tryFetchPackument(env.registry, packageA);
+      const result = await client.tryFetchPackument(env.registry, packageA)
+        .promise;
       expect(result).toBeOk((packument) => expect(packument).toBeNull());
     });
   });

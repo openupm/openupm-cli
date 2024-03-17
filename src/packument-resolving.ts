@@ -122,18 +122,18 @@ export function tryResolveFromPackument(
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
-export async function tryResolve(
+export function tryResolve(
   npmClient: NpmClient,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
 ): Promise<Result<ResolvedPackument, PackumentResolveError | HttpErrorBase>> {
-  return (await npmClient.tryFetchPackument(source, packageName)).andThen(
-    (packument) => {
+  return npmClient
+    .tryFetchPackument(source, packageName)
+    .andThen((packument) => {
       if (packument === null) return Err(new PackumentNotFoundError());
       return tryResolveFromPackument(packument, requestedVersion, source.url);
-    }
-  );
+    }).promise;
 }
 
 /**
