@@ -70,7 +70,7 @@ describe("project-manifest io", () => {
       makeSemanticVersion("1.0.0")
     );
     expect(
-      await trySaveProjectManifest(mockProject.projectPath, manifest)
+      await trySaveProjectManifest(mockProject.projectPath, manifest).promise
     ).toBeOk();
     const manifest2 = (
       await tryLoadProjectManifest(mockProject.projectPath).promise
@@ -99,6 +99,7 @@ describe("project-manifest io", () => {
     // Save and load manifest
     expect(
       await trySaveProjectManifest(mockProject.projectPath, initialManifest)
+        .promise
     ).toBeOk();
     const savedManifest = (
       await tryLoadProjectManifest(mockProject.projectPath).promise

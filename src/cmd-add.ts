@@ -298,7 +298,8 @@ export const add = async function (
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+      const saveResult = await trySaveProjectManifest(env.cwd, manifest)
+        .promise;
       if (saveResult.isErr()) {
         logManifestSaveError(saveResult.error);
         return saveResult;

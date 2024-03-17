@@ -9,7 +9,7 @@ import fse from "fs-extra";
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import { RequiredFileNotFoundError } from "../common-errors";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 
 export class ManifestParseError extends CustomError {
   constructor(readonly path: string, readonly cause: Error) {
@@ -51,19 +51,18 @@ export const tryLoadProjectManifest = function (
  * @param projectPath The path to the projects root directory.
  * @param manifest The manifest to save.
  */
-export const trySaveProjectManifest = async function (
+export const trySaveProjectManifest = function (
   projectPath: string,
   manifest: UnityProjectManifest
-): Promise<Result<void, ManifestSaveError>> {
+): AsyncResult<void, ManifestSaveError> {
   const manifestPath = manifestPathFor(projectPath);
   manifest = pruneManifest(manifest);
   const json = JSON.stringify(manifest, null, 2);
-  try {
-    await fse.ensureDir(path.dirname(manifestPath));
-    await fs.writeFile(manifestPath, json);
-    return Ok(undefined);
-  } catch (error) {
-    assertIsError(error);
-    return Err(error);
-  }
+
+  return new AsyncResult(
+    Result.wrapAsync(async () => {
+      await fse.ensureDir(path.dirname(manifestPath));
+      await fs.writeFile(manifestPath, json);
+    })
+  );
 };

@@ -72,7 +72,7 @@ export const remove = async function (
     });
 
     // save manifest
-    const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+    const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
       logManifestSaveError(saveResult.error);
       return saveResult;
