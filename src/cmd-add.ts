@@ -123,14 +123,14 @@ export const add = async function (
         name,
         requestedVersion,
         env.registry
-      );
+      ).promise;
       if (resolveResult.isErr() && env.upstream) {
         resolveResult = await tryResolve(
           client,
           name,
           requestedVersion,
           env.upstreamRegistry
-        );
+        ).promise;
         if (resolveResult.isOk()) isUpstreamPackage = true;
       }
 

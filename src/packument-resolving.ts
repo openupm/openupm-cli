@@ -12,7 +12,7 @@ import { PackageUrl } from "./types/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./types/registry-url";
 import { CustomError } from "ts-custom-error";
-import { Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "./common-errors";
 
@@ -127,13 +127,16 @@ export function tryResolve(
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-): Promise<Result<ResolvedPackument, PackumentResolveError | HttpErrorBase>> {
+): AsyncResult<ResolvedPackument, PackumentResolveError | HttpErrorBase> {
   return npmClient
     .tryFetchPackument(source, packageName)
-    .andThen((packument) => {
-      if (packument === null) return Err(new PackumentNotFoundError());
-      return tryResolveFromPackument(packument, requestedVersion, source.url);
-    }).promise;
+    .andThen((maybePackument) => {
+      if (maybePackument === null) return Err(new PackumentNotFoundError());
+      return Ok(maybePackument);
+    })
+    .andThen((packument) =>
+      tryResolveFromPackument(packument, requestedVersion, source.url)
+    );
 }
 
 /**
