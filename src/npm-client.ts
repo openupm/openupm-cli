@@ -8,7 +8,7 @@ import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "./utils/error-type-guards";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok } from "ts-results-es";
 
 /**
  * Error for when authentication failed.
@@ -93,7 +93,7 @@ export interface NpmClient {
    */
   tryGetAll(
     registry: Registry
-  ): Promise<Result<AllPackumentsResult, HttpErrorBase>>;
+  ): AsyncResult<AllPackumentsResult, HttpErrorBase>;
 }
 
 export type Registry = Readonly<{
@@ -176,17 +176,16 @@ export const makeNpmClient = (): NpmClient => {
       );
     },
 
-    async tryGetAll(registry) {
-      try {
-        const result = (await npmFetch.json(
-          "/-/all",
-          getNpmFetchOptions(registry)
-        )) as AllPackumentsResult;
-        return Ok(result);
-      } catch (error) {
-        assertIsHttpError(error);
-        return Err(error);
-      }
+    tryGetAll(registry) {
+      return new AsyncResult(
+        npmFetch
+          .json("/-/all", getNpmFetchOptions(registry))
+          .then((result) => Ok(result as AllPackumentsResult))
+          .catch((error) => {
+            assertIsHttpError(error);
+            return Err(error);
+          })
+      );
     },
   };
 };
