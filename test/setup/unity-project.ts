@@ -115,7 +115,7 @@ export async function setupUnityProject(
     const projectVersionResult = await tryCreateProjectVersionTxt(
       projectPath,
       version
-    );
+    ).promise;
     if (projectVersionResult.isErr()) throw projectVersionResult.error;
 
     // Project manifest
