@@ -18,7 +18,7 @@ import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
 } from "./project-version-io";
-import {manifestPathFor} from "./project-manifest-io";
+import { manifestPathFor } from "./project-manifest-io";
 
 export type Env = Readonly<{
   cwd: string;
@@ -30,12 +30,32 @@ export type Env = Readonly<{
   editorVersion: string | null;
 }>;
 
-export class CwdNotFoundError extends CustomError {}
+export class CwdNotFoundError extends CustomError {
+  constructor(
+    /**
+     * The path that was not found.
+     */
+    readonly path: string
+  ) {
+    super();
+  }
+}
 
 export type EnvParseError =
   | CwdNotFoundError
   | GetUpmConfigDirError
   | ProjectVersionLoadError;
+
+function determineCwd(options: CmdOptions): Result<string, CwdNotFoundError> {
+  const cwd =
+    options._global.chdir !== undefined
+      ? path.resolve(options._global.chdir)
+      : process.cwd();
+
+  if (!fs.existsSync(cwd)) return Err(new CwdNotFoundError(cwd));
+
+  return Ok(cwd);
+}
 
 /**
  * Attempts to parse env.
@@ -120,14 +140,15 @@ export const parseEnv = async function (
       upstreamRegistry,
       wsl,
     });
+
   // cwd
-  if (options._global.chdir) {
-    cwd = path.resolve(options._global.chdir);
-    if (!fs.existsSync(cwd)) {
-      log.error("env", `can not resolve path ${cwd}`);
-      return Err(new CwdNotFoundError());
-    }
-  } else cwd = process.cwd();
+  const cwdResult = determineCwd(options);
+  if (cwdResult.isErr()) {
+    log.error("env", `can not resolve path ${cwdResult.error.path}`);
+    return cwdResult;
+  }
+  cwd = cwdResult.value;
+
   // manifest path
   const manifestPath = manifestPathFor(cwd);
   if (!fs.existsSync(manifestPath)) {
