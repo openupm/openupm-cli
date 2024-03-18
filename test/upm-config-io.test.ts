@@ -14,7 +14,7 @@ describe("upm-config-io", function () {
           {
             USERPROFILE: expected,
           },
-          () => tryGetUpmConfigDir(false, false)
+          () => tryGetUpmConfigDir(false, false).promise
         );
 
         expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
@@ -26,14 +26,15 @@ describe("upm-config-io", function () {
           {
             HOME: expected,
           },
-          () => tryGetUpmConfigDir(false, false)
+          () => tryGetUpmConfigDir(false, false).promise
         );
 
         expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
       });
       it("should fail if HOME and USERPROFILE and undefined", async function () {
-        const result = await runWithEnv({}, () =>
-          tryGetUpmConfigDir(false, false)
+        const result = await runWithEnv(
+          {},
+          () => tryGetUpmConfigDir(false, false).promise
         );
 
         expect(result).toBeError((error) =>

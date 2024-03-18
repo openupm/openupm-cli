@@ -8,7 +8,7 @@ import {
 import { EnvParseError, parseEnv } from "./utils/env";
 import {
   hasVersion,
-  packageReference,
+  makePackageReference,
   PackageReference,
 } from "./types/package-reference";
 import { removeScope } from "./types/scoped-registry";
@@ -50,7 +50,7 @@ export const remove = async function (
       return Err(new PackageWithVersionError());
     }
     // load manifest
-    const manifestResult = await tryLoadProjectManifest(env.cwd);
+    const manifestResult = await tryLoadProjectManifest(env.cwd).promise;
     if (manifestResult.isErr()) {
       logManifestLoadError(manifestResult.error);
       return manifestResult;
@@ -72,7 +72,7 @@ export const remove = async function (
     });
 
     // save manifest
-    const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+    const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
       logManifestSaveError(saveResult.error);
       return saveResult;
@@ -80,7 +80,7 @@ export const remove = async function (
 
     log.notice(
       "manifest",
-      `removed ${packageReference(pkg, versionInManifest)}`
+      `removed ${makePackageReference(pkg, versionInManifest)}`
     );
     return Ok(undefined);
   };

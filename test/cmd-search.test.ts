@@ -9,8 +9,8 @@ import {
 } from "./mock-registry";
 import { SearchEndpointResult } from "./types";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { domainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
+import { makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-search.ts", function () {
@@ -46,9 +46,9 @@ describe("cmd-search.ts", function () {
       objects: [
         {
           package: {
-            name: domainName("com.example.package-a"),
+            name: makeDomainName("com.example.package-a"),
             scope: "unscoped",
-            version: semanticVersion("1.0.0"),
+            version: makeSemanticVersion("1.0.0"),
             description: "A demo package",
             date: "2019-10-02T04:02:38.335Z",
             links: {},

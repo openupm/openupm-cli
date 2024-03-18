@@ -9,10 +9,10 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { buildPackument } from "./data-packument";
-import { domainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/types/domain-name";
 import { makeNpmClient } from "../src/npm-client";
 
-const packageA = domainName("package-a");
+const packageA = makeDomainName("package-a");
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
@@ -31,7 +31,8 @@ describe("registry-client", function () {
 
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
-      const result = await client.tryFetchPackument(env.registry, packageA);
+      const result = await client.tryFetchPackument(env.registry, packageA)
+        .promise;
       expect(result).toBeOk((packument) =>
         expect(packument).toEqual(packumentRemote)
       );
@@ -42,7 +43,8 @@ describe("registry-client", function () {
       ).unwrap();
 
       registerMissingPackument(packageA);
-      const result = await client.tryFetchPackument(env.registry, packageA);
+      const result = await client.tryFetchPackument(env.registry, packageA)
+        .promise;
       expect(result).toBeOk((packument) => expect(packument).toBeNull());
     });
   });

@@ -15,11 +15,11 @@ import {
 import { makeNpmClient } from "./npm-client";
 import { DomainName } from "./types/domain-name";
 import {
-  packageReference,
+  makePackageReference,
   PackageReference,
   splitPackageReference,
 } from "./types/package-reference";
-import { addScope, scopedRegistry } from "./types/scoped-registry";
+import { addScope, makeScopedRegistry } from "./types/scoped-registry";
 import {
   addDependency,
   addTestable,
@@ -94,7 +94,7 @@ export const add = async function (
   const makeEmptyScopedRegistryFor = (registryUrl: RegistryUrl) => {
     const name = url.parse(registryUrl).hostname;
     if (name === null) throw new Error("Could not resolve registry name");
-    return scopedRegistry(name, registryUrl);
+    return makeScopedRegistry(name, registryUrl);
   };
 
   const addSingle = async function (
@@ -106,7 +106,7 @@ export const add = async function (
     const [name, requestedVersion] = splitPackageReference(pkg);
 
     // load manifest
-    const loadResult = await tryLoadProjectManifest(env.cwd);
+    const loadResult = await tryLoadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
       logManifestLoadError(loadResult.error);
 
@@ -123,14 +123,14 @@ export const add = async function (
         name,
         requestedVersion,
         env.registry
-      );
+      ).promise;
       if (resolveResult.isErr() && env.upstream) {
         resolveResult = await tryResolve(
           client,
           name,
           requestedVersion,
           env.upstreamRegistry
-        );
+        ).promise;
         if (resolveResult.isOk()) isUpstreamPackage = true;
       }
 
@@ -232,7 +232,7 @@ export const add = async function (
               if (depObj.reason instanceof VersionNotFoundError)
                 log.notice(
                   "suggest",
-                  `to install ${packageReference(
+                  `to install ${makePackageReference(
                     depObj.name,
                     depObj.reason.requestedVersion
                   )} or a replaceable version manually`
@@ -264,7 +264,10 @@ export const add = async function (
     );
     if (!oldVersion) {
       // Log the added package
-      log.notice("manifest", `added ${packageReference(name, versionToAdd)}`);
+      log.notice(
+        "manifest",
+        `added ${makePackageReference(name, versionToAdd)}`
+      );
       dirty = true;
     } else if (oldVersion !== versionToAdd) {
       // Log the modified package version
@@ -275,7 +278,10 @@ export const add = async function (
       dirty = true;
     } else {
       // Log the existed package
-      log.notice("manifest", `existed ${packageReference(name, versionToAdd)}`);
+      log.notice(
+        "manifest",
+        `existed ${makePackageReference(name, versionToAdd)}`
+      );
     }
 
     if (!isUpstreamPackage && pkgsInScope.length > 0) {
@@ -292,7 +298,8 @@ export const add = async function (
     if (options.test) manifest = addTestable(manifest, name);
     // save manifest
     if (dirty) {
-      const saveResult = await trySaveProjectManifest(env.cwd, manifest);
+      const saveResult = await trySaveProjectManifest(env.cwd, manifest)
+        .promise;
       if (saveResult.isErr()) {
         logManifestSaveError(saveResult.error);
         return saveResult;

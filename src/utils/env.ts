@@ -7,7 +7,7 @@ import {
 } from "./upm-config-io";
 import path from "path";
 import fs from "fs";
-import { coerceRegistryUrl, registryUrl } from "../types/registry-url";
+import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { manifestPathFor } from "../types/project-manifest";
@@ -46,13 +46,13 @@ export const parseEnv = async function (
 ): Promise<Result<Env, EnvParseError>> {
   // set defaults
   let registry: Registry = {
-    url: registryUrl("https://package.openupm.com"),
+    url: makeRegistryUrl("https://package.openupm.com"),
     auth: null,
   };
   let cwd = "";
   let upstream = true;
   let upstreamRegistry: Registry = {
-    url: registryUrl("https://packages.unity.com"),
+    url: makeRegistryUrl("https://packages.unity.com"),
     auth: null,
   };
   let systemUser = false;
@@ -72,11 +72,11 @@ export const parseEnv = async function (
   // region cn
   if (options._global.cn === true) {
     registry = {
-      url: registryUrl("https://package.openupm.cn"),
+      url: makeRegistryUrl("https://package.openupm.cn"),
       auth: null,
     };
     upstreamRegistry = {
-      url: registryUrl("https://packages.unity.cn"),
+      url: makeRegistryUrl("https://packages.unity.cn"),
       auth: null,
     };
     log.notice("region", "cn");
@@ -93,11 +93,11 @@ export const parseEnv = async function (
   if (options._global.systemUser) systemUser = true;
   if (options._global.wsl) wsl = true;
 
-  const configDirResult = await tryGetUpmConfigDir(wsl, systemUser);
-  if (configDirResult.isErr()) return Err(configDirResult.error);
-  const configDir = configDirResult.value;
-
-  const upmConfig = await tryLoadUpmConfig(configDir);
+  const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
+    tryLoadUpmConfig
+  ).promise;
+  if (upmConfigResult.isErr()) return upmConfigResult;
+  const upmConfig = upmConfigResult.value;
 
   if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
     registry = {

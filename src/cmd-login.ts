@@ -57,7 +57,8 @@ export const login = async function (
 
   const alwaysAuth = options.alwaysAuth || false;
 
-  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser);
+  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser)
+    .promise;
   if (configDirResult.isErr()) return configDirResult;
   const configDir = configDirResult.value;
 
@@ -68,7 +69,7 @@ export const login = async function (
       email,
       alwaysAuth,
       _auth,
-    } satisfies BasicAuth);
+    } satisfies BasicAuth).promise;
     if (result.isErr()) return result;
   } else {
     // npm login
@@ -82,7 +83,7 @@ export const login = async function (
       email,
       alwaysAuth,
       token,
-    } satisfies TokenAuth);
+    } satisfies TokenAuth).promise;
     if (storeResult.isErr()) return storeResult;
   }
 
@@ -99,7 +100,8 @@ const npmLogin = async function (
   registry: RegistryUrl
 ): Promise<Result<string, AuthenticationError>> {
   const client = makeNpmClient();
-  const result = await client.addUser(registry, username, password, email);
+  const result = await client.addUser(registry, username, password, email)
+    .promise;
 
   if (result.isOk()) {
     log.notice("auth", `you are authenticated as '${username}'`);

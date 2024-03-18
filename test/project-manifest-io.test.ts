@@ -2,8 +2,8 @@ import {
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../src/utils/project-manifest-io";
-import { DomainName, domainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
+import { DomainName, makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 import {
   addDependency,
   manifestPathFor,
@@ -36,16 +36,16 @@ describe("project-manifest io", () => {
   });
 
   it("loadManifest", async () => {
-    const manifestResult = await tryLoadProjectManifest(
-      mockProject.projectPath
-    );
+    const manifestResult = await tryLoadProjectManifest(mockProject.projectPath)
+      .promise;
 
     expect(manifestResult).toBeOk((manifest) =>
       expect(manifest).toEqual({ dependencies: {} })
     );
   });
   it("no manifest file", async () => {
-    const manifestResult = await tryLoadProjectManifest("/invalid-path");
+    const manifestResult = await tryLoadProjectManifest("/invalid-path")
+      .promise;
 
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(RequiredFileNotFoundError)
@@ -55,28 +55,27 @@ describe("project-manifest io", () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
     fse.writeFileSync(manifestPath, "invalid data");
 
-    const manifestResult = await tryLoadProjectManifest(
-      mockProject.projectPath
-    );
+    const manifestResult = await tryLoadProjectManifest(mockProject.projectPath)
+      .promise;
     expect(manifestResult).toBeError((error) =>
       expect(error).toBeInstanceOf(FileParseError)
     );
   });
   it("saveManifest", async () => {
     let manifest = (
-      await tryLoadProjectManifest(mockProject.projectPath)
+      await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
     expect(manifest).not.toHaveDependencies();
     manifest = addDependency(
       manifest,
-      domainName("some-pack"),
-      semanticVersion("1.0.0")
+      makeDomainName("some-pack"),
+      makeSemanticVersion("1.0.0")
     );
     expect(
-      await trySaveProjectManifest(mockProject.projectPath, manifest)
+      await trySaveProjectManifest(mockProject.projectPath, manifest).promise
     ).toBeOk();
     const manifest2 = (
-      await tryLoadProjectManifest(mockProject.projectPath)
+      await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
     expect(manifest2).toEqual(manifest);
   });
@@ -102,9 +101,10 @@ describe("project-manifest io", () => {
     // Save and load manifest
     expect(
       await trySaveProjectManifest(mockProject.projectPath, initialManifest)
+        .promise
     ).toBeOk();
     const savedManifest = (
-      await tryLoadProjectManifest(mockProject.projectPath)
+      await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
 
     expect(savedManifest.scopedRegistries).toHaveLength(0);

@@ -25,7 +25,7 @@ export function isPackageId(s: string): s is PackageId {
  * @param name The package name.
  * @param version The version.
  */
-export function packageId(
+export function makePackageId(
   name: DomainName,
   version: SemanticVersion
 ): PackageId {

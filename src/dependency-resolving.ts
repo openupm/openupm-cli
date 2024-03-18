@@ -1,7 +1,7 @@
 import { DomainName, isInternalPackage } from "./types/domain-name";
 import { isSemanticVersion, SemanticVersion } from "./types/semantic-version";
 import log from "./logger";
-import { packageReference } from "./types/package-reference";
+import { makePackageReference } from "./types/package-reference";
 import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {
   PackumentResolveError,
@@ -77,7 +77,7 @@ export const fetchPackageDependencies = async function (
 ): Promise<[ValidDependency[], InvalidDependency[]]> {
   log.verbose(
     "dependency",
-    `fetch: ${packageReference(name, version)} deep=${deep}`
+    `fetch: ${makePackageReference(name, version)} deep=${deep}`
   );
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
@@ -105,7 +105,7 @@ export const fetchPackageDependencies = async function (
     if (cacheResult.isOk()) return cacheResult;
 
     // Then registry
-    return await tryResolve(client, packumentName, version, registry);
+    return await tryResolve(client, packumentName, version, registry).promise;
   }
 
   while (pendingList.length > 0) {
@@ -199,7 +199,7 @@ export const fetchPackageDependencies = async function (
       });
       log.verbose(
         "dependency",
-        `${packageReference(entry.name, resolvedVersion)} ${
+        `${makePackageReference(entry.name, resolvedVersion)} ${
           isInternal ? "[internal] " : ""
         }${isUpstream ? "[upstream]" : ""}`
       );

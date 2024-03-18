@@ -7,10 +7,10 @@ import {
   removeDependency,
   tryGetScopedRegistryByUrl,
 } from "../src/types/project-manifest";
-import { domainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
-import { addScope, scopedRegistry } from "../src/types/scoped-registry";
-import { registryUrl } from "../src/types/registry-url";
+import { makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
+import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
+import { makeRegistryUrl } from "../src/types/registry-url";
 import { exampleRegistryUrl } from "./mock-registry";
 
 describe("project-manifest", function () {
@@ -20,8 +20,8 @@ describe("project-manifest", function () {
 
       manifest = addDependency(
         manifest,
-        domainName("test"),
-        semanticVersion("1.2.3")
+        makeDomainName("test"),
+        makeSemanticVersion("1.2.3")
       );
 
       expect(manifest.dependencies).toEqual({ test: "1.2.3" });
@@ -31,13 +31,13 @@ describe("project-manifest", function () {
 
       manifest = addDependency(
         manifest,
-        domainName("test"),
-        semanticVersion("1.2.3")
+        makeDomainName("test"),
+        makeSemanticVersion("1.2.3")
       );
       manifest = addDependency(
         manifest,
-        domainName("test"),
-        semanticVersion("2.3.4")
+        makeDomainName("test"),
+        makeSemanticVersion("2.3.4")
       );
 
       expect(manifest.dependencies).toEqual({ test: "2.3.4" });
@@ -47,17 +47,17 @@ describe("project-manifest", function () {
 
       manifest = addDependency(
         manifest,
-        domainName("test"),
-        semanticVersion("1.2.3")
+        makeDomainName("test"),
+        makeSemanticVersion("1.2.3")
       );
-      manifest = removeDependency(manifest, domainName("test"));
+      manifest = removeDependency(manifest, makeDomainName("test"));
 
       expect(manifest.dependencies).toEqual({});
     });
     it("should do nothing when dependency does not exist", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = removeDependency(manifest, domainName("test"));
+      manifest = removeDependency(manifest, makeDomainName("test"));
 
       expect(manifest.dependencies).toEqual({});
     });
@@ -65,8 +65,8 @@ describe("project-manifest", function () {
   describe("get scoped-registry", function () {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
-      const url = registryUrl("https://test.com");
-      const expected = scopedRegistry("test", url);
+      const url = makeRegistryUrl("https://test.com");
+      const expected = makeScopedRegistry("test", url);
 
       manifest = addScopedRegistry(manifest, expected);
 
@@ -74,8 +74,11 @@ describe("project-manifest", function () {
     });
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
-      const url = registryUrl("https://test.com");
-      const expected = scopedRegistry("test", registryUrl("https://test2.com"));
+      const url = makeRegistryUrl("https://test.com");
+      const expected = makeScopedRegistry(
+        "test",
+        makeRegistryUrl("https://test2.com")
+      );
 
       manifest = addScopedRegistry(manifest, expected);
 
@@ -95,7 +98,7 @@ describe("project-manifest", function () {
 
     it("should have scoped-registry as input if found", () => {
       let manifest = emptyProjectManifest;
-      const expected = scopedRegistry("test", exampleRegistryUrl);
+      const expected = makeScopedRegistry("test", exampleRegistryUrl);
       manifest = addScopedRegistry(manifest, expected);
 
       expect.assertions(1);
@@ -107,7 +110,7 @@ describe("project-manifest", function () {
 
     it("should not have scoped-registry after returning null", () => {
       let manifest = emptyProjectManifest;
-      const initial = scopedRegistry("test", exampleRegistryUrl);
+      const initial = makeScopedRegistry("test", exampleRegistryUrl);
       manifest = addScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(manifest, exampleRegistryUrl, () => null);
@@ -118,8 +121,8 @@ describe("project-manifest", function () {
 
     it("should not updated scoped-registry after returning it", () => {
       let manifest = emptyProjectManifest;
-      const initial = scopedRegistry("test", exampleRegistryUrl);
-      const expected = addScope(initial, domainName("wow"));
+      const initial = makeScopedRegistry("test", exampleRegistryUrl);
+      const expected = addScope(initial, makeDomainName("wow"));
       manifest = addScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(
@@ -136,16 +139,16 @@ describe("project-manifest", function () {
     it("should not add testables which already exist", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, domainName("a"));
-      manifest = addTestable(manifest, domainName("a"));
+      manifest = addTestable(manifest, makeDomainName("a"));
+      manifest = addTestable(manifest, makeDomainName("a"));
 
       expect(manifest.testables).toEqual(["a"]);
     });
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, domainName("b"));
-      manifest = addTestable(manifest, domainName("a"));
+      manifest = addTestable(manifest, makeDomainName("b"));
+      manifest = addTestable(manifest, makeDomainName("a"));
 
       expect(manifest.testables).toEqual(["a", "b"]);
     });

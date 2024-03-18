@@ -9,8 +9,8 @@ import {
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
-import { domainName } from "../src/types/domain-name";
-import { packageReference } from "../src/types/package-reference";
+import { makeDomainName } from "../src/types/domain-name";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-deps.ts", function () {
@@ -80,7 +80,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@latest", async function () {
       const depsResult = await deps(
-        packageReference(remotePackumentA.name, "latest"),
+        makePackageReference(remotePackumentA.name, "latest"),
         options
       );
       expect(depsResult).toBeOk();
@@ -88,7 +88,7 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@1.0.0", async function () {
       const depsResult = await deps(
-        packageReference(remotePackumentA.name, "1.0.0"),
+        makePackageReference(remotePackumentA.name, "1.0.0"),
         options
       );
       expect(depsResult).toBeOk();
@@ -96,14 +96,14 @@ describe("cmd-deps.ts", function () {
     });
     it("deps pkg@not-exist-version", async function () {
       const depsResult = await deps(
-        packageReference(remotePackumentA.name, "2.0.0"),
+        makePackageReference(remotePackumentA.name, "2.0.0"),
         options
       );
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
     });
     it("deps pkg-not-exist", async function () {
-      const depsResult = await deps(domainName("pkg-not-exist"), options);
+      const depsResult = await deps(makeDomainName("pkg-not-exist"), options);
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "not found");
     });

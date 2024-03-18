@@ -2,7 +2,7 @@ import assert from "assert";
 import { isDomainName } from "../src/types/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
 import { isSemanticVersion } from "../src/types/semantic-version";
-import { addScope, scopedRegistry } from "../src/types/scoped-registry";
+import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
 import {
   addDependency,
   addTestable,
@@ -33,7 +33,7 @@ class UnityProjectManifestBuilder {
       exampleRegistryUrl,
       (registry) => {
         if (registry === null)
-          registry = scopedRegistry("example.com", exampleRegistryUrl);
+          registry = makeScopedRegistry("example.com", exampleRegistryUrl);
         return addScope(registry, name);
       }
     );

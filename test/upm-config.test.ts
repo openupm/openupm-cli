@@ -12,7 +12,7 @@ import {
   UPMConfig,
 } from "../src/types/upm-config";
 import { Base64 } from "../src/types/base64";
-import { registryUrl, RegistryUrl } from "../src/types/registry-url";
+import { makeRegistryUrl, RegistryUrl } from "../src/types/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
 import { exampleRegistryUrl } from "./mock-registry";
 
@@ -96,7 +96,7 @@ describe("upm-config", function () {
     });
     describe("get auth for registry", function () {
       it("should find auth for url without trailing slash", function () {
-        const url = registryUrl("http://registry.npmjs.com");
+        const url = makeRegistryUrl("http://registry.npmjs.com");
         const expected: NpmAuth = {
           alwaysAuth: false,
           token: "This is not a valid token",
@@ -146,7 +146,7 @@ describe("upm-config", function () {
 
         const actual = tryGetAuthForRegistry(
           config,
-          registryUrl("http://registryB.com")
+          makeRegistryUrl("http://registryB.com")
         );
         expect(actual).toBeNull();
       });

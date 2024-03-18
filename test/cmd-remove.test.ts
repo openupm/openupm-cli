@@ -2,14 +2,14 @@ import { remove } from "../src/cmd-remove";
 import { exampleRegistryUrl } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildProjectManifest } from "./data-project-manifest";
-import { domainName } from "../src/types/domain-name";
-import { semanticVersion } from "../src/types/semantic-version";
-import { packageReference } from "../src/types/package-reference";
+import { makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
-const packageA = domainName("com.example.package-a");
-const packageB = domainName("com.example.package-b");
-const missingPackage = domainName("pkg-not-exist");
+const packageA = makeDomainName("com.example.package-a");
+const packageB = makeDomainName("com.example.package-b");
+const missingPackage = makeDomainName("pkg-not-exist");
 
 describe("cmd-remove.ts", function () {
   describe("remove", function () {
@@ -61,7 +61,7 @@ describe("cmd-remove.ts", function () {
         },
       };
       const removeResult = await remove(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(removeResult).toBeError();

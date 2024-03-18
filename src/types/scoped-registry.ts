@@ -27,7 +27,7 @@ export type ScopedRegistry = Readonly<{
  * @param url The url.
  * @param scopes The scopes. If not specified defaults to empty array.
  */
-export function scopedRegistry(
+export function makeScopedRegistry(
   name: string,
   url: RegistryUrl,
   scopes?: DomainName[]

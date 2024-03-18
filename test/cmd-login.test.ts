@@ -1,6 +1,6 @@
 import "nock";
 import { generateNpmrcLines, getNpmrcPath } from "../src/cmd-login";
-import { registryUrl } from "../src/types/registry-url";
+import { makeRegistryUrl } from "../src/types/registry-url";
 import { runWithEnv } from "./mock-env";
 import path from "path";
 
@@ -10,7 +10,7 @@ describe("cmd-login.ts", function () {
       expect(
         generateNpmrcLines(
           "",
-          registryUrl("http://registry.npmjs.org"),
+          makeRegistryUrl("http://registry.npmjs.org"),
           "123-456-789"
         )
       ).toEqual(["//registry.npmjs.org/:_authToken=123-456-789"]);
@@ -19,7 +19,7 @@ describe("cmd-login.ts", function () {
       expect(
         generateNpmrcLines(
           "registry=https://registry.npmjs.org/",
-          registryUrl(" registry(http://registry.npmjs.org"),
+          makeRegistryUrl(" registry(http://registry.npmjs.org"),
           "123-456-789"
         )
       ).toEqual([
@@ -31,7 +31,7 @@ describe("cmd-login.ts", function () {
       expect(
         generateNpmrcLines(
           "registry=https://registry.npmjs.org/\n//127.0.0.1:4873/:_authToken=blar-blar-blar\n//registry.npmjs.org/:_authToken=blar-blar-blar",
-          registryUrl("http://registry.npmjs.org"),
+          makeRegistryUrl("http://registry.npmjs.org"),
           "123-456-789"
         )
       ).toEqual([
@@ -44,7 +44,7 @@ describe("cmd-login.ts", function () {
       expect(
         generateNpmrcLines(
           "",
-          registryUrl("http://registry.npmjs.org"),
+          makeRegistryUrl("http://registry.npmjs.org"),
           "123-456-789"
         )
       ).toEqual(["//registry.npmjs.org/:_authToken=123-456-789"]);
@@ -53,14 +53,14 @@ describe("cmd-login.ts", function () {
       expect(
         generateNpmrcLines(
           "",
-          registryUrl("http://registry.npmjs.org"),
+          makeRegistryUrl("http://registry.npmjs.org"),
           "=123-456-789="
         )
       ).toEqual(['//registry.npmjs.org/:_authToken="=123-456-789="']);
       expect(
         generateNpmrcLines(
           "",
-          registryUrl("http://registry.npmjs.org"),
+          makeRegistryUrl("http://registry.npmjs.org"),
           "?123-456-789?"
         )
       ).toEqual(['//registry.npmjs.org/:_authToken="?123-456-789?"']);

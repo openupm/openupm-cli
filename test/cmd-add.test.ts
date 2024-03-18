@@ -10,26 +10,26 @@ import {
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
-import { domainName } from "../src/types/domain-name";
 import { PackageUrl } from "../src/types/package-url";
-import { semanticVersion } from "../src/types/semantic-version";
-import { packageReference } from "../src/types/package-reference";
+import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { makeDomainName } from "../src/types/domain-name";
+import { makeSemanticVersion } from "../src/types/semantic-version";
 
 describe("cmd-add.ts", function () {
-  const packageMissing = domainName("pkg-not-exist");
-  const packageA = domainName("com.base.package-a");
-  const packageB = domainName("com.base.package-b");
-  const packageC = domainName("com.base.package-c");
-  const packageD = domainName("com.base.package-d");
-  const packageUp = domainName("com.upstream.package-up");
-  const packageLowerEditor = domainName(
+  const packageMissing = makeDomainName("pkg-not-exist");
+  const packageA = makeDomainName("com.base.package-a");
+  const packageB = makeDomainName("com.base.package-b");
+  const packageC = makeDomainName("com.base.package-c");
+  const packageD = makeDomainName("com.base.package-d");
+  const packageUp = makeDomainName("com.upstream.package-up");
+  const packageLowerEditor = makeDomainName(
     "com.base.package-with-lower-editor-version"
   );
-  const packageHigherEditor = domainName(
+  const packageHigherEditor = makeDomainName(
     "com.base.package-with-higher-editor-version"
   );
-  const packageWrongEditor = domainName(
+  const packageWrongEditor = makeDomainName(
     "com.base.package-with-wrong-editor-version"
   );
 
@@ -165,7 +165,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@1.0.0", async function () {
       const addResult = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(addResult).toBeOk();
@@ -177,7 +177,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@latest", async function () {
       const addResult = await add(
-        packageReference(packageA, "latest"),
+        makePackageReference(packageA, "latest"),
         options
       );
       expect(addResult).toBeOk();
@@ -189,12 +189,12 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@0.1.0 then pkg@1.0.0", async function () {
       const addResult1 = await add(
-        packageReference(packageA, semanticVersion("0.1.0")),
+        makePackageReference(packageA, makeSemanticVersion("0.1.0")),
         options
       );
       expect(addResult1).toBeOk();
       const addResult2 = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(addResult2).toBeOk();
@@ -206,12 +206,12 @@ describe("cmd-add.ts", function () {
     });
     it("add exited pkg version", async function () {
       const addResult1 = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(addResult1).toBeOk();
       const addResult2 = await add(
-        packageReference(packageA, semanticVersion("1.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
       expect(addResult2).toBeOk();
@@ -223,7 +223,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@not-exist-version", async function () {
       const addResult = await add(
-        packageReference(packageA, semanticVersion("2.0.0")),
+        makePackageReference(packageA, makeSemanticVersion("2.0.0")),
         options
       );
       expect(addResult).toBeError();
@@ -239,7 +239,10 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@http", async function () {
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
-      const addResult = await add(packageReference(packageA, gitUrl), options);
+      const addResult = await add(
+        makePackageReference(packageA, gitUrl),
+        options
+      );
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
@@ -252,7 +255,10 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@git", async function () {
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
-      const addResult = await add(packageReference(packageA, gitUrl), options);
+      const addResult = await add(
+        makePackageReference(packageA, gitUrl),
+        options
+      );
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
@@ -265,7 +271,10 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg@file", async function () {
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
-      const addResult = await add(packageReference(packageA, fileUrl), options);
+      const addResult = await add(
+        makePackageReference(packageA, fileUrl),
+        options
+      );
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, fileUrl)
@@ -322,7 +331,7 @@ describe("cmd-add.ts", function () {
     });
     it("add pkg with nested dependencies", async function () {
       const addResult = await add(
-        packageReference(packageC, "latest"),
+        makePackageReference(packageC, "latest"),
         upstreamOptions
       );
       expect(addResult).toBeOk();
