@@ -57,6 +57,10 @@ function determineCwd(options: CmdOptions): Result<string, CwdNotFoundError> {
   return Ok(cwd);
 }
 
+function determineWsl(options: CmdOptions): boolean {
+  return options._global.wsl === true;
+}
+
 /**
  * Attempts to parse env.
  */
@@ -110,7 +114,7 @@ export const parseEnv = async function (
 
   // auth
   if (options._global.systemUser) systemUser = true;
-  if (options._global.wsl) wsl = true;
+  wsl = determineWsl(options);
 
   const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
     tryLoadUpmConfig
