@@ -8,7 +8,7 @@ import {
 import path from "path";
 import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
-import { tryGetAuthForRegistry } from "../types/upm-config";
+import { tryGetAuthForRegistry, UPMConfig } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { Registry } from "../npm-client";
 import { CustomError } from "ts-custom-error";
@@ -61,6 +61,37 @@ function determineWsl(options: CmdOptions): boolean {
   return options._global.wsl === true;
 }
 
+function determinePrimaryRegistry(
+  options: CmdOptions,
+  upmConfig: UPMConfig | null
+): Registry {
+  let registry: Registry = {
+    url: makeRegistryUrl("https://package.openupm.com"),
+    auth: null,
+  };
+
+  if (options._global.cn === true)
+    registry = {
+      url: makeRegistryUrl("https://package.openupm.cn"),
+      auth: null,
+    };
+
+  if (options._global.registry) {
+    registry = {
+      url: coerceRegistryUrl(options._global.registry),
+      auth: null,
+    };
+  }
+
+  if (upmConfig !== null)
+    registry = {
+      url: registry.url,
+      auth: tryGetAuthForRegistry(upmConfig, registry.url),
+    };
+
+  return registry;
+}
+
 /**
  * Attempts to parse env.
  */
@@ -69,10 +100,6 @@ export const parseEnv = async function (
   checkPath: boolean
 ): Promise<Result<Env, EnvParseError>> {
   // set defaults
-  let registry: Registry = {
-    url: makeRegistryUrl("https://package.openupm.com"),
-    auth: null,
-  };
   let upstream = true;
   let upstreamRegistry: Registry = {
     url: makeRegistryUrl("https://packages.unity.com"),
@@ -93,10 +120,6 @@ export const parseEnv = async function (
   if (options._global.upstream === false) upstream = false;
   // region cn
   if (options._global.cn === true) {
-    registry = {
-      url: makeRegistryUrl("https://package.openupm.cn"),
-      auth: null,
-    };
     upstreamRegistry = {
       url: makeRegistryUrl("https://packages.unity.cn"),
       auth: null,
@@ -104,12 +127,6 @@ export const parseEnv = async function (
     log.notice("region", "cn");
   }
   // registry
-  if (options._global.registry) {
-    registry = {
-      url: coerceRegistryUrl(options._global.registry),
-      auth: null,
-    };
-  }
 
   // auth
   if (options._global.systemUser) systemUser = true;
@@ -122,15 +139,14 @@ export const parseEnv = async function (
   const upmConfig = upmConfigResult.value;
 
   if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
-    registry = {
-      url: registry.url,
-      auth: tryGetAuthForRegistry(upmConfig, registry.url),
-    };
     upstreamRegistry = {
       url: upstreamRegistry.url,
       auth: tryGetAuthForRegistry(upmConfig, upstreamRegistry.url),
     };
   }
+
+  const registry = determinePrimaryRegistry(options, upmConfig);
+
   // return if no need to check path
   if (!checkPath)
     return Ok({
