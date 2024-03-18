@@ -13,7 +13,7 @@ import { makeDomainName } from "../src/types/domain-name";
 import { makeSemanticVersion } from "../src/types/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
-describe("cmd-search.ts", function () {
+describe("cmd-search.ts", () => {
   let mockConsole: MockConsole = null!;
   let mockProject: MockUnityProject = null!;
 
@@ -41,7 +41,7 @@ describe("cmd-search.ts", function () {
     await mockProject.restore();
   });
 
-  describe("search endpoint", function () {
+  describe("search endpoint", () => {
     const searchEndpointResult: SearchEndpointResult = {
       objects: [
         {
@@ -98,7 +98,7 @@ describe("cmd-search.ts", function () {
     });
   });
 
-  describe("old search", function () {
+  describe("old search", () => {
     const allResult = {
       _updated: 99999,
       "com.example.package-a": {

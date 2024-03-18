@@ -4,8 +4,8 @@ import { makeRegistryUrl } from "../src/types/registry-url";
 import { runWithEnv } from "./mock-env";
 import path from "path";
 
-describe("cmd-login.ts", function () {
-  describe("generateNpmrcLines", function () {
+describe("cmd-login.ts", () => {
+  describe("generateNpmrcLines", () => {
     it("should append token to empty content", async function () {
       expect(
         generateNpmrcLines(
@@ -67,7 +67,7 @@ describe("cmd-login.ts", function () {
     });
   });
 
-  describe("getNpmrcPath", function () {
+  describe("getNpmrcPath", () => {
     it("should be USERPROFILE if defined", function () {
       const actual = runWithEnv({ USERPROFILE: "/user/dir" }, getNpmrcPath);
       const expected = path.join(path.sep, "user", "dir", ".npmrc");

@@ -16,7 +16,7 @@ import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { makeDomainName } from "../src/types/domain-name";
 import { makeSemanticVersion } from "../src/types/semantic-version";
 
-describe("cmd-add.ts", function () {
+describe("cmd-add.ts", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
   const packageA = makeDomainName("com.base.package-a");
   const packageB = makeDomainName("com.base.package-b");
@@ -59,7 +59,7 @@ describe("cmd-add.ts", function () {
     },
     force: true,
   };
-  describe("add", function () {
+  describe("add", () => {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 

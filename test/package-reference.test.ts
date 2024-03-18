@@ -4,8 +4,8 @@ import {
   splitPackageReference,
 } from "../src/types/package-reference";
 
-describe("package-reference", function () {
-  describe("validation", function () {
+describe("package-reference", () => {
+  describe("validation", () => {
     [
       "com.abc.my-package",
       "com.abc.my-package@1.2.3",
@@ -26,7 +26,7 @@ describe("package-reference", function () {
     );
   });
 
-  describe("split", function () {
+  describe("split", () => {
     function shouldSplitCorrectly(name: string, version?: string) {
       const [actualName, actualVersion] = splitPackageReference(
         makePackageReference(name, version)

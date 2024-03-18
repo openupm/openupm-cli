@@ -7,14 +7,14 @@ import {
 import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/types/domain-name";
 
-describe("scoped-registry", function () {
-  describe("construction", function () {
+describe("scoped-registry", () => {
+  describe("construction", () => {
     it("should have empty scopes list if scopes are not specified", () => {
       const registry = makeScopedRegistry("test", exampleRegistryUrl);
       expect(registry.scopes).toHaveLength(0);
     });
   });
-  describe("add scope", function () {
+  describe("add scope", () => {
     it("should keep scope-list alphabetical", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl);
 
@@ -33,7 +33,7 @@ describe("scoped-registry", function () {
       expect(registry.scopes).toEqual(["a"]);
     });
   });
-  describe("has scope", function () {
+  describe("has scope", () => {
     it("should have scope that was added", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl);
 
@@ -47,7 +47,7 @@ describe("scoped-registry", function () {
       expect(hasScope(registry, makeDomainName("a"))).toBeFalsy();
     });
   });
-  describe("remove scope", function () {
+  describe("remove scope", () => {
     it("should not have scope after removing it", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl, [
         makeDomainName("a"),

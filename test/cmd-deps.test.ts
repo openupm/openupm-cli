@@ -13,13 +13,13 @@ import { makeDomainName } from "../src/types/domain-name";
 import { makePackageReference } from "../src/types/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
-describe("cmd-deps.ts", function () {
+describe("cmd-deps.ts", () => {
   const options: DepsOptions = {
     _global: {
       registry: exampleRegistryUrl,
     },
   };
-  describe("deps", function () {
+  describe("deps", () => {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 

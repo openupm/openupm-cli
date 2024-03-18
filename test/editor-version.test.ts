@@ -5,8 +5,8 @@ import {
 
 import assert from "assert";
 
-describe("editor-version", function () {
-  describe("parseEditorVersion", function () {
+describe("editor-version", () => {
+  describe("parseEditorVersion", () => {
     it("test x.y", function () {
       const version = tryParseEditorVersion("2019.2");
       assert(version !== null);
@@ -72,7 +72,7 @@ describe("editor-version", function () {
     });
   });
 
-  describe("compareEditorVersion", function () {
+  describe("compareEditorVersion", () => {
     Array.of<[string, string]>(
       ["2019.1", "2019.1"],
       ["2019.1.1", "2019.1.1"],

@@ -4,8 +4,8 @@ import {
   makeDomainName,
 } from "../src/types/domain-name";
 
-describe("domain-name", function () {
-  describe("validation", function () {
+describe("domain-name", () => {
+  describe("validation", () => {
     [
       "com",
       "com.unity",
@@ -34,7 +34,7 @@ describe("domain-name", function () {
       })
     );
   });
-  describe("internal package", function () {
+  describe("internal package", () => {
     it("test com.otherorg.software", function () {
       expect(
         isInternalPackage(makeDomainName("com.otherorg.software"))

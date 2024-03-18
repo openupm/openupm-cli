@@ -16,9 +16,9 @@ import { makeRegistryUrl, RegistryUrl } from "../src/types/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
 import { exampleRegistryUrl } from "./mock-registry";
 
-describe("upm-config", function () {
-  describe("auth", function () {
-    describe("add", function () {
+describe("upm-config", () => {
+  describe("auth", () => {
+    describe("add", () => {
       it("should have registry after adding", function () {
         const registry = exampleRegistryUrl;
         const auth: BasicAuth = {
@@ -31,7 +31,7 @@ describe("upm-config", function () {
         );
       });
     });
-    describe("classification", function () {
+    describe("classification", () => {
       it("should be basic auth if it has _auth property", () => {
         const auth: UpmAuth = {
           email: "real@email.com",
@@ -51,7 +51,7 @@ describe("upm-config", function () {
         expect(isTokenAuth(auth)).toBeTruthy();
       });
     });
-    describe("encode/decode", function () {
+    describe("encode/decode", () => {
       it("should decode the same basic auth as was encoded", () => {
         const expectedUsername = "my-name";
         const expectedPassword = "123pass";
@@ -66,7 +66,7 @@ describe("upm-config", function () {
         expect(decoded).toBeNull();
       });
     });
-    describe("always-auth", function () {
+    describe("always-auth", () => {
       it("should always-auth when prop is true", () => {
         const auth: UpmAuth = {
           email: "real@email.com",
@@ -94,7 +94,7 @@ describe("upm-config", function () {
         expect(shouldAlwaysAuth(auth)).toBeFalsy();
       });
     });
-    describe("get auth for registry", function () {
+    describe("get auth for registry", () => {
       it("should find auth for url without trailing slash", function () {
         const url = makeRegistryUrl("http://registry.npmjs.com");
         const expected: NpmAuth = {

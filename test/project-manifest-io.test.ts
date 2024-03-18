@@ -1,7 +1,7 @@
 import {
-    manifestPathFor,
-    tryLoadProjectManifest,
-    trySaveProjectManifest,
+  manifestPathFor,
+  tryLoadProjectManifest,
+  trySaveProjectManifest,
 } from "../src/utils/project-manifest-io";
 import { DomainName, makeDomainName } from "../src/types/domain-name";
 import { makeSemanticVersion } from "../src/types/semantic-version";
@@ -16,8 +16,8 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
 import {
-    FileParseError,
-    RequiredFileNotFoundError
+  FileParseError,
+  RequiredFileNotFoundError,
 } from "../src/common-errors";
 
 describe("project-manifest io", () => {
