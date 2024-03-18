@@ -1,5 +1,5 @@
 import {
-  tryCompareEditorVersion,
+  compareEditorVersion,
   tryParseEditorVersion,
 } from "../src/types/editor-version";
 
@@ -80,7 +80,12 @@ describe("editor-version", function () {
       ["2019.1.1f1c1", "2019.1.1f1c1"]
     ).forEach(([a, b]) =>
       it(`${a} == ${b}`, function () {
-        expect(tryCompareEditorVersion(a, b)).toEqual(0);
+        expect(
+          compareEditorVersion(
+            tryParseEditorVersion(a)!,
+            tryParseEditorVersion(b)!
+          )
+        ).toEqual(0);
       })
     );
     Array.of<[string, string]>(
@@ -88,7 +93,12 @@ describe("editor-version", function () {
       ["2020.1", "2019.1"]
     ).forEach(([a, b]) =>
       it(`${a} > ${b}`, function () {
-        expect(tryCompareEditorVersion(a, b)).toEqual(1);
+        expect(
+          compareEditorVersion(
+            tryParseEditorVersion(a)!,
+            tryParseEditorVersion(b)!
+          )
+        ).toEqual(1);
       })
     );
     Array.of<[string, string]>(
@@ -101,16 +111,12 @@ describe("editor-version", function () {
       ["2019.1.1f1", "2020.1.1f1c1"]
     ).forEach(([a, b]) =>
       it(`${a} < ${b}`, function () {
-        expect(tryCompareEditorVersion(a, b)).toEqual(-1);
-      })
-    );
-
-    Array.of<[string, string]>(
-      ["2019.1", "not-a-version"],
-      ["not-a-version", "2020.1"]
-    ).forEach(([a, b]) =>
-      it(`should not be able to compare ${a} and ${b}`, function () {
-        expect(tryCompareEditorVersion(a, b)).toBeNull();
+        expect(
+          compareEditorVersion(
+            tryParseEditorVersion(a)!,
+            tryParseEditorVersion(b)!
+          )
+        ).toEqual(-1);
       })
     );
   });
