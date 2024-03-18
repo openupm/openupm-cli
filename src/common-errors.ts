@@ -1,5 +1,9 @@
 import { CustomError } from "ts-custom-error";
 
+/**
+ * Error for when a file that is required for the program to function
+ * was not found.
+ */
 export class RequiredFileNotFoundError extends CustomError {
   constructor(readonly path: string) {
     super(`The required file at "${path}" could not be found.`);
@@ -24,6 +28,11 @@ export class PackumentNotFoundError extends CustomError {
   }
 }
 
+/**
+ * Error for when a function expected a package-reference with only a name
+ * e.g. "com.my-package", but it also included a version e.g.
+ * "com.my-package@1.2.3".
+ */
 export class PackageWithVersionError extends CustomError {
   constructor() {
     super(
