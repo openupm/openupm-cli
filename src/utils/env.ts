@@ -105,6 +105,10 @@ function determineUseUpstream(options: CmdOptions): boolean {
   return options._global.upstream !== false;
 }
 
+function determineIsSystemUser(options: CmdOptions): boolean {
+  return options._global.systemUser === true;
+}
+
 /**
  * Attempts to parse env.
  */
@@ -129,7 +133,7 @@ export const parseEnv = async function (
   if (options._global.cn === true) log.notice("region", "cn");
 
   // auth
-  if (options._global.systemUser) systemUser = true;
+  systemUser = determineIsSystemUser(options);
   const wsl = determineWsl(options);
 
   const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
