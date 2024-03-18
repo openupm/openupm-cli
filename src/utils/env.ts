@@ -113,7 +113,6 @@ export const parseEnv = async function (
   checkPath: boolean
 ): Promise<Result<Env, EnvParseError>> {
   // set defaults
-  let upstream = true;
   let systemUser = false;
   let editorVersion: string | null = null;
   // log level
@@ -125,7 +124,7 @@ export const parseEnv = async function (
     log.disableColor();
   }
   // upstream
-  upstream = determineUseUpstream(options);
+  const upstream = determineUseUpstream(options);
   // region cn
   if (options._global.cn === true) log.notice("region", "cn");
 
