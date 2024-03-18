@@ -49,7 +49,7 @@ type LocalVersion = ReleaseVersion & {
  */
 export type EditorVersion = RegularVersion | PatchVersion | LocalVersion;
 
-function localeValue(loc: LocaleCode) {
+function localeValue(loc: LocaleCode): number {
   if (loc === "c") return 1;
   throw new Error("Unknown locale");
 }
