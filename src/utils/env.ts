@@ -97,6 +97,10 @@ function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
   return options._global.verbose ? "verbose" : "notice";
 }
 
+function determineUseColor(options: CmdOptions): boolean {
+  return options._global.color !== false && process.env.NODE_ENV !== "test";
+}
+
 /**
  * Attempts to parse env.
  */
@@ -111,8 +115,7 @@ export const parseEnv = async function (
   // log level
   log.level = determineLogLevel(options);
   // color
-  const useColor =
-    options._global.color !== false && process.env.NODE_ENV !== "test";
+  const useColor = determineUseColor(options);
   if (!useColor) {
     chalk.level = 0;
     log.disableColor();
