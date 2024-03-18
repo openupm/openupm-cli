@@ -1,9 +1,9 @@
 export function trySplitAtFirstOccurrenceOf(
   s: string,
   split: string
-): [string, string | undefined] {
+): [string, string | null] {
   const elements = s.split(split);
-  if (elements.length === 1) return [s, undefined];
+  if (elements.length === 1) return [s, null];
   return [elements[0]!, elements.slice(1).join(split)];
 }
 

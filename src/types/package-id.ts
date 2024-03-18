@@ -15,9 +15,7 @@ export type PackageId = `${DomainName}@${SemanticVersion}`;
  */
 export function isPackageId(s: string): s is PackageId {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
-  return (
-    isDomainName(name) && version !== undefined && isSemanticVersion(version)
-  );
+  return isDomainName(name) && version !== null && isSemanticVersion(version);
 }
 
 /**

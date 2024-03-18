@@ -91,7 +91,7 @@ export function encodeBasicAuth(username: string, password: string): Base64 {
 export function tryDecodeBasicAuth(base64: Base64): [string, string] | null {
   const text = decodeBase64(base64);
   const [username, password] = trySplitAtFirstOccurrenceOf(text, ":");
-  if (password === undefined) return null;
+  if (password === null) return null;
   return [username, password];
 }
 
