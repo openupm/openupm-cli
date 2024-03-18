@@ -117,7 +117,6 @@ export const parseEnv = async function (
   checkPath: boolean
 ): Promise<Result<Env, EnvParseError>> {
   // set defaults
-  let systemUser = false;
   let editorVersion: string | null = null;
   // log level
   log.level = determineLogLevel(options);
@@ -133,7 +132,7 @@ export const parseEnv = async function (
   if (options._global.cn === true) log.notice("region", "cn");
 
   // auth
-  systemUser = determineIsSystemUser(options);
+  const systemUser = determineIsSystemUser(options);
   const wsl = determineWsl(options);
 
   const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
