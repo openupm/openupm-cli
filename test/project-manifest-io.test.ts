@@ -1,12 +1,12 @@
 import {
-  tryLoadProjectManifest,
-  trySaveProjectManifest,
+    manifestPathFor,
+    tryLoadProjectManifest,
+    trySaveProjectManifest,
 } from "../src/utils/project-manifest-io";
 import { DomainName, makeDomainName } from "../src/types/domain-name";
 import { makeSemanticVersion } from "../src/types/semantic-version";
 import {
   addDependency,
-  manifestPathFor,
   mapScopedRegistry,
 } from "../src/types/project-manifest";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";

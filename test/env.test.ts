@@ -4,8 +4,8 @@ import { makeRegistryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { manifestPathFor } from "../src/types/project-manifest";
 import fse from "fs-extra";
+import {manifestPathFor} from "../src/utils/project-manifest-io";
 
 const testUpmAuth: TokenAuth = {
   email: "test@mail.com",

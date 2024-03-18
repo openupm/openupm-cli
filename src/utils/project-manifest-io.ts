@@ -1,10 +1,6 @@
 import fs from "fs/promises";
 import { assertIsError } from "./error-type-guards";
-import {
-  manifestPathFor,
-  pruneManifest,
-  UnityProjectManifest,
-} from "../types/project-manifest";
+import { pruneManifest, UnityProjectManifest } from "../types/project-manifest";
 import fse from "fs-extra";
 import path from "path";
 import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
@@ -13,6 +9,15 @@ import { AsyncResult, Result } from "ts-results-es";
 export type ManifestLoadError = RequiredFileNotFoundError | FileParseError;
 
 export type ManifestSaveError = Error;
+
+/**
+ * Determines the path to the package manifest based on the project
+ * directory.
+ * @param projectPath The root path of the Unity project.
+ */
+export function manifestPathFor(projectPath: string): string {
+  return path.join(projectPath, "Packages/manifest.json");
+}
 
 /**
  * Attempts to load the manifest for a Unity project.
