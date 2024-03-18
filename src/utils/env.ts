@@ -78,6 +78,21 @@ function determinePrimaryRegistry(
   return { url, auth };
 }
 
+function determineUpstreamRegistry(
+  options: CmdOptions,
+  upmConfig: UPMConfig | null
+): Registry {
+  const url =
+    options._global.cn === true
+      ? makeRegistryUrl("https://packages.unity.cn")
+      : makeRegistryUrl("https://packages.unity.com");
+
+  const auth =
+    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
+
+  return { url, auth };
+}
+
 /**
  * Attempts to parse env.
  */
@@ -87,10 +102,6 @@ export const parseEnv = async function (
 ): Promise<Result<Env, EnvParseError>> {
   // set defaults
   let upstream = true;
-  let upstreamRegistry: Registry = {
-    url: makeRegistryUrl("https://packages.unity.com"),
-    auth: null,
-  };
   let systemUser = false;
   let editorVersion: string | null = null;
   // log level
@@ -105,14 +116,7 @@ export const parseEnv = async function (
   // upstream
   if (options._global.upstream === false) upstream = false;
   // region cn
-  if (options._global.cn === true) {
-    upstreamRegistry = {
-      url: makeRegistryUrl("https://packages.unity.cn"),
-      auth: null,
-    };
-    log.notice("region", "cn");
-  }
-  // registry
+  if (options._global.cn === true) log.notice("region", "cn");
 
   // auth
   if (options._global.systemUser) systemUser = true;
@@ -124,14 +128,8 @@ export const parseEnv = async function (
   if (upmConfigResult.isErr()) return upmConfigResult;
   const upmConfig = upmConfigResult.value;
 
-  if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
-    upstreamRegistry = {
-      url: upstreamRegistry.url,
-      auth: tryGetAuthForRegistry(upmConfig, upstreamRegistry.url),
-    };
-  }
-
   const registry = determinePrimaryRegistry(options, upmConfig);
+  const upstreamRegistry = determineUpstreamRegistry(options, upmConfig);
 
   // return if no need to check path
   if (!checkPath)
