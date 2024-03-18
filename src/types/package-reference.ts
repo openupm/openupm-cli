@@ -43,7 +43,7 @@ function isVersionReference(s: string): s is VersionReference {
 export function isPackageReference(s: string): s is PackageReference {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
   return (
-    isDomainName(name) && (version === undefined || isVersionReference(version))
+    isDomainName(name) && (version === null || isVersionReference(version))
   );
 }
 
@@ -54,10 +54,11 @@ export function isPackageReference(s: string): s is PackageReference {
 export function splitPackageReference(
   reference: PackageReference
 ): [DomainName, VersionReference | undefined] {
-  return trySplitAtFirstOccurrenceOf(reference, "@") as [
+  const [name, version] = trySplitAtFirstOccurrenceOf(reference, "@") as [
     DomainName,
-    VersionReference | undefined
+    VersionReference | null
   ];
+  return [name, version ?? undefined];
 }
 
 /**
