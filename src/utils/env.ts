@@ -93,6 +93,10 @@ function determineUpstreamRegistry(
   return { url, auth };
 }
 
+function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
+  return options._global.verbose ? "verbose" : "notice";
+}
+
 /**
  * Attempts to parse env.
  */
@@ -105,7 +109,7 @@ export const parseEnv = async function (
   let systemUser = false;
   let editorVersion: string | null = null;
   // log level
-  log.level = options._global.verbose ? "verbose" : "notice";
+  log.level = determineLogLevel(options);
   // color
   const useColor =
     options._global.color !== false && process.env.NODE_ENV !== "test";
