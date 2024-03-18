@@ -1,6 +1,6 @@
 import {
   addDependency,
-  addScopedRegistry,
+  setScopedRegistry,
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
@@ -68,7 +68,7 @@ describe("project-manifest", function () {
       const url = makeRegistryUrl("https://test.com");
       const expected = makeScopedRegistry("test", url);
 
-      manifest = addScopedRegistry(manifest, expected);
+      manifest = setScopedRegistry(manifest, expected);
 
       expect(tryGetScopedRegistryByUrl(manifest, url)).toEqual(expected);
     });
@@ -80,7 +80,7 @@ describe("project-manifest", function () {
         makeRegistryUrl("https://test2.com")
       );
 
-      manifest = addScopedRegistry(manifest, expected);
+      manifest = setScopedRegistry(manifest, expected);
 
       expect(tryGetScopedRegistryByUrl(manifest, url)).toBeNull();
     });
@@ -99,7 +99,7 @@ describe("project-manifest", function () {
     it("should have scoped-registry as input if found", () => {
       let manifest = emptyProjectManifest;
       const expected = makeScopedRegistry("test", exampleRegistryUrl);
-      manifest = addScopedRegistry(manifest, expected);
+      manifest = setScopedRegistry(manifest, expected);
 
       expect.assertions(1);
       mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
@@ -111,7 +111,7 @@ describe("project-manifest", function () {
     it("should not have scoped-registry after returning null", () => {
       let manifest = emptyProjectManifest;
       const initial = makeScopedRegistry("test", exampleRegistryUrl);
-      manifest = addScopedRegistry(manifest, initial);
+      manifest = setScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(manifest, exampleRegistryUrl, () => null);
 
@@ -123,7 +123,7 @@ describe("project-manifest", function () {
       let manifest = emptyProjectManifest;
       const initial = makeScopedRegistry("test", exampleRegistryUrl);
       const expected = addScope(initial, makeDomainName("wow"));
-      manifest = addScopedRegistry(manifest, initial);
+      manifest = setScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(
         manifest,
