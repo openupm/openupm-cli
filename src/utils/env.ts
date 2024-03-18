@@ -118,14 +118,17 @@ export const parseEnv = async function (
 ): Promise<Result<Env, EnvParseError>> {
   // log level
   log.level = determineLogLevel(options);
+
   // color
   const useColor = determineUseColor(options);
   if (!useColor) {
     chalk.level = 0;
     log.disableColor();
   }
+
   // upstream
   const upstream = determineUseUpstream(options);
+
   // region cn
   if (options._global.cn === true) log.notice("region", "cn");
 
@@ -133,6 +136,7 @@ export const parseEnv = async function (
   const systemUser = determineIsSystemUser(options);
   const wsl = determineWsl(options);
 
+  // registries
   const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
     tryLoadUpmConfig
   ).promise;
@@ -189,7 +193,6 @@ export const parseEnv = async function (
   }
   const editorVersion = projectVersionLoadResult.value;
 
-  // return
   return Ok({
     cwd,
     editorVersion,
