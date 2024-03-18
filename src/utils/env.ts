@@ -65,31 +65,17 @@ function determinePrimaryRegistry(
   options: CmdOptions,
   upmConfig: UPMConfig | null
 ): Registry {
-  let registry: Registry = {
-    url: makeRegistryUrl("https://package.openupm.com"),
-    auth: null,
-  };
+  const url =
+    options._global.registry !== undefined
+      ? coerceRegistryUrl(options._global.registry)
+      : options._global.cn === true
+      ? makeRegistryUrl("https://package.openupm.cn")
+      : makeRegistryUrl("https://package.openupm.com");
 
-  if (options._global.cn === true)
-    registry = {
-      url: makeRegistryUrl("https://package.openupm.cn"),
-      auth: null,
-    };
+  const auth =
+    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
 
-  if (options._global.registry) {
-    registry = {
-      url: coerceRegistryUrl(options._global.registry),
-      auth: null,
-    };
-  }
-
-  if (upmConfig !== null)
-    registry = {
-      url: registry.url,
-      auth: tryGetAuthForRegistry(upmConfig, registry.url),
-    };
-
-  return registry;
+  return { url, auth };
 }
 
 /**
