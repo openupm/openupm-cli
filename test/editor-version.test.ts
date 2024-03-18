@@ -7,12 +7,12 @@ import assert from "assert";
 
 describe("editor-version", () => {
   describe("parseEditorVersion", () => {
-    it("test x.y", function () {
+    it("test x.y", () => {
       const version = tryParseEditorVersion("2019.2");
       assert(version !== null);
       expect(version).toEqual({ major: 2019, minor: 2 });
     });
-    it("test x.y.z", function () {
+    it("test x.y.z", () => {
       const version = tryParseEditorVersion("2019.2.1");
       assert(version !== null);
       expect(version).toEqual({
@@ -21,7 +21,7 @@ describe("editor-version", () => {
         patch: 1,
       });
     });
-    it("test x.y.zan", function () {
+    it("test x.y.zan", () => {
       const version = tryParseEditorVersion("2019.2.1a5");
       assert(version !== null);
       expect(version).toEqual({
@@ -32,7 +32,7 @@ describe("editor-version", () => {
         build: 5,
       });
     });
-    it("test x.y.zbn", function () {
+    it("test x.y.zbn", () => {
       const version = tryParseEditorVersion("2019.2.1b5");
       assert(version !== null);
       expect(version).toEqual({
@@ -43,7 +43,7 @@ describe("editor-version", () => {
         build: 5,
       });
     });
-    it("test x.y.zfn", function () {
+    it("test x.y.zfn", () => {
       const version = tryParseEditorVersion("2019.2.1f5");
       assert(version !== null);
       expect(version).toEqual({
@@ -54,7 +54,7 @@ describe("editor-version", () => {
         build: 5,
       });
     });
-    it("test x.y.zcn", function () {
+    it("test x.y.zcn", () => {
       const version = tryParseEditorVersion("2019.2.1f1c5");
       assert(version !== null);
       expect(version).toEqual({
@@ -67,7 +67,7 @@ describe("editor-version", () => {
         locBuild: 5,
       });
     });
-    it("test invalid version", function () {
+    it("test invalid version", () => {
       expect(tryParseEditorVersion("2019") === null).toBeTruthy();
     });
   });

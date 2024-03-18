@@ -35,15 +35,15 @@ describe("domain-name", () => {
     );
   });
   describe("internal package", () => {
-    it("test com.otherorg.software", function () {
+    it("test com.otherorg.software", () => {
       expect(
         isInternalPackage(makeDomainName("com.otherorg.software"))
       ).not.toBeTruthy();
     });
-    it("test com.unity.ugui", function () {
+    it("test com.unity.ugui", () => {
       expect(isInternalPackage(makeDomainName("com.unity.ugui"))).toBeTruthy();
     });
-    it("test com.unity.modules.tilemap", function () {
+    it("test com.unity.modules.tilemap", () => {
       expect(
         isInternalPackage(makeDomainName("com.unity.modules.tilemap"))
       ).toBeTruthy();
