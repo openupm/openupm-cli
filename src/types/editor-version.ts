@@ -101,22 +101,6 @@ export const compareEditorVersion = function (
   }
   return 0;
 };
-/**
- * Attempts to compare two unparsed editor versions for ordering.
- * @param a The first version.
- * @param b The second version.
- * @returns A number indicating the ordering or null if either version could
- * not be parsed.
- */
-export const tryCompareEditorVersion = function (
-  a: string,
-  b: string
-): -1 | 0 | 1 | null {
-  const verA = tryParseEditorVersion(a);
-  const verB = tryParseEditorVersion(b);
-  if (verA === null || verB === null) return null;
-  return compareEditorVersion(verA, verB);
-};
 
 /**
  * Attempts to parse editor version string to groups.
