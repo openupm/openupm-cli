@@ -27,12 +27,12 @@ const searchEndpoint = function (
   });
 };
 
-const searchOld = async function (
+const searchOld = function (
   npmClient: NpmClient,
   registry: Registry,
   keyword: string
-): Promise<Result<SearchedPackument[], HttpErrorBase>> {
-  return (await npmClient.tryGetAll(registry).promise).map((allPackuments) => {
+): AsyncResult<SearchedPackument[], HttpErrorBase> {
+  return npmClient.tryGetAll(registry).map((allPackuments) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _updated, ...packumentEntries } = allPackuments;
     const packuments = Object.values(packumentEntries);
@@ -65,7 +65,7 @@ export async function search(
   // search old search
   if (result.isErr()) {
     log.warn("", "fast search endpoint is not available, using old search.");
-    result = await searchOld(npmClient, env.registry, keyword);
+    result = await searchOld(npmClient, env.registry, keyword).promise;
   }
   if (result.isErr()) {
     log.warn("", "/-/all endpoint is not available");
