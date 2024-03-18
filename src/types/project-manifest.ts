@@ -128,12 +128,12 @@ export function mapScopedRegistry(
 }
 
 /**
- * Adds a scoped-registry to the manifest.
- * NOTE: Does not check if a scoped-registry with the same name already exists.
+ * Sets a scoped-registry in the manifest. If no scoped-registry with
+ * the given url exists yet, it is added, otherwise it is overwritten.
  * @param manifest The manifest.
  * @param scopedRegistry The scoped-registry.
  */
-export function addScopedRegistry(
+export function setScopedRegistry(
   manifest: UnityProjectManifest,
   scopedRegistry: ScopedRegistry
 ): UnityProjectManifest {
