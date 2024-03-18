@@ -11,6 +11,7 @@ import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
 import { assertIsError } from "./error-type-guards";
+import { tryReadTextFromFile } from "./file-io";
 
 const configFileName = ".upmconfig.toml";
 
@@ -81,7 +82,11 @@ export const tryLoadUpmConfig = async (
 ): Promise<UPMConfig | null> => {
   const configPath = path.join(configDir, configFileName);
   try {
-    const content = await fs.readFile(configPath, "utf8");
+    // TODO:
+    //  Instead of unwrapping here and risking a throw that is then
+    //  immediately caught, we should make this function return a result
+    //  and use mapping.
+    const content = (await tryReadTextFromFile(configPath).promise).unwrap();
     const config = TOML.parse(content);
 
     // NOTE: We assume correct format
