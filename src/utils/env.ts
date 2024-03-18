@@ -69,7 +69,6 @@ export const parseEnv = async function (
     url: makeRegistryUrl("https://package.openupm.com"),
     auth: null,
   };
-  let cwd = "";
   let upstream = true;
   let upstreamRegistry: Registry = {
     url: makeRegistryUrl("https://packages.unity.com"),
@@ -132,7 +131,7 @@ export const parseEnv = async function (
   // return if no need to check path
   if (!checkPath)
     return Ok({
-      cwd,
+      cwd: "",
       editorVersion,
       registry,
       systemUser,
@@ -147,7 +146,7 @@ export const parseEnv = async function (
     log.error("env", `can not resolve path ${cwdResult.error.path}`);
     return cwdResult;
   }
-  cwd = cwdResult.value;
+  const cwd = cwdResult.value;
 
   // manifest path
   const manifestPath = manifestPathFor(cwd);
