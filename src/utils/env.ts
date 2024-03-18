@@ -10,7 +10,6 @@ import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
-import { manifestPathFor } from "../types/project-manifest";
 import { Registry } from "../npm-client";
 import { CustomError } from "ts-custom-error";
 import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
@@ -19,6 +18,7 @@ import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
 } from "./project-version-io";
+import {manifestPathFor} from "./project-manifest-io";
 
 export type Env = Readonly<{
   cwd: string;
