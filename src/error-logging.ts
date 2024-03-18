@@ -15,7 +15,7 @@ export function logManifestLoadError(error: ManifestLoadError) {
     log.error(prefix, `manifest at ${error.path} does not exist`);
   else {
     log.error(prefix, `failed to parse manifest at ${error.path}`);
-    log.error(prefix, error.cause.message);
+    if (error.cause !== undefined) log.error(prefix, error.cause.message);
   }
 }
 

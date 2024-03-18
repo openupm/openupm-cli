@@ -7,17 +7,10 @@ import {
 } from "../types/project-manifest";
 import fse from "fs-extra";
 import path from "path";
-import { CustomError } from "ts-custom-error";
-import { RequiredFileNotFoundError } from "../common-errors";
+import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
 
-export class ManifestParseError extends CustomError {
-  constructor(readonly path: string, readonly cause: Error) {
-    super("A project-manifest could not be parsed");
-  }
-}
-
-export type ManifestLoadError = RequiredFileNotFoundError | ManifestParseError;
+export type ManifestLoadError = RequiredFileNotFoundError | FileParseError;
 
 export type ManifestSaveError = Error;
 
@@ -41,7 +34,7 @@ export const tryLoadProjectManifest = function (
         assertIsError(error);
         if (error.code === "ENOENT")
           return new RequiredFileNotFoundError(manifestPath);
-        else return new ManifestParseError(manifestPath, error);
+        else return new FileParseError(manifestPath, "Project-manifest");
       })
   );
 };

@@ -31,3 +31,26 @@ export class PackageWithVersionError extends CustomError {
     );
   }
 }
+
+/**
+ * Error for when a file could not be parsed into a specific target type.
+ */
+export class FileParseError extends CustomError {
+  constructor(
+    /**
+     * The path to the file that could not be parsed.
+     */
+    readonly path: string,
+    /**
+     * A description or name of the thing that the file was supposed to be
+     * parsed to.
+     */
+    readonly targetDescription: string,
+    /**
+     * The error that caused this one.
+     */
+    readonly cause?: Error
+  ) {
+    super("A file could not be parsed into a specific target type.");
+  }
+}
