@@ -1,26 +1,10 @@
 import {
-  makeDomainName,
   isDomainName,
   isInternalPackage,
-  namespaceFor,
+  makeDomainName,
 } from "../src/types/domain-name";
 
 describe("domain-name", function () {
-  describe("namespace", function () {
-    (
-      [
-        ["unity.com", "com.unity"],
-        ["my-school.ac.at", "at.ac.my-school"],
-        ["openupm.com", "com.openupm"],
-        ["registry.npmjs.org", "org.npmjs"],
-      ] as [string, string][]
-    ).forEach(([hostName, expected]) =>
-      it(`"${hostName}" should become "${expected}"`, function () {
-        const actual = namespaceFor(hostName);
-        expect(actual).toEqual(expected);
-      })
-    );
-  });
   describe("validation", function () {
     [
       "com",
