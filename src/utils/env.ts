@@ -101,6 +101,10 @@ function determineUseColor(options: CmdOptions): boolean {
   return options._global.color !== false && process.env.NODE_ENV !== "test";
 }
 
+function determineUseUpstream(options: CmdOptions): boolean {
+  return options._global.upstream !== false;
+}
+
 /**
  * Attempts to parse env.
  */
@@ -121,7 +125,7 @@ export const parseEnv = async function (
     log.disableColor();
   }
   // upstream
-  if (options._global.upstream === false) upstream = false;
+  upstream = determineUseUpstream(options);
   // region cn
   if (options._global.cn === true) log.notice("region", "cn");
 
