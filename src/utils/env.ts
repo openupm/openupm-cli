@@ -116,8 +116,6 @@ export const parseEnv = async function (
   options: CmdOptions,
   checkPath: boolean
 ): Promise<Result<Env, EnvParseError>> {
-  // set defaults
-  let editorVersion: string | null = null;
   // log level
   log.level = determineLogLevel(options);
   // color
@@ -148,7 +146,7 @@ export const parseEnv = async function (
   if (!checkPath)
     return Ok({
       cwd: "",
-      editorVersion,
+      editorVersion: null,
       registry,
       systemUser,
       upstream,
@@ -189,7 +187,7 @@ export const parseEnv = async function (
       );
     return projectVersionLoadResult;
   }
-  editorVersion = projectVersionLoadResult.value;
+  const editorVersion = projectVersionLoadResult.value;
 
   // return
   return Ok({
