@@ -17,7 +17,7 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
-import { Ok, Result } from "ts-results-es";
+import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
 
 export type LoginError =
@@ -73,7 +73,8 @@ export const login = async function (
     if (result.isErr()) return result;
   } else {
     // npm login
-    const result = await npmLogin(username, password, email, loginRegistry);
+    const result = await npmLogin(username, password, email, loginRegistry)
+      .promise;
     if (result.isErr()) return result;
     const token = result.value;
 
@@ -93,26 +94,25 @@ export const login = async function (
 /**
  * Return npm login token.
  */
-const npmLogin = async function (
+const npmLogin = function (
   username: string,
   password: string,
   email: string,
   registry: RegistryUrl
-): Promise<Result<string, AuthenticationError>> {
+): AsyncResult<string, AuthenticationError> {
   const client = makeNpmClient();
-  const result = await client.addUser(registry, username, password, email)
-    .promise;
-
-  if (result.isOk()) {
-    log.notice("auth", `you are authenticated as '${username}'`);
-    return result;
-  }
-
-  if (result.error.status === 401)
-    log.warn("401", "Incorrect username or password");
-  else log.error(result.error.status.toString(), result.error.message);
-
-  return result;
+  return client
+    .addUser(registry, username, password, email)
+    .map((result) => {
+      log.notice("auth", `you are authenticated as '${username}'`);
+      return result;
+    })
+    .mapErr((error) => {
+      if (error.status === 401)
+        log.warn("401", "Incorrect username or password");
+      else log.error(error.status.toString(), error.message);
+      return error;
+    });
 };
 
 /**
