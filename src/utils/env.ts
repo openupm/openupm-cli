@@ -79,7 +79,6 @@ export const parseEnv = async function (
     auth: null,
   };
   let systemUser = false;
-  let wsl = false;
   let editorVersion: string | null = null;
   // log level
   log.level = options._global.verbose ? "verbose" : "notice";
@@ -114,7 +113,7 @@ export const parseEnv = async function (
 
   // auth
   if (options._global.systemUser) systemUser = true;
-  wsl = determineWsl(options);
+  const wsl = determineWsl(options);
 
   const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
     tryLoadUpmConfig
