@@ -11,7 +11,7 @@ import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { Registry } from "../npm-client";
-import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
+import { FileParseError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import {
   ProjectVersionLoadError,
@@ -162,13 +162,13 @@ export const parseEnv = async function (
       "manifest",
       `can not locate manifest.json at path ${manifestPath}`
     );
-    return Err(new RequiredFileNotFoundError(manifestPath));
+    return Err(new NotFoundError(manifestPath));
   }
 
   // editor version
   const projectVersionLoadResult = await tryLoadProjectVersion(cwd);
   if (projectVersionLoadResult.isErr()) {
-    if (projectVersionLoadResult.error instanceof RequiredFileNotFoundError)
+    if (projectVersionLoadResult.error instanceof NotFoundError)
       log.warn(
         "ProjectVersion",
         `can not locate ProjectVersion.text at path ${projectVersionLoadResult.error.path}`

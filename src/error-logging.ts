@@ -3,7 +3,7 @@ import {
   ManifestLoadError,
   ManifestSaveError,
 } from "./utils/project-manifest-io";
-import { RequiredFileNotFoundError } from "./common-errors";
+import { NotFoundError } from "./utils/file-io";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
@@ -11,7 +11,7 @@ import { RequiredFileNotFoundError } from "./common-errors";
  */
 export function logManifestLoadError(error: ManifestLoadError) {
   const prefix = "manifest";
-  if (error instanceof RequiredFileNotFoundError)
+  if (error instanceof NotFoundError)
     log.error(prefix, `manifest at ${error.path} does not exist`);
   else {
     log.error(prefix, `failed to parse manifest at ${error.path}`);

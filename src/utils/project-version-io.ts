@@ -2,18 +2,11 @@ import path from "path";
 import fse from "fs-extra";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import yaml from "yaml";
-import {
-  FileParseError,
-  IOError,
-  RequiredFileNotFoundError,
-} from "../common-errors";
-import { NotFoundError, tryReadTextFromFile } from "./file-io";
+import { FileParseError } from "../common-errors";
+import { FileReadError, tryReadTextFromFile } from "./file-io";
 import { assertIsError } from "./error-type-guards";
 
-export type ProjectVersionLoadError =
-  | RequiredFileNotFoundError
-  | FileParseError
-  | IOError;
+export type ProjectVersionLoadError = FileReadError | FileParseError;
 
 function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
@@ -70,12 +63,5 @@ export function tryLoadProjectVersion(
         return Err(new FileParseError(filePath, "Project-version"));
 
       return Ok(content.m_EditorVersion);
-    })
-    .mapErr((error) => {
-      {
-        if (error instanceof NotFoundError)
-          return new RequiredFileNotFoundError(filePath);
-        return error;
-      }
     }).promise;
 }

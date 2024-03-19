@@ -1,11 +1,7 @@
 import { assertIsError } from "./error-type-guards";
 import { pruneManifest, UnityProjectManifest } from "../types/project-manifest";
 import path from "path";
-import {
-  FileParseError,
-  IOError,
-  RequiredFileNotFoundError,
-} from "../common-errors";
+import { FileParseError, IOError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
 import {
   NotFoundError,
@@ -13,7 +9,7 @@ import {
   tryWriteTextToFile,
 } from "./file-io";
 
-export type ManifestLoadError = RequiredFileNotFoundError | FileParseError;
+export type ManifestLoadError = NotFoundError | FileParseError;
 
 export type ManifestSaveError = IOError;
 
@@ -46,9 +42,8 @@ export const tryLoadProjectManifest = function (
         )
       )
       .mapErr((error) => {
-        if (error instanceof NotFoundError)
-          return new RequiredFileNotFoundError(manifestPath);
-        else return new FileParseError(manifestPath, "Project-manifest");
+        if (error instanceof NotFoundError) return error;
+        return new FileParseError(manifestPath, "Project-manifest");
       })
   );
 };
