@@ -8,7 +8,7 @@ import {
 import path from "path";
 import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
-import { tryGetAuthForRegistry } from "../types/upm-config";
+import { tryGetAuthForRegistry, UPMConfig } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { Registry } from "../npm-client";
 import { CustomError } from "ts-custom-error";
@@ -18,7 +18,7 @@ import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
 } from "./project-version-io";
-import {manifestPathFor} from "./project-manifest-io";
+import { manifestPathFor } from "./project-manifest-io";
 
 export type Env = Readonly<{
   cwd: string;
@@ -30,12 +30,84 @@ export type Env = Readonly<{
   editorVersion: string | null;
 }>;
 
-export class CwdNotFoundError extends CustomError {}
+export class CwdNotFoundError extends CustomError {
+  constructor(
+    /**
+     * The path that was not found.
+     */
+    readonly path: string
+  ) {
+    super();
+  }
+}
 
 export type EnvParseError =
   | CwdNotFoundError
   | GetUpmConfigDirError
   | ProjectVersionLoadError;
+
+function determineCwd(options: CmdOptions): Result<string, CwdNotFoundError> {
+  const cwd =
+    options._global.chdir !== undefined
+      ? path.resolve(options._global.chdir)
+      : process.cwd();
+
+  if (!fs.existsSync(cwd)) return Err(new CwdNotFoundError(cwd));
+
+  return Ok(cwd);
+}
+
+function determineWsl(options: CmdOptions): boolean {
+  return options._global.wsl === true;
+}
+
+function determinePrimaryRegistry(
+  options: CmdOptions,
+  upmConfig: UPMConfig | null
+): Registry {
+  const url =
+    options._global.registry !== undefined
+      ? coerceRegistryUrl(options._global.registry)
+      : options._global.cn === true
+      ? makeRegistryUrl("https://package.openupm.cn")
+      : makeRegistryUrl("https://package.openupm.com");
+
+  const auth =
+    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
+
+  return { url, auth };
+}
+
+function determineUpstreamRegistry(
+  options: CmdOptions,
+  upmConfig: UPMConfig | null
+): Registry {
+  const url =
+    options._global.cn === true
+      ? makeRegistryUrl("https://packages.unity.cn")
+      : makeRegistryUrl("https://packages.unity.com");
+
+  const auth =
+    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
+
+  return { url, auth };
+}
+
+function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
+  return options._global.verbose ? "verbose" : "notice";
+}
+
+function determineUseColor(options: CmdOptions): boolean {
+  return options._global.color !== false && process.env.NODE_ENV !== "test";
+}
+
+function determineUseUpstream(options: CmdOptions): boolean {
+  return options._global.upstream !== false;
+}
+
+function determineIsSystemUser(options: CmdOptions): boolean {
+  return options._global.systemUser === true;
+}
 
 /**
  * Attempts to parse env.
@@ -44,90 +116,56 @@ export const parseEnv = async function (
   options: CmdOptions,
   checkPath: boolean
 ): Promise<Result<Env, EnvParseError>> {
-  // set defaults
-  let registry: Registry = {
-    url: makeRegistryUrl("https://package.openupm.com"),
-    auth: null,
-  };
-  let cwd = "";
-  let upstream = true;
-  let upstreamRegistry: Registry = {
-    url: makeRegistryUrl("https://packages.unity.com"),
-    auth: null,
-  };
-  let systemUser = false;
-  let wsl = false;
-  let editorVersion: string | null = null;
   // log level
-  log.level = options._global.verbose ? "verbose" : "notice";
+  log.level = determineLogLevel(options);
+
   // color
-  const useColor =
-    options._global.color !== false && process.env.NODE_ENV !== "test";
+  const useColor = determineUseColor(options);
   if (!useColor) {
     chalk.level = 0;
     log.disableColor();
   }
+
   // upstream
-  if (options._global.upstream === false) upstream = false;
+  const upstream = determineUseUpstream(options);
+
   // region cn
-  if (options._global.cn === true) {
-    registry = {
-      url: makeRegistryUrl("https://package.openupm.cn"),
-      auth: null,
-    };
-    upstreamRegistry = {
-      url: makeRegistryUrl("https://packages.unity.cn"),
-      auth: null,
-    };
-    log.notice("region", "cn");
-  }
-  // registry
-  if (options._global.registry) {
-    registry = {
-      url: coerceRegistryUrl(options._global.registry),
-      auth: null,
-    };
-  }
+  if (options._global.cn === true) log.notice("region", "cn");
 
   // auth
-  if (options._global.systemUser) systemUser = true;
-  if (options._global.wsl) wsl = true;
+  const systemUser = determineIsSystemUser(options);
+  const wsl = determineWsl(options);
 
+  // registries
   const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
     tryLoadUpmConfig
   ).promise;
   if (upmConfigResult.isErr()) return upmConfigResult;
   const upmConfig = upmConfigResult.value;
 
-  if (upmConfig !== null && upmConfig.npmAuth !== undefined) {
-    registry = {
-      url: registry.url,
-      auth: tryGetAuthForRegistry(upmConfig, registry.url),
-    };
-    upstreamRegistry = {
-      url: upstreamRegistry.url,
-      auth: tryGetAuthForRegistry(upmConfig, upstreamRegistry.url),
-    };
-  }
+  const registry = determinePrimaryRegistry(options, upmConfig);
+  const upstreamRegistry = determineUpstreamRegistry(options, upmConfig);
+
   // return if no need to check path
   if (!checkPath)
     return Ok({
-      cwd,
-      editorVersion,
+      cwd: "",
+      editorVersion: null,
       registry,
       systemUser,
       upstream,
       upstreamRegistry,
       wsl,
     });
+
   // cwd
-  if (options._global.chdir) {
-    cwd = path.resolve(options._global.chdir);
-    if (!fs.existsSync(cwd)) {
-      log.error("env", `can not resolve path ${cwd}`);
-      return Err(new CwdNotFoundError());
-    }
-  } else cwd = process.cwd();
+  const cwdResult = determineCwd(options);
+  if (cwdResult.isErr()) {
+    log.error("env", `can not resolve path ${cwdResult.error.path}`);
+    return cwdResult;
+  }
+  const cwd = cwdResult.value;
+
   // manifest path
   const manifestPath = manifestPathFor(cwd);
   if (!fs.existsSync(manifestPath)) {
@@ -153,9 +191,8 @@ export const parseEnv = async function (
       );
     return projectVersionLoadResult;
   }
-  editorVersion = projectVersionLoadResult.value;
+  const editorVersion = projectVersionLoadResult.value;
 
-  // return
   return Ok({
     cwd,
     editorVersion,
