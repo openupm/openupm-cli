@@ -1,15 +1,21 @@
-import fs from "fs/promises";
 import { assertIsError } from "./error-type-guards";
 import { pruneManifest, UnityProjectManifest } from "../types/project-manifest";
-import fse from "fs-extra";
 import path from "path";
-import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
+import {
+  FileParseError,
+  IOError,
+  RequiredFileNotFoundError,
+} from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
-import { NotFoundError, tryReadTextFromFile } from "./file-io";
+import {
+  NotFoundError,
+  tryReadTextFromFile,
+  tryWriteTextToFile,
+} from "./file-io";
 
 export type ManifestLoadError = RequiredFileNotFoundError | FileParseError;
 
-export type ManifestSaveError = Error;
+export type ManifestSaveError = IOError;
 
 /**
  * Determines the path to the package manifest based on the project
@@ -60,10 +66,5 @@ export const trySaveProjectManifest = function (
   manifest = pruneManifest(manifest);
   const json = JSON.stringify(manifest, null, 2);
 
-  return new AsyncResult(
-    Result.wrapAsync(async () => {
-      await fse.ensureDir(path.dirname(manifestPath));
-      await fs.writeFile(manifestPath, json);
-    })
-  );
+  return tryWriteTextToFile(manifestPath, json);
 };
