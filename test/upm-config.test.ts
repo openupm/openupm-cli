@@ -16,10 +16,10 @@ import { makeRegistryUrl, RegistryUrl } from "../src/types/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
 import { exampleRegistryUrl } from "./mock-registry";
 
-describe("upm-config", function () {
-  describe("auth", function () {
-    describe("add", function () {
-      it("should have registry after adding", function () {
+describe("upm-config", () => {
+  describe("auth", () => {
+    describe("add", () => {
+      it("should have registry after adding", () => {
         const registry = exampleRegistryUrl;
         const auth: BasicAuth = {
           email: "email@wow.com",
@@ -31,7 +31,7 @@ describe("upm-config", function () {
         );
       });
     });
-    describe("classification", function () {
+    describe("classification", () => {
       it("should be basic auth if it has _auth property", () => {
         const auth: UpmAuth = {
           email: "real@email.com",
@@ -51,7 +51,7 @@ describe("upm-config", function () {
         expect(isTokenAuth(auth)).toBeTruthy();
       });
     });
-    describe("encode/decode", function () {
+    describe("encode/decode", () => {
       it("should decode the same basic auth as was encoded", () => {
         const expectedUsername = "my-name";
         const expectedPassword = "123pass";
@@ -66,7 +66,7 @@ describe("upm-config", function () {
         expect(decoded).toBeNull();
       });
     });
-    describe("always-auth", function () {
+    describe("always-auth", () => {
       it("should always-auth when prop is true", () => {
         const auth: UpmAuth = {
           email: "real@email.com",
@@ -94,8 +94,8 @@ describe("upm-config", function () {
         expect(shouldAlwaysAuth(auth)).toBeFalsy();
       });
     });
-    describe("get auth for registry", function () {
-      it("should find auth for url without trailing slash", function () {
+    describe("get auth for registry", () => {
+      it("should find auth for url without trailing slash", () => {
         const url = makeRegistryUrl("http://registry.npmjs.com");
         const expected: NpmAuth = {
           alwaysAuth: false,
@@ -114,7 +114,7 @@ describe("upm-config", function () {
         const actual = tryGetAuthForRegistry(config, url);
         expect(actual).toEqual(expected);
       });
-      it("should find auth for url with trailing slash", function () {
+      it("should find auth for url with trailing slash", () => {
         const url = "http://registry.npmjs.com/" as RegistryUrl;
         const expected: NpmAuth = {
           alwaysAuth: false,
@@ -133,7 +133,7 @@ describe("upm-config", function () {
         const actual = tryGetAuthForRegistry(config, url);
         expect(actual).toEqual(expected);
       });
-      it("should not find auth for url that does not exist", function () {
+      it("should not find auth for url that does not exist", () => {
         const config: UPMConfig = {
           npmAuth: {
             ["http://registryA.com"]: {

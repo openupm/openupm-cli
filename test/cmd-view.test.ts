@@ -18,7 +18,7 @@ const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
 const packageMissing = makeDomainName("pkg-not-exist");
 
-describe("cmd-view.ts", function () {
+describe("cmd-view.ts", () => {
   const options: ViewOptions = {
     _global: {
       color: false,
@@ -32,7 +32,7 @@ describe("cmd-view.ts", function () {
       registry: exampleRegistryUrl,
     },
   };
-  describe("view", function () {
+  describe("view", () => {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 

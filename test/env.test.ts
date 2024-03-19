@@ -5,7 +5,7 @@ import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
-import {manifestPathFor} from "../src/utils/project-manifest-io";
+import { manifestPathFor } from "../src/utils/project-manifest-io";
 
 const testUpmAuth: TokenAuth = {
   email: "test@mail.com",
@@ -21,8 +21,8 @@ const testUpmConfig: UPMConfig = {
   npmAuth: { [makeRegistryUrl("http://registry.npmjs.org")]: testUpmAuth },
 };
 
-describe("env", function () {
-  describe("parseEnv", function () {
+describe("env", () => {
+  describe("parseEnv", () => {
     let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 

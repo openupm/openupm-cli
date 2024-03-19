@@ -17,8 +17,8 @@ const exampleRegistry: Registry = {
   auth: null,
 };
 
-describe("registry-client", function () {
-  describe("fetchPackageInfo", function () {
+describe("registry-client", () => {
+  describe("fetchPackageInfo", () => {
     const client = makeNpmClient();
 
     beforeEach(function () {

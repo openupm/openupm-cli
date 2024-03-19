@@ -4,9 +4,9 @@ import {
   tryGetUpmConfigDir,
 } from "../src/utils/upm-config-io";
 
-describe("upm-config-io", function () {
-  describe("get directory", function () {
-    describe("no wsl and no system-user", function () {
+describe("upm-config-io", () => {
+  describe("get directory", () => {
+    describe("no wsl and no system-user", () => {
       it("should be USERPROFILE if defined", async function () {
         const expected = "user/dir";
 

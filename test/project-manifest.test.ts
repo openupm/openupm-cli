@@ -13,8 +13,8 @@ import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
 import { makeRegistryUrl } from "../src/types/registry-url";
 import { exampleRegistryUrl } from "./mock-registry";
 
-describe("project-manifest", function () {
-  describe("dependency", function () {
+describe("project-manifest", () => {
+  describe("dependency", () => {
     it("should add dependency when adding first time", () => {
       let manifest = emptyProjectManifest;
 
@@ -62,7 +62,7 @@ describe("project-manifest", function () {
       expect(manifest.dependencies).toEqual({});
     });
   });
-  describe("get scoped-registry", function () {
+  describe("get scoped-registry", () => {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
       const url = makeRegistryUrl("https://test.com");
@@ -85,7 +85,7 @@ describe("project-manifest", function () {
       expect(tryGetScopedRegistryByUrl(manifest, url)).toBeNull();
     });
   });
-  describe("map scoped-registry", function () {
+  describe("map scoped-registry", () => {
     it("should have null as mapping input if manifest does not have scoped-registry", () => {
       const manifest = emptyProjectManifest;
 
@@ -135,7 +135,7 @@ describe("project-manifest", function () {
       expect(actual).toEqual(expected);
     });
   });
-  describe("testables", function () {
+  describe("testables", () => {
     it("should not add testables which already exist", () => {
       let manifest = emptyProjectManifest;
 

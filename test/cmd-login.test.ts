@@ -4,8 +4,8 @@ import { makeRegistryUrl } from "../src/types/registry-url";
 import { runWithEnv } from "./mock-env";
 import path from "path";
 
-describe("cmd-login.ts", function () {
-  describe("generateNpmrcLines", function () {
+describe("cmd-login.ts", () => {
+  describe("generateNpmrcLines", () => {
     it("should append token to empty content", async function () {
       expect(
         generateNpmrcLines(
@@ -67,18 +67,18 @@ describe("cmd-login.ts", function () {
     });
   });
 
-  describe("getNpmrcPath", function () {
-    it("should be USERPROFILE if defined", function () {
+  describe("getNpmrcPath", () => {
+    it("should be USERPROFILE if defined", () => {
       const actual = runWithEnv({ USERPROFILE: "/user/dir" }, getNpmrcPath);
       const expected = path.join(path.sep, "user", "dir", ".npmrc");
       expect(actual).toEqual(expected);
     });
-    it("should be HOME if USERPROFILE is not defined", function () {
+    it("should be HOME if USERPROFILE is not defined", () => {
       const actual = runWithEnv({ HOME: "/user/dir" }, getNpmrcPath);
       const expected = path.join(path.sep, "user", "dir", ".npmrc");
       expect(actual).toEqual(expected);
     });
-    it("should fail if HOME and USERPROFILE are not defined", function () {
+    it("should fail if HOME and USERPROFILE are not defined", () => {
       expect(() => runWithEnv({}, getNpmrcPath)).toThrow();
     });
   });

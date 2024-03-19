@@ -1,7 +1,7 @@
 import { isPackageUrl } from "../src/types/package-url";
 
-describe("package-url", function () {
-  describe("validation", function () {
+describe("package-url", () => {
+  describe("validation", () => {
     [
       "https://github.com/yo/com.base.package-a",
       "git@github.com:yo/com.base.package-a",
