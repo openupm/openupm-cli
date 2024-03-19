@@ -11,7 +11,6 @@ import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../types/upm-config";
 import { CmdOptions } from "../types/options";
 import { Registry } from "../npm-client";
-import { CustomError } from "ts-custom-error";
 import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import {
@@ -19,6 +18,7 @@ import {
   tryLoadProjectVersion,
 } from "./project-version-io";
 import { manifestPathFor } from "./project-manifest-io";
+import { NotFoundError } from "./file-io";
 
 export type Env = Readonly<{
   cwd: string;
@@ -30,29 +30,18 @@ export type Env = Readonly<{
   editorVersion: string | null;
 }>;
 
-export class CwdNotFoundError extends CustomError {
-  constructor(
-    /**
-     * The path that was not found.
-     */
-    readonly path: string
-  ) {
-    super();
-  }
-}
-
 export type EnvParseError =
-  | CwdNotFoundError
+  | NotFoundError
   | GetUpmConfigDirError
   | ProjectVersionLoadError;
 
-function determineCwd(options: CmdOptions): Result<string, CwdNotFoundError> {
+function determineCwd(options: CmdOptions): Result<string, NotFoundError> {
   const cwd =
     options._global.chdir !== undefined
       ? path.resolve(options._global.chdir)
       : process.cwd();
 
-  if (!fs.existsSync(cwd)) return Err(new CwdNotFoundError(cwd));
+  if (!fs.existsSync(cwd)) return Err(new NotFoundError(cwd));
 
   return Ok(cwd);
 }
