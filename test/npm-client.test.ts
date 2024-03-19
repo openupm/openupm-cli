@@ -1,6 +1,4 @@
 import "assert";
-
-import { parseEnv } from "../src/utils/env";
 import {
   exampleRegistryUrl,
   registerMissingPackument,
@@ -10,9 +8,14 @@ import {
 } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/types/domain-name";
-import { makeNpmClient } from "../src/npm-client";
+import { makeNpmClient, Registry } from "../src/npm-client";
 
 const packageA = makeDomainName("package-a");
+
+const exampleRegistry: Registry = {
+  url: exampleRegistryUrl,
+  auth: null,
+};
 
 describe("registry-client", function () {
   describe("fetchPackageInfo", function () {
@@ -21,30 +24,29 @@ describe("registry-client", function () {
     beforeEach(function () {
       startMockRegistry();
     });
+
     afterEach(function () {
       stopMockRegistry();
     });
-    it("simple", async function () {
-      const env = (
-        await parseEnv({ _global: { registry: exampleRegistryUrl } }, false)
-      ).unwrap();
 
+    it("simple", async function () {
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
-      const result = await client.tryFetchPackument(env.registry, packageA)
+
+      const result = await client.tryFetchPackument(exampleRegistry, packageA)
         .promise;
+
       expect(result).toBeOk((packument) =>
         expect(packument).toEqual(packumentRemote)
       );
     });
-    it("404", async function () {
-      const env = (
-        await parseEnv({ _global: { registry: exampleRegistryUrl } }, false)
-      ).unwrap();
 
+    it("404", async function () {
       registerMissingPackument(packageA);
-      const result = await client.tryFetchPackument(env.registry, packageA)
+
+      const result = await client.tryFetchPackument(exampleRegistry, packageA)
         .promise;
+
       expect(result).toBeOk((packument) => expect(packument).toBeNull());
     });
   });
