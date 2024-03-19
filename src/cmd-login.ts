@@ -123,15 +123,16 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   const configPath = getNpmrcPath();
 
   // read config
-  const readResult = await tryReadTextFromFile(configPath).promise;
-  const content = readResult.unwrapOr("");
-
-  // write config
-  const lines = generateNpmrcLines(content, registry, token);
-  const newContent = lines.join("\n") + "\n";
-  return await tryWriteTextToFile(configPath, newContent).map(() =>
-    log.notice("config", `saved to npm config: ${configPath}`)
-  ).promise;
+  (
+    await tryReadTextFromFile(configPath)
+      .or(Ok(""))
+      .map((content) => generateNpmrcLines(content, registry, token))
+      .map((lines) => lines.join("\n") + "\n")
+      // write config
+      .andThen((newContent) => tryWriteTextToFile(configPath, newContent))
+      .map(() => log.notice("config", `saved to npm config: ${configPath}`))
+      .promise
+  ).unwrap();
 };
 
 /**
