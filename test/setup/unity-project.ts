@@ -6,16 +6,13 @@ import path from "path";
 import os from "os";
 import fse from "fs-extra";
 import {
-  ManifestLoadError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../../src/utils/project-manifest-io";
-import assert from "assert";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
 import { trySaveUpmConfig } from "../../src/utils/upm-config-io";
 import { tryCreateProjectVersionTxt } from "../../src/utils/project-version-io";
-import { Result } from "ts-results-es";
 
 /**
  * A mock Unity project for testing.
@@ -25,12 +22,6 @@ export type MockUnityProject = {
    * The path to the projects root folder.
    */
   projectPath: string;
-
-  /**
-   * Attempts to load the project manifest for the project.
-   */
-  tryGetManifest(): Promise<Result<UnityProjectManifest, ManifestLoadError>>;
-
   /**
    * Runs an assertion function on the project manifest.
    * @param assertFn An assertion function.
@@ -135,16 +126,13 @@ export async function setupUnityProject(
     envSession?.unhook();
   }
 
-  function tryGetManifest() {
-    return tryLoadProjectManifest(projectPath).promise;
-  }
-
   async function tryAssertManifest(
     assertFn: (manifest: UnityProjectManifest) => void
   ) {
-    const manifestResult = await tryGetManifest();
-    assert(manifestResult.isOk());
-    assertFn(manifestResult.value);
+    const manifestResult = await tryLoadProjectManifest(projectPath).promise;
+    expect(manifestResult).toBeOk((manifest) =>
+      assertFn(manifest as UnityProjectManifest)
+    );
   }
 
   async function reset() {
@@ -155,7 +143,6 @@ export async function setupUnityProject(
   await setup();
   return {
     projectPath,
-    tryGetManifest,
     tryAssertManifest,
     reset,
     restore,
