@@ -3,6 +3,8 @@ import fs from "fs/promises";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { assertIsError } from "./error-type-guards";
+import fse from "fs-extra";
+import path from "path";
 
 /**
  * Error for when a file or directory did not exist.
@@ -26,6 +28,11 @@ export class NotFoundError extends CustomError {
 export type FileReadError = NotFoundError | IOError;
 
 /**
+ * Error for when a file-write failed.
+ */
+export type FileWriteError = IOError;
+
+/**
  * Attempts to read the content of a text file.
  * @param path The path to the file.
  */
@@ -39,4 +46,23 @@ export function tryReadTextFromFile(
     if (error.code === "ENOENT") return new NotFoundError(path);
     return new IOError(error);
   });
+}
+
+/**
+ * Attempts to overwrite the content of a text file.
+ * @param filePath The path to the file.
+ * @param content The content to write.
+ */
+export function tryWriteTextToFile(
+  filePath: string,
+  content: string
+): AsyncResult<void, FileWriteError> {
+  return new AsyncResult(
+    Result.wrapAsync(() => fse.ensureDir(path.dirname(filePath)))
+  )
+    .andThen(() => Result.wrapAsync(() => fs.writeFile(filePath, content)))
+    .mapErr((error) => {
+      assertIsError(error);
+      return new IOError(error);
+    });
 }
