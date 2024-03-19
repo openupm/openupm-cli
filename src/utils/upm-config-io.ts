@@ -95,18 +95,19 @@ export const tryLoadUpmConfig = async (
  * Save the upm config.
  * @param config The config to save.
  * @param configDir The directory in which to save the config.
+ * @return The path to which the file was saved.
  */
 export const trySaveUpmConfig = (
   config: UPMConfig,
   configDir: string
-): AsyncResult<void, IOError> => {
+): AsyncResult<string, IOError> => {
   return new AsyncResult(
     Result.wrapAsync(async () => {
       await mkdirp(configDir);
       const configPath = path.join(configDir, configFileName);
       const content = TOML.stringify(config);
       await fs.writeFile(configPath, content, "utf8");
-      log.notice("config", "saved unity config at " + configPath);
+      return configPath;
     })
   );
 };
@@ -126,5 +127,8 @@ export const tryStoreUpmAuth = function (
     })
     .map((maybeConfig) => maybeConfig || {})
     .map((config) => addAuth(registry, auth, config))
-    .andThen((config) => trySaveUpmConfig(config, configDir));
+    .andThen((config) => trySaveUpmConfig(config, configDir))
+    .map((configPath) =>
+      log.notice("config", "saved unity config at " + configPath)
+    );
 };
