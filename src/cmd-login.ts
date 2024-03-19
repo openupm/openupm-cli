@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import { AuthenticationError, makeNpmClient } from "./npm-client";
 import log from "./logger";
@@ -19,7 +18,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryReadTextFromFile } from "./utils/file-io";
+import { tryReadTextFromFile, tryWriteTextToFile } from "./utils/file-io";
 
 export type LoginError =
   | EnvParseError
@@ -124,14 +123,16 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   const configPath = getNpmrcPath();
 
   // read config
-  const readResult = await tryReadTextFromFile(configPath).promise;
-  const content = readResult.unwrapOr("");
-
-  // write config
-  const lines = generateNpmrcLines(content, registry, token);
-  const newContent = lines.join("\n") + "\n";
-  fs.writeFileSync(configPath, newContent);
-  log.notice("config", `saved to npm config: ${configPath}`);
+  (
+    await tryReadTextFromFile(configPath)
+      .or(Ok(""))
+      .map((content) => generateNpmrcLines(content, registry, token))
+      .map((lines) => lines.join("\n") + "\n")
+      // write config
+      .andThen((newContent) => tryWriteTextToFile(configPath, newContent))
+      .map(() => log.notice("config", `saved to npm config: ${configPath}`))
+      .promise
+  ).unwrap();
 };
 
 /**

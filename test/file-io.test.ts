@@ -1,8 +1,15 @@
 import fs from "fs/promises";
-import { NotFoundError, tryReadTextFromFile } from "../src/utils/file-io";
+import {
+  NotFoundError,
+  tryReadTextFromFile,
+  tryWriteTextToFile,
+} from "../src/utils/file-io";
 import { IOError } from "../src/common-errors";
+import fse from "fs-extra";
+import mocked = jest.mocked;
 
 jest.mock("fs/promises");
+jest.mock("fs-extra");
 
 function makeNodeError(code: string): NodeJS.ErrnoException {
   const error = new Error() as NodeJS.ErrnoException;
@@ -39,6 +46,70 @@ describe("file-io", () => {
       mockFsRead.mockRejectedValue(makeNodeError("EACCES"));
 
       const result = await tryReadTextFromFile("path/to/file.txt").promise;
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(IOError)
+      );
+    });
+  });
+
+  describe("write text", () => {
+    beforeEach(() => {
+      mocked(fse.ensureDir).mockResolvedValue(undefined!);
+      mocked(fs.writeFile).mockResolvedValue(undefined);
+    });
+
+    it("should be ok for valid write", async () => {
+      const result = await tryWriteTextToFile("path/to/file.txt", "content")
+        .promise;
+
+      expect(result).toBeOk();
+    });
+
+    it("should write to correct path", async () => {
+      const expected = "path/to/file.txt";
+      const fsWrite = jest.mocked(fs.writeFile);
+
+      await tryWriteTextToFile(expected, "content").promise;
+
+      expect(fsWrite).toHaveBeenCalledWith(expected, expect.any(String));
+    });
+
+    it("should write text to file", async () => {
+      const expected = "content";
+      const fsWrite = jest.mocked(fs.writeFile);
+
+      await tryWriteTextToFile("path/to/file.txt", expected).promise;
+
+      expect(fsWrite).toHaveBeenCalledWith(expect.any(String), expected);
+    });
+
+    it("should ensure directory exists", async () => {
+      const fseEnsureDir = jest.mocked(fse.ensureDir);
+
+      await tryWriteTextToFile("/path/to/file.txt", "content").promise;
+
+      expect(fseEnsureDir).toHaveBeenCalledWith("/path/to");
+    });
+
+    it("should notify of directory ensure error", async () => {
+      const fseEnsureDir = jest.mocked(fse.ensureDir);
+      fseEnsureDir.mockRejectedValue(makeNodeError("EACCES") as never);
+
+      const result = await tryWriteTextToFile("/path/to/file.txt", "content")
+        .promise;
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(IOError)
+      );
+    });
+
+    it("should notify of write error", async () => {
+      const fsWrite = jest.mocked(fs.writeFile);
+      fsWrite.mockRejectedValue(makeNodeError("EACCES") as never);
+
+      const result = await tryWriteTextToFile("/path/to/file.txt", "content")
+        .promise;
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(IOError)
