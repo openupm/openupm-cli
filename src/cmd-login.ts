@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import { AuthenticationError, makeNpmClient } from "./npm-client";
 import log from "./logger";
@@ -19,7 +18,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryReadTextFromFile } from "./utils/file-io";
+import { tryReadTextFromFile, tryWriteTextToFile } from "./utils/file-io";
 
 export type LoginError =
   | EnvParseError
@@ -130,8 +129,9 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   // write config
   const lines = generateNpmrcLines(content, registry, token);
   const newContent = lines.join("\n") + "\n";
-  fs.writeFileSync(configPath, newContent);
-  log.notice("config", `saved to npm config: ${configPath}`);
+  return await tryWriteTextToFile(configPath, newContent).map(() =>
+    log.notice("config", `saved to npm config: ${configPath}`)
+  ).promise;
 };
 
 /**
