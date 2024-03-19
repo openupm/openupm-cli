@@ -1,7 +1,5 @@
-import { mkdirp } from "mkdirp";
 import path from "path";
 import TOML from "@iarna/toml";
-import fs from "fs/promises";
 import log from "../logger";
 import isWsl from "is-wsl";
 import execute from "./process";
@@ -11,7 +9,7 @@ import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
 import { assertIsError } from "./error-type-guards";
-import { tryReadTextFromFile } from "./file-io";
+import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
 
 const configFileName = ".upmconfig.toml";
 
@@ -106,15 +104,9 @@ export const trySaveUpmConfig = (
   config: UPMConfig,
   configDir: string
 ): AsyncResult<string, IOError> => {
-  return new AsyncResult(
-    Result.wrapAsync(async () => {
-      await mkdirp(configDir);
-      const configPath = path.join(configDir, configFileName);
-      const content = TOML.stringify(config);
-      await fs.writeFile(configPath, content, "utf8");
-      return configPath;
-    })
-  );
+  const configPath = path.join(configDir, configFileName);
+  const content = TOML.stringify(config);
+  return tryWriteTextToFile(configPath, content).map(() => configPath);
 };
 
 /**
