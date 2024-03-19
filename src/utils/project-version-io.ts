@@ -1,14 +1,14 @@
 import path from "path";
 import fse from "fs-extra";
-import { assertIsError } from "./error-type-guards";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import fs from "fs";
 import yaml from "yaml";
 import {
   FileParseError,
   IOError,
   RequiredFileNotFoundError,
 } from "../common-errors";
+import { NotFoundError, tryReadTextFromFile } from "./file-io";
+import { assertIsError } from "./error-type-guards";
 
 export type ProjectVersionLoadError =
   | RequiredFileNotFoundError
@@ -46,29 +46,36 @@ export function tryCreateProjectVersionTxt(
  * Attempts to load a projects editor-version from ProjectVersion.txt.
  * @param projectDirPath The path to the projects root directory.
  */
-export async function tryLoadProjectVersion(
+export function tryLoadProjectVersion(
   projectDirPath: string
 ): Promise<Result<string, ProjectVersionLoadError>> {
   const filePath = projectVersionTxtPathFor(projectDirPath);
-  try {
-    const projectVersionData = fs.readFileSync(filePath, "utf8");
-    const projectVersionContent = yaml.parse(projectVersionData) as unknown;
 
-    if (
-      !(
-        typeof projectVersionContent === "object" &&
-        projectVersionContent !== null &&
-        "m_EditorVersion" in projectVersionContent &&
-        typeof projectVersionContent.m_EditorVersion === "string"
-      )
+  return tryReadTextFromFile(filePath)
+    .andThen((text) =>
+      Result.wrap(() => yaml.parse(text) as unknown).mapErr((error) => {
+        assertIsError(error);
+        return new FileParseError(filePath, "ProjectVersion.txt", error);
+      })
     )
-      return Err(new FileParseError(filePath, "Project-version"));
+    .andThen((content) => {
+      if (
+        !(
+          typeof content === "object" &&
+          content !== null &&
+          "m_EditorVersion" in content &&
+          typeof content.m_EditorVersion === "string"
+        )
+      )
+        return Err(new FileParseError(filePath, "Project-version"));
 
-    return Ok(projectVersionContent.m_EditorVersion);
-  } catch (error) {
-    assertIsError(error);
-    if (error.name === "ENOENT")
-      return Err(new RequiredFileNotFoundError(filePath));
-    return Err(new IOError(error));
-  }
+      return Ok(content.m_EditorVersion);
+    })
+    .mapErr((error) => {
+      {
+        if (error instanceof NotFoundError)
+          return new RequiredFileNotFoundError(filePath);
+        return error;
+      }
+    }).promise;
 }

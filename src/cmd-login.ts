@@ -19,6 +19,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
+import { tryReadTextFromFile } from "./utils/file-io";
 
 export type LoginError =
   | EnvParseError
@@ -121,11 +122,11 @@ const npmLogin = function (
  */
 const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   const configPath = getNpmrcPath();
+
   // read config
-  let content = "";
-  if (fs.existsSync(configPath)) {
-    content = fs.readFileSync(configPath, { encoding: "utf-8" });
-  }
+  const readResult = await tryReadTextFromFile(configPath).promise;
+  const content = readResult.unwrapOr("");
+
   // write config
   const lines = generateNpmrcLines(content, registry, token);
   const newContent = lines.join("\n") + "\n";

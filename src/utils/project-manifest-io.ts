@@ -5,6 +5,7 @@ import fse from "fs-extra";
 import path from "path";
 import { FileParseError, RequiredFileNotFoundError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
+import { NotFoundError, tryReadTextFromFile } from "./file-io";
 
 export type ManifestLoadError = RequiredFileNotFoundError | FileParseError;
 
@@ -28,16 +29,18 @@ export const tryLoadProjectManifest = function (
 ): AsyncResult<UnityProjectManifest, ManifestLoadError> {
   const manifestPath = manifestPathFor(projectPath);
   return (
-    new AsyncResult(
-      Result.wrapAsync(() => fs.readFile(manifestPath, { encoding: "utf8" }))
-    )
+    tryReadTextFromFile(manifestPath)
       // TODO: Actually validate the content of the file
       .andThen((text) =>
-        Result.wrap(() => JSON.parse(text) as UnityProjectManifest)
+        Result.wrap(() => JSON.parse(text) as UnityProjectManifest).mapErr(
+          (error) => {
+            assertIsError(error);
+            return error;
+          }
+        )
       )
       .mapErr((error) => {
-        assertIsError(error);
-        if (error.code === "ENOENT")
+        if (error instanceof NotFoundError)
           return new RequiredFileNotFoundError(manifestPath);
         else return new FileParseError(manifestPath, "Project-manifest");
       })
