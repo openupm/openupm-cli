@@ -68,17 +68,17 @@ type Config = {
   upmConfig?: UPMConfig;
 };
 
-const rootPath = path.join(os.tmpdir(), "test-openupm-cli");
+export const testRootPath = path.join(os.tmpdir(), "test-openupm-cli");
 
-const projectPath = path.join(rootPath, "Project");
+export const testProjectPath = path.join(testRootPath, "Project");
 
 /**
  * Setups a mock Unity project for testing.
  * This will set up a directory structure with a Unity project, as well
  * as some other effects:
- * - Change {@link process.cwd} to {@link projectPath}.
+ * - Change {@link process.cwd} to {@link testProjectPath}.
  * - Clear {@link process.env.USERPROFILE}.
- * - Change {@link process.env.HOME} to {@link rootPath}.
+ * - Change {@link process.env.HOME} to {@link testRootPath}.
  * - Place a .upmconfig.toml in the root folder of the test directory structure.
  * @param config Config describing the project to be setup.
  */
@@ -90,21 +90,21 @@ export async function setupUnityProject(
 
   async function setup() {
     originalCwd = process.cwd;
-    process.cwd = () => projectPath;
+    process.cwd = () => testProjectPath;
 
-    await fse.ensureDir(projectPath);
+    await fse.ensureDir(testProjectPath);
 
-    envSession = mockEnv({ HOME: rootPath });
+    envSession = mockEnv({ HOME: testRootPath });
 
     // Upmconfig
     const upmConfig = config.upmConfig ?? defaultUpmConfig;
-    const saveResult = await trySaveUpmConfig(upmConfig, rootPath).promise;
+    const saveResult = await trySaveUpmConfig(upmConfig, testRootPath).promise;
     if (saveResult.isErr()) throw saveResult.error;
 
     // Editor-version
     const version = config.version ?? defaultVersion;
     const projectVersionResult = await tryCreateProjectVersionTxt(
-      projectPath,
+      testProjectPath,
       version
     ).promise;
     if (projectVersionResult.isErr()) throw projectVersionResult.error;
@@ -112,8 +112,10 @@ export async function setupUnityProject(
     // Project manifest
     if (config.manifest !== false) {
       const manifest = config.manifest ?? defaultManifest;
-      const manifestResult = await trySaveProjectManifest(projectPath, manifest)
-        .promise;
+      const manifestResult = await trySaveProjectManifest(
+        testProjectPath,
+        manifest
+      ).promise;
       if (manifestResult.isErr()) throw manifestResult.error;
     }
   }
@@ -121,7 +123,7 @@ export async function setupUnityProject(
   async function restore() {
     process.cwd = originalCwd;
 
-    await fse.rm(rootPath, { recursive: true, force: true });
+    await fse.rm(testRootPath, { recursive: true, force: true });
 
     envSession?.unhook();
   }
@@ -129,7 +131,8 @@ export async function setupUnityProject(
   async function tryAssertManifest(
     assertFn: (manifest: UnityProjectManifest) => void
   ) {
-    const manifestResult = await tryLoadProjectManifest(projectPath).promise;
+    const manifestResult = await tryLoadProjectManifest(testProjectPath)
+      .promise;
     expect(manifestResult).toBeOk((manifest) =>
       assertFn(manifest as UnityProjectManifest)
     );
@@ -142,7 +145,7 @@ export async function setupUnityProject(
 
   await setup();
   return {
-    projectPath,
+    projectPath: testProjectPath,
     tryAssertManifest,
     reset,
     restore,
