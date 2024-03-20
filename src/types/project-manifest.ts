@@ -1,10 +1,10 @@
-import {DomainName} from "./domain-name";
-import {SemanticVersion} from "./semantic-version";
-import {PackageUrl} from "./package-url";
-import {ScopedRegistry} from "./scoped-registry";
-import {RegistryUrl} from "./registry-url";
-import {removeTrailingSlash} from "../utils/string-utils";
-import {removeRecordKey} from "../utils/record-utils";
+import { DomainName } from "./domain-name";
+import { SemanticVersion } from "./semantic-version";
+import { PackageUrl } from "./package-url";
+import { ScopedRegistry } from "./scoped-registry";
+import { RegistryUrl } from "./registry-url";
+import { removeTrailingSlash } from "../utils/string-utils";
+import { removeRecordKey } from "../utils/record-utils";
 
 /**
  * The content of the project-manifest (manifest.json) of a Unity project.

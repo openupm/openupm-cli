@@ -23,7 +23,7 @@ export const view = async function (
   options: ViewOptions
 ): Promise<Result<void, ViewError>> {
   // parse env
-  const envResult = await parseEnv(options, true);
+  const envResult = await parseEnv(options);
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 

@@ -41,7 +41,7 @@ export const login = async function (
   options: LoginOptions
 ): Promise<Result<void, LoginError>> {
   // parse env
-  const envResult = await parseEnv(options, true);
+  const envResult = await parseEnv(options);
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 

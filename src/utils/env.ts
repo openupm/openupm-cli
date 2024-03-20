@@ -102,8 +102,7 @@ function determineIsSystemUser(options: CmdOptions): boolean {
  * Attempts to parse env.
  */
 export const parseEnv = async function (
-  options: CmdOptions,
-  checkPath: boolean
+  options: CmdOptions
 ): Promise<Result<Env, EnvParseError>> {
   // log level
   log.level = determineLogLevel(options);
@@ -134,18 +133,6 @@ export const parseEnv = async function (
 
   const registry = determinePrimaryRegistry(options, upmConfig);
   const upstreamRegistry = determineUpstreamRegistry(options, upmConfig);
-
-  // return if no need to check path
-  if (!checkPath)
-    return Ok({
-      cwd: "",
-      editorVersion: null,
-      registry,
-      systemUser,
-      upstream,
-      upstreamRegistry,
-      wsl,
-    });
 
   // cwd
   const cwdResult = determineCwd(options);

@@ -85,7 +85,7 @@ export const add = async function (
 ): Promise<Result<void, AddError[]>> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
-  const envResult = await parseEnv(options, true);
+  const envResult = await parseEnv(options);
   if (envResult.isErr()) return Err([envResult.error]);
   const env = envResult.value;
 
