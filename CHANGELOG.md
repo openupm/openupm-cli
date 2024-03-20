@@ -1,3 +1,12 @@
+# [1.20.0](https://github.com/openupm/openupm-cli/compare/1.19.11...1.20.0) (2024-03-20)
+
+
+### Features
+
+* improve result ok matcher ([4622e68](https://github.com/openupm/openupm-cli/commit/4622e6847d84ad2e417817b702a2370592ccd97e))
+* remove manifest-path check from env ([b058bb3](https://github.com/openupm/openupm-cli/commit/b058bb3ae0cf07e7574604ee6d1634989e02adbd))
+* upstream-registry auth is always null ([fb1178a](https://github.com/openupm/openupm-cli/commit/fb1178a4f2cac1d1941be2ac51df890dfd2fa507))
+
 ## [1.19.11](https://github.com/openupm/openupm-cli/compare/1.19.10...1.19.11) (2024-03-06)
 
 
