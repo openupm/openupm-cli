@@ -1,10 +1,6 @@
 import { pruneManifest, UnityProjectManifest } from "../types/project-manifest";
 import path from "path";
-import {
-  FileParseError,
-  IOError,
-  RequiredFileNotFoundError,
-} from "../common-errors";
+import { FileParseError, IOError } from "../common-errors";
 import { AsyncResult } from "ts-results-es";
 import {
   NotFoundError,
@@ -13,7 +9,7 @@ import {
 } from "./file-io";
 import { tryParseJson } from "./data-parsing";
 
-export type ManifestLoadError = RequiredFileNotFoundError | FileParseError;
+export type ManifestLoadError = NotFoundError | FileParseError;
 
 export type ManifestSaveError = IOError;
 
@@ -40,9 +36,8 @@ export const tryLoadProjectManifest = function (
       // TODO: Actually validate the json structure
       .map((json) => json as unknown as UnityProjectManifest)
       .mapErr((error) => {
-        if (error instanceof NotFoundError)
-          return new RequiredFileNotFoundError(manifestPath);
-        else return new FileParseError(manifestPath, "Project-manifest");
+        if (error instanceof NotFoundError) return error;
+        return new FileParseError(manifestPath, "Project-manifest");
       })
   );
 };

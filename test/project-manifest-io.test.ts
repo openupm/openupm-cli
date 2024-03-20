@@ -15,10 +15,8 @@ import path from "path";
 import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
-import {
-  FileParseError,
-  RequiredFileNotFoundError,
-} from "../src/common-errors";
+import { FileParseError } from "../src/common-errors";
+import { NotFoundError } from "../src/utils/file-io";
 
 describe("project-manifest io", () => {
   let mockProject: MockUnityProject = null!;
@@ -48,7 +46,7 @@ describe("project-manifest io", () => {
       .promise;
 
     expect(manifestResult).toBeError((error) =>
-      expect(error).toBeInstanceOf(RequiredFileNotFoundError)
+      expect(error).toBeInstanceOf(NotFoundError)
     );
   });
   it("wrong json content", async () => {

@@ -1,21 +1,6 @@
 import { CustomError } from "ts-custom-error";
 
 /**
- * Error for when a file that is required for the program to function
- * was not found.
- */
-export class RequiredFileNotFoundError extends CustomError {
-  constructor(
-    /**
-     * The path where the file was expected to be.
-     */
-    readonly path: string
-  ) {
-    super(`The required file at "${path}" could not be found.`);
-  }
-}
-
-/**
  * Generic IO error for when interacting with the file-system failed.
  */
 export class IOError extends CustomError {
