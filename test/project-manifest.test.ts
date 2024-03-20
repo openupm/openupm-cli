@@ -1,10 +1,10 @@
 import {
   addDependency,
-  setScopedRegistry,
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
   removeDependency,
+  setScopedRegistry,
   tryGetScopedRegistryByUrl,
 } from "../src/types/project-manifest";
 import { makeDomainName } from "../src/types/domain-name";
