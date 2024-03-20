@@ -19,7 +19,7 @@ declare global {
 
       toHaveScopedRegistries(): R;
 
-      toBeOk(valueAsserter?: (value: unknown) => void): R;
+      toBeOk<T>(valueAsserter?: (value: T) => void): R;
 
       toBeError(errorAsserter?: (error: Error) => void): R;
     }

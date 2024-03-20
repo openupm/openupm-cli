@@ -17,7 +17,6 @@ import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
 } from "./project-version-io";
-import { manifestPathFor } from "./project-manifest-io";
 import { NotFoundError } from "./file-io";
 
 export type Env = Readonly<{
@@ -67,19 +66,13 @@ function determinePrimaryRegistry(
   return { url, auth };
 }
 
-function determineUpstreamRegistry(
-  options: CmdOptions,
-  upmConfig: UPMConfig | null
-): Registry {
+function determineUpstreamRegistry(options: CmdOptions): Registry {
   const url =
     options._global.cn === true
       ? makeRegistryUrl("https://packages.unity.cn")
       : makeRegistryUrl("https://packages.unity.com");
 
-  const auth =
-    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
-
-  return { url, auth };
+  return { url, auth: null };
 }
 
 function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
@@ -102,8 +95,7 @@ function determineIsSystemUser(options: CmdOptions): boolean {
  * Attempts to parse env.
  */
 export const parseEnv = async function (
-  options: CmdOptions,
-  checkPath: boolean
+  options: CmdOptions
 ): Promise<Result<Env, EnvParseError>> {
   // log level
   log.level = determineLogLevel(options);
@@ -133,19 +125,7 @@ export const parseEnv = async function (
   const upmConfig = upmConfigResult.value;
 
   const registry = determinePrimaryRegistry(options, upmConfig);
-  const upstreamRegistry = determineUpstreamRegistry(options, upmConfig);
-
-  // return if no need to check path
-  if (!checkPath)
-    return Ok({
-      cwd: "",
-      editorVersion: null,
-      registry,
-      systemUser,
-      upstream,
-      upstreamRegistry,
-      wsl,
-    });
+  const upstreamRegistry = determineUpstreamRegistry(options);
 
   // cwd
   const cwdResult = determineCwd(options);
@@ -154,16 +134,6 @@ export const parseEnv = async function (
     return cwdResult;
   }
   const cwd = cwdResult.value;
-
-  // manifest path
-  const manifestPath = manifestPathFor(cwd);
-  if (!fs.existsSync(manifestPath)) {
-    log.error(
-      "manifest",
-      `can not locate manifest.json at path ${manifestPath}`
-    );
-    return Err(new NotFoundError(manifestPath));
-  }
 
   // editor version
   const projectVersionLoadResult = await tryLoadProjectVersion(cwd);

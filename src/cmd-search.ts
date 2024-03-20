@@ -53,7 +53,7 @@ export async function search(
   options: SearchOptions
 ): Promise<Result<void, SearchError>> {
   // parse env
-  const envResult = await parseEnv(options, true);
+  const envResult = await parseEnv(options);
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
