@@ -1,13 +1,13 @@
-import { assertIsError } from "./error-type-guards";
 import { pruneManifest, UnityProjectManifest } from "../types/project-manifest";
 import path from "path";
 import { FileParseError, IOError } from "../common-errors";
-import { AsyncResult, Result } from "ts-results-es";
+import { AsyncResult } from "ts-results-es";
 import {
   NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,
 } from "./file-io";
+import { tryParseJson } from "./data-parsing";
 
 export type ManifestLoadError = NotFoundError | FileParseError;
 
@@ -32,15 +32,9 @@ export const tryLoadProjectManifest = function (
   const manifestPath = manifestPathFor(projectPath);
   return (
     tryReadTextFromFile(manifestPath)
-      // TODO: Actually validate the content of the file
-      .andThen((text) =>
-        Result.wrap(() => JSON.parse(text) as UnityProjectManifest).mapErr(
-          (error) => {
-            assertIsError(error);
-            return error;
-          }
-        )
-      )
+      .andThen(tryParseJson)
+      // TODO: Actually validate the json structure
+      .map((json) => json as unknown as UnityProjectManifest)
       .mapErr((error) => {
         if (error instanceof NotFoundError) return error;
         return new FileParseError(manifestPath, "Project-manifest");
