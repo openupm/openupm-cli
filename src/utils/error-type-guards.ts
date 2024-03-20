@@ -1,21 +1,27 @@
 import { HttpErrorBase } from "npm-registry-fetch";
 import assert, { AssertionError } from "assert";
 
-/*
- * Note: We are in a Node context, where Errors have the "code" property.
- * We need to make sure we use Node's error type instead of the default one
- * @see https://dev.to/jdbar/the-problem-with-handling-node-js-errors-in-typescript-and-the-workaround-m64
- */
-import ErrnoException = NodeJS.ErrnoException;
-
 /**
  * @throws {AssertionError} The given parameter is not an error.
  */
-export function assertIsError(x: unknown): asserts x is ErrnoException {
+export function assertIsError(x: unknown): asserts x is Error {
   assert(x !== null);
   assert(typeof x === "object");
   assert("name" in x);
   assert("message" in x);
+}
+
+/**
+ * Asserts that a value is a Node.js error, i.e it includes properties
+ * such as `code`.
+ * @param x The value to check.
+ * @throws {AssertionError} The given parameter is not a node-error.
+ */
+export function assertIsNodeError(
+  x: unknown
+): asserts x is NodeJS.ErrnoException {
+  assertIsError(x);
+  assert("code" in x);
 }
 
 export function assertIsHttpError(x: unknown): asserts x is HttpErrorBase {
