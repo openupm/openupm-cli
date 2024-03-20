@@ -2,13 +2,13 @@ import path from "path";
 import TOML from "@iarna/toml";
 import log from "../logger";
 import isWsl from "is-wsl";
-import execute from "./process";
+import execute from "../utils/process";
 import { addAuth, UpmAuth, UPMConfig } from "../types/upm-config";
 import { RegistryUrl } from "../types/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
-import { assertIsError } from "./error-type-guards";
+import { assertIsError } from "../utils/error-type-guards";
 import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
 
 const configFileName = ".upmconfig.toml";

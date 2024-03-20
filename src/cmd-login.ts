@@ -5,7 +5,7 @@ import {
   GetUpmConfigDirError,
   tryGetUpmConfigDir,
   tryStoreUpmAuth,
-} from "./utils/upm-config-io";
+} from "./io/upm-config-io";
 import { EnvParseError, parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
 import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
@@ -18,7 +18,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryReadTextFromFile, tryWriteTextToFile } from "./utils/file-io";
+import { tryReadTextFromFile, tryWriteTextToFile } from "./io/file-io";
 
 export type LoginError =
   | EnvParseError

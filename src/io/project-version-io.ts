@@ -4,7 +4,7 @@ import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import yaml from "yaml";
 import { FileParseError } from "../common-errors";
 import { FileReadError, tryReadTextFromFile } from "./file-io";
-import { assertIsError } from "./error-type-guards";
+import { assertIsError } from "../utils/error-type-guards";
 
 export type ProjectVersionLoadError = FileReadError | FileParseError;
 

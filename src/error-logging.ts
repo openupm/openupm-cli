@@ -1,9 +1,6 @@
 import log from "./logger";
-import {
-  ManifestLoadError,
-  ManifestSaveError,
-} from "./utils/project-manifest-io";
-import { NotFoundError } from "./utils/file-io";
+import { ManifestLoadError, ManifestSaveError } from "./io/project-manifest-io";
+import { NotFoundError } from "./io/file-io";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.

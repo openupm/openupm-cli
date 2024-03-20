@@ -4,7 +4,7 @@ import {
   ManifestSaveError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
-} from "./utils/project-manifest-io";
+} from "./io/project-manifest-io";
 import { EnvParseError, parseEnv } from "./utils/env";
 import {
   hasVersion,

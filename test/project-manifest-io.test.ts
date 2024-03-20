@@ -2,7 +2,7 @@ import {
   manifestPathFor,
   tryLoadProjectManifest,
   trySaveProjectManifest,
-} from "../src/utils/project-manifest-io";
+} from "../src/io/project-manifest-io";
 import { DomainName, makeDomainName } from "../src/types/domain-name";
 import { makeSemanticVersion } from "../src/types/semantic-version";
 import {
@@ -16,7 +16,7 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { removeScope } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
 import { FileParseError } from "../src/common-errors";
-import { NotFoundError } from "../src/utils/file-io";
+import { NotFoundError } from "../src/io/file-io";
 
 describe("project-manifest io", () => {
   let mockProject: MockUnityProject = null!;

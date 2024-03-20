@@ -2,21 +2,21 @@ import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, parseEnv } from "../src/utils/env";
 import log from "../src/logger";
-import { tryLoadProjectVersion } from "../src/utils/project-version-io";
+import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import {
   NoWslError,
   tryGetUpmConfigDir,
   tryLoadUpmConfig,
-} from "../src/utils/upm-config-io";
+} from "../src/io/upm-config-io";
 import { testRootPath } from "./setup/unity-project";
 import { exampleRegistryUrl } from "./mock-registry";
 import fs from "fs";
-import { NotFoundError } from "../src/utils/file-io";
+import { NotFoundError } from "../src/io/file-io";
 import { FileParseError, IOError } from "../src/common-errors";
 
-jest.mock("../src/utils/project-version-io");
-jest.mock("../src/utils/upm-config-io");
+jest.mock("../src/io/project-version-io");
+jest.mock("../src/io/upm-config-io");
 jest.mock("fs");
 jest.spyOn(process, "cwd");
 
