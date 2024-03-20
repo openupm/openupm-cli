@@ -75,10 +75,6 @@ export const fetchPackageDependencies = async function (
   deep: boolean,
   client: NpmClient
 ): Promise<[ValidDependency[], InvalidDependency[]]> {
-  log.verbose(
-    "dependency",
-    `fetch: ${makePackageReference(name, version)} deep=${deep}`
-  );
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
   // a list of processed dependency {name, version}

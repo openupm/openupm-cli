@@ -204,6 +204,10 @@ export const add = async function (
       }
       // pkgsInScope
       if (!isUpstreamPackage) {
+        log.verbose(
+          "dependency",
+          `fetch: ${makePackageReference(name, requestedVersion)}`
+        );
         const [depsValid, depsInvalid] = await fetchPackageDependencies(
           env.registry,
           env.upstreamRegistry,

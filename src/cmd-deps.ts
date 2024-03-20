@@ -48,12 +48,17 @@ export const deps = async function (
   if (version !== undefined && isPackageUrl(version))
     throw new Error("Cannot get dependencies for url-version");
 
+  const deep = options.deep || false;
+  log.verbose(
+    "dependency",
+    `fetch: ${makePackageReference(name, version)}, deep=${deep}`
+  );
   const [depsValid, depsInvalid] = await fetchPackageDependencies(
     env.registry,
     env.upstreamRegistry,
     name,
     version,
-    options.deep || false,
+    deep,
     client
   );
   depsValid
