@@ -1,11 +1,24 @@
-import { parseEnv } from "../src/utils/env";
-import { attachMockConsole, MockConsole } from "./mock-console";
-import { makeRegistryUrl } from "../src/types/registry-url";
 import { TokenAuth, UPMConfig } from "../src/types/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import fse from "fs-extra";
-import { manifestPathFor } from "../src/utils/project-manifest-io";
+import { Env, parseEnv } from "../src/utils/env";
+import log from "../src/logger";
+import { tryLoadProjectVersion } from "../src/utils/project-version-io";
+import { Err, Ok } from "ts-results-es";
+import {
+  NoWslError,
+  tryGetUpmConfigDir,
+  tryLoadUpmConfig,
+} from "../src/utils/upm-config-io";
+import { testRootPath } from "./setup/unity-project";
+import { exampleRegistryUrl } from "./mock-registry";
+import fs from "fs";
+import { NotFoundError } from "../src/utils/file-io";
+import { FileParseError, IOError } from "../src/common-errors";
+
+jest.mock("../src/utils/project-version-io");
+jest.mock("../src/utils/upm-config-io");
+jest.mock("fs");
+jest.spyOn(process, "cwd");
 
 const testUpmAuth: TokenAuth = {
   email: "test@mail.com",
@@ -18,163 +31,471 @@ const testNpmAuth: NpmAuth = {
 };
 
 const testUpmConfig: UPMConfig = {
-  npmAuth: { [makeRegistryUrl("http://registry.npmjs.org")]: testUpmAuth },
+  npmAuth: { [exampleRegistryUrl]: testUpmAuth },
 };
 
+const testProjectVersion = "2021.3";
+
 describe("env", () => {
-  describe("parseEnv", () => {
-    let mockConsole: MockConsole = null!;
-    let mockProject: MockUnityProject = null!;
+  beforeEach(() => {
+    // By default, we simulate the following:
 
-    beforeAll(async function () {
-      mockProject = await setupUnityProject({
-        version: "2019.2.13f1",
-        upmConfig: testUpmConfig,
+    // The following directories exist
+    jest.mocked(fs.existsSync).mockReturnValue(true);
+
+    // process.cwd is in the root directory.
+    jest.mocked(process.cwd).mockReturnValue(testRootPath);
+
+    // The root directory does not contain an upm-config
+    jest
+      .mocked(tryGetUpmConfigDir)
+      .mockReturnValue(Ok(testRootPath).toAsyncResult());
+    jest.mocked(tryLoadUpmConfig).mockResolvedValue(null);
+
+    // The project has a ProjectVersion.txt
+    jest
+      .mocked(tryLoadProjectVersion)
+      .mockResolvedValue(Ok(testProjectVersion));
+  });
+
+  describe("log-level", () => {
+    it("should be verbose if verbose option is true", async () => {
+      await parseEnv({
+        _global: {
+          verbose: true,
+        },
       });
+
+      expect(log.level).toEqual("verbose");
     });
 
-    beforeEach(function () {
-      mockConsole = attachMockConsole();
-    });
-
-    afterEach(async function () {
-      mockConsole.detach();
-      await mockProject.reset();
-    });
-
-    afterAll(async function () {
-      await mockProject.restore();
-    });
-
-    it("can not resolve path", async function () {
-      const envResult = await parseEnv({
-        _global: { chdir: "/path-not-exist" },
+    it("should be notice if verbose option is false", async () => {
+      await parseEnv({
+        _global: {
+          verbose: false,
+        },
       });
-      expect(envResult.isOk()).toBeFalsy();
-      expect(mockConsole).toHaveLineIncluding("out", "can not resolve path");
+
+      expect(log.level).toEqual("notice");
     });
 
-    it("can not locate manifest.json", async function () {
-      // Delete manifest
-      const manifestPath = manifestPathFor(mockProject.projectPath);
-      fse.rmSync(manifestPath);
+    it("should be notice if verbose option is missing", async () => {
+      await parseEnv({
+        _global: {
+          verbose: false,
+        },
+      });
 
-      const envResult = await parseEnv({ _global: {} });
-      expect(envResult.isOk()).toBeFalsy();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "can not locate manifest.json"
+      expect(log.level).toEqual("notice");
+    });
+  });
+
+  describe("color", () => {
+    beforeEach(() => {
+      process.env["NODE_ENV"] = undefined;
+    });
+
+    it("should use color if color option is true", async () => {
+      const colorDisableSpy = jest.spyOn(log, "disableColor");
+
+      await parseEnv({
+        _global: {
+          color: true,
+        },
+      });
+
+      expect(colorDisableSpy).not.toHaveBeenCalled();
+    });
+
+    it("should use color if color option is missing", async () => {
+      const colorDisableSpy = jest.spyOn(log, "disableColor");
+
+      await parseEnv({
+        _global: {},
+      });
+
+      expect(colorDisableSpy).not.toHaveBeenCalled();
+    });
+
+    it("should not use color if color option is false", async () => {
+      const colorDisableSpy = jest.spyOn(log, "disableColor");
+
+      await parseEnv({
+        _global: {
+          color: false,
+        },
+      });
+
+      expect(colorDisableSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("use upstream", () => {
+    it("should use upstream if upstream option is true", async () => {
+      const result = await parseEnv({
+        _global: {
+          upstream: true,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.upstream).toBeTruthy());
+    });
+
+    it("should use upstream if upstream option is missing", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.upstream).toBeTruthy());
+    });
+
+    it("should not use upstream if upstream option is false", async () => {
+      const result = await parseEnv({
+        _global: {
+          upstream: false,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.upstream).toBeFalsy());
+    });
+  });
+
+  describe("region log", () => {
+    it("should notify of china region if cn option is true", async () => {
+      const logSpy = jest.spyOn(log, "notice");
+
+      await parseEnv({
+        _global: {
+          cn: true,
+        },
+      });
+
+      expect(logSpy).toHaveBeenCalledWith("region", "cn");
+    });
+
+    it("should not notify of china region if cn option is missing", async () => {
+      const logSpy = jest.spyOn(log, "notice");
+
+      await parseEnv({
+        _global: {},
+      });
+
+      expect(logSpy).not.toHaveBeenCalledWith("region", "cn");
+    });
+
+    it("should not notify of china region if cn option is false", async () => {
+      const logSpy = jest.spyOn(log, "notice");
+
+      await parseEnv({
+        _global: { cn: false },
+      });
+
+      expect(logSpy).not.toHaveBeenCalledWith("region", "cn");
+    });
+  });
+
+  describe("system-user", () => {
+    it("should be system-user if option is true", async () => {
+      const result = await parseEnv({
+        _global: {
+          systemUser: true,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.systemUser).toBeTruthy());
+    });
+
+    it("should not be system-user if option is missing", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.systemUser).toBeFalsy());
+    });
+
+    it("should not be system-user if option is false", async () => {
+      const result = await parseEnv({
+        _global: {
+          systemUser: false,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.systemUser).toBeFalsy());
+    });
+  });
+
+  describe("wsl", () => {
+    it("should use wsl if option is true", async () => {
+      const result = await parseEnv({
+        _global: {
+          wsl: true,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.wsl).toBeTruthy());
+    });
+
+    it("should not use wsl if option is missing", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.wsl).toBeFalsy());
+    });
+
+    it("should not use wsl if option is false", async () => {
+      const result = await parseEnv({
+        _global: {
+          wsl: false,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.wsl).toBeFalsy());
+    });
+  });
+
+  describe("upm-config", () => {
+    it("should fail if upm-config dir cannot be determined", async () => {
+      const expected = new NoWslError();
+      jest
+        .mocked(tryGetUpmConfigDir)
+        .mockReturnValue(Err(expected).toAsyncResult());
+
+      const result = await parseEnv({ _global: {} });
+
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    });
+  });
+
+  describe("registry", () => {
+    it("should be global openupm by default", async () => {
+      const result = await parseEnv({ _global: {} });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.registry.url).toEqual("https://package.openupm.com")
       );
     });
-    it("custom registry", async function () {
-      const env = (
-        await parseEnv({ _global: { registry: "https://registry.npmjs.org" } })
-      ).unwrap();
 
-      expect(env.registry.url).toEqual("https://registry.npmjs.org");
+    it("should be chinese openupm for chinese locale", async () => {
+      const result = await parseEnv({
+        _global: {
+          cn: true,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.registry.url).toEqual("https://package.openupm.cn")
+      );
     });
-    it("custom registry with splash", async function () {
-      const env = (
-        await parseEnv({ _global: { registry: "https://registry.npmjs.org/" } })
-      ).unwrap();
 
-      expect(env.registry.url).toEqual("https://registry.npmjs.org");
+    it("should be custom registry if overridden", async () => {
+      const result = await parseEnv({
+        _global: {
+          registry: exampleRegistryUrl,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.registry.url).toEqual(exampleRegistryUrl)
+      );
     });
-    it("custom registry with extra path", async function () {
-      const env = (
-        await parseEnv({
-          _global: {
-            registry: "https://registry.npmjs.org/some",
-          },
-        })
-      ).unwrap();
 
-      expect(env.registry.url).toEqual("https://registry.npmjs.org/some");
+    it("should have no auth if no upm-config was found", async () => {
+      const result = await parseEnv({
+        _global: {
+          registry: exampleRegistryUrl,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.registry.auth).toEqual(null)
+      );
     });
-    it("custom registry with extra path and splash", async function () {
-      const env = (
-        await parseEnv({
-          _global: {
-            registry: "https://registry.npmjs.org/some/",
-          },
-        })
-      ).unwrap();
 
-      expect(env.registry.url).toEqual("https://registry.npmjs.org/some");
+    it("should have no auth if upm-config had no entry for the url", async () => {
+      jest.mocked(tryLoadUpmConfig).mockResolvedValue({
+        npmAuth: {},
+      });
+
+      const result = await parseEnv({
+        _global: {
+          registry: exampleRegistryUrl,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.registry.auth).toEqual(null)
+      );
     });
-    it("custom registry without http", async function () {
-      const env = (
-        await parseEnv({ _global: { registry: "registry.npmjs.org" } })
-      ).unwrap();
 
-      expect(env.registry.url).toEqual("http://registry.npmjs.org");
+    it("should have auth if upm-config had entry for the url", async () => {
+      jest.mocked(tryLoadUpmConfig).mockResolvedValue(testUpmConfig);
+
+      const result = await parseEnv({
+        _global: {
+          registry: exampleRegistryUrl,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.registry.auth).toEqual(testNpmAuth)
+      );
     });
-    it("custom registry with ipv4+port", async function () {
-      const env = (
-        await parseEnv({ _global: { registry: "http://127.0.0.1:4873" } })
-      ).unwrap();
+  });
 
-      expect(env.registry.url).toEqual("http://127.0.0.1:4873");
+  describe("upstream registry", () => {
+    it("should be global unity by default", async () => {
+      const result = await parseEnv({ _global: {} });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.upstreamRegistry.url).toEqual("https://packages.unity.com")
+      );
     });
-    it("custom registry with ipv6+port", async function () {
-      const env = (
-        await parseEnv({
-          _global: { registry: "http://[1:2:3:4:5:6:7:8]:4873" },
-        })
-      ).unwrap();
 
-      expect(env.registry.url).toEqual("http://[1:2:3:4:5:6:7:8]:4873");
+    it("should be chinese unity for chinese locale", async () => {
+      const result = await parseEnv({
+        _global: {
+          cn: true,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn")
+      );
     });
-    it("should have registry auth if specified", async function () {
-      const env = (
-        await parseEnv({
-          _global: {
-            registry: "registry.npmjs.org",
-          },
-        })
-      ).unwrap();
 
-      expect(env.registry.auth).toEqual(testNpmAuth);
+    it("should have no auth", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.upstreamRegistry.auth).toEqual(null)
+      );
     });
-    it("should not have unspecified registry auth", async function () {
-      const env = (
-        await parseEnv({
-          _global: {
-            registry: "registry.other.org",
-          },
-        })
-      ).unwrap();
+  });
 
-      expect(env.registry.auth).toBeNull();
+  describe("cwd", () => {
+    it("should be process directory by default", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.cwd).toEqual(testRootPath)
+      );
     });
-    it("upstream", async function () {
-      const env = (await parseEnv({ _global: { upstream: false } })).unwrap();
 
-      expect(env.upstream).not.toBeTruthy();
+    it("should be specified path if overridden", async () => {
+      const expected = "/some/other/path";
+
+      const result = await parseEnv({
+        _global: {
+          chdir: expected,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) => expect(env.cwd).toEqual(expected));
     });
-    it("editorVersion", async function () {
-      const env = (await parseEnv({ _global: {} })).unwrap();
 
-      expect(env.editorVersion).toEqual("2019.2.13f1");
+    it("should fail if specified path is not found", async () => {
+      const notExistentPath = "/some/other/path";
+      jest
+        .mocked(fs.existsSync)
+        .mockImplementation((path) => path !== notExistentPath);
+
+      const result = await parseEnv({
+        _global: {
+          chdir: notExistentPath,
+        },
+      });
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(NotFoundError)
+      );
     });
-    it("region cn", async function () {
-      const env = (await parseEnv({ _global: { cn: true } })).unwrap();
 
-      expect(env.registry.url).toEqual("https://package.openupm.cn");
-      expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn");
+    it("should notify if specified path is not found", async () => {
+      const notExistentPath = "/some/other/path";
+      jest
+        .mocked(fs.existsSync)
+        .mockImplementation((path) => path !== notExistentPath);
+      const logSpy = jest.spyOn(log, "error");
+
+      await parseEnv({
+        _global: {
+          chdir: notExistentPath,
+        },
+      });
+
+      expect(logSpy).toHaveBeenCalledWith(
+        "env",
+        expect.stringContaining("can not resolve")
+      );
     });
-    it("region cn with a custom registry", async function () {
-      const env = (
-        await parseEnv({
-          _global: {
-            cn: true,
-            registry: "https://reg.custom-package.com",
-          },
-        })
-      ).unwrap();
+  });
 
-      expect(env.registry.url).toEqual("https://reg.custom-package.com");
-      expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn");
+  describe("project-version", () => {
+    it("should use version from ProjectVersion.txt", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.editorVersion).toEqual(testProjectVersion)
+      );
+    });
+
+    it("should fail if ProjectVersion.txt could not be loaded", async () => {
+      const expected = new IOError();
+      jest.mocked(tryLoadProjectVersion).mockResolvedValue(Err(expected));
+
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeError((error) => expect(error).toEqual(expected));
+    });
+
+    it("should notify of missing ProjectVersion.txt", async () => {
+      jest
+        .mocked(tryLoadProjectVersion)
+        .mockResolvedValue(
+          Err(new NotFoundError("/some/path/ProjectVersion.txt"))
+        );
+      const logSpy = jest.spyOn(log, "warn");
+
+      await parseEnv({
+        _global: {},
+      });
+
+      expect(logSpy).toHaveBeenCalledWith(
+        "ProjectVersion",
+        expect.stringContaining("can not locate")
+      );
+    });
+
+    it("should notify of parsing issue", async () => {
+      jest
+        .mocked(tryLoadProjectVersion)
+        .mockResolvedValue(
+          Err(
+            new FileParseError(
+              "/some/path/ProjectVersion.txt",
+              "ProjectVersion.txt"
+            )
+          )
+        );
+      const logSpy = jest.spyOn(log, "error");
+
+      await parseEnv({
+        _global: {},
+      });
+
+      expect(logSpy).toHaveBeenCalledWith(
+        "ProjectVersion",
+        expect.stringContaining("could not be parsed")
+      );
     });
   });
 });
