@@ -8,11 +8,11 @@ import fse from "fs-extra";
 import {
   tryLoadProjectManifest,
   trySaveProjectManifest,
-} from "../../src/utils/project-manifest-io";
+} from "../../src/io/project-manifest-io";
 import { mockEnv, MockEnvSession } from "../mock-env";
 import { UPMConfig } from "../../src/types/upm-config";
-import { trySaveUpmConfig } from "../../src/utils/upm-config-io";
-import { tryCreateProjectVersionTxt } from "../../src/utils/project-version-io";
+import { trySaveUpmConfig } from "../../src/io/upm-config-io";
+import { tryCreateProjectVersionTxt } from "../../src/io/project-version-io";
 
 /**
  * A mock Unity project for testing.

@@ -4,7 +4,7 @@ import {
   GetUpmConfigDirError,
   tryGetUpmConfigDir,
   tryLoadUpmConfig,
-} from "./upm-config-io";
+} from "../io/upm-config-io";
 import path from "path";
 import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
@@ -16,8 +16,8 @@ import { Err, Ok, Result } from "ts-results-es";
 import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
-} from "./project-version-io";
-import { NotFoundError } from "./file-io";
+} from "../io/project-version-io";
+import { NotFoundError } from "../io/file-io";
 
 export type Env = Readonly<{
   cwd: string;

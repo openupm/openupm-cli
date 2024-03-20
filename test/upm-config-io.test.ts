@@ -2,7 +2,7 @@ import { runWithEnv } from "./mock-env";
 import {
   RequiredEnvMissingError,
   tryGetUpmConfigDir,
-} from "../src/utils/upm-config-io";
+} from "../src/io/upm-config-io";
 
 describe("upm-config-io", () => {
   describe("get directory", () => {

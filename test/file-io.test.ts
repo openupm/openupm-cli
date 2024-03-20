@@ -3,7 +3,7 @@ import {
   NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,
-} from "../src/utils/file-io";
+} from "../src/io/file-io";
 import { IOError } from "../src/common-errors";
 import fse from "fs-extra";
 import mocked = jest.mocked;

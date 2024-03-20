@@ -2,7 +2,7 @@ import { AsyncResult, Result } from "ts-results-es";
 import fs from "fs/promises";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
-import { assertIsNodeError } from "./error-type-guards";
+import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
 import path from "path";
 

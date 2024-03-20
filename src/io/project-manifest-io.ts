@@ -7,7 +7,7 @@ import {
   tryReadTextFromFile,
   tryWriteTextToFile,
 } from "./file-io";
-import { tryParseJson } from "./data-parsing";
+import { tryParseJson } from "../utils/data-parsing";
 
 export type ManifestLoadError = NotFoundError | FileParseError;
 
