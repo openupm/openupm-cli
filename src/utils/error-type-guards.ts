@@ -1,5 +1,5 @@
 import { HttpErrorBase } from "npm-registry-fetch";
-import { AssertionError } from "assert";
+import assert, { AssertionError } from "assert";
 
 /*
  * Note: We are in a Node context, where Errors have the "code" property.
@@ -12,10 +12,10 @@ import ErrnoException = NodeJS.ErrnoException;
  * @throws {AssertionError} The given parameter is not an error.
  */
 export function assertIsError(x: unknown): asserts x is ErrnoException {
-  if (x === null || typeof x !== "object" || !("name" in x && "message" in x))
-    throw new AssertionError({
-      message: "Argument was not an error!",
-    });
+  assert(x !== null);
+  assert(typeof x === "object");
+  assert("name" in x);
+  assert("message" in x);
 }
 
 export function assertIsHttpError(x: unknown): asserts x is HttpErrorBase {
