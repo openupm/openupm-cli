@@ -8,7 +8,7 @@ export class IOError extends CustomError {
     /**
      * The actual error that caused the failure.
      */
-    cause?: Error
+    cause?: NodeJS.ErrnoException
   ) {
     super("An interaction with the file-system caused an error.", { cause });
   }

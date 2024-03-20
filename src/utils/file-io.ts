@@ -2,7 +2,7 @@ import { AsyncResult, Result } from "ts-results-es";
 import fs from "fs/promises";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
-import { assertIsError } from "./error-type-guards";
+import { assertIsNodeError } from "./error-type-guards";
 import fse from "fs-extra";
 import path from "path";
 
@@ -42,7 +42,7 @@ export function tryReadTextFromFile(
   return new AsyncResult(
     Result.wrapAsync(() => fs.readFile(path, { encoding: "utf8" }))
   ).mapErr((error) => {
-    assertIsError(error);
+    assertIsNodeError(error);
     if (error.code === "ENOENT") return new NotFoundError(path);
     return new IOError(error);
   });
@@ -62,7 +62,7 @@ export function tryWriteTextToFile(
   )
     .andThen(() => Result.wrapAsync(() => fs.writeFile(filePath, content)))
     .mapErr((error) => {
-      assertIsError(error);
+      assertIsNodeError(error);
       return new IOError(error);
     });
 }
