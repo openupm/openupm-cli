@@ -17,7 +17,6 @@ import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
 } from "./project-version-io";
-import { manifestPathFor } from "./project-manifest-io";
 import { NotFoundError } from "./file-io";
 
 export type Env = Readonly<{
@@ -141,16 +140,6 @@ export const parseEnv = async function (
     return cwdResult;
   }
   const cwd = cwdResult.value;
-
-  // manifest path
-  const manifestPath = manifestPathFor(cwd);
-  if (!fs.existsSync(manifestPath)) {
-    log.error(
-      "manifest",
-      `can not locate manifest.json at path ${manifestPath}`
-    );
-    return Err(new NotFoundError(manifestPath));
-  }
 
   // editor version
   const projectVersionLoadResult = await tryLoadProjectVersion(cwd);
