@@ -66,19 +66,13 @@ function determinePrimaryRegistry(
   return { url, auth };
 }
 
-function determineUpstreamRegistry(
-  options: CmdOptions,
-  upmConfig: UPMConfig | null
-): Registry {
+function determineUpstreamRegistry(options: CmdOptions): Registry {
   const url =
     options._global.cn === true
       ? makeRegistryUrl("https://packages.unity.cn")
       : makeRegistryUrl("https://packages.unity.com");
 
-  const auth =
-    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
-
-  return { url, auth };
+  return { url, auth: null };
 }
 
 function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
@@ -131,7 +125,7 @@ export const parseEnv = async function (
   const upmConfig = upmConfigResult.value;
 
   const registry = determinePrimaryRegistry(options, upmConfig);
-  const upstreamRegistry = determineUpstreamRegistry(options, upmConfig);
+  const upstreamRegistry = determineUpstreamRegistry(options);
 
   // cwd
   const cwdResult = determineCwd(options);
