@@ -6,16 +6,15 @@ import {
 
 describe("package-reference", () => {
   describe("validation", () => {
-    [
+    it.each([
       "com.abc.my-package",
       "com.abc.my-package@1.2.3",
       "com.abc.my-package@file://./my-package",
       "com.abc.my-package@latest",
-    ].forEach((input) =>
-      it(`"${input}" should be package-reference`, function () {
-        expect(isPackageReference(input)).toBeTruthy();
-      })
-    );
+    ])(`"%s" should be package-reference`, (input) => {
+      expect(isPackageReference(input)).toBeTruthy();
+    });
+
     [
       // Not valid domain name
       "-hello",
