@@ -10,10 +10,8 @@ describe("package-url", () => {
       expect(isPackageUrl(url)).toBeTruthy();
     });
 
-    ["", "com.base.package.a"].forEach((url) =>
-      it(`"${url}" is not a package-url`, function () {
-        expect(isPackageUrl(url)).not.toBeTruthy();
-      })
-    );
+    it.each(["", "com.base.package.a"])(`should not be ok for "%s"`, (url) => {
+      expect(isPackageUrl(url)).not.toBeTruthy();
+    });
   });
 });
