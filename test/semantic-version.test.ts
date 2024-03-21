@@ -6,10 +6,11 @@ describe("semantic-version", () => {
       expect(isSemanticVersion(input)).toBeTruthy();
     });
 
-    ["", " ", "wow", "1", "1.2"].forEach((input) =>
-      it(`"${input}" is not a semantic version`, function () {
+    it.each(["", " ", "wow", "1", "1.2"])(
+      `shout not be ok for "%s"`,
+      (input) => {
         expect(isSemanticVersion(input)).not.toBeTruthy();
-      })
+      }
     );
   });
 });
