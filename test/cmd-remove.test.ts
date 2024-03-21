@@ -39,7 +39,7 @@ describe("cmd-remove.ts", () => {
       await mockProject.restore();
     });
 
-    it("remove pkg", async function () {
+    it("should remove packument without version", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
@@ -54,7 +54,7 @@ describe("cmd-remove.ts", () => {
       expect(mockConsole).toHaveLineIncluding("out", "removed ");
       expect(mockConsole).toHaveLineIncluding("out", "open Unity");
     });
-    it("remove pkg@1.0.0", async function () {
+    it("should remove packument with semantic version", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
@@ -73,7 +73,7 @@ describe("cmd-remove.ts", () => {
         "do not specify a version"
       );
     });
-    it("remove pkg-not-exist", async function () {
+    it("should fail for uninstalled packument", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,
@@ -86,7 +86,7 @@ describe("cmd-remove.ts", () => {
       });
       expect(mockConsole).toHaveLineIncluding("out", "package not found");
     });
-    it("remove more than one pkgs", async function () {
+    it("should remove multiple packuments", async function () {
       const options = {
         _global: {
           registry: exampleRegistryUrl,

@@ -29,7 +29,7 @@ describe("registry-client", () => {
       stopMockRegistry();
     });
 
-    it("simple", async function () {
+    it("should get known packument", async function () {
       const packumentRemote = buildPackument(packageA);
       registerRemotePackument(packumentRemote);
 
@@ -41,7 +41,7 @@ describe("registry-client", () => {
       );
     });
 
-    it("404", async function () {
+    it("should fail for unknown packument", async function () {
       registerMissingPackument(packageA);
 
       const result = await client.tryFetchPackument(exampleRegistry, packageA)

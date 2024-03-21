@@ -64,12 +64,12 @@ describe("cmd-deps.ts", () => {
       await mockProject.restore();
     });
 
-    it("deps pkg", async function () {
+    it("should print direct dependencies", async function () {
       const depsResult = await deps(remotePackumentA.name, options);
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
-    it("deps pkg --deep", async function () {
+    it("should print all dependencies when requested", async function () {
       const depsResult = await deps(remotePackumentA.name, {
         ...options,
         deep: true,
@@ -78,7 +78,7 @@ describe("cmd-deps.ts", () => {
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentUp.name);
     });
-    it("deps pkg@latest", async function () {
+    it("should print correct dependencies for latest tag", async function () {
       const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "latest"),
         options
@@ -86,7 +86,7 @@ describe("cmd-deps.ts", () => {
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
-    it("deps pkg@1.0.0", async function () {
+    it("should print correct dependencies for semantic version", async function () {
       const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "1.0.0"),
         options
@@ -94,7 +94,7 @@ describe("cmd-deps.ts", () => {
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
     });
-    it("deps pkg@not-exist-version", async function () {
+    it("should print no dependencies for unknown version", async function () {
       const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "2.0.0"),
         options
@@ -102,12 +102,12 @@ describe("cmd-deps.ts", () => {
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
     });
-    it("deps pkg-not-exist", async function () {
+    it("should print no dependencies for unknown packument", async function () {
       const depsResult = await deps(makeDomainName("pkg-not-exist"), options);
       expect(depsResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "not found");
     });
-    it("deps pkg upstream", async function () {
+    it("should print dependencies for upstream packuments", async function () {
       const depsResult = await deps(remotePackumentUp.name, options);
       expect(depsResult).toBeOk();
     });

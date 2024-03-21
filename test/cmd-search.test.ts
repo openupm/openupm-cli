@@ -84,14 +84,14 @@ describe("cmd-search.ts", () => {
     afterEach(function () {
       stopMockRegistry();
     });
-    it("simple", async function () {
+    it("should print packument information", async function () {
       const searchResult = await search("package-a", options);
       expect(searchResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "package-a");
       expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
       expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
     });
-    it("pkg not exist", async function () {
+    it("should notify of unknown packument", async function () {
       const searchResult = await search("pkg-not-exist", options);
       expect(searchResult).toBeOk();
       expect(mockConsole).toHaveLineIncluding("out", "No matches found");
@@ -131,7 +131,7 @@ describe("cmd-search.ts", () => {
     afterEach(function () {
       stopMockRegistry();
     });
-    it("from remote", async function () {
+    it("should print packument information", async function () {
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
@@ -145,7 +145,7 @@ describe("cmd-search.ts", () => {
       expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
       expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
     });
-    it("pkg not exist", async function () {
+    it("should notify of unknown packument", async function () {
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
