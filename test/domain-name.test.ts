@@ -16,7 +16,7 @@ describe("domain-name", () => {
       expect(isDomainName(s)).toBeTruthy();
     });
 
-    [
+    it.each([
       "",
       " ",
       // Invalid characters
@@ -27,11 +27,9 @@ describe("domain-name", () => {
       "com.-unity",
       // No trailing hyphens
       "com.unity-",
-    ].forEach((s) =>
-      it(`"${s}" should not be domain-name`, () => {
-        expect(isDomainName(s)).toBeFalsy();
-      })
-    );
+    ])(`"%s" should not be domain-name`, (s) => {
+      expect(isDomainName(s)).toBeFalsy();
+    });
   });
 
   describe("internal package", () => {
