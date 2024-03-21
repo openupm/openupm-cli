@@ -2,11 +2,11 @@ import { coerceRegistryUrl, isRegistryUrl } from "../src/types/registry-url";
 
 describe("registry-url", () => {
   describe("validation", () => {
-    ["http://registry.npmjs.org", "https://registry.npmjs.org"].forEach(
-      (input) =>
-        it(`"${input}" should be registry-url`, function () {
-          expect(isRegistryUrl(input)).toBeTruthy();
-        })
+    it.each(["http://registry.npmjs.org", "https://registry.npmjs.org"])(
+      `"should be ok for "%s"`,
+      (input) => {
+        expect(isRegistryUrl(input)).toBeTruthy();
+      }
     );
     [
       // Missing protocol
