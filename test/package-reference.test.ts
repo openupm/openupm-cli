@@ -11,7 +11,7 @@ describe("package-reference", () => {
       "com.abc.my-package@1.2.3",
       "com.abc.my-package@file://./my-package",
       "com.abc.my-package@latest",
-    ])(`"%s" should be package-reference`, (input) => {
+    ])(`should be ok for "%s"`, (input) => {
       expect(isPackageReference(input)).toBeTruthy();
     });
 

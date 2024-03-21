@@ -7,12 +7,12 @@ import assert from "assert";
 
 describe("editor-version", () => {
   describe("parseEditorVersion", () => {
-    it("test x.y", () => {
+    it("should parse x.y", () => {
       const version = tryParseEditorVersion("2019.2");
       assert(version !== null);
       expect(version).toEqual({ major: 2019, minor: 2 });
     });
-    it("test x.y.z", () => {
+    it("should parse x.y.z", () => {
       const version = tryParseEditorVersion("2019.2.1");
       assert(version !== null);
       expect(version).toEqual({
@@ -21,7 +21,7 @@ describe("editor-version", () => {
         patch: 1,
       });
     });
-    it("test x.y.zan", () => {
+    it("should parse x.y.zan", () => {
       const version = tryParseEditorVersion("2019.2.1a5");
       assert(version !== null);
       expect(version).toEqual({
@@ -32,7 +32,7 @@ describe("editor-version", () => {
         build: 5,
       });
     });
-    it("test x.y.zbn", () => {
+    it("should parse x.y.zbn", () => {
       const version = tryParseEditorVersion("2019.2.1b5");
       assert(version !== null);
       expect(version).toEqual({
@@ -43,7 +43,7 @@ describe("editor-version", () => {
         build: 5,
       });
     });
-    it("test x.y.zfn", () => {
+    it("should parse x.y.zfn", () => {
       const version = tryParseEditorVersion("2019.2.1f5");
       assert(version !== null);
       expect(version).toEqual({
@@ -54,7 +54,7 @@ describe("editor-version", () => {
         build: 5,
       });
     });
-    it("test x.y.zcn", () => {
+    it("should parse x.y.zcn", () => {
       const version = tryParseEditorVersion("2019.2.1f1c5");
       assert(version !== null);
       expect(version).toEqual({
@@ -67,7 +67,7 @@ describe("editor-version", () => {
         locBuild: 5,
       });
     });
-    it("test invalid version", () => {
+    it("should not parse invalid version", () => {
       expect(tryParseEditorVersion("2019") === null).toBeTruthy();
     });
   });
@@ -78,7 +78,7 @@ describe("editor-version", () => {
       ["2019.1.1", "2019.1.1"],
       ["2019.1.1f1", "2019.1.1f1"],
       ["2019.1.1f1c1", "2019.1.1f1c1"],
-    ])(`%s == %s`, function (a, b) {
+    ])(`should be equal %s and %s`, function (a, b) {
       expect(
         compareEditorVersion(
           tryParseEditorVersion(a)!,
@@ -90,7 +90,7 @@ describe("editor-version", () => {
     it.each([
       ["2019.2", "2019.1"],
       ["2020.1", "2019.1"],
-    ])(`%s > %s`, function (a, b) {
+    ])(`should be greater for %s and %s`, function (a, b) {
       expect(
         compareEditorVersion(
           tryParseEditorVersion(a)!,
@@ -107,7 +107,7 @@ describe("editor-version", () => {
       ["2019.1.1a1", "2020.1.1b1"],
       ["2019.1.1b1", "2020.1.1f1"],
       ["2019.1.1f1", "2020.1.1f1c1"],
-    ])(`%s < %s`, function (a, b) {
+    ])(`should be less for %s and %s`, function (a, b) {
       expect(
         compareEditorVersion(
           tryParseEditorVersion(a)!,

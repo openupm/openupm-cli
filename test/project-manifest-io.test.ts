@@ -33,7 +33,7 @@ describe("project-manifest io", () => {
     await mockProject.restore();
   });
 
-  it("loadManifest", async () => {
+  it("should load valid manifest", async () => {
     const manifestResult = await tryLoadProjectManifest(mockProject.projectPath)
       .promise;
 
@@ -41,7 +41,7 @@ describe("project-manifest io", () => {
       expect(manifest).toEqual({ dependencies: {} })
     );
   });
-  it("no manifest file", async () => {
+  it("should fail when manifest is missing", async () => {
     const manifestResult = await tryLoadProjectManifest("/invalid-path")
       .promise;
 
@@ -49,7 +49,7 @@ describe("project-manifest io", () => {
       expect(error).toBeInstanceOf(NotFoundError)
     );
   });
-  it("wrong json content", async () => {
+  it("should fail when manifest has invalid json", async () => {
     const manifestPath = manifestPathFor(mockProject.projectPath);
     fse.writeFileSync(manifestPath, "invalid data");
 
@@ -59,7 +59,7 @@ describe("project-manifest io", () => {
       expect(error).toBeInstanceOf(FileParseError)
     );
   });
-  it("saveManifest", async () => {
+  it("should save manifest", async () => {
     let manifest = (
       await tryLoadProjectManifest(mockProject.projectPath).promise
     ).unwrap();
@@ -77,7 +77,7 @@ describe("project-manifest io", () => {
     ).unwrap();
     expect(manifest2).toEqual(manifest);
   });
-  it("manifest-path is correct", () => {
+  it("should determine correct manifest path", () => {
     const manifestPath = manifestPathFor("test-openupm-cli");
     const expected = path.join("test-openupm-cli", "Packages", "manifest.json");
     expect(manifestPath).toEqual(expected);

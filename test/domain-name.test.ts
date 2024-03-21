@@ -12,7 +12,7 @@ describe("domain-name", () => {
       "com.openupm",
       "at.ac.my-school",
       "dev.comradevanti123",
-    ])(`"%s" should be domain-name`, (s) => {
+    ])(`should be ok for "%s"`, (s) => {
       expect(isDomainName(s)).toBeTruthy();
     });
 
@@ -27,7 +27,7 @@ describe("domain-name", () => {
       "com.-unity",
       // No trailing hyphens
       "com.unity-",
-    ])(`"%s" should not be domain-name`, (s) => {
+    ])(`should not be ok for "%s"`, (s) => {
       expect(isDomainName(s)).toBeFalsy();
     });
   });

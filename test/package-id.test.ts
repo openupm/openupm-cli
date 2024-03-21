@@ -15,7 +15,7 @@ describe("package-id", () => {
       // Incomplete version
       "com.my-package@1",
       "com.my-package@1.2",
-    ])(`"%s" should not be package-id`, (s) => {
+    ])(`should not be ok for "%s"`, (s) => {
       expect(isPackageId(s)).toBeFalsy();
     });
   });
