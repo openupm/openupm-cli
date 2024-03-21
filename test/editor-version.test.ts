@@ -87,19 +87,18 @@ describe("editor-version", () => {
       ).toEqual(0);
     });
 
-    Array.of<[string, string]>(
+    it.each([
       ["2019.2", "2019.1"],
-      ["2020.1", "2019.1"]
-    ).forEach(([a, b]) =>
-      it(`${a} > ${b}`, function () {
-        expect(
-          compareEditorVersion(
-            tryParseEditorVersion(a)!,
-            tryParseEditorVersion(b)!
-          )
-        ).toEqual(1);
-      })
-    );
+      ["2020.1", "2019.1"],
+    ])(`%s > %s`, function (a, b) {
+      expect(
+        compareEditorVersion(
+          tryParseEditorVersion(a)!,
+          tryParseEditorVersion(b)!
+        )
+      ).toEqual(1);
+    });
+
     Array.of<[string, string]>(
       ["2019.1", "2019.2"],
       ["2019.1", "2020.1"],
