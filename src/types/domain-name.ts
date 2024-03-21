@@ -21,7 +21,7 @@ function domainSegmentsIn(hostName: string): string[] {
  */
 export function isDomainName(s: string): s is DomainName {
   const segments = domainSegmentsIn(s);
-  if (segments === null || segments.length === 0) return false;
+  if (segments.length === 0) return false;
   return segments.every((segment) => segmentRegex.test(segment));
 }
 
