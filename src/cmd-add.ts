@@ -124,7 +124,7 @@ export const add = async function (
         requestedVersion,
         env.registry
       ).promise;
-      if (resolveResult.isErr() && env.upstream) {
+      if (resolveResult.isErr() && env.upstreamRegistry !== null) {
         resolveResult = await tryResolve(
           client,
           name,

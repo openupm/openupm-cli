@@ -130,36 +130,6 @@ describe("env", () => {
     });
   });
 
-  describe("use upstream", () => {
-    it("should use upstream if upstream option is true", async () => {
-      const result = await parseEnv({
-        _global: {
-          upstream: true,
-        },
-      });
-
-      expect(result).toBeOk((env: Env) => expect(env.upstream).toBeTruthy());
-    });
-
-    it("should use upstream if upstream option is missing", async () => {
-      const result = await parseEnv({
-        _global: {},
-      });
-
-      expect(result).toBeOk((env: Env) => expect(env.upstream).toBeTruthy());
-    });
-
-    it("should not use upstream if upstream option is false", async () => {
-      const result = await parseEnv({
-        _global: {
-          upstream: false,
-        },
-      });
-
-      expect(result).toBeOk((env: Env) => expect(env.upstream).toBeFalsy());
-    });
-  });
-
   describe("region log", () => {
     it("should notify of china region if cn option is true", async () => {
       const logSpy = jest.spyOn(log, "notice");
@@ -344,11 +314,45 @@ describe("env", () => {
   });
 
   describe("upstream registry", () => {
+    it("should use upstream if upstream option is true", async () => {
+      const result = await parseEnv({
+        _global: {
+          upstream: true,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.upstreamRegistry).not.toBeNull()
+      );
+    });
+
+    it("should use upstream if upstream option is missing", async () => {
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.upstreamRegistry).not.toBeNull()
+      );
+    });
+
+    it("should not use upstream if upstream option is false", async () => {
+      const result = await parseEnv({
+        _global: {
+          upstream: false,
+        },
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.upstreamRegistry).toBeNull()
+      );
+    });
+
     it("should be global unity by default", async () => {
       const result = await parseEnv({ _global: {} });
 
       expect(result).toBeOk((env: Env) =>
-        expect(env.upstreamRegistry.url).toEqual("https://packages.unity.com")
+        expect(env.upstreamRegistry!.url).toEqual("https://packages.unity.com")
       );
     });
 
@@ -360,7 +364,7 @@ describe("env", () => {
       });
 
       expect(result).toBeOk((env: Env) =>
-        expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn")
+        expect(env.upstreamRegistry!.url).toEqual("https://packages.unity.cn")
       );
     });
 
@@ -370,7 +374,7 @@ describe("env", () => {
       });
 
       expect(result).toBeOk((env: Env) =>
-        expect(env.upstreamRegistry.auth).toEqual(null)
+        expect(env.upstreamRegistry!.auth).toEqual(null)
       );
     });
   });

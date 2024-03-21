@@ -38,7 +38,7 @@ export const view = async function (
   return await client
     .tryFetchPackument(env.registry, pkg)
     .andThen(async (packument) => {
-      if (packument === null && env.upstream)
+      if (packument === null && env.upstreamRegistry !== null)
         return await client.tryFetchPackument(env.upstreamRegistry, pkg)
           .promise;
       return Ok(packument);

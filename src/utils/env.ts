@@ -23,8 +23,7 @@ export type Env = Readonly<{
   cwd: string;
   systemUser: boolean;
   wsl: boolean;
-  upstream: boolean;
-  upstreamRegistry: Registry;
+  upstreamRegistry: Registry | null;
   registry: Registry;
   editorVersion: string | null;
 }>;
@@ -107,9 +106,6 @@ export const parseEnv = async function (
     log.disableColor();
   }
 
-  // upstream
-  const upstream = determineUseUpstream(options);
-
   // region cn
   if (options._global.cn === true) log.notice("region", "cn");
 
@@ -125,7 +121,12 @@ export const parseEnv = async function (
   const upmConfig = upmConfigResult.value;
 
   const registry = determinePrimaryRegistry(options, upmConfig);
-  const upstreamRegistry = determineUpstreamRegistry(options);
+
+  // upstream
+  const useUpstream = determineUseUpstream(options);
+  const upstreamRegistry = useUpstream
+    ? determineUpstreamRegistry(options)
+    : null;
 
   // cwd
   const cwdResult = determineCwd(options);
@@ -157,7 +158,6 @@ export const parseEnv = async function (
     editorVersion,
     registry,
     systemUser,
-    upstream,
     upstreamRegistry,
     wsl,
   });

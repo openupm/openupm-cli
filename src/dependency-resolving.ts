@@ -69,7 +69,7 @@ type NameVersionPair = Readonly<{
  */
 export const fetchPackageDependencies = async function (
   registry: Registry,
-  upstreamRegistry: Registry,
+  upstreamRegistry: Registry | null,
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean,
@@ -126,7 +126,7 @@ export const fetchPackageDependencies = async function (
           entry.version
         );
         // Then upstream registry
-        if (resolveResult.isErr()) {
+        if (resolveResult.isErr() && upstreamRegistry !== null) {
           const upstreamResult = await tryResolveFromRegistry(
             upstreamRegistry,
             entry.name,
