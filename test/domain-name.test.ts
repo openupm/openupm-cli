@@ -6,18 +6,17 @@ import {
 
 describe("domain-name", () => {
   describe("validation", () => {
-    [
+    it.each([
       "com",
       "com.unity",
       "com.openupm",
       "at.ac.my-school",
       "dev.comradevanti123",
-    ].forEach((s) =>
-      it(`"${s}" should be domain-name`, () => {
-        expect(isDomainName(s)).toBeTruthy();
-      })
-    );
-    [
+    ])(`"%s" should be domain-name`, (s) => {
+      expect(isDomainName(s)).toBeTruthy();
+    });
+
+    it.each([
       "",
       " ",
       // Invalid characters
@@ -28,12 +27,11 @@ describe("domain-name", () => {
       "com.-unity",
       // No trailing hyphens
       "com.unity-",
-    ].forEach((s) =>
-      it(`"${s}" should not be domain-name`, () => {
-        expect(isDomainName(s)).toBeFalsy();
-      })
-    );
+    ])(`"%s" should not be domain-name`, (s) => {
+      expect(isDomainName(s)).toBeFalsy();
+    });
   });
+
   describe("internal package", () => {
     it("test com.otherorg.software", () => {
       expect(

@@ -2,13 +2,12 @@ import { isPackageId } from "../src/types/package-id";
 
 describe("package-id", () => {
   describe("validate", () => {
-    ["com.my-package@1.2.3"].forEach((s) =>
-      it(`"${s}" should be package-id`, () => {
-        expect(isPackageId(s)).toBeTruthy();
-      })
-    );
+    it("should be ok for valid string", () => {
+      const s = "com.my-package@1.2.3";
+      expect(isPackageId(s)).toBeTruthy();
+    });
 
-    [
+    it.each([
       "",
       " ",
       // Missing version
@@ -16,10 +15,8 @@ describe("package-id", () => {
       // Incomplete version
       "com.my-package@1",
       "com.my-package@1.2",
-    ].forEach((s) =>
-      it(`"${s}" should not be package-id`, () => {
-        expect(isPackageId(s)).toBeFalsy();
-      })
-    );
+    ])(`"%s" should not be package-id`, (s) => {
+      expect(isPackageId(s)).toBeFalsy();
+    });
   });
 });

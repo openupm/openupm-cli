@@ -6,24 +6,21 @@ import {
 
 describe("package-reference", () => {
   describe("validation", () => {
-    [
+    it.each([
       "com.abc.my-package",
       "com.abc.my-package@1.2.3",
       "com.abc.my-package@file://./my-package",
       "com.abc.my-package@latest",
-    ].forEach((input) =>
-      it(`"${input}" should be package-reference`, function () {
-        expect(isPackageReference(input)).toBeTruthy();
-      })
-    );
-    [
+    ])(`"%s" should be package-reference`, (input) => {
+      expect(isPackageReference(input)).toBeTruthy();
+    });
+
+    it.each([
       // Not valid domain name
       "-hello",
-    ].forEach((input) =>
-      it(`"${input}" should not be package-reference`, function () {
-        expect(isPackageReference(input)).not.toBeTruthy();
-      })
-    );
+    ])(`"should not be ok for "%s"`, (input) => {
+      expect(isPackageReference(input)).not.toBeTruthy();
+    });
   });
 
   describe("split", () => {
