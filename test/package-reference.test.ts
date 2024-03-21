@@ -15,14 +15,12 @@ describe("package-reference", () => {
       expect(isPackageReference(input)).toBeTruthy();
     });
 
-    [
+    it.each([
       // Not valid domain name
       "-hello",
-    ].forEach((input) =>
-      it(`"${input}" should not be package-reference`, function () {
-        expect(isPackageReference(input)).not.toBeTruthy();
-      })
-    );
+    ])(`"should not be ok for "%s"`, (input) => {
+      expect(isPackageReference(input)).not.toBeTruthy();
+    });
   });
 
   describe("split", () => {
