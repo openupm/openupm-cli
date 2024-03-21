@@ -2,11 +2,10 @@ import { isPackageId } from "../src/types/package-id";
 
 describe("package-id", () => {
   describe("validate", () => {
-    ["com.my-package@1.2.3"].forEach((s) =>
-      it(`"${s}" should be package-id`, () => {
-        expect(isPackageId(s)).toBeTruthy();
-      })
-    );
+    it("should be ok for valid string", () => {
+      const s = "com.my-package@1.2.3";
+      expect(isPackageId(s)).toBeTruthy();
+    });
 
     [
       "",
