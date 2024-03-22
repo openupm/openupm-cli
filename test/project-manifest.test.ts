@@ -12,56 +12,78 @@ import { makeSemanticVersion } from "../src/types/semantic-version";
 import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
 import { makeRegistryUrl } from "../src/types/registry-url";
 import { exampleRegistryUrl } from "./mock-registry";
+import fc from "fast-check";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
   describe("dependency", () => {
     it("should add dependency when adding first time", () => {
-      let manifest = emptyProjectManifest;
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let manifest = emptyProjectManifest;
 
-      manifest = addDependency(
-        manifest,
-        makeDomainName("test"),
-        makeSemanticVersion("1.2.3")
+          manifest = addDependency(
+            manifest,
+            packumentName,
+            makeSemanticVersion("1.2.3")
+          );
+
+          expect(manifest.dependencies).toEqual({ [packumentName]: "1.2.3" });
+        })
       );
-
-      expect(manifest.dependencies).toEqual({ test: "1.2.3" });
     });
+
     it("should overwrite dependency when adding second time", () => {
-      let manifest = emptyProjectManifest;
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let manifest = emptyProjectManifest;
 
-      manifest = addDependency(
-        manifest,
-        makeDomainName("test"),
-        makeSemanticVersion("1.2.3")
-      );
-      manifest = addDependency(
-        manifest,
-        makeDomainName("test"),
-        makeSemanticVersion("2.3.4")
-      );
+          manifest = addDependency(
+            manifest,
+            packumentName,
+            makeSemanticVersion("1.2.3")
+          );
+          manifest = addDependency(
+            manifest,
+            packumentName,
+            makeSemanticVersion("2.3.4")
+          );
 
-      expect(manifest.dependencies).toEqual({ test: "2.3.4" });
+          expect(manifest.dependencies).toEqual({ [packumentName]: "2.3.4" });
+        })
+      );
     });
+
     it("should remove existing dependency", () => {
-      let manifest = emptyProjectManifest;
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let manifest = emptyProjectManifest;
 
-      manifest = addDependency(
-        manifest,
-        makeDomainName("test"),
-        makeSemanticVersion("1.2.3")
+          manifest = addDependency(
+            manifest,
+            packumentName,
+            makeSemanticVersion("1.2.3")
+          );
+          manifest = removeDependency(manifest, packumentName);
+
+          expect(manifest.dependencies).toEqual({});
+        })
       );
-      manifest = removeDependency(manifest, makeDomainName("test"));
-
-      expect(manifest.dependencies).toEqual({});
     });
+
     it("should do nothing when dependency does not exist", () => {
-      let manifest = emptyProjectManifest;
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let manifest = emptyProjectManifest;
 
-      manifest = removeDependency(manifest, makeDomainName("test"));
+          manifest = removeDependency(manifest, packumentName);
 
-      expect(manifest.dependencies).toEqual({});
+          expect(manifest.dependencies).toEqual({});
+        })
+      );
     });
   });
+
   describe("get scoped-registry", () => {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
@@ -72,6 +94,7 @@ describe("project-manifest", () => {
 
       expect(tryGetScopedRegistryByUrl(manifest, url)).toEqual(expected);
     });
+
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
       const url = makeRegistryUrl("https://test.com");
@@ -85,6 +108,7 @@ describe("project-manifest", () => {
       expect(tryGetScopedRegistryByUrl(manifest, url)).toBeNull();
     });
   });
+
   describe("map scoped-registry", () => {
     it("should have null as mapping input if manifest does not have scoped-registry", () => {
       const manifest = emptyProjectManifest;
@@ -135,15 +159,21 @@ describe("project-manifest", () => {
       expect(actual).toEqual(expected);
     });
   });
+
   describe("testables", () => {
     it("should not add testables which already exist", () => {
-      let manifest = emptyProjectManifest;
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, makeDomainName("a"));
-      manifest = addTestable(manifest, makeDomainName("a"));
+          manifest = addTestable(manifest, packumentName);
+          manifest = addTestable(manifest, packumentName);
 
-      expect(manifest.testables).toEqual(["a"]);
+          expect(manifest.testables).toEqual([packumentName]);
+        })
+      );
     });
+
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
 

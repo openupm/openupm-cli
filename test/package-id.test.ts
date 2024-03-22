@@ -1,15 +1,24 @@
 import { isPackageId } from "../src/types/package-id";
+import fc from "fast-check";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("package-id", () => {
   describe("validate", () => {
     it("should be ok for name with semantic version", () => {
-      const s = "test@1.2.3";
-      expect(isPackageId(s)).toBeTruthy();
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const input = `${packumentName}@1.2.3`;
+          expect(isPackageId(input)).toBeTruthy();
+        })
+      );
     });
 
     it("should not be ok for just name", () => {
-      const s = "test";
-      expect(isPackageId(s)).toBeFalsy();
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) =>
+          expect(isPackageId(packumentName)).toBeFalsy()
+        )
+      );
     });
 
     it("should not be ok for invalid name", () => {

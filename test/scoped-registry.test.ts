@@ -6,6 +6,8 @@ import {
 } from "../src/types/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/types/domain-name";
+import fc from "fast-check";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("scoped-registry", () => {
   describe("construction", () => {
@@ -14,6 +16,7 @@ describe("scoped-registry", () => {
       expect(registry.scopes).toHaveLength(0);
     });
   });
+
   describe("add scope", () => {
     it("should keep scope-list alphabetical", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl);
@@ -25,38 +28,58 @@ describe("scoped-registry", () => {
     });
 
     it("should filter duplicates", () => {
-      let registry = makeScopedRegistry("test", exampleRegistryUrl);
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let registry = makeScopedRegistry("test", exampleRegistryUrl);
 
-      registry = addScope(registry, makeDomainName("a"));
-      registry = addScope(registry, makeDomainName("a"));
+          registry = addScope(registry, packumentName);
+          registry = addScope(registry, packumentName);
 
-      expect(registry.scopes).toEqual(["a"]);
+          expect(registry.scopes).toEqual([packumentName]);
+        })
+      );
     });
   });
+
   describe("has scope", () => {
     it("should have scope that was added", () => {
-      let registry = makeScopedRegistry("test", exampleRegistryUrl);
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let registry = makeScopedRegistry("test", exampleRegistryUrl);
 
-      registry = addScope(registry, makeDomainName("a"));
+          registry = addScope(registry, packumentName);
 
-      expect(hasScope(registry, makeDomainName("a"))).toBeTruthy();
+          expect(hasScope(registry, packumentName)).toBeTruthy();
+        })
+      );
     });
-    it("should not have scope that was not added", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl);
 
-      expect(hasScope(registry, makeDomainName("a"))).toBeFalsy();
+    it("should not have scope that was not added", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const registry = makeScopedRegistry("test", exampleRegistryUrl);
+
+          expect(hasScope(registry, packumentName)).toBeFalsy();
+        })
+      );
     });
   });
+
   describe("remove scope", () => {
     it("should not have scope after removing it", () => {
-      let registry = makeScopedRegistry("test", exampleRegistryUrl, [
-        makeDomainName("a"),
-      ]);
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let registry = makeScopedRegistry("test", exampleRegistryUrl, [
+            packumentName,
+          ]);
 
-      registry = removeScope(registry, makeDomainName("a"));
+          registry = removeScope(registry, packumentName);
 
-      expect(hasScope(registry, makeDomainName("a"))).toBeFalsy();
+          expect(hasScope(registry, packumentName)).toBeFalsy();
+        })
+      );
     });
+
     it("should not do nothing if scope does not exist", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl, [
         makeDomainName("a"),
@@ -66,15 +89,20 @@ describe("scoped-registry", () => {
 
       expect(hasScope(registry, makeDomainName("a"))).toBeTruthy();
     });
+
     it("should remove duplicate scopes", () => {
-      let registry = makeScopedRegistry("test", exampleRegistryUrl, [
-        makeDomainName("a"),
-        makeDomainName("a"),
-      ]);
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let registry = makeScopedRegistry("test", exampleRegistryUrl, [
+            packumentName,
+            packumentName,
+          ]);
 
-      registry = removeScope(registry, makeDomainName("a"));
+          registry = removeScope(registry, packumentName);
 
-      expect(registry.scopes).toHaveLength(0);
+          expect(registry.scopes).toHaveLength(0);
+        })
+      );
     });
   });
 });

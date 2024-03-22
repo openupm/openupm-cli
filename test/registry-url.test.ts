@@ -18,12 +18,12 @@ describe("registry-url", () => {
       expect(isRegistryUrl(input)).not.toBeTruthy();
     });
   });
-  
+
   describe("coerce", () => {
     it("should coerce urls without protocol", () => {
       expect(coerceRegistryUrl("test.com")).toEqual("http://test.com");
     });
-    
+
     it("should remove trailing slash", () => {
       expect(coerceRegistryUrl("http://test.com/")).toEqual("http://test.com");
     });

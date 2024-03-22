@@ -3,21 +3,73 @@ import {
   makePackageReference,
   splitPackageReference,
 } from "../src/types/package-reference";
+import fc from "fast-check";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("package-reference", () => {
   describe("validation", () => {
-    it.each([
-      "com.abc.my-package",
-      "com.abc.my-package@1.2.3",
-      "com.abc.my-package@file://./my-package",
-      "com.abc.my-package@latest",
-    ])(`should be ok for "%s"`, (input) => {
-      expect(isPackageReference(input)).toBeTruthy();
+    it("should be ok for just name", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          expect(isPackageReference(packumentName)).toBeTruthy();
+        })
+      );
+    });
+
+    it("should be ok for name with semantic version", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const input = `${packumentName}@1.2.3`;
+          expect(isPackageReference(input)).toBeTruthy();
+        })
+      );
+    });
+
+    it("should be ok for name with file version", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const input = `${packumentName}@file:/path/to/${packumentName}`;
+          expect(isPackageReference(input)).toBeTruthy();
+        })
+      );
+    });
+
+    it("should be ok for name with http version", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const input = `${packumentName}@http://my.server/${packumentName}`;
+          expect(isPackageReference(input)).toBeTruthy();
+        })
+      );
+    });
+
+    it("should be ok for name with git version", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const input = `${packumentName}@git@github:user/${packumentName}`;
+          expect(isPackageReference(input)).toBeTruthy();
+        })
+      );
+    });
+
+    it("should be ok for name with latest tag", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const input = `${packumentName}@latest`;
+          expect(isPackageReference(input)).toBeTruthy();
+        })
+      );
     });
 
     it.each([
       // Not valid domain name
       "-hello",
+      // Bad semantic version
+      "my.package@1.abc",
+      // Bad url version
+      "my.package@what://is.this",
+      // Bad tag
+      "my.package@ltst",
     ])(`"should not be ok for "%s"`, (input) => {
       expect(isPackageReference(input)).not.toBeTruthy();
     });
