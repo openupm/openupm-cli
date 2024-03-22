@@ -64,6 +64,12 @@ describe("package-reference", () => {
     it.each([
       // Not valid domain name
       "-hello",
+      // Bad semantic version
+      "my.package@1.abc",
+      // Bad url version
+      "my.package@what://is.this",
+      // Bad tag
+      "my.package@ltst",
     ])(`"should not be ok for "%s"`, (input) => {
       expect(isPackageReference(input)).not.toBeTruthy();
     });
