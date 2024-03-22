@@ -83,6 +83,7 @@ describe("project-manifest", () => {
       );
     });
   });
+
   describe("get scoped-registry", () => {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
@@ -93,6 +94,7 @@ describe("project-manifest", () => {
 
       expect(tryGetScopedRegistryByUrl(manifest, url)).toEqual(expected);
     });
+
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
       const url = makeRegistryUrl("https://test.com");
@@ -106,6 +108,7 @@ describe("project-manifest", () => {
       expect(tryGetScopedRegistryByUrl(manifest, url)).toBeNull();
     });
   });
+
   describe("map scoped-registry", () => {
     it("should have null as mapping input if manifest does not have scoped-registry", () => {
       const manifest = emptyProjectManifest;
@@ -156,15 +159,21 @@ describe("project-manifest", () => {
       expect(actual).toEqual(expected);
     });
   });
+
   describe("testables", () => {
     it("should not add testables which already exist", () => {
-      let manifest = emptyProjectManifest;
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, makeDomainName("a"));
-      manifest = addTestable(manifest, makeDomainName("a"));
+          manifest = addTestable(manifest, packumentName);
+          manifest = addTestable(manifest, packumentName);
 
-      expect(manifest.testables).toEqual(["a"]);
+          expect(manifest.testables).toEqual([packumentName]);
+        })
+      );
     });
+
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
 
