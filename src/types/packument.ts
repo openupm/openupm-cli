@@ -100,3 +100,22 @@ export const tryGetLatestVersion = function (
   if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
   else if (packument.version) return packument.version;
 };
+
+/**
+ * Extracts the target editor-version, e.g. 2020.3.1, from a packument-version.
+ * @param packumentVersion The packument-version for which to get the editor.
+ * @returns The editor-version or null if the packument is compatible
+ * with all Unity version.
+ */
+export function targetEditorVersionFor(
+  packumentVersion: UnityPackumentVersion
+): string | null {
+  if (packumentVersion.unity === undefined) return null;
+
+  const majorMinor = packumentVersion.unity;
+  const release =
+    packumentVersion.unityRelease !== undefined
+      ? `.${packumentVersion.unityRelease}`
+      : "";
+  return `${majorMinor}${release}`;
+}

@@ -40,6 +40,7 @@ import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { logManifestLoadError, logManifestSaveError } from "./error-logging";
+import { targetEditorVersionFor } from "./types/packument";
 
 export class InvalidPackumentDataError extends CustomError {
   constructor(readonly issue: string) {
@@ -152,16 +153,13 @@ export const add = async function (
       const packumentVersion = resolveResult.value.packumentVersion;
       versionToAdd = packumentVersion.version;
 
+      const targetEditorVersion = targetEditorVersionFor(packumentVersion);
       // verify editor version
-      if (packumentVersion.unity) {
-        const requiredEditorVersion = packumentVersion.unityRelease
-          ? packumentVersion.unity + "." + packumentVersion.unityRelease
-          : packumentVersion.unity;
+      if (targetEditorVersion !== null) {
         if (env.editorVersion) {
           const editorVersionResult = tryParseEditorVersion(env.editorVersion);
-          const requiredEditorVersionResult = tryParseEditorVersion(
-            requiredEditorVersion
-          );
+          const requiredEditorVersionResult =
+            tryParseEditorVersion(targetEditorVersion);
           if (!editorVersionResult) {
             log.warn(
               "editor.version",
@@ -169,7 +167,7 @@ export const add = async function (
             );
           }
           if (!requiredEditorVersionResult) {
-            log.warn("package.unity", `${requiredEditorVersion} is not valid`);
+            log.warn("package.unity", `${targetEditorVersion} is not valid`);
             if (!options.force) {
               log.notice(
                 "suggest",
@@ -190,12 +188,12 @@ export const add = async function (
           ) {
             log.warn(
               "editor.version",
-              `requires ${requiredEditorVersion} but found ${env.editorVersion}`
+              `requires ${targetEditorVersion} but found ${env.editorVersion}`
             );
             if (!options.force) {
               log.notice(
                 "suggest",
-                `upgrade the editor to ${requiredEditorVersion}, or run with option -f to ignore the warning`
+                `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
               );
               return Err(new EditorIncompatibleError());
             }
