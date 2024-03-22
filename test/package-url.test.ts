@@ -40,7 +40,12 @@ describe("package-url", () => {
       );
     });
 
-    it.each(["", "com.base.package.a"])(`should not be ok for "%s"`, (url) => {
+    it.each([
+      // No protocol
+      "my.server/my-package",
+      // Bad protocol
+      "ftp://my.server/my-package",
+    ])(`should not be ok for "%s"`, (url) => {
       expect(isPackageUrl(url)).not.toBeTruthy();
     });
   });
