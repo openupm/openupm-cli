@@ -1,6 +1,6 @@
 import { isPackageId } from "../src/types/package-id";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.gen";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("package-id", () => {
   describe("validate", () => {

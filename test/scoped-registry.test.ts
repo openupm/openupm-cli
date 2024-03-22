@@ -7,7 +7,7 @@ import {
 import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/types/domain-name";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.gen";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("scoped-registry", () => {
   describe("construction", () => {

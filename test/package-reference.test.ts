@@ -4,7 +4,7 @@ import {
   splitPackageReference,
 } from "../src/types/package-reference";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.gen";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("package-reference", () => {
   describe("validation", () => {

@@ -13,7 +13,7 @@ import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
 import { makeRegistryUrl } from "../src/types/registry-url";
 import { exampleRegistryUrl } from "./mock-registry";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.gen";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
   describe("dependency", () => {
