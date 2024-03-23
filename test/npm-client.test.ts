@@ -1,11 +1,16 @@
 import "assert";
 import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/domain/domain-name";
-import { makeNpmClient, Registry } from "../src/npm-client";
+import {
+  AuthenticationError,
+  makeNpmClient,
+  Registry,
+} from "../src/npm-client";
 import { UnityPackument } from "../src/domain/packument";
-import RegClient from "another-npm-registry-client";
+import RegClient, { AddUserResponse } from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { buildPackument } from "./data-packument";
+import { Response } from "request";
 
 jest.mock("another-npm-registry-client");
 
@@ -25,6 +30,18 @@ function mockRegClientGetResult(
     get: (_1, _2, cb) => {
       cb(error, packument!, null!, null!);
     },
+  }));
+}
+
+function mockRegClientAddUserResult(
+  error: HttpErrorBase | null,
+  responseData: AddUserResponse | null,
+  response: Pick<Response, "statusMessage" | "statusCode"> | null
+) {
+  jest.mocked(RegClient).mockImplementation(() => ({
+    adduser: (_1, _2, cb) =>
+      cb(error, responseData!, null!, response! as Response),
+    get: () => undefined,
   }));
 }
 
@@ -74,6 +91,74 @@ describe("npm-client", () => {
         .promise;
 
       expect(result).toBeError();
+    });
+  });
+
+  describe("add user", () => {
+    it("should give token for valid user", async () => {
+      const expected = "some token";
+      mockRegClientAddUserResult(
+        null,
+        {
+          ok: true,
+          token: expected,
+        },
+        null
+      );
+      const client = makeNpmClient();
+
+      const result = await client.addUser(
+        exampleRegistryUrl,
+        "valid-user",
+        "valid@user.com",
+        "valid-password"
+      ).promise;
+
+      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    });
+
+    it("should fail for not-ok response", async () => {
+      mockRegClientAddUserResult(
+        null,
+        {
+          ok: false,
+        },
+        {
+          statusMessage: "bad user",
+          statusCode: 401,
+        }
+      );
+      const client = makeNpmClient();
+
+      const result = await client.addUser(
+        exampleRegistryUrl,
+        "bad-user",
+        "bad@user.com",
+        "bad-password"
+      ).promise;
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(AuthenticationError)
+      );
+    });
+
+    it("should fail for error response", async () => {
+      mockRegClientAddUserResult({} as HttpErrorBase, null, {
+        statusMessage: "bad user",
+        statusCode: 401,
+      });
+      const client = makeNpmClient();
+
+      const result = await client.addUser(
+        exampleRegistryUrl,
+        "bad-user",
+        "bad@user.com",
+        "bad-password"
+      ).promise;
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(AuthenticationError)
+      );
     });
   });
 });
