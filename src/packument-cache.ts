@@ -1,6 +1,6 @@
-import { DomainName } from "./types/domain-name";
-import { UnityPackument } from "./types/packument";
-import { RegistryUrl } from "./types/registry-url";
+import { DomainName } from "./domain/domain-name";
+import { UnityPackument } from "./domain/packument";
+import { RegistryUrl } from "./domain/registry-url";
 
 type CachedRegistry = Readonly<{
   [name: DomainName]: UnityPackument;

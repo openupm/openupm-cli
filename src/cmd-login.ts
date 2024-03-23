@@ -7,8 +7,8 @@ import {
   tryStoreUpmAuth,
 } from "./io/upm-config-io";
 import { EnvParseError, parseEnv } from "./utils/env";
-import { BasicAuth, encodeBasicAuth, TokenAuth } from "./types/upm-config";
-import { coerceRegistryUrl, RegistryUrl } from "./types/registry-url";
+import { BasicAuth, encodeBasicAuth, TokenAuth } from "./domain/upm-config";
+import { coerceRegistryUrl, RegistryUrl } from "./domain/registry-url";
 import {
   promptEmail,
   promptPassword,

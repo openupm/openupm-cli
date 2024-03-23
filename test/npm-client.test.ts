@@ -7,7 +7,7 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { buildPackument } from "./data-packument";
-import { makeDomainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/domain/domain-name";
 import { makeNpmClient, Registry } from "../src/npm-client";
 
 const packageA = makeDomainName("package-a");

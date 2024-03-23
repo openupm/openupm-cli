@@ -2,7 +2,7 @@ import {
   isPackageReference,
   makePackageReference,
   splitPackageReference,
-} from "../src/types/package-reference";
+} from "../src/domain/package-reference";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 

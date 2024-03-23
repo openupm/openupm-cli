@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { makeDomainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/domain/domain-name";
 
 /**
  * Single char string [A-Z].

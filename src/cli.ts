@@ -12,9 +12,9 @@ import log from "./logger";
 // update-notifier
 import pkg from "../package.json";
 import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
-import { isPackageReference } from "./types/package-reference";
-import { isDomainName } from "./types/domain-name";
-import { coerceRegistryUrl } from "./types/registry-url";
+import { isPackageReference } from "./domain/package-reference";
+import { isDomainName } from "./domain/domain-name";
+import { coerceRegistryUrl } from "./domain/registry-url";
 import { CmdOptions } from "./types/options";
 
 const mustBePackageReference = mustSatisfy(

@@ -1,9 +1,9 @@
 import nock from "nock";
 import { SearchEndpointResult } from "./types";
-import { isDomainName } from "../src/types/domain-name";
+import { isDomainName } from "../src/domain/domain-name";
 import assert from "assert";
-import { makeRegistryUrl, unityRegistryUrl } from "../src/types/registry-url";
-import { UnityPackument } from "../src/types/packument";
+import { makeRegistryUrl, unityRegistryUrl } from "../src/domain/registry-url";
+import { UnityPackument } from "../src/domain/packument";
 
 export const exampleRegistryUrl = makeRegistryUrl("http://example.com");
 

@@ -9,9 +9,9 @@ import {
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
-import { makeDomainName } from "../src/types/domain-name";
-import { makeSemanticVersion } from "../src/types/semantic-version";
-import { makePackageReference } from "../src/types/package-reference";
+import { makeDomainName } from "../src/domain/domain-name";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
+import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 const packageA = makeDomainName("com.example.package-a");

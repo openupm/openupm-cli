@@ -1,4 +1,4 @@
-import { TokenAuth, UPMConfig } from "../src/types/upm-config";
+import { TokenAuth, UPMConfig } from "../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, parseEnv } from "../src/utils/env";
 import log from "../src/logger";

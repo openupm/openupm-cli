@@ -3,9 +3,9 @@ import {
   hasScope,
   makeScopedRegistry,
   removeScope,
-} from "../src/types/scoped-registry";
+} from "../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
-import { makeDomainName } from "../src/types/domain-name";
+import { makeDomainName } from "../src/domain/domain-name";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 

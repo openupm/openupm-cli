@@ -1,12 +1,12 @@
 import log from "./logger";
 import { EnvParseError, parseEnv } from "./utils/env";
 import { makeNpmClient } from "./npm-client";
-import { isPackageUrl } from "./types/package-url";
+import { isPackageUrl } from "./domain/package-url";
 import {
   makePackageReference,
   PackageReference,
   splitPackageReference,
-} from "./types/package-reference";
+} from "./domain/package-reference";
 import { CmdOptions } from "./types/options";
 import {
   PackumentResolveError,

@@ -10,9 +10,9 @@ import {
   tryToNpmAuth,
   UpmAuth,
   UPMConfig,
-} from "../src/types/upm-config";
-import { Base64 } from "../src/types/base64";
-import { makeRegistryUrl, RegistryUrl } from "../src/types/registry-url";
+} from "../src/domain/upm-config";
+import { Base64 } from "../src/domain/base64";
+import { makeRegistryUrl, RegistryUrl } from "../src/domain/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
 import { exampleRegistryUrl } from "./mock-registry";
 

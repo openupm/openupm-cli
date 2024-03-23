@@ -1,15 +1,15 @@
 import assert from "assert";
-import { isDomainName } from "../src/types/domain-name";
+import { isDomainName } from "../src/domain/domain-name";
 import { exampleRegistryUrl } from "./mock-registry";
-import { isSemanticVersion } from "../src/types/semantic-version";
-import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
+import { isSemanticVersion } from "../src/domain/semantic-version";
+import { addScope, makeScopedRegistry } from "../src/domain/scoped-registry";
 import {
   addDependency,
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
   UnityProjectManifest,
-} from "../src/types/project-manifest";
+} from "../src/domain/project-manifest";
 
 /**
  * Builder class for {@link UnityProjectManifest}.

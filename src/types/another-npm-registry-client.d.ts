@@ -34,7 +34,7 @@ declare module "another-npm-registry-client" {
       get(
         uri: string,
         params: GetParams,
-        cb: ClientCallback<import("./packument").UnityPackument>
+        cb: ClientCallback<import("../domain/packument").UnityPackument>
       ): void;
       adduser(
         uri: string,

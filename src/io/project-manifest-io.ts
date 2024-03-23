@@ -1,4 +1,7 @@
-import { pruneManifest, UnityProjectManifest } from "../types/project-manifest";
+import {
+  pruneManifest,
+  UnityProjectManifest,
+} from "../domain/project-manifest";
 import path from "path";
 import { FileParseError, IOError } from "../common-errors";
 import { AsyncResult } from "ts-results-es";

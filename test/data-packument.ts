@@ -1,11 +1,11 @@
 import assert from "assert";
-import { DomainName, isDomainName } from "../src/types/domain-name";
+import { DomainName, isDomainName } from "../src/domain/domain-name";
 import {
   isSemanticVersion,
   SemanticVersion,
-} from "../src/types/semantic-version";
-import { makePackageId } from "../src/types/package-id";
-import { UnityPackument, UnityPackumentVersion } from "../src/types/packument";
+} from "../src/domain/semantic-version";
+import { makePackageId } from "../src/domain/package-id";
+import { UnityPackument, UnityPackumentVersion } from "../src/domain/packument";
 
 /**
  * Builder class for {@link UnityPackumentVersion}.

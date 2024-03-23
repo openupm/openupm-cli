@@ -1,7 +1,7 @@
-import { DomainName, isInternalPackage } from "./types/domain-name";
-import { isSemanticVersion, SemanticVersion } from "./types/semantic-version";
+import { DomainName, isInternalPackage } from "./domain/domain-name";
+import { isSemanticVersion, SemanticVersion } from "./domain/semantic-version";
 import log from "./logger";
-import { makePackageReference } from "./types/package-reference";
+import { makePackageReference } from "./domain/package-reference";
 import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {
   PackumentResolveError,
@@ -11,7 +11,7 @@ import {
   tryResolveFromCache,
   VersionNotFoundError,
 } from "./packument-resolving";
-import { unityRegistryUrl } from "./types/registry-url";
+import { unityRegistryUrl } from "./domain/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import assert from "assert";
 import { NpmClient, Registry } from "./npm-client";

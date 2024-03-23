@@ -1,4 +1,4 @@
-import { isSemanticVersion } from "../src/types/semantic-version";
+import { isSemanticVersion } from "../src/domain/semantic-version";
 
 describe("semantic-version", () => {
   describe("validate", () => {

@@ -6,11 +6,11 @@ import {
   removeDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
-} from "../src/types/project-manifest";
-import { makeDomainName } from "../src/types/domain-name";
-import { makeSemanticVersion } from "../src/types/semantic-version";
-import { addScope, makeScopedRegistry } from "../src/types/scoped-registry";
-import { makeRegistryUrl } from "../src/types/registry-url";
+} from "../src/domain/project-manifest";
+import { makeDomainName } from "../src/domain/domain-name";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
+import { addScope, makeScopedRegistry } from "../src/domain/scoped-registry";
+import { makeRegistryUrl } from "../src/domain/registry-url";
 import { exampleRegistryUrl } from "./mock-registry";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";

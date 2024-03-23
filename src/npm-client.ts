@@ -1,9 +1,9 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
 import log from "./logger";
-import { UnityPackument } from "./types/packument";
-import { DomainName } from "./types/domain-name";
-import { SemanticVersion } from "./types/semantic-version";
-import { RegistryUrl } from "./types/registry-url";
+import { UnityPackument } from "./domain/packument";
+import { DomainName } from "./domain/domain-name";
+import { SemanticVersion } from "./domain/semantic-version";
+import { RegistryUrl } from "./domain/registry-url";
 import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "./utils/error-type-guards";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
