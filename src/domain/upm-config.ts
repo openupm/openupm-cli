@@ -2,7 +2,7 @@ import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { Base64, decodeBase64, encodeBase64 } from "./base64";
 import { RegistryUrl } from "./registry-url";
 import log from "../logger";
-import { NpmAuth } from "src/types/another-npm-registry-client";
+import { NpmAuth } from "another-npm-registry-client";
 
 /**
  * Authentication information that is shared between different authentication methods.
