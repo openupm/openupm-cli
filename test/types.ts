@@ -1,5 +1,5 @@
-import { DomainName } from "../src/types/domain-name";
-import { SemanticVersion } from "../src/types/semantic-version";
+import { DomainName } from "../src/domain/domain-name";
+import { SemanticVersion } from "../src/domain/semantic-version";
 import { Maintainer } from "@npm/types";
 
 export type SearchEndpointResult = {

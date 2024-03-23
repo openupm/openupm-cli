@@ -3,17 +3,17 @@ import {
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../src/io/project-manifest-io";
-import { DomainName, makeDomainName } from "../src/types/domain-name";
-import { makeSemanticVersion } from "../src/types/semantic-version";
+import { DomainName, makeDomainName } from "../src/domain/domain-name";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
 import {
   addDependency,
   mapScopedRegistry,
-} from "../src/types/project-manifest";
+} from "../src/domain/project-manifest";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import fse from "fs-extra";
 import path from "path";
 import { buildProjectManifest } from "./data-project-manifest";
-import { removeScope } from "../src/types/scoped-registry";
+import { removeScope } from "../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "./mock-registry";
 import { FileParseError } from "../src/common-errors";
 import { NotFoundError } from "../src/io/file-io";

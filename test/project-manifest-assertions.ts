@@ -1,7 +1,7 @@
-import { DomainName } from "../src/types/domain-name";
-import { SemanticVersion } from "../src/types/semantic-version";
-import { PackageUrl } from "../src/types/package-url";
-import { UnityProjectManifest } from "../src/types/project-manifest";
+import { DomainName } from "../src/domain/domain-name";
+import { SemanticVersion } from "../src/domain/semantic-version";
+import { PackageUrl } from "../src/domain/package-url";
+import { UnityProjectManifest } from "../src/domain/project-manifest";
 
 expect.extend({
   toHaveDependency(

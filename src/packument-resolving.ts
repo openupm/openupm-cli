@@ -1,16 +1,16 @@
-import { VersionReference } from "./types/package-reference";
+import { VersionReference } from "./domain/package-reference";
 import { NpmClient, Registry } from "./npm-client";
-import { DomainName } from "./types/domain-name";
-import { SemanticVersion } from "./types/semantic-version";
+import { DomainName } from "./domain/domain-name";
+import { SemanticVersion } from "./domain/semantic-version";
 import {
   tryGetLatestVersion,
   UnityPackument,
   UnityPackumentVersion,
-} from "./types/packument";
+} from "./domain/packument";
 import { recordKeys } from "./utils/record-utils";
-import { PackageUrl } from "./types/package-url";
+import { PackageUrl } from "./domain/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
-import { RegistryUrl } from "./types/registry-url";
+import { RegistryUrl } from "./domain/registry-url";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";

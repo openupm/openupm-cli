@@ -1,6 +1,6 @@
 import "nock";
 import { generateNpmrcLines, getNpmrcPath } from "../src/cmd-login";
-import { makeRegistryUrl } from "../src/types/registry-url";
+import { makeRegistryUrl } from "../src/domain/registry-url";
 import { runWithEnv } from "./mock-env";
 import path from "path";
 

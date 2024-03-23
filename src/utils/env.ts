@@ -7,8 +7,8 @@ import {
 } from "../io/upm-config-io";
 import path from "path";
 import fs from "fs";
-import { coerceRegistryUrl, makeRegistryUrl } from "../types/registry-url";
-import { tryGetAuthForRegistry, UPMConfig } from "../types/upm-config";
+import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
+import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../types/options";
 import { Registry } from "../npm-client";
 import { FileParseError } from "../common-errors";

@@ -1,7 +1,7 @@
 import {
   emptyProjectManifest,
   UnityProjectManifest,
-} from "../../src/types/project-manifest";
+} from "../../src/domain/project-manifest";
 import path from "path";
 import os from "os";
 import fse from "fs-extra";
@@ -10,7 +10,7 @@ import {
   trySaveProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { mockEnv, MockEnvSession } from "../mock-env";
-import { UPMConfig } from "../../src/types/upm-config";
+import { UPMConfig } from "../../src/domain/upm-config";
 import { trySaveUpmConfig } from "../../src/io/upm-config-io";
 import { tryCreateProjectVersionTxt } from "../../src/io/project-version-io";
 

@@ -1,4 +1,4 @@
-import { coerceRegistryUrl, isRegistryUrl } from "../src/types/registry-url";
+import { coerceRegistryUrl, isRegistryUrl } from "../src/domain/registry-url";
 
 describe("registry-url", () => {
   describe("validation", () => {

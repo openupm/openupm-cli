@@ -10,9 +10,9 @@ import {
   hasVersion,
   makePackageReference,
   PackageReference,
-} from "./types/package-reference";
-import { removeScope } from "./types/scoped-registry";
-import { mapScopedRegistry, removeDependency } from "./types/project-manifest";
+} from "./domain/package-reference";
+import { removeScope } from "./domain/scoped-registry";
+import { mapScopedRegistry, removeDependency } from "./domain/project-manifest";
 import { CmdOptions } from "./types/options";
 import { Err, Ok, Result } from "ts-results-es";
 

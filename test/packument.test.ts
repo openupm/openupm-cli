@@ -2,8 +2,8 @@ import {
   targetEditorVersionFor,
   tryGetLatestVersion,
   UnityPackumentVersion,
-} from "../src/types/packument";
-import { makeSemanticVersion } from "../src/types/semantic-version";
+} from "../src/domain/packument";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 

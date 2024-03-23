@@ -9,8 +9,8 @@ import {
 } from "./mock-registry";
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
-import { makeDomainName } from "../src/types/domain-name";
-import { makePackageReference } from "../src/types/package-reference";
+import { makeDomainName } from "../src/domain/domain-name";
+import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-deps.ts", () => {

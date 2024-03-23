@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
-import { tryGetLatestVersion, UnityPackument } from "./types/packument";
+import { tryGetLatestVersion, UnityPackument } from "./domain/packument";
 import { EnvParseError, parseEnv } from "./utils/env";
 import { makeNpmClient } from "./npm-client";
-import { hasVersion, PackageReference } from "./types/package-reference";
+import { hasVersion, PackageReference } from "./domain/package-reference";
 import { CmdOptions } from "./types/options";
 import { recordKeys } from "./utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";

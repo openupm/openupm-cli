@@ -10,11 +10,11 @@ import {
 import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
-import { PackageUrl } from "../src/types/package-url";
-import { makePackageReference } from "../src/types/package-reference";
+import { PackageUrl } from "../src/domain/package-url";
+import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import { makeDomainName } from "../src/types/domain-name";
-import { makeSemanticVersion } from "../src/types/semantic-version";
+import { makeDomainName } from "../src/domain/domain-name";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
 
 describe("cmd-add.ts", () => {
   const packageMissing = makeDomainName("pkg-not-exist");

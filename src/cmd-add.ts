@@ -1,6 +1,6 @@
 import log from "./logger";
 import url from "url";
-import { isPackageUrl, PackageUrl } from "./types/package-url";
+import { isPackageUrl, PackageUrl } from "./domain/package-url";
 import {
   ManifestLoadError,
   ManifestSaveError,
@@ -11,36 +11,36 @@ import { EnvParseError, parseEnv } from "./utils/env";
 import {
   compareEditorVersion,
   tryParseEditorVersion,
-} from "./types/editor-version";
+} from "./domain/editor-version";
 import { makeNpmClient } from "./npm-client";
-import { DomainName } from "./types/domain-name";
+import { DomainName } from "./domain/domain-name";
 import {
   makePackageReference,
   PackageReference,
   splitPackageReference,
-} from "./types/package-reference";
-import { addScope, makeScopedRegistry } from "./types/scoped-registry";
+} from "./domain/package-reference";
+import { addScope, makeScopedRegistry } from "./domain/scoped-registry";
 import {
   addDependency,
   addTestable,
   mapScopedRegistry,
-} from "./types/project-manifest";
+} from "./domain/project-manifest";
 import { CmdOptions } from "./types/options";
 import {
   PackumentResolveError,
   tryResolve,
   VersionNotFoundError,
 } from "./packument-resolving";
-import { SemanticVersion } from "./types/semantic-version";
+import { SemanticVersion } from "./domain/semantic-version";
 import { fetchPackageDependencies } from "./dependency-resolving";
 import { areArraysEqual } from "./utils/array-utils";
-import { RegistryUrl } from "./types/registry-url";
+import { RegistryUrl } from "./domain/registry-url";
 import { PackumentNotFoundError } from "./common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { logManifestLoadError, logManifestSaveError } from "./error-logging";
-import { targetEditorVersionFor } from "./types/packument";
+import { targetEditorVersionFor } from "./domain/packument";
 
 export class InvalidPackumentDataError extends CustomError {
   constructor(readonly issue: string) {

@@ -9,8 +9,8 @@ import {
 } from "./mock-registry";
 import { SearchEndpointResult } from "./types";
 import { attachMockConsole, MockConsole } from "./mock-console";
-import { makeDomainName } from "../src/types/domain-name";
-import { makeSemanticVersion } from "../src/types/semantic-version";
+import { makeDomainName } from "../src/domain/domain-name";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 
 describe("cmd-search.ts", () => {

@@ -1,4 +1,4 @@
-import { isPackageId } from "../src/types/package-id";
+import { isPackageId } from "../src/domain/package-id";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 

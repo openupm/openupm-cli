@@ -2,7 +2,7 @@ import {
   isDomainName,
   isInternalPackage,
   makeDomainName,
-} from "../src/types/domain-name";
+} from "../src/domain/domain-name";
 
 describe("domain-name", () => {
   describe("validation", () => {
