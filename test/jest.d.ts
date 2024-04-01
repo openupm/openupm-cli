@@ -22,6 +22,15 @@ declare global {
       toBeOk<T>(valueAsserter?: (value: T) => void): R;
 
       toBeError(errorAsserter?: (error: Error) => void): R;
+
+      // Log
+
+      /**
+       * Tests if a specific log was made to this spy.
+       * @param prefix The prefix. This is matched exactly.
+       * @param message The message. This matches if a log includes this string.
+       */
+      toHaveLogLike(prefix: string, message: string): R;
     }
   }
 }
