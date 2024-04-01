@@ -11,8 +11,11 @@ import RegClient, { AddUserResponse } from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { buildPackument } from "./data-packument";
 import { Response } from "request";
+import npmSearch from "libnpmsearch";
+import search from "libnpmsearch";
 
 jest.mock("another-npm-registry-client");
+jest.mock("libnpmsearch");
 
 const packageA = makeDomainName("package-a");
 
@@ -159,6 +162,32 @@ describe("npm-client", () => {
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(AuthenticationError)
       );
+    });
+  });
+
+  describe("search", () => {
+    it("should fail for error response", async () => {
+      const expected = {
+        message: "Idk, it failed",
+        name: "FakeError",
+        statusCode: 500,
+      } as HttpErrorBase;
+      jest.mocked(npmSearch).mockRejectedValue(expected);
+      const client = makeNpmClient();
+
+      const result = await client.trySearch(exampleRegistry, "wow").promise;
+
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    });
+
+    it("should succeed for ok response", async () => {
+      const expected = [{ name: "wow" } as search.Result];
+      jest.mocked(npmSearch).mockResolvedValue(expected);
+      const client = makeNpmClient();
+
+      const result = await client.trySearch(exampleRegistry, "wow").promise;
+
+      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
   });
 });
