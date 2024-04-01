@@ -6,8 +6,6 @@ import { PackageUrl } from "../src/domain/package-url";
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toHaveLineIncluding(stream: Stream, text: string): R;
-
       toHaveDependency(
         name: DomainName,
         version?: SemanticVersion | PackageUrl
