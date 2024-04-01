@@ -9,7 +9,7 @@ describe("cmd-login.ts", () => {
     it("should append token to empty content", async function () {
       expect(
         generateNpmrcLines(
-          "",
+          [],
           makeRegistryUrl("http://registry.npmjs.org"),
           "123-456-789"
         )
@@ -18,7 +18,7 @@ describe("cmd-login.ts", () => {
     it("should append token to exist contents", async function () {
       expect(
         generateNpmrcLines(
-          "registry=https://registry.npmjs.org/",
+          ["registry=https://registry.npmjs.org/"],
           makeRegistryUrl(" registry(http://registry.npmjs.org"),
           "123-456-789"
         )
@@ -30,7 +30,11 @@ describe("cmd-login.ts", () => {
     it("should replace token to exist contents", async function () {
       expect(
         generateNpmrcLines(
-          "registry=https://registry.npmjs.org/\n//127.0.0.1:4873/:_authToken=blar-blar-blar\n//registry.npmjs.org/:_authToken=blar-blar-blar",
+          [
+            "registry=https://registry.npmjs.org/",
+            "//127.0.0.1:4873/:_authToken=blar-blar-blar",
+            "//registry.npmjs.org/:_authToken=blar-blar-blar",
+          ],
           makeRegistryUrl("http://registry.npmjs.org"),
           "123-456-789"
         )
@@ -43,7 +47,7 @@ describe("cmd-login.ts", () => {
     it("should handle registry without trailing slash", async function () {
       expect(
         generateNpmrcLines(
-          "",
+          [],
           makeRegistryUrl("http://registry.npmjs.org"),
           "123-456-789"
         )
@@ -52,14 +56,14 @@ describe("cmd-login.ts", () => {
     it("should quote token if necessary", async function () {
       expect(
         generateNpmrcLines(
-          "",
+          [],
           makeRegistryUrl("http://registry.npmjs.org"),
           "=123-456-789="
         )
       ).toEqual(['//registry.npmjs.org/:_authToken="=123-456-789="']);
       expect(
         generateNpmrcLines(
-          "",
+          [],
           makeRegistryUrl("http://registry.npmjs.org"),
           "?123-456-789?"
         )

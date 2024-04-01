@@ -18,7 +18,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryReadTextFromFile, tryWriteTextToFile } from "./io/file-io";
+import { Npmrc, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
 
 export type LoginError =
   | EnvParseError
@@ -124,12 +124,10 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
 
   // read config
   (
-    await tryReadTextFromFile(configPath)
-      .or(Ok(""))
-      .map((content) => generateNpmrcLines(content, registry, token))
-      .map((lines) => lines.join("\n") + "\n")
-      // write config
-      .andThen((newContent) => tryWriteTextToFile(configPath, newContent))
+    await tryLoadNpmrc(configPath)
+      .or(Ok([]))
+      .map((npmrc) => generateNpmrcLines(npmrc, registry, token))
+      .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
       .map(() => log.notice("config", `saved to npm config: ${configPath}`))
       .promise
   ).unwrap();
@@ -151,11 +149,11 @@ export const getNpmrcPath = function () {
  * Generate .npmrc file content lines.
  */
 export const generateNpmrcLines = function (
-  content: string,
+  initialLines: ReadonlyArray<string>,
   registry: RegistryUrl,
   token: string
-) {
-  let lines = content ? content.split("\n") : [];
+): Npmrc {
+  let lines = [...initialLines];
   const quotes = /(\?|=)/.test(token) ? '"' : "";
   // get the registry url without http protocol
   let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
