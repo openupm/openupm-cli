@@ -18,6 +18,7 @@ import {
   tryLoadProjectVersion,
 } from "../io/project-version-io";
 import { NotFoundError } from "../io/file-io";
+import { tryGetEnv } from "./env-util";
 
 export type Env = Readonly<{
   cwd: string;
@@ -80,7 +81,7 @@ function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
 }
 
 function determineUseColor(options: CmdOptions): boolean {
-  return options._global.color !== false && process.env.NODE_ENV !== "test";
+  return options._global.color !== false && tryGetEnv("NODE_ENV") !== "test";
 }
 
 function determineUseUpstream(options: CmdOptions): boolean {
