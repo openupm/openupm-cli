@@ -48,7 +48,6 @@
     "@types/pkginfo": "^0.4.1",
     "@types/promptly": "^3.0.3",
     "@types/request": "^2.48.12",
-    "@types/test-console": "^2.0.1",
     "@types/update-notifier": "^6.0.5",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
@@ -62,7 +61,6 @@
     "prettier": "^2.8.8",
     "rimraf": "^5.0.5",
     "semantic-release": "^19.0.3",
-    "test-console": "^2.0.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.2.2"
   },
