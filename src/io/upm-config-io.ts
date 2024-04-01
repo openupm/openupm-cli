@@ -10,6 +10,7 @@ import { IOError } from "../common-errors";
 import { AsyncResult, Result } from "ts-results-es";
 import { assertIsError } from "../utils/error-type-guards";
 import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
+import { tryGetEnv } from "../utils/env-util";
 
 const configFileName = ".upmconfig.toml";
 
@@ -57,12 +58,13 @@ export const tryGetUpmConfigDir = (
           });
         }
       } else if (systemUser) {
-        if (!process.env.ALLUSERSPROFILE)
+        const profilePath = tryGetEnv("ALLUSERSPROFILE");
+        if (profilePath === null)
           throw new RequiredEnvMissingError("ALLUSERSPROFILE");
-        return path.join(process.env.ALLUSERSPROFILE, systemUserSubPath);
+        return path.join(profilePath, systemUserSubPath);
       } else {
-        const dirName = process.env.USERPROFILE ?? process.env.HOME;
-        if (dirName === undefined)
+        const dirName = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
+        if (dirName === null)
           throw new RequiredEnvMissingError("USERPROFILE", "HOME");
         return dirName;
       }

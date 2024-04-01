@@ -20,6 +20,7 @@ import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
 import { tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
 import { setToken } from "./domain/npmrc";
+import { tryGetEnv } from "./utils/env-util";
 
 export type LoginError =
   | EnvParseError
@@ -139,9 +140,7 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
  * @throws {Error} Home-path could not be determined.
  */
 export const getNpmrcPath = function () {
-  const dirPath = process.env.USERPROFILE
-    ? process.env.USERPROFILE
-    : process.env.HOME;
-  if (dirPath === undefined) throw new Error("Could not determine home path");
+  const dirPath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
+  if (dirPath === null) throw new Error("Could not determine home path");
   return path.join(dirPath, ".npmrc");
 };
