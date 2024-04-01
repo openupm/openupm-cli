@@ -19,7 +19,7 @@ import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
 import { tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
-import { Npmrc } from "./domain/npmrc";
+import { setToken } from "./domain/npmrc";
 
 export type LoginError =
   | EnvParseError
@@ -127,7 +127,7 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   (
     await tryLoadNpmrc(configPath)
       .or(Ok([]))
-      .map((npmrc) => generateNpmrcLines(npmrc, registry, token))
+      .map((npmrc) => setToken(npmrc, registry, token))
       .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
       .map(() => log.notice("config", `saved to npm config: ${configPath}`))
       .promise
@@ -144,38 +144,4 @@ export const getNpmrcPath = function () {
     : process.env.HOME;
   if (dirPath === undefined) throw new Error("Could not determine home path");
   return path.join(dirPath, ".npmrc");
-};
-
-/**
- * Generate .npmrc file content lines.
- */
-export const generateNpmrcLines = function (
-  initialLines: ReadonlyArray<string>,
-  registry: RegistryUrl,
-  token: string
-): Npmrc {
-  let lines = [...initialLines];
-  const quotes = /(\?|=)/.test(token) ? '"' : "";
-  // get the registry url without http protocol
-  let registryUrl = registry.slice(registry.search(/:\/\//) + 1);
-  // add trailing slash
-  if (!registryUrl.endsWith("/")) registryUrl = registryUrl + "/";
-  const index = lines.findIndex(function (element, index) {
-    if (element.indexOf(registryUrl + ":_authToken=") !== -1) {
-      // If an entry for the auth token is found, replace it
-      lines[index] = element.replace(
-        /authToken=.*/,
-        "authToken=" + quotes + token + quotes
-      );
-      return true;
-    }
-    return false;
-  });
-  // If no entry for the auth token is found, add one
-  if (index === -1) {
-    lines.push(registryUrl + ":_authToken=" + quotes + token + quotes);
-  }
-  // Remove empty lines
-  lines = lines.filter((l) => l);
-  return lines;
 };
