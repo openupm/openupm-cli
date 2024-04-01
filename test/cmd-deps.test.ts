@@ -7,11 +7,11 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { spyOnLog } from "./log.mock";
 
 describe("cmd-deps.ts", () => {
   const options: DepsOptions = {
@@ -20,7 +20,6 @@ describe("cmd-deps.ts", () => {
     },
   };
   describe("deps", () => {
-    let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
     const remotePackumentA = buildPackument(
@@ -52,60 +51,77 @@ describe("cmd-deps.ts", () => {
       registerRemotePackument(remotePackumentB);
       registerMissingPackument("pkg-not-exist");
       registerRemoteUpstreamPackument(remotePackumentUp);
-
-      mockConsole = attachMockConsole();
     });
+
     afterEach(async function () {
       await mockProject.reset();
       stopMockRegistry();
-      mockConsole.detach();
     });
+
     afterAll(async function () {
       await mockProject.restore();
     });
 
     it("should print direct dependencies", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const depsResult = await deps(remotePackumentA.name, options);
+
       expect(depsResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
+      expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
     it("should print all dependencies when requested", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const depsResult = await deps(remotePackumentA.name, {
         ...options,
         deep: true,
       });
+
       expect(depsResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
-      expect(mockConsole).toHaveLineIncluding("out", remotePackumentUp.name);
+      expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
+      expect(noticeSpy).toHaveLogLike("dependency", remotePackumentUp.name);
     });
     it("should print correct dependencies for latest tag", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "latest"),
         options
       );
+
       expect(depsResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
+      expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
     it("should print correct dependencies for semantic version", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "1.0.0"),
         options
       );
+
       expect(depsResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", remotePackumentB.name);
+      expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
     it("should print no dependencies for unknown version", async function () {
+      const warnLog = spyOnLog("warn");
+
       const depsResult = await deps(
         makePackageReference(remotePackumentA.name, "2.0.0"),
         options
       );
+
       expect(depsResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "is not a valid choice");
+      expect(warnLog).toHaveLogLike("404", "is not a valid choice");
     });
     it("should print no dependencies for unknown packument", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const depsResult = await deps(makeDomainName("pkg-not-exist"), options);
+
       expect(depsResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "not found");
+      expect(warnSpy).toHaveLogLike("404", "not found");
     });
     it("should print dependencies for upstream packuments", async function () {
       const depsResult = await deps(remotePackumentUp.name, options);

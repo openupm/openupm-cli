@@ -7,7 +7,6 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { PackageUrl } from "../src/domain/package-url";
@@ -15,6 +14,7 @@ import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
+import { spyOnLog } from "./log.mock";
 
 describe("cmd-add.ts", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -60,7 +60,6 @@ describe("cmd-add.ts", () => {
     force: true,
   };
   describe("add", () => {
-    let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
     const remotePackumentA = buildPackument(packageA, (packument) =>
@@ -141,13 +140,10 @@ describe("cmd-add.ts", () => {
       registerRemotePackument(remotePackumentWithWrongEditorVersion);
       registerRemoteUpstreamPackument(remotePackumentUp);
       registerMissingPackument(packageMissing);
-
-      mockConsole = attachMockConsole();
     });
     afterEach(async function () {
       await mockProject.reset();
       stopMockRegistry();
-      mockConsole.detach();
     });
 
     afterAll(async function () {
@@ -155,94 +151,110 @@ describe("cmd-add.ts", () => {
     });
 
     it("should add packument without version", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(packageA, options);
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should add packument with semantic version", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should add packument with latest tag", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(
         makePackageReference(packageA, "latest"),
         options
       );
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should override packument with lower version", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult1 = await add(
         makePackageReference(packageA, makeSemanticVersion("0.1.0")),
         options
       );
-      expect(addResult1).toBeOk();
       const addResult2 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
+
+      expect(addResult1).toBeOk();
       expect(addResult2).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "modified ");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "modified");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should have no effect to add same packument twice", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult1 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      expect(addResult1).toBeOk();
       const addResult2 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
+
+      expect(addResult1).toBeOk();
       expect(addResult2).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestA)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "existed ");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "existed");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should fail to add packument with unknown version", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("2.0.0")),
         options
       );
+
       expect(addResult).toBeError();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(defaultManifest)
       );
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "version 2.0.0 is not a valid choice"
-      );
-
-      expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
+      expect(warnSpy).toHaveLogLike("404", "2.0.0 is not a valid choice");
     });
     it("should add packument with http version", async function () {
+      const noticeSpy = spyOnLog("notice");
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
+
       const addResult = await add(
         makePackageReference(packageA, gitUrl),
         options
       );
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
@@ -250,15 +262,18 @@ describe("cmd-add.ts", () => {
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).not.toHaveScopedRegistries()
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should add packument with git version", async function () {
+      const noticeSpy = spyOnLog("notice");
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
+
       const addResult = await add(
         makePackageReference(packageA, gitUrl),
         options
       );
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, gitUrl)
@@ -266,15 +281,18 @@ describe("cmd-add.ts", () => {
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).not.toHaveScopedRegistries()
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should add packument with file version", async function () {
+      const noticeSpy = spyOnLog("notice");
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
+
       const addResult = await add(
         makePackageReference(packageA, fileUrl),
         options
       );
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toHaveDependency(packageA, fileUrl)
@@ -282,105 +300,132 @@ describe("cmd-add.ts", () => {
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).not.toHaveScopedRegistries()
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should fail for unknown packument", async function () {
+      const errorSpy = spyOnLog("error");
+
       const addResult = await add(packageMissing, options);
+
       expect(addResult).toBeError();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(defaultManifest)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "package not found");
+      expect(errorSpy).toHaveLogLike("404", "package not found");
     });
     it("should be able to add multiple packuments", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add([packageA, packageB], options);
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestAB)
       );
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "added com.base.package-a"
-      );
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "added com.base.package-b"
-      );
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added com.base.package-a");
+      expect(noticeSpy).toHaveLogLike("manifest", "added com.base.package-b");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should add upstream packument", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(packageUp, upstreamOptions);
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestUpstream)
       );
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
+      expect(noticeSpy).toHaveLogLike(
+        "manifest",
         "added com.upstream.package-up"
       );
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should fail for unknown upstream packument", async function () {
+      const errorSpy = spyOnLog("error");
+
       const addResult = await add(packageMissing, upstreamOptions);
+
       expect(addResult).toBeError();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(defaultManifest)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "package not found");
+      expect(errorSpy).toHaveLogLike("404", "package not found");
     });
     it("should add packument dependencies", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(
         makePackageReference(packageC, "latest"),
         upstreamOptions
       );
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestC)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should packument to testables when requested", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(packageA, testableOptions);
+
       expect(addResult).toBeOk();
       await mockProject.tryAssertManifest((manifest) =>
         expect(manifest).toEqual(expectedManifestTestable)
       );
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should add packument with lower editor-version", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const addResult = await add(packageLowerEditor, testableOptions);
+
       expect(addResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "added");
-      expect(mockConsole).toHaveLineIncluding("out", "open Unity");
+      expect(noticeSpy).toHaveLogLike("manifest", "added");
+      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should fail to add packument with higher editor-version", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const addResult = await add(packageHigherEditor, testableOptions);
+
       expect(addResult).toBeError();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
+      expect(warnSpy).toHaveLogLike(
+        "editor.version",
         "requires 2020.2 but found 2019.2.13f1"
       );
     });
     it("should add packument with higher editor-version when forced", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const addResult = await add(packageHigherEditor, forceOptions);
+
       expect(addResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
+      expect(warnSpy).toHaveLogLike(
+        "editor.version",
         "requires 2020.2 but found 2019.2.13f1"
       );
     });
     it("should not add packument with bad editor-version", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const addResult = await add(packageWrongEditor, testableOptions);
+
       expect(addResult).toBeError();
-      expect(mockConsole).toHaveLineIncluding("out", "2020 is not valid");
+      expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
     });
     it("should add packument with bad editor-version when forced", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const addResult = await add(packageWrongEditor, forceOptions);
+
       expect(addResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "2020 is not valid");
+      expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
     });
   });
 });

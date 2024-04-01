@@ -6,8 +6,6 @@ import { PackageUrl } from "../src/domain/package-url";
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toHaveLineIncluding(stream: Stream, text: string): R;
-
       toHaveDependency(
         name: DomainName,
         version?: SemanticVersion | PackageUrl
@@ -22,6 +20,15 @@ declare global {
       toBeOk<T>(valueAsserter?: (value: T) => void): R;
 
       toBeError(errorAsserter?: (error: Error) => void): R;
+
+      // Log
+
+      /**
+       * Tests if a specific log was made to this spy.
+       * @param prefix The prefix. This is matched exactly.
+       * @param message The message. This matches if a log includes this string.
+       */
+      toHaveLogLike(prefix: string, message: string): R;
     }
   }
 }

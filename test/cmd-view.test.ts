@@ -7,12 +7,12 @@ import {
   startMockRegistry,
   stopMockRegistry,
 } from "./mock-registry";
-import { attachMockConsole, MockConsole } from "./mock-console";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { spyOnLog } from "./log.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
@@ -33,7 +33,6 @@ describe("cmd-view.ts", () => {
     },
   };
   describe("view", () => {
-    let mockConsole: MockConsole = null!;
     let mockProject: MockUnityProject = null!;
 
     const remotePackumentA = buildPackument(packageA, (packument) =>
@@ -111,12 +110,10 @@ describe("cmd-view.ts", () => {
       registerRemotePackument(remotePackumentA);
       registerMissingPackument(packageMissing);
       registerRemoteUpstreamPackument(remotePackumentUp);
-      mockConsole = attachMockConsole();
     });
     afterEach(async function () {
       await mockProject.reset();
       stopMockRegistry();
-      mockConsole.detach();
     });
 
     afterAll(async function () {
@@ -124,41 +121,51 @@ describe("cmd-view.ts", () => {
     });
 
     it("should print information for packument without version", async function () {
+      const consoleSpy = jest.spyOn(console, "log");
+
       const viewResult = await view(packageA, options);
+
       expect(viewResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "com.example.package-a@1.0.0"
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("com.example.package-a@1.0.0")
       );
     });
     it("should print information for packument with semantic version", async function () {
+      const warnSpy = spyOnLog("warn");
+
       const viewResult = await view(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
+
       expect(viewResult).toBeError();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "do not specify a version"
-      );
+      expect(warnSpy).toHaveLogLike("", "do not specify a version");
     });
     it("should fail for unknown packument", async function () {
+      const errorSpy = spyOnLog("error");
+
       const viewResult = await view(packageMissing, options);
+
       expect(viewResult).toBeError();
-      expect(mockConsole).toHaveLineIncluding("out", "package not found");
+      expect(errorSpy).toHaveLogLike("404", "package not found");
     });
     it("should print information for upstream packument", async function () {
+      const consoleSpy = jest.spyOn(console, "log");
+
       const viewResult = await view(packageUp, upstreamOptions);
+
       expect(viewResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
-        "com.example.package-up@1.0.0"
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("com.example.package-up@1.0.0")
       );
     });
     it("should fail for unknown upstream packument", async function () {
+      const errorSpy = spyOnLog("error");
+
       const viewResult = await view(packageMissing, upstreamOptions);
+
       expect(viewResult).toBeError();
-      expect(mockConsole).toHaveLineIncluding("out", "package not found");
+      expect(errorSpy).toHaveLogLike("404", "package not found");
     });
   });
 });
