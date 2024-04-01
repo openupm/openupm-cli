@@ -1,4 +1,4 @@
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import {
   FileReadError,
   FileWriteError,
@@ -7,6 +7,9 @@ import {
 } from "./file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
+import path from "path";
+import { RequiredEnvMissingError } from "./upm-config-io";
+import { tryGetEnv } from "../utils/env-util";
 
 /**
  * Error that might occur when loading a npmrc.
@@ -17,6 +20,16 @@ export type NpmrcLoadError = FileReadError;
  * Error that might occur when saving a npmrc.
  */
 export type NpmrcSaveError = FileWriteError;
+
+/**
+ * Tries to get the npmrc path based on env.
+ */
+export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
+  const dirPath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
+  if (dirPath === null)
+    return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
+  return Ok(path.join(dirPath, ".npmrc"));
+}
 
 /**
  * Attempts to load an .npmrc. It will only load simple key-value pairs. That
