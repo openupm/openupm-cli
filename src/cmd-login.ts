@@ -18,8 +18,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryWriteTextToFile } from "./io/file-io";
-import { tryLoadNpmrc } from "./io/npmrc-io";
+import { Npmrc, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
 
 export type LoginError =
   | EnvParseError
@@ -127,10 +126,8 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   (
     await tryLoadNpmrc(configPath)
       .or(Ok([]))
-      .map((lines) => generateNpmrcLines(lines, registry, token))
-      .map((lines) => lines.join("\n") + "\n")
-      // write config
-      .andThen((newContent) => tryWriteTextToFile(configPath, newContent))
+      .map((npmrc) => generateNpmrcLines(npmrc, registry, token))
+      .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
       .map(() => log.notice("config", `saved to npm config: ${configPath}`))
       .promise
   ).unwrap();
@@ -155,7 +152,7 @@ export const generateNpmrcLines = function (
   initialLines: ReadonlyArray<string>,
   registry: RegistryUrl,
   token: string
-) {
+): Npmrc {
   let lines = [...initialLines];
   const quotes = /(\?|=)/.test(token) ? '"' : "";
   // get the registry url without http protocol
