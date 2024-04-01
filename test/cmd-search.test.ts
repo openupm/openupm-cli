@@ -1,5 +1,4 @@
 import nock from "nock";
-
 import { search, SearchOptions } from "../src/cmd-search";
 import {
   exampleRegistryUrl,
@@ -8,13 +7,12 @@ import {
   stopMockRegistry,
 } from "./mock-registry";
 import { SearchEndpointResult } from "./types";
-import { attachMockConsole, MockConsole } from "./mock-console";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
+import { spyOnLog } from "./log.mock";
 
 describe("cmd-search.ts", () => {
-  let mockConsole: MockConsole = null!;
   let mockProject: MockUnityProject = null!;
 
   const options: SearchOptions = {
@@ -28,13 +26,8 @@ describe("cmd-search.ts", () => {
     mockProject = await setupUnityProject({});
   });
 
-  beforeEach(function () {
-    mockConsole = attachMockConsole();
-  });
-
   afterEach(async function () {
     await mockProject.reset();
-    mockConsole.detach();
   });
 
   afterAll(async function () {
@@ -85,16 +78,26 @@ describe("cmd-search.ts", () => {
       stopMockRegistry();
     });
     it("should print packument information", async function () {
+      const consoleSpy = jest.spyOn(console, "log");
+
       const searchResult = await search("package-a", options);
+
       expect(searchResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "package-a");
-      expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
-      expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("package-a")
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("1.0.0"));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("2019-10-02")
+      );
     });
     it("should notify of unknown packument", async function () {
+      const noticeSpy = spyOnLog("notice");
+
       const searchResult = await search("pkg-not-exist", options);
+
       expect(searchResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "No matches found");
+      expect(noticeSpy).toHaveLogLike("", "No matches found");
     });
   });
 
@@ -132,26 +135,37 @@ describe("cmd-search.ts", () => {
       stopMockRegistry();
     });
     it("should print packument information", async function () {
+      const warnSpy = spyOnLog("warn");
+      const consoleSpy = jest.spyOn(console, "log");
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
+
       const searchResult = await search("package-a", options);
+
       expect(searchResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding(
-        "out",
+      expect(warnSpy).toHaveLogLike(
+        "",
         "fast search endpoint is not available"
       );
-      expect(mockConsole).toHaveLineIncluding("out", "package-a");
-      expect(mockConsole).toHaveLineIncluding("out", "1.0.0");
-      expect(mockConsole).toHaveLineIncluding("out", "2019-10-02");
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("package-a")
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("1.0.0"));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("2019-10-02")
+      );
     });
     it("should notify of unknown packument", async function () {
+      const noticeSpy = spyOnLog("notice");
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
       });
+
       const searchResult = await search("pkg-not-exist", options);
+
       expect(searchResult).toBeOk();
-      expect(mockConsole).toHaveLineIncluding("out", "No matches found");
+      expect(noticeSpy).toHaveLogLike("", "No matches found");
     });
   });
 });
