@@ -6,11 +6,7 @@ import {
   tryWriteTextToFile,
 } from "./file-io";
 import { EOL } from "node:os";
-
-/**
- * The content lines of a npmrc file.
- */
-export type Npmrc = ReadonlyArray<string>;
+import { Npmrc } from "../domain/npmrc";
 
 /**
  * Error that might occur when loading a npmrc.

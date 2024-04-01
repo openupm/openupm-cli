@@ -18,7 +18,8 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { Npmrc, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
+import { tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
+import { Npmrc } from "./domain/npmrc";
 
 export type LoginError =
   | EnvParseError
