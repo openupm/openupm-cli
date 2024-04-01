@@ -12,7 +12,6 @@ import { HttpErrorBase } from "npm-registry-fetch";
 import { buildPackument } from "./data-packument";
 import { Response } from "request";
 import npmSearch from "libnpmsearch";
-import { createDeflateRaw } from "node:zlib";
 import search from "libnpmsearch";
 
 jest.mock("another-npm-registry-client");
