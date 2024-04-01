@@ -8,7 +8,7 @@ import {
 } from "../src/npm-client";
 import { UnityPackument } from "../src/domain/packument";
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
-import { HttpErrorBase } from "npm-registry-fetch";
+import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { buildPackument } from "./data-packument";
 import { Response } from "request";
 import npmSearch from "libnpmsearch";
@@ -16,6 +16,7 @@ import search from "libnpmsearch";
 
 jest.mock("another-npm-registry-client");
 jest.mock("libnpmsearch");
+jest.mock("npm-registry-fetch");
 
 const packageA = makeDomainName("package-a");
 
@@ -186,6 +187,34 @@ describe("npm-client", () => {
       const client = makeNpmClient();
 
       const result = await client.trySearch(exampleRegistry, "wow").promise;
+
+      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    });
+  });
+
+  describe("get all", () => {
+    it("should fail on error response", async () => {
+      const expected = {
+        message: "Idk, it failed",
+        name: "FakeError",
+        statusCode: 500,
+      } as HttpErrorBase;
+      jest.mocked(npmFetch.json).mockRejectedValue(expected);
+      const client = makeNpmClient();
+
+      const result = await client.tryGetAll(exampleRegistry).promise;
+
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    });
+
+    it("should succeed on ok response", async () => {
+      const expected = {
+        _update: 123,
+      };
+      jest.mocked(npmFetch.json).mockResolvedValue(expected);
+      const client = makeNpmClient();
+
+      const result = await client.tryGetAll(exampleRegistry).promise;
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
