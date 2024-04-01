@@ -1,4 +1,3 @@
-import path from "path";
 import { AuthenticationError, makeNpmClient } from "./npm-client";
 import log from "./logger";
 import {
@@ -18,9 +17,8 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
+import { tryGetNpmrcPath, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
 import { setToken } from "./domain/npmrc";
-import { tryGetEnv } from "./utils/env-util";
 
 export type LoginError =
   | EnvParseError
@@ -122,25 +120,14 @@ const npmLogin = function (
  * @throws {Error} An unhandled error occurred.
  */
 const writeNpmToken = async function (registry: RegistryUrl, token: string) {
-  const configPath = getNpmrcPath();
-
   // read config
   (
-    await tryLoadNpmrc(configPath)
-      .or(Ok([]))
-      .map((npmrc) => setToken(npmrc, registry, token))
-      .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
-      .map(() => log.notice("config", `saved to npm config: ${configPath}`))
-      .promise
+    await new AsyncResult(tryGetNpmrcPath()).andThen((configPath) =>
+      tryLoadNpmrc(configPath)
+        .or(Ok([]))
+        .map((npmrc) => setToken(npmrc, registry, token))
+        .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
+        .map(() => log.notice("config", `saved to npm config: ${configPath}`))
+    ).promise
   ).unwrap();
-};
-
-/**
- * Return .npmrc config file path.
- * @throws {Error} Home-path could not be determined.
- */
-export const getNpmrcPath = function () {
-  const dirPath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-  if (dirPath === null) throw new Error("Could not determine home path");
-  return path.join(dirPath, ".npmrc");
 };
