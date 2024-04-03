@@ -63,9 +63,9 @@ export function trySaveNpmrc(
 }
 
 /**
- * Write npm token to .npmrc.
+ * Attempts to update the npm-auth token inside the users npmrc file.
  */
-export function writeNpmToken(
+export function tryUpdateAuthToken(
   registry: RegistryUrl,
   token: string
 ): AsyncResult<void, NpmrcLoadError | NpmrcSaveError> {

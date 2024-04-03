@@ -17,7 +17,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { writeNpmToken } from "./io/npmrc-io";
+import { tryUpdateAuthToken } from "./io/npmrc-io";
 
 export type LoginError =
   | EnvParseError
@@ -78,7 +78,7 @@ export const login = async function (
     const token = result.value;
 
     // write npm token
-    await writeNpmToken(loginRegistry, token).promise;
+    await tryUpdateAuthToken(loginRegistry, token).promise;
     const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
