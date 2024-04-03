@@ -64,7 +64,7 @@ describe("npmrc-io", () => {
       );
     });
 
-    it("should fail for missing file", async () => {
+    it("should be null for missing file", async () => {
       const path = "/invalid/path/.npmrc";
       const expected = new NotFoundError(path);
       jest
@@ -73,7 +73,7 @@ describe("npmrc-io", () => {
 
       const result = await tryLoadNpmrc(path).promise;
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      expect(result).toBeOk((actual) => expect(actual).toBeNull());
     });
   });
 

@@ -1,7 +1,7 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import {
-  FileReadError,
   FileWriteError,
+  NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,
 } from "./file-io";
@@ -10,11 +10,12 @@ import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetEnv } from "../utils/env-util";
+import { IOError } from "../common-errors";
 
 /**
  * Error that might occur when loading a npmrc.
  */
-export type NpmrcLoadError = FileReadError;
+export type NpmrcLoadError = IOError;
 
 /**
  * Error that might occur when saving a npmrc.
@@ -36,8 +37,14 @@ export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
  * means no objects and no arrays.
  * @param path The path to load from.
  */
-export function tryLoadNpmrc(path: string): AsyncResult<Npmrc, NpmrcLoadError> {
-  return tryReadTextFromFile(path).map((content) => content.split(EOL));
+export function tryLoadNpmrc(
+  path: string
+): AsyncResult<Npmrc | null, NpmrcLoadError> {
+  return tryReadTextFromFile(path)
+    .map<Npmrc | null>((content) => content.split(EOL))
+    .orElse((error) =>
+      error instanceof NotFoundError ? Ok(null) : Err(error)
+    );
 }
 
 /**

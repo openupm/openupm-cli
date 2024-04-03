@@ -18,7 +18,7 @@ import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
 import { tryGetNpmrcPath, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
-import { setToken } from "./domain/npmrc";
+import { emptyNpmrc, setToken } from "./domain/npmrc";
 
 export type LoginError =
   | EnvParseError
@@ -124,7 +124,7 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
   (
     await new AsyncResult(tryGetNpmrcPath()).andThen((configPath) =>
       tryLoadNpmrc(configPath)
-        .or(Ok([]))
+        .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
         .map((npmrc) => setToken(npmrc, registry, token))
         .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
         .map(() => log.notice("config", `saved to npm config: ${configPath}`))
