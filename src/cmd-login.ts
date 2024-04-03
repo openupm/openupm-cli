@@ -17,13 +17,14 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryUpdateAuthToken } from "./io/npmrc-io";
+import { tryUpdateAuthToken, UpdateNpmAuthTokenError } from "./io/npmrc-io";
 
 export type LoginError =
   | EnvParseError
   | GetUpmConfigDirError
   | IOError
-  | AuthenticationError;
+  | AuthenticationError
+  | UpdateNpmAuthTokenError;
 
 export type LoginOptions = CmdOptions<{
   username?: string;
@@ -78,9 +79,12 @@ export const login = async function (
     const token = result.value;
 
     // write npm token
-    await tryUpdateAuthToken(loginRegistry, token).map((configPath) =>
+    const updateResult = await tryUpdateAuthToken(loginRegistry, token).promise;
+    if (updateResult.isErr()) return updateResult;
+    updateResult.map((configPath) =>
       log.notice("config", `saved to npm config: ${configPath}`)
-    ).promise;
+    );
+
     const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
