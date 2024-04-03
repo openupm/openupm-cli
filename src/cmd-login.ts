@@ -18,7 +18,7 @@ import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
 import { NpmrcLoadError, NpmrcSaveError } from "./io/npmrc-io";
-import { tryUpdateNpmrcToken } from "./services/npmrc-token-update-service";
+import { tryUpdateUserNpmrcToken } from "./services/npmrc-token-update-service";
 
 export type LoginError =
   | EnvParseError
@@ -81,7 +81,7 @@ export const login = async function (
     const token = result.value;
 
     // write npm token
-    const updateResult = await tryUpdateNpmrcToken(loginRegistry, token).promise;
+    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token).promise;
     if (updateResult.isErr()) return updateResult;
     updateResult.map((configPath) =>
       log.notice("config", `saved to npm config: ${configPath}`)

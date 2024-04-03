@@ -19,10 +19,10 @@ export type NpmrcAuthTokenUpdateError =
   | NpmrcSaveError;
 
 /**
- * Attempts to update the npm-auth token inside the users npmrc file.
+ * Attempts to update the user-wide npm-auth token inside the users npmrc file.
  * @returns The path to which the config was saved.
  */
-export function tryUpdateNpmrcToken(
+export function tryUpdateUserNpmrcToken(
   registry: RegistryUrl,
   token: string
 ): AsyncResult<string, NpmrcAuthTokenUpdateError> {
