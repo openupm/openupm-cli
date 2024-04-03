@@ -6,12 +6,11 @@ import {
   tryWriteTextToFile,
 } from "./file-io";
 import { EOL } from "node:os";
-import { emptyNpmrc, Npmrc, setToken } from "../domain/npmrc";
+import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetEnv } from "../utils/env-util";
 import { IOError } from "../common-errors";
-import { RegistryUrl } from "../domain/registry-url";
 
 /**
  * Error that might occur when loading a npmrc.
@@ -22,11 +21,6 @@ export type NpmrcLoadError = IOError;
  * Error that might occur when saving a npmrc.
  */
 export type NpmrcSaveError = FileWriteError;
-
-/**
- * Error that might occur when updating a token inside a npmrc.
- */
-export type UpdateNpmAuthTokenError = NpmrcLoadError | NpmrcSaveError;
 
 /**
  * Tries to get the npmrc path based on env.
@@ -64,24 +58,4 @@ export function trySaveNpmrc(
 ): AsyncResult<void, NpmrcSaveError> {
   const content = npmrc.join(EOL);
   return tryWriteTextToFile(path, content);
-}
-
-/**
- * Attempts to update the npm-auth token inside the users npmrc file.
- * @returns The path to which the config was saved.
- */
-export function tryUpdateAuthToken(
-  registry: RegistryUrl,
-  token: string
-): AsyncResult<string, UpdateNpmAuthTokenError> {
-  // read config
-  return tryGetNpmrcPath()
-    .toAsyncResult()
-    .andThen((configPath) =>
-      tryLoadNpmrc(configPath)
-        .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
-        .map((npmrc) => setToken(npmrc, registry, token))
-        .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
-        .map(() => configPath)
-    );
 }
