@@ -119,7 +119,7 @@ const npmLogin = function (
  * Write npm token to .npmrc.
  * @throws {Error} An unhandled error occurred.
  */
-const writeNpmToken = async function (registry: RegistryUrl, token: string) {
+async function writeNpmToken(registry: RegistryUrl, token: string) {
   // read config
   (
     await new AsyncResult(tryGetNpmrcPath()).andThen((configPath) =>
@@ -130,4 +130,4 @@ const writeNpmToken = async function (registry: RegistryUrl, token: string) {
         .map(() => log.notice("config", `saved to npm config: ${configPath}`))
     ).promise
   ).unwrap();
-};
+}
