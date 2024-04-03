@@ -6,11 +6,13 @@ import {
   tryWriteTextToFile,
 } from "./file-io";
 import { EOL } from "node:os";
-import { Npmrc } from "../domain/npmrc";
+import { emptyNpmrc, Npmrc, setToken } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetEnv } from "../utils/env-util";
 import { IOError } from "../common-errors";
+import { RegistryUrl } from "../domain/registry-url";
+import log from "../logger";
 
 /**
  * Error that might occur when loading a npmrc.
@@ -58,4 +60,23 @@ export function trySaveNpmrc(
 ): AsyncResult<void, NpmrcSaveError> {
   const content = npmrc.join(EOL);
   return tryWriteTextToFile(path, content);
+}
+
+/**
+ * Write npm token to .npmrc.
+ */
+export function writeNpmToken(
+  registry: RegistryUrl,
+  token: string
+): AsyncResult<void, NpmrcLoadError | NpmrcSaveError> {
+  // read config
+  return tryGetNpmrcPath()
+    .toAsyncResult()
+    .andThen((configPath) =>
+      tryLoadNpmrc(configPath)
+        .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
+        .map((npmrc) => setToken(npmrc, registry, token))
+        .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
+        .map(() => log.notice("config", `saved to npm config: ${configPath}`))
+    );
 }

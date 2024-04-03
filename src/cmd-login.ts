@@ -17,14 +17,7 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import {
-  NpmrcLoadError,
-  NpmrcSaveError,
-  tryGetNpmrcPath,
-  tryLoadNpmrc,
-  trySaveNpmrc,
-} from "./io/npmrc-io";
-import { emptyNpmrc, setToken } from "./domain/npmrc";
+import { writeNpmToken } from "./io/npmrc-io";
 
 export type LoginError =
   | EnvParseError
@@ -120,22 +113,3 @@ const npmLogin = function (
       return error;
     });
 };
-
-/**
- * Write npm token to .npmrc.
- */
-function writeNpmToken(
-  registry: RegistryUrl,
-  token: string
-): AsyncResult<void, NpmrcLoadError | NpmrcSaveError> {
-  // read config
-  return tryGetNpmrcPath()
-    .toAsyncResult()
-    .andThen((configPath) =>
-      tryLoadNpmrc(configPath)
-        .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
-        .map((npmrc) => setToken(npmrc, registry, token))
-        .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
-        .map(() => log.notice("config", `saved to npm config: ${configPath}`))
-    );
-}
