@@ -79,7 +79,7 @@ export const login = async function (
     const token = result.value;
 
     // write npm token
-    await writeNpmToken(loginRegistry, token);
+    await writeNpmToken(loginRegistry, token).promise;
     const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
@@ -117,17 +117,16 @@ const npmLogin = function (
 
 /**
  * Write npm token to .npmrc.
- * @throws {Error} An unhandled error occurred.
  */
-const writeNpmToken = async function (registry: RegistryUrl, token: string) {
+function writeNpmToken(registry: RegistryUrl, token: string) {
   // read config
-  (
-    await new AsyncResult(tryGetNpmrcPath()).andThen((configPath) =>
+  return tryGetNpmrcPath()
+    .toAsyncResult()
+    .andThen((configPath) =>
       tryLoadNpmrc(configPath)
         .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
         .map((npmrc) => setToken(npmrc, registry, token))
         .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
         .map(() => log.notice("config", `saved to npm config: ${configPath}`))
-    ).promise
-  ).unwrap();
-};
+    );
+}
