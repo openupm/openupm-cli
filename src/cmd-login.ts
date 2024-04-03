@@ -78,7 +78,9 @@ export const login = async function (
     const token = result.value;
 
     // write npm token
-    await tryUpdateAuthToken(loginRegistry, token).promise;
+    await tryUpdateAuthToken(loginRegistry, token).map((configPath) =>
+      log.notice("config", `saved to npm config: ${configPath}`)
+    ).promise;
     const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,

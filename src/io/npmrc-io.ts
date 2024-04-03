@@ -12,7 +12,6 @@ import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetEnv } from "../utils/env-util";
 import { IOError } from "../common-errors";
 import { RegistryUrl } from "../domain/registry-url";
-import log from "../logger";
 
 /**
  * Error that might occur when loading a npmrc.
@@ -64,11 +63,12 @@ export function trySaveNpmrc(
 
 /**
  * Attempts to update the npm-auth token inside the users npmrc file.
+ * @returns The path to which the config was saved.
  */
 export function tryUpdateAuthToken(
   registry: RegistryUrl,
   token: string
-): AsyncResult<void, NpmrcLoadError | NpmrcSaveError> {
+): AsyncResult<string, NpmrcLoadError | NpmrcSaveError> {
   // read config
   return tryGetNpmrcPath()
     .toAsyncResult()
@@ -77,6 +77,6 @@ export function tryUpdateAuthToken(
         .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
         .map((npmrc) => setToken(npmrc, registry, token))
         .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
-        .map(() => log.notice("config", `saved to npm config: ${configPath}`))
+        .map(() => configPath)
     );
 }
