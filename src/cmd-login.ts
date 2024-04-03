@@ -17,7 +17,13 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryGetNpmrcPath, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
+import {
+  NpmrcLoadError,
+  NpmrcSaveError,
+  tryGetNpmrcPath,
+  tryLoadNpmrc,
+  trySaveNpmrc,
+} from "./io/npmrc-io";
 import { emptyNpmrc, setToken } from "./domain/npmrc";
 
 export type LoginError =
@@ -118,7 +124,10 @@ const npmLogin = function (
 /**
  * Write npm token to .npmrc.
  */
-function writeNpmToken(registry: RegistryUrl, token: string) {
+function writeNpmToken(
+  registry: RegistryUrl,
+  token: string
+): AsyncResult<void, NpmrcLoadError | NpmrcSaveError> {
   // read config
   return tryGetNpmrcPath()
     .toAsyncResult()
