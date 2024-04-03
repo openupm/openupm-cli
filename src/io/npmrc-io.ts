@@ -24,6 +24,11 @@ export type NpmrcLoadError = IOError;
 export type NpmrcSaveError = FileWriteError;
 
 /**
+ * Error that might occur when updating a token inside a npmrc.
+ */
+export type UpdateNpmAuthTokenError = NpmrcLoadError | NpmrcSaveError;
+
+/**
  * Tries to get the npmrc path based on env.
  */
 export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
@@ -68,7 +73,7 @@ export function trySaveNpmrc(
 export function tryUpdateAuthToken(
   registry: RegistryUrl,
   token: string
-): AsyncResult<string, NpmrcLoadError | NpmrcSaveError> {
+): AsyncResult<string, UpdateNpmAuthTokenError> {
   // read config
   return tryGetNpmrcPath()
     .toAsyncResult()
