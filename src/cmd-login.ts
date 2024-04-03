@@ -17,14 +17,16 @@ import {
 import { CmdOptions } from "./types/options";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
-import { tryGetNpmrcPath, tryLoadNpmrc, trySaveNpmrc } from "./io/npmrc-io";
-import { emptyNpmrc, setToken } from "./domain/npmrc";
+import { NpmrcLoadError, NpmrcSaveError } from "./io/npmrc-io";
+import { tryUpdateUserNpmrcToken } from "./services/npmrc-token-update-service";
 
 export type LoginError =
   | EnvParseError
   | GetUpmConfigDirError
   | IOError
-  | AuthenticationError;
+  | AuthenticationError
+  | NpmrcLoadError
+  | NpmrcSaveError;
 
 export type LoginOptions = CmdOptions<{
   username?: string;
@@ -79,7 +81,12 @@ export const login = async function (
     const token = result.value;
 
     // write npm token
-    await writeNpmToken(loginRegistry, token).promise;
+    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token).promise;
+    if (updateResult.isErr()) return updateResult;
+    updateResult.map((configPath) =>
+      log.notice("config", `saved to npm config: ${configPath}`)
+    );
+
     const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
       email,
       alwaysAuth,
@@ -114,19 +121,3 @@ const npmLogin = function (
       return error;
     });
 };
-
-/**
- * Write npm token to .npmrc.
- */
-function writeNpmToken(registry: RegistryUrl, token: string) {
-  // read config
-  return tryGetNpmrcPath()
-    .toAsyncResult()
-    .andThen((configPath) =>
-      tryLoadNpmrc(configPath)
-        .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
-        .map((npmrc) => setToken(npmrc, registry, token))
-        .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
-        .map(() => log.notice("config", `saved to npm config: ${configPath}`))
-    );
-}
