@@ -45,6 +45,8 @@ export type LoginOptions = CmdOptions<{
 }>;
 
 /**
+ * Attempts to log in a user into a npm-registry.
+ * @param options Options for logging in.
  */
 export const login = async function (
   options: LoginOptions
