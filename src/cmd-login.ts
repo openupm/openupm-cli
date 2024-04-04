@@ -87,6 +87,7 @@ export const login = async function (
         );
       return loginResult;
     }
+    log.notice("auth", `you are authenticated as '${username}'`);
     const token = loginResult.value;
 
     // write npm token
@@ -118,8 +119,5 @@ const npmLogin = function (
   registry: RegistryUrl
 ): AsyncResult<string, AuthenticationError> {
   const client = makeNpmClient();
-  return client.addUser(registry, username, password, email).map((result) => {
-    log.notice("auth", `you are authenticated as '${username}'`);
-    return result;
-  });
+  return client.addUser(registry, username, password, email);
 };
