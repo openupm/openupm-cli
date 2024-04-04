@@ -1,4 +1,4 @@
-import { add, AddOptions } from "../src/cmd-add";
+import { add, AddOptions } from "../src/cli/cmd-add";
 import {
   exampleRegistryUrl,
   registerMissingPackument,

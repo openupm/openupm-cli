@@ -1,24 +1,24 @@
-import { AuthenticationError, makeNpmClient } from "./npm-client";
+import { AuthenticationError, makeNpmClient } from "../npm-client";
 import log from "./logger";
 import {
   GetUpmConfigDirError,
   tryGetUpmConfigDir,
   tryStoreUpmAuth,
-} from "./io/upm-config-io";
-import { EnvParseError, parseEnv } from "./utils/env";
-import { BasicAuth, encodeBasicAuth, TokenAuth } from "./domain/upm-config";
-import { coerceRegistryUrl } from "./domain/registry-url";
+} from "../io/upm-config-io";
+import { EnvParseError, parseEnv } from "../utils/env";
+import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
+import { coerceRegistryUrl } from "../domain/registry-url";
 import {
   promptEmail,
   promptPassword,
   promptRegistryUrl,
   promptUsername,
-} from "./utils/prompts";
-import { CmdOptions } from "./types/options";
+} from "./prompts";
+import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
-import { IOError } from "./common-errors";
-import { NpmrcLoadError, NpmrcSaveError } from "./io/npmrc-io";
-import { tryUpdateUserNpmrcToken } from "./services/npmrc-token-update-service";
+import { IOError } from "../common-errors";
+import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
+import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update-service";
 
 /**
  * Errors which may occur when logging in.

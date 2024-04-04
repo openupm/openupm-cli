@@ -3,7 +3,7 @@ import {
   tryGetLatestVersion,
   UnityPackument,
   VersionedPackument,
-} from "./domain/packument";
+} from "../domain/packument";
 import assert from "assert";
 
 /**

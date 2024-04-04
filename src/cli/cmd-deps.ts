@@ -1,19 +1,19 @@
 import log from "./logger";
-import { EnvParseError, parseEnv } from "./utils/env";
-import { makeNpmClient } from "./npm-client";
-import { isPackageUrl } from "./domain/package-url";
+import { EnvParseError, parseEnv } from "../utils/env";
+import { makeNpmClient } from "../npm-client";
+import { isPackageUrl } from "../domain/package-url";
 import {
   makePackageReference,
   PackageReference,
   splitPackageReference,
-} from "./domain/package-reference";
-import { CmdOptions } from "./types/options";
+} from "../domain/package-reference";
+import { CmdOptions } from "./options";
 import {
   PackumentResolveError,
   VersionNotFoundError,
-} from "./packument-resolving";
-import { fetchPackageDependencies } from "./dependency-resolving";
-import { PackumentNotFoundError } from "./common-errors";
+} from "../packument-resolving";
+import { fetchPackageDependencies } from "../dependency-resolving";
+import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
 
 export type DepsError = EnvParseError;

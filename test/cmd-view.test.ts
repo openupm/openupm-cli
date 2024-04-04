@@ -1,4 +1,4 @@
-import { view, ViewOptions } from "../src/cmd-view";
+import { view, ViewOptions } from "../src/cli/cmd-view";
 import {
   exampleRegistryUrl,
   registerMissingPackument,

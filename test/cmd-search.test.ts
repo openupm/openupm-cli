@@ -1,5 +1,5 @@
 import nock from "nock";
-import { search, SearchOptions } from "../src/cmd-search";
+import { search, SearchOptions } from "../src/cli/cmd-search";
 import {
   exampleRegistryUrl,
   registerSearchResult,

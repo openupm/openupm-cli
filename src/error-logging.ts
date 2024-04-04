@@ -1,4 +1,4 @@
-import log from "./logger";
+import log from "./cli/logger";
 import { ManifestLoadError, ManifestSaveError } from "./io/project-manifest-io";
 import { NotFoundError } from "./io/file-io";
 

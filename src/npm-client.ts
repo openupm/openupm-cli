@@ -1,5 +1,5 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
-import log from "./logger";
+import log from "./cli/logger";
 import { UnityPackument } from "./domain/packument";
 import { DomainName } from "./domain/domain-name";
 import { SemanticVersion } from "./domain/semantic-version";

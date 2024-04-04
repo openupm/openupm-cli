@@ -1,13 +1,13 @@
 import log from "./logger";
 import * as os from "os";
-import { EnvParseError, parseEnv } from "./utils/env";
-import { CmdOptions } from "./types/options";
+import { EnvParseError, parseEnv } from "../utils/env";
+import { CmdOptions } from "./options";
 import {
   makeNpmClient,
   NpmClient,
   Registry,
   SearchedPackument,
-} from "./npm-client";
+} from "../npm-client";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
