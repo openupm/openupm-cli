@@ -7,7 +7,7 @@ import {
 } from "./io/upm-config-io";
 import { EnvParseError, parseEnv } from "./utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "./domain/upm-config";
-import { coerceRegistryUrl, RegistryUrl } from "./domain/registry-url";
+import { coerceRegistryUrl } from "./domain/registry-url";
 import {
   promptEmail,
   promptPassword,
@@ -15,7 +15,7 @@ import {
   promptUsername,
 } from "./utils/prompts";
 import { CmdOptions } from "./types/options";
-import { AsyncResult, Ok, Result } from "ts-results-es";
+import { Ok, Result } from "ts-results-es";
 import { IOError } from "./common-errors";
 import { NpmrcLoadError, NpmrcSaveError } from "./io/npmrc-io";
 import { tryUpdateUserNpmrcToken } from "./services/npmrc-token-update-service";
@@ -75,8 +75,13 @@ export const login = async function (
     if (result.isErr()) return result;
   } else {
     // npm login
-    const loginResult = await npmLogin(username, password, email, loginRegistry)
-      .promise;
+    const client = makeNpmClient();
+    const loginResult = await client.addUser(
+      loginRegistry,
+      username,
+      password,
+      email
+    ).promise;
     if (loginResult.isErr()) {
       if (loginResult.error.status === 401)
         log.warn("401", "Incorrect username or password");
@@ -107,17 +112,4 @@ export const login = async function (
   }
 
   return Ok(undefined);
-};
-
-/**
- * Return npm login token.
- */
-const npmLogin = function (
-  username: string,
-  password: string,
-  email: string,
-  registry: RegistryUrl
-): AsyncResult<string, AuthenticationError> {
-  const client = makeNpmClient();
-  return client.addUser(registry, username, password, email);
 };
