@@ -20,6 +20,9 @@ import { IOError } from "./common-errors";
 import { NpmrcLoadError, NpmrcSaveError } from "./io/npmrc-io";
 import { tryUpdateUserNpmrcToken } from "./services/npmrc-token-update-service";
 
+/**
+ * Errors which may occur when logging in.
+ */
 export type LoginError =
   | EnvParseError
   | GetUpmConfigDirError
@@ -28,6 +31,11 @@ export type LoginError =
   | NpmrcLoadError
   | NpmrcSaveError;
 
+/**
+ * Options for logging in a user. These come from the CLI.
+ * All properties are optional. If missing they will either be prompted
+ * from the user or get default values.
+ */
 export type LoginOptions = CmdOptions<{
   username?: string;
   password?: string;
