@@ -75,13 +75,24 @@ export const login = async function (
     if (result.isErr()) return result;
   } else {
     // npm login
-    const result = await npmLogin(username, password, email, loginRegistry)
+    const loginResult = await npmLogin(username, password, email, loginRegistry)
       .promise;
-    if (result.isErr()) return result;
-    const token = result.value;
+    if (loginResult.isErr()) {
+      if (loginResult.error.status === 401)
+        log.warn("401", "Incorrect username or password");
+      else
+        log.error(
+          loginResult.error.status.toString(),
+          loginResult.error.message
+        );
+      return loginResult;
+    }
+    log.notice("auth", `you are authenticated as '${username}'`);
+    const token = loginResult.value;
 
     // write npm token
-    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token).promise;
+    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token)
+      .promise;
     if (updateResult.isErr()) return updateResult;
     updateResult.map((configPath) =>
       log.notice("config", `saved to npm config: ${configPath}`)
@@ -108,16 +119,5 @@ const npmLogin = function (
   registry: RegistryUrl
 ): AsyncResult<string, AuthenticationError> {
   const client = makeNpmClient();
-  return client
-    .addUser(registry, username, password, email)
-    .map((result) => {
-      log.notice("auth", `you are authenticated as '${username}'`);
-      return result;
-    })
-    .mapErr((error) => {
-      if (error.status === 401)
-        log.warn("401", "Incorrect username or password");
-      else log.error(error.status.toString(), error.message);
-      return error;
-    });
+  return client.addUser(registry, username, password, email);
 };
