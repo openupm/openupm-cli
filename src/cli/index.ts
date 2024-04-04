@@ -10,12 +10,12 @@ import { login } from "./cmd-login";
 import log from "./logger";
 
 // update-notifier
-import pkg from "../package.json";
+import pkg from "../../package.json";
 import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
-import { isPackageReference } from "./domain/package-reference";
-import { isDomainName } from "./domain/domain-name";
-import { coerceRegistryUrl } from "./domain/registry-url";
-import { CmdOptions } from "./types/options";
+import { isPackageReference } from "../domain/package-reference";
+import { isDomainName } from "../domain/domain-name";
+import { coerceRegistryUrl } from "../domain/registry-url";
+import { CmdOptions } from "./options";
 
 const mustBePackageReference = mustSatisfy(
   isPackageReference,

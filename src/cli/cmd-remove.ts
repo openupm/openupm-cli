@@ -4,23 +4,23 @@ import {
   ManifestSaveError,
   tryLoadProjectManifest,
   trySaveProjectManifest,
-} from "./io/project-manifest-io";
-import { EnvParseError, parseEnv } from "./utils/env";
+} from "../io/project-manifest-io";
+import { EnvParseError, parseEnv } from "../utils/env";
 import {
   hasVersion,
   makePackageReference,
   PackageReference,
-} from "./domain/package-reference";
-import { removeScope } from "./domain/scoped-registry";
-import { mapScopedRegistry, removeDependency } from "./domain/project-manifest";
-import { CmdOptions } from "./types/options";
+} from "../domain/package-reference";
+import { removeScope } from "../domain/scoped-registry";
+import { mapScopedRegistry, removeDependency } from "../domain/project-manifest";
+import { CmdOptions } from "./options";
 import { Err, Ok, Result } from "ts-results-es";
 
 import {
   PackageWithVersionError,
   PackumentNotFoundError,
-} from "./common-errors";
-import { logManifestLoadError, logManifestSaveError } from "./error-logging";
+} from "../common-errors";
+import { logManifestLoadError, logManifestSaveError } from "../error-logging";
 
 export type RemoveError =
   | EnvParseError

@@ -1,6 +1,6 @@
 import path from "path";
 import TOML from "@iarna/toml";
-import log from "../logger";
+import log from "../cli/logger";
 import isWsl from "is-wsl";
 import execute from "../utils/process";
 import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";

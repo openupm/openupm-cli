@@ -1,4 +1,4 @@
-import { remove } from "../src/cmd-remove";
+import { remove } from "../src/cli/cmd-remove";
 import { exampleRegistryUrl } from "./mock-registry";
 import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/domain/domain-name";

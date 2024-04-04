@@ -1,6 +1,6 @@
 import { DomainName, isInternalPackage } from "./domain/domain-name";
 import { isSemanticVersion, SemanticVersion } from "./domain/semantic-version";
-import log from "./logger";
+import log from "./cli/logger";
 import { makePackageReference } from "./domain/package-reference";
 import { addToCache, emptyPackumentCache } from "./packument-cache";
 import {

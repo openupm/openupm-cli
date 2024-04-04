@@ -1,7 +1,7 @@
 import { TokenAuth, UPMConfig } from "../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, parseEnv } from "../src/utils/env";
-import log from "../src/logger";
+import log from "../src/cli/logger";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import {

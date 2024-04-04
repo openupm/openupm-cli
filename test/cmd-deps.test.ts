@@ -1,4 +1,4 @@
-import { deps, DepsOptions } from "../src/cmd-deps";
+import { deps, DepsOptions } from "../src/cli/cmd-deps";
 import {
   exampleRegistryUrl,
   registerMissingPackument,

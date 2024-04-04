@@ -1,4 +1,4 @@
-import log from "../logger";
+import log from "../cli/logger";
 import chalk from "chalk";
 import {
   GetUpmConfigDirError,
@@ -9,7 +9,7 @@ import path from "path";
 import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
-import { CmdOptions } from "../types/options";
+import { CmdOptions } from "../cli/options";
 import { Registry } from "../npm-client";
 import { FileParseError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
