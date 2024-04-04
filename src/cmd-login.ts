@@ -45,7 +45,6 @@ export type LoginOptions = CmdOptions<{
 }>;
 
 /**
- * @throws {Error} An unhandled error occurred.
  */
 export const login = async function (
   options: LoginOptions
