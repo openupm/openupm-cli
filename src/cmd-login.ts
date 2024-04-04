@@ -75,13 +75,14 @@ export const login = async function (
     if (result.isErr()) return result;
   } else {
     // npm login
-    const result = await npmLogin(username, password, email, loginRegistry)
+    const loginResult = await npmLogin(username, password, email, loginRegistry)
       .promise;
-    if (result.isErr()) return result;
-    const token = result.value;
+    if (loginResult.isErr()) return loginResult;
+    const token = loginResult.value;
 
     // write npm token
-    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token).promise;
+    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token)
+      .promise;
     if (updateResult.isErr()) return updateResult;
     updateResult.map((configPath) =>
       log.notice("config", `saved to npm config: ${configPath}`)
