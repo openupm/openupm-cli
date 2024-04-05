@@ -50,7 +50,7 @@ describe("env", () => {
     jest
       .mocked(tryGetUpmConfigDir)
       .mockReturnValue(Ok(testRootPath).toAsyncResult());
-    jest.mocked(tryLoadUpmConfig).mockResolvedValue(null);
+    jest.mocked(tryLoadUpmConfig).mockReturnValue(Ok(null).toAsyncResult());
 
     // The project has a ProjectVersion.txt
     jest
@@ -313,9 +313,11 @@ describe("env", () => {
     });
 
     it("should have no auth if upm-config had no entry for the url", async () => {
-      jest.mocked(tryLoadUpmConfig).mockResolvedValue({
-        npmAuth: {},
-      });
+      jest.mocked(tryLoadUpmConfig).mockReturnValue(
+        Ok({
+          npmAuth: {},
+        }).toAsyncResult()
+      );
 
       const result = await parseEnv({
         _global: {
@@ -329,7 +331,9 @@ describe("env", () => {
     });
 
     it("should have auth if upm-config had entry for the url", async () => {
-      jest.mocked(tryLoadUpmConfig).mockResolvedValue(testUpmConfig);
+      jest
+        .mocked(tryLoadUpmConfig)
+        .mockReturnValue(Ok(testUpmConfig).toAsyncResult());
 
       const result = await parseEnv({
         _global: {
