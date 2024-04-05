@@ -47,15 +47,17 @@ export const tryGetUpmConfigDir = (
       if (wsl) {
         if (!isWsl) throw new NoWslError();
         if (systemUser) {
-          const allUserProfilePath = await execute(
-            'wslpath "$(wslvar ALLUSERSPROFILE)"',
-            { trim: true }
-          );
+          const allUserProfilePath = (
+            await execute('wslpath "$(wslvar ALLUSERSPROFILE)"', { trim: true })
+              .promise
+          ).unwrap();
           return path.join(allUserProfilePath, systemUserSubPath);
         } else {
-          return await execute('wslpath "$(wslvar USERPROFILE)"', {
-            trim: true,
-          });
+          return (
+            await execute('wslpath "$(wslvar USERPROFILE)"', {
+              trim: true,
+            }).promise
+          ).unwrap();
         }
       } else if (systemUser) {
         const profilePath = tryGetEnv("ALLUSERSPROFILE");
