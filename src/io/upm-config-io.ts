@@ -12,6 +12,7 @@ import { assertIsError } from "../utils/error-type-guards";
 import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetHomePath } from "./home";
+import { tryParseToml } from "../utils/data-parsing";
 
 const configFileName = ".upmconfig.toml";
 
@@ -87,7 +88,7 @@ export const tryLoadUpmConfig = async (
     //  immediately caught, we should make this function return a result
     //  and use mapping.
     const content = (await tryReadTextFromFile(configPath).promise).unwrap();
-    const config = TOML.parse(content);
+    const config = tryParseToml(content).unwrap();
 
     // NOTE: We assume correct format
     return config as UPMConfig;
