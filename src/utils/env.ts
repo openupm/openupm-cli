@@ -119,7 +119,7 @@ export const parseEnv = async function (
   const wsl = determineWsl(options);
 
   // registries
-  const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).map(
+  const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).andThen(
     tryLoadUpmConfig
   ).promise;
   if (upmConfigResult.isErr()) return upmConfigResult;

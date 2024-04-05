@@ -2,17 +2,21 @@ import path from "path";
 import TOML from "@iarna/toml";
 import log from "../cli/logger";
 import isWsl from "is-wsl";
-import execute, { ChildProcessError } from "../utils/process";
-import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
-import { RegistryUrl } from "../domain/registry-url";
-import { CustomError } from "ts-custom-error";
-import { IOError } from "../common-errors";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { assertIsError } from "../utils/error-type-guards";
-import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
-import { tryGetEnv } from "../utils/env-util";
-import { tryGetHomePath } from "./home";
-import { tryParseToml } from "../utils/data-parsing";
+import execute, {ChildProcessError} from "../utils/process";
+import {addAuth, UpmAuth, UPMConfig} from "../domain/upm-config";
+import {RegistryUrl} from "../domain/registry-url";
+import {CustomError} from "ts-custom-error";
+import {IOError} from "../common-errors";
+import {AsyncResult, Err, Ok} from "ts-results-es";
+import {assertIsError} from "../utils/error-type-guards";
+import {
+  NotFoundError,
+  tryReadTextFromFile,
+  tryWriteTextToFile,
+} from "./file-io";
+import {tryGetEnv} from "../utils/env-util";
+import {tryGetHomePath} from "./home";
+import {TomlParseError, tryParseToml} from "../utils/data-parsing";
 
 const configFileName = ".upmconfig.toml";
 
@@ -36,6 +40,8 @@ export type GetUpmConfigDirError =
   | NoWslError
   | RequiredEnvMissingError
   | ChildProcessError;
+
+export type UpmConfigLoadError = TomlParseError;
 
 /**
  * Gets the path to directory in which the upm config is stored.
@@ -78,23 +84,20 @@ export const tryGetUpmConfigDir = (
  * @param configDir The directory from which to load the config.
  * @returns The config or null if not found.
  */
-export const tryLoadUpmConfig = async (
+export const tryLoadUpmConfig = (
   configDir: string
-): Promise<UPMConfig | null> => {
+): AsyncResult<UPMConfig | null, UpmConfigLoadError> => {
   const configPath = path.join(configDir, configFileName);
-  try {
-    // TODO:
-    //  Instead of unwrapping here and risking a throw that is then
-    //  immediately caught, we should make this function return a result
-    //  and use mapping.
-    const content = (await tryReadTextFromFile(configPath).promise).unwrap();
-    const config = tryParseToml(content).unwrap();
 
-    // NOTE: We assume correct format
-    return config as UPMConfig;
-  } catch {
-    return null;
-  }
+  return (
+    tryReadTextFromFile(configPath)
+      .andThen(tryParseToml)
+      // TODO: Actually validate
+      .map<UPMConfig | null>((toml) => toml as UPMConfig)
+      .orElse((error) =>
+        error instanceof NotFoundError ? Ok(null) : Err(error)
+      )
+  );
 };
 
 /**
@@ -120,7 +123,7 @@ export const tryStoreUpmAuth = function (
   registry: RegistryUrl,
   auth: UpmAuth
 ): AsyncResult<void, IOError> {
-  return new AsyncResult(Result.wrapAsync(() => tryLoadUpmConfig(configDir)))
+  return tryLoadUpmConfig(configDir)
     .mapErr((error) => {
       assertIsError(error);
       return error;
