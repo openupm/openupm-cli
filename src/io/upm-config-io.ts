@@ -2,12 +2,12 @@ import path from "path";
 import TOML from "@iarna/toml";
 import log from "../cli/logger";
 import isWsl from "is-wsl";
-import execute from "../utils/process";
+import execute, { ChildProcessError } from "../utils/process";
 import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
-import { AsyncResult, Result } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { assertIsError } from "../utils/error-type-guards";
 import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
@@ -30,7 +30,10 @@ export class RequiredEnvMissingError extends CustomError {
   }
 }
 
-export type GetUpmConfigDirError = NoWslError | RequiredEnvMissingError;
+export type GetUpmConfigDirError =
+  | NoWslError
+  | RequiredEnvMissingError
+  | ChildProcessError;
 
 /**
  * Gets the path to directory in which the upm config is stored.
@@ -41,37 +44,33 @@ export const tryGetUpmConfigDir = (
   wsl: boolean,
   systemUser: boolean
 ): AsyncResult<string, GetUpmConfigDirError> => {
-  return new AsyncResult(
-    Result.wrapAsync(async () => {
-      const systemUserSubPath = "Unity/config/ServiceAccounts";
-      if (wsl) {
-        if (!isWsl) throw new NoWslError();
-        if (systemUser) {
-          const allUserProfilePath = (
-            await execute('wslpath "$(wslvar ALLUSERSPROFILE)"', { trim: true })
-              .promise
-          ).unwrap();
-          return path.join(allUserProfilePath, systemUserSubPath);
-        } else {
-          return (
-            await execute('wslpath "$(wslvar USERPROFILE)"', {
-              trim: true,
-            }).promise
-          ).unwrap();
-        }
-      } else if (systemUser) {
-        const profilePath = tryGetEnv("ALLUSERSPROFILE");
-        if (profilePath === null)
-          throw new RequiredEnvMissingError("ALLUSERSPROFILE");
-        return path.join(profilePath, systemUserSubPath);
-      } else {
-        const dirName = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-        if (dirName === null)
-          throw new RequiredEnvMissingError("USERPROFILE", "HOME");
-        return dirName;
-      }
-    })
-  );
+  const systemUserSubPath = "Unity/config/ServiceAccounts";
+  if (wsl) {
+    if (!isWsl) return Err(new NoWslError()).toAsyncResult();
+    if (systemUser) {
+      return execute('wslpath "$(wslvar ALLUSERSPROFILE)"', {
+        trim: true,
+      }).map((it) => path.join(it, systemUserSubPath));
+    } else {
+      return execute('wslpath "$(wslvar USERPROFILE)"', {
+        trim: true,
+      });
+    }
+  } else if (systemUser) {
+    const profilePath = tryGetEnv("ALLUSERSPROFILE");
+    if (profilePath === null)
+      return Err(
+        new RequiredEnvMissingError("ALLUSERSPROFILE")
+      ).toAsyncResult();
+    return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
+  } else {
+    const dirName = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
+    if (dirName === null)
+      return Err(
+        new RequiredEnvMissingError("USERPROFILE", "HOME")
+      ).toAsyncResult();
+    return Ok(dirName).toAsyncResult();
+  }
 };
 
 /**
