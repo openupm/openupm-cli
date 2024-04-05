@@ -11,6 +11,7 @@ import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { assertIsError } from "../utils/error-type-guards";
 import { tryReadTextFromFile, tryWriteTextToFile } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
+import { tryGetHomePath } from "./home";
 
 const configFileName = ".upmconfig.toml";
 
@@ -47,30 +48,28 @@ export const tryGetUpmConfigDir = (
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (wsl) {
     if (!isWsl) return Err(new NoWslError()).toAsyncResult();
+
     if (systemUser) {
       return execute('wslpath "$(wslvar ALLUSERSPROFILE)"', {
         trim: true,
       }).map((it) => path.join(it, systemUserSubPath));
-    } else {
-      return execute('wslpath "$(wslvar USERPROFILE)"', {
-        trim: true,
-      });
     }
-  } else if (systemUser) {
+
+    return execute('wslpath "$(wslvar USERPROFILE)"', {
+      trim: true,
+    });
+  }
+
+  if (systemUser) {
     const profilePath = tryGetEnv("ALLUSERSPROFILE");
     if (profilePath === null)
       return Err(
         new RequiredEnvMissingError("ALLUSERSPROFILE")
       ).toAsyncResult();
     return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
-  } else {
-    const dirName = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-    if (dirName === null)
-      return Err(
-        new RequiredEnvMissingError("USERPROFILE", "HOME")
-      ).toAsyncResult();
-    return Ok(dirName).toAsyncResult();
   }
+
+  return tryGetHomePath().toAsyncResult();
 };
 
 /**
