@@ -12,37 +12,28 @@ import {
 } from "../src/io/npmrc-io";
 import { IOError } from "../src/common-errors";
 import path from "path";
-import { tryGetEnv } from "../src/utils/env-util";
+import { tryGetHomePath } from "../src/io/home";
+import { RequiredEnvMissingError } from "../src/io/upm-config-io";
 
 jest.mock("../src/io/file-io");
-jest.mock("../src/utils/env-util");
+jest.mock("../src/io/home");
 
 describe("npmrc-io", () => {
   describe("get path", () => {
-    it("should be USERPROFILE if defined", () => {
+    it("should be [Home]/.npmrc", () => {
       const home = path.join(path.sep, "user", "dir");
       const expected = path.join(home, ".npmrc");
-      jest
-        .mocked(tryGetEnv)
-        .mockImplementation((key) => (key === "USERPROFILE" ? home : null));
+      jest.mocked(tryGetHomePath).mockReturnValue(Ok(home));
 
       const result = tryGetNpmrcPath();
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
-    it("should be HOME if USERPROFILE is not defined", () => {
-      const home = path.join(path.sep, "user", "dir");
-      const expected = path.join(home, ".npmrc");
+
+    it("should fail if home could not be determined", () => {
       jest
-        .mocked(tryGetEnv)
-        .mockImplementation((key) => (key === "HOME" ? home : null));
-
-      const result = tryGetNpmrcPath();
-
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
-    });
-    it("should fail if HOME and USERPROFILE are not defined", () => {
-      jest.mocked(tryGetEnv).mockReturnValue(null);
+        .mocked(tryGetHomePath)
+        .mockReturnValue(Err(new RequiredEnvMissingError()));
 
       const result = tryGetNpmrcPath();
 

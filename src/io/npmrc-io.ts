@@ -11,6 +11,7 @@ import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetEnv } from "../utils/env-util";
 import { IOError } from "../common-errors";
+import { tryGetHomePath } from "./home";
 
 /**
  * Error that might occur when loading a npmrc.
@@ -26,10 +27,7 @@ export type NpmrcSaveError = FileWriteError;
  * Tries to get the npmrc path based on env.
  */
 export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
-  const dirPath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-  if (dirPath === null)
-    return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
-  return Ok(path.join(dirPath, ".npmrc"));
+  return tryGetHomePath().map((homePath) => path.join(homePath, ".npmrc"));
 }
 
 /**
