@@ -1,4 +1,5 @@
 import { CustomError } from "ts-custom-error";
+import { EditorVersion } from "./domain/editor-version";
 
 /**
  * Generic IO error for when interacting with the file-system failed.
@@ -56,5 +57,19 @@ export class FileParseError extends CustomError {
     readonly cause?: Error
   ) {
     super("A file could not be parsed into a specific target type.");
+  }
+}
+
+/**
+ * Error for when OpenUPM was used with an editor-version that is not supported.
+ */
+export class EditorVersionNotSupportedError extends CustomError {
+  constructor(
+    /**
+     * The unsupported version.
+     */
+    public readonly version: EditorVersion
+  ) {
+    super();
   }
 }
