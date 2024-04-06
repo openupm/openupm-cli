@@ -3,14 +3,14 @@ import {
   tryGetUpmConfigDir,
   tryLoadUpmConfig,
 } from "../src/io/upm-config-io";
-import { tryGetHomePath } from "../src/io/home";
+import { tryGetHomePath } from "../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
 import { NotFoundError, tryReadTextFromFile } from "../src/io/file-io";
 import { IOError } from "../src/common-errors";
 import { tryParseToml } from "../src/utils/data-parsing";
 
 jest.mock("../src/io/file-io");
-jest.mock("../src/io/home");
+jest.mock("../src/io/special-paths");
 jest.mock("../src/utils/data-parsing");
 
 describe("upm-config-io", () => {

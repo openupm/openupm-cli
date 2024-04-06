@@ -12,11 +12,11 @@ import {
 } from "../src/io/npmrc-io";
 import { IOError } from "../src/common-errors";
 import path from "path";
-import { tryGetHomePath } from "../src/io/home";
+import { tryGetHomePath } from "../src/io/special-paths";
 import { RequiredEnvMissingError } from "../src/io/upm-config-io";
 
 jest.mock("../src/io/file-io");
-jest.mock("../src/io/home");
+jest.mock("../src/io/special-paths");
 
 describe("npmrc-io", () => {
   describe("get path", () => {
