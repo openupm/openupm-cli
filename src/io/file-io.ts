@@ -66,3 +66,27 @@ export function tryWriteTextToFile(
       return new IOError(error);
     });
 }
+
+/**
+ * Error which may occur when getting all directory names in a directory.
+ */
+export type GetDirectoriesError = NotFoundError | IOError;
+
+/**
+ * Attempts to get the names of all directories in a directory.
+ * @param directoryPath The directories name.
+ */
+export function tryGetDirectoriesIn(
+  directoryPath: string
+): AsyncResult<ReadonlyArray<string>, GetDirectoriesError> {
+  return new AsyncResult(
+    Result.wrapAsync(() => fs.readdir(directoryPath, { withFileTypes: true }))
+  )
+    .map((entries) => entries.filter((it) => it.isDirectory()))
+    .map((directories) => directories.map((it) => it.name))
+    .mapErr((error) => {
+      assertIsNodeError(error);
+      if (error.code === "ENOENT") return new NotFoundError(directoryPath);
+      return new IOError(error);
+    });
+}

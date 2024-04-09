@@ -15,7 +15,7 @@ import {
   tryWriteTextToFile,
 } from "./file-io";
 import {tryGetEnv} from "../utils/env-util";
-import {tryGetHomePath} from "./home";
+import {tryGetHomePath} from "./special-paths";
 import {TomlParseError, tryParseToml} from "../utils/data-parsing";
 
 const configFileName = ".upmconfig.toml";

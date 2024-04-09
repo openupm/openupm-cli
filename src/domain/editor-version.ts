@@ -20,7 +20,7 @@ type PatchVersion = RegularVersion & {
   readonly patch: number;
 };
 
-type ReleaseVersion = PatchVersion & {
+export type ReleaseVersion = PatchVersion & {
   /**
    * A flag describing a specific release.
    */
@@ -148,3 +148,41 @@ export const tryParseEditorVersion = function (
     locBuild: parseInt(groups.locBuild),
   } satisfies LocalVersion;
 };
+
+/**
+ * Constructs a regular editor-version.
+ */
+export function makeEditorVersion(major: number, minor: number): RegularVersion;
+/**
+ * Constructs a release editor-version.
+ */
+export function makeEditorVersion(
+  major: number,
+  minor: number,
+  patch: number,
+  flag: ReleaseFlag,
+  build: number
+): ReleaseVersion;
+export function makeEditorVersion(
+  major: number,
+  minor: number,
+  patch?: number,
+  flag?: ReleaseFlag,
+  build?: number
+) {
+  return { major, minor, patch, flag, build };
+}
+
+/**
+ * Converts an editor-version object to the corresponding string.
+ * @param version The version to convert.
+ */
+export function stringifyEditorVersion(version: EditorVersion): string {
+  if (isLocal(version))
+    return `${version.major}.${version.minor}.${version.patch}${version.flag}${version.build}${version.loc}${version.locBuild}`;
+  else if (isRelease(version))
+    return `${version.major}.${version.minor}.${version.patch}${version.flag}${version.build}`;
+  else if (isPatch(version))
+    return `${version.major}.${version.minor}.${version.patch}`;
+  return `${version.major}.${version.minor}`;
+}

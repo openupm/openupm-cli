@@ -11,7 +11,7 @@ import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetEnv } from "../utils/env-util";
 import { IOError } from "../common-errors";
-import { tryGetHomePath } from "./home";
+import { tryGetHomePath } from "./special-paths";
 
 /**
  * Error that might occur when loading a npmrc.
