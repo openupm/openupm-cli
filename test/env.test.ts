@@ -14,6 +14,7 @@ import { exampleRegistryUrl } from "./mock-registry";
 import fs from "fs";
 import { NotFoundError } from "../src/io/file-io";
 import { FileParseError, IOError } from "../src/common-errors";
+import { makeEditorVersion } from "../src/domain/editor-version";
 
 jest.mock("../src/io/project-version-io");
 jest.mock("../src/io/upm-config-io");
@@ -439,14 +440,27 @@ describe("env", () => {
     });
   });
 
-  describe("project-version", () => {
-    it("should use version from ProjectVersion.txt", async () => {
+  describe("editor-version", () => {
+    it("should be parsed object for valid versions", async () => {
       const result = await parseEnv({
         _global: {},
       });
 
       expect(result).toBeOk((env: Env) =>
-        expect(env.editorVersion).toEqual(testProjectVersion)
+        expect(env.editorVersion).toEqual(makeEditorVersion(2021, 3))
+      );
+    });
+
+    it("should be original string for invalid versions", async () => {
+      const expected = "Bad version";
+      jest.mocked(tryLoadProjectVersion).mockResolvedValue(Ok(expected));
+
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.editorVersion).toEqual(expected)
       );
     });
 

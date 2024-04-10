@@ -10,6 +10,7 @@ import {
 import { EnvParseError, parseEnv } from "../utils/env";
 import {
   compareEditorVersion,
+  stringifyEditorVersion,
   tryParseEditorVersion,
 } from "../domain/editor-version";
 import { makeNpmClient } from "../npm-client";
@@ -156,47 +157,44 @@ export const add = async function (
       const targetEditorVersion = targetEditorVersionFor(packumentVersion);
       // verify editor version
       if (targetEditorVersion !== null) {
-        if (env.editorVersion) {
-          const editorVersionResult = tryParseEditorVersion(env.editorVersion);
-          const requiredEditorVersionResult =
-            tryParseEditorVersion(targetEditorVersion);
-          if (!editorVersionResult) {
-            log.warn(
-              "editor.version",
-              `${env.editorVersion} is unknown, the editor version check is disabled`
+        const requiredEditorVersionResult =
+          tryParseEditorVersion(targetEditorVersion);
+        if (typeof env.editorVersion === "string") {
+          log.warn(
+            "editor.version",
+            `${env.editorVersion} is unknown, the editor version check is disabled`
+          );
+        }
+        if (!requiredEditorVersionResult) {
+          log.warn("package.unity", `${targetEditorVersion} is not valid`);
+          if (!options.force) {
+            log.notice(
+              "suggest",
+              "contact the package author to fix the issue, or run with option -f to ignore the warning"
+            );
+            return Err(
+              new InvalidPackumentDataError("Editor-version not valid.")
             );
           }
-          if (!requiredEditorVersionResult) {
-            log.warn("package.unity", `${targetEditorVersion} is not valid`);
-            if (!options.force) {
-              log.notice(
-                "suggest",
-                "contact the package author to fix the issue, or run with option -f to ignore the warning"
-              );
-              return Err(
-                new InvalidPackumentDataError("Editor-version not valid.")
-              );
-            }
-          }
-          if (
-            editorVersionResult &&
-            requiredEditorVersionResult &&
-            compareEditorVersion(
-              editorVersionResult,
-              requiredEditorVersionResult
-            ) < 0
-          ) {
-            log.warn(
-              "editor.version",
-              `requires ${targetEditorVersion} but found ${env.editorVersion}`
+        }
+        if (
+          typeof env.editorVersion !== "string" &&
+          requiredEditorVersionResult &&
+          compareEditorVersion(env.editorVersion, requiredEditorVersionResult) <
+            0
+        ) {
+          log.warn(
+            "editor.version",
+            `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
+              env.editorVersion
+            )}`
+          );
+          if (!options.force) {
+            log.notice(
+              "suggest",
+              `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
             );
-            if (!options.force) {
-              log.notice(
-                "suggest",
-                `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
-              );
-              return Err(new EditorIncompatibleError());
-            }
+            return Err(new EditorIncompatibleError());
           }
         }
       }

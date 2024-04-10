@@ -19,6 +19,7 @@ import {
 } from "../io/project-version-io";
 import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "./env-util";
+import { EditorVersion, tryParseEditorVersion } from "../domain/editor-version";
 
 export type Env = Readonly<{
   cwd: string;
@@ -27,7 +28,11 @@ export type Env = Readonly<{
   upstream: boolean;
   upstreamRegistry: Registry;
   registry: Registry;
-  editorVersion: string | null;
+  /**
+   * The current project's editor version. Either a parsed {@link EditorVersion}
+   * object if parsing was successful or the unparsed string.
+   */
+  editorVersion: EditorVersion | string;
 }>;
 
 export type EnvParseError =
@@ -151,7 +156,9 @@ export const parseEnv = async function (
       );
     return projectVersionLoadResult;
   }
-  const editorVersion = projectVersionLoadResult.value;
+  const editorVersion =
+    tryParseEditorVersion(projectVersionLoadResult.value) ??
+    projectVersionLoadResult.value;
 
   return Ok({
     cwd,
