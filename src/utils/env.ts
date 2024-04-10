@@ -20,7 +20,6 @@ import {
 import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "./env-util";
 import {
-  EditorVersion,
   isPatch,
   PatchVersion,
   tryParseEditorVersion,
