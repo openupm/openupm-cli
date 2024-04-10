@@ -35,7 +35,7 @@ const testUpmConfig: UPMConfig = {
   npmAuth: { [exampleRegistryUrl]: testUpmAuth },
 };
 
-const testProjectVersion = "2021.3";
+const testProjectVersion = "2021.3.1f1";
 
 describe("env", () => {
   beforeEach(() => {
@@ -447,7 +447,7 @@ describe("env", () => {
       });
 
       expect(result).toBeOk((env: Env) =>
-        expect(env.editorVersion).toEqual(makeEditorVersion(2021, 3))
+        expect(env.editorVersion).toEqual(makeEditorVersion(2021, 3, 1, "f", 1))
       );
     });
 
