@@ -27,7 +27,7 @@ export type Env = Readonly<{
   upstream: boolean;
   upstreamRegistry: Registry;
   registry: Registry;
-  editorVersion: string | null;
+  editorVersion: string;
 }>;
 
 export type EnvParseError =
