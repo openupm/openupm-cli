@@ -14,6 +14,7 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
  * Error for when authentication failed.
  */
 export class AuthenticationError extends CustomError {
+  private readonly _class = "AuthenticationError";
   constructor(
     /**
      * The http-response code returned by the server.

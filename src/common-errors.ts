@@ -5,6 +5,7 @@ import { EditorVersion } from "./domain/editor-version";
  * Generic IO error for when interacting with the file-system failed.
  */
 export class IOError extends CustomError {
+  private readonly _class = "CustomError";
   constructor(
     /**
      * The actual error that caused the failure.
@@ -64,6 +65,7 @@ export class FileParseError extends CustomError {
  * Error for when OpenUPM was used with an editor-version that is not supported.
  */
 export class EditorVersionNotSupportedError extends CustomError {
+  private readonly _class = "EditorVersionNotSupportedError";
   constructor(
     /**
      * The unsupported version.

@@ -10,6 +10,7 @@ import path from "path";
  * Error for when a file or directory did not exist.
  */
 export class NotFoundError extends CustomError {
+  private readonly _class = "NotFoundError";
   constructor(
     /**
      * The path to the missing file.

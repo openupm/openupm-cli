@@ -16,6 +16,7 @@ import { EditorVersionNotSupportedError } from "../common-errors";
  * Error for when a specific OS does not support a specific editor-version.
  */
 export class VersionNotSupportedOnOsError extends CustomError {
+  private readonly _class = "VersionNotSupportedOnOsError";
   constructor(
     /**
      * The version that is not supported.
@@ -34,6 +35,7 @@ export class VersionNotSupportedOnOsError extends CustomError {
  * Error for when Unity does not support an OS.
  */
 export class OSNotSupportedError extends CustomError {
+  private readonly _class = "OSNotSupportedError";
   constructor(
     /**
      * Name of the unsupported OS.
