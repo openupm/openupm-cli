@@ -44,20 +44,22 @@ import { logManifestLoadError, logManifestSaveError } from "../error-logging";
 import { targetEditorVersionFor } from "../domain/packument";
 
 export class InvalidPackumentDataError extends CustomError {
+  private readonly _class = "InvalidPackumentDataError";
   constructor(readonly issue: string) {
     super("A packument object was malformed.");
   }
 }
 
 export class EditorIncompatibleError extends CustomError {
+  private readonly _class = "EditorIncompatibleError";
   constructor() {
     super(
       "A packuments target editor-version was not compatible with the installed editor-version."
     );
   }
 }
-
 export class UnresolvedDependencyError extends CustomError {
+  private readonly _class = "UnresolvedDependencyError";
   constructor() {
     super("A packuments dependency could not be resolved.");
   }

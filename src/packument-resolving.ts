@@ -47,6 +47,7 @@ interface ResolvedPackument {
  * had no versions.
  */
 export class NoVersionsError extends CustomError {
+  private readonly _class = "NoVersionsError";
   constructor() {
     super("A packument contained no versions");
   }
@@ -57,6 +58,7 @@ export class NoVersionsError extends CustomError {
  * requested version did not exist.
  */
 export class VersionNotFoundError extends CustomError {
+  private readonly _class = "VersionNotFoundError";
   constructor(
     /**
      * The version that was requested.
