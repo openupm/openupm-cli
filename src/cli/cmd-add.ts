@@ -10,6 +10,7 @@ import {
 import { EnvParseError, parseEnv } from "../utils/env";
 import {
   compareEditorVersion,
+  stringifyEditorVersion,
   tryParseEditorVersion,
 } from "../domain/editor-version";
 import { makeNpmClient } from "../npm-client";
@@ -156,10 +157,9 @@ export const add = async function (
       const targetEditorVersion = targetEditorVersionFor(packumentVersion);
       // verify editor version
       if (targetEditorVersion !== null) {
-        const editorVersionResult = tryParseEditorVersion(env.editorVersion);
         const requiredEditorVersionResult =
           tryParseEditorVersion(targetEditorVersion);
-        if (!editorVersionResult) {
+        if (typeof env.editorVersion === "string") {
           log.warn(
             "editor.version",
             `${env.editorVersion} is unknown, the editor version check is disabled`
@@ -178,16 +178,16 @@ export const add = async function (
           }
         }
         if (
-          editorVersionResult &&
+          typeof env.editorVersion !== "string" &&
           requiredEditorVersionResult &&
-          compareEditorVersion(
-            editorVersionResult,
-            requiredEditorVersionResult
-          ) < 0
+          compareEditorVersion(env.editorVersion, requiredEditorVersionResult) <
+            0
         ) {
           log.warn(
             "editor.version",
-            `requires ${targetEditorVersion} but found ${env.editorVersion}`
+            `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
+              env.editorVersion
+            )}`
           );
           if (!options.force) {
             log.notice(
