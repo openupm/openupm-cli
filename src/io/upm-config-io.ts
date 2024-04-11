@@ -124,10 +124,6 @@ export const tryStoreUpmAuth = function (
   auth: UpmAuth
 ): AsyncResult<void, UpmAuthStoreError> {
   return tryLoadUpmConfig(configDir)
-    .mapErr((error) => {
-      assertIsError(error);
-      return error;
-    })
     .map((maybeConfig) => maybeConfig || {})
     .map((config) => addAuth(registry, auth, config))
     .andThen((config) => trySaveUpmConfig(config, configDir))
