@@ -91,6 +91,11 @@ export const tryLoadUpmConfig = (
 };
 
 /**
+ * Errors which may occur when saving a UPM-config file.
+ */
+export type UpmConfigSaveError = IOError;
+
+/**
  * Save the upm config.
  * @param config The config to save.
  * @param configDir The directory in which to save the config.
@@ -99,11 +104,16 @@ export const tryLoadUpmConfig = (
 export const trySaveUpmConfig = (
   config: UPMConfig,
   configDir: string
-): AsyncResult<string, IOError> => {
+): AsyncResult<string, UpmConfigSaveError> => {
   const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
   return tryWriteTextToFile(configPath, content).map(() => configPath);
 };
+
+/**
+ * Errors which may occur when storing an {@link UpmAuth} to the file-system.
+ */
+export type UpmAuthStoreError = UpmConfigLoadError | IOError;
 
 /**
  * Stores authentication information in the projects upm config.
@@ -112,7 +122,7 @@ export const tryStoreUpmAuth = function (
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
-): AsyncResult<void, IOError | Error> {
+): AsyncResult<void, UpmAuthStoreError> {
   return tryLoadUpmConfig(configDir)
     .mapErr((error) => {
       assertIsError(error);
