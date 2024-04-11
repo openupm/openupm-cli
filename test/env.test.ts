@@ -5,7 +5,6 @@ import log from "../src/cli/logger";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import {
-  NoWslError,
   tryGetUpmConfigDir,
   tryLoadUpmConfig,
 } from "../src/io/upm-config-io";
@@ -15,6 +14,7 @@ import fs from "fs";
 import { NotFoundError } from "../src/io/file-io";
 import { FileParseError, IOError } from "../src/common-errors";
 import { makeEditorVersion } from "../src/domain/editor-version";
+import {NoWslError} from "../src/io/wls";
 
 jest.mock("../src/io/project-version-io");
 jest.mock("../src/io/upm-config-io");

@@ -1,8 +1,6 @@
 import path from "path";
 import TOML from "@iarna/toml";
 import log from "../cli/logger";
-import isWsl from "is-wsl";
-import execute, { ChildProcessError } from "../utils/process";
 import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
@@ -17,15 +15,10 @@ import {
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetHomePath } from "./special-paths";
 import { TomlParseError, tryParseToml } from "../utils/data-parsing";
+import { tryGetWslPath, WslPathError } from "./wls";
+import { ChildProcessError } from "../utils/process";
 
 const configFileName = ".upmconfig.toml";
-
-export class NoWslError extends CustomError {
-  private readonly _class = "NoWslError";
-  constructor() {
-    super("No WSL detected.");
-  }
-}
 
 export class RequiredEnvMissingError extends CustomError {
   private readonly _class = "RequiredEnvMissingError";
@@ -39,7 +32,7 @@ export class RequiredEnvMissingError extends CustomError {
 }
 
 export type GetUpmConfigDirError =
-  | NoWslError
+  | WslPathError
   | RequiredEnvMissingError
   | ChildProcessError;
 
@@ -56,17 +49,12 @@ export const tryGetUpmConfigDir = (
 ): AsyncResult<string, GetUpmConfigDirError> => {
   const systemUserSubPath = "Unity/config/ServiceAccounts";
   if (wsl) {
-    if (!isWsl) return Err(new NoWslError()).toAsyncResult();
+    if (systemUser)
+      return tryGetWslPath("ALLUSERSPROFILE").map((it) =>
+        path.join(it, systemUserSubPath)
+      );
 
-    if (systemUser) {
-      return execute('wslpath "$(wslvar ALLUSERSPROFILE)"', {
-        trim: true,
-      }).map((it) => path.join(it, systemUserSubPath));
-    }
-
-    return execute('wslpath "$(wslvar USERPROFILE)"', {
-      trim: true,
-    });
+    return tryGetWslPath("USERPROFILE");
   }
 
   if (systemUser) {
