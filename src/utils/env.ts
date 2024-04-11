@@ -20,8 +20,8 @@ import {
 import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "./env-util";
 import {
-  isPatch,
-  PatchVersion,
+  isRelease,
+  ReleaseVersion,
   tryParseEditorVersion,
 } from "../domain/editor-version";
 
@@ -36,7 +36,7 @@ export type Env = Readonly<{
    * The current project's editor version. Either a parsed {@link EditorVersion}
    * object if parsing was successful or the unparsed string.
    */
-  editorVersion: PatchVersion | string;
+  editorVersion: ReleaseVersion | string;
 }>;
 
 export type EnvParseError =
@@ -163,7 +163,7 @@ export const parseEnv = async function (
   const unparsedEditorVersion = projectVersionLoadResult.value;
   const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
   const editorVersion =
-    parsedEditorVersion !== null && isPatch(parsedEditorVersion)
+    parsedEditorVersion !== null && isRelease(parsedEditorVersion)
       ? parsedEditorVersion
       : unparsedEditorVersion;
 

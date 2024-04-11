@@ -60,11 +60,11 @@ function releaseValue(flag: ReleaseFlag): number {
   return 0;
 }
 
-export function isPatch(version: EditorVersion): version is PatchVersion {
+function isPatch(version: EditorVersion): version is PatchVersion {
   return "patch" in version;
 }
 
-function isRelease(version: EditorVersion): version is ReleaseVersion {
+export function isRelease(version: EditorVersion): version is ReleaseVersion {
   return isPatch(version) && "flag" in version;
 }
 
