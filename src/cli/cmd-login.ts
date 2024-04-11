@@ -4,6 +4,7 @@ import {
   GetUpmConfigDirError,
   tryGetUpmConfigDir,
   tryStoreUpmAuth,
+  UpmAuthStoreError,
 } from "../io/upm-config-io";
 import { EnvParseError, parseEnv } from "../utils/env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
@@ -16,7 +17,6 @@ import {
 } from "./prompts";
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
-import { IOError } from "../common-errors";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
 import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update-service";
 
@@ -26,10 +26,10 @@ import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update-service"
 export type LoginError =
   | EnvParseError
   | GetUpmConfigDirError
-  | IOError
   | AuthenticationError
   | NpmrcLoadError
-  | NpmrcSaveError;
+  | NpmrcSaveError
+  | UpmAuthStoreError;
 
 /**
  * Options for logging in a user. These come from the CLI.
