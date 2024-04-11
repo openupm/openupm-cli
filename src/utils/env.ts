@@ -4,6 +4,7 @@ import {
   GetUpmConfigDirError,
   tryGetUpmConfigDir,
   tryLoadUpmConfig,
+  UpmConfigLoadError,
 } from "../io/upm-config-io";
 import path from "path";
 import fs from "fs";
@@ -42,6 +43,7 @@ export type Env = Readonly<{
 export type EnvParseError =
   | NotFoundError
   | GetUpmConfigDirError
+  | UpmConfigLoadError
   | ProjectVersionLoadError;
 
 function determineCwd(options: CmdOptions): Result<string, NotFoundError> {

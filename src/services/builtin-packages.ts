@@ -14,6 +14,7 @@ import { IOError } from "../common-errors";
  * Error for when an editor-version is not installed.
  */
 export class EditorNotInstalledError extends CustomError {
+  private readonly _class = "EditorNotInstalledError";
   constructor(
     /**
      * The version that is not installed.
