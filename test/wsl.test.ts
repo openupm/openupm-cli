@@ -1,6 +1,7 @@
 import * as processModule from "../src/utils/process";
 import { tryGetWslPath } from "../src/io/wls";
 import { Err, Ok } from "ts-results-es";
+import { ChildProcessError } from "../src/utils/process";
 
 jest.mock("is-wsl", () => ({
   __esModule: true,
@@ -24,7 +25,9 @@ describe("wsl", () => {
       jest
         .spyOn(processModule, "default")
         .mockReturnValue(
-          Err({ name: "Error", message: "It failed" }).toAsyncResult()
+          Err(
+            new ChildProcessError({ name: "Error", message: "It failed" })
+          ).toAsyncResult()
         );
 
       const result = await tryGetWslPath("SOMEVAR").promise;
