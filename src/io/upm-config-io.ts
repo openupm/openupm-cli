@@ -6,7 +6,6 @@ import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
 import { IOError } from "../common-errors";
 import { AsyncResult, Err, Ok } from "ts-results-es";
-import { assertIsError } from "../utils/error-type-guards";
 import {
   NotFoundError,
   tryReadTextFromFile,

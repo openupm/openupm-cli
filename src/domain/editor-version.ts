@@ -13,7 +13,7 @@ type RegularVersion = {
   readonly minor: number;
 };
 
-type PatchVersion = RegularVersion & {
+export type PatchVersion = RegularVersion & {
   /**
    * A patch.
    */
@@ -64,7 +64,7 @@ function isPatch(version: EditorVersion): version is PatchVersion {
   return "patch" in version;
 }
 
-function isRelease(version: EditorVersion): version is ReleaseVersion {
+export function isRelease(version: EditorVersion): version is ReleaseVersion {
   return isPatch(version) && "flag" in version;
 }
 

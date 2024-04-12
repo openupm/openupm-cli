@@ -20,7 +20,11 @@ import {
 } from "../io/project-version-io";
 import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "./env-util";
-import { EditorVersion, tryParseEditorVersion } from "../domain/editor-version";
+import {
+  isRelease,
+  ReleaseVersion,
+  tryParseEditorVersion,
+} from "../domain/editor-version";
 
 export type Env = Readonly<{
   cwd: string;
@@ -33,7 +37,7 @@ export type Env = Readonly<{
    * The current project's editor version. Either a parsed {@link EditorVersion}
    * object if parsing was successful or the unparsed string.
    */
-  editorVersion: EditorVersion | string;
+  editorVersion: ReleaseVersion | string;
 }>;
 
 export type EnvParseError =
@@ -158,9 +162,12 @@ export const parseEnv = async function (
       );
     return projectVersionLoadResult;
   }
+  const unparsedEditorVersion = projectVersionLoadResult.value;
+  const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
   const editorVersion =
-    tryParseEditorVersion(projectVersionLoadResult.value) ??
-    projectVersionLoadResult.value;
+    parsedEditorVersion !== null && isRelease(parsedEditorVersion)
+      ? parsedEditorVersion
+      : unparsedEditorVersion;
 
   return Ok({
     cwd,

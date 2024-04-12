@@ -12,7 +12,10 @@ import {
   PackageReference,
 } from "../domain/package-reference";
 import { removeScope } from "../domain/scoped-registry";
-import { mapScopedRegistry, removeDependency } from "../domain/project-manifest";
+import {
+  mapScopedRegistry,
+  removeDependency,
+} from "../domain/project-manifest";
 import { CmdOptions } from "./options";
 import { Err, Ok, Result } from "ts-results-es";
 

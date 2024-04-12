@@ -35,7 +35,7 @@ const testUpmConfig: UPMConfig = {
   npmAuth: { [exampleRegistryUrl]: testUpmAuth },
 };
 
-const testProjectVersion = "2021.3";
+const testProjectVersion = "2021.3.1f1";
 
 describe("env", () => {
   beforeEach(() => {
@@ -441,17 +441,30 @@ describe("env", () => {
   });
 
   describe("editor-version", () => {
-    it("should be parsed object for valid versions", async () => {
+    it("should be parsed object for valid release versions", async () => {
       const result = await parseEnv({
         _global: {},
       });
 
       expect(result).toBeOk((env: Env) =>
-        expect(env.editorVersion).toEqual(makeEditorVersion(2021, 3))
+        expect(env.editorVersion).toEqual(makeEditorVersion(2021, 3, 1, "f", 1))
       );
     });
 
-    it("should be original string for invalid versions", async () => {
+    it("should be original string for non-release versions", async () => {
+      const expected = "2022.3";
+      jest.mocked(tryLoadProjectVersion).mockResolvedValue(Ok(expected));
+
+      const result = await parseEnv({
+        _global: {},
+      });
+
+      expect(result).toBeOk((env: Env) =>
+        expect(env.editorVersion).toEqual(expected)
+      );
+    });
+
+    it("should be original string for non-version string", async () => {
       const expected = "Bad version";
       jest.mocked(tryLoadProjectVersion).mockResolvedValue(Ok(expected));
 

@@ -9,7 +9,6 @@ import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
-import { tryGetEnv } from "../utils/env-util";
 import { IOError } from "../common-errors";
 import { tryGetHomePath } from "./special-paths";
 
