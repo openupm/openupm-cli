@@ -1,4 +1,3 @@
-import { Stream } from "./mock-console";
 import { DomainName } from "../src/domain/domain-name";
 import { SemanticVersion } from "../src/domain/semantic-version";
 import { PackageUrl } from "../src/domain/package-url";
