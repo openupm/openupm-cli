@@ -18,7 +18,7 @@ declare global {
 
       toBeOk<T>(valueAsserter?: (value: T) => void): R;
 
-      toBeError(errorAsserter?: (error: Error) => void): R;
+      toBeError<T>(errorAsserter?: (error: T) => void): R;
 
       // Log
 
