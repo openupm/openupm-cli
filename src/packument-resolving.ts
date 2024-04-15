@@ -1,5 +1,4 @@
 import { VersionReference } from "./domain/package-reference";
-import { NpmClient, Registry } from "./npm-client";
 import { DomainName } from "./domain/domain-name";
 import { SemanticVersion } from "./domain/semantic-version";
 import {
@@ -15,6 +14,8 @@ import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "./common-errors";
+import { FetchPackumentService } from "./services/fetch-packument";
+import { Registry } from "./domain/registry";
 
 /**
  * A version-reference that is resolvable.
@@ -119,19 +120,19 @@ export function tryResolveFromPackument(
 
 /**
  * Attempts to resolve a packument from a specific registry.
- * @param npmClient An npm client to interact with the registry.
+ * @param fetchService The packument fetch service to use for this operation.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
 export function tryResolve(
-  npmClient: NpmClient,
+  fetchService: FetchPackumentService,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
 ): AsyncResult<ResolvedPackument, PackumentResolveError | HttpErrorBase> {
-  return npmClient
-    .tryFetchPackument(source, packageName)
+  return fetchService
+    .tryFetchByName(source, packageName)
     .andThen((maybePackument) => {
       if (maybePackument === null) return Err(new PackumentNotFoundError());
       return Ok(maybePackument);

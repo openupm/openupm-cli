@@ -7,7 +7,7 @@ import {
 } from "../src/io/file-io";
 import { IOError } from "../src/common-errors";
 import fse from "fs-extra";
-import { Dir, Dirent } from "node:fs";
+import { Dirent } from "node:fs";
 
 function makeNodeError(code: string): NodeJS.ErrnoException {
   const error = new Error() as NodeJS.ErrnoException;

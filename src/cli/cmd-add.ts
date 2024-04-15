@@ -13,7 +13,6 @@ import {
   stringifyEditorVersion,
   tryParseEditorVersion,
 } from "../domain/editor-version";
-import { makeNpmClient } from "../npm-client";
 import { DomainName } from "../domain/domain-name";
 import {
   makePackageReference,
@@ -43,6 +42,7 @@ import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { logManifestLoadError, logManifestSaveError } from "../error-logging";
 import { targetEditorVersionFor } from "../domain/packument";
+import { makePackumentFetchService } from "../services/fetch-packument";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -94,7 +94,7 @@ export const add = async function (
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
-  const client = makeNpmClient();
+  const fetchService = makePackumentFetchService();
 
   const makeEmptyScopedRegistryFor = (registryUrl: RegistryUrl) => {
     const name = url.parse(registryUrl).hostname;
@@ -116,14 +116,14 @@ export const add = async function (
     let versionToAdd = requestedVersion;
     if (requestedVersion === undefined || !isPackageUrl(requestedVersion)) {
       let resolveResult = await tryResolve(
-        client,
+        fetchService,
         name,
         requestedVersion,
         env.registry
       ).promise;
       if (resolveResult.isErr() && env.upstream) {
         resolveResult = await tryResolve(
-          client,
+          fetchService,
           name,
           requestedVersion,
           env.upstreamRegistry
@@ -205,7 +205,7 @@ export const add = async function (
           name,
           requestedVersion,
           true,
-          client
+          fetchService
         );
         // add depsValid to pkgsInScope.
         depsValid

@@ -1,8 +1,8 @@
 import * as projectManifestIoModule from "../src/io/project-manifest-io";
+import { manifestPathFor } from "../src/io/project-manifest-io";
 import { UnityProjectManifest } from "../src/domain/project-manifest";
 import { Err, Ok } from "ts-results-es";
 import { NotFoundError } from "../src/io/file-io";
-import { manifestPathFor } from "../src/io/project-manifest-io";
 
 /**
  * Mocks results for calls to {@link tryLoadProjectManifest}.

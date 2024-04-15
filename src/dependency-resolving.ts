@@ -14,8 +14,9 @@ import {
 import { unityRegistryUrl } from "./domain/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import assert from "assert";
-import { NpmClient, Registry } from "./npm-client";
 import { PackumentNotFoundError } from "./common-errors";
+import { FetchPackumentService } from "./services/fetch-packument";
+import { Registry } from "./domain/registry";
 
 export type DependencyBase = {
   /**
@@ -65,7 +66,7 @@ type NameVersionPair = Readonly<{
  * @param name The name of the package.
  * @param version The version for which to search dependencies.
  * @param deep Whether to search for all dependencies.
- * @param client The client to use for communicating with the registries.
+ * @param fetchService The fetch-service to use for this operation.
  */
 export const fetchPackageDependencies = async function (
   registry: Registry,
@@ -73,7 +74,7 @@ export const fetchPackageDependencies = async function (
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean,
-  client: NpmClient
+  fetchService: FetchPackumentService
 ): Promise<[ValidDependency[], InvalidDependency[]]> {
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];
@@ -101,7 +102,8 @@ export const fetchPackageDependencies = async function (
     if (cacheResult.isOk()) return cacheResult;
 
     // Then registry
-    return await tryResolve(client, packumentName, version, registry).promise;
+    return await tryResolve(fetchService, packumentName, version, registry)
+      .promise;
   }
 
   while (pendingList.length > 0) {

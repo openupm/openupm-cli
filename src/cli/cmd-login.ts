@@ -1,4 +1,7 @@
-import { AuthenticationError, makeNpmClient } from "../npm-client";
+import {
+  AuthenticationError,
+  makeAddUserService,
+} from "../services/add-user";
 import log from "./logger";
 import {
   GetUpmConfigDirError,
@@ -18,7 +21,7 @@ import {
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
-import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update-service";
+import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update";
 
 /**
  * Errors which may occur when logging in.
@@ -84,8 +87,8 @@ export const login = async function (
     if (result.isErr()) return result;
   } else {
     // npm login
-    const client = makeNpmClient();
-    const loginResult = await client.addUser(
+    const addUserService = makeAddUserService();
+    const loginResult = await addUserService.tryAdd(
       loginRegistry,
       username,
       password,
