@@ -69,8 +69,13 @@ const printInfo = function (packument: UnityPackument) {
   const dist = verInfo.dist;
   const dependencies = verInfo.dependencies;
   const latest = packument["dist-tags"]?.latest;
-  let time = packument.time.modified;
-  if (!time && latest && latest in packument.time)
+  let time = packument.time?.modified;
+  if (
+    !time &&
+    latest &&
+    packument.time !== undefined &&
+    latest in packument.time
+  )
     time = packument.time[latest];
 
   console.log();
