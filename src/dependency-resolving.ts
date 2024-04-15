@@ -14,7 +14,7 @@ import {
 import { unityRegistryUrl } from "./domain/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import assert from "assert";
-import { Registry } from "./npm-client";
+import { Registry } from "./services/add-user-service";
 import { PackumentNotFoundError } from "./common-errors";
 import { PackumentFetchService } from "./services/fetch-packument";
 

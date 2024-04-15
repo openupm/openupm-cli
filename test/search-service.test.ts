@@ -2,7 +2,7 @@ import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { makeSearchService } from "../src/services/search-service";
-import { Registry } from "../src/npm-client";
+import { Registry } from "../src/services/add-user-service";
 import { exampleRegistryUrl } from "./mock-registry";
 
 jest.mock("libnpmsearch");

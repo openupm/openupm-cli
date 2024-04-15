@@ -3,7 +3,7 @@ import { makePackumentFetchService } from "../src/services/fetch-packument";
 import { UnityPackument } from "../src/domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { makeDomainName } from "../src/domain/domain-name";
-import { Registry } from "../src/npm-client";
+import { Registry } from "../src/services/add-user-service";
 import { exampleRegistryUrl } from "./mock-registry";
 import RegClient from "another-npm-registry-client";
 

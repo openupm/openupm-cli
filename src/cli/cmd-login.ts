@@ -1,4 +1,7 @@
-import { AuthenticationError, makeNpmClient } from "../npm-client";
+import {
+  AuthenticationError,
+  makeAddUserService,
+} from "../services/add-user-service";
 import log from "./logger";
 import {
   GetUpmConfigDirError,
@@ -84,8 +87,8 @@ export const login = async function (
     if (result.isErr()) return result;
   } else {
     // npm login
-    const client = makeNpmClient();
-    const loginResult = await client.addUser(
+    const addUserService = makeAddUserService();
+    const loginResult = await addUserService.tryAdd(
       loginRegistry,
       username,
       password,

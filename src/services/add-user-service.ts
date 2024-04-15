@@ -1,6 +1,6 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
-import log from "./cli/logger";
-import { RegistryUrl } from "./domain/registry-url";
+import log from "../cli/logger";
+import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 
@@ -26,9 +26,9 @@ export class AuthenticationError extends CustomError {
 type AuthenticationToken = string;
 
 /**
- * Abstraction over a regular npm client which is specialized for UPM purposes.
+ * Service for adding users to a npm-registry.
  */
-export interface NpmClient {
+export interface AddUserService {
   /**
    * Attempts to add a user to a registry.
    * @param registryUrl The url of the registry into which to login.
@@ -37,7 +37,7 @@ export interface NpmClient {
    * @param password The password with which to login.
    * @returns An authentication token or null if registration failed.
    */
-  addUser(
+  tryAdd(
     registryUrl: RegistryUrl,
     username: string,
     email: string,
@@ -51,13 +51,12 @@ export type Registry = Readonly<{
 }>;
 
 /**
- * Makes a new {@link NpmClient}.
+ * Makes a new {@link AddUserService}.
  */
-export const makeNpmClient = (): NpmClient => {
-  // create client
+export function makeAddUserService(): AddUserService {
   const registryClient = new RegClient({ log });
   return {
-    addUser(registryUrl, username, email, password) {
+    tryAdd(registryUrl, username, email, password) {
       return new AsyncResult(
         new Promise((resolve) => {
           registryClient.adduser(
@@ -80,4 +79,4 @@ export const makeNpmClient = (): NpmClient => {
       );
     },
   };
-};
+}

@@ -11,7 +11,7 @@ import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
-import { Registry } from "../npm-client";
+import { Registry } from "../services/add-user-service";
 import { FileParseError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import {

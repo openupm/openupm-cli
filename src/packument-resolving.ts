@@ -1,5 +1,5 @@
 import { VersionReference } from "./domain/package-reference";
-import { Registry } from "./npm-client";
+import { Registry } from "./services/add-user-service";
 import { DomainName } from "./domain/domain-name";
 import { SemanticVersion } from "./domain/semantic-version";
 import {

@@ -1,4 +1,4 @@
-import { Registry } from "../npm-client";
+import { Registry } from "./add-user-service";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import npmSearch from "libnpmsearch";

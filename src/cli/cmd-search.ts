@@ -2,7 +2,7 @@ import log from "./logger";
 import * as os from "os";
 import { EnvParseError, parseEnv } from "../utils/env";
 import { CmdOptions } from "./options";
-import { Registry } from "../npm-client";
+import { Registry } from "../services/add-user-service";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
