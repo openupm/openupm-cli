@@ -7,7 +7,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "test:full": "cross-env NODE_ENV=test jest --runInBand",
+    "test:full": "cross-env NODE_ENV=test jest",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
