@@ -56,19 +56,23 @@ describe("cmd-search", () => {
       total: 1,
       time: "Sat Dec 07 2019 04:57:11 GMT+0000 (UTC)",
     };
+    
     const searchEndpointEmptyResult: SearchEndpointResult = {
       objects: [],
       total: 0,
       time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)",
     };
+    
     beforeEach(() => {
       startMockRegistry();
       registerSearchResult("package-a", searchEndpointResult);
       registerSearchResult("pkg-not-exist", searchEndpointEmptyResult);
     });
+    
     afterEach(() => {
       stopMockRegistry();
     });
+    
     it("should print packument information", async () => {
       const consoleSpy = jest.spyOn(console, "log");
 
@@ -83,6 +87,7 @@ describe("cmd-search", () => {
         expect.stringContaining("2019-10-02")
       );
     });
+    
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
 
@@ -116,6 +121,7 @@ describe("cmd-search", () => {
         versions: { "1.0.0": "latest" },
       },
     };
+    
     beforeEach(() => {
       startMockRegistry();
       nock(exampleRegistryUrl)
@@ -123,9 +129,11 @@ describe("cmd-search", () => {
         .get(/-\/v1\/search\?text=/)
         .reply(404);
     });
+    
     afterEach(() => {
       stopMockRegistry();
     });
+    
     it("should print packument information", async () => {
       const warnSpy = spyOnLog("warn");
       const consoleSpy = jest.spyOn(console, "log");
@@ -148,6 +156,7 @@ describe("cmd-search", () => {
         expect.stringContaining("2019-10-02")
       );
     });
+    
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
