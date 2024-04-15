@@ -324,7 +324,10 @@ export const add = async function (
   // Save manifest
   if (dirty) {
     const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
-    if (saveResult.isErr()) return Err([saveResult.error]);
+    if (saveResult.isErr()) {
+      logManifestSaveError(saveResult.error);
+      return Err([saveResult.error]);
+    }
 
     // print manifest notice
     log.notice("", "please open Unity project to apply changes");
