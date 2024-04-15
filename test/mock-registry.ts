@@ -1,5 +1,4 @@
 import nock from "nock";
-import { SearchEndpointResult } from "./types";
 import { isDomainName } from "../src/domain/domain-name";
 import assert from "assert";
 import { makeRegistryUrl, unityRegistryUrl } from "../src/domain/registry-url";
@@ -33,17 +32,6 @@ export function registerMissingPackument(name: string) {
   assert(isDomainName(name));
   nock(exampleRegistryUrl).persist().get(`/${name}`).reply(404);
   nock(unityRegistryUrl).persist().get(`/${name}`).reply(404);
-}
-
-export function registerSearchResult(
-  searchText: string,
-  result: SearchEndpointResult
-) {
-  nock(exampleRegistryUrl)
-    .get(new RegExp(`-\\/v1\\/search\\?text=${searchText}`))
-    .reply(200, result, {
-      "Content-Type": "application/json",
-    });
 }
 
 export function stopMockRegistry() {
