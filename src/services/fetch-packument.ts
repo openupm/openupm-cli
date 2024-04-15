@@ -11,7 +11,7 @@ import { Registry } from "../domain/registry";
 /**
  * Service for fetching packuments from a npm-registry.
  */
-export type PackumentFetchService = {
+export type FetchPackumentService = {
   /**
    * Attempts to fetch a packument.
    * @param registry The registry to fetch from.
@@ -24,9 +24,9 @@ export type PackumentFetchService = {
 };
 
 /**
- * Makes a {@link PackumentFetchService} service.
+ * Makes a {@link FetchPackumentService} service.
  */
-export function makePackumentFetchService(): PackumentFetchService {
+export function makePackumentFetchService(): FetchPackumentService {
   const registryClient = new RegClient({ log });
 
   return {

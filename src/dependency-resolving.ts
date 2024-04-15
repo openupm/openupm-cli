@@ -15,7 +15,7 @@ import { unityRegistryUrl } from "./domain/registry-url";
 import { recordEntries } from "./utils/record-utils";
 import assert from "assert";
 import { PackumentNotFoundError } from "./common-errors";
-import { PackumentFetchService } from "./services/fetch-packument";
+import { FetchPackumentService } from "./services/fetch-packument";
 import { Registry } from "./domain/registry";
 
 export type DependencyBase = {
@@ -74,7 +74,7 @@ export const fetchPackageDependencies = async function (
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean,
-  fetchService: PackumentFetchService
+  fetchService: FetchPackumentService
 ): Promise<[ValidDependency[], InvalidDependency[]]> {
   // a list of pending dependency {name, version}
   const pendingList: NameVersionPair[] = [{ name, version }];

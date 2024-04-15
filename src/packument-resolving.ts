@@ -14,7 +14,7 @@ import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "./common-errors";
-import { PackumentFetchService } from "./services/fetch-packument";
+import { FetchPackumentService } from "./services/fetch-packument";
 import { Registry } from "./domain/registry";
 
 /**
@@ -126,7 +126,7 @@ export function tryResolveFromPackument(
  * @param source The registry to resolve the packument from.
  */
 export function tryResolve(
-  fetchService: PackumentFetchService,
+  fetchService: FetchPackumentService,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
