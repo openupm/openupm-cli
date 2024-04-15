@@ -5,7 +5,6 @@ import log from "../src/cli/logger";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import { tryGetUpmConfigDir } from "../src/io/upm-config-io";
-import { testRootPath } from "./setup/unity-project";
 import { exampleRegistryUrl } from "./mock-registry";
 import fs from "fs";
 import { NotFoundError } from "../src/io/file-io";
@@ -19,6 +18,8 @@ jest.mock("../src/io/project-version-io");
 jest.mock("../src/io/upm-config-io");
 jest.mock("fs");
 jest.spyOn(process, "cwd");
+
+const testRootPath = "/users/some-user/projects/MyUnityProject";
 
 const testUpmAuth: TokenAuth = {
   email: "test@mail.com",
