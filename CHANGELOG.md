@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/openupm/openupm-cli/compare/1.20.0...1.21.0) (2024-04-15)
+
+
+### Features
+
+* atomic package add ([#234](https://github.com/openupm/openupm-cli/issues/234)) ([4b2fffc](https://github.com/openupm/openupm-cli/commit/4b2fffc6c975b4295a805d410a6d13ef4de25c52)), closes [#223](https://github.com/openupm/openupm-cli/issues/223)
+
 # [1.20.0](https://github.com/openupm/openupm-cli/compare/1.19.11...1.20.0) (2024-03-20)
 
 
