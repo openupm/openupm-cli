@@ -1,5 +1,6 @@
 import { emptyNpmrc, setToken } from "../src/domain/npmrc";
-import { exampleRegistryUrl } from "./mock-registry";
+
+import { exampleRegistryUrl } from "./data-registry";
 
 const exampleToken = "123-456-789";
 const normalizedRegistryUrl = "//example.com/";

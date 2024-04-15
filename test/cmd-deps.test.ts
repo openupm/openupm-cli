@@ -1,5 +1,4 @@
 import { deps, DepsOptions } from "../src/cli/cmd-deps";
-import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makePackageReference } from "../src/domain/package-reference";
@@ -8,6 +7,7 @@ import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
+import { exampleRegistryUrl } from "./data-registry";
 
 describe("cmd-deps", () => {
   const options: DepsOptions = {

@@ -5,7 +5,6 @@ import log from "../src/cli/logger";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import { tryGetUpmConfigDir } from "../src/io/upm-config-io";
-import { exampleRegistryUrl } from "./mock-registry";
 import fs from "fs";
 import { NotFoundError } from "../src/io/file-io";
 import { FileParseError, IOError } from "../src/common-errors";
@@ -13,6 +12,7 @@ import { makeEditorVersion } from "../src/domain/editor-version";
 import { NoWslError } from "../src/io/wls";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
+import { exampleRegistryUrl } from "./data-registry";
 
 jest.mock("../src/io/project-version-io");
 jest.mock("../src/io/upm-config-io");

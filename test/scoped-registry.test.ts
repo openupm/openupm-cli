@@ -4,10 +4,10 @@ import {
   makeScopedRegistry,
   removeScope,
 } from "../src/domain/scoped-registry";
-import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/domain/domain-name";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
+import { exampleRegistryUrl } from "./data-registry";
 
 describe("scoped-registry", () => {
   describe("construction", () => {

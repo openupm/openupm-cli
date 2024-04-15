@@ -20,7 +20,7 @@ const searchEndpoint = function (
   searchService: SearchService,
   registry: Registry,
   keyword: string
-): AsyncResult<SearchedPackument[], HttpErrorBase> {
+): AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase> {
   return searchService.trySearch(registry, keyword).map((results) => {
     log.verbose("npmsearch", results.join(os.EOL));
     return results;

@@ -14,7 +14,8 @@ import {
 import { Base64 } from "../src/domain/base64";
 import { makeRegistryUrl, RegistryUrl } from "../src/domain/registry-url";
 import { NpmAuth } from "another-npm-registry-client";
-import { exampleRegistryUrl } from "./mock-registry";
+
+import { exampleRegistryUrl } from "./data-registry";
 
 describe("upm-config", () => {
   describe("auth", () => {

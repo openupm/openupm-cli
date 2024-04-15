@@ -66,7 +66,7 @@ export type UnityPackument = Readonly<{
   /**
    * Information about package and version creation/modification times.
    */
-  time: Readonly<{
+  time?: Readonly<{
     [key: SemanticVersion]: string;
     created?: string;
     modified?: string;
