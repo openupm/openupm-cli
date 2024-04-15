@@ -1,12 +1,5 @@
 import { view, ViewOptions } from "../src/cli/cmd-view";
-import {
-  exampleRegistryUrl,
-  registerMissingPackument,
-  registerRemotePackument,
-  registerRemoteUpstreamPackument,
-  startMockRegistry,
-  stopMockRegistry,
-} from "./mock-registry";
+import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
@@ -14,6 +7,11 @@ import { makePackageReference } from "../src/domain/package-reference";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
+import { unityRegistryUrl } from "../src/domain/registry-url";
+import { mockFetchPackumentService } from "./fetch-packument.mock";
+import { makePackumentFetchService } from "../src/services/fetch-packument";
+
+jest.mock("../src/services/fetch-packument");
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
@@ -102,15 +100,16 @@ describe("cmd-view", () => {
 
     beforeEach(() => {
       mockUpmConfig(null);
-      startMockRegistry();
-      registerRemotePackument(remotePackumentA);
-      registerMissingPackument(packageMissing);
-      registerRemoteUpstreamPackument(remotePackumentUp);
-      mockProjectVersion("2020.2.1f1");
-    });
 
-    afterEach(async () => {
-      stopMockRegistry();
+      mockProjectVersion("2020.2.1f1");
+
+      const fetchPackumentService = mockFetchPackumentService(
+        [exampleRegistryUrl, remotePackumentA],
+        [unityRegistryUrl, remotePackumentUp]
+      );
+      jest
+        .mocked(makePackumentFetchService)
+        .mockReturnValue(fetchPackumentService);
     });
 
     it("should print information for packument without version", async () => {
