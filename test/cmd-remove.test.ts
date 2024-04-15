@@ -4,14 +4,13 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { makePackageReference } from "../src/domain/package-reference";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import {
   mockProjectManifest,
   spyOnSavedManifest,
 } from "./project-manifest-io.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
-import {mockProjectVersion} from "./project-version-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");
@@ -25,24 +24,10 @@ describe("cmd-remove", () => {
         .addDependency(packageB, "1.0.0", true, false)
     );
 
-    let mockProject: MockUnityProject = null!;
-
     beforeEach(() => {
       mockProjectManifest(defaultManifest);
       mockUpmConfig(null);
       mockProjectVersion("2020.2.1f1");
-    });
-
-    beforeAll(async () => {
-      mockProject = await setupUnityProject({ manifest: defaultManifest });
-    });
-
-    afterEach(async () => {
-      await mockProject.reset();
-    });
-
-    afterAll(async () => {
-      await mockProject.restore();
     });
 
     it("should remove packument without version", async () => {

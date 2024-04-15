@@ -24,5 +24,7 @@ export function mockProjectManifest(manifest: UnityProjectManifest | null) {
  * Creates a spy for saved project-manifests.
  */
 export function spyOnSavedManifest() {
-  return jest.spyOn(projectManifestIoModule, "trySaveProjectManifest");
+  return jest
+    .spyOn(projectManifestIoModule, "trySaveProjectManifest")
+    .mockReturnValue(Ok(undefined).toAsyncResult());
 }

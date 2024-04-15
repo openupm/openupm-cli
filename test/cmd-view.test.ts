@@ -11,10 +11,9 @@ import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { makePackageReference } from "../src/domain/package-reference";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
-import {mockProjectVersion} from "./project-version-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
@@ -35,8 +34,6 @@ describe("cmd-view", () => {
     },
   };
   describe("view", () => {
-    let mockProject: MockUnityProject = null!;
-
     const remotePackumentA = buildPackument(packageA, (packument) =>
       packument
         .set("time", {
@@ -103,10 +100,6 @@ describe("cmd-view", () => {
         )
     );
 
-    beforeAll(async () => {
-      mockProject = await setupUnityProject({});
-    });
-
     beforeEach(() => {
       mockUpmConfig(null);
       startMockRegistry();
@@ -115,13 +108,9 @@ describe("cmd-view", () => {
       registerRemoteUpstreamPackument(remotePackumentUp);
       mockProjectVersion("2020.2.1f1");
     });
-    afterEach(async () => {
-      await mockProject.reset();
-      stopMockRegistry();
-    });
 
-    afterAll(async () => {
-      await mockProject.restore();
+    afterEach(async () => {
+      stopMockRegistry();
     });
 
     it("should print information for packument without version", async () => {
