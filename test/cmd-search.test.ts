@@ -12,6 +12,7 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
+import {mockProjectVersion} from "./project-version-io.mock";
 
 describe("cmd-search", () => {
   let mockProject: MockUnityProject = null!;
@@ -25,6 +26,7 @@ describe("cmd-search", () => {
 
   beforeEach(() => {
     mockUpmConfig(null);
+    mockProjectVersion("2020.2.1f1");
   });
 
   beforeAll(async () => {

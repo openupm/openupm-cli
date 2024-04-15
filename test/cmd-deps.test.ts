@@ -8,6 +8,7 @@ import { spyOnLog } from "./log.mock";
 import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
 import { mockUpmConfig } from "./upm-config-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 describe("cmd-deps", () => {
   const options: DepsOptions = {
@@ -47,6 +48,7 @@ describe("cmd-deps", () => {
         [exampleRegistryUrl, remotePackumentB],
         [unityRegistryUrl, remotePackumentUp]
       );
+      mockProjectVersion("2020.2.1f1");
       mockUpmConfig(null);
     });
 

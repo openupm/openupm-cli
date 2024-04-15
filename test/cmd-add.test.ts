@@ -19,6 +19,7 @@ import {
   emptyProjectManifest,
 } from "../src/domain/project-manifest";
 import { mockUpmConfig } from "./upm-config-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 describe("cmd-add", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -132,6 +133,7 @@ describe("cmd-add", () => {
     beforeEach(() => {
       mockProjectManifest(emptyProjectManifest);
       mockUpmConfig(null);
+      mockProjectVersion("2019.2.13f1");
     });
 
     beforeAll(async () => {

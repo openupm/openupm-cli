@@ -11,6 +11,7 @@ import {
   spyOnSavedManifest,
 } from "./project-manifest-io.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
+import {mockProjectVersion} from "./project-version-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");
@@ -29,6 +30,7 @@ describe("cmd-remove", () => {
     beforeEach(() => {
       mockProjectManifest(defaultManifest);
       mockUpmConfig(null);
+      mockProjectVersion("2020.2.1f1");
     });
 
     beforeAll(async () => {
