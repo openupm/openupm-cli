@@ -70,7 +70,7 @@ export function makeSearchService(): SearchService {
     trySearch(registry, keyword) {
       return new AsyncResult(
         npmSearch(keyword, getNpmFetchOptions(registry))
-          // NOTE: The results of the search will be Packument objects so we can change the type
+          // NOTE: The results of the search will be packument objects, so we can change the type
           .then((results) => Ok(results as SearchedPackument[]))
           .catch((error) => {
             assertIsHttpError(error);
