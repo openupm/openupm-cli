@@ -9,7 +9,7 @@ import { arbDomainName } from "./domain-name.arb";
 
 describe("packument", () => {
   describe("tryGetLatestVersion", () => {
-    it("should get version from dist-tags", async function () {
+    it("should get version from dist-tags", async () => {
       const version = tryGetLatestVersion({
         "dist-tags": { latest: makeSemanticVersion("1.0.0") },
       });

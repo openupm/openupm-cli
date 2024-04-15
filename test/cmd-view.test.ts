@@ -13,7 +13,7 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
-import {mockUpmConfig} from "./upm-config-io.mock";
+import { mockUpmConfig } from "./upm-config-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
@@ -102,27 +102,27 @@ describe("cmd-view", () => {
         )
     );
 
-    beforeAll(async function () {
+    beforeAll(async () => {
       mockProject = await setupUnityProject({});
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
       mockUpmConfig(null);
       startMockRegistry();
       registerRemotePackument(remotePackumentA);
       registerMissingPackument(packageMissing);
       registerRemoteUpstreamPackument(remotePackumentUp);
     });
-    afterEach(async function () {
+    afterEach(async () => {
       await mockProject.reset();
       stopMockRegistry();
     });
 
-    afterAll(async function () {
+    afterAll(async () => {
       await mockProject.restore();
     });
 
-    it("should print information for packument without version", async function () {
+    it("should print information for packument without version", async () => {
       const consoleSpy = jest.spyOn(console, "log");
 
       const viewResult = await view(packageA, options);
@@ -132,7 +132,7 @@ describe("cmd-view", () => {
         expect.stringContaining("com.example.package-a@1.0.0")
       );
     });
-    it("should print information for packument with semantic version", async function () {
+    it("should print information for packument with semantic version", async () => {
       const warnSpy = spyOnLog("warn");
 
       const viewResult = await view(
@@ -143,7 +143,7 @@ describe("cmd-view", () => {
       expect(viewResult).toBeError();
       expect(warnSpy).toHaveLogLike("", "do not specify a version");
     });
-    it("should fail for unknown packument", async function () {
+    it("should fail for unknown packument", async () => {
       const errorSpy = spyOnLog("error");
 
       const viewResult = await view(packageMissing, options);
@@ -151,7 +151,7 @@ describe("cmd-view", () => {
       expect(viewResult).toBeError();
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
-    it("should print information for upstream packument", async function () {
+    it("should print information for upstream packument", async () => {
       const consoleSpy = jest.spyOn(console, "log");
 
       const viewResult = await view(packageUp, upstreamOptions);
@@ -161,7 +161,7 @@ describe("cmd-view", () => {
         expect.stringContaining("com.example.package-up@1.0.0")
       );
     });
-    it("should fail for unknown upstream packument", async function () {
+    it("should fail for unknown upstream packument", async () => {
       const errorSpy = spyOnLog("error");
 
       const viewResult = await view(packageMissing, upstreamOptions);

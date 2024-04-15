@@ -134,19 +134,19 @@ describe("cmd-add", () => {
       mockUpmConfig(null);
     });
 
-    beforeAll(async function () {
+    beforeAll(async () => {
       mockProject = await setupUnityProject({ version: "2019.2.13f1" });
     });
 
-    afterEach(async function () {
+    afterEach(async () => {
       await mockProject.reset();
     });
 
-    afterAll(async function () {
+    afterAll(async () => {
       await mockProject.restore();
     });
 
-    it("should add packument without version", async function () {
+    it("should add packument without version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -162,7 +162,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should add packument with semantic version", async function () {
+    it("should add packument with semantic version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -181,7 +181,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should add packument with latest tag", async function () {
+    it("should add packument with latest tag", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -200,7 +200,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should override packument with lower version", async function () {
+    it("should override packument with lower version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -223,7 +223,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should have no effect to add same packument twice", async function () {
+    it("should have no effect to add same packument twice", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -242,7 +242,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "existed");
     });
 
-    it("should fail to add packument with unknown version", async function () {
+    it("should fail to add packument with unknown version", async () => {
       const warnSpy = spyOnLog("warn");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -257,7 +257,7 @@ describe("cmd-add", () => {
       expect(warnSpy).toHaveLogLike("404", "2.0.0 is not a valid choice");
     });
 
-    it("should add packument with http version", async function () {
+    it("should add packument with http version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
@@ -275,7 +275,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should add packument with git version", async function () {
+    it("should add packument with git version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
@@ -293,7 +293,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should add packument with file version", async function () {
+    it("should add packument with file version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
@@ -311,7 +311,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should fail for unknown packument", async function () {
+    it("should fail for unknown packument", async () => {
       const errorSpy = spyOnLog("error");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments();
@@ -323,7 +323,7 @@ describe("cmd-add", () => {
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
 
-    it("should be able to add multiple packuments", async function () {
+    it("should be able to add multiple packuments", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments(
@@ -343,7 +343,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should add upstream packument", async function () {
+    it("should add upstream packument", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([unityRegistryUrl, remotePackumentUp]);
@@ -362,7 +362,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should fail for unknown upstream packument", async function () {
+    it("should fail for unknown upstream packument", async () => {
       const errorSpy = spyOnLog("error");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments();
@@ -374,7 +374,7 @@ describe("cmd-add", () => {
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
 
-    it("should add packument dependencies", async function () {
+    it("should add packument dependencies", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments(
@@ -397,7 +397,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should packument to testables when requested", async function () {
+    it("should packument to testables when requested", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
@@ -413,7 +413,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should add packument with lower editor-version", async function () {
+    it("should add packument with lower editor-version", async () => {
       const noticeSpy = spyOnLog("notice");
       mockResolvedPackuments([
         exampleRegistryUrl,
@@ -427,7 +427,7 @@ describe("cmd-add", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
-    it("should fail to add packument with higher editor-version", async function () {
+    it("should fail to add packument with higher editor-version", async () => {
       const warnSpy = spyOnLog("warn");
       mockResolvedPackuments([
         exampleRegistryUrl,
@@ -443,7 +443,7 @@ describe("cmd-add", () => {
       );
     });
 
-    it("should add packument with higher editor-version when forced", async function () {
+    it("should add packument with higher editor-version when forced", async () => {
       const warnSpy = spyOnLog("warn");
       mockResolvedPackuments([
         exampleRegistryUrl,
@@ -459,7 +459,7 @@ describe("cmd-add", () => {
       );
     });
 
-    it("should not add packument with bad editor-version", async function () {
+    it("should not add packument with bad editor-version", async () => {
       const warnSpy = spyOnLog("warn");
       mockResolvedPackuments([
         exampleRegistryUrl,
@@ -472,7 +472,7 @@ describe("cmd-add", () => {
       expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
     });
 
-    it("should add packument with bad editor-version when forced", async function () {
+    it("should add packument with bad editor-version when forced", async () => {
       const warnSpy = spyOnLog("warn");
       mockResolvedPackuments([
         exampleRegistryUrl,

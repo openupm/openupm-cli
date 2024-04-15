@@ -7,7 +7,7 @@ import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
-import {mockUpmConfig} from "./upm-config-io.mock";
+import { mockUpmConfig } from "./upm-config-io.mock";
 
 describe("cmd-deps", () => {
   const options: DepsOptions = {
@@ -37,7 +37,7 @@ describe("cmd-deps", () => {
       (packument) => packument.addVersion("1.0.0")
     );
 
-    beforeAll(async function () {
+    beforeAll(async () => {
       mockProject = await setupUnityProject({});
     });
 
@@ -50,15 +50,15 @@ describe("cmd-deps", () => {
       mockUpmConfig(null);
     });
 
-    afterEach(async function () {
+    afterEach(async () => {
       await mockProject.reset();
     });
 
-    afterAll(async function () {
+    afterAll(async () => {
       await mockProject.restore();
     });
 
-    it("should print direct dependencies", async function () {
+    it("should print direct dependencies", async () => {
       const noticeSpy = spyOnLog("notice");
 
       const depsResult = await deps(remotePackumentA.name, options);
@@ -66,7 +66,7 @@ describe("cmd-deps", () => {
       expect(depsResult).toBeOk();
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
-    it("should print all dependencies when requested", async function () {
+    it("should print all dependencies when requested", async () => {
       const noticeSpy = spyOnLog("notice");
 
       const depsResult = await deps(remotePackumentA.name, {
@@ -78,7 +78,7 @@ describe("cmd-deps", () => {
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentUp.name);
     });
-    it("should print correct dependencies for latest tag", async function () {
+    it("should print correct dependencies for latest tag", async () => {
       const noticeSpy = spyOnLog("notice");
 
       const depsResult = await deps(
@@ -89,7 +89,7 @@ describe("cmd-deps", () => {
       expect(depsResult).toBeOk();
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
-    it("should print correct dependencies for semantic version", async function () {
+    it("should print correct dependencies for semantic version", async () => {
       const noticeSpy = spyOnLog("notice");
 
       const depsResult = await deps(
@@ -100,7 +100,7 @@ describe("cmd-deps", () => {
       expect(depsResult).toBeOk();
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
-    it("should print no dependencies for unknown version", async function () {
+    it("should print no dependencies for unknown version", async () => {
       const warnLog = spyOnLog("warn");
 
       const depsResult = await deps(
@@ -111,7 +111,7 @@ describe("cmd-deps", () => {
       expect(depsResult).toBeOk();
       expect(warnLog).toHaveLogLike("404", "is not a valid choice");
     });
-    it("should print no dependencies for unknown packument", async function () {
+    it("should print no dependencies for unknown packument", async () => {
       const warnSpy = spyOnLog("warn");
 
       const depsResult = await deps(makeDomainName("pkg-not-exist"), options);
@@ -119,7 +119,7 @@ describe("cmd-deps", () => {
       expect(depsResult).toBeOk();
       expect(warnSpy).toHaveLogLike("404", "not found");
     });
-    it("should print dependencies for upstream packuments", async function () {
+    it("should print dependencies for upstream packuments", async () => {
       const depsResult = await deps(remotePackumentUp.name, options);
 
       expect(depsResult).toBeOk();
