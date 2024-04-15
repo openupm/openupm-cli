@@ -31,19 +31,19 @@ describe("cmd-remove", () => {
       mockUpmConfig(null);
     });
 
-    beforeAll(async function () {
+    beforeAll(async () => {
       mockProject = await setupUnityProject({ manifest: defaultManifest });
     });
 
-    afterEach(async function () {
+    afterEach(async () => {
       await mockProject.reset();
     });
 
-    afterAll(async function () {
+    afterAll(async () => {
       await mockProject.restore();
     });
 
-    it("should remove packument without version", async function () {
+    it("should remove packument without version", async () => {
       const noticeSpy = spyOnLog("notice");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -64,7 +64,7 @@ describe("cmd-remove", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "removed ");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
-    it("should fail to remove packument with semantic version", async function () {
+    it("should fail to remove packument with semantic version", async () => {
       const warnSpy = spyOnLog("warn");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -82,7 +82,7 @@ describe("cmd-remove", () => {
       expect(manifestSavedSpy).not.toHaveBeenCalled();
       expect(warnSpy).toHaveLogLike("", "do not specify a version");
     });
-    it("should fail for uninstalled packument", async function () {
+    it("should fail for uninstalled packument", async () => {
       const errorSpy = spyOnLog("error");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -97,7 +97,7 @@ describe("cmd-remove", () => {
       expect(manifestSavedSpy).not.toHaveBeenCalled();
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
-    it("should remove multiple packuments", async function () {
+    it("should remove multiple packuments", async () => {
       const noticeSpy = spyOnLog("notice");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {

@@ -27,15 +27,15 @@ describe("cmd-search", () => {
     mockUpmConfig(null);
   });
 
-  beforeAll(async function () {
+  beforeAll(async () => {
     mockProject = await setupUnityProject({});
   });
 
-  afterEach(async function () {
+  afterEach(async () => {
     await mockProject.reset();
   });
 
-  afterAll(async function () {
+  afterAll(async () => {
     await mockProject.restore();
   });
 
@@ -74,15 +74,15 @@ describe("cmd-search", () => {
       total: 0,
       time: "Sat Dec 07 2019 05:07:42 GMT+0000 (UTC)",
     };
-    beforeEach(function () {
+    beforeEach(() => {
       startMockRegistry();
       registerSearchResult("package-a", searchEndpointResult);
       registerSearchResult("pkg-not-exist", searchEndpointEmptyResult);
     });
-    afterEach(function () {
+    afterEach(() => {
       stopMockRegistry();
     });
-    it("should print packument information", async function () {
+    it("should print packument information", async () => {
       const consoleSpy = jest.spyOn(console, "log");
 
       const searchResult = await search("package-a", options);
@@ -96,7 +96,7 @@ describe("cmd-search", () => {
         expect.stringContaining("2019-10-02")
       );
     });
-    it("should notify of unknown packument", async function () {
+    it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
 
       const searchResult = await search("pkg-not-exist", options);
@@ -129,17 +129,17 @@ describe("cmd-search", () => {
         versions: { "1.0.0": "latest" },
       },
     };
-    beforeEach(function () {
+    beforeEach(() => {
       startMockRegistry();
       nock(exampleRegistryUrl)
         .persist()
         .get(/-\/v1\/search\?text=/)
         .reply(404);
     });
-    afterEach(function () {
+    afterEach(() => {
       stopMockRegistry();
     });
-    it("should print packument information", async function () {
+    it("should print packument information", async () => {
       const warnSpy = spyOnLog("warn");
       const consoleSpy = jest.spyOn(console, "log");
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
@@ -161,7 +161,7 @@ describe("cmd-search", () => {
         expect.stringContaining("2019-10-02")
       );
     });
-    it("should notify of unknown packument", async function () {
+    it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
       nock(exampleRegistryUrl).get("/-/all").reply(200, allResult, {
         "Content-Type": "application/json",
