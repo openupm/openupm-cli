@@ -20,7 +20,7 @@ import {
 } from "../src/domain/project-manifest";
 import { mockUpmConfig } from "./upm-config-io.mock";
 
-describe("cmd-add.ts", () => {
+describe("cmd-add", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
   const packageA = makeDomainName("com.base.package-a");
   const packageB = makeDomainName("com.base.package-b");

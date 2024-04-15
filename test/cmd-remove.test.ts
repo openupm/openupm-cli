@@ -16,7 +16,7 @@ const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");
 const missingPackage = makeDomainName("pkg-not-exist");
 
-describe("cmd-remove.ts", () => {
+describe("cmd-remove", () => {
   describe("remove", () => {
     const defaultManifest = buildProjectManifest((manifest) =>
       manifest
