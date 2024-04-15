@@ -14,6 +14,7 @@ import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
+import {mockProjectVersion} from "./project-version-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
@@ -112,6 +113,7 @@ describe("cmd-view", () => {
       registerRemotePackument(remotePackumentA);
       registerMissingPackument(packageMissing);
       registerRemoteUpstreamPackument(remotePackumentUp);
+      mockProjectVersion("2020.2.1f1");
     });
     afterEach(async () => {
       await mockProject.reset();

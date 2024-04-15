@@ -13,6 +13,7 @@ import { FileParseError, IOError } from "../src/common-errors";
 import { makeEditorVersion } from "../src/domain/editor-version";
 import { NoWslError } from "../src/io/wls";
 import { mockUpmConfig } from "./upm-config-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 jest.mock("../src/io/project-version-io");
 jest.mock("../src/io/upm-config-io");
@@ -52,9 +53,7 @@ describe("env", () => {
     mockUpmConfig(null);
 
     // The project has a ProjectVersion.txt
-    jest
-      .mocked(tryLoadProjectVersion)
-      .mockReturnValue(Ok(testProjectVersion).toAsyncResult());
+    mockProjectVersion(testProjectVersion);
   });
 
   describe("log-level", () => {
@@ -447,9 +446,7 @@ describe("env", () => {
 
     it("should be original string for non-release versions", async () => {
       const expected = "2022.3";
-      jest
-        .mocked(tryLoadProjectVersion)
-        .mockReturnValue(Ok(expected).toAsyncResult());
+      mockProjectVersion(expected);
 
       const result = await parseEnv({
         _global: {},
@@ -462,9 +459,7 @@ describe("env", () => {
 
     it("should be original string for non-version string", async () => {
       const expected = "Bad version";
-      jest
-        .mocked(tryLoadProjectVersion)
-        .mockReturnValue(Ok(expected).toAsyncResult());
+      mockProjectVersion(expected);
 
       const result = await parseEnv({
         _global: {},
