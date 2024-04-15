@@ -1,12 +1,6 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
 import log from "./cli/logger";
-import { UnityPackument } from "./domain/packument";
-import { DomainName } from "./domain/domain-name";
-import { SemanticVersion } from "./domain/semantic-version";
 import { RegistryUrl } from "./domain/registry-url";
-import npmSearch from "libnpmsearch";
-import { assertIsHttpError } from "./utils/error-type-guards";
-import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 
@@ -32,24 +26,6 @@ export class AuthenticationError extends CustomError {
 type AuthenticationToken = string;
 
 /**
- * A type representing a searched packument. Instead of having all versions
- * this type only includes the latest version.
- */
-export type SearchedPackument = Readonly<
-  Omit<UnityPackument, "versions"> & {
-    versions: Readonly<Record<SemanticVersion, "latest">>;
-  }
->;
-
-/**
- * The result of querying the /-/all endpoint.
- */
-type AllPackumentsResult = Readonly<{
-  _updated: number;
-  [name: DomainName]: SearchedPackument;
-}>;
-
-/**
  * Abstraction over a regular npm client which is specialized for UPM purposes.
  */
 export interface NpmClient {
@@ -67,44 +43,12 @@ export interface NpmClient {
     email: string,
     password: string
   ): AsyncResult<AuthenticationToken, AuthenticationError>;
-
-  /**
-   * Attempts to search a npm registry.
-   * @param registry The registry to search.
-   * @param keyword The keyword to search.
-   */
-  trySearch(
-    registry: Registry,
-    keyword: string
-  ): AsyncResult<SearchedPackument[], HttpErrorBase>;
-
-  /**
-   * Attempts to query the /-/all endpoint.
-   * @param registry The registry to query.
-   */
-  tryGetAll(
-    registry: Registry
-  ): AsyncResult<AllPackumentsResult, HttpErrorBase>;
 }
 
 export type Registry = Readonly<{
   url: RegistryUrl;
   auth: NpmAuth | null;
 }>;
-
-/**
- * Get npm fetch options.
- * @param registry The registry for which to get the options.
- */
-const getNpmFetchOptions = function (registry: Registry): npmSearch.Options {
-  const opts: npmSearch.Options = {
-    log,
-    registry: registry.url,
-  };
-  const auth = registry.auth;
-  if (auth !== null) Object.assign(opts, auth);
-  return opts;
-};
 
 /**
  * Makes a new {@link NpmClient}.
@@ -133,30 +77,6 @@ export const makeNpmClient = (): NpmClient => {
             }
           );
         })
-      );
-    },
-
-    trySearch(registry, keyword) {
-      return new AsyncResult(
-        npmSearch(keyword, getNpmFetchOptions(registry))
-          // NOTE: The results of the search will be Packument objects so we can change the type
-          .then((results) => Ok(results as SearchedPackument[]))
-          .catch((error) => {
-            assertIsHttpError(error);
-            return Err(error);
-          })
-      );
-    },
-
-    tryGetAll(registry) {
-      return new AsyncResult(
-        npmFetch
-          .json("/-/all", getNpmFetchOptions(registry))
-          .then((result) => Ok(result as AllPackumentsResult))
-          .catch((error) => {
-            assertIsHttpError(error);
-            return Err(error);
-          })
       );
     },
   };

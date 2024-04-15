@@ -1,24 +1,13 @@
 import "assert";
 import { exampleRegistryUrl } from "./mock-registry";
-import {
-  AuthenticationError,
-  makeNpmClient,
-  Registry,
-} from "../src/npm-client";
+import { AuthenticationError, makeNpmClient } from "../src/npm-client";
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
-import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch";
 import { Response } from "request";
-import npmSearch from "libnpmsearch";
-import search from "libnpmsearch";
 
 jest.mock("another-npm-registry-client");
 jest.mock("libnpmsearch");
 jest.mock("npm-registry-fetch");
-
-const exampleRegistry: Registry = {
-  url: exampleRegistryUrl,
-  auth: null,
-};
 
 function mockRegClientAddUserResult(
   error: HttpErrorBase | null,
@@ -98,60 +87,6 @@ describe("npm-client", () => {
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(AuthenticationError)
       );
-    });
-  });
-
-  describe("search", () => {
-    it("should fail for error response", async () => {
-      const expected = {
-        message: "Idk, it failed",
-        name: "FakeError",
-        statusCode: 500,
-      } as HttpErrorBase;
-      jest.mocked(npmSearch).mockRejectedValue(expected);
-      const client = makeNpmClient();
-
-      const result = await client.trySearch(exampleRegistry, "wow").promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should succeed for ok response", async () => {
-      const expected = [{ name: "wow" } as search.Result];
-      jest.mocked(npmSearch).mockResolvedValue(expected);
-      const client = makeNpmClient();
-
-      const result = await client.trySearch(exampleRegistry, "wow").promise;
-
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
-    });
-  });
-
-  describe("get all", () => {
-    it("should fail on error response", async () => {
-      const expected = {
-        message: "Idk, it failed",
-        name: "FakeError",
-        statusCode: 500,
-      } as HttpErrorBase;
-      jest.mocked(npmFetch.json).mockRejectedValue(expected);
-      const client = makeNpmClient();
-
-      const result = await client.tryGetAll(exampleRegistry).promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should succeed on ok response", async () => {
-      const expected = {
-        _update: 123,
-      };
-      jest.mocked(npmFetch.json).mockResolvedValue(expected);
-      const client = makeNpmClient();
-
-      const result = await client.tryGetAll(exampleRegistry).promise;
-
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
   });
 });

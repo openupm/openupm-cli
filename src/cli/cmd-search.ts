@@ -2,37 +2,37 @@ import log from "./logger";
 import * as os from "os";
 import { EnvParseError, parseEnv } from "../utils/env";
 import { CmdOptions } from "./options";
-import {
-  makeNpmClient,
-  NpmClient,
-  Registry,
-  SearchedPackument,
-} from "../npm-client";
+import { Registry } from "../npm-client";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
+import {
+  makeSearchService,
+  SearchedPackument,
+  SearchService,
+} from "../services/search-service";
 
 export type SearchError = EnvParseError | HttpErrorBase;
 
 export type SearchOptions = CmdOptions;
 
 const searchEndpoint = function (
-  npmClient: NpmClient,
+  searchService: SearchService,
   registry: Registry,
   keyword: string
 ): AsyncResult<SearchedPackument[], HttpErrorBase> {
-  return npmClient.trySearch(registry, keyword).map((results) => {
+  return searchService.trySearch(registry, keyword).map((results) => {
     log.verbose("npmsearch", results.join(os.EOL));
     return results;
   });
 };
 
 const searchOld = function (
-  npmClient: NpmClient,
+  searchService: SearchService,
   registry: Registry,
   keyword: string
 ): AsyncResult<SearchedPackument[], HttpErrorBase> {
-  return npmClient.tryGetAll(registry).map((allPackuments) => {
+  return searchService.tryGetAll(registry).map((allPackuments) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _updated, ...packumentEntries } = allPackuments;
     const packuments = Object.values(packumentEntries);
@@ -57,15 +57,16 @@ export async function search(
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
-  const npmClient = makeNpmClient();
+  const searchService = makeSearchService();
 
   // search endpoint
-  let result = await searchEndpoint(npmClient, env.registry, keyword).promise;
+  let result = await searchEndpoint(searchService, env.registry, keyword)
+    .promise;
 
   // search old search
   if (result.isErr()) {
     log.warn("", "fast search endpoint is not available, using old search.");
-    result = await searchOld(npmClient, env.registry, keyword).promise;
+    result = await searchOld(searchService, env.registry, keyword).promise;
   }
   if (result.isErr()) {
     log.warn("", "/-/all endpoint is not available");
