@@ -1,17 +1,12 @@
 import { deps, DepsOptions } from "../src/cli/cmd-deps";
-import {
-  exampleRegistryUrl,
-  registerMissingPackument,
-  registerRemotePackument,
-  registerRemoteUpstreamPackument,
-  startMockRegistry,
-  stopMockRegistry,
-} from "./mock-registry";
+import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
+import { mockResolvedPackuments } from "./packument-resolving.mock";
+import { unityRegistryUrl } from "../src/domain/registry-url";
 
 describe("cmd-deps.ts", () => {
   const options: DepsOptions = {
@@ -45,17 +40,16 @@ describe("cmd-deps.ts", () => {
       mockProject = await setupUnityProject({});
     });
 
-    beforeEach(function () {
-      startMockRegistry();
-      registerRemotePackument(remotePackumentA);
-      registerRemotePackument(remotePackumentB);
-      registerMissingPackument("pkg-not-exist");
-      registerRemoteUpstreamPackument(remotePackumentUp);
+    beforeEach(() => {
+      mockResolvedPackuments(
+        [exampleRegistryUrl, remotePackumentA],
+        [exampleRegistryUrl, remotePackumentB],
+        [unityRegistryUrl, remotePackumentUp]
+      );
     });
 
     afterEach(async function () {
       await mockProject.reset();
-      stopMockRegistry();
     });
 
     afterAll(async function () {
@@ -125,6 +119,7 @@ describe("cmd-deps.ts", () => {
     });
     it("should print dependencies for upstream packuments", async function () {
       const depsResult = await deps(remotePackumentUp.name, options);
+
       expect(depsResult).toBeOk();
     });
   });

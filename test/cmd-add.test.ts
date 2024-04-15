@@ -1,12 +1,5 @@
 import { add, AddOptions } from "../src/cli/cmd-add";
-import {
-  exampleRegistryUrl,
-  registerMissingPackument,
-  registerRemotePackument,
-  registerRemoteUpstreamPackument,
-  startMockRegistry,
-  stopMockRegistry,
-} from "./mock-registry";
+import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { PackageUrl } from "../src/domain/package-url";
@@ -15,6 +8,8 @@ import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { spyOnLog } from "./log.mock";
+import { mockResolvedPackuments } from "./packument-resolving.mock";
+import { unityRegistryUrl } from "../src/domain/registry-url";
 
 describe("cmd-add.ts", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -130,21 +125,8 @@ describe("cmd-add.ts", () => {
       mockProject = await setupUnityProject({ version: "2019.2.13f1" });
     });
 
-    beforeEach(function () {
-      startMockRegistry();
-      registerRemotePackument(remotePackumentA);
-      registerRemotePackument(remotePackumentB);
-      registerRemotePackument(remotePackumentC);
-      registerRemotePackument(remotePackumentD);
-      registerRemotePackument(remotePackumentWithLowerEditorVersion);
-      registerRemotePackument(remotePackumentWithHigherEditorVersion);
-      registerRemotePackument(remotePackumentWithWrongEditorVersion);
-      registerRemoteUpstreamPackument(remotePackumentUp);
-      registerMissingPackument(packageMissing);
-    });
     afterEach(async function () {
       await mockProject.reset();
-      stopMockRegistry();
     });
 
     afterAll(async function () {
@@ -153,6 +135,7 @@ describe("cmd-add.ts", () => {
 
     it("should add packument without version", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(packageA, options);
 
@@ -166,6 +149,7 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with semantic version", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
@@ -182,6 +166,7 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with latest tag", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(
         makePackageReference(packageA, "latest"),
@@ -198,6 +183,7 @@ describe("cmd-add.ts", () => {
 
     it("should override packument with lower version", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult1 = await add(
         makePackageReference(packageA, makeSemanticVersion("0.1.0")),
@@ -219,6 +205,7 @@ describe("cmd-add.ts", () => {
 
     it("should have no effect to add same packument twice", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult1 = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
@@ -240,6 +227,7 @@ describe("cmd-add.ts", () => {
 
     it("should fail to add packument with unknown version", async function () {
       const warnSpy = spyOnLog("warn");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("2.0.0")),
@@ -315,6 +303,7 @@ describe("cmd-add.ts", () => {
 
     it("should fail for unknown packument", async function () {
       const errorSpy = spyOnLog("error");
+      mockResolvedPackuments();
 
       const addResult = await add(packageMissing, options);
 
@@ -327,6 +316,10 @@ describe("cmd-add.ts", () => {
 
     it("should be able to add multiple packuments", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments(
+        [exampleRegistryUrl, remotePackumentA],
+        [exampleRegistryUrl, remotePackumentB]
+      );
 
       const addResult = await add([packageA, packageB], options);
 
@@ -341,6 +334,7 @@ describe("cmd-add.ts", () => {
 
     it("should add upstream packument", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([unityRegistryUrl, remotePackumentUp]);
 
       const addResult = await add(packageUp, upstreamOptions);
 
@@ -357,6 +351,7 @@ describe("cmd-add.ts", () => {
 
     it("should fail for unknown upstream packument", async function () {
       const errorSpy = spyOnLog("error");
+      mockResolvedPackuments();
 
       const addResult = await add(packageMissing, upstreamOptions);
 
@@ -369,6 +364,11 @@ describe("cmd-add.ts", () => {
 
     it("should add packument dependencies", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments(
+        [exampleRegistryUrl, remotePackumentC],
+        [exampleRegistryUrl, remotePackumentD],
+        [unityRegistryUrl, remotePackumentUp]
+      );
 
       const addResult = await add(
         makePackageReference(packageC, "latest"),
@@ -385,6 +385,7 @@ describe("cmd-add.ts", () => {
 
     it("should packument to testables when requested", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(packageA, testableOptions);
 
@@ -398,6 +399,10 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with lower editor-version", async function () {
       const noticeSpy = spyOnLog("notice");
+      mockResolvedPackuments([
+        exampleRegistryUrl,
+        remotePackumentWithLowerEditorVersion,
+      ]);
 
       const addResult = await add(packageLowerEditor, testableOptions);
 
@@ -408,6 +413,10 @@ describe("cmd-add.ts", () => {
 
     it("should fail to add packument with higher editor-version", async function () {
       const warnSpy = spyOnLog("warn");
+      mockResolvedPackuments([
+        exampleRegistryUrl,
+        remotePackumentWithHigherEditorVersion,
+      ]);
 
       const addResult = await add(packageHigherEditor, testableOptions);
 
@@ -420,6 +429,10 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with higher editor-version when forced", async function () {
       const warnSpy = spyOnLog("warn");
+      mockResolvedPackuments([
+        exampleRegistryUrl,
+        remotePackumentWithHigherEditorVersion,
+      ]);
 
       const addResult = await add(packageHigherEditor, forceOptions);
 
@@ -432,6 +445,10 @@ describe("cmd-add.ts", () => {
 
     it("should not add packument with bad editor-version", async function () {
       const warnSpy = spyOnLog("warn");
+      mockResolvedPackuments([
+        exampleRegistryUrl,
+        remotePackumentWithWrongEditorVersion,
+      ]);
 
       const addResult = await add(packageWrongEditor, testableOptions);
 
@@ -441,6 +458,10 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with bad editor-version when forced", async function () {
       const warnSpy = spyOnLog("warn");
+      mockResolvedPackuments([
+        exampleRegistryUrl,
+        remotePackumentWithWrongEditorVersion,
+      ]);
 
       const addResult = await add(packageWrongEditor, forceOptions);
 
