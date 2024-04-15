@@ -1,3 +1,10 @@
+## [1.22.1](https://github.com/openupm/openupm-cli/compare/1.22.0...1.22.1) (2024-04-15)
+
+
+### Bug Fixes
+
+* engine warning ([#237](https://github.com/openupm/openupm-cli/issues/237)) ([db7370f](https://github.com/openupm/openupm-cli/commit/db7370f125fac86baeac0f79c811ec7bf305b795))
+
 # [1.22.0](https://github.com/openupm/openupm-cli/compare/1.21.0...1.22.0) (2024-04-15)
 
 
