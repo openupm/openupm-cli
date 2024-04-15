@@ -60,7 +60,7 @@
     "nock": "^13.2.4",
     "prettier": "^2.8.8",
     "rimraf": "^5.0.5",
-    "semantic-release": "^23.0.8",
+    "semantic-release": "^19.0.3",
     "ts-jest": "^29.1.2",
     "typescript": "^5.2.2"
   },
