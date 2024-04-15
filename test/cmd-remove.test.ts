@@ -10,6 +10,7 @@ import {
   mockProjectManifest,
   spyOnSavedManifest,
 } from "./project-manifest-io.mock";
+import { mockUpmConfig } from "./upm-config-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");
@@ -25,9 +26,13 @@ describe("cmd-remove.ts", () => {
 
     let mockProject: MockUnityProject = null!;
 
+    beforeEach(() => {
+      mockProjectManifest(defaultManifest);
+      mockUpmConfig(null);
+    });
+
     beforeAll(async function () {
       mockProject = await setupUnityProject({ manifest: defaultManifest });
-      mockProjectManifest(defaultManifest);
     });
 
     afterEach(async function () {
