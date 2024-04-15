@@ -6,7 +6,7 @@ import {
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { RequiredEnvMissingError } from "../src/io/upm-config-io";
 import { exampleRegistryUrl } from "./mock-registry";
-import { tryUpdateUserNpmrcToken } from "../src/services/npmrc-token-update-service";
+import { tryUpdateUserNpmrcToken } from "../src/services/npmrc-token-update";
 import { IOError } from "../src/common-errors";
 import { emptyNpmrc, setToken } from "../src/domain/npmrc";
 

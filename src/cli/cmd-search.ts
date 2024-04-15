@@ -9,7 +9,7 @@ import {
   makeSearchService,
   SearchedPackument,
   SearchService,
-} from "../services/search-service";
+} from "../services/search";
 import { Registry } from "../domain/registry";
 
 export type SearchError = EnvParseError | HttpErrorBase;

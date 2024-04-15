@@ -1,7 +1,7 @@
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
-import { makeSearchService } from "../src/services/search-service";
+import { makeSearchService } from "../src/services/search";
 import { exampleRegistryUrl } from "./mock-registry";
 import { Registry } from "../src/domain/registry";
 

@@ -1,7 +1,7 @@
 import {
   AuthenticationError,
   makeAddUserService,
-} from "../services/add-user-service";
+} from "../services/add-user";
 import log from "./logger";
 import {
   GetUpmConfigDirError,
@@ -21,7 +21,7 @@ import {
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
-import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update-service";
+import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update";
 
 /**
  * Errors which may occur when logging in.

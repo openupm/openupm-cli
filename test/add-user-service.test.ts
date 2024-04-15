@@ -3,7 +3,7 @@ import { exampleRegistryUrl } from "./mock-registry";
 import {
   AuthenticationError,
   makeAddUserService,
-} from "../src/services/add-user-service";
+} from "../src/services/add-user";
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { Response } from "request";
