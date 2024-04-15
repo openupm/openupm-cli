@@ -25,6 +25,7 @@ import {
   addDependency,
   addTestable,
   mapScopedRegistry,
+  UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
 import {
@@ -101,22 +102,14 @@ export const add = async function (
     return makeScopedRegistry(name, registryUrl);
   };
 
-  const addSingle = async function (
+  const tryAddToManifest = async function (
+    manifest: UnityProjectManifest,
     pkg: PackageReference
-  ): Promise<Result<boolean, AddError>> {
+  ): Promise<Result<[UnityProjectManifest, boolean], AddError>> {
     // is upstream package flag
     let isUpstreamPackage = false;
     // parse name
     const [name, requestedVersion] = splitPackageReference(pkg);
-
-    // load manifest
-    const loadResult = await tryLoadProjectManifest(env.cwd).promise;
-    if (loadResult.isErr()) {
-      logManifestLoadError(loadResult.error);
-
-      return loadResult;
-    }
-    let manifest = loadResult.value;
 
     // packages that added to scope registry
     const pkgsInScope = Array.of<DomainName>();
@@ -298,32 +291,47 @@ export const add = async function (
       });
     }
     if (options.test) manifest = addTestable(manifest, name);
-    // save manifest
-    if (dirty) {
-      const saveResult = await trySaveProjectManifest(env.cwd, manifest)
-        .promise;
-      if (saveResult.isErr()) {
-        logManifestSaveError(saveResult.error);
-        return saveResult;
-      }
-    }
-    return Ok(dirty);
+
+    return Ok([manifest, dirty]);
   };
 
+  // load manifest
+  const loadResult = await tryLoadProjectManifest(env.cwd).promise;
+  if (loadResult.isErr()) {
+    logManifestLoadError(loadResult.error);
+    return Err([loadResult.error]);
+  }
+  let manifest = loadResult.value;
+
   // add
-  const results = Array.of<Result<boolean, AddError>>();
-  for (const pkg of pkgs) results.push(await addSingle(pkg));
+  const errors = Array.of<AddError>();
+  let dirty = false;
 
-  const [errors, dirty] = results.reduce(
-    ([errors, dirty], result) => {
-      if (result.isErr()) return [[...errors, result.error], dirty];
-      return [errors, result.value || dirty];
-    },
-    [Array.of<AddError>(), false]
-  );
+  for (const pkg of pkgs) {
+    const result = await tryAddToManifest(manifest, pkg);
+    if (result.isErr()) {
+      errors.push(result.error);
+      continue;
+    }
 
-  // print manifest notice
-  if (dirty) log.notice("", "please open Unity project to apply changes");
+    const [newManifest, manifestChanged] = result.value;
+    if (manifestChanged) {
+      manifest = newManifest;
+      dirty = true;
+    }
+  }
+
+  // Save manifest
+  if (dirty) {
+    const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
+    if (saveResult.isErr()) {
+      logManifestSaveError(saveResult.error);
+      return Err([saveResult.error]);
+    }
+
+    // print manifest notice
+    log.notice("", "please open Unity project to apply changes");
+  }
 
   return errors.length === 0 ? Ok(undefined) : Err(errors);
 };
