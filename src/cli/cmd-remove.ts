@@ -15,6 +15,7 @@ import { removeScope } from "../domain/scoped-registry";
 import {
   mapScopedRegistry,
   removeDependency,
+  UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
 import { Err, Ok, Result } from "ts-results-es";
@@ -37,28 +38,22 @@ export type RemoveOptions = CmdOptions;
 export const remove = async function (
   pkgs: PackageReference[] | PackageReference,
   options: RemoveOptions
-): Promise<Result<void, RemoveError[]>> {
+): Promise<Result<void, RemoveError>> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envResult = await parseEnv(options);
-  if (envResult.isErr()) return Err([envResult.error]);
+  if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
-  const removeSingle = async function (
+  const tryRemoveFromManifest = async function (
+    manifest: UnityProjectManifest,
     pkg: PackageReference
-  ): Promise<Result<void, RemoveError>> {
+  ): Promise<Result<UnityProjectManifest, RemoveError>> {
     // parse name
     if (hasVersion(pkg)) {
       log.warn("", `please do not specify a version (Write only '${pkg}').`);
       return Err(new PackageWithVersionError());
     }
-    // load manifest
-    const manifestResult = await tryLoadProjectManifest(env.cwd).promise;
-    if (manifestResult.isErr()) {
-      logManifestLoadError(manifestResult.error);
-      return manifestResult;
-    }
-    let manifest = manifestResult.value;
 
     // not found array
     const versionInManifest = manifest.dependencies[pkg];
@@ -74,30 +69,37 @@ export const remove = async function (
       return removeScope(initial, pkg);
     });
 
-    // save manifest
-    const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
-    if (saveResult.isErr()) {
-      logManifestSaveError(saveResult.error);
-      return saveResult;
-    }
-
     log.notice(
       "manifest",
       `removed ${makePackageReference(pkg, versionInManifest)}`
     );
-    return Ok(undefined);
+    return Ok(manifest);
   };
-  // remove
-  const results = Array.of<Result<void, RemoveError>>();
-  for (const pkg of pkgs) results.push(await removeSingle(pkg));
 
-  const errors = results.reduce((errors, result) => {
-    if (result.isErr()) return [...errors, result.error];
-    return errors;
-  }, Array.of<RemoveError>());
+  // load manifest
+  const manifestResult = await tryLoadProjectManifest(env.cwd).promise;
+  if (manifestResult.isErr()) {
+    logManifestLoadError(manifestResult.error);
+    return manifestResult;
+  }
+  let manifest = manifestResult.value;
+
+  // remove
+  for (const pkg of pkgs) {
+    const result = await tryRemoveFromManifest(manifest, pkg);
+    if (result.isErr()) return result;
+    manifest = result.value;
+  }
+
+  // save manifest
+  const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
+  if (saveResult.isErr()) {
+    logManifestSaveError(saveResult.error);
+    return saveResult;
+  }
 
   // print manifest notice
   log.notice("", "please open Unity project to apply changes");
 
-  return errors.length > 0 ? Err(errors) : Ok(undefined);
+  return Ok(undefined);
 };
