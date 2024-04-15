@@ -1,4 +1,3 @@
-import { Registry } from "./add-user-service";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import npmSearch from "libnpmsearch";
@@ -7,6 +6,7 @@ import log from "../cli/logger";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { DomainName } from "../domain/domain-name";
+import { Registry } from "../domain/registry";
 
 /**
  * A type representing a searched packument. Instead of having all versions

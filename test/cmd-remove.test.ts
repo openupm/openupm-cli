@@ -11,7 +11,7 @@ import {
   spyOnSavedManifest,
 } from "./project-manifest-io.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
-import {mockProjectVersion} from "./project-version-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");

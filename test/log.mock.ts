@@ -1,6 +1,5 @@
 import log from "../src/cli/logger";
 import { Logger, LogLevels } from "npmlog";
-import { EOL } from "node:os";
 
 type LogSpy = jest.SpyInstance<void, Parameters<Logger[LogLevels]>>;
 

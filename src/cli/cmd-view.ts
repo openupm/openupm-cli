@@ -39,7 +39,8 @@ export const view = async function (
     .tryFetchByName(env.registry, pkg)
     .andThen(async (packument) => {
       if (packument === null && env.upstream)
-        return await fetchService.tryFetchByName(env.upstreamRegistry, pkg).promise;
+        return await fetchService.tryFetchByName(env.upstreamRegistry, pkg)
+          .promise;
       return Ok(packument);
     })
     .andThen((packument) => {

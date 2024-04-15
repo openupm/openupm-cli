@@ -1,5 +1,4 @@
 import { VersionReference } from "./domain/package-reference";
-import { Registry } from "./services/add-user-service";
 import { DomainName } from "./domain/domain-name";
 import { SemanticVersion } from "./domain/semantic-version";
 import {
@@ -16,6 +15,7 @@ import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "./common-errors";
 import { PackumentFetchService } from "./services/fetch-packument";
+import { Registry } from "./domain/registry";
 
 /**
  * A version-reference that is resolvable.

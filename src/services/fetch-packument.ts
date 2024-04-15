@@ -5,7 +5,8 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { DomainName } from "../domain/domain-name";
-import { Registry } from "./add-user-service";
+
+import { Registry } from "../domain/registry";
 
 /**
  * Service for fetching packuments from a npm-registry.

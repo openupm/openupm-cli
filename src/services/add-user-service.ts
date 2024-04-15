@@ -1,4 +1,4 @@
-import RegClient, { NpmAuth } from "another-npm-registry-client";
+import RegClient from "another-npm-registry-client";
 import log from "../cli/logger";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
@@ -44,11 +44,6 @@ export interface AddUserService {
     password: string
   ): AsyncResult<AuthenticationToken, AuthenticationError>;
 }
-
-export type Registry = Readonly<{
-  url: RegistryUrl;
-  auth: NpmAuth | null;
-}>;
 
 /**
  * Makes a new {@link AddUserService}.

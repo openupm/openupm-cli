@@ -3,9 +3,9 @@ import { makePackumentFetchService } from "../src/services/fetch-packument";
 import { UnityPackument } from "../src/domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { makeDomainName } from "../src/domain/domain-name";
-import { Registry } from "../src/services/add-user-service";
 import { exampleRegistryUrl } from "./mock-registry";
 import RegClient from "another-npm-registry-client";
+import { Registry } from "../src/domain/registry";
 
 jest.mock("another-npm-registry-client");
 
@@ -34,7 +34,8 @@ describe("fetch packument service", () => {
     mockRegClientGetResult(null, packument);
     const service = makePackumentFetchService();
 
-    const result = await service.tryFetchByName(exampleRegistry, packageA).promise;
+    const result = await service.tryFetchByName(exampleRegistry, packageA)
+      .promise;
 
     expect(result).toBeOk((actual) => expect(actual).toEqual(packument));
   });
@@ -50,7 +51,8 @@ describe("fetch packument service", () => {
     );
     const service = makePackumentFetchService();
 
-    const result = await service.tryFetchByName(exampleRegistry, packageA).promise;
+    const result = await service.tryFetchByName(exampleRegistry, packageA)
+      .promise;
 
     expect(result).toBeOk((actual) => expect(actual).toBeNull());
   });
@@ -66,7 +68,8 @@ describe("fetch packument service", () => {
     );
     const service = makePackumentFetchService();
 
-    const result = await service.tryFetchByName(exampleRegistry, packageA).promise;
+    const result = await service.tryFetchByName(exampleRegistry, packageA)
+      .promise;
 
     expect(result).toBeError();
   });
