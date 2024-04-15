@@ -59,6 +59,7 @@ describe("cmd-add.ts", () => {
     },
     force: true,
   };
+
   describe("add", () => {
     let mockProject: MockUnityProject = null!;
 
@@ -162,6 +163,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should add packument with semantic version", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -177,6 +179,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should add packument with latest tag", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -192,6 +195,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should override packument with lower version", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -212,6 +216,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "modified");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should have no effect to add same packument twice", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -232,6 +237,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "existed");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should fail to add packument with unknown version", async function () {
       const warnSpy = spyOnLog("warn");
 
@@ -246,6 +252,7 @@ describe("cmd-add.ts", () => {
       );
       expect(warnSpy).toHaveLogLike("404", "2.0.0 is not a valid choice");
     });
+
     it("should add packument with http version", async function () {
       const noticeSpy = spyOnLog("notice");
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
@@ -265,6 +272,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should add packument with git version", async function () {
       const noticeSpy = spyOnLog("notice");
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
@@ -284,6 +292,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should add packument with file version", async function () {
       const noticeSpy = spyOnLog("notice");
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
@@ -303,6 +312,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should fail for unknown packument", async function () {
       const errorSpy = spyOnLog("error");
 
@@ -314,6 +324,7 @@ describe("cmd-add.ts", () => {
       );
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
+
     it("should be able to add multiple packuments", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -327,6 +338,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added com.base.package-b");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should add upstream packument", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -342,6 +354,7 @@ describe("cmd-add.ts", () => {
       );
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should fail for unknown upstream packument", async function () {
       const errorSpy = spyOnLog("error");
 
@@ -353,6 +366,7 @@ describe("cmd-add.ts", () => {
       );
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
+
     it("should add packument dependencies", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -368,6 +382,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should packument to testables when requested", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -380,6 +395,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should add packument with lower editor-version", async function () {
       const noticeSpy = spyOnLog("notice");
 
@@ -389,6 +405,7 @@ describe("cmd-add.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
+
     it("should fail to add packument with higher editor-version", async function () {
       const warnSpy = spyOnLog("warn");
 
@@ -400,6 +417,7 @@ describe("cmd-add.ts", () => {
         "requires 2020.2 but found 2019.2.13f1"
       );
     });
+
     it("should add packument with higher editor-version when forced", async function () {
       const warnSpy = spyOnLog("warn");
 
@@ -411,6 +429,7 @@ describe("cmd-add.ts", () => {
         "requires 2020.2 but found 2019.2.13f1"
       );
     });
+
     it("should not add packument with bad editor-version", async function () {
       const warnSpy = spyOnLog("warn");
 
@@ -419,6 +438,7 @@ describe("cmd-add.ts", () => {
       expect(addResult).toBeError();
       expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
     });
+
     it("should add packument with bad editor-version when forced", async function () {
       const warnSpy = spyOnLog("warn");
 
