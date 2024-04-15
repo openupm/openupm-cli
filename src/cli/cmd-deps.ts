@@ -1,6 +1,5 @@
 import log from "./logger";
 import { EnvParseError, parseEnv } from "../utils/env";
-import { makeNpmClient } from "../npm-client";
 import { isPackageUrl } from "../domain/package-url";
 import {
   makePackageReference,
@@ -15,6 +14,7 @@ import {
 import { fetchPackageDependencies } from "../dependency-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
+import { makePackumentFetchService } from "../services/fetch-packument";
 
 export type DepsError = EnvParseError;
 
@@ -41,7 +41,7 @@ export const deps = async function (
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
-  const client = makeNpmClient();
+  const fetchService = makePackumentFetchService();
 
   const [name, version] = splitPackageReference(pkg);
 
@@ -59,7 +59,7 @@ export const deps = async function (
     name,
     version,
     deep,
-    client
+    fetchService
   );
   depsValid
     .filter((x) => !x.self)

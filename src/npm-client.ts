@@ -54,16 +54,6 @@ type AllPackumentsResult = Readonly<{
  */
 export interface NpmClient {
   /**
-   * Attempts to get a packument from a registry.
-   * @param registry The registry to get the packument from.
-   * @param name The name of the packument to get.
-   */
-  tryFetchPackument(
-    registry: Registry,
-    name: DomainName
-  ): AsyncResult<UnityPackument | null, HttpErrorBase>;
-
-  /**
    * Attempts to add a user to a registry.
    * @param registryUrl The url of the registry into which to login.
    * @param username The username with which to login.
@@ -123,25 +113,6 @@ export const makeNpmClient = (): NpmClient => {
   // create client
   const registryClient = new RegClient({ log });
   return {
-    tryFetchPackument(registry, name) {
-      const url = `${registry.url}/${name}`;
-      return new AsyncResult(
-        new Promise((resolve) => {
-          return registryClient.get(
-            url,
-            { auth: registry.auth || undefined },
-            (error, packument) => {
-              if (error !== null) {
-                assertIsHttpError(error);
-                if (error.statusCode === 404) resolve(Ok(null));
-                else resolve(Err(error));
-              } else resolve(Ok(packument));
-            }
-          );
-        })
-      );
-    },
-
     addUser(registryUrl, username, email, password) {
       return new AsyncResult(
         new Promise((resolve) => {

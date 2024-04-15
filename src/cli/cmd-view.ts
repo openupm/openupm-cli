@@ -3,7 +3,6 @@ import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
 import { EnvParseError, parseEnv } from "../utils/env";
-import { makeNpmClient } from "../npm-client";
 import { hasVersion, PackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
@@ -13,6 +12,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../common-errors";
+import { makePackumentFetchService } from "../services/fetch-packument";
 
 export type ViewOptions = CmdOptions;
 
@@ -27,7 +27,7 @@ export const view = async function (
   if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
-  const client = makeNpmClient();
+  const fetchService = makePackumentFetchService();
 
   // parse name
   if (hasVersion(pkg)) {
@@ -35,12 +35,11 @@ export const view = async function (
     return Err(new PackageWithVersionError());
   }
   // verify name
-  return await client
-    .tryFetchPackument(env.registry, pkg)
+  return await fetchService
+    .tryFetchByName(env.registry, pkg)
     .andThen(async (packument) => {
       if (packument === null && env.upstream)
-        return await client.tryFetchPackument(env.upstreamRegistry, pkg)
-          .promise;
+        return await fetchService.tryFetchByName(env.upstreamRegistry, pkg).promise;
       return Ok(packument);
     })
     .andThen((packument) => {

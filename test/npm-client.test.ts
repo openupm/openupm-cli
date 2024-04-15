@@ -1,15 +1,12 @@
 import "assert";
 import { exampleRegistryUrl } from "./mock-registry";
-import { makeDomainName } from "../src/domain/domain-name";
 import {
   AuthenticationError,
   makeNpmClient,
   Registry,
 } from "../src/npm-client";
-import { UnityPackument } from "../src/domain/packument";
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
-import { buildPackument } from "./data-packument";
 import { Response } from "request";
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
@@ -18,24 +15,10 @@ jest.mock("another-npm-registry-client");
 jest.mock("libnpmsearch");
 jest.mock("npm-registry-fetch");
 
-const packageA = makeDomainName("package-a");
-
 const exampleRegistry: Registry = {
   url: exampleRegistryUrl,
   auth: null,
 };
-
-function mockRegClientGetResult(
-  error: HttpErrorBase | null,
-  packument: UnityPackument | null
-) {
-  jest.mocked(RegClient).mockImplementation(() => ({
-    adduser: () => undefined,
-    get: (_1, _2, cb) => {
-      cb(error, packument!, null!, null!);
-    },
-  }));
-}
 
 function mockRegClientAddUserResult(
   error: HttpErrorBase | null,
@@ -50,54 +33,6 @@ function mockRegClientAddUserResult(
 }
 
 describe("npm-client", () => {
-  describe("fetch packument", () => {
-    it("should get existing packument", async () => {
-      // TODO: Use prop test
-      const packument = buildPackument(packageA);
-      mockRegClientGetResult(null, packument);
-      const client = makeNpmClient();
-
-      const result = await client.tryFetchPackument(exampleRegistry, packageA)
-        .promise;
-
-      expect(result).toBeOk((actual) => expect(actual).toEqual(packument));
-    });
-
-    it("should not find unknown packument", async () => {
-      mockRegClientGetResult(
-        {
-          message: "not found",
-          name: "FakeError",
-          statusCode: 404,
-        } as HttpErrorBase,
-        null
-      );
-      const client = makeNpmClient();
-
-      const result = await client.tryFetchPackument(exampleRegistry, packageA)
-        .promise;
-
-      expect(result).toBeOk((actual) => expect(actual).toBeNull());
-    });
-
-    it("should fail for errors", async () => {
-      mockRegClientGetResult(
-        {
-          message: "Unauthorized",
-          name: "FakeError",
-          statusCode: 401,
-        } as HttpErrorBase,
-        null
-      );
-      const client = makeNpmClient();
-
-      const result = await client.tryFetchPackument(exampleRegistry, packageA)
-        .promise;
-
-      expect(result).toBeError();
-    });
-  });
-
   describe("add user", () => {
     it("should give token for valid user", async () => {
       const expected = "some token";

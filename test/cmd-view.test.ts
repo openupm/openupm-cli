@@ -14,7 +14,7 @@ import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
-import {mockProjectVersion} from "./project-version-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
