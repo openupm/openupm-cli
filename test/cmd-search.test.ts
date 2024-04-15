@@ -9,14 +9,11 @@ import {
 import { SearchEndpointResult } from "./types";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
-import {mockProjectVersion} from "./project-version-io.mock";
+import { mockProjectVersion } from "./project-version-io.mock";
 
 describe("cmd-search", () => {
-  let mockProject: MockUnityProject = null!;
-
   const options: SearchOptions = {
     _global: {
       registry: exampleRegistryUrl,
@@ -27,18 +24,6 @@ describe("cmd-search", () => {
   beforeEach(() => {
     mockUpmConfig(null);
     mockProjectVersion("2020.2.1f1");
-  });
-
-  beforeAll(async () => {
-    mockProject = await setupUnityProject({});
-  });
-
-  afterEach(async () => {
-    await mockProject.reset();
-  });
-
-  afterAll(async () => {
-    await mockProject.restore();
   });
 
   describe("search endpoint", () => {

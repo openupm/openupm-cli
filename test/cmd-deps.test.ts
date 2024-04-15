@@ -3,7 +3,6 @@ import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makePackageReference } from "../src/domain/package-reference";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
@@ -17,8 +16,6 @@ describe("cmd-deps", () => {
     },
   };
   describe("deps", () => {
-    let mockProject: MockUnityProject = null!;
-
     const remotePackumentA = buildPackument(
       "com.example.package-a",
       (packument) =>
@@ -38,10 +35,6 @@ describe("cmd-deps", () => {
       (packument) => packument.addVersion("1.0.0")
     );
 
-    beforeAll(async () => {
-      mockProject = await setupUnityProject({});
-    });
-
     beforeEach(() => {
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentA],
@@ -50,14 +43,6 @@ describe("cmd-deps", () => {
       );
       mockProjectVersion("2020.2.1f1");
       mockUpmConfig(null);
-    });
-
-    afterEach(async () => {
-      await mockProject.reset();
-    });
-
-    afterAll(async () => {
-      await mockProject.restore();
     });
 
     it("should print direct dependencies", async () => {

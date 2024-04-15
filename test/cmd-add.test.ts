@@ -4,7 +4,6 @@ import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { PackageUrl } from "../src/domain/package-url";
 import { makePackageReference } from "../src/domain/package-reference";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { spyOnLog } from "./log.mock";
@@ -66,8 +65,6 @@ describe("cmd-add", () => {
   };
 
   describe("add", () => {
-    let mockProject: MockUnityProject = null!;
-
     const remotePackumentA = buildPackument(packageA, (packument) =>
       packument.addVersion("0.1.0").addVersion("1.0.0")
     );
@@ -131,21 +128,10 @@ describe("cmd-add", () => {
     );
 
     beforeEach(() => {
+      spyOnSavedManifest();
       mockProjectManifest(emptyProjectManifest);
       mockUpmConfig(null);
       mockProjectVersion("2019.2.13f1");
-    });
-
-    beforeAll(async () => {
-      mockProject = await setupUnityProject({ version: "2019.2.13f1" });
-    });
-
-    afterEach(async () => {
-      await mockProject.reset();
-    });
-
-    afterAll(async () => {
-      await mockProject.restore();
     });
 
     it("should add packument without version", async () => {
