@@ -4,17 +4,15 @@ import { Env, parseEnv } from "../src/utils/env";
 import log from "../src/cli/logger";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
-import {
-  tryGetUpmConfigDir,
-  tryLoadUpmConfig,
-} from "../src/io/upm-config-io";
+import { tryGetUpmConfigDir } from "../src/io/upm-config-io";
 import { testRootPath } from "./setup/unity-project";
 import { exampleRegistryUrl } from "./mock-registry";
 import fs from "fs";
 import { NotFoundError } from "../src/io/file-io";
 import { FileParseError, IOError } from "../src/common-errors";
 import { makeEditorVersion } from "../src/domain/editor-version";
-import {NoWslError} from "../src/io/wls";
+import { NoWslError } from "../src/io/wls";
+import { mockUpmConfig } from "./upm-config-io.mock";
 
 jest.mock("../src/io/project-version-io");
 jest.mock("../src/io/upm-config-io");
@@ -51,7 +49,7 @@ describe("env", () => {
     jest
       .mocked(tryGetUpmConfigDir)
       .mockReturnValue(Ok(testRootPath).toAsyncResult());
-    jest.mocked(tryLoadUpmConfig).mockReturnValue(Ok(null).toAsyncResult());
+    mockUpmConfig(null);
 
     // The project has a ProjectVersion.txt
     jest
@@ -314,11 +312,9 @@ describe("env", () => {
     });
 
     it("should have no auth if upm-config had no entry for the url", async () => {
-      jest.mocked(tryLoadUpmConfig).mockReturnValue(
-        Ok({
-          npmAuth: {},
-        }).toAsyncResult()
-      );
+      mockUpmConfig({
+        npmAuth: {},
+      });
 
       const result = await parseEnv({
         _global: {
@@ -332,9 +328,7 @@ describe("env", () => {
     });
 
     it("should have auth if upm-config had entry for the url", async () => {
-      jest
-        .mocked(tryLoadUpmConfig)
-        .mockReturnValue(Ok(testUpmConfig).toAsyncResult());
+      mockUpmConfig(testUpmConfig);
 
       const result = await parseEnv({
         _global: {

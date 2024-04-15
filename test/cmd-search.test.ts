@@ -11,6 +11,7 @@ import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
+import { mockUpmConfig } from "./upm-config-io.mock";
 
 describe("cmd-search.ts", () => {
   let mockProject: MockUnityProject = null!;
@@ -21,6 +22,10 @@ describe("cmd-search.ts", () => {
       upstream: false,
     },
   };
+
+  beforeEach(() => {
+    mockUpmConfig(null);
+  });
 
   beforeAll(async function () {
     mockProject = await setupUnityProject({});

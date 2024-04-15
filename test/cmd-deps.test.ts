@@ -7,6 +7,7 @@ import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
+import {mockUpmConfig} from "./upm-config-io.mock";
 
 describe("cmd-deps.ts", () => {
   const options: DepsOptions = {
@@ -46,6 +47,7 @@ describe("cmd-deps.ts", () => {
         [exampleRegistryUrl, remotePackumentB],
         [unityRegistryUrl, remotePackumentUp]
       );
+      mockUpmConfig(null);
     });
 
     afterEach(async function () {

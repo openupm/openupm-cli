@@ -18,6 +18,7 @@ import {
   addDependency,
   emptyProjectManifest,
 } from "../src/domain/project-manifest";
+import { mockUpmConfig } from "./upm-config-io.mock";
 
 describe("cmd-add.ts", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -130,6 +131,7 @@ describe("cmd-add.ts", () => {
 
     beforeEach(() => {
       mockProjectManifest(emptyProjectManifest);
+      mockUpmConfig(null);
     });
 
     beforeAll(async function () {

@@ -13,6 +13,7 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { makePackageReference } from "../src/domain/package-reference";
 import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
+import {mockUpmConfig} from "./upm-config-io.mock";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
@@ -106,6 +107,7 @@ describe("cmd-view.ts", () => {
     });
 
     beforeEach(function () {
+      mockUpmConfig(null);
       startMockRegistry();
       registerRemotePackument(remotePackumentA);
       registerMissingPackument(packageMissing);
