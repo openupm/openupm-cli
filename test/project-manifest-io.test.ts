@@ -3,36 +3,21 @@ import {
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../src/io/project-manifest-io";
-import { DomainName, makeDomainName } from "../src/domain/domain-name";
-import { makeSemanticVersion } from "../src/domain/semantic-version";
 import {
-  addDependency,
+  emptyProjectManifest,
   mapScopedRegistry,
 } from "../src/domain/project-manifest";
-import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
-import fse from "fs-extra";
 import path from "path";
-import { buildProjectManifest } from "./data-project-manifest";
-import { removeScope } from "../src/domain/scoped-registry";
-import { exampleRegistryUrl } from "./mock-registry";
-import { FileParseError } from "../src/common-errors";
+import { FileParseError, IOError } from "../src/common-errors";
+import * as fileIoModule from "../src/io/file-io";
 import { NotFoundError } from "../src/io/file-io";
+import { Err, Ok } from "ts-results-es";
+import { buildProjectManifest } from "./data-project-manifest";
+import { DomainName } from "../src/domain/domain-name";
+import { exampleRegistryUrl } from "./mock-registry";
+import { removeScope } from "../src/domain/scoped-registry";
 
 describe("project-manifest io", () => {
-  let mockProject: MockUnityProject = null!;
-
-  beforeAll(async () => {
-    mockProject = await setupUnityProject({});
-  });
-
-  afterEach(async () => {
-    await mockProject.reset();
-  });
-
-  afterAll(async () => {
-    await mockProject.restore();
-  });
-
   describe("path", () => {
     it("should determine correct manifest path", () => {
       const manifestPath = manifestPathFor("test-openupm-cli");
@@ -46,82 +31,127 @@ describe("project-manifest io", () => {
   });
 
   describe("load", () => {
+    it("should fail if file could not be read", async () => {
+      jest
+        .spyOn(fileIoModule, "tryReadTextFromFile")
+        .mockReturnValue(Err(new IOError()).toAsyncResult());
+
+      const result = await tryLoadProjectManifest("/some/path").promise;
+
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(FileParseError)
+      );
+    });
+
+    it("should fail if file is not found", async () => {
+      jest
+        .spyOn(fileIoModule, "tryReadTextFromFile")
+        .mockReturnValue(Err(new NotFoundError("/some/path")).toAsyncResult());
+
+      const result = await tryLoadProjectManifest("/some/path").promise;
+
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(NotFoundError)
+      );
+    });
+
+    it("should fail if file does not contain json", async () => {
+      jest
+        .spyOn(fileIoModule, "tryReadTextFromFile")
+        .mockReturnValue(Ok("{} dang, this is not json []").toAsyncResult());
+
+      const result = await tryLoadProjectManifest("/some/path").promise;
+
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(FileParseError)
+      );
+    });
+
     it("should load valid manifest", async () => {
-      const manifestResult = await tryLoadProjectManifest(
-        mockProject.projectPath
-      ).promise;
+      jest
+        .spyOn(fileIoModule, "tryReadTextFromFile")
+        .mockReturnValue(
+          Ok(`{ "dependencies": { "com.package.a": "1.0.0"} }`).toAsyncResult()
+        );
 
-      expect(manifestResult).toBeOk((manifest) =>
-        expect(manifest).toEqual({ dependencies: {} })
-      );
-    });
+      const result = await tryLoadProjectManifest("/some/path").promise;
 
-    it("should fail when manifest is missing", async () => {
-      const manifestResult = await tryLoadProjectManifest("/invalid-path")
-        .promise;
-
-      expect(manifestResult).toBeError((error) =>
-        expect(error).toBeInstanceOf(NotFoundError)
-      );
-    });
-
-    it("should fail when manifest has invalid json", async () => {
-      const manifestPath = manifestPathFor(mockProject.projectPath);
-      fse.writeFileSync(manifestPath, "invalid data");
-
-      const manifestResult = await tryLoadProjectManifest(
-        mockProject.projectPath
-      ).promise;
-      expect(manifestResult).toBeError((error) =>
-        expect(error).toBeInstanceOf(FileParseError)
+      expect(result).toBeOk((actual) =>
+        expect(actual).toEqual({
+          dependencies: {
+            "com.package.a": "1.0.0",
+          },
+        })
       );
     });
   });
 
   describe("save", () => {
-    it("should save manifest", async () => {
-      let manifest = (
-        await tryLoadProjectManifest(mockProject.projectPath).promise
-      ).unwrap();
-      expect(manifest).not.toHaveDependencies();
-      manifest = addDependency(
-        manifest,
-        makeDomainName("some-pack"),
-        makeSemanticVersion("1.0.0")
-      );
-      expect(
-        await trySaveProjectManifest(mockProject.projectPath, manifest).promise
-      ).toBeOk();
-      const manifest2 = (
-        await tryLoadProjectManifest(mockProject.projectPath).promise
-      ).unwrap();
-      expect(manifest2).toEqual(manifest);
+    it("should fail if file could not be written", async () => {
+      const expected = new IOError();
+      jest
+        .spyOn(fileIoModule, "tryWriteTextToFile")
+        .mockReturnValue(Err(expected).toAsyncResult());
+
+      const result = await trySaveProjectManifest(
+        "/some/path",
+        emptyProjectManifest
+      ).promise;
+
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
-    it("should not save scoped-registry with empty scopes", async () => {
+    it("should write manifest json", async () => {
+      const writeSpy = jest
+        .spyOn(fileIoModule, "tryWriteTextToFile")
+        .mockReturnValue(Ok(undefined).toAsyncResult());
+      const manifest = buildProjectManifest((manifest) =>
+        manifest.addDependency("com.package.a", "1.0.0", true, true)
+      );
+
+      await trySaveProjectManifest("/some/path", manifest).promise;
+
+      expect(writeSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        JSON.stringify(
+          {
+            dependencies: {
+              "com.package.a": "1.0.0",
+            },
+            scopedRegistries: [
+              {
+                name: "example.com",
+                url: exampleRegistryUrl,
+                scopes: ["com.package.a"],
+              },
+            ],
+            testables: ["com.package.a"],
+          },
+          null,
+          2
+        )
+      );
+    });
+
+    it("should prune manifest before saving", async () => {
+      const writeSpy = jest
+        .spyOn(fileIoModule, "tryWriteTextToFile")
+        .mockReturnValue(Ok(undefined).toAsyncResult());
       // Add and then remove a scope to force an empty scoped-registry
       const testDomain = "test" as DomainName;
-      let initialManifest = buildProjectManifest((manifest) =>
+      let manifest = buildProjectManifest((manifest) =>
         manifest.addScope(testDomain)
       );
-      initialManifest = mapScopedRegistry(
-        initialManifest,
-        exampleRegistryUrl,
-        (registry) => {
-          return removeScope(registry!, testDomain);
-        }
+      manifest = mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
+        return removeScope(registry!, testDomain);
+      });
+
+      await trySaveProjectManifest("/some/path", manifest).promise;
+
+      expect(writeSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        JSON.stringify({ dependencies: {}, scopedRegistries: [] }, null, 2)
       );
-
-      // Save and load manifest
-      expect(
-        await trySaveProjectManifest(mockProject.projectPath, initialManifest)
-          .promise
-      ).toBeOk();
-      const savedManifest = (
-        await tryLoadProjectManifest(mockProject.projectPath).promise
-      ).unwrap();
-
-      expect(savedManifest.scopedRegistries).toHaveLength(0);
     });
   });
 });
