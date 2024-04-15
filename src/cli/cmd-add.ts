@@ -87,11 +87,11 @@ export type AddError =
 export const add = async function (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
-): Promise<Result<void, AddError[]>> {
+): Promise<Result<void, AddError>> {
   if (!Array.isArray(pkgs)) pkgs = [pkgs];
   // parse env
   const envResult = await parseEnv(options);
-  if (envResult.isErr()) return Err([envResult.error]);
+  if (envResult.isErr()) return envResult;
   const env = envResult.value;
 
   const client = makeNpmClient();
@@ -299,20 +299,15 @@ export const add = async function (
   const loadResult = await tryLoadProjectManifest(env.cwd).promise;
   if (loadResult.isErr()) {
     logManifestLoadError(loadResult.error);
-    return Err([loadResult.error]);
+    return loadResult;
   }
   let manifest = loadResult.value;
 
   // add
-  const errors = Array.of<AddError>();
   let dirty = false;
-
   for (const pkg of pkgs) {
     const result = await tryAddToManifest(manifest, pkg);
-    if (result.isErr()) {
-      errors.push(result.error);
-      continue;
-    }
+    if (result.isErr()) return result;
 
     const [newManifest, manifestChanged] = result.value;
     if (manifestChanged) {
@@ -326,12 +321,12 @@ export const add = async function (
     const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
       logManifestSaveError(saveResult.error);
-      return Err([saveResult.error]);
+      return saveResult;
     }
 
     // print manifest notice
     log.notice("", "please open Unity project to apply changes");
   }
 
-  return errors.length === 0 ? Ok(undefined) : Err(errors);
+  return Ok(undefined);
 };
