@@ -9,7 +9,7 @@ import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
 import {mockUpmConfig} from "./upm-config-io.mock";
 
-describe("cmd-deps.ts", () => {
+describe("cmd-deps", () => {
   const options: DepsOptions = {
     _global: {
       registry: exampleRegistryUrl,

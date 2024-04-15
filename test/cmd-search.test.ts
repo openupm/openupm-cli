@@ -13,7 +13,7 @@ import { MockUnityProject, setupUnityProject } from "./setup/unity-project";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
 
-describe("cmd-search.ts", () => {
+describe("cmd-search", () => {
   let mockProject: MockUnityProject = null!;
 
   const options: SearchOptions = {

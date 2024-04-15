@@ -19,7 +19,7 @@ const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
 const packageMissing = makeDomainName("pkg-not-exist");
 
-describe("cmd-view.ts", () => {
+describe("cmd-view", () => {
   const options: ViewOptions = {
     _global: {
       color: false,
