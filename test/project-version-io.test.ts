@@ -12,7 +12,7 @@ describe("project-version-io", () => {
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Err(expected).toAsyncResult());
 
-      const result = await tryLoadProjectVersion("/some/bad/path");
+      const result = await tryLoadProjectVersion("/some/bad/path").promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
@@ -22,7 +22,7 @@ describe("project-version-io", () => {
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Ok("this is not valid yaml").toAsyncResult());
 
-      const result = await tryLoadProjectVersion("/some/path");
+      const result = await tryLoadProjectVersion("/some/path").promise;
 
       expect(result).toBeError((actual) =>
         expect(actual).toBeInstanceOf(FileParseError)
@@ -36,7 +36,7 @@ describe("project-version-io", () => {
           Ok("thisIsYaml: but not what we want").toAsyncResult()
         );
 
-      const result = await tryLoadProjectVersion("/some/path");
+      const result = await tryLoadProjectVersion("/some/path").promise;
 
       expect(result).toBeError((actual) =>
         expect(actual).toBeInstanceOf(FileParseError)
@@ -49,7 +49,7 @@ describe("project-version-io", () => {
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Ok(`m_EditorVersion: ${expected}`).toAsyncResult());
 
-      const result = await tryLoadProjectVersion("/some/path");
+      const result = await tryLoadProjectVersion("/some/path").promise;
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });

@@ -148,7 +148,7 @@ export const parseEnv = async function (
   const cwd = cwdResult.value;
 
   // editor version
-  const projectVersionLoadResult = await tryLoadProjectVersion(cwd);
+  const projectVersionLoadResult = await tryLoadProjectVersion(cwd).promise;
   if (projectVersionLoadResult.isErr()) {
     if (projectVersionLoadResult.error instanceof NotFoundError)
       log.warn(

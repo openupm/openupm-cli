@@ -41,7 +41,7 @@ export function tryCreateProjectVersionTxt(
  */
 export function tryLoadProjectVersion(
   projectDirPath: string
-): Promise<Result<string, ProjectVersionLoadError>> {
+): AsyncResult<string, ProjectVersionLoadError> {
   const filePath = projectVersionTxtPathFor(projectDirPath);
 
   return tryReadTextFromFile(filePath)
@@ -63,5 +63,5 @@ export function tryLoadProjectVersion(
         return Err(new FileParseError(filePath, "Project-version"));
 
       return Ok(content.m_EditorVersion);
-    }).promise;
+    });
 }

@@ -54,7 +54,7 @@ describe("env", () => {
     // The project has a ProjectVersion.txt
     jest
       .mocked(tryLoadProjectVersion)
-      .mockResolvedValue(Ok(testProjectVersion));
+      .mockReturnValue(Ok(testProjectVersion).toAsyncResult());
   });
 
   describe("log-level", () => {
@@ -447,7 +447,9 @@ describe("env", () => {
 
     it("should be original string for non-release versions", async () => {
       const expected = "2022.3";
-      jest.mocked(tryLoadProjectVersion).mockResolvedValue(Ok(expected));
+      jest
+        .mocked(tryLoadProjectVersion)
+        .mockReturnValue(Ok(expected).toAsyncResult());
 
       const result = await parseEnv({
         _global: {},
@@ -460,7 +462,9 @@ describe("env", () => {
 
     it("should be original string for non-version string", async () => {
       const expected = "Bad version";
-      jest.mocked(tryLoadProjectVersion).mockResolvedValue(Ok(expected));
+      jest
+        .mocked(tryLoadProjectVersion)
+        .mockReturnValue(Ok(expected).toAsyncResult());
 
       const result = await parseEnv({
         _global: {},
@@ -473,7 +477,9 @@ describe("env", () => {
 
     it("should fail if ProjectVersion.txt could not be loaded", async () => {
       const expected = new IOError();
-      jest.mocked(tryLoadProjectVersion).mockResolvedValue(Err(expected));
+      jest
+        .mocked(tryLoadProjectVersion)
+        .mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await parseEnv({
         _global: {},
@@ -485,8 +491,10 @@ describe("env", () => {
     it("should notify of missing ProjectVersion.txt", async () => {
       jest
         .mocked(tryLoadProjectVersion)
-        .mockResolvedValue(
-          Err(new NotFoundError("/some/path/ProjectVersion.txt"))
+        .mockReturnValue(
+          Err(
+            new NotFoundError("/some/path/ProjectVersion.txt")
+          ).toAsyncResult()
         );
       const logSpy = jest.spyOn(log, "warn");
 
@@ -503,13 +511,13 @@ describe("env", () => {
     it("should notify of parsing issue", async () => {
       jest
         .mocked(tryLoadProjectVersion)
-        .mockResolvedValue(
+        .mockReturnValue(
           Err(
             new FileParseError(
               "/some/path/ProjectVersion.txt",
               "ProjectVersion.txt"
             )
-          )
+          ).toAsyncResult()
         );
       const logSpy = jest.spyOn(log, "error");
 
