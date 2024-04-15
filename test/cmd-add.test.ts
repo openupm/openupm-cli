@@ -1,5 +1,4 @@
 import { add, AddOptions } from "../src/cli/cmd-add";
-import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { PackageUrl } from "../src/domain/package-url";
@@ -19,6 +18,7 @@ import {
 } from "../src/domain/project-manifest";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
+import { exampleRegistryUrl } from "./data-registry";
 
 describe("cmd-add", () => {
   const packageMissing = makeDomainName("pkg-not-exist");

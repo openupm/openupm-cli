@@ -11,9 +11,9 @@ import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../src/domain/scoped-registry";
 import { makeRegistryUrl } from "../src/domain/registry-url";
-import { exampleRegistryUrl } from "./mock-registry";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
+import { exampleRegistryUrl } from "./data-registry";
 
 describe("project-manifest", () => {
   describe("dependency", () => {

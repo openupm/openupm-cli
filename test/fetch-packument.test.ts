@@ -3,9 +3,9 @@ import { makePackumentFetchService } from "../src/services/fetch-packument";
 import { UnityPackument } from "../src/domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { makeDomainName } from "../src/domain/domain-name";
-import { exampleRegistryUrl } from "./mock-registry";
 import RegClient from "another-npm-registry-client";
 import { Registry } from "../src/domain/registry";
+import { exampleRegistryUrl } from "./data-registry";
 
 jest.mock("another-npm-registry-client");
 

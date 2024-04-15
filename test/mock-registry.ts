@@ -1,10 +1,9 @@
 import nock from "nock";
 import { isDomainName } from "../src/domain/domain-name";
 import assert from "assert";
-import { makeRegistryUrl, unityRegistryUrl } from "../src/domain/registry-url";
+import { unityRegistryUrl } from "../src/domain/registry-url";
 import { UnityPackument } from "../src/domain/packument";
-
-export const exampleRegistryUrl = makeRegistryUrl("http://example.com");
+import { exampleRegistryUrl } from "./data-registry";
 
 export function startMockRegistry() {
   if (!nock.isActive()) nock.activate();

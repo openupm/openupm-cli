@@ -1,5 +1,4 @@
 import { remove } from "../src/cli/cmd-remove";
-import { exampleRegistryUrl } from "./mock-registry";
 import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
@@ -11,6 +10,7 @@ import {
 } from "./project-manifest-io.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
+import { exampleRegistryUrl } from "./data-registry";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");

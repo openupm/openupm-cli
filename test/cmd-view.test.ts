@@ -1,5 +1,4 @@
 import { view, ViewOptions } from "../src/cli/cmd-view";
-import { exampleRegistryUrl } from "./mock-registry";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
@@ -10,6 +9,7 @@ import { mockProjectVersion } from "./project-version-io.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
 import { mockFetchPackumentService } from "./fetch-packument.mock";
 import { makePackumentFetchService } from "../src/services/fetch-packument";
+import { exampleRegistryUrl } from "./data-registry";
 
 jest.mock("../src/services/fetch-packument");
 

@@ -14,8 +14,8 @@ import { NotFoundError } from "../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { buildProjectManifest } from "./data-project-manifest";
 import { DomainName } from "../src/domain/domain-name";
-import { exampleRegistryUrl } from "./mock-registry";
 import { removeScope } from "../src/domain/scoped-registry";
+import { exampleRegistryUrl } from "./data-registry";
 
 describe("project-manifest io", () => {
   describe("path", () => {

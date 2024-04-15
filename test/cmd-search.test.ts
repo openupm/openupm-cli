@@ -1,5 +1,4 @@
 import { search, SearchOptions } from "../src/cli/cmd-search";
-import { exampleRegistryUrl } from "./mock-registry";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { spyOnLog } from "./log.mock";
@@ -7,6 +6,7 @@ import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
 import { mockSearchService } from "./search-service.mock";
 import { makeSearchService, SearchedPackument } from "../src/services/search";
+import { exampleRegistryUrl } from "./data-registry";
 
 jest.mock("../src/services/search");
 

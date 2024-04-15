@@ -1,6 +1,5 @@
 import assert from "assert";
 import { isDomainName } from "../src/domain/domain-name";
-import { exampleRegistryUrl } from "./mock-registry";
 import { isSemanticVersion } from "../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../src/domain/scoped-registry";
 import {
@@ -10,6 +9,7 @@ import {
   mapScopedRegistry,
   UnityProjectManifest,
 } from "../src/domain/project-manifest";
+import { exampleRegistryUrl } from "./data-registry";
 
 /**
  * Builder class for {@link UnityProjectManifest}.

@@ -1,5 +1,4 @@
 import "assert";
-import { exampleRegistryUrl } from "./mock-registry";
 import {
   AuthenticationError,
   makeAddUserService,
@@ -7,6 +6,7 @@ import {
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { Response } from "request";
+import { exampleRegistryUrl } from "./data-registry";
 
 jest.mock("another-npm-registry-client");
 
