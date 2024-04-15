@@ -51,7 +51,7 @@ describe("cmd-remove.ts", () => {
       expect(noticeSpy).toHaveLogLike("manifest", "removed ");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
-    it("should remove packument with semantic version", async function () {
+    it("should fail to remove packument with semantic version", async function () {
       const warnSpy = spyOnLog("warn");
       const options = {
         _global: {
