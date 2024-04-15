@@ -468,5 +468,25 @@ describe("cmd-add.ts", () => {
       expect(addResult).toBeOk();
       expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
     });
+
+    it("should perform multiple adds atomically", async () => {
+      mockResolvedPackuments(
+        [exampleRegistryUrl, remotePackumentA],
+        [exampleRegistryUrl, remotePackumentB]
+      );
+
+      const addResult = await add(
+        // Second package will fail.
+        // Because of this the whole operation should fail.
+        [packageA, packageMissing, packageB],
+        upstreamOptions
+      );
+
+      expect(addResult).toBeError();
+      // Since not all packages could be added, the manifest should not be modified.
+      await mockProject.tryAssertManifest((manifest) =>
+        expect(manifest).toEqual(defaultManifest)
+      );
+    });
   });
 });
