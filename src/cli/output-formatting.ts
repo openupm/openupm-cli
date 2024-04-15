@@ -18,7 +18,9 @@ type TableablePackument = Pick<UnityPackument, "name" | "time" | "date"> &
  * as a single string (Includes line breaks).
  * @param packuments The packuments.
  */
-export function formatAsTable(packuments: TableablePackument[]): string {
+export function formatAsTable(
+  packuments: ReadonlyArray<TableablePackument>
+): string {
   const table = new Table({
     head: ["Name", "Version", "Date"],
     colWidths: [42, 20, 12],

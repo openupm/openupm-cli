@@ -37,7 +37,7 @@ export type SearchService = {
   trySearch(
     registry: Registry,
     keyword: string
-  ): AsyncResult<SearchedPackument[], HttpErrorBase>;
+  ): AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase>;
 
   /**
    * Attempts to query the /-/all endpoint.
