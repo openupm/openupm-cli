@@ -10,6 +10,14 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { spyOnLog } from "./log.mock";
 import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
+import {
+  mockProjectManifest,
+  spyOnSavedManifest,
+} from "./project-manifest-io.mock";
+import {
+  addDependency,
+  emptyProjectManifest,
+} from "../src/domain/project-manifest";
 
 describe("cmd-add.ts", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -102,7 +110,6 @@ describe("cmd-add.ts", () => {
       packument.addVersion("1.0.0")
     );
 
-    const defaultManifest = buildProjectManifest();
     const expectedManifestA = buildProjectManifest((manifest) =>
       manifest.addDependency(packageA, "1.0.0", true, false)
     );
@@ -121,6 +128,10 @@ describe("cmd-add.ts", () => {
       manifest.addDependency(packageA, "1.0.0", true, true)
     );
 
+    beforeEach(() => {
+      mockProjectManifest(emptyProjectManifest);
+    });
+
     beforeAll(async function () {
       mockProject = await setupUnityProject({ version: "2019.2.13f1" });
     });
@@ -135,13 +146,15 @@ describe("cmd-add.ts", () => {
 
     it("should add packument without version", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(packageA, options);
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestA)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestA
       );
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
@@ -149,6 +162,7 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with semantic version", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(
@@ -157,8 +171,9 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestA)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestA
       );
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
@@ -166,6 +181,7 @@ describe("cmd-add.ts", () => {
 
     it("should add packument with latest tag", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(
@@ -174,8 +190,9 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestA)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestA
       );
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
@@ -183,21 +200,22 @@ describe("cmd-add.ts", () => {
 
     it("should override packument with lower version", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
-
-      const addResult1 = await add(
-        makePackageReference(packageA, makeSemanticVersion("0.1.0")),
-        options
+      mockProjectManifest(
+        // Manifest already had package with a lower version
+        addDependency(expectedManifestA, packageA, makeSemanticVersion("0.1.0"))
       );
-      const addResult2 = await add(
+
+      const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
 
-      expect(addResult1).toBeOk();
-      expect(addResult2).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestA)
+      expect(addResult).toBeOk();
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestA
       );
       expect(noticeSpy).toHaveLogLike("manifest", "modified");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
@@ -205,28 +223,26 @@ describe("cmd-add.ts", () => {
 
     it("should have no effect to add same packument twice", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
+      mockProjectManifest(
+        // Manifest already had package with same version
+        addDependency(expectedManifestA, packageA, makeSemanticVersion("1.0.0"))
+      );
 
-      const addResult1 = await add(
+      const addResult = await add(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
-      const addResult2 = await add(
-        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
-        options
-      );
 
-      expect(addResult1).toBeOk();
-      expect(addResult2).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestA)
-      );
+      expect(addResult).toBeOk();
+      expect(savedManifestSpy).not.toHaveBeenCalled();
       expect(noticeSpy).toHaveLogLike("manifest", "existed");
-      expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
     it("should fail to add packument with unknown version", async function () {
       const warnSpy = spyOnLog("warn");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(
@@ -235,14 +251,13 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeError();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(defaultManifest)
-      );
+      expect(savedManifestSpy).not.toHaveBeenCalled();
       expect(warnSpy).toHaveLogLike("404", "2.0.0 is not a valid choice");
     });
 
     it("should add packument with http version", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
 
       const addResult = await add(
@@ -251,18 +266,16 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toHaveDependency(packageA, gitUrl)
-      );
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).not.toHaveScopedRegistries()
-      );
+      expect(savedManifestSpy).toHaveBeenCalledWith(expect.any(String), {
+        dependencies: { [packageA]: gitUrl },
+      });
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
     it("should add packument with git version", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
 
       const addResult = await add(
@@ -271,18 +284,16 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toHaveDependency(packageA, gitUrl)
-      );
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).not.toHaveScopedRegistries()
-      );
+      expect(savedManifestSpy).toHaveBeenCalledWith(expect.any(String), {
+        dependencies: { [packageA]: gitUrl },
+      });
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
     it("should add packument with file version", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
 
       const addResult = await add(
@@ -291,31 +302,28 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toHaveDependency(packageA, fileUrl)
-      );
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).not.toHaveScopedRegistries()
-      );
+      expect(savedManifestSpy).toHaveBeenCalledWith(expect.any(String), {
+        dependencies: { [packageA]: fileUrl },
+      });
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
 
     it("should fail for unknown packument", async function () {
       const errorSpy = spyOnLog("error");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments();
 
       const addResult = await add(packageMissing, options);
 
       expect(addResult).toBeError();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(defaultManifest)
-      );
+      expect(savedManifestSpy).not.toHaveBeenCalled();
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
 
     it("should be able to add multiple packuments", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentA],
         [exampleRegistryUrl, remotePackumentB]
@@ -324,8 +332,9 @@ describe("cmd-add.ts", () => {
       const addResult = await add([packageA, packageB], options);
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestAB)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestAB
       );
       expect(noticeSpy).toHaveLogLike("manifest", "added com.base.package-a");
       expect(noticeSpy).toHaveLogLike("manifest", "added com.base.package-b");
@@ -334,13 +343,15 @@ describe("cmd-add.ts", () => {
 
     it("should add upstream packument", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([unityRegistryUrl, remotePackumentUp]);
 
       const addResult = await add(packageUp, upstreamOptions);
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestUpstream)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestUpstream
       );
       expect(noticeSpy).toHaveLogLike(
         "manifest",
@@ -351,19 +362,19 @@ describe("cmd-add.ts", () => {
 
     it("should fail for unknown upstream packument", async function () {
       const errorSpy = spyOnLog("error");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments();
 
       const addResult = await add(packageMissing, upstreamOptions);
 
       expect(addResult).toBeError();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(defaultManifest)
-      );
+      expect(savedManifestSpy).not.toHaveBeenCalled();
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
 
     it("should add packument dependencies", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentC],
         [exampleRegistryUrl, remotePackumentD],
@@ -376,8 +387,9 @@ describe("cmd-add.ts", () => {
       );
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestC)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestC
       );
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
@@ -385,13 +397,15 @@ describe("cmd-add.ts", () => {
 
     it("should packument to testables when requested", async function () {
       const noticeSpy = spyOnLog("notice");
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
       const addResult = await add(packageA, testableOptions);
 
       expect(addResult).toBeOk();
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(expectedManifestTestable)
+      expect(savedManifestSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expectedManifestTestable
       );
       expect(noticeSpy).toHaveLogLike("manifest", "added");
       expect(noticeSpy).toHaveLogLike("", "open Unity");
@@ -470,6 +484,7 @@ describe("cmd-add.ts", () => {
     });
 
     it("should perform multiple adds atomically", async () => {
+      const savedManifestSpy = spyOnSavedManifest();
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentA],
         [exampleRegistryUrl, remotePackumentB]
@@ -484,9 +499,7 @@ describe("cmd-add.ts", () => {
 
       expect(addResult).toBeError();
       // Since not all packages could be added, the manifest should not be modified.
-      await mockProject.tryAssertManifest((manifest) =>
-        expect(manifest).toEqual(defaultManifest)
-      );
+      expect(savedManifestSpy).not.toHaveBeenCalled();
     });
   });
 });
