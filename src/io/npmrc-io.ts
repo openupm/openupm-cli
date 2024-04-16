@@ -30,8 +30,7 @@ export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
 }
 
 /**
- * Attempts to load an .npmrc. It will only load simple key-value pairs. That
- * means no objects and no arrays.
+ * Attempts to load an .npmrc. It will load all lines from the file.
  * @param path The path to load from.
  */
 export function tryLoadNpmrc(
