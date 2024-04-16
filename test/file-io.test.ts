@@ -1,11 +1,11 @@
 import fs from "fs/promises";
 import {
+  IOError,
   NotFoundError,
   tryGetDirectoriesIn,
   tryReadTextFromFile,
   tryWriteTextToFile,
 } from "../src/io/file-io";
-import { IOError } from "../src/common-errors";
 import fse from "fs-extra";
 import { Dirent } from "node:fs";
 

@@ -4,9 +4,9 @@ import log from "../cli/logger";
 import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
-import { IOError } from "../common-errors";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import {
+  IOError,
   NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,

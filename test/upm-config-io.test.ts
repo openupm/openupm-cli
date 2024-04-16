@@ -5,8 +5,7 @@ import {
 } from "../src/io/upm-config-io";
 import { tryGetHomePath } from "../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
-import { NotFoundError, tryReadTextFromFile } from "../src/io/file-io";
-import { IOError } from "../src/common-errors";
+import { IOError, NotFoundError, tryReadTextFromFile } from "../src/io/file-io";
 import { tryParseToml } from "../src/utils/data-parsing";
 
 jest.mock("../src/io/file-io");

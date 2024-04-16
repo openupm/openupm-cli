@@ -3,9 +3,10 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import path from "path";
-import { FileParseError, IOError } from "../common-errors";
+import { FileParseError } from "../common-errors";
 import { AsyncResult } from "ts-results-es";
 import {
+  IOError,
   NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,

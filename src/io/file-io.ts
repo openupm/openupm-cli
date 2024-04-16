@@ -1,7 +1,6 @@
 import { AsyncResult, Result } from "ts-results-es";
 import fs from "fs/promises";
 import { CustomError } from "ts-custom-error";
-import { IOError } from "../common-errors";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
 import path from "path";
@@ -20,6 +19,22 @@ export class NotFoundError extends CustomError {
     super(
       "An IO operation was performed on a file or directory which does not exist."
     );
+  }
+}
+
+/**
+ * Generic IO error for when interacting with the file-system failed.
+ */
+export class IOError extends CustomError {
+  private readonly _class = "CustomError";
+
+  constructor(
+    /**
+     * The actual error that caused the failure.
+     */
+    cause?: NodeJS.ErrnoException
+  ) {
+    super("An interaction with the file-system caused an error.", { cause });
   }
 }
 

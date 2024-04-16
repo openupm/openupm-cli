@@ -1,5 +1,8 @@
 import log from "./logger";
-import { ManifestLoadError, ManifestSaveError } from "../io/project-manifest-io";
+import {
+  ManifestLoadError,
+  ManifestSaveError,
+} from "../io/project-manifest-io";
 import { NotFoundError } from "../io/file-io";
 
 /**
