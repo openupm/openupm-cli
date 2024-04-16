@@ -40,7 +40,7 @@ import { PackumentNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { logManifestLoadError, logManifestSaveError } from "../error-logging";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 import { targetEditorVersionFor } from "../domain/packument";
 import { makePackumentFetchService } from "../services/fetch-packument";
 
