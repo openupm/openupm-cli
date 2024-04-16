@@ -24,7 +24,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../common-errors";
-import { logManifestLoadError, logManifestSaveError } from "../error-logging";
+import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 
 export type RemoveError =
   | EnvParseError
