@@ -1,6 +1,7 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import {
   FileWriteError,
+  IOError,
   NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,
@@ -9,7 +10,6 @@ import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
-import { IOError } from "../common-errors";
 import { tryGetHomePath } from "./special-paths";
 
 /**

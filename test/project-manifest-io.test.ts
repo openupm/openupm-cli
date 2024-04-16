@@ -8,9 +8,9 @@ import {
   mapScopedRegistry,
 } from "../src/domain/project-manifest";
 import path from "path";
-import { FileParseError, IOError } from "../src/common-errors";
+import { FileParseError } from "../src/common-errors";
 import * as fileIoModule from "../src/io/file-io";
-import { NotFoundError } from "../src/io/file-io";
+import { IOError, NotFoundError } from "../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { buildProjectManifest } from "./data-project-manifest";
 import { DomainName } from "../src/domain/domain-name";

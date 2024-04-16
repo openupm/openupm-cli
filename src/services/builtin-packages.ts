@@ -7,8 +7,7 @@ import {
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { NotFoundError, tryGetDirectoriesIn } from "../io/file-io";
-import { IOError } from "../common-errors";
+import { IOError, NotFoundError, tryGetDirectoriesIn } from "../io/file-io";
 
 /**
  * Error for when an editor-version is not installed.

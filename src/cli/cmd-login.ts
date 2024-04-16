@@ -1,7 +1,4 @@
-import {
-  AuthenticationError,
-  makeAddUserService,
-} from "../services/add-user";
+import { AuthenticationError, makeAddUserService } from "../services/add-user";
 import log from "./logger";
 import {
   GetUpmConfigDirError,

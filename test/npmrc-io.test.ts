@@ -1,4 +1,5 @@
 import {
+  IOError,
   NotFoundError,
   tryReadTextFromFile,
   tryWriteTextToFile,
@@ -10,7 +11,6 @@ import {
   tryLoadNpmrc,
   trySaveNpmrc,
 } from "../src/io/npmrc-io";
-import { IOError } from "../src/common-errors";
 import path from "path";
 import { tryGetHomePath } from "../src/io/special-paths";
 import { RequiredEnvMissingError } from "../src/io/upm-config-io";
