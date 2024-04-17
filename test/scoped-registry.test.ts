@@ -1,6 +1,7 @@
 import {
   addScope,
   hasScope,
+  makeEmptyScopedRegistryFor,
   makeScopedRegistry,
   removeScope,
 } from "../src/domain/scoped-registry";
@@ -8,12 +9,19 @@ import { makeDomainName } from "../src/domain/domain-name";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { exampleRegistryUrl } from "./data-registry";
+import { unityRegistryUrl } from "../src/domain/registry-url";
 
 describe("scoped-registry", () => {
   describe("construction", () => {
     it("should have empty scopes list if scopes are not specified", () => {
       const registry = makeScopedRegistry("test", exampleRegistryUrl);
       expect(registry.scopes).toHaveLength(0);
+    });
+
+    it("should use hostname as name when creating from registry-url", () => {
+      const scopedRegistry = makeEmptyScopedRegistryFor(unityRegistryUrl);
+
+      expect(scopedRegistry.name).toEqual("packages.unity.com");
     });
   });
 

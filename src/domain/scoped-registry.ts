@@ -70,3 +70,13 @@ export function removeScope(
 ): ScopedRegistry {
   return { ...registry, scopes: registry.scopes.filter((it) => it !== scope) };
 }
+
+/**
+ * Makes an empty scoped-registry from a registry-url. The name will be
+ * the registry's hostname.
+ * @param registryUrl The registry-url.
+ */
+export function makeEmptyScopedRegistryFor(registryUrl: RegistryUrl): ScopedRegistry {
+  const name = new URL(registryUrl).hostname;
+  return makeScopedRegistry(name, registryUrl);
+}
