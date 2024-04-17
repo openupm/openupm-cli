@@ -27,35 +27,51 @@ export class EditorNotInstalledError extends CustomError {
 /**
  * Errors which may occur when getting the builtin packages for an editor-version.
  */
-export type BuiltinPackagesError =
+export type LoadBuiltInPackagesError =
   | GetEditorInstallPathError
   | EditorNotInstalledError
   | IOError;
 
 /**
- * Attempts to get the names of all built-in packages for a Unity editor.
- * The editor must be installed for this to work.
- * @param editorVersion The editors version.
+ * Service for interacting with the built-in packages that are installed
+ * with a Unity editor.
  */
-export function tryGetBuiltinPackagesFor(
-  editorVersion: ReleaseVersion
-): AsyncResult<ReadonlyArray<DomainName>, BuiltinPackagesError> {
-  const pathResult = tryGetEditorInstallPath(editorVersion);
-  if (pathResult.isErr()) return pathResult.toAsyncResult();
-  const installPath = pathResult.value;
-  const packagesDir = path.join(
-    installPath,
-    "Editor/Data/Resources/PackageManager/BuiltInPackages"
-  );
+export interface BuiltInPackagesService {
+  /**
+   * Attempts to load all built-in packages for an installed editor.
+   * @param editorVersion The editors version.
+   */
+  tryLoadAll(
+    editorVersion: ReleaseVersion
+  ): AsyncResult<ReadonlyArray<DomainName>, LoadBuiltInPackagesError>;
+}
 
-  return (
-    tryGetDirectoriesIn(packagesDir)
-      // We can assume correct format
-      .map((names) => names as DomainName[])
-      .mapErr((error) =>
-        error instanceof NotFoundError
-          ? new EditorNotInstalledError(editorVersion)
-          : error
-      )
-  );
+/**
+ * Makes a {@link BuiltInPackagesService}.
+ */
+export function makeBuiltInPackagesService(): BuiltInPackagesService {
+  return {
+    tryLoadAll(editorVersion) {
+      {
+        const pathResult = tryGetEditorInstallPath(editorVersion);
+        if (pathResult.isErr()) return pathResult.toAsyncResult();
+        const installPath = pathResult.value;
+        const packagesDir = path.join(
+          installPath,
+          "Editor/Data/Resources/PackageManager/BuiltInPackages"
+        );
+
+        return (
+          tryGetDirectoriesIn(packagesDir)
+            // We can assume correct format
+            .map((names) => names as DomainName[])
+            .mapErr((error) =>
+              error instanceof NotFoundError
+                ? new EditorNotInstalledError(editorVersion)
+                : error
+            )
+        );
+      }
+    },
+  };
 }
