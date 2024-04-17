@@ -18,7 +18,7 @@ import {
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
-import { tryUpdateUserNpmrcToken } from "../services/npmrc-token-update";
+import { makeNpmrcAuthService } from "../services/npmrc-auth";
 
 /**
  * Errors which may occur when logging in.
@@ -51,6 +51,9 @@ export type LoginOptions = CmdOptions<{
 export const login = async function (
   options: LoginOptions
 ): Promise<Result<void, LoginError>> {
+  // Create services
+  const npmrcAuthService = makeNpmrcAuthService();
+
   // parse env
   const envResult = await parseEnv(options);
   if (envResult.isErr()) return envResult;
@@ -105,8 +108,10 @@ export const login = async function (
     const token = loginResult.value;
 
     // write npm token
-    const updateResult = await tryUpdateUserNpmrcToken(loginRegistry, token)
-      .promise;
+    const updateResult = await npmrcAuthService.trySetAuthToken(
+      loginRegistry,
+      token
+    ).promise;
     if (updateResult.isErr()) return updateResult;
     updateResult.map((configPath) =>
       log.notice("config", `saved to npm config: ${configPath}`)
