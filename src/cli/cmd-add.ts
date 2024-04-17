@@ -1,5 +1,4 @@
 import log from "./logger";
-import url from "url";
 import { isPackageUrl, PackageUrl } from "../domain/package-url";
 import {
   ManifestLoadError,
@@ -19,7 +18,10 @@ import {
   PackageReference,
   splitPackageReference,
 } from "../domain/package-reference";
-import { addScope, makeScopedRegistry } from "../domain/scoped-registry";
+import {
+  addScope,
+  makeEmptyScopedRegistryFor,
+} from "../domain/scoped-registry";
 import {
   addDependency,
   addTestable,
@@ -35,7 +37,6 @@ import {
 import { SemanticVersion } from "../domain/semantic-version";
 import { fetchPackageDependencies } from "../dependency-resolving";
 import { areArraysEqual } from "../utils/array-utils";
-import { RegistryUrl } from "../domain/registry-url";
 import { PackumentNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
@@ -95,12 +96,6 @@ export const add = async function (
   const env = envResult.value;
 
   const fetchService = makePackumentFetchService();
-
-  const makeEmptyScopedRegistryFor = (registryUrl: RegistryUrl) => {
-    const name = url.parse(registryUrl).hostname;
-    if (name === null) throw new Error("Could not resolve registry name");
-    return makeScopedRegistry(name, registryUrl);
-  };
 
   const tryAddToManifest = async function (
     manifest: UnityProjectManifest,
