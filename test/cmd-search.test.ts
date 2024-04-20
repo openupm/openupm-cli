@@ -4,14 +4,14 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
-import {
-  AllPackumentsResult,
-  SearchedPackument,
-  SearchService,
-} from "../src/services/search";
+import { SearchedPackument, SearchService } from "../src/services/search";
 import { exampleRegistryUrl } from "./data-registry";
 import { Err, Ok } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
+import {
+  AllPackumentsResult,
+  GetAllPackumentsService,
+} from "../src/services/get-all-packuments";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -26,15 +26,19 @@ function makeDependencies() {
     trySearch: jest
       .fn()
       .mockReturnValue(Ok([exampleSearchResult]).toAsyncResult()),
-    tryGetAll: jest.fn().mockReturnValue(
-      Ok({
-        _updated: 9999,
-        [exampleSearchResult.name]: exampleSearchResult,
-      } as AllPackumentsResult).toAsyncResult()
-    ),
   };
-  const searchCmd = makeSearchCmd(searchService);
-  return [searchCmd, searchService] as const;
+
+  const getAllPackuments: jest.MockedFunction<GetAllPackumentsService> =
+    jest.fn();
+  getAllPackuments.mockReturnValue(
+    Ok({
+      _updated: 9999,
+      [exampleSearchResult.name]: exampleSearchResult,
+    } as AllPackumentsResult).toAsyncResult()
+  );
+
+  const searchCmd = makeSearchCmd(searchService, getAllPackuments);
+  return [searchCmd, searchService, getAllPackuments] as const;
 }
 
 describe("cmd-search", () => {
@@ -106,13 +110,11 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, searchService] = makeDependencies();
+      const [searchCmd, searchService, getAllPackuments] = makeDependencies();
       searchService.trySearch.mockReturnValue(
         Err({} as HttpErrorBase).toAsyncResult()
       );
-      searchService.tryGetAll.mockReturnValue(
-        Ok({ _updated: 9999 }).toAsyncResult()
-      );
+      getAllPackuments.mockReturnValue(Ok({ _updated: 9999 }).toAsyncResult());
 
       const searchResult = await searchCmd("pkg-not-exist", options);
 

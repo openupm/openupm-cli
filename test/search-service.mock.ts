@@ -1,8 +1,4 @@
-import {
-  AllPackumentsResult,
-  SearchedPackument,
-  SearchService,
-} from "../src/services/search";
+import { SearchedPackument, SearchService } from "../src/services/search";
 import { Registry } from "../src/domain/registry";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
@@ -25,18 +21,6 @@ export function mockSearchService(
       if (entry === undefined) return Ok([]).toAsyncResult();
 
       return Ok(entry[1]).toAsyncResult();
-    },
-    tryGetAll(): AsyncResult<AllPackumentsResult, HttpErrorBase> {
-      const all = entries
-        .flatMap((it) => it[1])
-        .reduce<AllPackumentsResult>(
-          (result, searchResult) => ({
-            ...result,
-            [searchResult.name]: searchResult,
-          }),
-          { _updated: 99999 }
-        );
-      return Ok(all).toAsyncResult();
     },
   };
 }
