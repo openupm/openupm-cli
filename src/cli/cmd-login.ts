@@ -1,4 +1,4 @@
-import { AuthenticationError, makeAddUserService } from "../services/add-user";
+import { AddUserService, AuthenticationError } from "../services/add-user";
 import log from "./logger";
 import {
   GetUpmConfigDirError,
@@ -18,7 +18,7 @@ import {
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
-import { makeNpmrcAuthService } from "../services/npmrc-auth";
+import { NpmrcAuthService } from "../services/npmrc-auth";
 
 /**
  * Errors which may occur when logging in.
@@ -45,85 +45,91 @@ export type LoginOptions = CmdOptions<{
 }>;
 
 /**
- * Attempts to log in a user into a npm-registry.
+ * Cmd-handler for logging in users.
  * @param options Options for logging in.
  */
-export const login = async function (
+export type LoginCmd = (
   options: LoginOptions
-): Promise<Result<void, LoginError>> {
-  // Create services
-  const npmrcAuthService = makeNpmrcAuthService();
+) => Promise<Result<void, LoginError>>;
 
-  // parse env
-  const envResult = await parseEnv(options);
-  if (envResult.isErr()) return envResult;
-  const env = envResult.value;
+/**
+ * Makes a {@link LoginCmd} function.
+ */
+export function makeLoginCmd(
+  npmrcAuthService: NpmrcAuthService,
+  addUserService: AddUserService
+): LoginCmd {
+  return async (options) => {
+    // parse env
+    const envResult = await parseEnv(options);
+    if (envResult.isErr()) return envResult;
+    const env = envResult.value;
 
-  // query parameters
-  const username = options.username ?? (await promptUsername());
-  const password = options.password ?? (await promptPassword());
-  const email = options.email ?? (await promptEmail());
+    // query parameters
+    const username = options.username ?? (await promptUsername());
+    const password = options.password ?? (await promptPassword());
+    const email = options.email ?? (await promptEmail());
 
-  const loginRegistry =
-    options._global.registry !== undefined
-      ? coerceRegistryUrl(options._global.registry)
-      : await promptRegistryUrl();
+    const loginRegistry =
+      options._global.registry !== undefined
+        ? coerceRegistryUrl(options._global.registry)
+        : await promptRegistryUrl();
 
-  const alwaysAuth = options.alwaysAuth || false;
+    const alwaysAuth = options.alwaysAuth || false;
 
-  const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser)
-    .promise;
-  if (configDirResult.isErr()) return configDirResult;
-  const configDir = configDirResult.value;
+    const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser)
+      .promise;
+    if (configDirResult.isErr()) return configDirResult;
+    const configDir = configDirResult.value;
 
-  if (options.basicAuth) {
-    // basic auth
-    const _auth = encodeBasicAuth(username, password);
-    const result = await tryStoreUpmAuth(configDir, loginRegistry, {
-      email,
-      alwaysAuth,
-      _auth,
-    } satisfies BasicAuth).promise;
-    if (result.isErr()) return result;
-  } else {
-    // npm login
-    const addUserService = makeAddUserService();
-    const loginResult = await addUserService.tryAdd(
-      loginRegistry,
-      username,
-      password,
-      email
-    ).promise;
-    if (loginResult.isErr()) {
-      if (loginResult.error.status === 401)
-        log.warn("401", "Incorrect username or password");
-      else
-        log.error(
-          loginResult.error.status.toString(),
-          loginResult.error.message
-        );
-      return loginResult;
+    if (options.basicAuth) {
+      // basic auth
+      const _auth = encodeBasicAuth(username, password);
+      const result = await tryStoreUpmAuth(configDir, loginRegistry, {
+        email,
+        alwaysAuth,
+        _auth,
+      } satisfies BasicAuth).promise;
+      if (result.isErr()) return result;
+    } else {
+      // npm login
+      const loginResult = await addUserService.tryAdd(
+        loginRegistry,
+        username,
+        password,
+        email
+      ).promise;
+      if (loginResult.isErr()) {
+        if (loginResult.error.status === 401)
+          log.warn("401", "Incorrect username or password");
+        else
+          log.error(
+            loginResult.error.status.toString(),
+            loginResult.error.message
+          );
+        return loginResult;
+      }
+      log.notice("auth", `you are authenticated as '${username}'`);
+      const token = loginResult.value;
+
+      // write npm token
+      const updateResult = await npmrcAuthService.trySetAuthToken(
+        loginRegistry,
+        token
+      ).promise;
+      if (updateResult.isErr()) return updateResult;
+      updateResult.map((configPath) =>
+        log.notice("config", `saved to npm config: ${configPath}`)
+      );
+
+      const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
+        email,
+        alwaysAuth,
+        token,
+      } satisfies TokenAuth).promise;
+      if (storeResult.isErr()) return storeResult;
     }
-    log.notice("auth", `you are authenticated as '${username}'`);
-    const token = loginResult.value;
 
-    // write npm token
-    const updateResult = await npmrcAuthService.trySetAuthToken(
-      loginRegistry,
-      token
-    ).promise;
-    if (updateResult.isErr()) return updateResult;
-    updateResult.map((configPath) =>
-      log.notice("config", `saved to npm config: ${configPath}`)
-    );
-
-    const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
-      email,
-      alwaysAuth,
-      token,
-    } satisfies TokenAuth).promise;
-    if (storeResult.isErr()) return storeResult;
-  }
-
-  return Ok(undefined);
-};
+    return Ok(undefined);
+  };
+}
