@@ -24,6 +24,7 @@ import {
 } from "./validators";
 import RegClient from "another-npm-registry-client";
 import { makeParseEnvService } from "../services/parse-env";
+import { makeResolveRemotePackumentService } from "../services/resolve-remote-packument";
 
 // Composition root
 
@@ -34,15 +35,23 @@ const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
 const addUser = makeAddUserService(regClient);
 const searchRegistry = makeSearchRegistryService();
-const resolveDependencies = makeResolveDependenciesService(fetchPackument);
+const resolveRemotePackument =
+  makeResolveRemotePackumentService(fetchPackument);
+const resolveDependencies = makeResolveDependenciesService(
+  resolveRemotePackument
+);
 const getAllPackuments = makeGetAllPackumentsService();
 
-const addCmd = makeAddCmd(parseEnv, fetchPackument, resolveDependencies);
+const addCmd = makeAddCmd(
+  parseEnv,
+  resolveRemotePackument,
+  resolveDependencies
+);
 const loginCmd = makeLoginCmd(parseEnv, authNpmrc, addUser);
 const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
 const removeCmd = makeRemoveCmd(parseEnv);
-const viewCmd = makeViewCmd(parseEnv, fetchPackument);
+const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument);
 
 // update-notifier
 

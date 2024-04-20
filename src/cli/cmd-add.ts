@@ -31,7 +31,6 @@ import {
 import { CmdOptions } from "./options";
 import {
   PackumentResolveError,
-  tryResolve,
   VersionNotFoundError,
 } from "../packument-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
@@ -42,8 +41,8 @@ import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 import { targetEditorVersionFor } from "../domain/packument";
-import { FetchPackumentService } from "../services/fetch-packument";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
+import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -98,7 +97,7 @@ type AddCmd = (
  */
 export function makeAddCmd(
   parseEnv: ParseEnvService,
-  fetchService: FetchPackumentService,
+  resolveRemovePackument: ResolveRemotePackumentService,
   resolveDependencies: ResolveDependenciesService
 ): AddCmd {
   return async (pkgs, options) => {
@@ -121,15 +120,13 @@ export function makeAddCmd(
       const pkgsInScope = Array.of<DomainName>();
       let versionToAdd = requestedVersion;
       if (requestedVersion === undefined || !isPackageUrl(requestedVersion)) {
-        let resolveResult = await tryResolve(
-          fetchService,
+        let resolveResult = await resolveRemovePackument(
           name,
           requestedVersion,
           env.registry
         ).promise;
         if (resolveResult.isErr() && env.upstream) {
-          resolveResult = await tryResolve(
-            fetchService,
+          resolveResult = await resolveRemovePackument(
             name,
             requestedVersion,
             env.upstreamRegistry

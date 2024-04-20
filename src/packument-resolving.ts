@@ -11,11 +11,8 @@ import { PackageUrl } from "./domain/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./domain/registry-url";
 import { CustomError } from "ts-custom-error";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
-import { FetchPackumentService } from "./services/fetch-packument";
-import { Registry } from "./domain/registry";
 
 /**
  * A version-reference that is resolvable.
@@ -116,29 +113,6 @@ export function tryResolveFromPackument(
     source,
     packumentVersion: packument.versions[requestedVersion]!,
   } satisfies ResolvedPackument);
-}
-
-/**
- * Attempts to resolve a packument from a specific registry.
- * @param fetchPackument The packument fetch service to use for this operation.
- * @param packageName The name of the package to resolve.
- * @param requestedVersion The version that should be resolved.
- * @param source The registry to resolve the packument from.
- */
-export function tryResolve(
-  fetchPackument: FetchPackumentService,
-  packageName: DomainName,
-  requestedVersion: ResolvableVersion,
-  source: Registry
-): AsyncResult<ResolvedPackument, PackumentResolveError | HttpErrorBase> {
-  return fetchPackument(source, packageName)
-    .andThen((maybePackument) => {
-      if (maybePackument === null) return Err(new PackumentNotFoundError());
-      return Ok(maybePackument);
-    })
-    .andThen((packument) =>
-      tryResolveFromPackument(packument, requestedVersion, source.url)
-    );
 }
 
 /**
