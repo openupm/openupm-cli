@@ -1,3 +1,10 @@
+## [1.22.2](https://github.com/openupm/openupm-cli/compare/1.22.1...1.22.2) (2024-04-20)
+
+
+### Bug Fixes
+
+* bad log ([#259](https://github.com/openupm/openupm-cli/issues/259)) ([ac23e7b](https://github.com/openupm/openupm-cli/commit/ac23e7bf5e5e035bd880c22eb661d84dd3d4b9a3))
+
 ## [1.22.1](https://github.com/openupm/openupm-cli/compare/1.22.0...1.22.1) (2024-04-15)
 
 
