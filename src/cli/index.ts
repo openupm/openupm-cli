@@ -2,7 +2,6 @@ import { createCommand } from "@commander-js/extra-typings";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import { remove } from "./cmd-remove";
-import { search } from "./cmd-search";
 import { view } from "./cmd-view";
 import { deps } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
@@ -16,18 +15,20 @@ import { makePackumentFetchService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
 import { makeNpmrcAuthService } from "../services/npmrc-auth";
 import { makeAddUserService } from "../services/add-user";
-
-// update-notifier
+import { makeSearchService } from "../services/search";
 import pkg from "../../package.json";
+import { makeSearchCmd } from "./cmd-search";
 
 // Composition root
 
 const fetchService = makePackumentFetchService();
 const npmrcAuthService = makeNpmrcAuthService();
 const addUserService = makeAddUserService();
+const searchService = makeSearchService();
 
 const addCmd = makeAddCmd(fetchService);
 const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
+const searchCmd = makeSearchCmd(searchService);
 
 // Validators
 
@@ -45,6 +46,8 @@ const mustBeRegistryUrl = mustBeParsable(
   coerceRegistryUrl,
   (input) => `"${input}" is not a valid registry-url`
 );
+
+// update-notifier
 
 pkginfo(module);
 const notifier = updateNotifier({ pkg });
@@ -123,7 +126,7 @@ program
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
-    const searchResult = await search(keyword, makeCmdOptions(options));
+    const searchResult = await searchCmd(keyword, makeCmdOptions(options));
     if (searchResult.isErr()) process.exit(1);
   });
 
