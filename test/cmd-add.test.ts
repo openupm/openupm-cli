@@ -23,6 +23,9 @@ import { buildPackument } from "./data-packument";
 import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { PackumentNotFoundError } from "../src/common-errors";
 import { buildProjectManifest } from "./data-project-manifest";
+import { ResolveDependenciesService } from "../src/services/dependency-resolving";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
+import { VersionNotFoundError } from "../src/packument-resolving";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -44,13 +47,6 @@ const badEditorPackument = buildPackument(somePackage, (packument) =>
 const incompatiblePackument = buildPackument(somePackage, (packument) =>
   packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
 );
-const missingDependencyVersionPackument = buildPackument(
-  somePackage,
-  (packument) =>
-    packument.addVersion("1.0.0", (version) =>
-      version.addDependency(otherPackage, "2.0.0")
-    )
-);
 
 const defaultEnv: Env = {
   cwd: "/users/some-user/projects/SomeProject",
@@ -61,12 +57,36 @@ const defaultEnv: Env = {
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
   editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
 };
+
 function makeDependencies() {
   const fetchService: jest.Mocked<FetchPackumentService> = {
     tryFetchByName: jest.fn(),
   };
-  const addCmd = makeAddCmd(fetchService);
-  return [addCmd, fetchService] as const;
+
+  const resolveDependencies: jest.MockedFunction<ResolveDependenciesService> =
+    jest.fn();
+  resolveDependencies.mockResolvedValue([
+    [
+      {
+        name: somePackage,
+        version: makeSemanticVersion("1.0.0"),
+        upstream: false,
+        internal: false,
+        self: true,
+      },
+      {
+        name: otherPackage,
+        version: makeSemanticVersion("1.0.0"),
+        upstream: false,
+        internal: false,
+        self: false,
+      },
+    ],
+    [],
+  ]);
+
+  const addCmd = makeAddCmd(fetchService, resolveDependencies);
+  return [addCmd, fetchService, resolveDependencies] as const;
 }
 
 describe("cmd-add", () => {
@@ -306,11 +326,17 @@ describe("cmd-add", () => {
 
   it("should suggest to install missing dependency version manually", async () => {
     const noticeSpy = spyOnLog("notice");
-    mockResolvedPackuments(
-      [exampleRegistryUrl, otherPackument],
-      [exampleRegistryUrl, missingDependencyVersionPackument]
-    );
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveDependencies] = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+        },
+      ],
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},
@@ -321,11 +347,17 @@ describe("cmd-add", () => {
 
   it("should suggest to run with force if dependency could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    mockResolvedPackuments(
-      [exampleRegistryUrl, otherPackument],
-      [exampleRegistryUrl, missingDependencyVersionPackument]
-    );
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveDependencies] = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+        },
+      ],
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},
@@ -338,11 +370,17 @@ describe("cmd-add", () => {
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
-    mockResolvedPackuments(
-      [exampleRegistryUrl, otherPackument],
-      [exampleRegistryUrl, missingDependencyVersionPackument]
-    );
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveDependencies] = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+        },
+      ],
+    ]);
 
     const result = await viewCmd(somePackage, {
       _global: {},
@@ -354,11 +392,17 @@ describe("cmd-add", () => {
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
-    mockResolvedPackuments(
-      [exampleRegistryUrl, otherPackument],
-      [exampleRegistryUrl, missingDependencyVersionPackument]
-    );
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveDependencies] = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+        },
+      ],
+    ]);
 
     const result = await viewCmd(somePackage, {
       _global: {},

@@ -18,6 +18,7 @@ import { makeSearchService } from "../services/search";
 import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
+import { makeResolveDependenciesService } from "../services/dependency-resolving";
 
 // Composition root
 
@@ -25,11 +26,12 @@ const fetchService = makePackumentFetchService();
 const npmrcAuthService = makeNpmrcAuthService();
 const addUserService = makeAddUserService();
 const searchService = makeSearchService();
+const resolveDependencies = makeResolveDependenciesService(fetchService);
 
-const addCmd = makeAddCmd(fetchService);
+const addCmd = makeAddCmd(fetchService, resolveDependencies);
 const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
 const searchCmd = makeSearchCmd(searchService);
-const depsCmd = makeDepsCmd();
+const depsCmd = makeDepsCmd(resolveDependencies);
 const removeCmd = makeRemoveCmd();
 const viewCmd = makeViewCmd(fetchService);
 
