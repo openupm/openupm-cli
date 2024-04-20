@@ -7,10 +7,9 @@ import { hasVersion, PackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
-
-import { PackageWithVersionError } from "../common-errors";
-import { makePackumentFetchService } from "../services/fetch-packument";
+import { FetchPackumentService } from "../services/fetch-packument";
 import { tryResolve } from "../packument-resolving";
+import { PackageWithVersionError } from "../common-errors";
 
 export type ViewOptions = CmdOptions;
 
@@ -98,14 +97,12 @@ const printInfo = function (packument: UnityPackument) {
 /**
  * Makes a {@link ViewCmd} function.
  */
-export function makeViewCmd(): ViewCmd {
+export function makeViewCmd(fetchService: FetchPackumentService): ViewCmd {
   return async (pkg, options) => {
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) return envResult;
     const env = envResult.value;
-
-    const fetchService = makePackumentFetchService();
 
     // parse name
     if (hasVersion(pkg)) {

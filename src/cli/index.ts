@@ -31,7 +31,7 @@ const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
 const searchCmd = makeSearchCmd(searchService);
 const depsCmd = makeDepsCmd();
 const removeCmd = makeRemoveCmd();
-const viewCmd = makeViewCmd();
+const viewCmd = makeViewCmd(fetchService);
 
 // Validators
 
