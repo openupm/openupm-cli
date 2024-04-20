@@ -6,8 +6,7 @@ import {
 } from "../src/cli/cmd-add";
 import { FetchPackumentService } from "../src/services/fetch-packument";
 import { makeDomainName } from "../src/domain/domain-name";
-import * as envModule from "../src/utils/env";
-import { Env } from "../src/utils/env";
+import { Env, ParseEnvService } from "../src/services/parse-env";
 import { exampleRegistryUrl } from "./data-registry";
 import { unityRegistryUrl } from "../src/domain/registry-url";
 import { makeEditorVersion } from "../src/domain/editor-version";
@@ -48,17 +47,18 @@ const incompatiblePackument = buildPackument(somePackage, (packument) =>
   packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
 );
 
-const defaultEnv: Env = {
+const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
-  systemUser: false,
-  wsl: false,
   upstream: true,
   registry: { url: exampleRegistryUrl, auth: null },
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
   editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
-};
+} as Env;
 
 function makeDependencies() {
+  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  parseEnv.mockResolvedValue(Ok(defaultEnv));
+
   const fetchService: jest.MockedFunction<FetchPackumentService> = jest.fn();
 
   const resolveDependencies: jest.MockedFunction<ResolveDependenciesService> =
@@ -83,13 +83,12 @@ function makeDependencies() {
     [],
   ]);
 
-  const addCmd = makeAddCmd(fetchService, resolveDependencies);
-  return [addCmd, fetchService, resolveDependencies] as const;
+  const addCmd = makeAddCmd(parseEnv, fetchService, resolveDependencies);
+  return [addCmd, parseEnv, fetchService, resolveDependencies] as const;
 }
 
 describe("cmd-add", () => {
   beforeEach(() => {
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
     mockResolvedPackuments(
       [exampleRegistryUrl, somePackument],
       [exampleRegistryUrl, otherPackument]
@@ -100,8 +99,8 @@ describe("cmd-add", () => {
 
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Err(expected));
-    const [addCmd] = makeDependencies();
+    const [addCmd, parseEnv] = makeDependencies();
+    parseEnv.mockResolvedValue(Err(expected));
 
     const result = await addCmd(somePackage, { _global: {} });
 
@@ -189,10 +188,10 @@ describe("cmd-add", () => {
 
   it("should notify if editor-version is unknown", async () => {
     const warnSpy = spyOnLog("warn");
-    jest
-      .spyOn(envModule, "parseEnv")
-      .mockResolvedValue(Ok({ ...defaultEnv, editorVersion: "bad version" }));
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, parseEnv] = makeDependencies();
+    parseEnv.mockResolvedValue(
+      Ok({ ...defaultEnv, editorVersion: "bad version" })
+    );
 
     await viewCmd(somePackage, {
       _global: {},
@@ -324,7 +323,7 @@ describe("cmd-add", () => {
 
   it("should suggest to install missing dependency version manually", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd, , resolveDependencies] = makeDependencies();
+    const [viewCmd, , , resolveDependencies] = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -345,7 +344,7 @@ describe("cmd-add", () => {
 
   it("should suggest to run with force if dependency could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    const [viewCmd, , resolveDependencies] = makeDependencies();
+    const [viewCmd, , , resolveDependencies] = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -368,7 +367,7 @@ describe("cmd-add", () => {
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
-    const [viewCmd, , resolveDependencies] = makeDependencies();
+    const [viewCmd, , , resolveDependencies] = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -390,7 +389,7 @@ describe("cmd-add", () => {
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
-    const [viewCmd, , resolveDependencies] = makeDependencies();
+    const [viewCmd, , , resolveDependencies] = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [

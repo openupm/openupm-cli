@@ -1,11 +1,14 @@
 import log from "./logger";
 import * as os from "os";
-import { EnvParseError, parseEnv } from "../utils/env";
+import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
-import { SearchedPackument, SearchRegistryService } from "../services/search-registry";
+import {
+  SearchedPackument,
+  SearchRegistryService,
+} from "../services/search-registry";
 import { Registry } from "../domain/registry";
 import { GetAllPackumentsService } from "../services/get-all-packuments";
 
@@ -59,6 +62,7 @@ const searchOld = function (
  * Makes a {@link SearchCmd} function.
  */
 export function makeSearchCmd(
+  parseEnv: ParseEnvService,
   searchRegistry: SearchRegistryService,
   getAllPackuments: GetAllPackumentsService
 ): SearchCmd {

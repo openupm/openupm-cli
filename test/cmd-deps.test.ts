@@ -1,10 +1,8 @@
 import { makeDepsCmd } from "../src/cli/cmd-deps";
-import * as envModule from "../src/utils/env";
-import { Env } from "../src/utils/env";
+import { Env, ParseEnvService } from "../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "./data-registry";
 import { unityRegistryUrl } from "../src/domain/registry-url";
-import { makeEditorVersion } from "../src/domain/editor-version";
 import { IOError } from "../src/io/file-io";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makePackageReference } from "../src/domain/package-reference";
@@ -17,17 +15,15 @@ import { ResolveDependenciesService } from "../src/services/dependency-resolving
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
 
-const defaultEnv: Env = {
-  cwd: "/users/some-user/projects/SomeProject",
-  systemUser: false,
-  wsl: false,
-  upstream: false,
+const defaultEnv = {
   registry: { url: exampleRegistryUrl, auth: null },
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
-  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
-};
+} as Env;
 
 function makeDependencies() {
+  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  parseEnv.mockResolvedValue(Ok(defaultEnv));
+
   const resolveDependencies: jest.MockedFunction<ResolveDependenciesService> =
     jest.fn();
   resolveDependencies.mockResolvedValue([
@@ -50,19 +46,15 @@ function makeDependencies() {
     [],
   ]);
 
-  const depsCmd = makeDepsCmd(resolveDependencies);
-  return [depsCmd, resolveDependencies] as const;
+  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
+  return [depsCmd, parseEnv, resolveDependencies] as const;
 }
 
 describe("cmd-deps", () => {
-  beforeEach(() => {
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
-  });
-
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Err(expected));
-    const [depsCmd] = makeDependencies();
+    const [depsCmd, parseEnv] = makeDependencies();
+    parseEnv.mockResolvedValue(Err(expected));
 
     const result = await depsCmd(somePackage, { _global: {} });
 
@@ -120,7 +112,7 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency", async () => {
     const warnSpy = spyOnLog("warn");
-    const [depsCmd, resolveDependencies] = makeDependencies();
+    const [depsCmd, , resolveDependencies] = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -141,7 +133,7 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency version", async () => {
     const warnSpy = spyOnLog("warn");
-    const [depsCmd, resolveDependencies] = makeDependencies();
+    const [depsCmd, , resolveDependencies] = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [

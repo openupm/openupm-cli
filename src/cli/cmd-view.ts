@@ -2,7 +2,7 @@ import chalk from "chalk";
 import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
-import { EnvParseError, parseEnv } from "../utils/env";
+import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import {
   hasVersion,
   PackageReference,
@@ -101,7 +101,10 @@ const printInfo = function (packument: UnityPackument) {
 /**
  * Makes a {@link ViewCmd} function.
  */
-export function makeViewCmd(fetchService: FetchPackumentService): ViewCmd {
+export function makeViewCmd(
+  parseEnv: ParseEnvService,
+  fetchService: FetchPackumentService
+): ViewCmd {
   return async (pkg, options) => {
     // parse env
     const envResult = await parseEnv(options);

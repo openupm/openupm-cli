@@ -23,11 +23,13 @@ import {
   mustBeRegistryUrl,
 } from "./validators";
 import RegClient from "another-npm-registry-client";
+import { makeParseEnvService } from "../services/parse-env";
 
 // Composition root
 
 const regClient = new RegClient({ log });
 
+const parseEnv = makeParseEnvService();
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
 const addUser = makeAddUserService(regClient);
@@ -35,12 +37,12 @@ const searchRegistry = makeSearchRegistryService();
 const resolveDependencies = makeResolveDependenciesService(fetchPackument);
 const getAllPackuments = makeGetAllPackumentsService();
 
-const addCmd = makeAddCmd(fetchPackument, resolveDependencies);
-const loginCmd = makeLoginCmd(authNpmrc, addUser);
-const searchCmd = makeSearchCmd(searchRegistry, getAllPackuments);
-const depsCmd = makeDepsCmd(resolveDependencies);
-const removeCmd = makeRemoveCmd();
-const viewCmd = makeViewCmd(fetchPackument);
+const addCmd = makeAddCmd(parseEnv, fetchPackument, resolveDependencies);
+const loginCmd = makeLoginCmd(parseEnv, authNpmrc, addUser);
+const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
+const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
+const removeCmd = makeRemoveCmd(parseEnv);
+const viewCmd = makeViewCmd(parseEnv, fetchPackument);
 
 // update-notifier
 

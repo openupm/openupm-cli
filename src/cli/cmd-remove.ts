@@ -5,7 +5,7 @@ import {
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../io/project-manifest-io";
-import { EnvParseError, parseEnv } from "../utils/env";
+import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import {
   hasVersion,
   makePackageReference,
@@ -49,7 +49,7 @@ export type RemoveCmd = (
 /**
  * Makes a {@link RemoveCmd} function.
  */
-export function makeRemoveCmd(): RemoveCmd {
+export function makeRemoveCmd(parseEnv: ParseEnvService): RemoveCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
     // parse env

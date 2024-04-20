@@ -18,7 +18,7 @@ import {
   tryLoadProjectVersion,
 } from "../io/project-version-io";
 import { NotFoundError } from "../io/file-io";
-import { tryGetEnv } from "./env-util";
+import { tryGetEnv } from "../utils/env-util";
 import {
   isRelease,
   ReleaseVersion,
@@ -104,78 +104,86 @@ function determineIsSystemUser(options: CmdOptions): boolean {
 }
 
 /**
- * Attempts to parse env.
+ * Service function for parsing environment information and global
+ * command-options for further usage.
  */
-export const parseEnv = async function (
+export type ParseEnvService = (
   options: CmdOptions
-): Promise<Result<Env, EnvParseError>> {
-  // log level
-  log.level = determineLogLevel(options);
+) => Promise<Result<Env, EnvParseError>>;
 
-  // color
-  const useColor = determineUseColor(options);
-  if (!useColor) {
-    chalk.level = 0;
-    log.disableColor();
-  }
+/**
+ * Creates a {@link ParseEnvService} function.
+ */
+export function makeParseEnvService(): ParseEnvService {
+  return async (options) => {
+    // log level
+    log.level = determineLogLevel(options);
 
-  // upstream
-  const upstream = determineUseUpstream(options);
+    // color
+    const useColor = determineUseColor(options);
+    if (!useColor) {
+      chalk.level = 0;
+      log.disableColor();
+    }
 
-  // region cn
-  if (options._global.cn === true) log.notice("region", "cn");
+    // upstream
+    const upstream = determineUseUpstream(options);
 
-  // auth
-  const systemUser = determineIsSystemUser(options);
-  const wsl = determineWsl(options);
+    // region cn
+    if (options._global.cn === true) log.notice("region", "cn");
 
-  // registries
-  const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).andThen(
-    tryLoadUpmConfig
-  ).promise;
-  if (upmConfigResult.isErr()) return upmConfigResult;
-  const upmConfig = upmConfigResult.value;
+    // auth
+    const systemUser = determineIsSystemUser(options);
+    const wsl = determineWsl(options);
 
-  const registry = determinePrimaryRegistry(options, upmConfig);
-  const upstreamRegistry = determineUpstreamRegistry(options);
+    // registries
+    const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).andThen(
+      tryLoadUpmConfig
+    ).promise;
+    if (upmConfigResult.isErr()) return upmConfigResult;
+    const upmConfig = upmConfigResult.value;
 
-  // cwd
-  const cwdResult = determineCwd(options);
-  if (cwdResult.isErr()) {
-    log.error("env", `can not resolve path ${cwdResult.error.path}`);
-    return cwdResult;
-  }
-  const cwd = cwdResult.value;
+    const registry = determinePrimaryRegistry(options, upmConfig);
+    const upstreamRegistry = determineUpstreamRegistry(options);
 
-  // editor version
-  const projectVersionLoadResult = await tryLoadProjectVersion(cwd).promise;
-  if (projectVersionLoadResult.isErr()) {
-    if (projectVersionLoadResult.error instanceof NotFoundError)
-      log.warn(
-        "ProjectVersion",
-        `can not locate ProjectVersion.text at path ${projectVersionLoadResult.error.path}`
-      );
-    else if (projectVersionLoadResult.error instanceof FileParseError)
-      log.error(
-        "ProjectVersion",
-        "ProjectVersion.txt could not be parsed for editor-version!"
-      );
-    return projectVersionLoadResult;
-  }
-  const unparsedEditorVersion = projectVersionLoadResult.value;
-  const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
-  const editorVersion =
-    parsedEditorVersion !== null && isRelease(parsedEditorVersion)
-      ? parsedEditorVersion
-      : unparsedEditorVersion;
+    // cwd
+    const cwdResult = determineCwd(options);
+    if (cwdResult.isErr()) {
+      log.error("env", `can not resolve path ${cwdResult.error.path}`);
+      return cwdResult;
+    }
+    const cwd = cwdResult.value;
 
-  return Ok({
-    cwd,
-    editorVersion,
-    registry,
-    systemUser,
-    upstream,
-    upstreamRegistry,
-    wsl,
-  });
-};
+    // editor version
+    const projectVersionLoadResult = await tryLoadProjectVersion(cwd).promise;
+    if (projectVersionLoadResult.isErr()) {
+      if (projectVersionLoadResult.error instanceof NotFoundError)
+        log.warn(
+          "ProjectVersion",
+          `can not locate ProjectVersion.text at path ${projectVersionLoadResult.error.path}`
+        );
+      else if (projectVersionLoadResult.error instanceof FileParseError)
+        log.error(
+          "ProjectVersion",
+          "ProjectVersion.txt could not be parsed for editor-version!"
+        );
+      return projectVersionLoadResult;
+    }
+    const unparsedEditorVersion = projectVersionLoadResult.value;
+    const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
+    const editorVersion =
+      parsedEditorVersion !== null && isRelease(parsedEditorVersion)
+        ? parsedEditorVersion
+        : unparsedEditorVersion;
+
+    return Ok({
+      cwd,
+      editorVersion,
+      registry,
+      systemUser,
+      upstream,
+      upstreamRegistry,
+      wsl,
+    });
+  };
+}

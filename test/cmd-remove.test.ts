@@ -1,9 +1,6 @@
 import { exampleRegistryUrl } from "./data-registry";
-import * as envModule from "../src/utils/env";
-import { Env } from "../src/utils/env";
+import { Env, ParseEnvService } from "../src/services/parse-env";
 import { makeRemoveCmd } from "../src/cli/cmd-remove";
-import { unityRegistryUrl } from "../src/domain/registry-url";
-import { makeEditorVersion } from "../src/domain/editor-version";
 import { Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError } from "../src/io/file-io";
 import { makeDomainName } from "../src/domain/domain-name";
@@ -22,35 +19,32 @@ import { spyOnLog } from "./log.mock";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
-const defaultEnv: Env = {
+const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
-  systemUser: false,
-  wsl: false,
-  upstream: false,
   registry: { url: exampleRegistryUrl, auth: null },
-  upstreamRegistry: { url: unityRegistryUrl, auth: null },
-  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
-};
+} as Env;
 const defaultManifest = buildProjectManifest((manifest) =>
   manifest.addDependency(somePackage, "1.0.0", true, true)
 );
 
 function makeDependencies() {
-  const removeCmd = makeRemoveCmd();
-  return [removeCmd] as const;
+  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  parseEnv.mockResolvedValue(Ok(defaultEnv));
+
+  const removeCmd = makeRemoveCmd(parseEnv);
+  return [removeCmd, parseEnv] as const;
 }
 
 describe("cmd-remove", () => {
   beforeEach(() => {
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
     mockProjectManifest(defaultManifest);
     spyOnSavedManifest();
   });
 
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Err(expected));
-    const [removeCmd] = makeDependencies();
+    const [removeCmd, parseEnv] = makeDependencies();
+    parseEnv.mockResolvedValue(Err(expected));
 
     const result = await removeCmd(somePackage, { _global: {} });
 

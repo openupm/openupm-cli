@@ -1,6 +1,6 @@
 import { TokenAuth, UPMConfig } from "../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
-import { Env, parseEnv } from "../src/utils/env";
+import { Env, makeParseEnvService } from "../src/services/parse-env";
 import log from "../src/cli/logger";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
@@ -37,6 +37,12 @@ const testUpmConfig: UPMConfig = {
 
 const testProjectVersion = "2021.3.1f1";
 
+function makeDependencies() {
+  const parseEnv = makeParseEnvService();
+
+  return [parseEnv] as const;
+}
+
 describe("env", () => {
   beforeEach(() => {
     // By default, we simulate the following:
@@ -59,6 +65,8 @@ describe("env", () => {
 
   describe("log-level", () => {
     it("should be verbose if verbose option is true", async () => {
+      const [parseEnv] = makeDependencies();
+
       await parseEnv({
         _global: {
           verbose: true,
@@ -69,6 +77,8 @@ describe("env", () => {
     });
 
     it("should be notice if verbose option is false", async () => {
+      const [parseEnv] = makeDependencies();
+
       await parseEnv({
         _global: {
           verbose: false,
@@ -79,6 +89,8 @@ describe("env", () => {
     });
 
     it("should be notice if verbose option is missing", async () => {
+      const [parseEnv] = makeDependencies();
+
       await parseEnv({
         _global: {
           verbose: false,
@@ -95,6 +107,7 @@ describe("env", () => {
     });
 
     it("should use color if color option is true", async () => {
+      const [parseEnv] = makeDependencies();
       const colorDisableSpy = jest.spyOn(log, "disableColor");
 
       await parseEnv({
@@ -107,6 +120,7 @@ describe("env", () => {
     });
 
     it("should use color if color option is missing", async () => {
+      const [parseEnv] = makeDependencies();
       const colorDisableSpy = jest.spyOn(log, "disableColor");
 
       await parseEnv({
@@ -117,6 +131,7 @@ describe("env", () => {
     });
 
     it("should not use color if color option is false", async () => {
+      const [parseEnv] = makeDependencies();
       const colorDisableSpy = jest.spyOn(log, "disableColor");
 
       await parseEnv({
@@ -131,6 +146,8 @@ describe("env", () => {
 
   describe("use upstream", () => {
     it("should use upstream if upstream option is true", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           upstream: true,
@@ -141,6 +158,8 @@ describe("env", () => {
     });
 
     it("should use upstream if upstream option is missing", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {},
       });
@@ -149,6 +168,8 @@ describe("env", () => {
     });
 
     it("should not use upstream if upstream option is false", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           upstream: false,
@@ -161,6 +182,7 @@ describe("env", () => {
 
   describe("region log", () => {
     it("should notify of china region if cn option is true", async () => {
+      const [parseEnv] = makeDependencies();
       const logSpy = jest.spyOn(log, "notice");
 
       await parseEnv({
@@ -173,6 +195,7 @@ describe("env", () => {
     });
 
     it("should not notify of china region if cn option is missing", async () => {
+      const [parseEnv] = makeDependencies();
       const logSpy = jest.spyOn(log, "notice");
 
       await parseEnv({
@@ -183,6 +206,7 @@ describe("env", () => {
     });
 
     it("should not notify of china region if cn option is false", async () => {
+      const [parseEnv] = makeDependencies();
       const logSpy = jest.spyOn(log, "notice");
 
       await parseEnv({
@@ -195,6 +219,8 @@ describe("env", () => {
 
   describe("system-user", () => {
     it("should be system-user if option is true", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           systemUser: true,
@@ -205,6 +231,8 @@ describe("env", () => {
     });
 
     it("should not be system-user if option is missing", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {},
       });
@@ -213,6 +241,8 @@ describe("env", () => {
     });
 
     it("should not be system-user if option is false", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           systemUser: false,
@@ -225,6 +255,8 @@ describe("env", () => {
 
   describe("wsl", () => {
     it("should use wsl if option is true", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           wsl: true,
@@ -235,6 +267,8 @@ describe("env", () => {
     });
 
     it("should not use wsl if option is missing", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {},
       });
@@ -243,6 +277,8 @@ describe("env", () => {
     });
 
     it("should not use wsl if option is false", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           wsl: false,
@@ -255,6 +291,7 @@ describe("env", () => {
 
   describe("upm-config", () => {
     it("should fail if upm-config dir cannot be determined", async () => {
+      const [parseEnv] = makeDependencies();
       const expected = new NoWslError();
       jest
         .mocked(tryGetUpmConfigDir)
@@ -268,6 +305,8 @@ describe("env", () => {
 
   describe("registry", () => {
     it("should be global openupm by default", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({ _global: {} });
 
       expect(result).toBeOk((env: Env) =>
@@ -276,6 +315,8 @@ describe("env", () => {
     });
 
     it("should be chinese openupm for chinese locale", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           cn: true,
@@ -288,6 +329,8 @@ describe("env", () => {
     });
 
     it("should be custom registry if overridden", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           registry: exampleRegistryUrl,
@@ -300,6 +343,8 @@ describe("env", () => {
     });
 
     it("should have no auth if no upm-config was found", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           registry: exampleRegistryUrl,
@@ -312,6 +357,7 @@ describe("env", () => {
     });
 
     it("should have no auth if upm-config had no entry for the url", async () => {
+      const [parseEnv] = makeDependencies();
       mockUpmConfig({
         npmAuth: {},
       });
@@ -328,6 +374,7 @@ describe("env", () => {
     });
 
     it("should have auth if upm-config had entry for the url", async () => {
+      const [parseEnv] = makeDependencies();
       mockUpmConfig(testUpmConfig);
 
       const result = await parseEnv({
@@ -344,6 +391,8 @@ describe("env", () => {
 
   describe("upstream registry", () => {
     it("should be global unity by default", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({ _global: {} });
 
       expect(result).toBeOk((env: Env) =>
@@ -352,6 +401,8 @@ describe("env", () => {
     });
 
     it("should be chinese unity for chinese locale", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {
           cn: true,
@@ -364,6 +415,8 @@ describe("env", () => {
     });
 
     it("should have no auth", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {},
       });
@@ -376,6 +429,8 @@ describe("env", () => {
 
   describe("cwd", () => {
     it("should be process directory by default", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {},
       });
@@ -386,6 +441,8 @@ describe("env", () => {
     });
 
     it("should be specified path if overridden", async () => {
+      const [parseEnv] = makeDependencies();
+
       const expected = "/some/other/path";
 
       const result = await parseEnv({
@@ -398,6 +455,7 @@ describe("env", () => {
     });
 
     it("should fail if specified path is not found", async () => {
+      const [parseEnv] = makeDependencies();
       const notExistentPath = "/some/other/path";
       jest
         .mocked(fs.existsSync)
@@ -415,6 +473,8 @@ describe("env", () => {
     });
 
     it("should notify if specified path is not found", async () => {
+      const [parseEnv] = makeDependencies();
+
       const notExistentPath = "/some/other/path";
       jest
         .mocked(fs.existsSync)
@@ -436,6 +496,8 @@ describe("env", () => {
 
   describe("editor-version", () => {
     it("should be parsed object for valid release versions", async () => {
+      const [parseEnv] = makeDependencies();
+
       const result = await parseEnv({
         _global: {},
       });
@@ -446,6 +508,7 @@ describe("env", () => {
     });
 
     it("should be original string for non-release versions", async () => {
+      const [parseEnv] = makeDependencies();
       const expected = "2022.3";
       mockProjectVersion(expected);
 
@@ -459,6 +522,7 @@ describe("env", () => {
     });
 
     it("should be original string for non-version string", async () => {
+      const [parseEnv] = makeDependencies();
       const expected = "Bad version";
       mockProjectVersion(expected);
 
@@ -472,6 +536,7 @@ describe("env", () => {
     });
 
     it("should fail if ProjectVersion.txt could not be loaded", async () => {
+      const [parseEnv] = makeDependencies();
       const expected = new IOError();
       jest
         .mocked(tryLoadProjectVersion)
@@ -485,6 +550,7 @@ describe("env", () => {
     });
 
     it("should notify of missing ProjectVersion.txt", async () => {
+      const [parseEnv] = makeDependencies();
       jest
         .mocked(tryLoadProjectVersion)
         .mockReturnValue(
@@ -505,6 +571,7 @@ describe("env", () => {
     });
 
     it("should notify of parsing issue", async () => {
+      const [parseEnv] = makeDependencies();
       jest
         .mocked(tryLoadProjectVersion)
         .mockReturnValue(
