@@ -7,7 +7,6 @@ import {
   PackumentResolveError,
   pickMostFixable,
   ResolvableVersion,
-  tryResolve,
   tryResolveFromCache,
   VersionNotFoundError,
 } from "../packument-resolving";
@@ -15,8 +14,8 @@ import { unityRegistryUrl } from "../domain/registry-url";
 import { recordEntries } from "../utils/record-utils";
 import assert from "assert";
 import { PackumentNotFoundError } from "../common-errors";
-import { FetchPackumentService } from "./fetch-packument";
 import { Registry } from "../domain/registry";
+import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 
 export type DependencyBase = {
   /**
@@ -80,7 +79,7 @@ export type ResolveDependenciesService = (
  * Makes a {@link ResolveDependenciesService} function.
  */
 export function makeResolveDependenciesService(
-  fetchService: FetchPackumentService
+  resolveRemotePackument: ResolveRemotePackumentService
 ): ResolveDependenciesService {
   return async (registry, upstreamRegistry, name, version, deep) => {
     // a list of pending dependency {name, version}
@@ -109,7 +108,7 @@ export function makeResolveDependenciesService(
       if (cacheResult.isOk()) return cacheResult;
 
       // Then registry
-      return await tryResolve(fetchService, packumentName, version, registry)
+      return await resolveRemotePackument(packumentName, version, registry)
         .promise;
     }
 

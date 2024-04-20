@@ -4,7 +4,6 @@ import {
   makeAddCmd,
   UnresolvedDependencyError,
 } from "../src/cli/cmd-add";
-import { FetchPackumentService } from "../src/services/fetch-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { Env, ParseEnvService } from "../src/services/parse-env";
 import { exampleRegistryUrl } from "./data-registry";
@@ -26,6 +25,7 @@ import { ResolveDependenciesService } from "../src/services/dependency-resolving
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { VersionNotFoundError } from "../src/packument-resolving";
 import { mockService } from "./service.mock";
+import { ResolveRemotePackumentService } from "../src/services/resolve-remote-packument";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -60,7 +60,12 @@ function makeDependencies() {
   const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const fetchService = mockService<FetchPackumentService>();
+  const resolveRemotePackument = mockService<ResolveRemotePackumentService>();
+  mockResolvedPackuments(
+    resolveRemotePackument,
+    [exampleRegistryUrl, somePackument],
+    [exampleRegistryUrl, otherPackument]
+  );
 
   const resolveDependencies = mockService<ResolveDependenciesService>();
   resolveDependencies.mockResolvedValue([
@@ -83,16 +88,21 @@ function makeDependencies() {
     [],
   ]);
 
-  const addCmd = makeAddCmd(parseEnv, fetchService, resolveDependencies);
-  return [addCmd, parseEnv, fetchService, resolveDependencies] as const;
+  const addCmd = makeAddCmd(
+    parseEnv,
+    resolveRemotePackument,
+    resolveDependencies
+  );
+  return [
+    addCmd,
+    parseEnv,
+    resolveRemotePackument,
+    resolveDependencies,
+  ] as const;
 }
 
 describe("cmd-add", () => {
   beforeEach(() => {
-    mockResolvedPackuments(
-      [exampleRegistryUrl, somePackument],
-      [exampleRegistryUrl, otherPackument]
-    );
     mockProjectManifest(emptyProjectManifest);
     spyOnSavedManifest();
   });
@@ -129,8 +139,8 @@ describe("cmd-add", () => {
   });
 
   it("should fail if package could not be resolved", async () => {
-    const [viewCmd] = makeDependencies();
-    mockResolvedPackuments();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument);
 
     const result = await viewCmd(somePackage, { _global: {} });
 
@@ -141,8 +151,8 @@ describe("cmd-add", () => {
 
   it("should notify if package could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    const [viewCmd] = makeDependencies();
-    mockResolvedPackuments();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument);
 
     await viewCmd(somePackage, { _global: {} });
 
@@ -202,8 +212,11 @@ describe("cmd-add", () => {
 
   it("should notify if package editor version is not valid", async () => {
     const warnSpy = spyOnLog("warn");
-    mockResolvedPackuments([exampleRegistryUrl, badEditorPackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      badEditorPackument,
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},
@@ -214,8 +227,11 @@ describe("cmd-add", () => {
 
   it("should suggest running with force if package editor version is not valid", async () => {
     const noticeSpy = spyOnLog("notice");
-    mockResolvedPackuments([exampleRegistryUrl, badEditorPackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      badEditorPackument,
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},
@@ -225,8 +241,11 @@ describe("cmd-add", () => {
   });
 
   it("should fail if package editor version is not valid and not running with force", async () => {
-    mockResolvedPackuments([exampleRegistryUrl, badEditorPackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      badEditorPackument,
+    ]);
 
     const result = await viewCmd(somePackage, {
       _global: {},
@@ -238,8 +257,11 @@ describe("cmd-add", () => {
   });
 
   it("should add package with invalid editor version when running with force", async () => {
-    mockResolvedPackuments([exampleRegistryUrl, badEditorPackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      badEditorPackument,
+    ]);
 
     const result = await viewCmd(somePackage, {
       _global: {},
@@ -250,9 +272,12 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package is incompatible with editor", async () => {
-    mockResolvedPackuments([exampleRegistryUrl, incompatiblePackument]);
     const warnSpy = spyOnLog("warn");
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      incompatiblePackument,
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},
@@ -262,9 +287,12 @@ describe("cmd-add", () => {
   });
 
   it("should suggest to run with force if package is incompatible with editor", async () => {
-    mockResolvedPackuments([exampleRegistryUrl, incompatiblePackument]);
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      incompatiblePackument,
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},
@@ -274,8 +302,11 @@ describe("cmd-add", () => {
   });
 
   it("should fail if package is incompatible with editor and not running with force", async () => {
-    mockResolvedPackuments([exampleRegistryUrl, incompatiblePackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      incompatiblePackument,
+    ]);
 
     const result = await viewCmd(somePackage, {
       _global: {},
@@ -287,8 +318,11 @@ describe("cmd-add", () => {
   });
 
   it("should add package with incompatible with editor when running with force", async () => {
-    mockResolvedPackuments([exampleRegistryUrl, incompatiblePackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      exampleRegistryUrl,
+      incompatiblePackument,
+    ]);
 
     const result = await viewCmd(somePackage, {
       _global: {},
@@ -311,8 +345,11 @@ describe("cmd-add", () => {
 
   it("should not fetch dependencies for upstream packages", async () => {
     const verboseSpy = spyOnLog("verbose");
-    mockResolvedPackuments([unityRegistryUrl, somePackument]);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    mockResolvedPackuments(resolveRemotePackument, [
+      unityRegistryUrl,
+      somePackument,
+    ]);
 
     await viewCmd(somePackage, {
       _global: {},

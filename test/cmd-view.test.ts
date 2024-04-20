@@ -1,5 +1,4 @@
 import { makeViewCmd } from "../src/cli/cmd-view";
-import { FetchPackumentService } from "../src/services/fetch-packument";
 import { Env, ParseEnvService } from "../src/services/parse-env";
 import { exampleRegistryUrl } from "./data-registry";
 import { unityRegistryUrl } from "../src/domain/registry-url";
@@ -13,10 +12,10 @@ import {
   PackumentNotFoundError,
 } from "../src/common-errors";
 import { spyOnLog } from "./log.mock";
-import * as packumentResolveModule from "../src/packument-resolving";
 import { ResolvedPackument } from "../src/packument-resolving";
 import { buildPackument } from "./data-packument";
-import {mockService} from "./service.mock";
+import { mockService } from "./service.mock";
+import { ResolveRemotePackumentService } from "../src/services/resolve-remote-packument";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -56,24 +55,21 @@ const defaultEnv = {
 } as Env;
 
 function makeDependencies() {
-  const parseEnv= mockService<ParseEnvService>();
+  const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const fetchService= mockService<FetchPackumentService>();
+  const resolveRemotePackument = mockService<ResolveRemotePackumentService>();
+  resolveRemotePackument.mockReturnValue(
+    Ok({
+      packument: somePackument,
+    } as ResolvedPackument).toAsyncResult()
+  );
 
-  const viewCmd = makeViewCmd(parseEnv, fetchService);
-  return [viewCmd, parseEnv] as const;
+  const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument);
+  return [viewCmd, parseEnv, resolveRemotePackument] as const;
 }
 
 describe("cmd-view", () => {
-  beforeEach(() => {
-    jest.spyOn(packumentResolveModule, "tryResolve").mockReturnValue(
-      Ok({
-        packument: somePackument,
-      } as ResolvedPackument).toAsyncResult()
-    );
-  });
-
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
     const [viewCmd, parseEnv] = makeDependencies();
@@ -111,10 +107,8 @@ describe("cmd-view", () => {
 
   it("should fail if package could not be resolved", async () => {
     const expected = new PackumentNotFoundError();
-    jest
-      .spyOn(packumentResolveModule, "tryResolve")
-      .mockReturnValue(Err(expected).toAsyncResult());
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    resolveRemotePackument.mockReturnValue(Err(expected).toAsyncResult());
 
     const result = await viewCmd(somePackage, { _global: {} });
 
@@ -123,10 +117,10 @@ describe("cmd-view", () => {
 
   it("should notify if package could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    jest
-      .spyOn(packumentResolveModule, "tryResolve")
-      .mockReturnValue(Err(new PackumentNotFoundError()).toAsyncResult());
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    resolveRemotePackument.mockReturnValue(
+      Err(new PackumentNotFoundError()).toAsyncResult()
+    );
 
     await viewCmd(somePackage, { _global: {} });
 

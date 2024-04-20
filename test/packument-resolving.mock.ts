@@ -1,28 +1,25 @@
-import * as resolveModule from "../src/packument-resolving";
 import { tryResolveFromPackument } from "../src/packument-resolving";
 import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../src/common-errors";
 import { UnityPackument } from "../src/domain/packument";
 import { RegistryUrl } from "../src/domain/registry-url";
+import { ResolveRemotePackumentService } from "../src/services/resolve-remote-packument";
 
 type MockEntry = [RegistryUrl, UnityPackument];
 
 /**
- * Spies on {@link tryResolve}.
- */
-export function spyOnPackumentResolving() {
-  return jest.spyOn(resolveModule, "tryResolve");
-}
-
-/**
- * Mocks the results of {@link tryResolve}.
+ * Mocks the results of a {@link ResolveRemotePackumentService}.
+ * @param resolveRemotePackument The service to mock.
  * @param entries The entries of the mocked registry. Each entry contains
  * the url under which the packument is registered and the packument. All
  * packuments not given in this list are assumed to not exist.
  */
-export function mockResolvedPackuments(...entries: MockEntry[]) {
-  return spyOnPackumentResolving().mockImplementation(
-    (_, name, requestedVersion, registry) => {
+export function mockResolvedPackuments(
+  resolveRemotePackument: jest.MockedFunction<ResolveRemotePackumentService>,
+  ...entries: MockEntry[]
+) {
+  return resolveRemotePackument.mockImplementation(
+    (name, requestedVersion, registry) => {
       const matchingEntry = entries.find(
         (entry) => entry[0] === registry.url && entry[1].name === name
       );

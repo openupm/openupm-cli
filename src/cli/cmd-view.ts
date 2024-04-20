@@ -11,9 +11,8 @@ import {
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
-import { FetchPackumentService } from "../services/fetch-packument";
-import { tryResolve } from "../packument-resolving";
 import { PackageWithVersionError } from "../common-errors";
+import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 
 export type ViewOptions = CmdOptions;
 
@@ -103,7 +102,7 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnvService,
-  fetchService: FetchPackumentService
+  resolveRemotePackument: ResolveRemotePackumentService
 ): ViewCmd {
   return async (pkg, options) => {
     // parse env
@@ -119,14 +118,13 @@ export function makeViewCmd(
     }
 
     // verify name
-    const result = await tryResolve(
-      fetchService,
+    const result = await resolveRemotePackument(
       pkg,
       undefined,
       env.registry
     ).orElse((error) =>
       env.upstream
-        ? tryResolve(fetchService, pkg, undefined, env.upstreamRegistry)
+        ? resolveRemotePackument(pkg, undefined, env.upstreamRegistry)
         : Err(error)
     ).promise;
 
