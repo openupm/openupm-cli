@@ -24,12 +24,12 @@ import { makeResolveDependenciesService } from "../services/dependency-resolving
 
 const fetchService = makePackumentFetchService();
 const npmrcAuthService = makeNpmrcAuthService();
-const addUserService = makeAddUserService();
+const addUser = makeAddUserService();
 const searchService = makeSearchService();
 const resolveDependencies = makeResolveDependenciesService(fetchService);
 
 const addCmd = makeAddCmd(fetchService, resolveDependencies);
-const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
+const loginCmd = makeLoginCmd(npmrcAuthService, addUser);
 const searchCmd = makeSearchCmd(searchService);
 const depsCmd = makeDepsCmd(resolveDependencies);
 const removeCmd = makeRemoveCmd();

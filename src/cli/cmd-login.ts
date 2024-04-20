@@ -57,7 +57,7 @@ export type LoginCmd = (
  */
 export function makeLoginCmd(
   npmrcAuthService: NpmrcAuthService,
-  addUserService: AddUserService
+  addUser: AddUserService
 ): LoginCmd {
   return async (options) => {
     // parse env
@@ -93,7 +93,7 @@ export function makeLoginCmd(
       if (result.isErr()) return result;
     } else {
       // npm login
-      const loginResult = await addUserService.tryAdd(
+      const loginResult = await addUser(
         loginRegistry,
         username,
         password,
