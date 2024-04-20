@@ -16,28 +16,31 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const fetchPackument = makeFetchPackumentService();
-  return [fetchPackument] as const;
+  const regClient: jest.Mocked<RegClient.Instance> = {
+    adduser: jest.fn(),
+    get: jest.fn(),
+  };
+
+  const fetchPackument = makeFetchPackumentService(regClient);
+  return [fetchPackument, regClient] as const;
 }
 
 function mockRegClientGetResult(
+  regClient: jest.Mocked<RegClient.Instance>,
   error: HttpErrorBase | null,
   packument: UnityPackument | null
 ) {
-  jest.mocked(RegClient).mockImplementation(() => ({
-    adduser: () => undefined,
-    get: (_1, _2, cb) => {
-      cb(error, packument!, null!, null!);
-    },
-  }));
+  regClient.get.mockImplementation((_1, _2, cb) => {
+    cb(error, packument!, null!, null!);
+  });
 }
 
 describe("fetch packument service", () => {
   it("should get existing packument", async () => {
     // TODO: Use prop test
     const packument = buildPackument(packageA);
-    mockRegClientGetResult(null, packument);
-    const [fetchPackument] = makeDependencies();
+    const [fetchPackument, regClient] = makeDependencies();
+    mockRegClientGetResult(regClient, null, packument);
 
     const result = await fetchPackument(exampleRegistry, packageA).promise;
 
@@ -45,7 +48,9 @@ describe("fetch packument service", () => {
   });
 
   it("should not find unknown packument", async () => {
+    const [fetchPackument, regClient] = makeDependencies();
     mockRegClientGetResult(
+      regClient,
       {
         message: "not found",
         name: "FakeError",
@@ -53,7 +58,6 @@ describe("fetch packument service", () => {
       } as HttpErrorBase,
       null
     );
-    const [fetchPackument] = makeDependencies();
 
     const result = await fetchPackument(exampleRegistry, packageA).promise;
 
@@ -61,7 +65,9 @@ describe("fetch packument service", () => {
   });
 
   it("should fail for errors", async () => {
+    const [fetchPackument, regClient] = makeDependencies();
     mockRegClientGetResult(
+      regClient,
       {
         message: "Unauthorized",
         name: "FakeError",
@@ -69,7 +75,6 @@ describe("fetch packument service", () => {
       } as HttpErrorBase,
       null
     );
-    const [fetchPackument] = makeDependencies();
 
     const result = await fetchPackument(exampleRegistry, packageA).promise;
 
