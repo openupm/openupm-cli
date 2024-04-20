@@ -12,7 +12,7 @@ import { coerceRegistryUrl } from "../domain/registry-url";
 import { CmdOptions } from "./options";
 import { makeFetchPackumentService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
-import { makeNpmrcAuthService } from "../services/npmrc-auth";
+import { makeAuthNpmrcService } from "../services/npmrc-auth";
 import { makeAddUserService } from "../services/add-user";
 import { makeSearchService } from "../services/search";
 import pkg from "../../package.json";
@@ -23,13 +23,13 @@ import { makeResolveDependenciesService } from "../services/dependency-resolving
 // Composition root
 
 const fetchPackument = makeFetchPackumentService();
-const npmrcAuthService = makeNpmrcAuthService();
+const authNpmrc = makeAuthNpmrcService();
 const addUser = makeAddUserService();
 const searchService = makeSearchService();
 const resolveDependencies = makeResolveDependenciesService(fetchPackument);
 
 const addCmd = makeAddCmd(fetchPackument, resolveDependencies);
-const loginCmd = makeLoginCmd(npmrcAuthService, addUser);
+const loginCmd = makeLoginCmd(authNpmrc, addUser);
 const searchCmd = makeSearchCmd(searchService);
 const depsCmd = makeDepsCmd(resolveDependencies);
 const removeCmd = makeRemoveCmd();

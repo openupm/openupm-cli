@@ -18,7 +18,7 @@ import {
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
-import { NpmrcAuthService } from "../services/npmrc-auth";
+import { AuthNpmrcService } from "../services/npmrc-auth";
 
 /**
  * Errors which may occur when logging in.
@@ -56,7 +56,7 @@ export type LoginCmd = (
  * Makes a {@link LoginCmd} function.
  */
 export function makeLoginCmd(
-  npmrcAuthService: NpmrcAuthService,
+  authNpmrc: AuthNpmrcService,
   addUser: AddUserService
 ): LoginCmd {
   return async (options) => {
@@ -113,10 +113,7 @@ export function makeLoginCmd(
       const token = loginResult.value;
 
       // write npm token
-      const updateResult = await npmrcAuthService.trySetAuthToken(
-        loginRegistry,
-        token
-      ).promise;
+      const updateResult = await authNpmrc(loginRegistry, token).promise;
       if (updateResult.isErr()) return updateResult;
       updateResult.map((configPath) =>
         log.notice("config", `saved to npm config: ${configPath}`)
