@@ -5,10 +5,7 @@ import { makeRemoveCmd } from "./cmd-remove";
 import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
 import log from "./logger";
-import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
-import { isPackageReference } from "../domain/package-reference";
-import { isDomainName } from "../domain/domain-name";
-import { coerceRegistryUrl } from "../domain/registry-url";
+import { eachValue } from "./cli-parsing";
 import { CmdOptions } from "./options";
 import { makeFetchPackumentService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
@@ -20,6 +17,11 @@ import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
 import { makeResolveDependenciesService } from "../services/dependency-resolving";
 import { makeGetAllPackumentsService } from "../services/get-all-packuments";
+import {
+  mustBeDomainName,
+  mustBePackageReference,
+  mustBeRegistryUrl,
+} from "./validators";
 
 // Composition root
 
@@ -36,23 +38,6 @@ const searchCmd = makeSearchCmd(searchRegistry, getAllPackuments);
 const depsCmd = makeDepsCmd(resolveDependencies);
 const removeCmd = makeRemoveCmd();
 const viewCmd = makeViewCmd(fetchPackument);
-
-// Validators
-
-const mustBePackageReference = mustSatisfy(
-  isPackageReference,
-  (input) => `"${input}" is not a valid package-reference`
-);
-
-const mustBeDomainName = mustSatisfy(
-  isDomainName,
-  (input) => `"${input}" is not a valid package name`
-);
-
-const mustBeRegistryUrl = mustBeParsable(
-  coerceRegistryUrl,
-  (input) => `"${input}" is not a valid registry-url`
-);
 
 // update-notifier
 
