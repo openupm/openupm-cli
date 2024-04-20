@@ -10,6 +10,7 @@ import {
   hasVersion,
   makePackageReference,
   PackageReference,
+  splitPackageReference,
 } from "../domain/package-reference";
 import { removeScope } from "../domain/scoped-registry";
 import {
@@ -62,7 +63,8 @@ export function makeRemoveCmd(): RemoveCmd {
     ): Promise<Result<UnityProjectManifest, RemoveError>> {
       // parse name
       if (hasVersion(pkg)) {
-        log.warn("", `please do not specify a version (Write only '${pkg}').`);
+        const [name] = splitPackageReference(pkg);
+        log.warn("", `please do not specify a version (Write only '${name}').`);
         return Err(new PackageWithVersionError());
       }
 
