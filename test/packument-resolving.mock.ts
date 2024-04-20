@@ -8,15 +8,21 @@ import { RegistryUrl } from "../src/domain/registry-url";
 type MockEntry = [RegistryUrl, UnityPackument];
 
 /**
+ * Spies on {@link tryResolve}.
+ */
+export function spyOnPackumentResolving() {
+  return jest.spyOn(resolveModule, "tryResolve");
+}
+
+/**
  * Mocks the results of {@link tryResolve}.
  * @param entries The entries of the mocked registry. Each entry contains
  * the url under which the packument is registered and the packument. All
  * packuments not given in this list are assumed to not exist.
  */
 export function mockResolvedPackuments(...entries: MockEntry[]) {
-  jest
-    .spyOn(resolveModule, "tryResolve")
-    .mockImplementation((_, name, requestedVersion, registry) => {
+  return spyOnPackumentResolving().mockImplementation(
+    (_, name, requestedVersion, registry) => {
       const matchingEntry = entries.find(
         (entry) => entry[0] === registry.url && entry[1].name === name
       );
@@ -29,5 +35,6 @@ export function mockResolvedPackuments(...entries: MockEntry[]) {
         matchingEntry[0]
       );
       return resolvedVersionResult.toAsyncResult();
-    });
+    }
+  );
 }
