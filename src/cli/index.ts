@@ -10,7 +10,7 @@ import { isPackageReference } from "../domain/package-reference";
 import { isDomainName } from "../domain/domain-name";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { CmdOptions } from "./options";
-import { makePackumentFetchService } from "../services/fetch-packument";
+import { makeFetchPackumentService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
 import { makeNpmrcAuthService } from "../services/npmrc-auth";
 import { makeAddUserService } from "../services/add-user";
@@ -22,18 +22,18 @@ import { makeResolveDependenciesService } from "../services/dependency-resolving
 
 // Composition root
 
-const fetchService = makePackumentFetchService();
+const fetchPackument = makeFetchPackumentService();
 const npmrcAuthService = makeNpmrcAuthService();
 const addUser = makeAddUserService();
 const searchService = makeSearchService();
-const resolveDependencies = makeResolveDependenciesService(fetchService);
+const resolveDependencies = makeResolveDependenciesService(fetchPackument);
 
-const addCmd = makeAddCmd(fetchService, resolveDependencies);
+const addCmd = makeAddCmd(fetchPackument, resolveDependencies);
 const loginCmd = makeLoginCmd(npmrcAuthService, addUser);
 const searchCmd = makeSearchCmd(searchService);
 const depsCmd = makeDepsCmd(resolveDependencies);
 const removeCmd = makeRemoveCmd();
-const viewCmd = makeViewCmd(fetchService);
+const viewCmd = makeViewCmd(fetchPackument);
 
 // Validators
 
