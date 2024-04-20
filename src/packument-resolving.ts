@@ -120,19 +120,18 @@ export function tryResolveFromPackument(
 
 /**
  * Attempts to resolve a packument from a specific registry.
- * @param fetchService The packument fetch service to use for this operation.
+ * @param fetchPackument The packument fetch service to use for this operation.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
 export function tryResolve(
-  fetchService: FetchPackumentService,
+  fetchPackument: FetchPackumentService,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
 ): AsyncResult<ResolvedPackument, PackumentResolveError | HttpErrorBase> {
-  return fetchService
-    .tryFetchByName(source, packageName)
+  return fetchPackument(source, packageName)
     .andThen((maybePackument) => {
       if (maybePackument === null) return Err(new PackumentNotFoundError());
       return Ok(maybePackument);

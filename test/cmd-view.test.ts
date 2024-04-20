@@ -61,10 +61,8 @@ const defaultEnv: Env = {
 };
 
 function makeDependencies() {
-  const fetchService: jest.Mocked<FetchPackumentService> = {
-    tryFetchByName: jest.fn(),
-  };
-
+  const fetchService: jest.MockedFunction<FetchPackumentService> = jest.fn();
+  
   const viewCmd = makeViewCmd(fetchService);
   return [viewCmd] as const;
 }

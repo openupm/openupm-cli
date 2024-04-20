@@ -5,8 +5,9 @@ import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
-import { SearchedPackument, SearchService } from "../services/search";
+import { SearchedPackument, SearchRegistryService } from "../services/search-registry";
 import { Registry } from "../domain/registry";
+import { GetAllPackumentsService } from "../services/get-all-packuments";
 
 export type SearchError = EnvParseError | HttpErrorBase;
 
@@ -23,22 +24,22 @@ export type SearchCmd = (
 ) => Promise<Result<void, SearchError>>;
 
 const searchEndpoint = function (
-  searchService: SearchService,
+  searchRegistry: SearchRegistryService,
   registry: Registry,
   keyword: string
 ): AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase> {
-  return searchService.trySearch(registry, keyword).map((results) => {
+  return searchRegistry(registry, keyword).map((results) => {
     log.verbose("npmsearch", results.join(os.EOL));
     return results;
   });
 };
 
 const searchOld = function (
-  searchService: SearchService,
+  getAllPackuments: GetAllPackumentsService,
   registry: Registry,
   keyword: string
 ): AsyncResult<SearchedPackument[], HttpErrorBase> {
-  return searchService.tryGetAll(registry).map((allPackuments) => {
+  return getAllPackuments(registry).map((allPackuments) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _updated, ...packumentEntries } = allPackuments;
     const packuments = Object.values(packumentEntries);
@@ -57,7 +58,10 @@ const searchOld = function (
 /**
  * Makes a {@link SearchCmd} function.
  */
-export function makeSearchCmd(searchService: SearchService): SearchCmd {
+export function makeSearchCmd(
+  searchRegistry: SearchRegistryService,
+  getAllPackuments: GetAllPackumentsService
+): SearchCmd {
   return async (keyword, options) => {
     // parse env
     const envResult = await parseEnv(options);
@@ -65,13 +69,13 @@ export function makeSearchCmd(searchService: SearchService): SearchCmd {
     const env = envResult.value;
 
     // search endpoint
-    let result = await searchEndpoint(searchService, env.registry, keyword)
+    let result = await searchEndpoint(searchRegistry, env.registry, keyword)
       .promise;
 
     // search old search
     if (result.isErr()) {
       log.warn("", "fast search endpoint is not available, using old search.");
-      result = await searchOld(searchService, env.registry, keyword).promise;
+      result = await searchOld(getAllPackuments, env.registry, keyword).promise;
     }
     if (result.isErr()) {
       log.warn("", "/-/all endpoint is not available");
