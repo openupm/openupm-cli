@@ -44,6 +44,7 @@ export type AddUserService = (
  * Makes a new {@link AddUserService} function.
  */
 export function makeAddUserService(): AddUserService {
+  // TODO: Inject registry client
   const registryClient = new RegClient({ log });
   return (registryUrl, username, email, password) => {
     return new AsyncResult(
