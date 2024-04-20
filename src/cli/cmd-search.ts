@@ -5,16 +5,22 @@ import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
-import {
-  makeSearchService,
-  SearchedPackument,
-  SearchService,
-} from "../services/search";
+import { SearchedPackument, SearchService } from "../services/search";
 import { Registry } from "../domain/registry";
 
 export type SearchError = EnvParseError | HttpErrorBase;
 
 export type SearchOptions = CmdOptions;
+
+/**
+ * Cmd-handler for searching the registry.
+ * @param keyword The keyword to search for.
+ * @param options Command options.
+ */
+export type SearchCmd = (
+  keyword: string,
+  options: SearchOptions
+) => Promise<Result<void, SearchError>>;
 
 const searchEndpoint = function (
   searchService: SearchService,
@@ -48,38 +54,38 @@ const searchOld = function (
   });
 };
 
-export async function search(
-  keyword: string,
-  options: SearchOptions
-): Promise<Result<void, SearchError>> {
-  // parse env
-  const envResult = await parseEnv(options);
-  if (envResult.isErr()) return envResult;
-  const env = envResult.value;
+/**
+ * Makes a {@link SearchCmd} function.
+ */
+export function makeSearchCmd(searchService: SearchService): SearchCmd {
+  return async (keyword, options) => {
+    // parse env
+    const envResult = await parseEnv(options);
+    if (envResult.isErr()) return envResult;
+    const env = envResult.value;
 
-  const searchService = makeSearchService();
+    // search endpoint
+    let result = await searchEndpoint(searchService, env.registry, keyword)
+      .promise;
 
-  // search endpoint
-  let result = await searchEndpoint(searchService, env.registry, keyword)
-    .promise;
+    // search old search
+    if (result.isErr()) {
+      log.warn("", "fast search endpoint is not available, using old search.");
+      result = await searchOld(searchService, env.registry, keyword).promise;
+    }
+    if (result.isErr()) {
+      log.warn("", "/-/all endpoint is not available");
+      return result;
+    }
 
-  // search old search
-  if (result.isErr()) {
-    log.warn("", "fast search endpoint is not available, using old search.");
-    result = await searchOld(searchService, env.registry, keyword).promise;
-  }
-  if (result.isErr()) {
-    log.warn("", "/-/all endpoint is not available");
-    return result;
-  }
+    const results = result.value;
 
-  const results = result.value;
+    if (results.length === 0) {
+      log.notice("", `No matches found for "${keyword}"`);
+      return Ok(undefined);
+    }
 
-  if (results.length === 0) {
-    log.notice("", `No matches found for "${keyword}"`);
+    console.log(formatAsTable(results));
     return Ok(undefined);
-  }
-
-  console.log(formatAsTable(results));
-  return Ok(undefined);
+  };
 }

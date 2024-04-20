@@ -22,6 +22,16 @@ export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
 
+/**
+ * Cmd-handler for listing dependencies for a package.
+ * @param pkg Reference to a package.
+ * @param options Command options.
+ */
+export type DepsCmd = (
+  pkg: PackageReference,
+  options: DepsOptions
+) => Promise<Result<void, DepsError>>;
+
 function errorPrefixForError(error: PackumentResolveError): string {
   if (error instanceof PackumentNotFoundError) return "missing dependency";
   else if (error instanceof VersionNotFoundError)
@@ -30,48 +40,47 @@ function errorPrefixForError(error: PackumentResolveError): string {
 }
 
 /**
- * @throws {Error} An unhandled error occurred.
+ * Makes a {@link DepsCmd} function.
  */
-export const deps = async function (
-  pkg: PackageReference,
-  options: DepsOptions
-): Promise<Result<void, DepsError>> {
-  // parse env
-  const envResult = await parseEnv(options);
-  if (envResult.isErr()) return envResult;
-  const env = envResult.value;
+export function makeDepsCmd(): DepsCmd {
+  return async (pkg, options) => {
+    // parse env
+    const envResult = await parseEnv(options);
+    if (envResult.isErr()) return envResult;
+    const env = envResult.value;
 
-  const fetchService = makePackumentFetchService();
+    const fetchService = makePackumentFetchService();
 
-  const [name, version] = splitPackageReference(pkg);
+    const [name, version] = splitPackageReference(pkg);
 
-  if (version !== undefined && isPackageUrl(version))
-    throw new Error("Cannot get dependencies for url-version");
+    if (version !== undefined && isPackageUrl(version))
+      throw new Error("Cannot get dependencies for url-version");
 
-  const deep = options.deep || false;
-  log.verbose(
-    "dependency",
-    `fetch: ${makePackageReference(name, version)}, deep=${deep}`
-  );
-  const [depsValid, depsInvalid] = await fetchPackageDependencies(
-    env.registry,
-    env.upstreamRegistry,
-    name,
-    version,
-    deep,
-    fetchService
-  );
-  depsValid
-    .filter((x) => !x.self)
-    .forEach((x) =>
-      log.notice("dependency", `${makePackageReference(x.name, x.version)}`)
+    const deep = options.deep || false;
+    log.verbose(
+      "dependency",
+      `fetch: ${makePackageReference(name, version)}, deep=${deep}`
     );
-  depsInvalid
-    .filter((x) => !x.self)
-    .forEach((x) => {
-      const prefix = errorPrefixForError(x.reason);
-      log.warn(prefix, x.name);
-    });
+    const [depsValid, depsInvalid] = await fetchPackageDependencies(
+      env.registry,
+      env.upstreamRegistry,
+      name,
+      version,
+      deep,
+      fetchService
+    );
+    depsValid
+      .filter((x) => !x.self)
+      .forEach((x) =>
+        log.notice("dependency", `${makePackageReference(x.name, x.version)}`)
+      );
+    depsInvalid
+      .filter((x) => !x.self)
+      .forEach((x) => {
+        const prefix = errorPrefixForError(x.reason);
+        log.warn(prefix, x.name);
+      });
 
-  return Ok(undefined);
-};
+    return Ok(undefined);
+  };
+}

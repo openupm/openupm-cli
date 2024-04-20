@@ -1,4 +1,4 @@
-import { add, AddOptions } from "../src/cli/cmd-add";
+import { AddOptions, makeAddCmd } from "../src/cli/cmd-add";
 import { buildPackument } from "./data-packument";
 import { buildProjectManifest } from "./data-project-manifest";
 import { PackageUrl } from "../src/domain/package-url";
@@ -19,6 +19,15 @@ import {
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
 import { exampleRegistryUrl } from "./data-registry";
+import { FetchPackumentService } from "../src/services/fetch-packument";
+
+function makeDependencies() {
+  const fetchService: jest.Mocked<FetchPackumentService> = {
+    tryFetchByName: jest.fn(),
+  };
+  const addCmd = makeAddCmd(fetchService);
+  return [addCmd, fetchService] as const;
+}
 
 describe("cmd-add", () => {
   const packageMissing = makeDomainName("pkg-not-exist");
@@ -137,9 +146,10 @@ describe("cmd-add", () => {
     it("should add packument without version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
-      const addResult = await add(packageA, options);
+      const addResult = await addCmd(packageA, options);
 
       expect(addResult).toBeOk();
       expect(savedManifestSpy).toHaveBeenCalledWith(
@@ -153,9 +163,10 @@ describe("cmd-add", () => {
     it("should add packument with semantic version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
@@ -172,9 +183,10 @@ describe("cmd-add", () => {
     it("should add packument with latest tag", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, "latest"),
         options
       );
@@ -191,13 +203,14 @@ describe("cmd-add", () => {
     it("should override packument with lower version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
       mockProjectManifest(
         // Manifest already had package with a lower version
         addDependency(expectedManifestA, packageA, makeSemanticVersion("0.1.0"))
       );
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
@@ -214,13 +227,14 @@ describe("cmd-add", () => {
     it("should have no effect to add same packument twice", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
       mockProjectManifest(
         // Manifest already had package with same version
         addDependency(expectedManifestA, packageA, makeSemanticVersion("1.0.0"))
       );
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
@@ -233,9 +247,10 @@ describe("cmd-add", () => {
     it("should fail to add packument with unknown version", async () => {
       const warnSpy = spyOnLog("warn");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, makeSemanticVersion("2.0.0")),
         options
       );
@@ -248,9 +263,10 @@ describe("cmd-add", () => {
     it("should add packument with http version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       const gitUrl = "https://github.com/yo/com.base.package-a" as PackageUrl;
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, gitUrl),
         options
       );
@@ -266,9 +282,10 @@ describe("cmd-add", () => {
     it("should add packument with git version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       const gitUrl = "git@github.com:yo/com.base.package-a" as PackageUrl;
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, gitUrl),
         options
       );
@@ -284,9 +301,10 @@ describe("cmd-add", () => {
     it("should add packument with file version", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       const fileUrl = "file../yo/com.base.package-a" as PackageUrl;
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageA, fileUrl),
         options
       );
@@ -302,9 +320,10 @@ describe("cmd-add", () => {
     it("should fail for unknown packument", async () => {
       const errorSpy = spyOnLog("error");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments();
 
-      const addResult = await add(packageMissing, options);
+      const addResult = await addCmd(packageMissing, options);
 
       expect(addResult).toBeError();
       expect(savedManifestSpy).not.toHaveBeenCalled();
@@ -314,12 +333,13 @@ describe("cmd-add", () => {
     it("should be able to add multiple packuments", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentA],
         [exampleRegistryUrl, remotePackumentB]
       );
 
-      const addResult = await add([packageA, packageB], options);
+      const addResult = await addCmd([packageA, packageB], options);
 
       expect(addResult).toBeOk();
       expect(savedManifestSpy).toHaveBeenCalledWith(
@@ -334,9 +354,10 @@ describe("cmd-add", () => {
     it("should add upstream packument", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([unityRegistryUrl, remotePackumentUp]);
 
-      const addResult = await add(packageUp, upstreamOptions);
+      const addResult = await addCmd(packageUp, upstreamOptions);
 
       expect(addResult).toBeOk();
       expect(savedManifestSpy).toHaveBeenCalledWith(
@@ -353,9 +374,10 @@ describe("cmd-add", () => {
     it("should fail for unknown upstream packument", async () => {
       const errorSpy = spyOnLog("error");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments();
 
-      const addResult = await add(packageMissing, upstreamOptions);
+      const addResult = await addCmd(packageMissing, upstreamOptions);
 
       expect(addResult).toBeError();
       expect(savedManifestSpy).not.toHaveBeenCalled();
@@ -365,13 +387,14 @@ describe("cmd-add", () => {
     it("should add packument dependencies", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentC],
         [exampleRegistryUrl, remotePackumentD],
         [unityRegistryUrl, remotePackumentUp]
       );
 
-      const addResult = await add(
+      const addResult = await addCmd(
         makePackageReference(packageC, "latest"),
         upstreamOptions
       );
@@ -388,9 +411,10 @@ describe("cmd-add", () => {
     it("should packument to testables when requested", async () => {
       const noticeSpy = spyOnLog("notice");
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([exampleRegistryUrl, remotePackumentA]);
 
-      const addResult = await add(packageA, testableOptions);
+      const addResult = await addCmd(packageA, testableOptions);
 
       expect(addResult).toBeOk();
       expect(savedManifestSpy).toHaveBeenCalledWith(
@@ -403,12 +427,13 @@ describe("cmd-add", () => {
 
     it("should add packument with lower editor-version", async () => {
       const noticeSpy = spyOnLog("notice");
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([
         exampleRegistryUrl,
         remotePackumentWithLowerEditorVersion,
       ]);
 
-      const addResult = await add(packageLowerEditor, testableOptions);
+      const addResult = await addCmd(packageLowerEditor, testableOptions);
 
       expect(addResult).toBeOk();
       expect(noticeSpy).toHaveLogLike("manifest", "added");
@@ -417,12 +442,13 @@ describe("cmd-add", () => {
 
     it("should fail to add packument with higher editor-version", async () => {
       const warnSpy = spyOnLog("warn");
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([
         exampleRegistryUrl,
         remotePackumentWithHigherEditorVersion,
       ]);
 
-      const addResult = await add(packageHigherEditor, testableOptions);
+      const addResult = await addCmd(packageHigherEditor, testableOptions);
 
       expect(addResult).toBeError();
       expect(warnSpy).toHaveLogLike(
@@ -433,12 +459,13 @@ describe("cmd-add", () => {
 
     it("should add packument with higher editor-version when forced", async () => {
       const warnSpy = spyOnLog("warn");
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([
         exampleRegistryUrl,
         remotePackumentWithHigherEditorVersion,
       ]);
 
-      const addResult = await add(packageHigherEditor, forceOptions);
+      const addResult = await addCmd(packageHigherEditor, forceOptions);
 
       expect(addResult).toBeOk();
       expect(warnSpy).toHaveLogLike(
@@ -448,13 +475,14 @@ describe("cmd-add", () => {
     });
 
     it("should not add packument with bad editor-version", async () => {
+      const [addCmd] = makeDependencies();
       const warnSpy = spyOnLog("warn");
       mockResolvedPackuments([
         exampleRegistryUrl,
         remotePackumentWithWrongEditorVersion,
       ]);
 
-      const addResult = await add(packageWrongEditor, testableOptions);
+      const addResult = await addCmd(packageWrongEditor, testableOptions);
 
       expect(addResult).toBeError();
       expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
@@ -462,12 +490,13 @@ describe("cmd-add", () => {
 
     it("should add packument with bad editor-version when forced", async () => {
       const warnSpy = spyOnLog("warn");
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments([
         exampleRegistryUrl,
         remotePackumentWithWrongEditorVersion,
       ]);
 
-      const addResult = await add(packageWrongEditor, forceOptions);
+      const addResult = await addCmd(packageWrongEditor, forceOptions);
 
       expect(addResult).toBeOk();
       expect(warnSpy).toHaveLogLike("package.unity", "2020 is not valid");
@@ -475,12 +504,13 @@ describe("cmd-add", () => {
 
     it("should perform multiple adds atomically", async () => {
       const savedManifestSpy = spyOnSavedManifest();
+      const [addCmd] = makeDependencies();
       mockResolvedPackuments(
         [exampleRegistryUrl, remotePackumentA],
         [exampleRegistryUrl, remotePackumentB]
       );
 
-      const addResult = await add(
+      const addResult = await addCmd(
         // Second package will fail.
         // Because of this the whole operation should fail.
         [packageA, packageMissing, packageB],

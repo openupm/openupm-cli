@@ -1,21 +1,39 @@
 import { createCommand } from "@commander-js/extra-typings";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
-import { add } from "./cmd-add";
-import { remove } from "./cmd-remove";
-import { search } from "./cmd-search";
-import { view } from "./cmd-view";
-import { deps } from "./cmd-deps";
-import { login } from "./cmd-login";
+import { makeRemoveCmd } from "./cmd-remove";
+import { makeDepsCmd } from "./cmd-deps";
+import { makeLoginCmd } from "./cmd-login";
 import log from "./logger";
-
-// update-notifier
-import pkg from "../../package.json";
 import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
 import { isPackageReference } from "../domain/package-reference";
 import { isDomainName } from "../domain/domain-name";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { CmdOptions } from "./options";
+import { makePackumentFetchService } from "../services/fetch-packument";
+import { makeAddCmd } from "./cmd-add";
+import { makeNpmrcAuthService } from "../services/npmrc-auth";
+import { makeAddUserService } from "../services/add-user";
+import { makeSearchService } from "../services/search";
+import pkg from "../../package.json";
+import { makeSearchCmd } from "./cmd-search";
+import { makeViewCmd } from "./cmd-view";
+
+// Composition root
+
+const fetchService = makePackumentFetchService();
+const npmrcAuthService = makeNpmrcAuthService();
+const addUserService = makeAddUserService();
+const searchService = makeSearchService();
+
+const addCmd = makeAddCmd(fetchService);
+const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
+const searchCmd = makeSearchCmd(searchService);
+const depsCmd = makeDepsCmd();
+const removeCmd = makeRemoveCmd();
+const viewCmd = makeViewCmd(fetchService);
+
+// Validators
 
 const mustBePackageReference = mustSatisfy(
   isPackageReference,
@@ -31,6 +49,8 @@ const mustBeRegistryUrl = mustBeParsable(
   coerceRegistryUrl,
   (input) => `"${input}" is not a valid registry-url`
 );
+
+// update-notifier
 
 pkginfo(module);
 const notifier = updateNotifier({ pkg });
@@ -83,7 +103,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const addResult = await add(pkgs, makeCmdOptions(options));
+    const addResult = await addCmd(pkgs, makeCmdOptions(options));
     if (addResult.isErr()) process.exit(1);
   });
 
@@ -99,7 +119,7 @@ program
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const removeResult = await remove(pkgs, makeCmdOptions(options));
+    const removeResult = await removeCmd(pkgs, makeCmdOptions(options));
     if (removeResult.isErr()) process.exit(1);
   });
 
@@ -109,7 +129,7 @@ program
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
-    const searchResult = await search(keyword, makeCmdOptions(options));
+    const searchResult = await searchCmd(keyword, makeCmdOptions(options));
     if (searchResult.isErr()) process.exit(1);
   });
 
@@ -119,7 +139,7 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    const result = await view(pkg, makeCmdOptions(options));
+    const result = await viewCmd(pkg, makeCmdOptions(options));
     if (result.isErr()) process.exit(1);
   });
 
@@ -134,7 +154,7 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    const depsResult = await deps(pkg, makeCmdOptions(options));
+    const depsResult = await depsCmd(pkg, makeCmdOptions(options));
     if (depsResult.isErr()) process.exit(1);
   });
 
@@ -151,7 +171,7 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(async function (options) {
-    const loginResult = await login(makeCmdOptions(options));
+    const loginResult = await loginCmd(makeCmdOptions(options));
     if (loginResult.isErr()) process.exit(1);
   });
 
