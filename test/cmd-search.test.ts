@@ -16,6 +16,7 @@ import {
   GetAllPackumentsService,
 } from "../src/services/get-all-packuments";
 import { Env, ParseEnvService } from "../src/services/parse-env";
+import { mockService } from "./service.mock";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -26,16 +27,15 @@ const exampleSearchResult: SearchedPackument = {
 };
 
 function makeDependencies() {
-  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(
     Ok({ registry: { url: exampleRegistryUrl, auth: null } } as Env)
   );
 
-  const searchRegistry: jest.MockedFunction<SearchRegistryService> = jest.fn();
+  const searchRegistry = mockService<SearchRegistryService>();
   searchRegistry.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
 
-  const getAllPackuments: jest.MockedFunction<GetAllPackumentsService> =
-    jest.fn();
+  const getAllPackuments = mockService<GetAllPackumentsService>();
   getAllPackuments.mockReturnValue(
     Ok({
       _updated: 9999,

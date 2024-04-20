@@ -16,6 +16,7 @@ import { spyOnLog } from "./log.mock";
 import * as packumentResolveModule from "../src/packument-resolving";
 import { ResolvedPackument } from "../src/packument-resolving";
 import { buildPackument } from "./data-packument";
+import {mockService} from "./service.mock";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -55,10 +56,10 @@ const defaultEnv = {
 } as Env;
 
 function makeDependencies() {
-  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  const parseEnv= mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const fetchService: jest.MockedFunction<FetchPackumentService> = jest.fn();
+  const fetchService= mockService<FetchPackumentService>();
 
   const viewCmd = makeViewCmd(parseEnv, fetchService);
   return [viewCmd, parseEnv] as const;
