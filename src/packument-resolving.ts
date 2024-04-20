@@ -28,7 +28,7 @@ export type ResolvableVersion =
 /**
  * A successfully resolved packument-version.
  */
-interface ResolvedPackument {
+export interface ResolvedPackument {
   /**
    * The packument from which the version was resolved.
    */

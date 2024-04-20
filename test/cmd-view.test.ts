@@ -1,20 +1,26 @@
-import { makeViewCmd, ViewOptions } from "../src/cli/cmd-view";
-import { buildPackument } from "./data-packument";
-import { makeDomainName } from "../src/domain/domain-name";
-import { makeSemanticVersion } from "../src/domain/semantic-version";
-import { makePackageReference } from "../src/domain/package-reference";
-import { spyOnLog } from "./log.mock";
-import { mockUpmConfig } from "./upm-config-io.mock";
-import { mockProjectVersion } from "./project-version-io.mock";
+import { makeViewCmd } from "../src/cli/cmd-view";
 import { FetchPackumentService } from "../src/services/fetch-packument";
+import * as envModule from "../src/utils/env";
+import { Env } from "../src/utils/env";
 import { exampleRegistryUrl } from "./data-registry";
-import { mockResolvedPackuments } from "./packument-resolving.mock";
 import { unityRegistryUrl } from "../src/domain/registry-url";
+import { makeEditorVersion } from "../src/domain/editor-version";
+import { IOError } from "../src/io/file-io";
+import { Err, Ok } from "ts-results-es";
+import { makeDomainName } from "../src/domain/domain-name";
+import { makePackageReference } from "../src/domain/package-reference";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
+import {
+  PackageWithVersionError,
+  PackumentNotFoundError,
+} from "../src/common-errors";
+import { spyOnLog } from "./log.mock";
+import * as packumentResolveModule from "../src/packument-resolving";
+import { ResolvedPackument } from "../src/packument-resolving";
+import { buildPackument } from "./data-packument";
 
-const packageA = makeDomainName("com.example.package-a");
-const packageUp = makeDomainName("com.example.package-up");
-const packageMissing = makeDomainName("pkg-not-exist");
-const remotePackumentA = buildPackument(packageA, (packument) =>
+const somePackage = makeDomainName("com.some.package");
+const somePackument = buildPackument(somePackage, (packument) =>
   packument
     .set("time", {
       modified: "2019-11-28T18:51:58.123Z",
@@ -42,43 +48,17 @@ const remotePackumentA = buildPackument(packageA, (packument) =>
           tarball:
             "https://cdn.example.com/com.example.package-a/com.example.package-a-1.0.0.tgz",
         })
-        .addDependency(packageA, "1.0.0")
     )
 );
-
-const remotePackumentUp = buildPackument(packageUp, (packument) =>
-  packument
-    .set("time", {
-      modified: "2019-11-28T18:51:58.123Z",
-      created: "2019-11-28T18:51:58.123Z",
-      [makeSemanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
-    })
-    .set("_rev", "3-418f950115c32bd0")
-    .set("readme", "A demo package")
-    .addVersion("1.0.0", (version) =>
-      version
-        .set("displayName", "Package A")
-        .set("author", {
-          name: "batman",
-        })
-        .set("unity", "2018.4")
-        .set("description", "A demo package")
-        .set("keywords", [""])
-        .set("category", "Unity")
-        .addDependency(packageUp, "1.0.0")
-        .set("gitHead", "5c141ecfac59c389090a07540f44c8ac5d07a729")
-        .set("readmeFilename", "README.md")
-        .set("_nodeVersion", "12.13.1")
-        .set("_npmVersion", "6.12.1")
-        .set("dist", {
-          integrity:
-            "sha512-MAh44bur7HGyfbCXH9WKfaUNS67aRMfO0VAbLkr+jwseb1hJue/I1pKsC7PKksuBYh4oqoo9Jov1cBcvjVgjmA==",
-          shasum: "516957cac4249f95cafab0290335def7d9703db7",
-          tarball:
-            "https://cdn.example.com/com.example.package-up/com.example.package-up-1.0.0.tgz",
-        })
-    )
-);
+const defaultEnv: Env = {
+  cwd: "/users/some-user/projects/SomeProject",
+  systemUser: false,
+  wsl: false,
+  upstream: false,
+  registry: { url: exampleRegistryUrl, auth: null },
+  upstreamRegistry: { url: unityRegistryUrl, auth: null },
+  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
+};
 
 function makeDependencies() {
   const fetchService: jest.Mocked<FetchPackumentService> = {
@@ -90,84 +70,82 @@ function makeDependencies() {
 }
 
 describe("cmd-view", () => {
-  const options: ViewOptions = {
-    _global: {
-      color: false,
-      registry: exampleRegistryUrl,
-      upstream: false,
-    },
-  };
-  const upstreamOptions: ViewOptions = {
-    _global: {
-      color: false,
-      registry: exampleRegistryUrl,
-    },
-  };
-  describe("view", () => {
-    beforeEach(() => {
-      mockUpmConfig(null);
-      mockProjectVersion("2020.2.1f1");
-      mockResolvedPackuments(
-        [exampleRegistryUrl, remotePackumentA],
-        [unityRegistryUrl, remotePackumentUp]
-      );
-    });
+  beforeEach(() => {
+    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
+    jest.spyOn(packumentResolveModule, "tryResolve").mockReturnValue(
+      Ok({
+        packument: somePackument,
+      } as ResolvedPackument).toAsyncResult()
+    );
+  });
 
-    it("should print information for packument without version", async () => {
-      const [viewCmd] = makeDependencies();
-      const consoleSpy = jest.spyOn(console, "log");
+  it("should fail if env could not be parsed", async () => {
+    const expected = new IOError();
+    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Err(expected));
+    const [viewCmd] = makeDependencies();
 
-      const viewResult = await viewCmd(packageA, options);
+    const result = await viewCmd(somePackage, { _global: {} });
 
-      expect(viewResult).toBeOk();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("com.example.package-a@1.0.0")
-      );
-    });
+    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
 
-    it("should print information for packument with semantic version", async () => {
-      const [viewCmd] = makeDependencies();
-      const warnSpy = spyOnLog("warn");
+  it("should fail if package version was specified", async () => {
+    const [viewCmd] = makeDependencies();
 
-      const viewResult = await viewCmd(
-        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
-        options
-      );
+    const result = await viewCmd(
+      makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
+      { _global: {} }
+    );
 
-      expect(viewResult).toBeError();
-      expect(warnSpy).toHaveLogLike("", "do not specify a version");
-    });
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(PackageWithVersionError)
+    );
+  });
 
-    it("should fail for unknown packument", async () => {
-      const [viewCmd] = makeDependencies();
-      const errorSpy = spyOnLog("error");
+  it("should notify if package version was specified", async () => {
+    const warnSpy = spyOnLog("warn");
+    const [viewCmd] = makeDependencies();
 
-      const viewResult = await viewCmd(packageMissing, options);
+    await viewCmd(
+      makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
+      { _global: {} }
+    );
 
-      expect(viewResult).toBeError();
-      expect(errorSpy).toHaveLogLike("404", "package not found");
-    });
+    expect(warnSpy).toHaveLogLike("", "please do not specify");
+  });
 
-    it("should print information for upstream packument", async () => {
-      const [viewCmd] = makeDependencies();
-      const consoleSpy = jest.spyOn(console, "log");
+  it("should fail if package could not be resolved", async () => {
+    const expected = new PackumentNotFoundError();
+    jest
+      .spyOn(packumentResolveModule, "tryResolve")
+      .mockReturnValue(Err(expected).toAsyncResult());
+    const [viewCmd] = makeDependencies();
 
-      const viewResult = await viewCmd(packageUp, upstreamOptions);
+    const result = await viewCmd(somePackage, { _global: {} });
 
-      expect(viewResult).toBeOk();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("com.example.package-up@1.0.0")
-      );
-    });
+    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
 
-    it("should fail for unknown upstream packument", async () => {
-      const [viewCmd] = makeDependencies();
-      const errorSpy = spyOnLog("error");
+  it("should notify if package could not be resolved", async () => {
+    const errorSpy = spyOnLog("error");
+    jest
+      .spyOn(packumentResolveModule, "tryResolve")
+      .mockReturnValue(Err(new PackumentNotFoundError()).toAsyncResult());
+    const [viewCmd] = makeDependencies();
 
-      const viewResult = await viewCmd(packageMissing, upstreamOptions);
+    await viewCmd(somePackage, { _global: {} });
 
-      expect(viewResult).toBeError();
-      expect(errorSpy).toHaveLogLike("404", "package not found");
-    });
+    expect(errorSpy).toHaveLogLike("404", "not found");
+  });
+
+  it("should print package information", async () => {
+    const consoleSpy = jest.spyOn(console, "log");
+    const [viewCmd] = makeDependencies();
+
+    await viewCmd(somePackage, { _global: {} });
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(somePackage)
+    );
   });
 });
