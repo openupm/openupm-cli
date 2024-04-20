@@ -18,19 +18,14 @@ export type SearchedPackument = Readonly<
 >;
 
 /**
- * Service for searching packuments on a npm-registry.
+ * Service function for searching packuments on a registry.
+ * @param registry The registry to search.
+ * @param keyword The keyword to search.
  */
-export type SearchService = {
-  /**
-   * Attempts to search a npm registry.
-   * @param registry The registry to search.
-   * @param keyword The keyword to search.
-   */
-  trySearch(
-    registry: Registry,
-    keyword: string
-  ): AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase>;
-};
+export type SearchRegistryService = (
+  registry: Registry,
+  keyword: string
+) => AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase>;
 
 /**
  * Get npm fetch options.
@@ -49,20 +44,18 @@ export const getNpmFetchOptions = function (
 };
 
 /**
- * Makes a new {@link SearchService}.
+ * Makes a {@link SearchRegistryService} function.
  */
-export function makeSearchService(): SearchService {
-  return {
-    trySearch(registry, keyword) {
-      return new AsyncResult(
-        npmSearch(keyword, getNpmFetchOptions(registry))
-          // NOTE: The results of the search will be packument objects, so we can change the type
-          .then((results) => Ok(results as SearchedPackument[]))
-          .catch((error) => {
-            assertIsHttpError(error);
-            return Err(error);
-          })
-      );
-    },
+export function makeSearchRegistryService(): SearchRegistryService {
+  return (registry, keyword) => {
+    return new AsyncResult(
+      npmSearch(keyword, getNpmFetchOptions(registry))
+        // NOTE: The results of the search will be packument objects, so we can change the type
+        .then((results) => Ok(results as SearchedPackument[]))
+        .catch((error) => {
+          assertIsHttpError(error);
+          return Err(error);
+        })
+    );
   };
 }

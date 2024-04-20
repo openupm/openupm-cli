@@ -4,7 +4,10 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { spyOnLog } from "./log.mock";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
-import { SearchedPackument, SearchService } from "../src/services/search";
+import {
+  SearchedPackument,
+  SearchRegistryService,
+} from "../src/services/search-registry";
 import { exampleRegistryUrl } from "./data-registry";
 import { Err, Ok } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
@@ -22,11 +25,8 @@ const exampleSearchResult: SearchedPackument = {
 };
 
 function makeDependencies() {
-  const searchService: jest.Mocked<SearchService> = {
-    trySearch: jest
-      .fn()
-      .mockReturnValue(Ok([exampleSearchResult]).toAsyncResult()),
-  };
+  const searchRegistry: jest.MockedFunction<SearchRegistryService> = jest.fn();
+  searchRegistry.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
 
   const getAllPackuments: jest.MockedFunction<GetAllPackumentsService> =
     jest.fn();
@@ -37,8 +37,8 @@ function makeDependencies() {
     } as AllPackumentsResult).toAsyncResult()
   );
 
-  const searchCmd = makeSearchCmd(searchService, getAllPackuments);
-  return [searchCmd, searchService, getAllPackuments] as const;
+  const searchCmd = makeSearchCmd(searchRegistry, getAllPackuments);
+  return [searchCmd, searchRegistry, getAllPackuments] as const;
 }
 
 describe("cmd-search", () => {
@@ -73,8 +73,8 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, searchService] = makeDependencies();
-      searchService.trySearch.mockReturnValue(Ok([]).toAsyncResult());
+      const [searchCmd, searchRegistry] = makeDependencies();
+      searchRegistry.mockReturnValue(Ok([]).toAsyncResult());
 
       const searchResult = await searchCmd("pkg-not-exist", options);
 
@@ -87,10 +87,8 @@ describe("cmd-search", () => {
     it("should print packument information", async () => {
       const warnSpy = spyOnLog("warn");
       const consoleSpy = jest.spyOn(console, "log");
-      const [searchCmd, searchService] = makeDependencies();
-      searchService.trySearch.mockReturnValue(
-        Err({} as HttpErrorBase).toAsyncResult()
-      );
+      const [searchCmd, searchRegistry] = makeDependencies();
+      searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
 
       const searchResult = await searchCmd("package-a", options);
 
@@ -110,10 +108,8 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, searchService, getAllPackuments] = makeDependencies();
-      searchService.trySearch.mockReturnValue(
-        Err({} as HttpErrorBase).toAsyncResult()
-      );
+      const [searchCmd, searchRegistry, getAllPackuments] = makeDependencies();
+      searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
       getAllPackuments.mockReturnValue(Ok({ _updated: 9999 }).toAsyncResult());
 
       const searchResult = await searchCmd("pkg-not-exist", options);

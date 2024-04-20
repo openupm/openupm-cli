@@ -1,7 +1,7 @@
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
 import { HttpErrorBase } from "npm-registry-fetch";
-import { makeSearchService } from "../src/services/search";
+import { makeSearchRegistryService } from "../src/services/search-registry";
 import { Registry } from "../src/domain/registry";
 import { exampleRegistryUrl } from "./data-registry";
 
@@ -12,6 +12,11 @@ const exampleRegistry: Registry = {
   auth: null,
 };
 
+function makeDependencies() {
+  const searchRegistry = makeSearchRegistryService();
+  return [searchRegistry] as const;
+}
+
 describe("search service", () => {
   it("should fail for error response", async () => {
     const expected = {
@@ -20,9 +25,9 @@ describe("search service", () => {
       statusCode: 500,
     } as HttpErrorBase;
     jest.mocked(npmSearch).mockRejectedValue(expected);
-    const service = makeSearchService();
+    const [searchRegistry] = makeDependencies();
 
-    const result = await service.trySearch(exampleRegistry, "wow").promise;
+    const result = await searchRegistry(exampleRegistry, "wow").promise;
 
     expect(result).toBeError((actual) => expect(actual).toEqual(expected));
   });
@@ -30,9 +35,9 @@ describe("search service", () => {
   it("should succeed for ok response", async () => {
     const expected = [{ name: "wow" } as search.Result];
     jest.mocked(npmSearch).mockResolvedValue(expected);
-    const service = makeSearchService();
+    const [searchRegistry] = makeDependencies();
 
-    const result = await service.trySearch(exampleRegistry, "wow").promise;
+    const result = await searchRegistry(exampleRegistry, "wow").promise;
 
     expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
   });

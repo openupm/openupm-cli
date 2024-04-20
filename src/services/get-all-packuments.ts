@@ -2,7 +2,7 @@ import { Registry } from "../domain/registry";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { assertIsHttpError } from "../utils/error-type-guards";
-import { getNpmFetchOptions, SearchedPackument } from "./search";
+import { getNpmFetchOptions, SearchedPackument } from "./search-registry";
 import { DomainName } from "../domain/domain-name";
 
 /**
