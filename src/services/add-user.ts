@@ -26,52 +26,46 @@ export class AuthenticationError extends CustomError {
 type AuthenticationToken = string;
 
 /**
- * Service for adding users to a npm-registry.
+ * Service function for adding authenticating new users.
+ * @param registryUrl The url of the registry into which to login.
+ * @param username The username with which to login.
+ * @param email The email with which to login.
+ * @param password The password with which to login.
+ * @returns An authentication token or null if registration failed.
  */
-export interface AddUserService {
-  /**
-   * Attempts to add a user to a registry.
-   * @param registryUrl The url of the registry into which to login.
-   * @param username The username with which to login.
-   * @param email The email with which to login.
-   * @param password The password with which to login.
-   * @returns An authentication token or null if registration failed.
-   */
-  tryAdd(
-    registryUrl: RegistryUrl,
-    username: string,
-    email: string,
-    password: string
-  ): AsyncResult<AuthenticationToken, AuthenticationError>;
-}
+export type AddUserService = (
+  registryUrl: RegistryUrl,
+  username: string,
+  email: string,
+  password: string
+) => AsyncResult<AuthenticationToken, AuthenticationError>;
 
 /**
- * Makes a new {@link AddUserService}.
+ * Makes a new {@link AddUserService} function.
  */
 export function makeAddUserService(): AddUserService {
+  // TODO: Inject registry client
   const registryClient = new RegClient({ log });
-  return {
-    tryAdd(registryUrl, username, email, password) {
-      return new AsyncResult(
-        new Promise((resolve) => {
-          registryClient.adduser(
-            registryUrl,
-            { auth: { username, email, password } },
-            (error, responseData, _, response) => {
-              if (error !== null || !responseData.ok)
-                resolve(
-                  Err(
-                    new AuthenticationError(
-                      response.statusCode,
-                      response.statusMessage
-                    )
+  return (registryUrl, username, email, password) => {
+    return new AsyncResult(
+      new Promise((resolve) => {
+        registryClient.adduser(
+          registryUrl,
+          { auth: { username, email, password } },
+          (error, responseData, _, response) => {
+            if (error !== null || !responseData.ok)
+              resolve(
+                Err(
+                  new AuthenticationError(
+                    response.statusCode,
+                    response.statusMessage
                   )
-                );
-              else resolve(Ok(responseData.token));
-            }
-          );
-        })
-      );
-    },
+                )
+              );
+            else resolve(Ok(responseData.token));
+          }
+        );
+      })
+    );
   };
 }

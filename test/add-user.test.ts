@@ -10,6 +10,11 @@ import { exampleRegistryUrl } from "./data-registry";
 
 jest.mock("another-npm-registry-client");
 
+function makeDependencies() {
+  const addUser = makeAddUserService();
+  return [addUser] as const;
+}
+
 function mockRegClientAddUserResult(
   error: HttpErrorBase | null,
   responseData: AddUserResponse | null,
@@ -33,9 +38,9 @@ describe("add-user-service", () => {
       },
       null
     );
-    const service = makeAddUserService();
+    const [addUser] = makeDependencies();
 
-    const result = await service.tryAdd(
+    const result = await addUser(
       exampleRegistryUrl,
       "valid-user",
       "valid@user.com",
@@ -56,9 +61,9 @@ describe("add-user-service", () => {
         statusCode: 401,
       }
     );
-    const service = makeAddUserService();
+    const [addUser] = makeDependencies();
 
-    const result = await service.tryAdd(
+    const result = await addUser(
       exampleRegistryUrl,
       "bad-user",
       "bad@user.com",
@@ -75,9 +80,9 @@ describe("add-user-service", () => {
       statusMessage: "bad user",
       statusCode: 401,
     });
-    const service = makeAddUserService();
+    const [addUser] = makeDependencies();
 
-    const result = await service.tryAdd(
+    const result = await addUser(
       exampleRegistryUrl,
       "bad-user",
       "bad@user.com",

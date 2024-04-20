@@ -10,30 +10,32 @@ import { isPackageReference } from "../domain/package-reference";
 import { isDomainName } from "../domain/domain-name";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { CmdOptions } from "./options";
-import { makePackumentFetchService } from "../services/fetch-packument";
+import { makeFetchPackumentService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
-import { makeNpmrcAuthService } from "../services/npmrc-auth";
+import { makeAuthNpmrcService } from "../services/npmrc-auth";
 import { makeAddUserService } from "../services/add-user";
-import { makeSearchService } from "../services/search";
+import { makeSearchRegistryService } from "../services/search-registry";
 import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
 import { makeResolveDependenciesService } from "../services/dependency-resolving";
+import { makeGetAllPackumentsService } from "../services/get-all-packuments";
 
 // Composition root
 
-const fetchService = makePackumentFetchService();
-const npmrcAuthService = makeNpmrcAuthService();
-const addUserService = makeAddUserService();
-const searchService = makeSearchService();
-const resolveDependencies = makeResolveDependenciesService(fetchService);
+const fetchPackument = makeFetchPackumentService();
+const authNpmrc = makeAuthNpmrcService();
+const addUser = makeAddUserService();
+const searchRegistry = makeSearchRegistryService();
+const resolveDependencies = makeResolveDependenciesService(fetchPackument);
+const getAllPackuments = makeGetAllPackumentsService();
 
-const addCmd = makeAddCmd(fetchService, resolveDependencies);
-const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
-const searchCmd = makeSearchCmd(searchService);
+const addCmd = makeAddCmd(fetchPackument, resolveDependencies);
+const loginCmd = makeLoginCmd(authNpmrc, addUser);
+const searchCmd = makeSearchCmd(searchRegistry, getAllPackuments);
 const depsCmd = makeDepsCmd(resolveDependencies);
 const removeCmd = makeRemoveCmd();
-const viewCmd = makeViewCmd(fetchService);
+const viewCmd = makeViewCmd(fetchPackument);
 
 // Validators
 

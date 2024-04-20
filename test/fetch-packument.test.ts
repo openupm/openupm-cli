@@ -1,5 +1,5 @@
 import { buildPackument } from "./data-packument";
-import { makePackumentFetchService } from "../src/services/fetch-packument";
+import { makeFetchPackumentService } from "../src/services/fetch-packument";
 import { UnityPackument } from "../src/domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { makeDomainName } from "../src/domain/domain-name";
@@ -14,6 +14,11 @@ const exampleRegistry: Registry = {
   url: exampleRegistryUrl,
   auth: null,
 };
+
+function makeDependencies() {
+  const fetchPackument = makeFetchPackumentService();
+  return [fetchPackument] as const;
+}
 
 function mockRegClientGetResult(
   error: HttpErrorBase | null,
@@ -32,10 +37,9 @@ describe("fetch packument service", () => {
     // TODO: Use prop test
     const packument = buildPackument(packageA);
     mockRegClientGetResult(null, packument);
-    const service = makePackumentFetchService();
+    const [fetchPackument] = makeDependencies();
 
-    const result = await service.tryFetchByName(exampleRegistry, packageA)
-      .promise;
+    const result = await fetchPackument(exampleRegistry, packageA).promise;
 
     expect(result).toBeOk((actual) => expect(actual).toEqual(packument));
   });
@@ -49,10 +53,9 @@ describe("fetch packument service", () => {
       } as HttpErrorBase,
       null
     );
-    const service = makePackumentFetchService();
+    const [fetchPackument] = makeDependencies();
 
-    const result = await service.tryFetchByName(exampleRegistry, packageA)
-      .promise;
+    const result = await fetchPackument(exampleRegistry, packageA).promise;
 
     expect(result).toBeOk((actual) => expect(actual).toBeNull());
   });
@@ -66,10 +69,9 @@ describe("fetch packument service", () => {
       } as HttpErrorBase,
       null
     );
-    const service = makePackumentFetchService();
+    const [fetchPackument] = makeDependencies();
 
-    const result = await service.tryFetchByName(exampleRegistry, packageA)
-      .promise;
+    const result = await fetchPackument(exampleRegistry, packageA).promise;
 
     expect(result).toBeError();
   });
