@@ -30,7 +30,7 @@ const regClient = new RegClient({ log });
 
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
-const addUser = makeAddUserService();
+const addUser = makeAddUserService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveDependencies = makeResolveDependenciesService(fetchPackument);
 const getAllPackuments = makeGetAllPackumentsService();
