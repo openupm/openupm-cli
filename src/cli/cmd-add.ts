@@ -35,7 +35,6 @@ import {
   VersionNotFoundError,
 } from "../packument-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
-import { fetchPackageDependencies } from "../dependency-resolving";
 import { areArraysEqual } from "../utils/array-utils";
 import { PackumentNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
@@ -44,6 +43,7 @@ import { CustomError } from "ts-custom-error";
 import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 import { targetEditorVersionFor } from "../domain/packument";
 import { FetchPackumentService } from "../services/fetch-packument";
+import { ResolveDependenciesService } from "../services/dependency-resolving";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -96,7 +96,10 @@ type AddCmd = (
 /**
  * Makes a {@link AddCmd} function.
  */
-export function makeAddCmd(fetchService: FetchPackumentService): AddCmd {
+export function makeAddCmd(
+  fetchService: FetchPackumentService,
+  resolveDependencies: ResolveDependenciesService
+): AddCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
     // parse env
@@ -203,13 +206,12 @@ export function makeAddCmd(fetchService: FetchPackumentService): AddCmd {
             "dependency",
             `fetch: ${makePackageReference(name, requestedVersion)}`
           );
-          const [depsValid, depsInvalid] = await fetchPackageDependencies(
+          const [depsValid, depsInvalid] = await resolveDependencies(
             env.registry,
             env.upstreamRegistry,
             name,
             requestedVersion,
-            true,
-            fetchService
+            true
           );
           // add depsValid to pkgsInScope.
           depsValid

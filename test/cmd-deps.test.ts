@@ -1,7 +1,6 @@
 import { makeDepsCmd } from "../src/cli/cmd-deps";
 import * as envModule from "../src/utils/env";
 import { Env } from "../src/utils/env";
-import * as resolveDependencyModule from "../src/dependency-resolving";
 import { Err, Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "./data-registry";
 import { unityRegistryUrl } from "../src/domain/registry-url";
@@ -13,6 +12,7 @@ import { spyOnLog } from "./log.mock";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../src/common-errors";
 import { VersionNotFoundError } from "../src/packument-resolving";
+import { ResolveDependenciesService } from "../src/services/dependency-resolving";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -28,34 +28,35 @@ const defaultEnv: Env = {
 };
 
 function makeDependencies() {
-  const depsCmd = makeDepsCmd();
-  return [depsCmd] as const;
+  const resolveDependencies: jest.MockedFunction<ResolveDependenciesService> =
+    jest.fn();
+  resolveDependencies.mockResolvedValue([
+    [
+      {
+        upstream: false,
+        internal: false,
+        self: true,
+        name: somePackage,
+        version: makeSemanticVersion("1.2.3"),
+      },
+      {
+        upstream: false,
+        internal: false,
+        self: false,
+        name: otherPackage,
+        version: makeSemanticVersion("1.2.3"),
+      },
+    ],
+    [],
+  ]);
+
+  const depsCmd = makeDepsCmd(resolveDependencies);
+  return [depsCmd, resolveDependencies] as const;
 }
 
 describe("cmd-deps", () => {
   beforeEach(() => {
     jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
-    jest
-      .spyOn(resolveDependencyModule, "fetchPackageDependencies")
-      .mockResolvedValue([
-        [
-          {
-            upstream: false,
-            internal: false,
-            self: true,
-            name: somePackage,
-            version: makeSemanticVersion("1.2.3"),
-          },
-          {
-            upstream: false,
-            internal: false,
-            self: false,
-            name: otherPackage,
-            version: makeSemanticVersion("1.2.3"),
-          },
-        ],
-        [],
-      ]);
   });
 
   it("should fail if env could not be parsed", async () => {
@@ -119,19 +120,17 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency", async () => {
     const warnSpy = spyOnLog("warn");
-    jest
-      .spyOn(resolveDependencyModule, "fetchPackageDependencies")
-      .mockResolvedValue([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new PackumentNotFoundError(),
-          },
-        ],
-      ]);
-    const [depsCmd] = makeDependencies();
+    const [depsCmd, resolveDependencies] = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new PackumentNotFoundError(),
+        },
+      ],
+    ]);
 
     await depsCmd(somePackage, {
       _global: {},
@@ -142,19 +141,17 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency version", async () => {
     const warnSpy = spyOnLog("warn");
-    jest
-      .spyOn(resolveDependencyModule, "fetchPackageDependencies")
-      .mockResolvedValue([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.2.3"), []),
-          },
-        ],
-      ]);
-    const [depsCmd] = makeDependencies();
+    const [depsCmd, resolveDependencies] = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(makeSemanticVersion("1.2.3"), []),
+        },
+      ],
+    ]);
 
     await depsCmd(somePackage, {
       _global: {},

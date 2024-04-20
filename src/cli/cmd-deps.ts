@@ -11,10 +11,9 @@ import {
   PackumentResolveError,
   VersionNotFoundError,
 } from "../packument-resolving";
-import { fetchPackageDependencies } from "../dependency-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
-import { makePackumentFetchService } from "../services/fetch-packument";
+import { ResolveDependenciesService } from "../services/dependency-resolving";
 
 export type DepsError = EnvParseError;
 
@@ -42,14 +41,14 @@ function errorPrefixForError(error: PackumentResolveError): string {
 /**
  * Makes a {@link DepsCmd} function.
  */
-export function makeDepsCmd(): DepsCmd {
+export function makeDepsCmd(
+  resolveDependencies: ResolveDependenciesService
+): DepsCmd {
   return async (pkg, options) => {
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) return envResult;
     const env = envResult.value;
-
-    const fetchService = makePackumentFetchService();
 
     const [name, version] = splitPackageReference(pkg);
     
@@ -62,13 +61,12 @@ export function makeDepsCmd(): DepsCmd {
       "dependency",
       `fetch: ${makePackageReference(name, version)}, deep=${deep}`
     );
-    const [depsValid, depsInvalid] = await fetchPackageDependencies(
+    const [depsValid, depsInvalid] = await resolveDependencies(
       env.registry,
       env.upstreamRegistry,
       name,
       version,
-      deep,
-      fetchService
+      deep
     );
     depsValid
       .filter((x) => !x.self)
