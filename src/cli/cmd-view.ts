@@ -8,11 +8,9 @@ import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
 
-import {
-  PackageWithVersionError,
-  PackumentNotFoundError,
-} from "../common-errors";
+import { PackageWithVersionError } from "../common-errors";
 import { makePackumentFetchService } from "../services/fetch-packument";
+import { tryResolve } from "../packument-resolving";
 
 export type ViewOptions = CmdOptions;
 
@@ -35,25 +33,24 @@ export const view = async function (
     return Err(new PackageWithVersionError());
   }
   // verify name
-  return await fetchService
-    .tryFetchByName(env.registry, pkg)
-    .andThen(async (packument) => {
-      if (packument === null && env.upstream)
-        return await fetchService.tryFetchByName(env.upstreamRegistry, pkg)
-          .promise;
-      return Ok(packument);
-    })
-    .andThen((packument) => {
-      if (packument === null) {
-        log.error("404", `package not found: ${pkg}`);
-        return Err(new PackumentNotFoundError());
-      }
-      return Ok(packument);
-    })
-    .map((packument) => {
-      // print info
-      printInfo(packument);
-    }).promise;
+  const result = await tryResolve(
+    fetchService,
+    pkg,
+    undefined,
+    env.registry
+  ).orElse((error) =>
+    env.upstream
+      ? tryResolve(fetchService, pkg, undefined, env.upstreamRegistry)
+      : Err(error)
+  ).promise;
+
+  if (result.isOk()) {
+    printInfo(result.value.packument);
+    return Ok(undefined);
+  } else {
+    log.error("404", `package not found: ${pkg}`);
+    return result;
+  }
 };
 
 const printInfo = function (packument: UnityPackument) {
