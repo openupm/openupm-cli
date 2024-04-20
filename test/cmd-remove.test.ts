@@ -16,6 +16,7 @@ import {
   PackumentNotFoundError,
 } from "../src/common-errors";
 import { spyOnLog } from "./log.mock";
+import {mockService} from "./service.mock";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -28,7 +29,7 @@ const defaultManifest = buildProjectManifest((manifest) =>
 );
 
 function makeDependencies() {
-  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  const parseEnv= mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
   const removeCmd = makeRemoveCmd(parseEnv);

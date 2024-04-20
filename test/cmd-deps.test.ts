@@ -11,6 +11,7 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../src/common-errors";
 import { VersionNotFoundError } from "../src/packument-resolving";
 import { ResolveDependenciesService } from "../src/services/dependency-resolving";
+import { mockService } from "./service.mock";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -21,11 +22,10 @@ const defaultEnv = {
 } as Env;
 
 function makeDependencies() {
-  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const resolveDependencies: jest.MockedFunction<ResolveDependenciesService> =
-    jest.fn();
+  const resolveDependencies = mockService<ResolveDependenciesService>();
   resolveDependencies.mockResolvedValue([
     [
       {
