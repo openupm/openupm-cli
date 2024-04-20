@@ -6,7 +6,7 @@ import {
   tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../io/project-manifest-io";
-import { EnvParseError, parseEnv } from "../utils/env";
+import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import {
   compareEditorVersion,
   stringifyEditorVersion,
@@ -97,6 +97,7 @@ type AddCmd = (
  * Makes a {@link AddCmd} function.
  */
 export function makeAddCmd(
+  parseEnv: ParseEnvService,
   fetchService: FetchPackumentService,
   resolveDependencies: ResolveDependenciesService
 ): AddCmd {

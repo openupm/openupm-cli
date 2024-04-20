@@ -1,10 +1,8 @@
 import { makeViewCmd } from "../src/cli/cmd-view";
 import { FetchPackumentService } from "../src/services/fetch-packument";
-import * as envModule from "../src/utils/env";
-import { Env } from "../src/utils/env";
+import { Env, ParseEnvService } from "../src/services/parse-env";
 import { exampleRegistryUrl } from "./data-registry";
 import { unityRegistryUrl } from "../src/domain/registry-url";
-import { makeEditorVersion } from "../src/domain/editor-version";
 import { IOError } from "../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../src/domain/domain-name";
@@ -50,26 +48,24 @@ const somePackument = buildPackument(somePackage, (packument) =>
         })
     )
 );
-const defaultEnv: Env = {
-  cwd: "/users/some-user/projects/SomeProject",
-  systemUser: false,
-  wsl: false,
+const defaultEnv = {
   upstream: false,
   registry: { url: exampleRegistryUrl, auth: null },
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
-  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
-};
+} as Env;
 
 function makeDependencies() {
+  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  parseEnv.mockResolvedValue(Ok(defaultEnv));
+
   const fetchService: jest.MockedFunction<FetchPackumentService> = jest.fn();
-  
-  const viewCmd = makeViewCmd(fetchService);
-  return [viewCmd] as const;
+
+  const viewCmd = makeViewCmd(parseEnv, fetchService);
+  return [viewCmd, parseEnv] as const;
 }
 
 describe("cmd-view", () => {
   beforeEach(() => {
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
     jest.spyOn(packumentResolveModule, "tryResolve").mockReturnValue(
       Ok({
         packument: somePackument,
@@ -79,8 +75,8 @@ describe("cmd-view", () => {
 
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Err(expected));
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, parseEnv] = makeDependencies();
+    parseEnv.mockResolvedValue(Err(expected));
 
     const result = await viewCmd(somePackage, { _global: {} });
 

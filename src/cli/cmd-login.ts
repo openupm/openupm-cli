@@ -6,7 +6,7 @@ import {
   tryStoreUpmAuth,
   UpmAuthStoreError,
 } from "../io/upm-config-io";
-import { EnvParseError, parseEnv } from "../utils/env";
+import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import {
@@ -56,6 +56,7 @@ export type LoginCmd = (
  * Makes a {@link LoginCmd} function.
  */
 export function makeLoginCmd(
+  parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
   addUser: AddUserService
 ): LoginCmd {

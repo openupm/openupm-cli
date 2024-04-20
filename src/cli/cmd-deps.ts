@@ -1,5 +1,5 @@
 import log from "./logger";
-import { EnvParseError, parseEnv } from "../utils/env";
+import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { isPackageUrl } from "../domain/package-url";
 import {
   makePackageReference,
@@ -42,6 +42,7 @@ function errorPrefixForError(error: PackumentResolveError): string {
  * Makes a {@link DepsCmd} function.
  */
 export function makeDepsCmd(
+  parseEnv: ParseEnvService,
   resolveDependencies: ResolveDependenciesService
 ): DepsCmd {
   return async (pkg, options) => {
@@ -51,7 +52,7 @@ export function makeDepsCmd(
     const env = envResult.value;
 
     const [name, version] = splitPackageReference(pkg);
-    
+
     if (version !== undefined && isPackageUrl(version))
       // TODO: Convert to result
       throw new Error("Cannot get dependencies for url-version");

@@ -15,6 +15,7 @@ import {
   AllPackumentsResult,
   GetAllPackumentsService,
 } from "../src/services/get-all-packuments";
+import { Env, ParseEnvService } from "../src/services/parse-env";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -25,6 +26,11 @@ const exampleSearchResult: SearchedPackument = {
 };
 
 function makeDependencies() {
+  const parseEnv: jest.MockedFunction<ParseEnvService> = jest.fn();
+  parseEnv.mockResolvedValue(
+    Ok({ registry: { url: exampleRegistryUrl, auth: null } } as Env)
+  );
+
   const searchRegistry: jest.MockedFunction<SearchRegistryService> = jest.fn();
   searchRegistry.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
 
@@ -37,8 +43,8 @@ function makeDependencies() {
     } as AllPackumentsResult).toAsyncResult()
   );
 
-  const searchCmd = makeSearchCmd(searchRegistry, getAllPackuments);
-  return [searchCmd, searchRegistry, getAllPackuments] as const;
+  const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
+  return [searchCmd, parseEnv, searchRegistry, getAllPackuments] as const;
 }
 
 describe("cmd-search", () => {
@@ -73,7 +79,7 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, searchRegistry] = makeDependencies();
+      const [searchCmd, , searchRegistry] = makeDependencies();
       searchRegistry.mockReturnValue(Ok([]).toAsyncResult());
 
       const searchResult = await searchCmd("pkg-not-exist", options);
@@ -87,7 +93,7 @@ describe("cmd-search", () => {
     it("should print packument information", async () => {
       const warnSpy = spyOnLog("warn");
       const consoleSpy = jest.spyOn(console, "log");
-      const [searchCmd, searchRegistry] = makeDependencies();
+      const [searchCmd, , searchRegistry] = makeDependencies();
       searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
 
       const searchResult = await searchCmd("package-a", options);
@@ -108,7 +114,8 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, searchRegistry, getAllPackuments] = makeDependencies();
+      const [searchCmd, , searchRegistry, getAllPackuments] =
+        makeDependencies();
       searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
       getAllPackuments.mockReturnValue(Ok({ _updated: 9999 }).toAsyncResult());
 
