@@ -1,21 +1,29 @@
 import { createCommand } from "@commander-js/extra-typings";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
-import { add } from "./cmd-add";
 import { remove } from "./cmd-remove";
 import { search } from "./cmd-search";
 import { view } from "./cmd-view";
 import { deps } from "./cmd-deps";
 import { login } from "./cmd-login";
 import log from "./logger";
-
-// update-notifier
-import pkg from "../../package.json";
 import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
 import { isPackageReference } from "../domain/package-reference";
 import { isDomainName } from "../domain/domain-name";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { CmdOptions } from "./options";
+
+// update-notifier
+import pkg from "../../package.json";
+import { makePackumentFetchService } from "../services/fetch-packument";
+import { makeAddCmd } from "./cmd-add";
+
+// Composition root
+
+const fetchService = makePackumentFetchService();
+const addCmd = makeAddCmd(fetchService);
+
+// Validators
 
 const mustBePackageReference = mustSatisfy(
   isPackageReference,
@@ -83,7 +91,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const addResult = await add(pkgs, makeCmdOptions(options));
+    const addResult = await addCmd(pkgs, makeCmdOptions(options));
     if (addResult.isErr()) process.exit(1);
   });
 
