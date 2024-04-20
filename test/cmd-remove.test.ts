@@ -1,20 +1,39 @@
-import { buildProjectManifest } from "./data-project-manifest";
+import { exampleRegistryUrl } from "./data-registry";
+import * as envModule from "../src/utils/env";
+import { Env } from "../src/utils/env";
+import { makeRemoveCmd } from "../src/cli/cmd-remove";
+import { unityRegistryUrl } from "../src/domain/registry-url";
+import { makeEditorVersion } from "../src/domain/editor-version";
+import { Err, Ok } from "ts-results-es";
+import { IOError, NotFoundError } from "../src/io/file-io";
 import { makeDomainName } from "../src/domain/domain-name";
-import { makeSemanticVersion } from "../src/domain/semantic-version";
-import { makePackageReference } from "../src/domain/package-reference";
-import { spyOnLog } from "./log.mock";
 import {
   mockProjectManifest,
   spyOnSavedManifest,
 } from "./project-manifest-io.mock";
-import { mockUpmConfig } from "./upm-config-io.mock";
-import { mockProjectVersion } from "./project-version-io.mock";
-import { exampleRegistryUrl } from "./data-registry";
-import { makeRemoveCmd } from "../src/cli/cmd-remove";
+import { buildProjectManifest } from "./data-project-manifest";
+import { makePackageReference } from "../src/domain/package-reference";
+import { makeSemanticVersion } from "../src/domain/semantic-version";
+import {
+  PackageWithVersionError,
+  PackumentNotFoundError,
+} from "../src/common-errors";
+import { spyOnLog } from "./log.mock";
 
-const packageA = makeDomainName("com.example.package-a");
-const packageB = makeDomainName("com.example.package-b");
-const missingPackage = makeDomainName("pkg-not-exist");
+const somePackage = makeDomainName("com.some.package");
+const otherPackage = makeDomainName("com.other.package");
+const defaultEnv: Env = {
+  cwd: "/users/some-user/projects/SomeProject",
+  systemUser: false,
+  wsl: false,
+  upstream: false,
+  registry: { url: exampleRegistryUrl, auth: null },
+  upstreamRegistry: { url: unityRegistryUrl, auth: null },
+  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
+};
+const defaultManifest = buildProjectManifest((manifest) =>
+  manifest.addDependency(somePackage, "1.0.0", true, true)
+);
 
 function makeDependencies() {
   const removeCmd = makeRemoveCmd();
@@ -22,102 +41,162 @@ function makeDependencies() {
 }
 
 describe("cmd-remove", () => {
-  describe("remove", () => {
-    const defaultManifest = buildProjectManifest((manifest) =>
-      manifest
-        .addDependency(packageA, "1.0.0", true, false)
-        .addDependency(packageB, "1.0.0", true, false)
+  beforeEach(() => {
+    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Ok(defaultEnv));
+    mockProjectManifest(defaultManifest);
+    spyOnSavedManifest();
+  });
+
+  it("should fail if env could not be parsed", async () => {
+    const expected = new IOError();
+    jest.spyOn(envModule, "parseEnv").mockResolvedValue(Err(expected));
+    const [removeCmd] = makeDependencies();
+
+    const result = await removeCmd(somePackage, { _global: {} });
+
+    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
+
+  it("should fail if manifest could not be loaded", async () => {
+    mockProjectManifest(null);
+    const [removeCmd] = makeDependencies();
+
+    const result = await removeCmd(somePackage, { _global: {} });
+
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(NotFoundError)
+    );
+  });
+
+  it("should notify if manifest could not be loaded", async () => {
+    const errorSpy = spyOnLog("error");
+    mockProjectManifest(null);
+    const [removeCmd] = makeDependencies();
+
+    await removeCmd(somePackage, { _global: {} });
+
+    expect(errorSpy).toHaveLogLike("manifest", "");
+  });
+
+  it("should fail if package version was specified", async () => {
+    const [removeCmd] = makeDependencies();
+
+    const result = await removeCmd(
+      makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
+      { _global: {} }
     );
 
-    beforeEach(() => {
-      mockProjectManifest(defaultManifest);
-      mockUpmConfig(null);
-      mockProjectVersion("2020.2.1f1");
-    });
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(PackageWithVersionError)
+    );
+  });
 
-    it("should remove packument without version", async () => {
-      const [removeCmd] = makeDependencies();
-      const noticeSpy = spyOnLog("notice");
-      const manifestSavedSpy = spyOnSavedManifest();
-      const options = {
-        _global: {
-          registry: exampleRegistryUrl,
+  it("should notify if package version was specified", async () => {
+    const warnSpy = spyOnLog("warn");
+    const [removeCmd] = makeDependencies();
+
+    await removeCmd(
+      makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
+      { _global: {} }
+    );
+
+    expect(warnSpy).toHaveLogLike("", "please do not specify");
+  });
+
+  it("should fail if package is not in manifest", async () => {
+    const [removeCmd] = makeDependencies();
+
+    const result = await removeCmd(otherPackage, { _global: {} });
+
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(PackumentNotFoundError)
+    );
+  });
+
+  it("should notify if package is not in manifest", async () => {
+    const errorSpy = spyOnLog("error");
+    const [removeCmd] = makeDependencies();
+
+    await removeCmd(otherPackage, { _global: {} });
+
+    expect(errorSpy).toHaveLogLike("404", "not found");
+  });
+
+  it("should notify of removed package", async () => {
+    const noticeSpy = spyOnLog("notice");
+    const [removeCmd] = makeDependencies();
+
+    await removeCmd(somePackage, { _global: {} });
+
+    expect(noticeSpy).toHaveLogLike("manifest", "removed");
+  });
+
+  it("should be atomic for multiple packages", async () => {
+    const saveSpy = spyOnSavedManifest();
+    const [removeCmd] = makeDependencies();
+
+    // One of these packages can not be removed, so none should be removed.
+    await removeCmd([somePackage, otherPackage], { _global: {} });
+
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+
+  it("should remove package from manifest", async () => {
+    const saveSpy = spyOnSavedManifest();
+    const [removeCmd] = makeDependencies();
+
+    await removeCmd(somePackage, { _global: {} });
+
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.not.objectContaining({
+        dependencies: {
+          [somePackage]: expect.anything(),
         },
-      };
+      })
+    );
+  });
 
-      const removeResult = await removeCmd(packageA, options);
+  it("should remove scope from manifest", async () => {
+    const saveSpy = spyOnSavedManifest();
+    const [removeCmd] = makeDependencies();
 
-      expect(removeResult).toBeOk();
-      expect(manifestSavedSpy).toHaveBeenCalledWith(
-        expect.any(String),
-        buildProjectManifest((manifest) =>
-          manifest.addDependency(packageB, "1.0.0", true, false)
-        )
-      );
-      expect(noticeSpy).toHaveLogLike("manifest", "removed ");
-      expect(noticeSpy).toHaveLogLike("", "open Unity");
-    });
-    it("should fail to remove packument with semantic version", async () => {
-      const [removeCmd] = makeDependencies();
-      const warnSpy = spyOnLog("warn");
-      const manifestSavedSpy = spyOnSavedManifest();
-      const options = {
-        _global: {
-          registry: exampleRegistryUrl,
-        },
-      };
+    await removeCmd(somePackage, { _global: {} });
 
-      const removeResult = await removeCmd(
-        makePackageReference(packageA, makeSemanticVersion("1.0.0")),
-        options
-      );
+    expect(saveSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.not.objectContaining({
+        scopes: [somePackage],
+      })
+    );
+  });
 
-      expect(removeResult).toBeError();
-      expect(manifestSavedSpy).not.toHaveBeenCalled();
-      expect(warnSpy).toHaveLogLike("", "do not specify a version");
-    });
-    it("should fail for uninstalled packument", async () => {
-      const [removeCmd] = makeDependencies();
-      const errorSpy = spyOnLog("error");
-      const manifestSavedSpy = spyOnSavedManifest();
-      const options = {
-        _global: {
-          registry: exampleRegistryUrl,
-        },
-      };
+  it("should fail if manifest could not be saved", async () => {
+    const expected = new IOError();
+    spyOnSavedManifest().mockReturnValue(Err(expected).toAsyncResult());
+    const [removeCmd] = makeDependencies();
 
-      const removeResult = await removeCmd(missingPackage, options);
+    const result = await removeCmd(somePackage, { _global: {} });
 
-      expect(removeResult).toBeError();
-      expect(manifestSavedSpy).not.toHaveBeenCalled();
-      expect(errorSpy).toHaveLogLike("404", "package not found");
-    });
-    it("should remove multiple packuments", async () => {
-      const [removeCmd] = makeDependencies();
-      const noticeSpy = spyOnLog("notice");
-      const manifestSavedSpy = spyOnSavedManifest();
-      const options = {
-        _global: {
-          registry: exampleRegistryUrl,
-        },
-      };
+    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
 
-      const removeResult = await removeCmd([packageA, packageB], options);
+  it("should notify if manifest could not be saved", async () => {
+    const errorSpy = spyOnLog("error");
+    spyOnSavedManifest().mockReturnValue(Err(new IOError()).toAsyncResult());
+    const [removeCmd] = makeDependencies();
 
-      expect(removeResult).toBeOk();
-      expect(manifestSavedSpy).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ dependencies: {} })
-      );
-      expect(noticeSpy).toHaveLogLike(
-        "manifest",
-        "removed com.example.package-a"
-      );
-      expect(noticeSpy).toHaveLogLike(
-        "manifest",
-        "removed com.example.package-b"
-      );
-      expect(noticeSpy).toHaveLogLike("", "open Unity");
-    });
+    await removeCmd(somePackage, { _global: {} });
+
+    expect(errorSpy).toHaveLogLike("manifest", "");
+  });
+
+  it("should suggest to open Unity after save", async () => {
+    const noticeSpy = spyOnLog("notice");
+    const [removeCmd] = makeDependencies();
+
+    await removeCmd(somePackage, { _global: {} });
+
+    expect(noticeSpy).toHaveLogLike("", "open Unity");
   });
 });
