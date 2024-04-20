@@ -1,5 +1,4 @@
 import RegClient from "another-npm-registry-client";
-import log from "../cli/logger";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
@@ -21,10 +20,9 @@ export type FetchPackumentService = (
 /**
  * Makes a {@link FetchPackumentService} function.
  */
-export function makeFetchPackumentService(): FetchPackumentService {
-  // TODO: Inject registry client
-  const registryClient = new RegClient({ log });
-
+export function makeFetchPackumentService(
+  registryClient: RegClient.Instance
+): FetchPackumentService {
   return (registry, name) => {
     const url = `${registry.url}/${name}`;
     return new AsyncResult(

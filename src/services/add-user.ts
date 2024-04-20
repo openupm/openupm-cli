@@ -1,5 +1,4 @@
 import RegClient from "another-npm-registry-client";
-import log from "../cli/logger";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
@@ -43,9 +42,9 @@ export type AddUserService = (
 /**
  * Makes a new {@link AddUserService} function.
  */
-export function makeAddUserService(): AddUserService {
-  // TODO: Inject registry client
-  const registryClient = new RegClient({ log });
+export function makeAddUserService(
+  registryClient: RegClient.Instance
+): AddUserService {
   return (registryUrl, username, email, password) => {
     return new AsyncResult(
       new Promise((resolve) => {
