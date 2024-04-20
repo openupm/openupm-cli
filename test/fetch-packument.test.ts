@@ -1,11 +1,11 @@
 import { buildPackument } from "./data-packument";
 import { makeFetchPackumentService } from "../src/services/fetch-packument";
-import { UnityPackument } from "../src/domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { makeDomainName } from "../src/domain/domain-name";
 import RegClient from "another-npm-registry-client";
 import { Registry } from "../src/domain/registry";
 import { exampleRegistryUrl } from "./data-registry";
+import { mockRegClientGetResult } from "./registry-client.mock";
 
 jest.mock("another-npm-registry-client");
 
@@ -23,16 +23,6 @@ function makeDependencies() {
 
   const fetchPackument = makeFetchPackumentService(regClient);
   return [fetchPackument, regClient] as const;
-}
-
-function mockRegClientGetResult(
-  regClient: jest.Mocked<RegClient.Instance>,
-  error: HttpErrorBase | null,
-  packument: UnityPackument | null
-) {
-  regClient.get.mockImplementation((_1, _2, cb) => {
-    cb(error, packument!, null!, null!);
-  });
 }
 
 describe("fetch packument service", () => {

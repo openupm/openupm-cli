@@ -3,10 +3,10 @@ import {
   AuthenticationError,
   makeAddUserService,
 } from "../src/services/add-user";
-import RegClient, { AddUserResponse } from "another-npm-registry-client";
+import RegClient from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch";
-import { Response } from "request";
 import { exampleRegistryUrl } from "./data-registry";
+import { mockRegClientAddUserResult } from "./registry-client.mock";
 
 function makeDependencies() {
   const registryClient: jest.Mocked<RegClient.Instance> = {
@@ -16,17 +16,6 @@ function makeDependencies() {
 
   const addUser = makeAddUserService(registryClient);
   return [addUser, registryClient] as const;
-}
-
-function mockRegClientAddUserResult(
-  registryClient: jest.Mocked<RegClient.Instance>,
-  error: HttpErrorBase | null,
-  responseData: AddUserResponse | null,
-  response: Pick<Response, "statusMessage" | "statusCode"> | null
-) {
-  registryClient.adduser.mockImplementation((_1, _2, cb) =>
-    cb(error, responseData!, null!, response! as Response)
-  );
 }
 
 describe("add-user-service", () => {
