@@ -1,4 +1,4 @@
-import { view, ViewOptions } from "../src/cli/cmd-view";
+import { makeViewCmd, ViewOptions } from "../src/cli/cmd-view";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
@@ -16,6 +16,11 @@ jest.mock("../src/services/fetch-packument");
 const packageA = makeDomainName("com.example.package-a");
 const packageUp = makeDomainName("com.example.package-up");
 const packageMissing = makeDomainName("pkg-not-exist");
+
+function makeDependencies() {
+  const viewCmd = makeViewCmd();
+  return [viewCmd] as const;
+}
 
 describe("cmd-view", () => {
   const options: ViewOptions = {
@@ -113,19 +118,22 @@ describe("cmd-view", () => {
     });
 
     it("should print information for packument without version", async () => {
+      const [viewCmd] = makeDependencies();
       const consoleSpy = jest.spyOn(console, "log");
 
-      const viewResult = await view(packageA, options);
+      const viewResult = await viewCmd(packageA, options);
 
       expect(viewResult).toBeOk();
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("com.example.package-a@1.0.0")
       );
     });
+
     it("should print information for packument with semantic version", async () => {
+      const [viewCmd] = makeDependencies();
       const warnSpy = spyOnLog("warn");
 
-      const viewResult = await view(
+      const viewResult = await viewCmd(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
@@ -133,28 +141,34 @@ describe("cmd-view", () => {
       expect(viewResult).toBeError();
       expect(warnSpy).toHaveLogLike("", "do not specify a version");
     });
+
     it("should fail for unknown packument", async () => {
+      const [viewCmd] = makeDependencies();
       const errorSpy = spyOnLog("error");
 
-      const viewResult = await view(packageMissing, options);
+      const viewResult = await viewCmd(packageMissing, options);
 
       expect(viewResult).toBeError();
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
+
     it("should print information for upstream packument", async () => {
+      const [viewCmd] = makeDependencies();
       const consoleSpy = jest.spyOn(console, "log");
 
-      const viewResult = await view(packageUp, upstreamOptions);
+      const viewResult = await viewCmd(packageUp, upstreamOptions);
 
       expect(viewResult).toBeOk();
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("com.example.package-up@1.0.0")
       );
     });
+
     it("should fail for unknown upstream packument", async () => {
+      const [viewCmd] = makeDependencies();
       const errorSpy = spyOnLog("error");
 
-      const viewResult = await view(packageMissing, upstreamOptions);
+      const viewResult = await viewCmd(packageMissing, upstreamOptions);
 
       expect(viewResult).toBeError();
       expect(errorSpy).toHaveLogLike("404", "package not found");

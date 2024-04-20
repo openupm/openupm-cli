@@ -1,4 +1,4 @@
-import { deps, DepsOptions } from "../src/cli/cmd-deps";
+import { DepsOptions, makeDepsCmd } from "../src/cli/cmd-deps";
 import { buildPackument } from "./data-packument";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makePackageReference } from "../src/domain/package-reference";
@@ -8,6 +8,11 @@ import { unityRegistryUrl } from "../src/domain/registry-url";
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
 import { exampleRegistryUrl } from "./data-registry";
+
+function makeDependencies() {
+  const depsCmd = makeDepsCmd();
+  return [depsCmd] as const;
+}
 
 describe("cmd-deps", () => {
   const options: DepsOptions = {
@@ -46,17 +51,19 @@ describe("cmd-deps", () => {
     });
 
     it("should print direct dependencies", async () => {
+      const [depsCmd] = makeDependencies();
       const noticeSpy = spyOnLog("notice");
 
-      const depsResult = await deps(remotePackumentA.name, options);
+      const depsResult = await depsCmd(remotePackumentA.name, options);
 
       expect(depsResult).toBeOk();
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
     it("should print all dependencies when requested", async () => {
+      const [depsCmd] = makeDependencies();
       const noticeSpy = spyOnLog("notice");
 
-      const depsResult = await deps(remotePackumentA.name, {
+      const depsResult = await depsCmd(remotePackumentA.name, {
         ...options,
         deep: true,
       });
@@ -66,9 +73,10 @@ describe("cmd-deps", () => {
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentUp.name);
     });
     it("should print correct dependencies for latest tag", async () => {
+      const [depsCmd] = makeDependencies();
       const noticeSpy = spyOnLog("notice");
 
-      const depsResult = await deps(
+      const depsResult = await depsCmd(
         makePackageReference(remotePackumentA.name, "latest"),
         options
       );
@@ -77,9 +85,10 @@ describe("cmd-deps", () => {
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
     it("should print correct dependencies for semantic version", async () => {
+      const [depsCmd] = makeDependencies();
       const noticeSpy = spyOnLog("notice");
 
-      const depsResult = await deps(
+      const depsResult = await depsCmd(
         makePackageReference(remotePackumentA.name, "1.0.0"),
         options
       );
@@ -88,9 +97,10 @@ describe("cmd-deps", () => {
       expect(noticeSpy).toHaveLogLike("dependency", remotePackumentB.name);
     });
     it("should print no dependencies for unknown version", async () => {
+      const [depsCmd] = makeDependencies();
       const warnLog = spyOnLog("warn");
 
-      const depsResult = await deps(
+      const depsResult = await depsCmd(
         makePackageReference(remotePackumentA.name, "2.0.0"),
         options
       );
@@ -99,15 +109,20 @@ describe("cmd-deps", () => {
       expect(warnLog).toHaveLogLike("404", "is not a valid choice");
     });
     it("should print no dependencies for unknown packument", async () => {
+      const [depsCmd] = makeDependencies();
       const warnSpy = spyOnLog("warn");
 
-      const depsResult = await deps(makeDomainName("pkg-not-exist"), options);
+      const depsResult = await depsCmd(
+        makeDomainName("pkg-not-exist"),
+        options
+      );
 
       expect(depsResult).toBeOk();
       expect(warnSpy).toHaveLogLike("404", "not found");
     });
     it("should print dependencies for upstream packuments", async () => {
-      const depsResult = await deps(remotePackumentUp.name, options);
+      const [depsCmd] = makeDependencies();
+      const depsResult = await depsCmd(remotePackumentUp.name, options);
 
       expect(depsResult).toBeOk();
     });

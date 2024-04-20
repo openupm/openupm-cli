@@ -1,9 +1,8 @@
 import { createCommand } from "@commander-js/extra-typings";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
-import { remove } from "./cmd-remove";
-import { view } from "./cmd-view";
-import { deps } from "./cmd-deps";
+import { makeRemoveCmd } from "./cmd-remove";
+import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
 import log from "./logger";
 import { eachValue, mustBeParsable, mustSatisfy } from "./cli-parsing";
@@ -18,6 +17,7 @@ import { makeAddUserService } from "../services/add-user";
 import { makeSearchService } from "../services/search";
 import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
+import { makeViewCmd } from "./cmd-view";
 
 // Composition root
 
@@ -29,6 +29,9 @@ const searchService = makeSearchService();
 const addCmd = makeAddCmd(fetchService);
 const loginCmd = makeLoginCmd(npmrcAuthService, addUserService);
 const searchCmd = makeSearchCmd(searchService);
+const depsCmd = makeDepsCmd();
+const removeCmd = makeRemoveCmd();
+const viewCmd = makeViewCmd();
 
 // Validators
 
@@ -116,7 +119,7 @@ program
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const removeResult = await remove(pkgs, makeCmdOptions(options));
+    const removeResult = await removeCmd(pkgs, makeCmdOptions(options));
     if (removeResult.isErr()) process.exit(1);
   });
 
@@ -136,7 +139,7 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    const result = await view(pkg, makeCmdOptions(options));
+    const result = await viewCmd(pkg, makeCmdOptions(options));
     if (result.isErr()) process.exit(1);
   });
 
@@ -151,7 +154,7 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    const depsResult = await deps(pkg, makeCmdOptions(options));
+    const depsResult = await depsCmd(pkg, makeCmdOptions(options));
     if (depsResult.isErr()) process.exit(1);
   });
 

@@ -1,4 +1,3 @@
-import { remove } from "../src/cli/cmd-remove";
 import { buildProjectManifest } from "./data-project-manifest";
 import { makeDomainName } from "../src/domain/domain-name";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
@@ -11,10 +10,16 @@ import {
 import { mockUpmConfig } from "./upm-config-io.mock";
 import { mockProjectVersion } from "./project-version-io.mock";
 import { exampleRegistryUrl } from "./data-registry";
+import { makeRemoveCmd } from "../src/cli/cmd-remove";
 
 const packageA = makeDomainName("com.example.package-a");
 const packageB = makeDomainName("com.example.package-b");
 const missingPackage = makeDomainName("pkg-not-exist");
+
+function makeDependencies() {
+  const removeCmd = makeRemoveCmd();
+  return [removeCmd] as const;
+}
 
 describe("cmd-remove", () => {
   describe("remove", () => {
@@ -31,6 +36,7 @@ describe("cmd-remove", () => {
     });
 
     it("should remove packument without version", async () => {
+      const [removeCmd] = makeDependencies();
       const noticeSpy = spyOnLog("notice");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -39,7 +45,7 @@ describe("cmd-remove", () => {
         },
       };
 
-      const removeResult = await remove(packageA, options);
+      const removeResult = await removeCmd(packageA, options);
 
       expect(removeResult).toBeOk();
       expect(manifestSavedSpy).toHaveBeenCalledWith(
@@ -52,6 +58,7 @@ describe("cmd-remove", () => {
       expect(noticeSpy).toHaveLogLike("", "open Unity");
     });
     it("should fail to remove packument with semantic version", async () => {
+      const [removeCmd] = makeDependencies();
       const warnSpy = spyOnLog("warn");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -60,7 +67,7 @@ describe("cmd-remove", () => {
         },
       };
 
-      const removeResult = await remove(
+      const removeResult = await removeCmd(
         makePackageReference(packageA, makeSemanticVersion("1.0.0")),
         options
       );
@@ -70,6 +77,7 @@ describe("cmd-remove", () => {
       expect(warnSpy).toHaveLogLike("", "do not specify a version");
     });
     it("should fail for uninstalled packument", async () => {
+      const [removeCmd] = makeDependencies();
       const errorSpy = spyOnLog("error");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -78,13 +86,14 @@ describe("cmd-remove", () => {
         },
       };
 
-      const removeResult = await remove(missingPackage, options);
+      const removeResult = await removeCmd(missingPackage, options);
 
       expect(removeResult).toBeError();
       expect(manifestSavedSpy).not.toHaveBeenCalled();
       expect(errorSpy).toHaveLogLike("404", "package not found");
     });
     it("should remove multiple packuments", async () => {
+      const [removeCmd] = makeDependencies();
       const noticeSpy = spyOnLog("notice");
       const manifestSavedSpy = spyOnSavedManifest();
       const options = {
@@ -93,7 +102,7 @@ describe("cmd-remove", () => {
         },
       };
 
-      const removeResult = await remove([packageA, packageB], options);
+      const removeResult = await removeCmd([packageA, packageB], options);
 
       expect(removeResult).toBeOk();
       expect(manifestSavedSpy).toHaveBeenCalledWith(

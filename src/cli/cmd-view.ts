@@ -16,42 +16,15 @@ export type ViewOptions = CmdOptions;
 
 export type ViewError = EnvParseError | PackageWithVersionError;
 
-export const view = async function (
+/**
+ * Cmd-handler for viewing package information.
+ * @param pkg Reference to the package to view.
+ * @param options Command options.
+ */
+export type ViewCmd = (
   pkg: PackageReference,
   options: ViewOptions
-): Promise<Result<void, ViewError>> {
-  // parse env
-  const envResult = await parseEnv(options);
-  if (envResult.isErr()) return envResult;
-  const env = envResult.value;
-
-  const fetchService = makePackumentFetchService();
-
-  // parse name
-  if (hasVersion(pkg)) {
-    log.warn("", `please do not specify a version (Write only '${pkg}').`);
-    return Err(new PackageWithVersionError());
-  }
-  // verify name
-  const result = await tryResolve(
-    fetchService,
-    pkg,
-    undefined,
-    env.registry
-  ).orElse((error) =>
-    env.upstream
-      ? tryResolve(fetchService, pkg, undefined, env.upstreamRegistry)
-      : Err(error)
-  ).promise;
-
-  if (result.isOk()) {
-    printInfo(result.value.packument);
-    return Ok(undefined);
-  } else {
-    log.error("404", `package not found: ${pkg}`);
-    return result;
-  }
-};
+) => Promise<Result<void, ViewError>>;
 
 const printInfo = function (packument: UnityPackument) {
   const versionCount = recordKeys(packument.versions).length;
@@ -121,3 +94,43 @@ const printInfo = function (packument: UnityPackument) {
     console.log("  " + chalk.greenBright(version));
   }
 };
+
+/**
+ * Makes a {@link ViewCmd} function.
+ */
+export function makeViewCmd(): ViewCmd {
+  return async (pkg, options) => {
+    // parse env
+    const envResult = await parseEnv(options);
+    if (envResult.isErr()) return envResult;
+    const env = envResult.value;
+
+    const fetchService = makePackumentFetchService();
+
+    // parse name
+    if (hasVersion(pkg)) {
+      log.warn("", `please do not specify a version (Write only '${pkg}').`);
+      return Err(new PackageWithVersionError());
+    }
+
+    // verify name
+    const result = await tryResolve(
+      fetchService,
+      pkg,
+      undefined,
+      env.registry
+    ).orElse((error) =>
+      env.upstream
+        ? tryResolve(fetchService, pkg, undefined, env.upstreamRegistry)
+        : Err(error)
+    ).promise;
+
+    if (result.isOk()) {
+      printInfo(result.value.packument);
+      return Ok(undefined);
+    } else {
+      log.error("404", `package not found: ${pkg}`);
+      return result;
+    }
+  };
+}
