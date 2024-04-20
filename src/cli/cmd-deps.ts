@@ -52,8 +52,9 @@ export function makeDepsCmd(): DepsCmd {
     const fetchService = makePackumentFetchService();
 
     const [name, version] = splitPackageReference(pkg);
-
+    
     if (version !== undefined && isPackageUrl(version))
+      // TODO: Convert to result
       throw new Error("Cannot get dependencies for url-version");
 
     const deep = options.deep || false;
