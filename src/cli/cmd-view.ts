@@ -3,7 +3,11 @@ import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
 import { EnvParseError, parseEnv } from "../utils/env";
-import { hasVersion, PackageReference } from "../domain/package-reference";
+import {
+  hasVersion,
+  PackageReference,
+  splitPackageReference,
+} from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
@@ -106,7 +110,8 @@ export function makeViewCmd(fetchService: FetchPackumentService): ViewCmd {
 
     // parse name
     if (hasVersion(pkg)) {
-      log.warn("", `please do not specify a version (Write only '${pkg}').`);
+      const [name] = splitPackageReference(pkg);
+      log.warn("", `please do not specify a version (Write only '${name}').`);
       return Err(new PackageWithVersionError());
     }
 
