@@ -154,6 +154,14 @@ export const tryParseEditorVersion = function (
  */
 export function makeEditorVersion(major: number, minor: number): RegularVersion;
 /**
+ * Constructs a patch editor-version.
+ */
+export function makeEditorVersion(
+  major: number,
+  minor: number,
+  patch: number
+): PatchVersion;
+/**
  * Constructs a release editor-version.
  */
 export function makeEditorVersion(
@@ -170,7 +178,9 @@ export function makeEditorVersion(
   flag?: ReleaseFlag,
   build?: number
 ) {
-  return { major, minor, patch, flag, build };
+  if (flag !== undefined) return { major, minor, patch, flag, build };
+  if (patch !== undefined) return { major, minor, patch };
+  return { major, minor };
 }
 
 /**
