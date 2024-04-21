@@ -10,7 +10,6 @@ import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import {
   compareEditorVersion,
   stringifyEditorVersion,
-  tryParseEditorVersion,
 } from "../domain/editor-version";
 import { DomainName } from "../domain/domain-name";
 import {
@@ -40,7 +39,7 @@ import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import { logManifestLoadError, logManifestSaveError } from "./error-logging";
-import { targetEditorVersionFor } from "../domain/packument";
+import { tryGetTargetEditorVersionFor } from "../domain/packument";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 
@@ -154,49 +153,48 @@ export function makeAddCmd(
         const packumentVersion = resolveResult.value.packumentVersion;
         versionToAdd = packumentVersion.version;
 
-        const targetEditorVersion = targetEditorVersionFor(packumentVersion);
-        // verify editor version
-        if (targetEditorVersion !== null) {
-          const requiredEditorVersionResult =
-            tryParseEditorVersion(targetEditorVersion);
-          if (typeof env.editorVersion === "string") {
-            log.warn(
-              "editor.version",
-              `${env.editorVersion} is unknown, the editor version check is disabled`
+        const targetEditorVersionResult =
+          tryGetTargetEditorVersionFor(packumentVersion);
+        if (targetEditorVersionResult.isErr()) {
+          log.warn(
+            "package.unity",
+            `${targetEditorVersionResult.error.versionString} is not valid`
+          );
+          if (!options.force) {
+            log.notice(
+              "suggest",
+              "contact the package author to fix the issue, or run with option -f to ignore the warning"
+            );
+            return Err(
+              new InvalidPackumentDataError("Editor-version not valid.")
             );
           }
-          if (!requiredEditorVersionResult) {
-            log.warn("package.unity", `${targetEditorVersion} is not valid`);
-            if (!options.force) {
-              log.notice(
-                "suggest",
-                "contact the package author to fix the issue, or run with option -f to ignore the warning"
+        } else {
+          const targetEditorVersion = targetEditorVersionResult.value;
+
+          // verify editor version
+          if (targetEditorVersion !== null) {
+            if (typeof env.editorVersion === "string") {
+              log.warn(
+                "editor.version",
+                `${env.editorVersion} is unknown, the editor version check is disabled`
               );
-              return Err(
-                new InvalidPackumentDataError("Editor-version not valid.")
+            } else if (
+              compareEditorVersion(env.editorVersion, targetEditorVersion) < 0
+            ) {
+              log.warn(
+                "editor.version",
+                `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
+                  env.editorVersion
+                )}`
               );
-            }
-          }
-          if (
-            typeof env.editorVersion !== "string" &&
-            requiredEditorVersionResult &&
-            compareEditorVersion(
-              env.editorVersion,
-              requiredEditorVersionResult
-            ) < 0
-          ) {
-            log.warn(
-              "editor.version",
-              `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
-                env.editorVersion
-              )}`
-            );
-            if (!options.force) {
-              log.notice(
-                "suggest",
-                `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
-              );
-              return Err(new EditorIncompatibleError());
+              if (!options.force) {
+                log.notice(
+                  "suggest",
+                  `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
+                );
+                return Err(new EditorIncompatibleError());
+              }
             }
           }
         }

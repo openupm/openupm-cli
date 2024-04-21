@@ -3,6 +3,10 @@ import { DomainName } from "./domain-name";
 import { UnityPackageManifest } from "./package-manifest";
 import { PackageId } from "./package-id";
 import { Dist, Maintainer } from "@npm/types";
+import { Err, Ok, Result } from "ts-results-es";
+import { EditorVersion, tryParseEditorVersion } from "./editor-version";
+import { CustomError } from "ts-custom-error";
+import { constant } from "fast-check";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -102,20 +106,41 @@ export const tryGetLatestVersion = function (
 };
 
 /**
- * Extracts the target editor-version, e.g. 2020.3.1, from a packument-version.
+ * Error for when a packument contained an invalid target editor-version.
+ */
+export class InvalidTargetEditorError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "InvalidTargetEditorError";
+
+  constructor(
+    /**
+     * The invalid editor-version string.
+     */
+    public readonly versionString: string
+  ) {
+    super();
+  }
+}
+
+/**
+ * Extracts the target editor-version from a packument-version.
  * @param packumentVersion The packument-version for which to get the editor.
  * @returns The editor-version or null if the packument is compatible
  * with all Unity version.
  */
-export function targetEditorVersionFor(
+export function tryGetTargetEditorVersionFor(
   packumentVersion: UnityPackumentVersion
-): string | null {
-  if (packumentVersion.unity === undefined) return null;
+): Result<EditorVersion | null, InvalidTargetEditorError> {
+  if (packumentVersion.unity === undefined) return Ok(null);
 
   const majorMinor = packumentVersion.unity;
   const release =
     packumentVersion.unityRelease !== undefined
       ? `.${packumentVersion.unityRelease}`
       : "";
-  return `${majorMinor}${release}`;
+  const versionString = `${majorMinor}${release}`;
+  const parsed = tryParseEditorVersion(versionString);
+  return parsed !== null
+    ? Ok(parsed)
+    : Err(new InvalidTargetEditorError(versionString));
 }

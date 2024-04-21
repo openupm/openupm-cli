@@ -1,11 +1,13 @@
 import {
-  targetEditorVersionFor,
+  InvalidTargetEditorError,
   tryGetLatestVersion,
+  tryGetTargetEditorVersionFor,
   UnityPackumentVersion,
 } from "../src/domain/packument";
 import { makeSemanticVersion } from "../src/domain/semantic-version";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
+import { makeEditorVersion } from "../src/domain/editor-version";
 
 describe("packument", () => {
   describe("tryGetLatestVersion", () => {
@@ -21,16 +23,16 @@ describe("packument", () => {
     it("should get version without release", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          const expected = "2020.3";
+          const expected = makeEditorVersion(2020, 3);
           const packumentVersion: UnityPackumentVersion = {
             name: packumentName,
             version: makeSemanticVersion("1.0.0"),
-            unity: expected,
+            unity: "2020.3",
           };
 
-          const actual = targetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packumentVersion);
 
-          expect(actual).toEqual(expected);
+          expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
         })
       );
     });
@@ -38,6 +40,7 @@ describe("packument", () => {
     it("should get version with release", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
+          const expected = makeEditorVersion(2020, 3, 1);
           const packumentVersion: UnityPackumentVersion = {
             name: packumentName,
             version: makeSemanticVersion("1.0.0"),
@@ -45,9 +48,9 @@ describe("packument", () => {
             unityRelease: "1",
           };
 
-          const actual = targetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packumentVersion);
 
-          expect(actual).toEqual("2020.3.1");
+          expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
         })
       );
     });
@@ -60,9 +63,29 @@ describe("packument", () => {
             version: makeSemanticVersion("1.0.0"),
           };
 
-          const actual = targetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packumentVersion);
 
-          expect(actual).toBeNull();
+          expect(result).toBeOk((actual) => expect(actual).toBeNull());
+        })
+      );
+    });
+
+    it("should fail for bad version", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packumentName) => {
+          const packumentVersion: UnityPackumentVersion = {
+            name: packumentName,
+            version: makeSemanticVersion("1.0.0"),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            unity: "bad version",
+          };
+
+          const result = tryGetTargetEditorVersionFor(packumentVersion);
+
+          expect(result).toBeError((actual) =>
+            expect(actual).toBeInstanceOf(InvalidTargetEditorError)
+          );
         })
       );
     });
