@@ -108,6 +108,12 @@ export function makeAddCmd(
     if (envResult.isErr()) return envResult;
     const env = envResult.value;
 
+    if (typeof env.editorVersion === "string")
+      log.warn(
+        "editor.version",
+        `${env.editorVersion} is unknown, the editor version check is disabled`
+      );
+
     const tryAddToManifest = async function (
       manifest: UnityProjectManifest,
       pkg: PackageReference
@@ -173,31 +179,27 @@ export function makeAddCmd(
           const targetEditorVersion = targetEditorVersionResult.value;
 
           // verify editor version
-          if (targetEditorVersion !== null) {
-            if (typeof env.editorVersion === "string") {
-              log.warn(
-                "editor.version",
-                `${env.editorVersion} is unknown, the editor version check is disabled`
+          if (
+            targetEditorVersion !== null &&
+            typeof env.editorVersion !== "string" &&
+            compareEditorVersion(env.editorVersion, targetEditorVersion) < 0
+          ) {
+            log.warn(
+              "editor.version",
+              `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
+                env.editorVersion
+              )}`
+            );
+            if (!options.force) {
+              log.notice(
+                "suggest",
+                `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
               );
-            } else if (
-              compareEditorVersion(env.editorVersion, targetEditorVersion) < 0
-            ) {
-              log.warn(
-                "editor.version",
-                `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
-                  env.editorVersion
-                )}`
-              );
-              if (!options.force) {
-                log.notice(
-                  "suggest",
-                  `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
-                );
-                return Err(new EditorIncompatibleError());
-              }
+              return Err(new EditorIncompatibleError());
             }
           }
         }
+
         // pkgsInScope
         if (!isUpstreamPackage) {
           log.verbose(
