@@ -13,6 +13,9 @@ import {
 } from "./file-io";
 import { tryParseJson } from "../utils/data-parsing";
 
+/**
+ * Error which may occur when saving a project manifest.
+ */
 export type ManifestSaveError = IOError;
 
 /**
@@ -24,6 +27,9 @@ export function manifestPathFor(projectPath: string): string {
   return path.join(projectPath, "Packages/manifest.json");
 }
 
+/**
+ * Error which may occur when loading a project manifest.
+ */
 export type ManifestLoadError = NotFoundError | FileParseError;
 
 /**
