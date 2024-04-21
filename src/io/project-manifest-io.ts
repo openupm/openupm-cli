@@ -14,11 +14,6 @@ import {
 import { tryParseJson } from "../utils/data-parsing";
 
 /**
- * Error which may occur when saving a project manifest.
- */
-export type ManifestSaveError = IOError;
-
-/**
  * Determines the path to the package manifest based on the project
  * directory.
  * @param projectPath The root path of the Unity project.
@@ -60,17 +55,29 @@ export function makeProjectManifestLoader(): LoadProjectManifest {
 }
 
 /**
- * Saves a Unity project manifest.
- * @param projectPath The path to the projects root directory.
- * @param manifest The manifest to save.
+ * Error which may occur when saving a project manifest.
  */
-export const trySaveProjectManifest = function (
+export type ManifestWriteError = IOError;
+
+/**
+ * Function for replacing the project manifest for a Unity project.
+ * @param projectPath The path to the project's directory.
+ * @param manifest The manifest to write to the project.
+ */
+export type WriteProjectManifest = (
   projectPath: string,
   manifest: UnityProjectManifest
-): AsyncResult<void, ManifestSaveError> {
-  const manifestPath = manifestPathFor(projectPath);
-  manifest = pruneManifest(manifest);
-  const json = JSON.stringify(manifest, null, 2);
+) => AsyncResult<void, ManifestWriteError>;
 
-  return tryWriteTextToFile(manifestPath, json);
-};
+/**
+ * Makes a {@link WriteProjectManifest} function.
+ */
+export function makeProjectManifestWriter(): WriteProjectManifest {
+  return (projectPath, manifest) => {
+    const manifestPath = manifestPathFor(projectPath);
+    manifest = pruneManifest(manifest);
+    const json = JSON.stringify(manifest, null, 2);
+
+    return tryWriteTextToFile(manifestPath, json);
+  };
+}

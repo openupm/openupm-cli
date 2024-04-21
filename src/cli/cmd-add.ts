@@ -3,8 +3,8 @@ import { isPackageUrl, PackageUrl } from "../domain/package-url";
 import {
   LoadProjectManifest,
   ManifestLoadError,
-  ManifestSaveError,
-  trySaveProjectManifest,
+  ManifestWriteError,
+  WriteProjectManifest,
 } from "../io/project-manifest-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import {
@@ -80,7 +80,7 @@ export type AddError =
   | InvalidPackumentDataError
   | EditorIncompatibleError
   | UnresolvedDependencyError
-  | ManifestSaveError;
+  | ManifestWriteError;
 
 /**
  * Cmd-handler for adding packages.
@@ -99,7 +99,8 @@ export function makeAddCmd(
   parseEnv: ParseEnvService,
   resolveRemovePackument: ResolveRemotePackumentService,
   resolveDependencies: ResolveDependenciesService,
-  loadProjectManifest: LoadProjectManifest
+  loadProjectManifest: LoadProjectManifest,
+  writeProjectManifest: WriteProjectManifest
 ): AddCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -323,8 +324,7 @@ export function makeAddCmd(
 
     // Save manifest
     if (dirty) {
-      const saveResult = await trySaveProjectManifest(env.cwd, manifest)
-        .promise;
+      const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
       if (saveResult.isErr()) {
         logManifestSaveError(saveResult.error);
         return saveResult;

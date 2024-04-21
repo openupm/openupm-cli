@@ -1,7 +1,8 @@
-import * as projectManifestIoModule from "../src/io/project-manifest-io";
 import {
   LoadProjectManifest,
   manifestPathFor,
+  ManifestWriteError,
+  WriteProjectManifest,
 } from "../src/io/project-manifest-io";
 import { UnityProjectManifest } from "../src/domain/project-manifest";
 import { Err, Ok } from "ts-results-es";
@@ -26,10 +27,15 @@ export function mockProjectManifest(
 }
 
 /**
- * Creates a spy for saved project-manifests.
+ * Mocks the result of writing the project manifest.
+ * @param writeProjectManifest The write function.
+ * @param error The error that should be returned by the write operation. If
+ * omitted the operation will be mocked to succeed.
  */
-export function spyOnSavedManifest() {
-  return jest
-    .spyOn(projectManifestIoModule, "trySaveProjectManifest")
-    .mockReturnValue(Ok(undefined).toAsyncResult());
+export function mockProjectManifestWriteResult(
+  writeProjectManifest: jest.MockedFunction<WriteProjectManifest>,
+  error?: ManifestWriteError
+) {
+  const result = error !== undefined ? Err(error) : Ok(undefined);
+  return writeProjectManifest.mockReturnValue(result.toAsyncResult());
 }

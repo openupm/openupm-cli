@@ -6,7 +6,7 @@ import { IOError, NotFoundError } from "../src/io/file-io";
 import { makeDomainName } from "../src/domain/domain-name";
 import {
   mockProjectManifest,
-  spyOnSavedManifest,
+  mockProjectManifestWriteResult,
 } from "./project-manifest-io.mock";
 import { buildProjectManifest } from "./data-project-manifest";
 import { makePackageReference } from "../src/domain/package-reference";
@@ -17,7 +17,10 @@ import {
 } from "../src/common-errors";
 import { spyOnLog } from "./log.mock";
 import { mockService } from "./service.mock";
-import { LoadProjectManifest } from "../src/io/project-manifest-io";
+import {
+  LoadProjectManifest,
+  WriteProjectManifest,
+} from "../src/io/project-manifest-io";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -36,15 +39,23 @@ function makeDependencies() {
   const loadProjectManifest = mockService<LoadProjectManifest>();
   mockProjectManifest(loadProjectManifest, defaultManifest);
 
-  const removeCmd = makeRemoveCmd(parseEnv, loadProjectManifest);
-  return { removeCmd, parseEnv, loadProjectManifest } as const;
+  const writeProjectManifest = mockService<WriteProjectManifest>();
+  mockProjectManifestWriteResult(writeProjectManifest);
+
+  const removeCmd = makeRemoveCmd(
+    parseEnv,
+    loadProjectManifest,
+    writeProjectManifest
+  );
+  return {
+    removeCmd,
+    parseEnv,
+    loadProjectManifest,
+    writeProjectManifest,
+  } as const;
 }
 
 describe("cmd-remove", () => {
-  beforeEach(() => {
-    spyOnSavedManifest();
-  });
-
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
     const { removeCmd, parseEnv } = makeDependencies();
@@ -130,22 +141,20 @@ describe("cmd-remove", () => {
   });
 
   it("should be atomic for multiple packages", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, writeProjectManifest } = makeDependencies();
 
     // One of these packages can not be removed, so none should be removed.
     await removeCmd([somePackage, otherPackage], { _global: {} });
 
-    expect(saveSpy).not.toHaveBeenCalled();
+    expect(writeProjectManifest).not.toHaveBeenCalled();
   });
 
   it("should remove package from manifest", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, writeProjectManifest } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(saveSpy).toHaveBeenCalledWith(
+    expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
       expect.not.objectContaining({
         dependencies: {
@@ -156,12 +165,11 @@ describe("cmd-remove", () => {
   });
 
   it("should remove scope from manifest", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, writeProjectManifest } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(saveSpy).toHaveBeenCalledWith(
+    expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
       expect.not.objectContaining({
         scopes: [somePackage],
@@ -171,8 +179,8 @@ describe("cmd-remove", () => {
 
   it("should fail if manifest could not be saved", async () => {
     const expected = new IOError();
-    spyOnSavedManifest().mockReturnValue(Err(expected).toAsyncResult());
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, writeProjectManifest } = makeDependencies();
+    mockProjectManifestWriteResult(writeProjectManifest, expected);
 
     const result = await removeCmd(somePackage, { _global: {} });
 
@@ -181,8 +189,8 @@ describe("cmd-remove", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const errorSpy = spyOnLog("error");
-    spyOnSavedManifest().mockReturnValue(Err(new IOError()).toAsyncResult());
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, writeProjectManifest } = makeDependencies();
+    mockProjectManifestWriteResult(writeProjectManifest, new IOError());
 
     await removeCmd(somePackage, { _global: {} });
 

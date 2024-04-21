@@ -1,7 +1,7 @@
 import {
   makeProjectManifestLoader,
+  makeProjectManifestWriter,
   manifestPathFor,
-  trySaveProjectManifest,
 } from "../src/io/project-manifest-io";
 import {
   emptyProjectManifest,
@@ -95,14 +95,20 @@ describe("project-manifest io", () => {
     });
   });
 
-  describe("save", () => {
+  describe("write", () => {
+    function makeDependencies() {
+      const writeProjectManifest = makeProjectManifestWriter();
+      return [writeProjectManifest] as const;
+    }
+
     it("should fail if file could not be written", async () => {
       const expected = new IOError();
+      const [writeProjectManifest] = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryWriteTextToFile")
         .mockReturnValue(Err(expected).toAsyncResult());
 
-      const result = await trySaveProjectManifest(
+      const result = await writeProjectManifest(
         "/some/path",
         emptyProjectManifest
       ).promise;
@@ -111,6 +117,7 @@ describe("project-manifest io", () => {
     });
 
     it("should write manifest json", async () => {
+      const [writeProjectManifest] = makeDependencies();
       const writeSpy = jest
         .spyOn(fileIoModule, "tryWriteTextToFile")
         .mockReturnValue(Ok(undefined).toAsyncResult());
@@ -118,7 +125,7 @@ describe("project-manifest io", () => {
         manifest.addDependency("com.package.a", "1.0.0", true, true)
       );
 
-      await trySaveProjectManifest("/some/path", manifest).promise;
+      await writeProjectManifest("/some/path", manifest).promise;
 
       expect(writeSpy).toHaveBeenCalledWith(
         expect.any(String),
@@ -142,7 +149,8 @@ describe("project-manifest io", () => {
       );
     });
 
-    it("should prune manifest before saving", async () => {
+    it("should prune manifest before writing", async () => {
+      const [writeProjectManifest] = makeDependencies();
       const writeSpy = jest
         .spyOn(fileIoModule, "tryWriteTextToFile")
         .mockReturnValue(Ok(undefined).toAsyncResult());
@@ -155,7 +163,7 @@ describe("project-manifest io", () => {
         return removeScope(registry!, testDomain);
       });
 
-      await trySaveProjectManifest("/some/path", manifest).promise;
+      await writeProjectManifest("/some/path", manifest).promise;
 
       expect(writeSpy).toHaveBeenCalledWith(
         expect.any(String),

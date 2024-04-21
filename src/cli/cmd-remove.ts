@@ -2,8 +2,8 @@ import log from "./logger";
 import {
   LoadProjectManifest,
   ManifestLoadError,
-  ManifestSaveError,
-  trySaveProjectManifest,
+  ManifestWriteError,
+  WriteProjectManifest,
 } from "../io/project-manifest-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import {
@@ -32,7 +32,7 @@ export type RemoveError =
   | PackageWithVersionError
   | PackumentNotFoundError
   | ManifestLoadError
-  | ManifestSaveError;
+  | ManifestWriteError;
 
 export type RemoveOptions = CmdOptions;
 
@@ -51,7 +51,8 @@ export type RemoveCmd = (
  */
 export function makeRemoveCmd(
   parseEnv: ParseEnvService,
-  loadProjectManifest: LoadProjectManifest
+  loadProjectManifest: LoadProjectManifest,
+  writeProjectManifest: WriteProjectManifest
 ): RemoveCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -108,7 +109,7 @@ export function makeRemoveCmd(
     }
 
     // save manifest
-    const saveResult = await trySaveProjectManifest(env.cwd, manifest).promise;
+    const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
       logManifestSaveError(saveResult.error);
       return saveResult;

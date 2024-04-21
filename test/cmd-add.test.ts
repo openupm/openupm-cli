@@ -13,7 +13,7 @@ import { Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError } from "../src/io/file-io";
 import {
   mockProjectManifest,
-  spyOnSavedManifest,
+  mockProjectManifestWriteResult,
 } from "./project-manifest-io.mock";
 import { emptyProjectManifest } from "../src/domain/project-manifest";
 import { spyOnLog } from "./log.mock";
@@ -26,7 +26,10 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { VersionNotFoundError } from "../src/packument-resolving";
 import { mockService } from "./service.mock";
 import { ResolveRemotePackumentService } from "../src/services/resolve-remote-packument";
-import { LoadProjectManifest } from "../src/io/project-manifest-io";
+import {
+  LoadProjectManifest,
+  WriteProjectManifest,
+} from "../src/io/project-manifest-io";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -92,11 +95,15 @@ function makeDependencies() {
   const loadProjectManifest = mockService<LoadProjectManifest>();
   mockProjectManifest(loadProjectManifest, emptyProjectManifest);
 
+  const writeProjectManifest = mockService<WriteProjectManifest>();
+  mockProjectManifestWriteResult(writeProjectManifest);
+
   const addCmd = makeAddCmd(
     parseEnv,
     resolveRemotePackument,
     resolveDependencies,
-    loadProjectManifest
+    loadProjectManifest,
+    writeProjectManifest
   );
   return {
     addCmd,
@@ -104,14 +111,11 @@ function makeDependencies() {
     resolveRemotePackument,
     resolveDependencies,
     loadProjectManifest,
+    writeProjectManifest,
   } as const;
 }
 
 describe("cmd-add", () => {
-  beforeEach(() => {
-    spyOnSavedManifest();
-  });
-
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
     const { addCmd, parseEnv } = makeDependencies();
@@ -452,14 +456,13 @@ describe("cmd-add", () => {
   });
 
   it("should add package", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { addCmd } = makeDependencies();
+    const { addCmd, writeProjectManifest } = makeDependencies();
 
     await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(saveSpy).toHaveBeenCalledWith(
+    expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         dependencies: { [somePackage]: "1.0.0" },
@@ -479,8 +482,8 @@ describe("cmd-add", () => {
   });
 
   it("should replace package", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { addCmd, loadProjectManifest } = makeDependencies();
+    const { addCmd, writeProjectManifest, loadProjectManifest } =
+      makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -492,7 +495,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(saveSpy).toHaveBeenCalledWith(
+    expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         dependencies: { [somePackage]: "1.0.0" },
@@ -535,14 +538,13 @@ describe("cmd-add", () => {
   });
 
   it("should add scope for package", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { addCmd } = makeDependencies();
+    const { addCmd, writeProjectManifest } = makeDependencies();
 
     await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(saveSpy).toHaveBeenCalledWith(
+    expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         scopedRegistries: [
@@ -557,15 +559,14 @@ describe("cmd-add", () => {
   });
 
   it("should add package to testables when running with test option", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { addCmd } = makeDependencies();
+    const { addCmd, writeProjectManifest } = makeDependencies();
 
     await addCmd(somePackage, {
       _global: {},
       test: true,
     });
 
-    expect(saveSpy).toHaveBeenCalledWith(
+    expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         testables: [somePackage],
@@ -574,8 +575,8 @@ describe("cmd-add", () => {
   });
 
   it("should not save if nothing changed", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { addCmd, loadProjectManifest } = makeDependencies();
+    const { addCmd, loadProjectManifest, writeProjectManifest } =
+      makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -589,12 +590,11 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(saveSpy).not.toHaveBeenCalled();
+    expect(writeProjectManifest).not.toHaveBeenCalled();
   });
 
   it("should be atomic", async () => {
-    const saveSpy = spyOnSavedManifest();
-    const { addCmd } = makeDependencies();
+    const { addCmd, writeProjectManifest } = makeDependencies();
 
     // The second package can not be added
     await addCmd([somePackage, makeDomainName("com.unknown.package")], {
@@ -603,7 +603,7 @@ describe("cmd-add", () => {
 
     // Because adding is atomic the manifest should only be written if
     // all packages were added.
-    expect(saveSpy).not.toHaveBeenCalled();
+    expect(writeProjectManifest).not.toHaveBeenCalled();
   });
 
   it("should suggest to open Unity after save", async () => {
@@ -619,8 +619,8 @@ describe("cmd-add", () => {
 
   it("should fail if manifest could not be saved", async () => {
     const expected = new IOError();
-    spyOnSavedManifest().mockReturnValue(Err(expected).toAsyncResult());
-    const { addCmd } = makeDependencies();
+    const { addCmd, writeProjectManifest } = makeDependencies();
+    mockProjectManifestWriteResult(writeProjectManifest, expected);
 
     const result = await addCmd(somePackage, { _global: {} });
 
@@ -629,8 +629,8 @@ describe("cmd-add", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const errorSpy = spyOnLog("error");
-    spyOnSavedManifest().mockReturnValue(Err(new IOError()).toAsyncResult());
-    const { addCmd } = makeDependencies();
+    const { addCmd, writeProjectManifest } = makeDependencies();
+    mockProjectManifestWriteResult(writeProjectManifest, new IOError());
 
     await addCmd(somePackage, { _global: {} });
 
