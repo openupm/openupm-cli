@@ -13,7 +13,7 @@ import {
 } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetHomePath } from "./special-paths";
-import { TomlParseError, tryParseToml } from "../utils/data-parsing";
+import { StringFormatError, tryParseToml } from "../utils/data-parsing";
 import { tryGetWslPath, WslPathError } from "./wls";
 import { ChildProcessError } from "../utils/process";
 
@@ -35,7 +35,7 @@ export type GetUpmConfigDirError =
   | RequiredEnvMissingError
   | ChildProcessError;
 
-export type UpmConfigLoadError = TomlParseError;
+export type UpmConfigLoadError = IOError | StringFormatError;
 
 /**
  * Gets the path to directory in which the upm config is stored.
