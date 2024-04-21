@@ -12,7 +12,7 @@ const exampleRegistry: Registry = {
 
 function makeDependencies() {
   const getAllPackuments = makeGetAllPackumentsService();
-  return [getAllPackuments] as const;
+  return { getAllPackuments } as const;
 }
 
 describe("get all packuments service", () => {
@@ -23,7 +23,7 @@ describe("get all packuments service", () => {
       statusCode: 500,
     } as HttpErrorBase;
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
-    const [getAllPackuments] = makeDependencies();
+    const { getAllPackuments } = makeDependencies();
 
     const result = await getAllPackuments(exampleRegistry).promise;
 
@@ -35,7 +35,7 @@ describe("get all packuments service", () => {
       _update: 123,
     };
     jest.mocked(npmFetch.json).mockResolvedValue(expected);
-    const [getAllPackuments] = makeDependencies();
+    const { getAllPackuments } = makeDependencies();
 
     const result = await getAllPackuments(exampleRegistry).promise;
 

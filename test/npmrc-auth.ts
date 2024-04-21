@@ -16,7 +16,7 @@ jest.mock("../src/io/npmrc-io");
 
 function makeDependencies() {
   const authNpmrc = makeAuthNpmrcService();
-  return [authNpmrc] as const;
+  return { authNpmrc } as const;
 }
 
 describe("npmrc-auth", () => {
@@ -30,50 +30,38 @@ describe("npmrc-auth", () => {
 
     it("should fail if path could not be determined", async () => {
       const expected = new RequiredEnvMissingError();
-      const [authNpmrc] = makeDependencies();
+      const { authNpmrc } = makeDependencies();
       jest.mocked(tryGetNpmrcPath).mockReturnValue(Err(expected));
 
-      const result = await authNpmrc(
-        exampleRegistryUrl,
-        "some token"
-      ).promise;
+      const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
     it("should fail if npmrc load failed", async () => {
       const expected = new IOError();
-      const [authNpmrc] = makeDependencies();
+      const { authNpmrc } = makeDependencies();
       jest.mocked(tryLoadNpmrc).mockReturnValue(new AsyncResult(Err(expected)));
 
-      const result = await authNpmrc(
-        exampleRegistryUrl,
-        "some token"
-      ).promise;
+      const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
     it("should fail if npmrc save failed", async () => {
       const expected = new IOError();
-      const [authNpmrc] = makeDependencies();
+      const { authNpmrc } = makeDependencies();
       jest.mocked(trySaveNpmrc).mockReturnValue(new AsyncResult(Err(expected)));
 
-      const result = await authNpmrc(
-        exampleRegistryUrl,
-        "some token"
-      ).promise;
+      const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
     it("should return npmrc path", async () => {
-      const [authNpmrc] = makeDependencies();
+      const { authNpmrc } = makeDependencies();
 
-      const result = await authNpmrc(
-        exampleRegistryUrl,
-        "some token"
-      ).promise;
+      const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 
       expect(result).toBeOk((actual) =>
         expect(actual).toEqual(exampleNpmrcPath)
@@ -83,7 +71,7 @@ describe("npmrc-auth", () => {
     it("should create npmrc if missing", async () => {
       const expected = setToken(emptyNpmrc, exampleRegistryUrl, "some token");
       const saveSpy = jest.mocked(trySaveNpmrc);
-      const [authNpmrc] = makeDependencies();
+      const { authNpmrc } = makeDependencies();
 
       await authNpmrc(exampleRegistryUrl, "some token").promise;
 
@@ -99,7 +87,7 @@ describe("npmrc-auth", () => {
       const expected = setToken(initial, exampleRegistryUrl, "some token");
       jest.mocked(tryLoadNpmrc).mockReturnValue(new AsyncResult(Ok(initial)));
       const saveSpy = jest.mocked(trySaveNpmrc);
-      const [authNpmrc] = makeDependencies();
+      const { authNpmrc } = makeDependencies();
 
       await authNpmrc(exampleRegistryUrl, "some token").promise;
 

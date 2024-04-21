@@ -44,7 +44,7 @@ function makeDependencies() {
   );
 
   const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
-  return [searchCmd, parseEnv, searchRegistry, getAllPackuments] as const;
+  return { searchCmd, parseEnv, searchRegistry, getAllPackuments } as const;
 }
 
 describe("cmd-search", () => {
@@ -63,7 +63,7 @@ describe("cmd-search", () => {
   describe("search endpoint", () => {
     it("should print packument information", async () => {
       const consoleSpy = jest.spyOn(console, "log");
-      const [searchCmd] = makeDependencies();
+      const { searchCmd } = makeDependencies();
 
       const searchResult = await searchCmd("package-a", options);
 
@@ -79,7 +79,7 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, , searchRegistry] = makeDependencies();
+      const { searchCmd, searchRegistry } = makeDependencies();
       searchRegistry.mockReturnValue(Ok([]).toAsyncResult());
 
       const searchResult = await searchCmd("pkg-not-exist", options);
@@ -93,7 +93,7 @@ describe("cmd-search", () => {
     it("should print packument information", async () => {
       const warnSpy = spyOnLog("warn");
       const consoleSpy = jest.spyOn(console, "log");
-      const [searchCmd, , searchRegistry] = makeDependencies();
+      const { searchCmd, searchRegistry } = makeDependencies();
       searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
 
       const searchResult = await searchCmd("package-a", options);
@@ -114,7 +114,7 @@ describe("cmd-search", () => {
 
     it("should notify of unknown packument", async () => {
       const noticeSpy = spyOnLog("notice");
-      const [searchCmd, , searchRegistry, getAllPackuments] =
+      const { searchCmd, searchRegistry, getAllPackuments } =
         makeDependencies();
       searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
       getAllPackuments.mockReturnValue(Ok({ _updated: 9999 }).toAsyncResult());
