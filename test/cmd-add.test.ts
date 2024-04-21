@@ -26,6 +26,7 @@ import { makeSemanticVersion } from "../src/domain/semantic-version";
 import { VersionNotFoundError } from "../src/packument-resolving";
 import { mockService } from "./service.mock";
 import { ResolveRemotePackumentService } from "../src/services/resolve-remote-packument";
+import { LoadProjectManifest } from "../src/io/project-manifest-io";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -88,22 +89,26 @@ function makeDependencies() {
     [],
   ]);
 
+  const loadProjectManifest = mockService<LoadProjectManifest>();
+  mockProjectManifest(loadProjectManifest, emptyProjectManifest);
+
   const addCmd = makeAddCmd(
     parseEnv,
     resolveRemotePackument,
-    resolveDependencies
+    resolveDependencies,
+    loadProjectManifest
   );
   return [
     addCmd,
     parseEnv,
     resolveRemotePackument,
     resolveDependencies,
+    loadProjectManifest,
   ] as const;
 }
 
 describe("cmd-add", () => {
   beforeEach(() => {
-    mockProjectManifest(emptyProjectManifest);
     spyOnSavedManifest();
   });
 
@@ -118,8 +123,8 @@ describe("cmd-add", () => {
   });
 
   it("should fail if manifest could not be loaded", async () => {
-    mockProjectManifest(null);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    mockProjectManifest(loadProjectManifest, null);
 
     const result = await viewCmd(somePackage, { _global: {} });
 
@@ -130,8 +135,8 @@ describe("cmd-add", () => {
 
   it("should notify if manifest could not be loaded", async () => {
     const errorSpy = spyOnLog("error");
-    mockProjectManifest(null);
-    const [viewCmd] = makeDependencies();
+    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    mockProjectManifest(loadProjectManifest, null);
 
     await viewCmd(somePackage, { _global: {} });
 
@@ -475,12 +480,13 @@ describe("cmd-add", () => {
 
   it("should replace package", async () => {
     const saveSpy = spyOnSavedManifest();
+    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
     mockProjectManifest(
+      loadProjectManifest,
       buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "0.1.0", true, true)
       )
     );
-    const [viewCmd] = makeDependencies();
 
     await viewCmd(somePackage, {
       _global: {},
@@ -496,12 +502,13 @@ describe("cmd-add", () => {
 
   it("should notify if package was replaced", async () => {
     const noticeSpy = spyOnLog("notice");
+    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
     mockProjectManifest(
+      loadProjectManifest,
       buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "0.1.0", true, true)
       )
     );
-    const [viewCmd] = makeDependencies();
 
     await viewCmd(somePackage, {
       _global: {},
@@ -512,12 +519,13 @@ describe("cmd-add", () => {
 
   it("should notify if package is already in manifest", async () => {
     const noticeSpy = spyOnLog("notice");
+    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
     mockProjectManifest(
+      loadProjectManifest,
       buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "1.0.0", true, true)
       )
     );
-    const [viewCmd] = makeDependencies();
 
     await viewCmd(somePackage, {
       _global: {},
@@ -567,14 +575,15 @@ describe("cmd-add", () => {
 
   it("should not save if nothing changed", async () => {
     const saveSpy = spyOnSavedManifest();
+    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
     mockProjectManifest(
+      loadProjectManifest,
       buildProjectManifest((manifest) =>
         manifest
           .addDependency(somePackage, "1.0.0", true, false)
           .addScope(otherPackage)
       )
     );
-    const [viewCmd] = makeDependencies();
 
     await viewCmd(somePackage, {
       _global: {},

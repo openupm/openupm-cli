@@ -1,8 +1,8 @@
 import log from "./logger";
 import {
+  LoadProjectManifest,
   ManifestLoadError,
   ManifestSaveError,
-  tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../io/project-manifest-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
@@ -49,7 +49,10 @@ export type RemoveCmd = (
 /**
  * Makes a {@link RemoveCmd} function.
  */
-export function makeRemoveCmd(parseEnv: ParseEnvService): RemoveCmd {
+export function makeRemoveCmd(
+  parseEnv: ParseEnvService,
+  loadProjectManifest: LoadProjectManifest
+): RemoveCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
     // parse env
@@ -90,7 +93,7 @@ export function makeRemoveCmd(parseEnv: ParseEnvService): RemoveCmd {
     };
 
     // load manifest
-    const manifestResult = await tryLoadProjectManifest(env.cwd).promise;
+    const manifestResult = await loadProjectManifest(env.cwd).promise;
     if (manifestResult.isErr()) {
       logManifestLoadError(manifestResult.error);
       return manifestResult;

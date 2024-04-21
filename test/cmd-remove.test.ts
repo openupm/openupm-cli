@@ -16,7 +16,8 @@ import {
   PackumentNotFoundError,
 } from "../src/common-errors";
 import { spyOnLog } from "./log.mock";
-import {mockService} from "./service.mock";
+import { mockService } from "./service.mock";
+import { LoadProjectManifest } from "../src/io/project-manifest-io";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -29,16 +30,18 @@ const defaultManifest = buildProjectManifest((manifest) =>
 );
 
 function makeDependencies() {
-  const parseEnv= mockService<ParseEnvService>();
+  const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const removeCmd = makeRemoveCmd(parseEnv);
-  return [removeCmd, parseEnv] as const;
+  const loadProjectManifest = mockService<LoadProjectManifest>();
+  mockProjectManifest(loadProjectManifest, defaultManifest);
+
+  const removeCmd = makeRemoveCmd(parseEnv, loadProjectManifest);
+  return [removeCmd, parseEnv, loadProjectManifest] as const;
 }
 
 describe("cmd-remove", () => {
   beforeEach(() => {
-    mockProjectManifest(defaultManifest);
     spyOnSavedManifest();
   });
 
@@ -53,8 +56,8 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if manifest could not be loaded", async () => {
-    mockProjectManifest(null);
-    const [removeCmd] = makeDependencies();
+    const [removeCmd, , loadProjectManifest] = makeDependencies();
+    mockProjectManifest(loadProjectManifest, null);
 
     const result = await removeCmd(somePackage, { _global: {} });
 
@@ -65,8 +68,8 @@ describe("cmd-remove", () => {
 
   it("should notify if manifest could not be loaded", async () => {
     const errorSpy = spyOnLog("error");
-    mockProjectManifest(null);
-    const [removeCmd] = makeDependencies();
+    const [removeCmd, , loadProjectManifest] = makeDependencies();
+    mockProjectManifest(loadProjectManifest, null);
 
     await removeCmd(somePackage, { _global: {} });
 

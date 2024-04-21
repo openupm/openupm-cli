@@ -1,6 +1,6 @@
 import {
+  makeProjectManifestLoader,
   manifestPathFor,
-  tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../src/io/project-manifest-io";
 import {
@@ -31,12 +31,18 @@ describe("project-manifest io", () => {
   });
 
   describe("load", () => {
+    function makeDependencies() {
+      const loadProjectManifest = makeProjectManifestLoader();
+      return [loadProjectManifest] as const;
+    }
+
     it("should fail if file could not be read", async () => {
+      const [loadProjectManifest] = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Err(new IOError()).toAsyncResult());
 
-      const result = await tryLoadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest("/some/path").promise;
 
       expect(result).toBeError((actual) =>
         expect(actual).toBeInstanceOf(FileParseError)
@@ -44,11 +50,12 @@ describe("project-manifest io", () => {
     });
 
     it("should fail if file is not found", async () => {
+      const [loadProjectManifest] = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Err(new NotFoundError("/some/path")).toAsyncResult());
 
-      const result = await tryLoadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest("/some/path").promise;
 
       expect(result).toBeError((actual) =>
         expect(actual).toBeInstanceOf(NotFoundError)
@@ -56,11 +63,12 @@ describe("project-manifest io", () => {
     });
 
     it("should fail if file does not contain json", async () => {
+      const [loadProjectManifest] = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Ok("{} dang, this is not json []").toAsyncResult());
 
-      const result = await tryLoadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest("/some/path").promise;
 
       expect(result).toBeError((actual) =>
         expect(actual).toBeInstanceOf(FileParseError)
@@ -68,13 +76,14 @@ describe("project-manifest io", () => {
     });
 
     it("should load valid manifest", async () => {
+      const [loadProjectManifest] = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(
           Ok(`{ "dependencies": { "com.package.a": "1.0.0"} }`).toAsyncResult()
         );
 
-      const result = await tryLoadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest("/some/path").promise;
 
       expect(result).toBeOk((actual) =>
         expect(actual).toEqual({

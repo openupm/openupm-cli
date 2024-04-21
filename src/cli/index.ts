@@ -25,10 +25,12 @@ import {
 import RegClient from "another-npm-registry-client";
 import { makeParseEnvService } from "../services/parse-env";
 import { makeResolveRemotePackumentService } from "../services/resolve-remote-packument";
+import { makeProjectManifestLoader } from "../io/project-manifest-io";
 
 // Composition root
 
 const regClient = new RegClient({ log });
+const loadProjectManifest = makeProjectManifestLoader();
 
 const parseEnv = makeParseEnvService();
 const fetchPackument = makeFetchPackumentService(regClient);
@@ -45,12 +47,13 @@ const getAllPackuments = makeGetAllPackumentsService();
 const addCmd = makeAddCmd(
   parseEnv,
   resolveRemotePackument,
-  resolveDependencies
+  resolveDependencies,
+  loadProjectManifest
 );
 const loginCmd = makeLoginCmd(parseEnv, authNpmrc, addUser);
 const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
-const removeCmd = makeRemoveCmd(parseEnv);
+const removeCmd = makeRemoveCmd(parseEnv, loadProjectManifest);
 const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument);
 
 // update-notifier
