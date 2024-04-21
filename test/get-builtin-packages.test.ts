@@ -11,7 +11,7 @@ import { makeEditorVersion } from "../src/domain/editor-version";
 
 function makeDependencies() {
   const getBuiltInPackages = makeGetBuiltInPackagesService();
-  return [getBuiltInPackages] as const;
+  return { getBuiltInPackages } as const;
 }
 
 describe("builtin-packages", () => {
@@ -21,7 +21,7 @@ describe("builtin-packages", () => {
       .spyOn(specialPaths, "tryGetEditorInstallPath")
       .mockReturnValue(Err(expected));
     const version = makeEditorVersion(2022, 1, 2, "f", 1);
-    const [getBuiltInPackages] = makeDependencies();
+    const { getBuiltInPackages } = makeDependencies();
 
     const result = await getBuiltInPackages(version).promise;
 
@@ -31,7 +31,7 @@ describe("builtin-packages", () => {
   it("should fail if editor is not installed", async () => {
     const version = makeEditorVersion(2022, 1, 2, "f", 1);
     const expected = new EditorNotInstalledError(version);
-    const [getBuiltInPackages] = makeDependencies();
+    const { getBuiltInPackages } = makeDependencies();
     jest
       .spyOn(fileIo, "tryGetDirectoriesIn")
       .mockReturnValue(Err(new NotFoundError("")).toAsyncResult());
@@ -44,7 +44,7 @@ describe("builtin-packages", () => {
   it("should find package names", async () => {
     const version = makeEditorVersion(2022, 1, 2, "f", 1);
     const expected = ["com.unity.ugui", "com.unity.modules.uielements"];
-    const [getBuiltInPackages] = makeDependencies();
+    const { getBuiltInPackages } = makeDependencies();
     jest
       .spyOn(specialPaths, "tryGetEditorInstallPath")
       .mockReturnValue(Ok("/some/path"));

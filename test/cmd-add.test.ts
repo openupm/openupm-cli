@@ -98,13 +98,13 @@ function makeDependencies() {
     resolveDependencies,
     loadProjectManifest
   );
-  return [
+  return {
     addCmd,
     parseEnv,
     resolveRemotePackument,
     resolveDependencies,
     loadProjectManifest,
-  ] as const;
+  } as const;
 }
 
 describe("cmd-add", () => {
@@ -114,7 +114,7 @@ describe("cmd-add", () => {
 
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    const [addCmd, parseEnv] = makeDependencies();
+    const { addCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
     const result = await addCmd(somePackage, { _global: {} });
@@ -123,10 +123,10 @@ describe("cmd-add", () => {
   });
 
   it("should fail if manifest could not be loaded", async () => {
-    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
-    const result = await viewCmd(somePackage, { _global: {} });
+    const result = await addCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual) =>
       expect(actual).toBeInstanceOf(NotFoundError)
@@ -135,19 +135,19 @@ describe("cmd-add", () => {
 
   it("should notify if manifest could not be loaded", async () => {
     const errorSpy = spyOnLog("error");
-    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
-    await viewCmd(somePackage, { _global: {} });
+    await addCmd(somePackage, { _global: {} });
 
     expect(errorSpy).toHaveLogLike("manifest", "");
   });
 
   it("should fail if package could not be resolved", async () => {
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument);
 
-    const result = await viewCmd(somePackage, { _global: {} });
+    const result = await addCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((error) =>
       expect(error).toBeInstanceOf(PackumentNotFoundError)
@@ -156,10 +156,10 @@ describe("cmd-add", () => {
 
   it("should notify if package could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument);
 
-    await viewCmd(somePackage, { _global: {} });
+    await addCmd(somePackage, { _global: {} });
 
     expect(errorSpy).toHaveLogLike("404", "not found");
   });
@@ -178,9 +178,9 @@ describe("cmd-add", () => {
   ---
       
   it("should fail if package version could not be resolved", async () => {
-    const [viewCmd] = makeDependencies();
+    const {addCmd} = makeDependencies();
 
-    const result = await viewCmd(makePackageReference(somePackage, "2.0.0"), {
+    const result = await addCmd(makePackageReference(somePackage, "2.0.0"), {
       _global: {},
     });
 
@@ -191,9 +191,9 @@ describe("cmd-add", () => {
 
   it("should notify if package version could not be resolved", async () => {
     const warnSpy = spyOnLog("warn");
-    const [viewCmd] = makeDependencies();
+    const {addCmd} = makeDependencies();
 
-    await viewCmd(makePackageReference(somePackage, "2.0.0"), {
+    await addCmd(makePackageReference(somePackage, "2.0.0"), {
       _global: {},
     });
 
@@ -203,12 +203,12 @@ describe("cmd-add", () => {
 
   it("should notify if editor-version is unknown", async () => {
     const warnSpy = spyOnLog("warn");
-    const [viewCmd, parseEnv] = makeDependencies();
+    const { addCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(
       Ok({ ...defaultEnv, editorVersion: "bad version" })
     );
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -217,13 +217,13 @@ describe("cmd-add", () => {
 
   it("should notify if package editor version is not valid", async () => {
     const warnSpy = spyOnLog("warn");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       badEditorPackument,
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -232,13 +232,13 @@ describe("cmd-add", () => {
 
   it("should suggest running with force if package editor version is not valid", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       badEditorPackument,
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -246,13 +246,13 @@ describe("cmd-add", () => {
   });
 
   it("should fail if package editor version is not valid and not running with force", async () => {
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       badEditorPackument,
     ]);
 
-    const result = await viewCmd(somePackage, {
+    const result = await addCmd(somePackage, {
       _global: {},
     });
 
@@ -262,13 +262,13 @@ describe("cmd-add", () => {
   });
 
   it("should add package with invalid editor version when running with force", async () => {
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       badEditorPackument,
     ]);
 
-    const result = await viewCmd(somePackage, {
+    const result = await addCmd(somePackage, {
       _global: {},
       force: true,
     });
@@ -278,13 +278,13 @@ describe("cmd-add", () => {
 
   it("should notify if package is incompatible with editor", async () => {
     const warnSpy = spyOnLog("warn");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       incompatiblePackument,
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -293,13 +293,13 @@ describe("cmd-add", () => {
 
   it("should suggest to run with force if package is incompatible with editor", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       incompatiblePackument,
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -307,13 +307,13 @@ describe("cmd-add", () => {
   });
 
   it("should fail if package is incompatible with editor and not running with force", async () => {
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       incompatiblePackument,
     ]);
 
-    const result = await viewCmd(somePackage, {
+    const result = await addCmd(somePackage, {
       _global: {},
     });
 
@@ -323,13 +323,13 @@ describe("cmd-add", () => {
   });
 
   it("should add package with incompatible with editor when running with force", async () => {
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       incompatiblePackument,
     ]);
 
-    const result = await viewCmd(somePackage, {
+    const result = await addCmd(somePackage, {
       _global: {},
       force: true,
     });
@@ -339,9 +339,9 @@ describe("cmd-add", () => {
 
   it("should notify of fetching dependencies", async () => {
     const verboseSpy = spyOnLog("verbose");
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -350,13 +350,13 @@ describe("cmd-add", () => {
 
   it("should not fetch dependencies for upstream packages", async () => {
     const verboseSpy = spyOnLog("verbose");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { addCmd, resolveRemotePackument } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       unityRegistryUrl,
       somePackument,
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -365,7 +365,7 @@ describe("cmd-add", () => {
 
   it("should suggest to install missing dependency version manually", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd, , , resolveDependencies] = makeDependencies();
+    const { addCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -377,7 +377,7 @@ describe("cmd-add", () => {
       ],
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -386,7 +386,7 @@ describe("cmd-add", () => {
 
   it("should suggest to run with force if dependency could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    const [viewCmd, , , resolveDependencies] = makeDependencies();
+    const { addCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -398,7 +398,7 @@ describe("cmd-add", () => {
       ],
     ]);
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -409,7 +409,7 @@ describe("cmd-add", () => {
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
-    const [viewCmd, , , resolveDependencies] = makeDependencies();
+    const { addCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -421,7 +421,7 @@ describe("cmd-add", () => {
       ],
     ]);
 
-    const result = await viewCmd(somePackage, {
+    const result = await addCmd(somePackage, {
       _global: {},
     });
 
@@ -431,7 +431,7 @@ describe("cmd-add", () => {
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
-    const [viewCmd, , , resolveDependencies] = makeDependencies();
+    const { addCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -443,7 +443,7 @@ describe("cmd-add", () => {
       ],
     ]);
 
-    const result = await viewCmd(somePackage, {
+    const result = await addCmd(somePackage, {
       _global: {},
       force: true,
     });
@@ -453,9 +453,9 @@ describe("cmd-add", () => {
 
   it("should add package", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -469,9 +469,9 @@ describe("cmd-add", () => {
 
   it("should notify if package was added", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -480,7 +480,7 @@ describe("cmd-add", () => {
 
   it("should replace package", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -488,7 +488,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -502,7 +502,7 @@ describe("cmd-add", () => {
 
   it("should notify if package was replaced", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -510,7 +510,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -519,7 +519,7 @@ describe("cmd-add", () => {
 
   it("should notify if package is already in manifest", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -527,7 +527,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -536,9 +536,9 @@ describe("cmd-add", () => {
 
   it("should add scope for package", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -558,9 +558,9 @@ describe("cmd-add", () => {
 
   it("should add package to testables when running with test option", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
       test: true,
     });
@@ -575,7 +575,7 @@ describe("cmd-add", () => {
 
   it("should not save if nothing changed", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [viewCmd, , , , loadProjectManifest] = makeDependencies();
+    const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -585,7 +585,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -594,10 +594,10 @@ describe("cmd-add", () => {
 
   it("should be atomic", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
     // The second package can not be added
-    await viewCmd([somePackage, makeDomainName("com.unknown.package")], {
+    await addCmd([somePackage, makeDomainName("com.unknown.package")], {
       _global: {},
     });
 
@@ -608,9 +608,9 @@ describe("cmd-add", () => {
 
   it("should suggest to open Unity after save", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, {
+    await addCmd(somePackage, {
       _global: {},
     });
 
@@ -620,9 +620,9 @@ describe("cmd-add", () => {
   it("should fail if manifest could not be saved", async () => {
     const expected = new IOError();
     spyOnSavedManifest().mockReturnValue(Err(expected).toAsyncResult());
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    const result = await viewCmd(somePackage, { _global: {} });
+    const result = await addCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual) => expect(actual).toEqual(expected));
   });
@@ -630,9 +630,9 @@ describe("cmd-add", () => {
   it("should notify if manifest could not be saved", async () => {
     const errorSpy = spyOnLog("error");
     spyOnSavedManifest().mockReturnValue(Err(new IOError()).toAsyncResult());
-    const [viewCmd] = makeDependencies();
+    const { addCmd } = makeDependencies();
 
-    await viewCmd(somePackage, { _global: {} });
+    await addCmd(somePackage, { _global: {} });
 
     expect(errorSpy).toHaveLogLike("manifest", "");
   });

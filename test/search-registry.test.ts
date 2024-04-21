@@ -14,7 +14,7 @@ const exampleRegistry: Registry = {
 
 function makeDependencies() {
   const searchRegistry = makeSearchRegistryService();
-  return [searchRegistry] as const;
+  return { searchRegistry } as const;
 }
 
 describe("search service", () => {
@@ -25,7 +25,7 @@ describe("search service", () => {
       statusCode: 500,
     } as HttpErrorBase;
     jest.mocked(npmSearch).mockRejectedValue(expected);
-    const [searchRegistry] = makeDependencies();
+    const { searchRegistry } = makeDependencies();
 
     const result = await searchRegistry(exampleRegistry, "wow").promise;
 
@@ -35,7 +35,7 @@ describe("search service", () => {
   it("should succeed for ok response", async () => {
     const expected = [{ name: "wow" } as search.Result];
     jest.mocked(npmSearch).mockResolvedValue(expected);
-    const [searchRegistry] = makeDependencies();
+    const { searchRegistry } = makeDependencies();
 
     const result = await searchRegistry(exampleRegistry, "wow").promise;
 

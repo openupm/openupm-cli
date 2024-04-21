@@ -66,13 +66,13 @@ function makeDependencies() {
   );
 
   const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument);
-  return [viewCmd, parseEnv, resolveRemotePackument] as const;
+  return { viewCmd, parseEnv, resolveRemotePackument } as const;
 }
 
 describe("cmd-view", () => {
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    const [viewCmd, parseEnv] = makeDependencies();
+    const { viewCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
     const result = await viewCmd(somePackage, { _global: {} });
@@ -81,7 +81,7 @@ describe("cmd-view", () => {
   });
 
   it("should fail if package version was specified", async () => {
-    const [viewCmd] = makeDependencies();
+    const { viewCmd } = makeDependencies();
 
     const result = await viewCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
@@ -95,7 +95,7 @@ describe("cmd-view", () => {
 
   it("should notify if package version was specified", async () => {
     const warnSpy = spyOnLog("warn");
-    const [viewCmd] = makeDependencies();
+    const { viewCmd } = makeDependencies();
 
     await viewCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
@@ -107,7 +107,7 @@ describe("cmd-view", () => {
 
   it("should fail if package could not be resolved", async () => {
     const expected = new PackumentNotFoundError();
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { viewCmd, resolveRemotePackument } = makeDependencies();
     resolveRemotePackument.mockReturnValue(Err(expected).toAsyncResult());
 
     const result = await viewCmd(somePackage, { _global: {} });
@@ -117,7 +117,7 @@ describe("cmd-view", () => {
 
   it("should notify if package could not be resolved", async () => {
     const errorSpy = spyOnLog("error");
-    const [viewCmd, , resolveRemotePackument] = makeDependencies();
+    const { viewCmd, resolveRemotePackument } = makeDependencies();
     resolveRemotePackument.mockReturnValue(
       Err(new PackumentNotFoundError()).toAsyncResult()
     );
@@ -129,7 +129,7 @@ describe("cmd-view", () => {
 
   it("should print package information", async () => {
     const consoleSpy = jest.spyOn(console, "log");
-    const [viewCmd] = makeDependencies();
+    const { viewCmd } = makeDependencies();
 
     await viewCmd(somePackage, { _global: {} });
 

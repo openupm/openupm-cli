@@ -33,11 +33,11 @@ describe("project-manifest io", () => {
   describe("load", () => {
     function makeDependencies() {
       const loadProjectManifest = makeProjectManifestLoader();
-      return [loadProjectManifest] as const;
+      return { loadProjectManifest } as const;
     }
 
     it("should fail if file could not be read", async () => {
-      const [loadProjectManifest] = makeDependencies();
+      const { loadProjectManifest } = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Err(new IOError()).toAsyncResult());
@@ -50,7 +50,7 @@ describe("project-manifest io", () => {
     });
 
     it("should fail if file is not found", async () => {
-      const [loadProjectManifest] = makeDependencies();
+      const { loadProjectManifest } = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Err(new NotFoundError("/some/path")).toAsyncResult());
@@ -63,7 +63,7 @@ describe("project-manifest io", () => {
     });
 
     it("should fail if file does not contain json", async () => {
-      const [loadProjectManifest] = makeDependencies();
+      const { loadProjectManifest } = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(Ok("{} dang, this is not json []").toAsyncResult());
@@ -76,7 +76,7 @@ describe("project-manifest io", () => {
     });
 
     it("should load valid manifest", async () => {
-      const [loadProjectManifest] = makeDependencies();
+      const { loadProjectManifest } = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
         .mockReturnValue(

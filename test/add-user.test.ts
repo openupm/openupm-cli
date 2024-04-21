@@ -15,13 +15,13 @@ function makeDependencies() {
   };
 
   const addUser = makeAddUserService(registryClient);
-  return [addUser, registryClient] as const;
+  return { addUser, registryClient } as const;
 }
 
 describe("add-user-service", () => {
   it("should give token for valid user", async () => {
     const expected = "some token";
-    const [addUser, registryClient] = makeDependencies();
+    const { addUser, registryClient } = makeDependencies();
     mockRegClientAddUserResult(
       registryClient,
       null,
@@ -43,7 +43,7 @@ describe("add-user-service", () => {
   });
 
   it("should fail for not-ok response", async () => {
-    const [addUser, registryClient] = makeDependencies();
+    const { addUser, registryClient } = makeDependencies();
     mockRegClientAddUserResult(
       registryClient,
       null,
@@ -69,7 +69,7 @@ describe("add-user-service", () => {
   });
 
   it("should fail for error response", async () => {
-    const [addUser, registryClient] = makeDependencies();
+    const { addUser, registryClient } = makeDependencies();
     mockRegClientAddUserResult(registryClient, {} as HttpErrorBase, null, {
       statusMessage: "bad user",
       statusCode: 401,

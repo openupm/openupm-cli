@@ -22,14 +22,14 @@ function makeDependencies() {
   };
 
   const fetchPackument = makeFetchPackumentService(regClient);
-  return [fetchPackument, regClient] as const;
+  return { fetchPackument, regClient } as const;
 }
 
 describe("fetch packument service", () => {
   it("should get existing packument", async () => {
     // TODO: Use prop test
     const packument = buildPackument(packageA);
-    const [fetchPackument, regClient] = makeDependencies();
+    const { fetchPackument, regClient } = makeDependencies();
     mockRegClientGetResult(regClient, null, packument);
 
     const result = await fetchPackument(exampleRegistry, packageA).promise;
@@ -38,7 +38,7 @@ describe("fetch packument service", () => {
   });
 
   it("should not find unknown packument", async () => {
-    const [fetchPackument, regClient] = makeDependencies();
+    const { fetchPackument, regClient } = makeDependencies();
     mockRegClientGetResult(
       regClient,
       {
@@ -55,7 +55,7 @@ describe("fetch packument service", () => {
   });
 
   it("should fail for errors", async () => {
-    const [fetchPackument, regClient] = makeDependencies();
+    const { fetchPackument, regClient } = makeDependencies();
     mockRegClientGetResult(
       regClient,
       {

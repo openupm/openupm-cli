@@ -37,7 +37,7 @@ function makeDependencies() {
   mockProjectManifest(loadProjectManifest, defaultManifest);
 
   const removeCmd = makeRemoveCmd(parseEnv, loadProjectManifest);
-  return [removeCmd, parseEnv, loadProjectManifest] as const;
+  return { removeCmd, parseEnv, loadProjectManifest } as const;
 }
 
 describe("cmd-remove", () => {
@@ -47,7 +47,7 @@ describe("cmd-remove", () => {
 
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    const [removeCmd, parseEnv] = makeDependencies();
+    const { removeCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
     const result = await removeCmd(somePackage, { _global: {} });
@@ -56,7 +56,7 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if manifest could not be loaded", async () => {
-    const [removeCmd, , loadProjectManifest] = makeDependencies();
+    const { removeCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
     const result = await removeCmd(somePackage, { _global: {} });
@@ -68,7 +68,7 @@ describe("cmd-remove", () => {
 
   it("should notify if manifest could not be loaded", async () => {
     const errorSpy = spyOnLog("error");
-    const [removeCmd, , loadProjectManifest] = makeDependencies();
+    const { removeCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
     await removeCmd(somePackage, { _global: {} });
@@ -77,7 +77,7 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if package version was specified", async () => {
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     const result = await removeCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
@@ -91,7 +91,7 @@ describe("cmd-remove", () => {
 
   it("should notify if package version was specified", async () => {
     const warnSpy = spyOnLog("warn");
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
@@ -102,7 +102,7 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if package is not in manifest", async () => {
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     const result = await removeCmd(otherPackage, { _global: {} });
 
@@ -113,7 +113,7 @@ describe("cmd-remove", () => {
 
   it("should notify if package is not in manifest", async () => {
     const errorSpy = spyOnLog("error");
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(otherPackage, { _global: {} });
 
@@ -122,7 +122,7 @@ describe("cmd-remove", () => {
 
   it("should notify of removed package", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
@@ -131,7 +131,7 @@ describe("cmd-remove", () => {
 
   it("should be atomic for multiple packages", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     // One of these packages can not be removed, so none should be removed.
     await removeCmd([somePackage, otherPackage], { _global: {} });
@@ -141,7 +141,7 @@ describe("cmd-remove", () => {
 
   it("should remove package from manifest", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
@@ -157,7 +157,7 @@ describe("cmd-remove", () => {
 
   it("should remove scope from manifest", async () => {
     const saveSpy = spyOnSavedManifest();
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
@@ -172,7 +172,7 @@ describe("cmd-remove", () => {
   it("should fail if manifest could not be saved", async () => {
     const expected = new IOError();
     spyOnSavedManifest().mockReturnValue(Err(expected).toAsyncResult());
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     const result = await removeCmd(somePackage, { _global: {} });
 
@@ -182,7 +182,7 @@ describe("cmd-remove", () => {
   it("should notify if manifest could not be saved", async () => {
     const errorSpy = spyOnLog("error");
     spyOnSavedManifest().mockReturnValue(Err(new IOError()).toAsyncResult());
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
@@ -191,7 +191,7 @@ describe("cmd-remove", () => {
 
   it("should suggest to open Unity after save", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [removeCmd] = makeDependencies();
+    const { removeCmd } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 

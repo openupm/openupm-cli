@@ -47,13 +47,13 @@ function makeDependencies() {
   ]);
 
   const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
-  return [depsCmd, parseEnv, resolveDependencies] as const;
+  return { depsCmd, parseEnv, resolveDependencies } as const;
 }
 
 describe("cmd-deps", () => {
   it("should fail if env could not be parsed", async () => {
     const expected = new IOError();
-    const [depsCmd, parseEnv] = makeDependencies();
+    const { depsCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
     const result = await depsCmd(somePackage, { _global: {} });
@@ -62,7 +62,7 @@ describe("cmd-deps", () => {
   });
 
   it("should fail if package-reference has url-version", async () => {
-    const [depsCmd] = makeDependencies();
+    const { depsCmd } = makeDependencies();
 
     const operation = depsCmd(
       makePackageReference(somePackage, "https://some.registry.com"),
@@ -78,7 +78,7 @@ describe("cmd-deps", () => {
 
   it("should notify of shallow operation start", async () => {
     const verboseSpy = spyOnLog("verbose");
-    const [depsCmd] = makeDependencies();
+    const { depsCmd } = makeDependencies();
 
     await depsCmd(somePackage, {
       _global: {},
@@ -89,7 +89,7 @@ describe("cmd-deps", () => {
 
   it("should notify of deep operation start", async () => {
     const verboseSpy = spyOnLog("verbose");
-    const [depsCmd] = makeDependencies();
+    const { depsCmd } = makeDependencies();
 
     await depsCmd(somePackage, {
       _global: {},
@@ -101,7 +101,7 @@ describe("cmd-deps", () => {
 
   it("should log valid dependencies", async () => {
     const noticeSpy = spyOnLog("notice");
-    const [depsCmd] = makeDependencies();
+    const { depsCmd } = makeDependencies();
 
     await depsCmd(somePackage, {
       _global: {},
@@ -112,7 +112,7 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency", async () => {
     const warnSpy = spyOnLog("warn");
-    const [depsCmd, , resolveDependencies] = makeDependencies();
+    const { depsCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -133,7 +133,7 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency version", async () => {
     const warnSpy = spyOnLog("warn");
-    const [depsCmd, , resolveDependencies] = makeDependencies();
+    const { depsCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
