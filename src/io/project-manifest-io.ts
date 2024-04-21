@@ -13,8 +13,6 @@ import {
 } from "./file-io";
 import { tryParseJson } from "../utils/data-parsing";
 
-export type ManifestLoadError = NotFoundError | FileParseError;
-
 export type ManifestSaveError = IOError;
 
 /**
@@ -26,25 +24,34 @@ export function manifestPathFor(projectPath: string): string {
   return path.join(projectPath, "Packages/manifest.json");
 }
 
+export type ManifestLoadError = NotFoundError | FileParseError;
+
 /**
- * Attempts to load the manifest for a Unity project.
- * @param projectPath The path to the root of the project.
+ * Function for loading the project manifest for a Unity project.
+ * @param projectPath The path to the project's directory.
  */
-export const tryLoadProjectManifest = function (
+export type LoadProjectManifest = (
   projectPath: string
-): AsyncResult<UnityProjectManifest, ManifestLoadError> {
-  const manifestPath = manifestPathFor(projectPath);
-  return (
-    tryReadTextFromFile(manifestPath)
-      .andThen(tryParseJson)
-      // TODO: Actually validate the json structure
-      .map((json) => json as unknown as UnityProjectManifest)
-      .mapErr((error) => {
-        if (error instanceof NotFoundError) return error;
-        return new FileParseError(manifestPath, "Project-manifest");
-      })
-  );
-};
+) => AsyncResult<UnityProjectManifest, ManifestLoadError>;
+
+/**
+ * Makes a {@link LoadProjectManifest} function.
+ */
+export function makeProjectManifestLoader(): LoadProjectManifest {
+  return (projectPath) => {
+    const manifestPath = manifestPathFor(projectPath);
+    return (
+      tryReadTextFromFile(manifestPath)
+        .andThen(tryParseJson)
+        // TODO: Actually validate the json structure
+        .map((json) => json as unknown as UnityProjectManifest)
+        .mapErr((error) => {
+          if (error instanceof NotFoundError) return error;
+          return new FileParseError(manifestPath, "Project-manifest");
+        })
+    );
+  };
+}
 
 /**
  * Saves a Unity project manifest.

@@ -1,9 +1,9 @@
 import log from "./logger";
 import { isPackageUrl, PackageUrl } from "../domain/package-url";
 import {
+  LoadProjectManifest,
   ManifestLoadError,
   ManifestSaveError,
-  tryLoadProjectManifest,
   trySaveProjectManifest,
 } from "../io/project-manifest-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
@@ -98,7 +98,8 @@ type AddCmd = (
 export function makeAddCmd(
   parseEnv: ParseEnvService,
   resolveRemovePackument: ResolveRemotePackumentService,
-  resolveDependencies: ResolveDependenciesService
+  resolveDependencies: ResolveDependenciesService,
+  loadProjectManifest: LoadProjectManifest
 ): AddCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -300,7 +301,7 @@ export function makeAddCmd(
     };
 
     // load manifest
-    const loadResult = await tryLoadProjectManifest(env.cwd).promise;
+    const loadResult = await loadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
       logManifestLoadError(loadResult.error);
       return loadResult;
