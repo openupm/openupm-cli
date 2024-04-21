@@ -1,7 +1,7 @@
 import log from "./logger";
 import {
   ManifestLoadError,
-  ManifestSaveError,
+  ManifestWriteError,
 } from "../io/project-manifest-io";
 import { NotFoundError } from "../io/file-io";
 
@@ -20,10 +20,10 @@ export function logManifestLoadError(error: ManifestLoadError) {
 }
 
 /**
- * Logs a {@link ManifestSaveError} to the console.
+ * Logs a {@link ManifestWriteError} to the console.
  * @param error The error to log.
  */
-export function logManifestSaveError(error: ManifestSaveError) {
+export function logManifestSaveError(error: ManifestWriteError) {
   const prefix = "manifest";
   log.error(prefix, "can not write manifest json file");
   log.error(prefix, error.message);

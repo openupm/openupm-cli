@@ -76,7 +76,9 @@ export function removeScope(
  * the registry's hostname.
  * @param registryUrl The registry-url.
  */
-export function makeEmptyScopedRegistryFor(registryUrl: RegistryUrl): ScopedRegistry {
+export function makeEmptyScopedRegistryFor(
+  registryUrl: RegistryUrl
+): ScopedRegistry {
   const name = new URL(registryUrl).hostname;
   return makeScopedRegistry(name, registryUrl);
 }
