@@ -1,4 +1,4 @@
-import { tryParseJson } from "../src/utils/data-parsing";
+import { StringFormatError, tryParseJson } from "../src/utils/data-parsing";
 
 describe("data-parsing", () => {
   describe("json", () => {
@@ -17,7 +17,7 @@ describe("data-parsing", () => {
       const result = tryParseJson(json);
 
       expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(SyntaxError)
+        expect(error).toBeInstanceOf(StringFormatError)
       );
     });
   });

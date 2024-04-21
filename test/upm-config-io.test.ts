@@ -6,7 +6,7 @@ import {
 import { tryGetHomePath } from "../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError, tryReadTextFromFile } from "../src/io/file-io";
-import { tryParseToml } from "../src/utils/data-parsing";
+import { StringFormatError, tryParseToml } from "../src/utils/data-parsing";
 
 jest.mock("../src/io/file-io");
 jest.mock("../src/io/special-paths");
@@ -74,7 +74,7 @@ describe("upm-config-io", () => {
 
     it("should fail if file has bad toml content", async () => {
       const path = "/home/user";
-      const expected = new Error("Bad toml");
+      const expected = new StringFormatError("Toml");
       jest.mocked(tryParseToml).mockReturnValue(Err(expected));
 
       const result = await tryLoadUpmConfig(path).promise;
