@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/openupm/openupm-cli/compare/1.22.2...1.23.0) (2024-04-22)
+
+
+### Features
+
+* deduplicate log ([#275](https://github.com/openupm/openupm-cli/issues/275)) ([31e7f42](https://github.com/openupm/openupm-cli/commit/31e7f42a65f3ca58e493e1f1529516b7972f349c))
+
 ## [1.22.2](https://github.com/openupm/openupm-cli/compare/1.22.1...1.22.2) (2024-04-20)
 
 
