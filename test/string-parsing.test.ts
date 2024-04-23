@@ -16,7 +16,7 @@ describe("string-parsing", () => {
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
-    it("should notify of parse error", () => {
+    it("should fail for bad data", () => {
       const json = "{ invalid json ";
 
       const result = tryParseJson(json);
