@@ -3,6 +3,7 @@ import { NotFoundError } from "../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { FileParseError } from "../src/common-errors";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
+import { StringFormatError } from "../src/utils/data-parsing";
 
 describe("project-version-io", () => {
   describe("load", () => {
@@ -20,12 +21,12 @@ describe("project-version-io", () => {
     it("should fail if file does not contain valid yaml", async () => {
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(Ok("this is not valid yaml").toAsyncResult());
+        .mockReturnValue(Ok("{ this is not valid yaml").toAsyncResult());
 
       const result = await tryLoadProjectVersion("/some/path").promise;
 
       expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FileParseError)
+        expect(actual).toBeInstanceOf(StringFormatError)
       );
     });
 
