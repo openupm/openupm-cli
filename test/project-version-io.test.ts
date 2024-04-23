@@ -3,7 +3,7 @@ import { NotFoundError } from "../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { FileParseError } from "../src/common-errors";
 import { tryLoadProjectVersion } from "../src/io/project-version-io";
-import { StringFormatError } from "../src/utils/data-parsing";
+import { StringFormatError } from "../src/utils/string-parsing";
 
 describe("project-version-io", () => {
   describe("load", () => {

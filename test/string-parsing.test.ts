@@ -2,10 +2,10 @@ import {
   StringFormatError,
   tryParseJson,
   tryParseYaml,
-} from "../src/utils/data-parsing";
+} from "../src/utils/string-parsing";
 import yaml from "yaml";
 
-describe("data-parsing", () => {
+describe("string-parsing", () => {
   describe("json", () => {
     it("should round-trip valid json", () => {
       const expected = { test: 123 };

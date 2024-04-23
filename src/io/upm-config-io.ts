@@ -13,7 +13,7 @@ import {
 } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetHomePath } from "./special-paths";
-import { StringFormatError, tryParseToml } from "../utils/data-parsing";
+import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wls";
 import { ChildProcessError } from "../utils/process";
 

@@ -11,7 +11,7 @@ import {
   tryReadTextFromFile,
   tryWriteTextToFile,
 } from "./file-io";
-import { tryParseJson } from "../utils/data-parsing";
+import { tryParseJson } from "../utils/string-parsing";
 
 /**
  * Determines the path to the package manifest based on the project
