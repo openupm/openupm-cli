@@ -1,9 +1,11 @@
 import {
   StringFormatError,
   tryParseJson,
+  tryParseToml,
   tryParseYaml,
 } from "../src/utils/string-parsing";
 import yaml from "yaml";
+import TOML from "@iarna/toml";
 
 describe("string-parsing", () => {
   describe("json", () => {
@@ -27,7 +29,26 @@ describe("string-parsing", () => {
     });
   });
 
-  // TODO: Add toml tests
+  describe("toml", () => {
+    it("should round-trip toml", () => {
+      const expected = { test: 123 };
+      const toml = TOML.stringify(expected);
+
+      const result = tryParseToml(toml);
+
+      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    });
+
+    it("should fail for bad data", () => {
+      const toml = "{ invalid toml ";
+
+      const result = tryParseToml(toml);
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(StringFormatError)
+      );
+    });
+  });
 
   describe("yaml", () => {
     it("should round-trip valid yaml", () => {
