@@ -27,12 +27,14 @@ export function logManifestLoadError(error: ManifestLoadError) {
         ? `"${error.cause.cause.toString()}"`
         : "unknown";
     log.verbose(prefix, `The exact error is ${causeMessage}`);
-  } else
+  } else {
     log.error(
       prefix,
-      `your project manifests content does not seem to be valid json.
-      The exact error is "${error.cause.cause.toString()}".`
+      `your project manifests content does not seem to be valid json.`
     );
+    const causeMessage = error.cause.cause.toString();
+    log.verbose(prefix, `The exact error is "${causeMessage}".`);
+  }
 }
 
 /**
