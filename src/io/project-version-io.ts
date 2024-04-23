@@ -1,11 +1,13 @@
 import path from "path";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import yaml from "yaml";
+import { AsyncResult, Err, Ok } from "ts-results-es";
 import { FileParseError } from "../common-errors";
 import { FileReadError, tryReadTextFromFile } from "./file-io";
-import { assertIsError } from "../utils/error-type-guards";
+import { StringFormatError, tryParseYaml } from "../utils/data-parsing";
 
-export type ProjectVersionLoadError = FileReadError | FileParseError;
+export type ProjectVersionLoadError =
+  | FileReadError
+  | StringFormatError
+  | FileParseError;
 
 function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
@@ -21,12 +23,7 @@ export function tryLoadProjectVersion(
   const filePath = projectVersionTxtPathFor(projectDirPath);
 
   return tryReadTextFromFile(filePath)
-    .andThen((text) =>
-      Result.wrap(() => yaml.parse(text) as unknown).mapErr((error) => {
-        assertIsError(error);
-        return new FileParseError(filePath, "ProjectVersion.txt", error);
-      })
-    )
+    .andThen(tryParseYaml)
     .andThen((content) => {
       if (
         !(
