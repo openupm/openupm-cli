@@ -3,7 +3,6 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import path from "path";
-import { FileParseError } from "../common-errors";
 import { AsyncResult } from "ts-results-es";
 import {
   IOError,
@@ -11,7 +10,8 @@ import {
   tryReadTextFromFile,
   tryWriteTextToFile,
 } from "./file-io";
-import { tryParseJson } from "../utils/string-parsing";
+import { StringFormatError, tryParseJson } from "../utils/string-parsing";
+import { CustomError } from "ts-custom-error";
 
 /**
  * Determines the path to the package manifest based on the project
@@ -25,7 +25,23 @@ export function manifestPathFor(projectPath: string): string {
 /**
  * Error which may occur when loading a project manifest.
  */
-export type ManifestLoadError = NotFoundError | FileParseError;
+export class ManifestLoadError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "ManifestLoadError";
+
+  public constructor(
+    /**
+     * The manifest's path.
+     */
+    public readonly path: string,
+    /**
+     * The error that caused the load to fail.
+     */
+    public readonly cause: NotFoundError | IOError | StringFormatError
+  ) {
+    super();
+  }
+}
 
 /**
  * Function for loading the project manifest for a Unity project.
@@ -46,10 +62,7 @@ export function makeProjectManifestLoader(): LoadProjectManifest {
         .andThen(tryParseJson)
         // TODO: Actually validate the json structure
         .map((json) => json as unknown as UnityProjectManifest)
-        .mapErr((error) => {
-          if (error instanceof NotFoundError) return error;
-          return new FileParseError(manifestPath, "Project-manifest");
-        })
+        .mapErr((error) => new ManifestLoadError(manifestPath, error))
     );
   };
 }

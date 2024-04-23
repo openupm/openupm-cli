@@ -1,6 +1,7 @@
 import {
   makeProjectManifestLoader,
   makeProjectManifestWriter,
+  ManifestLoadError,
   manifestPathFor,
 } from "../src/io/project-manifest-io";
 import {
@@ -8,7 +9,6 @@ import {
   mapScopedRegistry,
 } from "../src/domain/project-manifest";
 import path from "path";
-import { FileParseError } from "../src/common-errors";
 import * as fileIoModule from "../src/io/file-io";
 import { IOError, NotFoundError } from "../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
@@ -16,6 +16,7 @@ import { buildProjectManifest } from "./data-project-manifest";
 import { DomainName } from "../src/domain/domain-name";
 import { removeScope } from "../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "./data-registry";
+import { StringFormatError } from "../src/utils/string-parsing";
 
 describe("project-manifest io", () => {
   describe("path", () => {
@@ -38,27 +39,29 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest } = makeDependencies();
+      const expected = new IOError();
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(Err(new IOError()).toAsyncResult());
+        .mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await loadProjectManifest("/some/path").promise;
 
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FileParseError)
+      expect(result).toBeError((actual: ManifestLoadError) =>
+        expect(actual.cause).toEqual(expected)
       );
     });
 
     it("should fail if file is not found", async () => {
       const { loadProjectManifest } = makeDependencies();
+      const expected = new NotFoundError("/some/path");
       jest
         .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(Err(new NotFoundError("/some/path")).toAsyncResult());
+        .mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await loadProjectManifest("/some/path").promise;
 
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(NotFoundError)
+      expect(result).toBeError((actual: ManifestLoadError) =>
+        expect(actual.cause).toEqual(expected)
       );
     });
 
@@ -70,8 +73,8 @@ describe("project-manifest io", () => {
 
       const result = await loadProjectManifest("/some/path").promise;
 
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FileParseError)
+      expect(result).toBeError((actual: ManifestLoadError) =>
+        expect(actual.cause).toBeInstanceOf(StringFormatError)
       );
     });
 

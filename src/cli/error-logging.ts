@@ -3,7 +3,7 @@ import {
   ManifestLoadError,
   ManifestWriteError,
 } from "../io/project-manifest-io";
-import { NotFoundError } from "../io/file-io";
+import { IOError, NotFoundError } from "../io/file-io";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
@@ -11,12 +11,30 @@ import { NotFoundError } from "../io/file-io";
  */
 export function logManifestLoadError(error: ManifestLoadError) {
   const prefix = "manifest";
-  if (error instanceof NotFoundError)
-    log.error(prefix, `manifest at ${error.path} does not exist`);
-  else {
-    log.error(prefix, `failed to parse manifest at ${error.path}`);
-    if (error.cause !== undefined) log.error(prefix, error.cause.message);
-  }
+
+  if (error.cause instanceof NotFoundError)
+    log.error(
+      prefix,
+      `there is no project manifest at ${error.path}. Are you in the correct working directory?`
+    );
+  else if (error.cause instanceof IOError)
+    log.error(
+      prefix,
+      `failed to load project manifest at ${
+        error.path
+      } due to a file-system error.
+    The exact error is ${
+      error.cause.cause !== undefined
+        ? `"${error.cause.cause.message}"`
+        : "unknown"
+    }`
+    );
+  else
+    log.error(
+      prefix,
+      `your project manifests content does not seem to be valid json.
+      The exact error is "${error.cause.cause.message}".`
+    );
 }
 
 /**

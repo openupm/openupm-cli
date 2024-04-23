@@ -1,5 +1,6 @@
 import {
   LoadProjectManifest,
+  ManifestLoadError,
   manifestPathFor,
   ManifestWriteError,
   WriteProjectManifest,
@@ -20,9 +21,13 @@ export function mockProjectManifest(
 ) {
   return loadProjectManifest.mockImplementation((projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
-    return manifest === null
-      ? Err(new NotFoundError(manifestPath)).toAsyncResult()
-      : Ok(manifest).toAsyncResult();
+    const result =
+      manifest === null
+        ? Err(
+            new ManifestLoadError(manifestPath, new NotFoundError(manifestPath))
+          )
+        : Ok(manifest);
+    return result.toAsyncResult();
   });
 }
 

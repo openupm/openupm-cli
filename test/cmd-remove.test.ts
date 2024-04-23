@@ -2,7 +2,7 @@ import { exampleRegistryUrl } from "./data-registry";
 import { Env, ParseEnvService } from "../src/services/parse-env";
 import { makeRemoveCmd } from "../src/cli/cmd-remove";
 import { Err, Ok } from "ts-results-es";
-import { IOError, NotFoundError } from "../src/io/file-io";
+import { IOError } from "../src/io/file-io";
 import { makeDomainName } from "../src/domain/domain-name";
 import {
   mockProjectManifest,
@@ -19,6 +19,7 @@ import { spyOnLog } from "./log.mock";
 import { mockService } from "./service.mock";
 import {
   LoadProjectManifest,
+  ManifestLoadError,
   WriteProjectManifest,
 } from "../src/io/project-manifest-io";
 
@@ -73,7 +74,7 @@ describe("cmd-remove", () => {
     const result = await removeCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(NotFoundError)
+      expect(actual).toBeInstanceOf(ManifestLoadError)
     );
   });
 

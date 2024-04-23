@@ -10,7 +10,7 @@ import { exampleRegistryUrl } from "./data-registry";
 import { unityRegistryUrl } from "../src/domain/registry-url";
 import { makeEditorVersion } from "../src/domain/editor-version";
 import { Err, Ok } from "ts-results-es";
-import { IOError, NotFoundError } from "../src/io/file-io";
+import { IOError } from "../src/io/file-io";
 import {
   mockProjectManifest,
   mockProjectManifestWriteResult,
@@ -28,6 +28,7 @@ import { mockService } from "./service.mock";
 import { ResolveRemotePackumentService } from "../src/services/resolve-remote-packument";
 import {
   LoadProjectManifest,
+  ManifestLoadError,
   WriteProjectManifest,
 } from "../src/io/project-manifest-io";
 
@@ -133,7 +134,7 @@ describe("cmd-add", () => {
     const result = await addCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(NotFoundError)
+      expect(actual).toBeInstanceOf(ManifestLoadError)
     );
   });
 
