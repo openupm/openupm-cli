@@ -74,7 +74,7 @@ describe("upm-config-io", () => {
 
     it("should fail if file has bad toml content", async () => {
       const path = "/home/user";
-      const expected = new StringFormatError("Toml");
+      const expected = new StringFormatError("Toml", new Error());
       jest.mocked(tryParseToml).mockReturnValue(Err(expected));
 
       const result = await tryLoadUpmConfig(path).promise;
