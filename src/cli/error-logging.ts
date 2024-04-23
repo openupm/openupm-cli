@@ -17,23 +17,21 @@ export function logManifestLoadError(error: ManifestLoadError) {
       prefix,
       `there is no project manifest at ${error.path}. Are you in the correct working directory?`
     );
-  else if (error.cause instanceof IOError)
+  else if (error.cause instanceof IOError) {
     log.error(
       prefix,
-      `failed to load project manifest at ${
-        error.path
-      } due to a file-system error.
-    The exact error is ${
-      error.cause.cause !== undefined
-        ? `"${error.cause.cause.message}"`
-        : "unknown"
-    }`
+      `failed to load project manifest at ${error.path} due to a file-system error.`
     );
-  else
+    const causeMessage =
+      error.cause.cause !== undefined
+        ? `"${error.cause.cause.toString()}"`
+        : "unknown";
+    log.verbose(prefix, `The exact error is ${causeMessage}`);
+  } else
     log.error(
       prefix,
       `your project manifests content does not seem to be valid json.
-      The exact error is "${error.cause.cause.message}".`
+      The exact error is "${error.cause.cause.toString()}".`
     );
 }
 
