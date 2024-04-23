@@ -98,7 +98,7 @@ export type UpmConfigSaveError = IOError;
  * Save the upm config.
  * @param config The config to save.
  * @param configDir The directory in which to save the config.
- * @return The path to which the file was saved.
+ * @returns The path to which the file was saved.
  */
 export const trySaveUpmConfig = (
   config: UPMConfig,
