@@ -2,7 +2,7 @@ import path from "path";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { FileParseError } from "../common-errors";
 import { FileReadError, tryReadTextFromFile } from "./file-io";
-import { StringFormatError, tryParseYaml } from "../utils/data-parsing";
+import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
 
 export type ProjectVersionLoadError =
   | FileReadError

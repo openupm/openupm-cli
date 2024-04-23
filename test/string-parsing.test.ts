@@ -1,11 +1,13 @@
 import {
   StringFormatError,
   tryParseJson,
+  tryParseToml,
   tryParseYaml,
-} from "../src/utils/data-parsing";
+} from "../src/utils/string-parsing";
 import yaml from "yaml";
+import TOML from "@iarna/toml";
 
-describe("data-parsing", () => {
+describe("string-parsing", () => {
   describe("json", () => {
     it("should round-trip valid json", () => {
       const expected = { test: 123 };
@@ -16,7 +18,7 @@ describe("data-parsing", () => {
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
-    it("should notify of parse error", () => {
+    it("should fail for bad data", () => {
       const json = "{ invalid json ";
 
       const result = tryParseJson(json);
@@ -27,7 +29,26 @@ describe("data-parsing", () => {
     });
   });
 
-  // TODO: Add toml tests
+  describe("toml", () => {
+    it("should round-trip toml", () => {
+      const expected = { test: 123 };
+      const toml = TOML.stringify(expected);
+
+      const result = tryParseToml(toml);
+
+      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    });
+
+    it("should fail for bad data", () => {
+      const toml = "{ invalid toml ";
+
+      const result = tryParseToml(toml);
+
+      expect(result).toBeError((error) =>
+        expect(error).toBeInstanceOf(StringFormatError)
+      );
+    });
+  });
 
   describe("yaml", () => {
     it("should round-trip valid yaml", () => {
