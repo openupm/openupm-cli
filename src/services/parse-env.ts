@@ -7,12 +7,11 @@ import {
   UpmConfigLoadError,
 } from "../io/upm-config-io";
 import path from "path";
-import fs from "fs";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
 import { FileParseError } from "../common-errors";
-import { Err, Ok, Result } from "ts-results-es";
+import { Ok, Result } from "ts-results-es";
 import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
@@ -41,20 +40,14 @@ export type Env = Readonly<{
 }>;
 
 export type EnvParseError =
-  | NotFoundError
   | GetUpmConfigDirError
   | UpmConfigLoadError
   | ProjectVersionLoadError;
 
-function determineCwd(options: CmdOptions): Result<string, NotFoundError> {
-  const cwd =
-    options._global.chdir !== undefined
-      ? path.resolve(options._global.chdir)
-      : process.cwd();
-
-  if (!fs.existsSync(cwd)) return Err(new NotFoundError(cwd));
-
-  return Ok(cwd);
+function determineCwd(options: CmdOptions): string {
+  return options._global.chdir !== undefined
+    ? path.resolve(options._global.chdir)
+    : process.cwd();
 }
 
 function determineWsl(options: CmdOptions): boolean {
@@ -147,12 +140,7 @@ export function makeParseEnvService(): ParseEnvService {
     const upstreamRegistry = determineUpstreamRegistry(options);
 
     // cwd
-    const cwdResult = determineCwd(options);
-    if (cwdResult.isErr()) {
-      log.error("env", `can not resolve path ${cwdResult.error.path}`);
-      return cwdResult;
-    }
-    const cwd = cwdResult.value;
+    const cwd = determineCwd(options);
 
     // editor version
     const projectVersionLoadResult = await tryLoadProjectVersion(cwd).promise;
