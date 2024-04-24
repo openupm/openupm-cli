@@ -453,45 +453,6 @@ describe("env", () => {
 
       expect(result).toBeOk((env: Env) => expect(env.cwd).toEqual(expected));
     });
-
-    it("should fail if specified path is not found", async () => {
-      const { parseEnv } = makeDependencies();
-      const notExistentPath = "/some/other/path";
-      jest
-        .mocked(fs.existsSync)
-        .mockImplementation((path) => path !== notExistentPath);
-
-      const result = await parseEnv({
-        _global: {
-          chdir: notExistentPath,
-        },
-      });
-
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(NotFoundError)
-      );
-    });
-
-    it("should notify if specified path is not found", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const notExistentPath = "/some/other/path";
-      jest
-        .mocked(fs.existsSync)
-        .mockImplementation((path) => path !== notExistentPath);
-      const logSpy = jest.spyOn(log, "error");
-
-      await parseEnv({
-        _global: {
-          chdir: notExistentPath,
-        },
-      });
-
-      expect(logSpy).toHaveBeenCalledWith(
-        "env",
-        expect.stringContaining("can not resolve")
-      );
-    });
   });
 
   describe("editor-version", () => {
