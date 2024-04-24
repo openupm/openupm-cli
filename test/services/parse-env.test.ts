@@ -9,7 +9,7 @@ import fs from "fs";
 import { IOError, NotFoundError } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
-import { NoWslError } from "../../src/io/wls";
+import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
