@@ -1,3 +1,10 @@
+## [1.23.2](https://github.com/openupm/openupm-cli/compare/1.23.1...1.23.2) (2024-04-24)
+
+
+### Bug Fixes
+
+* incorrect log ([#287](https://github.com/openupm/openupm-cli/issues/287)) ([320fb36](https://github.com/openupm/openupm-cli/commit/320fb368e13e899234246d06bf624c42b5931356))
+
 ## [1.23.1](https://github.com/openupm/openupm-cli/compare/1.23.0...1.23.1) (2024-04-24)
 
 
