@@ -20,31 +20,36 @@ export class AuthenticationError extends CustomError {
 }
 
 /**
+ * Error which may occur when logging a user into a npm registry.
+ */
+export type NpmLoginError = AuthenticationError;
+
+/**
  * A token authenticating a user.
  */
 type AuthenticationToken = string;
 
 /**
- * Service function for adding authenticating new users.
+ * Service function for authenticating users with a npm registry.
  * @param registryUrl The url of the registry into which to login.
  * @param username The username with which to login.
  * @param email The email with which to login.
  * @param password The password with which to login.
  * @returns An authentication token or null if registration failed.
  */
-export type AddUserService = (
+export type NpmLoginService = (
   registryUrl: RegistryUrl,
   username: string,
   email: string,
   password: string
-) => AsyncResult<AuthenticationToken, AuthenticationError>;
+) => AsyncResult<AuthenticationToken, NpmLoginError>;
 
 /**
- * Makes a new {@link AddUserService} function.
+ * Makes a new {@link NpmLoginService} function.
  */
-export function makeAddUserService(
+export function makeNpmLoginService(
   registryClient: RegClient.Instance
-): AddUserService {
+): NpmLoginService {
   return (registryUrl, username, email, password) => {
     return new AsyncResult(
       new Promise((resolve) => {
