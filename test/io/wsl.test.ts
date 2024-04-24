@@ -1,6 +1,6 @@
 import * as processModule from "../../src/utils/process";
 import { ChildProcessError } from "../../src/utils/process";
-import { tryGetWslPath } from "../../src/io/wls";
+import { tryGetWslPath } from "../../src/io/wsl";
 import { Err, Ok } from "ts-results-es";
 
 jest.mock("is-wsl", () => ({

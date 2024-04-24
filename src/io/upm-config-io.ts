@@ -14,7 +14,7 @@ import {
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetHomePath } from "./special-paths";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
-import { tryGetWslPath, WslPathError } from "./wls";
+import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError } from "../utils/process";
 
 const configFileName = ".upmconfig.toml";
