@@ -102,7 +102,10 @@ describe("cmd-view", () => {
       { _global: {} }
     );
 
-    expect(warnSpy).toHaveLogLike("", "please do not specify");
+    expect(warnSpy).toHaveLogLike(
+      "",
+      expect.stringContaining("please do not specify")
+    );
   });
 
   it("should fail if package could not be resolved", async () => {
@@ -124,7 +127,7 @@ describe("cmd-view", () => {
 
     await viewCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("404", "not found");
+    expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
   });
 
   it("should print package information", async () => {

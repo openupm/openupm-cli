@@ -84,7 +84,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", "");
+    expect(errorSpy).toHaveLogLike("manifest", expect.any(String));
   });
 
   it("should fail if package version was specified", async () => {
@@ -109,7 +109,10 @@ describe("cmd-remove", () => {
       { _global: {} }
     );
 
-    expect(warnSpy).toHaveLogLike("", "please do not specify");
+    expect(warnSpy).toHaveLogLike(
+      "",
+      expect.stringContaining("please do not specify")
+    );
   });
 
   it("should fail if package is not in manifest", async () => {
@@ -128,7 +131,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(otherPackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("404", "not found");
+    expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
   });
 
   it("should notify of removed package", async () => {
@@ -137,7 +140,10 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(noticeSpy).toHaveLogLike("manifest", "removed");
+    expect(noticeSpy).toHaveLogLike(
+      "manifest",
+      expect.stringContaining("removed")
+    );
   });
 
   it("should be atomic for multiple packages", async () => {
@@ -194,7 +200,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", "");
+    expect(errorSpy).toHaveLogLike("manifest", expect.stringContaining(""));
   });
 
   it("should suggest to open Unity after save", async () => {
@@ -203,6 +209,6 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(noticeSpy).toHaveLogLike("", "open Unity");
+    expect(noticeSpy).toHaveLogLike("", expect.stringContaining("open Unity"));
   });
 });

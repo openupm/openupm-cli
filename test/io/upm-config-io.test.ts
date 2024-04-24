@@ -5,8 +5,15 @@ import {
 } from "../../src/io/upm-config-io";
 import { tryGetHomePath } from "../../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
-import { IOError, NotFoundError, tryReadTextFromFile } from "../../src/io/file-io";
-import { StringFormatError, tryParseToml } from "../../src/utils/string-parsing";
+import {
+  IOError,
+  NotFoundError,
+  tryReadTextFromFile,
+} from "../../src/io/file-io";
+import {
+  StringFormatError,
+  tryParseToml,
+} from "../../src/utils/string-parsing";
 
 jest.mock("../../src/io/file-io");
 jest.mock("../../src/io/special-paths");

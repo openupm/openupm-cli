@@ -5,7 +5,10 @@ import {
   SemanticVersion,
 } from "../../src/domain/semantic-version";
 import { makePackageId } from "../../src/domain/package-id";
-import { UnityPackument, UnityPackumentVersion } from "../../src/domain/packument";
+import {
+  UnityPackument,
+  UnityPackumentVersion,
+} from "../../src/domain/packument";
 
 /**
  * Builder class for {@link UnityPackumentVersion}.
