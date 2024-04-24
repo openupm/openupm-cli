@@ -30,6 +30,7 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
+import { makePackageReference } from "../../src/domain/package-reference";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -168,21 +169,8 @@ describe("cmd-add", () => {
     expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
   });
 
-  /*
-  ---
-  TODO: Fix these tests
-  For these tests to work, logic in add-cmd needs to be changed.
-  The tests expects that in the scenario
-    - Primary registry: Has package, but not correct version
-    - Upstream registry: Does not have the package
-  it should fail because the version was not found.
-  
-  Currently it will still fail with "package not found" because the error
-  of the package missing in the upstream overrides the first error.
-  ---
-      
   it("should fail if package version could not be resolved", async () => {
-    const {addCmd} = makeDependencies();
+    const { addCmd } = makeDependencies();
 
     const result = await addCmd(makePackageReference(somePackage, "2.0.0"), {
       _global: {},
@@ -195,15 +183,17 @@ describe("cmd-add", () => {
 
   it("should notify if package version could not be resolved", async () => {
     const warnSpy = spyOnLog("warn");
-    const {addCmd} = makeDependencies();
+    const { addCmd } = makeDependencies();
 
     await addCmd(makePackageReference(somePackage, "2.0.0"), {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("404", expect.stringContaining("is not a valid choice"));
+    expect(warnSpy).toHaveLogLike(
+      "404",
+      expect.stringContaining("is not a valid choice")
+    );
   });
-  */
 
   it("should notify if editor-version is unknown", async () => {
     const warnSpy = spyOnLog("warn");

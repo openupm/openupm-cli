@@ -30,6 +30,7 @@ import {
 import { CmdOptions } from "./options";
 import {
   PackumentResolveError,
+  pickMostFixable,
   VersionNotFoundError,
 } from "../packument-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
@@ -133,12 +134,17 @@ export function makeAddCmd(
           env.registry
         ).promise;
         if (resolveResult.isErr() && env.upstream) {
-          resolveResult = await resolveRemovePackument(
+          const upstreamResult = await resolveRemovePackument(
             name,
             requestedVersion,
             env.upstreamRegistry
           ).promise;
-          if (resolveResult.isOk()) isUpstreamPackage = true;
+          if (upstreamResult.isOk()) {
+            resolveResult = upstreamResult;
+            isUpstreamPackage = true;
+          } else {
+            resolveResult = pickMostFixable(resolveResult, upstreamResult);
+          }
         }
 
         if (resolveResult.isErr()) {
