@@ -1,4 +1,4 @@
-import { AddUserService, AuthenticationError } from "../services/add-user";
+import { NpmLoginService, AuthenticationError } from "../services/npm-login";
 import log from "./logger";
 import {
   GetUpmConfigDirError,
@@ -58,7 +58,7 @@ export type LoginCmd = (
 export function makeLoginCmd(
   parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
-  addUser: AddUserService
+  npmLogin: NpmLoginService
 ): LoginCmd {
   return async (options) => {
     // parse env
@@ -94,7 +94,7 @@ export function makeLoginCmd(
       if (result.isErr()) return result;
     } else {
       // npm login
-      const loginResult = await addUser(
+      const loginResult = await npmLogin(
         loginRegistry,
         username,
         password,

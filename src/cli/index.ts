@@ -10,7 +10,7 @@ import { CmdOptions } from "./options";
 import { makeFetchPackumentService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
 import { makeAuthNpmrcService } from "../services/npmrc-auth";
-import { makeAddUserService } from "../services/add-user";
+import { makeNpmLoginService } from "../services/npm-login";
 import { makeSearchRegistryService } from "../services/search-registry";
 import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
@@ -39,7 +39,7 @@ const writeProjectManifest = makeProjectManifestWriter();
 const parseEnv = makeParseEnvService();
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
-const addUser = makeAddUserService(regClient);
+const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =
   makeResolveRemotePackumentService(fetchPackument);
@@ -55,7 +55,7 @@ const addCmd = makeAddCmd(
   loadProjectManifest,
   writeProjectManifest
 );
-const loginCmd = makeLoginCmd(parseEnv, authNpmrc, addUser);
+const loginCmd = makeLoginCmd(parseEnv, authNpmrc, npmLogin);
 const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
 const removeCmd = makeRemoveCmd(

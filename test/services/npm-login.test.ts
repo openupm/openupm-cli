@@ -1,8 +1,8 @@
 import "assert";
 import {
   AuthenticationError,
-  makeAddUserService,
-} from "../../src/services/add-user";
+  makeNpmLoginService,
+} from "../../src/services/npm-login";
 import RegClient from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -14,11 +14,11 @@ function makeDependencies() {
     get: jest.fn(),
   };
 
-  const addUser = makeAddUserService(registryClient);
+  const addUser = makeNpmLoginService(registryClient);
   return { addUser, registryClient } as const;
 }
 
-describe("add-user-service", () => {
+describe("npm-login service", () => {
   it("should give token for valid user", async () => {
     const expected = "some token";
     const { addUser, registryClient } = makeDependencies();
