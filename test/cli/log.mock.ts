@@ -1,5 +1,6 @@
 import log from "../../src/cli/logger";
 import { Logger, LogLevels } from "npmlog";
+import AsymmetricMatcher = jest.AsymmetricMatcher;
 
 type LogSpy = jest.SpyInstance<void, Parameters<Logger[LogLevels]>>;
 
@@ -7,15 +8,20 @@ expect.extend({
   toHaveLogLike(
     spy: LogSpy,
     prefix: string,
-    message: string,
+    expected: string | AsymmetricMatcher,
     count: number = 1
   ) {
+    const matches = (s: string) =>
+      typeof expected === "string"
+        ? s === expected
+        : expected.asymmetricMatch(s);
+
     const calls = spy.mock.calls;
     const callsWithPrefix = calls.filter(
       ([actualPrefix]) => actualPrefix === prefix
     );
     const matchingCalls = callsWithPrefix.filter(([, actualMessage]) =>
-      actualMessage.includes(message)
+      matches(actualMessage)
     );
     const hasMatch = matchingCalls.length >= count;
     return {
@@ -23,7 +29,7 @@ expect.extend({
       message: () => `Logs failed expectation
       Criteria:
         Prefix: "${prefix}"
-        Message: "${message}"
+        Message: "${expected}"
         Min-count: ${count}
       Issue: ${
         callsWithPrefix.length === 0

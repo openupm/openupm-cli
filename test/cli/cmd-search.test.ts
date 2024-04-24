@@ -85,7 +85,10 @@ describe("cmd-search", () => {
       const searchResult = await searchCmd("pkg-not-exist", options);
 
       expect(searchResult).toBeOk();
-      expect(noticeSpy).toHaveLogLike("", "No matches found");
+      expect(noticeSpy).toHaveLogLike(
+        "",
+        expect.stringContaining("No matches found")
+      );
     });
   });
 
@@ -101,7 +104,7 @@ describe("cmd-search", () => {
       expect(searchResult).toBeOk();
       expect(warnSpy).toHaveLogLike(
         "",
-        "fast search endpoint is not available"
+        expect.stringContaining("fast search endpoint is not available")
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("package-a")
@@ -122,7 +125,10 @@ describe("cmd-search", () => {
       const searchResult = await searchCmd("pkg-not-exist", options);
 
       expect(searchResult).toBeOk();
-      expect(noticeSpy).toHaveLogLike("", "No matches found");
+      expect(noticeSpy).toHaveLogLike(
+        "",
+        expect.stringContaining("No matches found")
+      );
     });
   });
 });

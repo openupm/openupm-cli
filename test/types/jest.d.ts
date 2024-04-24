@@ -25,11 +25,16 @@ declare global {
       /**
        * Tests if a specific log was made to this spy.
        * @param prefix The prefix. This is matched exactly.
-       * @param message The message. This matches if a log includes this string.
+       * @param expected The expected value. Either an exact string that a log
+       * needs to match or a matcher.
        * @param count The minimum number of times a message matching the given criteria
        * should have been logged. Defaults to 1 if omitted.
        */
-      toHaveLogLike(prefix: string, message: string, count?: number): R;
+      toHaveLogLike(
+        prefix: string,
+        expected: string | AsymmetricMatcher,
+        count?: number
+      ): R;
     }
   }
 }

@@ -144,7 +144,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", "");
+    expect(errorSpy).toHaveLogLike("manifest", expect.any(String));
   });
 
   it("should fail if package could not be resolved", async () => {
@@ -165,7 +165,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("404", "not found");
+    expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
   });
 
   /*
@@ -201,7 +201,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("404", "is not a valid choice");
+    expect(warnSpy).toHaveLogLike("404", expect.stringContaining("is not a valid choice"));
   });
   */
 
@@ -216,7 +216,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("editor.version", "unknown");
+    expect(warnSpy).toHaveLogLike(
+      "editor.version",
+      expect.stringContaining("unknown")
+    );
   });
 
   it("should notify if package editor version is not valid", async () => {
@@ -231,7 +234,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("package.unity", "not valid");
+    expect(warnSpy).toHaveLogLike(
+      "package.unity",
+      expect.stringContaining("not valid")
+    );
   });
 
   it("should suggest running with force if package editor version is not valid", async () => {
@@ -246,7 +252,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("suggest", "run with option -f");
+    expect(noticeSpy).toHaveLogLike(
+      "suggest",
+      expect.stringContaining("run with option -f")
+    );
   });
 
   it("should fail if package editor version is not valid and not running with force", async () => {
@@ -292,7 +301,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("editor.version", "requires");
+    expect(warnSpy).toHaveLogLike(
+      "editor.version",
+      expect.stringContaining("requires")
+    );
   });
 
   it("should suggest to run with force if package is incompatible with editor", async () => {
@@ -307,7 +319,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("suggest", "run with option -f");
+    expect(noticeSpy).toHaveLogLike(
+      "suggest",
+      expect.stringContaining("run with option -f")
+    );
   });
 
   it("should fail if package is incompatible with editor and not running with force", async () => {
@@ -349,7 +364,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(verboseSpy).toHaveLogLike("dependency", "fetch");
+    expect(verboseSpy).toHaveLogLike(
+      "dependency",
+      expect.stringContaining("fetch")
+    );
   });
 
   it("should not fetch dependencies for upstream packages", async () => {
@@ -364,7 +382,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(verboseSpy).not.toHaveLogLike("dependency", "fetch");
+    expect(verboseSpy).not.toHaveLogLike(
+      "dependency",
+      expect.stringContaining("fetch")
+    );
   });
 
   it("should suggest to install missing dependency version manually", async () => {
@@ -385,7 +406,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("suggest", "manually");
+    expect(noticeSpy).toHaveLogLike(
+      "suggest",
+      expect.stringContaining("manually")
+    );
   });
 
   it("should suggest to run with force if dependency could not be resolved", async () => {
@@ -408,7 +432,7 @@ describe("cmd-add", () => {
 
     expect(errorSpy).toHaveLogLike(
       "missing dependencies",
-      "run with option -f"
+      expect.stringContaining("run with option -f")
     );
   });
 
@@ -478,7 +502,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("manifest", "added");
+    expect(noticeSpy).toHaveLogLike(
+      "manifest",
+      expect.stringContaining("added")
+    );
   });
 
   it("should replace package", async () => {
@@ -517,7 +544,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("manifest", "modified");
+    expect(noticeSpy).toHaveLogLike(
+      "manifest",
+      expect.stringContaining("modified")
+    );
   });
 
   it("should notify if package is already in manifest", async () => {
@@ -534,7 +564,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("manifest", "existed");
+    expect(noticeSpy).toHaveLogLike(
+      "manifest",
+      expect.stringContaining("existed")
+    );
   });
 
   it("should add scope for package", async () => {
@@ -614,7 +647,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("", "open Unity");
+    expect(noticeSpy).toHaveLogLike("", expect.stringContaining("open Unity"));
   });
 
   it("should fail if manifest could not be saved", async () => {
@@ -634,6 +667,6 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", "");
+    expect(errorSpy).toHaveLogLike("manifest", expect.stringContaining(""));
   });
 });

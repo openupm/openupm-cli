@@ -84,7 +84,10 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(verboseSpy).toHaveLogLike("dependency", "deep=false");
+    expect(verboseSpy).toHaveLogLike(
+      "dependency",
+      expect.stringContaining("deep=false")
+    );
   });
 
   it("should notify of deep operation start", async () => {
@@ -96,7 +99,10 @@ describe("cmd-deps", () => {
       deep: true,
     });
 
-    expect(verboseSpy).toHaveLogLike("dependency", "deep=true");
+    expect(verboseSpy).toHaveLogLike(
+      "dependency",
+      expect.stringContaining("deep=true")
+    );
   });
 
   it("should log valid dependencies", async () => {
@@ -107,7 +113,10 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("dependency", otherPackage);
+    expect(noticeSpy).toHaveLogLike(
+      "dependency",
+      expect.stringContaining(otherPackage)
+    );
   });
 
   it("should log missing dependency", async () => {
@@ -128,7 +137,10 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("missing dependency", otherPackage);
+    expect(warnSpy).toHaveLogLike(
+      "missing dependency",
+      expect.stringContaining(otherPackage)
+    );
   });
 
   it("should log missing dependency version", async () => {
@@ -149,6 +161,9 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike("missing dependency version", otherPackage);
+    expect(warnSpy).toHaveLogLike(
+      "missing dependency version",
+      expect.stringContaining(otherPackage)
+    );
   });
 });
