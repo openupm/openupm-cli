@@ -1,3 +1,10 @@
+## [1.23.1](https://github.com/openupm/openupm-cli/compare/1.23.0...1.23.1) (2024-04-24)
+
+
+### Bug Fixes
+
+* remove cwd pre-check ([#276](https://github.com/openupm/openupm-cli/issues/276)) ([52f988d](https://github.com/openupm/openupm-cli/commit/52f988da457fd99cd418bba71d6fd0ed05f0cb6d))
+
 # [1.23.0](https://github.com/openupm/openupm-cli/compare/1.22.2...1.23.0) (2024-04-22)
 
 
