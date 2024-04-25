@@ -26,7 +26,7 @@ declare module "another-npm-registry-client" {
     error: Error | null,
     data: TData,
     raw: string,
-    res: Response
+    res: Response | undefined
   ) => void;
 
   type Instance = {

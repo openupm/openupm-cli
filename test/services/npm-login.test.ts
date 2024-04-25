@@ -70,10 +70,15 @@ describe("npm-login service", () => {
 
   it("should fail for error response", async () => {
     const { addUser, registryClient } = makeDependencies();
-    mockRegClientAddUserResult(registryClient, {} as HttpErrorBase, null, {
-      statusMessage: "bad user",
-      statusCode: 401,
-    });
+    mockRegClientAddUserResult(
+      registryClient,
+      {} as HttpErrorBase,
+      { ok: false },
+      {
+        statusMessage: "bad user",
+        statusCode: 401,
+      }
+    );
 
     const result = await addUser(
       exampleRegistryUrl,
