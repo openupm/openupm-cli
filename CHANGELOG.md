@@ -1,3 +1,10 @@
+## [1.23.3](https://github.com/openupm/openupm-cli/compare/1.23.2...1.23.3) (2024-04-25)
+
+
+### Bug Fixes
+
+* adjust incorrect typing ([#288](https://github.com/openupm/openupm-cli/issues/288)) ([a5a055d](https://github.com/openupm/openupm-cli/commit/a5a055d356667a527c84aa0c9e5e2174381f3275))
+
 ## [1.23.2](https://github.com/openupm/openupm-cli/compare/1.23.1...1.23.2) (2024-04-24)
 
 
