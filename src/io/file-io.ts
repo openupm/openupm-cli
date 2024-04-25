@@ -26,7 +26,7 @@ export class NotFoundError extends CustomError {
  * Generic IO error for when interacting with the file-system failed.
  */
 export class IOError extends CustomError {
-  private readonly _class = "CustomError";
+  private readonly _class = "IOError";
 
   constructor(
     /**
