@@ -1,7 +1,7 @@
 import { makeSearchCmd, SearchOptions } from "../../src/cli/cmd-search";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
-import { spyOnLog } from "./log.mock";
+import { makeMockLogger } from "./log.mock";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import {
@@ -43,8 +43,21 @@ function makeDependencies() {
     } as AllPackumentsResult).toAsyncResult()
   );
 
-  const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
-  return { searchCmd, parseEnv, searchRegistry, getAllPackuments } as const;
+  const log = makeMockLogger();
+
+  const searchCmd = makeSearchCmd(
+    parseEnv,
+    searchRegistry,
+    getAllPackuments,
+    log
+  );
+  return {
+    searchCmd,
+    parseEnv,
+    searchRegistry,
+    getAllPackuments,
+    log,
+  } as const;
 }
 
 describe("cmd-search", () => {
@@ -78,14 +91,13 @@ describe("cmd-search", () => {
     });
 
     it("should notify of unknown packument", async () => {
-      const noticeSpy = spyOnLog("notice");
-      const { searchCmd, searchRegistry } = makeDependencies();
+      const { searchCmd, searchRegistry, log } = makeDependencies();
       searchRegistry.mockReturnValue(Ok([]).toAsyncResult());
 
       const searchResult = await searchCmd("pkg-not-exist", options);
 
       expect(searchResult).toBeOk();
-      expect(noticeSpy).toHaveLogLike(
+      expect(log.notice).toHaveLogLike(
         "",
         expect.stringContaining("No matches found")
       );
@@ -94,15 +106,14 @@ describe("cmd-search", () => {
 
   describe("old search", () => {
     it("should print packument information", async () => {
-      const warnSpy = spyOnLog("warn");
       const consoleSpy = jest.spyOn(console, "log");
-      const { searchCmd, searchRegistry } = makeDependencies();
+      const { searchCmd, searchRegistry, log } = makeDependencies();
       searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
 
       const searchResult = await searchCmd("package-a", options);
 
       expect(searchResult).toBeOk();
-      expect(warnSpy).toHaveLogLike(
+      expect(log.warn).toHaveLogLike(
         "",
         expect.stringContaining("fast search endpoint is not available")
       );
@@ -116,8 +127,7 @@ describe("cmd-search", () => {
     });
 
     it("should notify of unknown packument", async () => {
-      const noticeSpy = spyOnLog("notice");
-      const { searchCmd, searchRegistry, getAllPackuments } =
+      const { searchCmd, searchRegistry, log, getAllPackuments } =
         makeDependencies();
       searchRegistry.mockReturnValue(Err({} as HttpErrorBase).toAsyncResult());
       getAllPackuments.mockReturnValue(Ok({ _updated: 9999 }).toAsyncResult());
@@ -125,7 +135,7 @@ describe("cmd-search", () => {
       const searchResult = await searchCmd("pkg-not-exist", options);
 
       expect(searchResult).toBeOk();
-      expect(noticeSpy).toHaveLogLike(
+      expect(log.notice).toHaveLogLike(
         "",
         expect.stringContaining("No matches found")
       );

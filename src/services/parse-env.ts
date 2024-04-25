@@ -1,4 +1,3 @@
-import log from "../cli/logger";
 import chalk from "chalk";
 import {
   GetUpmConfigDirError,
@@ -24,6 +23,7 @@ import {
   tryParseEditorVersion,
 } from "../domain/editor-version";
 import { Registry } from "../domain/registry";
+import { Logger } from "npmlog";
 
 export type Env = Readonly<{
   cwd: string;
@@ -55,6 +55,7 @@ function determineWsl(options: CmdOptions): boolean {
 }
 
 function determinePrimaryRegistry(
+  log: Logger,
   options: CmdOptions,
   upmConfig: UPMConfig | null
 ): Registry {
@@ -115,7 +116,7 @@ export type ParseEnvService = (
 /**
  * Creates a {@link ParseEnvService} function.
  */
-export function makeParseEnvService(): ParseEnvService {
+export function makeParseEnvService(log: Logger): ParseEnvService {
   return async (options) => {
     // log level
     log.level = determineLogLevel(options);
@@ -144,7 +145,7 @@ export function makeParseEnvService(): ParseEnvService {
     if (upmConfigResult.isErr()) return upmConfigResult;
     const upmConfig = upmConfigResult.value;
 
-    const registry = determinePrimaryRegistry(options, upmConfig);
+    const registry = determinePrimaryRegistry(log, options, upmConfig);
     const upstreamRegistry = determineUpstreamRegistry(options);
 
     // cwd

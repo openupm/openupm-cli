@@ -4,7 +4,6 @@ import updateNotifier from "update-notifier";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
-import log from "./logger";
 import { eachValue } from "./cli-parsing";
 import { CmdOptions } from "./options";
 import { makeFetchPackumentService } from "../services/fetch-packument";
@@ -29,41 +28,51 @@ import {
   makeProjectManifestLoader,
   makeProjectManifestWriter,
 } from "../io/project-manifest-io";
+import npmlog from "npmlog";
 
 // Composition root
 
+const log = npmlog;
 const regClient = new RegClient({ log });
 const loadProjectManifest = makeProjectManifestLoader();
 const writeProjectManifest = makeProjectManifestWriter();
 
-const parseEnv = makeParseEnvService();
+const parseEnv = makeParseEnvService(log);
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
 const npmLogin = makeNpmLoginService(regClient);
-const searchRegistry = makeSearchRegistryService();
+const searchRegistry = makeSearchRegistryService(log);
 const resolveRemotePackument =
   makeResolveRemotePackumentService(fetchPackument);
 const resolveDependencies = makeResolveDependenciesService(
-  resolveRemotePackument
+  resolveRemotePackument,
+  log
 );
-const getAllPackuments = makeGetAllPackumentsService();
+const getAllPackuments = makeGetAllPackumentsService(log);
 
 const addCmd = makeAddCmd(
   parseEnv,
   resolveRemotePackument,
   resolveDependencies,
   loadProjectManifest,
-  writeProjectManifest
+  writeProjectManifest,
+  log
 );
-const loginCmd = makeLoginCmd(parseEnv, authNpmrc, npmLogin);
-const searchCmd = makeSearchCmd(parseEnv, searchRegistry, getAllPackuments);
-const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
+const loginCmd = makeLoginCmd(parseEnv, authNpmrc, npmLogin, log);
+const searchCmd = makeSearchCmd(
+  parseEnv,
+  searchRegistry,
+  getAllPackuments,
+  log
+);
+const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);
 const removeCmd = makeRemoveCmd(
   parseEnv,
   loadProjectManifest,
-  writeProjectManifest
+  writeProjectManifest,
+  log
 );
-const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument);
+const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
 
 // update-notifier
 

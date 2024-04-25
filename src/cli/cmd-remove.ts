@@ -1,4 +1,3 @@
-import log from "./logger";
 import {
   LoadProjectManifest,
   ManifestLoadError,
@@ -26,6 +25,7 @@ import {
   PackumentNotFoundError,
 } from "../common-errors";
 import { logManifestLoadError, logManifestSaveError } from "./error-logging";
+import { Logger } from "npmlog";
 
 export type RemoveError =
   | EnvParseError
@@ -52,7 +52,8 @@ export type RemoveCmd = (
 export function makeRemoveCmd(
   parseEnv: ParseEnvService,
   loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest
+  writeProjectManifest: WriteProjectManifest,
+  log: Logger
 ): RemoveCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -96,7 +97,7 @@ export function makeRemoveCmd(
     // load manifest
     const manifestResult = await loadProjectManifest(env.cwd).promise;
     if (manifestResult.isErr()) {
-      logManifestLoadError(manifestResult.error);
+      logManifestLoadError(log, manifestResult.error);
       return manifestResult;
     }
     let manifest = manifestResult.value;
@@ -111,7 +112,7 @@ export function makeRemoveCmd(
     // save manifest
     const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
-      logManifestSaveError(saveResult.error);
+      logManifestSaveError(log, saveResult.error);
       return saveResult;
     }
 

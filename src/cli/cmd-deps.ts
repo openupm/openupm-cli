@@ -1,4 +1,3 @@
-import log from "./logger";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { isPackageUrl } from "../domain/package-url";
 import {
@@ -14,6 +13,7 @@ import {
 import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
+import { Logger } from "npmlog";
 
 export type DepsError = EnvParseError;
 
@@ -43,7 +43,8 @@ function errorPrefixForError(error: PackumentResolveError): string {
  */
 export function makeDepsCmd(
   parseEnv: ParseEnvService,
-  resolveDependencies: ResolveDependenciesService
+  resolveDependencies: ResolveDependenciesService,
+  log: Logger
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env

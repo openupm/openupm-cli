@@ -15,7 +15,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../../src/common-errors";
-import { spyOnLog } from "./log.mock";
+import { makeMockLogger } from "./log.mock";
 import { mockService } from "../services/service.mock";
 import {
   LoadProjectManifest,
@@ -42,16 +42,20 @@ function makeDependencies() {
   const writeProjectManifest = mockService<WriteProjectManifest>();
   mockProjectManifestWriteResult(writeProjectManifest);
 
+  const log = makeMockLogger();
+
   const removeCmd = makeRemoveCmd(
     parseEnv,
     loadProjectManifest,
-    writeProjectManifest
+    writeProjectManifest,
+    log
   );
   return {
     removeCmd,
     parseEnv,
     loadProjectManifest,
     writeProjectManifest,
+    log,
   } as const;
 }
 
@@ -78,13 +82,12 @@ describe("cmd-remove", () => {
   });
 
   it("should notify if manifest could not be loaded", async () => {
-    const errorSpy = spyOnLog("error");
-    const { removeCmd, loadProjectManifest } = makeDependencies();
+    const { removeCmd, loadProjectManifest, log } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", expect.any(String));
+    expect(log.error).toHaveLogLike("manifest", expect.any(String));
   });
 
   it("should fail if package version was specified", async () => {
@@ -101,15 +104,14 @@ describe("cmd-remove", () => {
   });
 
   it("should notify if package version was specified", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, log } = makeDependencies();
 
     await removeCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
       { _global: {} }
     );
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "",
       expect.stringContaining("please do not specify")
     );
@@ -126,21 +128,22 @@ describe("cmd-remove", () => {
   });
 
   it("should notify if package is not in manifest", async () => {
-    const errorSpy = spyOnLog("error");
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, log } = makeDependencies();
 
     await removeCmd(otherPackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
+    expect(log.error).toHaveLogLike(
+      "404",
+      expect.stringContaining("not found")
+    );
   });
 
   it("should notify of removed package", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, log } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "manifest",
       expect.stringContaining("removed")
     );
@@ -194,21 +197,19 @@ describe("cmd-remove", () => {
   });
 
   it("should notify if manifest could not be saved", async () => {
-    const errorSpy = spyOnLog("error");
-    const { removeCmd, writeProjectManifest } = makeDependencies();
+    const { removeCmd, log, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, new IOError());
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveLogLike("manifest", expect.stringContaining(""));
   });
 
   it("should suggest to open Unity after save", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { removeCmd } = makeDependencies();
+    const { removeCmd, log } = makeDependencies();
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(noticeSpy).toHaveLogLike("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveLogLike("", expect.stringContaining("open Unity"));
   });
 });
