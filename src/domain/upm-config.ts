@@ -145,14 +145,7 @@ export function tryGetAuthForRegistry(
     // As a backup search for the registry with trailing slash
     upmConfig.npmAuth?.[registry + "/"];
   if (upmAuth === undefined) return null;
-  const npmAuth = tryToNpmAuth(upmAuth);
-  if (npmAuth === null) {
-    log.warn(
-      "env.auth",
-      `failed to parse auth info for ${registry} in .upmconfig.toml: missing token or _auth fields`
-    );
-  }
-  return npmAuth;
+  return tryToNpmAuth(upmAuth);
 }
 
 /**

@@ -65,8 +65,16 @@ function determinePrimaryRegistry(
       ? makeRegistryUrl("https://package.openupm.cn")
       : makeRegistryUrl("https://package.openupm.com");
 
-  const auth =
-    upmConfig !== null ? tryGetAuthForRegistry(upmConfig, url) : null;
+  if (upmConfig === null) return { url, auth: null };
+
+  const auth = tryGetAuthForRegistry(upmConfig, url);
+
+  if (auth === null) {
+    log.warn(
+      "env.auth",
+      `failed to parse auth info for ${url} in .upmconfig.toml: missing token or _auth fields`
+    );
+  }
 
   return { url, auth };
 }
