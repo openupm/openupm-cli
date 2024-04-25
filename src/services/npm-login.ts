@@ -57,7 +57,7 @@ export function makeNpmLoginService(
           registryUrl,
           { auth: { username, email, password } },
           (error, responseData, _, response) => {
-            if (error !== null || !responseData.ok)
+            if (response !== undefined && !responseData.ok)
               resolve(
                 Err(
                   new AuthenticationError(
@@ -66,7 +66,9 @@ export function makeNpmLoginService(
                   )
                 )
               );
-            else resolve(Ok(responseData.token));
+            else if (responseData.ok) resolve(Ok(responseData.token));
+
+            // TODO: Handle error
           }
         );
       })
