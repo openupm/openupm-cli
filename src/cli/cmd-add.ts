@@ -1,4 +1,3 @@
-import log from "./logger";
 import { isPackageUrl, PackageUrl } from "../domain/package-url";
 import {
   LoadProjectManifest,
@@ -43,6 +42,7 @@ import { logManifestLoadError, logManifestSaveError } from "./error-logging";
 import { tryGetTargetEditorVersionFor } from "../domain/packument";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
+import { Logger } from "npmlog";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -100,7 +100,8 @@ export function makeAddCmd(
   resolveRemovePackument: ResolveRemotePackumentService,
   resolveDependencies: ResolveDependenciesService,
   loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest
+  writeProjectManifest: WriteProjectManifest,
+  log: Logger
 ): AddCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -310,7 +311,7 @@ export function makeAddCmd(
     // load manifest
     const loadResult = await loadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
-      logManifestLoadError(loadResult.error);
+      logManifestLoadError(log, loadResult.error);
       return loadResult;
     }
     let manifest = loadResult.value;
@@ -332,7 +333,7 @@ export function makeAddCmd(
     if (dirty) {
       const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
       if (saveResult.isErr()) {
-        logManifestSaveError(saveResult.error);
+        logManifestSaveError(log, saveResult.error);
         return saveResult;
       }
 

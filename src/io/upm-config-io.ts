@@ -1,6 +1,5 @@
 import path from "path";
 import TOML from "@iarna/toml";
-import log from "../cli/logger";
 import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
@@ -16,6 +15,7 @@ import { tryGetHomePath } from "./special-paths";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError } from "../utils/process";
+import { Logger } from "npmlog";
 
 const configFileName = ".upmconfig.toml";
 
@@ -118,6 +118,7 @@ export type UpmAuthStoreError = UpmConfigLoadError | IOError;
  * Stores authentication information in the projects upm config.
  */
 export const tryStoreUpmAuth = function (
+  log: Logger,
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth

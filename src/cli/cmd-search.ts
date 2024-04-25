@@ -1,4 +1,3 @@
-import log from "./logger";
 import * as os from "os";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { CmdOptions } from "./options";
@@ -11,6 +10,7 @@ import {
 } from "../services/search-registry";
 import { Registry } from "../domain/registry";
 import { GetAllPackumentsService } from "../services/get-all-packuments";
+import { Logger } from "npmlog";
 
 export type SearchError = EnvParseError | HttpErrorBase;
 
@@ -27,6 +27,7 @@ export type SearchCmd = (
 ) => Promise<Result<void, SearchError>>;
 
 const searchEndpoint = function (
+  log: Logger,
   searchRegistry: SearchRegistryService,
   registry: Registry,
   keyword: string
@@ -38,6 +39,7 @@ const searchEndpoint = function (
 };
 
 const searchOld = function (
+  log: Logger,
   getAllPackuments: GetAllPackumentsService,
   registry: Registry,
   keyword: string
@@ -64,7 +66,8 @@ const searchOld = function (
 export function makeSearchCmd(
   parseEnv: ParseEnvService,
   searchRegistry: SearchRegistryService,
-  getAllPackuments: GetAllPackumentsService
+  getAllPackuments: GetAllPackumentsService,
+  log: Logger
 ): SearchCmd {
   return async (keyword, options) => {
     // parse env
@@ -73,13 +76,18 @@ export function makeSearchCmd(
     const env = envResult.value;
 
     // search endpoint
-    let result = await searchEndpoint(searchRegistry, env.registry, keyword)
-      .promise;
+    let result = await searchEndpoint(
+      log,
+      searchRegistry,
+      env.registry,
+      keyword
+    ).promise;
 
     // search old search
     if (result.isErr()) {
       log.warn("", "fast search endpoint is not available, using old search.");
-      result = await searchOld(getAllPackuments, env.registry, keyword).promise;
+      result = await searchOld(log, getAllPackuments, env.registry, keyword)
+        .promise;
     }
     if (result.isErr()) {
       log.warn("", "/-/all endpoint is not available");

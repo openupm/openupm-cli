@@ -1,7 +1,6 @@
 import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
-import log from "../../src/cli/logger";
 import { tryLoadProjectVersion } from "../../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import { tryGetUpmConfigDir } from "../../src/io/upm-config-io";
@@ -13,7 +12,7 @@ import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { spyOnLog } from "../cli/log.mock";
+import { makeMockLogger } from "../cli/log.mock";
 
 jest.mock("../../src/io/project-version-io");
 jest.mock("../../src/io/upm-config-io");
@@ -39,9 +38,10 @@ const testUpmConfig: UPMConfig = {
 const testProjectVersion = "2021.3.1f1";
 
 function makeDependencies() {
-  const parseEnv = makeParseEnvService();
+  const log = makeMockLogger();
 
-  return { parseEnv } as const;
+  const parseEnv = makeParseEnvService(log);
+  return { parseEnv, log } as const;
 }
 
 describe("env", () => {
@@ -66,7 +66,7 @@ describe("env", () => {
 
   describe("log-level", () => {
     it("should be verbose if verbose option is true", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {
@@ -78,7 +78,7 @@ describe("env", () => {
     });
 
     it("should be notice if verbose option is false", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {
@@ -90,7 +90,7 @@ describe("env", () => {
     });
 
     it("should be notice if verbose option is missing", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {
@@ -108,8 +108,7 @@ describe("env", () => {
     });
 
     it("should use color if color option is true", async () => {
-      const { parseEnv } = makeDependencies();
-      const colorDisableSpy = jest.spyOn(log, "disableColor");
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {
@@ -117,23 +116,21 @@ describe("env", () => {
         },
       });
 
-      expect(colorDisableSpy).not.toHaveBeenCalled();
+      expect(log.disableColor).not.toHaveBeenCalled();
     });
 
     it("should use color if color option is missing", async () => {
-      const { parseEnv } = makeDependencies();
-      const colorDisableSpy = jest.spyOn(log, "disableColor");
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {},
       });
 
-      expect(colorDisableSpy).not.toHaveBeenCalled();
+      expect(log.disableColor).not.toHaveBeenCalled();
     });
 
     it("should not use color if color option is false", async () => {
-      const { parseEnv } = makeDependencies();
-      const colorDisableSpy = jest.spyOn(log, "disableColor");
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {
@@ -141,7 +138,7 @@ describe("env", () => {
         },
       });
 
-      expect(colorDisableSpy).toHaveBeenCalled();
+      expect(log.disableColor).toHaveBeenCalled();
     });
   });
 
@@ -183,8 +180,7 @@ describe("env", () => {
 
   describe("region log", () => {
     it("should notify of china region if cn option is true", async () => {
-      const { parseEnv } = makeDependencies();
-      const logSpy = jest.spyOn(log, "notice");
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {
@@ -192,29 +188,27 @@ describe("env", () => {
         },
       });
 
-      expect(logSpy).toHaveBeenCalledWith("region", "cn");
+      expect(log.notice).toHaveBeenCalledWith("region", "cn");
     });
 
     it("should not notify of china region if cn option is missing", async () => {
-      const { parseEnv } = makeDependencies();
-      const logSpy = jest.spyOn(log, "notice");
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: {},
       });
 
-      expect(logSpy).not.toHaveBeenCalledWith("region", "cn");
+      expect(log.notice).not.toHaveBeenCalledWith("region", "cn");
     });
 
     it("should not notify of china region if cn option is false", async () => {
-      const { parseEnv } = makeDependencies();
-      const logSpy = jest.spyOn(log, "notice");
+      const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
         _global: { cn: false },
       });
 
-      expect(logSpy).not.toHaveBeenCalledWith("region", "cn");
+      expect(log.notice).not.toHaveBeenCalledWith("region", "cn");
     });
   });
 
@@ -375,8 +369,7 @@ describe("env", () => {
     });
 
     it("should notify if upm-config did not have auth", async () => {
-      const { parseEnv } = makeDependencies();
-      const warnSpy = spyOnLog("warn");
+      const { parseEnv, log } = makeDependencies();
       mockUpmConfig({
         npmAuth: {},
       });
@@ -387,7 +380,7 @@ describe("env", () => {
         },
       });
 
-      expect(warnSpy).toHaveLogLike(
+      expect(log.warn).toHaveLogLike(
         "env.auth",
         expect.stringContaining("failed to parse auth info")
       );
@@ -531,7 +524,7 @@ describe("env", () => {
     });
 
     it("should notify of missing ProjectVersion.txt", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, log } = makeDependencies();
       jest
         .mocked(tryLoadProjectVersion)
         .mockReturnValue(
@@ -539,20 +532,19 @@ describe("env", () => {
             new NotFoundError("/some/path/ProjectVersion.txt")
           ).toAsyncResult()
         );
-      const logSpy = jest.spyOn(log, "warn");
 
       await parseEnv({
         _global: {},
       });
 
-      expect(logSpy).toHaveBeenCalledWith(
+      expect(log.warn).toHaveBeenCalledWith(
         "ProjectVersion",
         expect.stringContaining("can not locate")
       );
     });
 
     it("should notify of parsing issue", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, log } = makeDependencies();
       jest
         .mocked(tryLoadProjectVersion)
         .mockReturnValue(
@@ -563,13 +555,12 @@ describe("env", () => {
             )
           ).toAsyncResult()
         );
-      const logSpy = jest.spyOn(log, "error");
 
       await parseEnv({
         _global: {},
       });
 
-      expect(logSpy).toHaveBeenCalledWith(
+      expect(log.error).toHaveBeenCalledWith(
         "ProjectVersion",
         expect.stringContaining("could not be parsed")
       );

@@ -1,8 +1,7 @@
-import log from "../../src/cli/logger";
 import { Logger, LogLevels } from "npmlog";
 import AsymmetricMatcher = jest.AsymmetricMatcher;
 
-type LogSpy = jest.SpyInstance<void, Parameters<Logger[LogLevels]>>;
+type LogSpy = jest.MockedFunctionDeep<Logger[LogLevels]>;
 
 expect.extend({
   toHaveLogLike(
@@ -43,9 +42,8 @@ expect.extend({
 });
 
 /**
- * Creates a spy for mocking logs to a specific logging-level.
- * @param level The level to spy on.
+ * Creates mock logger.
  */
-export function spyOnLog(level: LogLevels): LogSpy {
-  return jest.spyOn(log, level);
+export function makeMockLogger() {
+  return jest.mocked(jest.createMockFromModule<Logger>("npmlog"));
 }

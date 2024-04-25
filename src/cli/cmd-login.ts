@@ -1,5 +1,4 @@
-import { NpmLoginService, AuthenticationError } from "../services/npm-login";
-import log from "./logger";
+import { AuthenticationError, NpmLoginService } from "../services/npm-login";
 import {
   GetUpmConfigDirError,
   tryGetUpmConfigDir,
@@ -19,6 +18,7 @@ import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
 import { AuthNpmrcService } from "../services/npmrc-auth";
+import { Logger } from "npmlog";
 
 /**
  * Errors which may occur when logging in.
@@ -58,7 +58,8 @@ export type LoginCmd = (
 export function makeLoginCmd(
   parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
-  npmLogin: NpmLoginService
+  npmLogin: NpmLoginService,
+  log: Logger
 ): LoginCmd {
   return async (options) => {
     // parse env
@@ -86,7 +87,7 @@ export function makeLoginCmd(
     if (options.basicAuth) {
       // basic auth
       const _auth = encodeBasicAuth(username, password);
-      const result = await tryStoreUpmAuth(configDir, loginRegistry, {
+      const result = await tryStoreUpmAuth(log, configDir, loginRegistry, {
         email,
         alwaysAuth,
         _auth,
@@ -120,7 +121,7 @@ export function makeLoginCmd(
         log.notice("config", `saved to npm config: ${configPath}`)
       );
 
-      const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
+      const storeResult = await tryStoreUpmAuth(log, configDir, loginRegistry, {
         email,
         alwaysAuth,
         token,

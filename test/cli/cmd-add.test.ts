@@ -16,7 +16,7 @@ import {
   mockProjectManifestWriteResult,
 } from "../io/project-manifest-io.mock";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
-import { spyOnLog } from "./log.mock";
+import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockResolvedPackuments } from "../services/packument-resolving.mock";
 import { PackumentNotFoundError } from "../../src/common-errors";
@@ -99,12 +99,15 @@ function makeDependencies() {
   const writeProjectManifest = mockService<WriteProjectManifest>();
   mockProjectManifestWriteResult(writeProjectManifest);
 
+  const log = makeMockLogger();
+
   const addCmd = makeAddCmd(
     parseEnv,
     resolveRemotePackument,
     resolveDependencies,
     loadProjectManifest,
-    writeProjectManifest
+    writeProjectManifest,
+    log
   );
   return {
     addCmd,
@@ -113,6 +116,7 @@ function makeDependencies() {
     resolveDependencies,
     loadProjectManifest,
     writeProjectManifest,
+    log,
   } as const;
 }
 
@@ -139,13 +143,12 @@ describe("cmd-add", () => {
   });
 
   it("should notify if manifest could not be loaded", async () => {
-    const errorSpy = spyOnLog("error");
-    const { addCmd, loadProjectManifest } = makeDependencies();
+    const { addCmd, loadProjectManifest, log } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", expect.any(String));
+    expect(log.error).toHaveLogLike("manifest", expect.any(String));
   });
 
   it("should fail if package could not be resolved", async () => {
@@ -160,13 +163,15 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package could not be resolved", async () => {
-    const errorSpy = spyOnLog("error");
-    const { addCmd, resolveRemotePackument } = makeDependencies();
+    const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument);
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
+    expect(log.error).toHaveLogLike(
+      "404",
+      expect.stringContaining("not found")
+    );
   });
 
   it("should fail if package version could not be resolved", async () => {
@@ -182,22 +187,20 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package version could not be resolved", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { addCmd } = makeDependencies();
+    const { addCmd, log } = makeDependencies();
 
     await addCmd(makePackageReference(somePackage, "2.0.0"), {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "404",
       expect.stringContaining("is not a valid choice")
     );
   });
 
   it("should notify if editor-version is unknown", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { addCmd, parseEnv } = makeDependencies();
+    const { addCmd, parseEnv, log } = makeDependencies();
     parseEnv.mockResolvedValue(
       Ok({ ...defaultEnv, editorVersion: "bad version" })
     );
@@ -206,15 +209,14 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "editor.version",
       expect.stringContaining("unknown")
     );
   });
 
   it("should notify if package editor version is not valid", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { addCmd, resolveRemotePackument } = makeDependencies();
+    const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       badEditorPackument,
@@ -224,15 +226,14 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "package.unity",
       expect.stringContaining("not valid")
     );
   });
 
   it("should suggest running with force if package editor version is not valid", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd, resolveRemotePackument } = makeDependencies();
+    const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       badEditorPackument,
@@ -242,7 +243,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "suggest",
       expect.stringContaining("run with option -f")
     );
@@ -280,8 +281,7 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package is incompatible with editor", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { addCmd, resolveRemotePackument } = makeDependencies();
+    const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       incompatiblePackument,
@@ -291,15 +291,14 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "editor.version",
       expect.stringContaining("requires")
     );
   });
 
   it("should suggest to run with force if package is incompatible with editor", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd, resolveRemotePackument } = makeDependencies();
+    const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       exampleRegistryUrl,
       incompatiblePackument,
@@ -309,7 +308,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "suggest",
       expect.stringContaining("run with option -f")
     );
@@ -347,22 +346,20 @@ describe("cmd-add", () => {
   });
 
   it("should notify of fetching dependencies", async () => {
-    const verboseSpy = spyOnLog("verbose");
-    const { addCmd } = makeDependencies();
+    const { addCmd, log } = makeDependencies();
 
     await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(verboseSpy).toHaveLogLike(
+    expect(log.verbose).toHaveLogLike(
       "dependency",
       expect.stringContaining("fetch")
     );
   });
 
   it("should not fetch dependencies for upstream packages", async () => {
-    const verboseSpy = spyOnLog("verbose");
-    const { addCmd, resolveRemotePackument } = makeDependencies();
+    const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [
       unityRegistryUrl,
       somePackument,
@@ -372,15 +369,14 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(verboseSpy).not.toHaveLogLike(
+    expect(log.verbose).not.toHaveLogLike(
       "dependency",
       expect.stringContaining("fetch")
     );
   });
 
   it("should suggest to install missing dependency version manually", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd, resolveDependencies } = makeDependencies();
+    const { addCmd, resolveDependencies, log } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -396,15 +392,14 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "suggest",
       expect.stringContaining("manually")
     );
   });
 
   it("should suggest to run with force if dependency could not be resolved", async () => {
-    const errorSpy = spyOnLog("error");
-    const { addCmd, resolveDependencies } = makeDependencies();
+    const { addCmd, resolveDependencies, log } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -420,7 +415,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(errorSpy).toHaveLogLike(
+    expect(log.error).toHaveLogLike(
       "missing dependencies",
       expect.stringContaining("run with option -f")
     );
@@ -485,14 +480,13 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package was added", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd } = makeDependencies();
+    const { addCmd, log } = makeDependencies();
 
     await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "manifest",
       expect.stringContaining("added")
     );
@@ -521,8 +515,7 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package was replaced", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd, loadProjectManifest } = makeDependencies();
+    const { addCmd, loadProjectManifest, log } = makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -534,15 +527,14 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "manifest",
       expect.stringContaining("modified")
     );
   });
 
   it("should notify if package is already in manifest", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd, loadProjectManifest } = makeDependencies();
+    const { addCmd, loadProjectManifest, log } = makeDependencies();
     mockProjectManifest(
       loadProjectManifest,
       buildProjectManifest((manifest) =>
@@ -554,7 +546,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "manifest",
       expect.stringContaining("existed")
     );
@@ -630,14 +622,13 @@ describe("cmd-add", () => {
   });
 
   it("should suggest to open Unity after save", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { addCmd } = makeDependencies();
+    const { addCmd, log } = makeDependencies();
 
     await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveLogLike("", expect.stringContaining("open Unity"));
   });
 
   it("should fail if manifest could not be saved", async () => {
@@ -651,12 +642,11 @@ describe("cmd-add", () => {
   });
 
   it("should notify if manifest could not be saved", async () => {
-    const errorSpy = spyOnLog("error");
-    const { addCmd, writeProjectManifest } = makeDependencies();
+    const { addCmd, writeProjectManifest, log } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, new IOError());
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveLogLike("manifest", expect.stringContaining(""));
   });
 });

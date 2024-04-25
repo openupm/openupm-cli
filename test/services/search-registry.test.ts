@@ -4,6 +4,7 @@ import { HttpErrorBase } from "npm-registry-fetch";
 import { makeSearchRegistryService } from "../../src/services/search-registry";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
+import { makeMockLogger } from "../cli/log.mock";
 
 jest.mock("libnpmsearch");
 
@@ -13,7 +14,9 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const searchRegistry = makeSearchRegistryService();
+  const log = makeMockLogger();
+
+  const searchRegistry = makeSearchRegistryService(log);
   return { searchRegistry } as const;
 }
 

@@ -6,7 +6,7 @@ import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { IOError } from "../../src/io/file-io";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
-import { spyOnLog } from "./log.mock";
+import { makeMockLogger } from "./log.mock";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { VersionNotFoundError } from "../../src/packument-resolving";
@@ -46,8 +46,10 @@ function makeDependencies() {
     [],
   ]);
 
-  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies);
-  return { depsCmd, parseEnv, resolveDependencies } as const;
+  const log = makeMockLogger();
+
+  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);
+  return { depsCmd, parseEnv, resolveDependencies, log } as const;
 }
 
 describe("cmd-deps", () => {
@@ -77,51 +79,47 @@ describe("cmd-deps", () => {
   });
 
   it("should notify of shallow operation start", async () => {
-    const verboseSpy = spyOnLog("verbose");
-    const { depsCmd } = makeDependencies();
+    const { depsCmd, log } = makeDependencies();
 
     await depsCmd(somePackage, {
       _global: {},
     });
 
-    expect(verboseSpy).toHaveLogLike(
+    expect(log.verbose).toHaveLogLike(
       "dependency",
       expect.stringContaining("deep=false")
     );
   });
 
   it("should notify of deep operation start", async () => {
-    const verboseSpy = spyOnLog("verbose");
-    const { depsCmd } = makeDependencies();
+    const { depsCmd, log } = makeDependencies();
 
     await depsCmd(somePackage, {
       _global: {},
       deep: true,
     });
 
-    expect(verboseSpy).toHaveLogLike(
+    expect(log.verbose).toHaveLogLike(
       "dependency",
       expect.stringContaining("deep=true")
     );
   });
 
   it("should log valid dependencies", async () => {
-    const noticeSpy = spyOnLog("notice");
-    const { depsCmd } = makeDependencies();
+    const { depsCmd, log } = makeDependencies();
 
     await depsCmd(somePackage, {
       _global: {},
     });
 
-    expect(noticeSpy).toHaveLogLike(
+    expect(log.notice).toHaveLogLike(
       "dependency",
       expect.stringContaining(otherPackage)
     );
   });
 
   it("should log missing dependency", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { depsCmd, resolveDependencies } = makeDependencies();
+    const { depsCmd, resolveDependencies, log } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -137,15 +135,14 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "missing dependency",
       expect.stringContaining(otherPackage)
     );
   });
 
   it("should log missing dependency version", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { depsCmd, resolveDependencies } = makeDependencies();
+    const { depsCmd, resolveDependencies, log } = makeDependencies();
     resolveDependencies.mockResolvedValue([
       [],
       [
@@ -161,7 +158,7 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "missing dependency version",
       expect.stringContaining(otherPackage)
     );

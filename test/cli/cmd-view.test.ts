@@ -11,7 +11,7 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../../src/common-errors";
-import { spyOnLog } from "./log.mock";
+import { makeMockLogger } from "./log.mock";
 import { ResolvedPackument } from "../../src/packument-resolving";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
@@ -65,8 +65,10 @@ function makeDependencies() {
     } as ResolvedPackument).toAsyncResult()
   );
 
-  const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument);
-  return { viewCmd, parseEnv, resolveRemotePackument } as const;
+  const log = makeMockLogger();
+
+  const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
+  return { viewCmd, parseEnv, resolveRemotePackument, log } as const;
 }
 
 describe("cmd-view", () => {
@@ -94,15 +96,14 @@ describe("cmd-view", () => {
   });
 
   it("should notify if package version was specified", async () => {
-    const warnSpy = spyOnLog("warn");
-    const { viewCmd } = makeDependencies();
+    const { viewCmd, log } = makeDependencies();
 
     await viewCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
       { _global: {} }
     );
 
-    expect(warnSpy).toHaveLogLike(
+    expect(log.warn).toHaveLogLike(
       "",
       expect.stringContaining("please do not specify")
     );
@@ -119,15 +120,17 @@ describe("cmd-view", () => {
   });
 
   it("should notify if package could not be resolved", async () => {
-    const errorSpy = spyOnLog("error");
-    const { viewCmd, resolveRemotePackument } = makeDependencies();
+    const { viewCmd, resolveRemotePackument, log } = makeDependencies();
     resolveRemotePackument.mockReturnValue(
       Err(new PackumentNotFoundError()).toAsyncResult()
     );
 
     await viewCmd(somePackage, { _global: {} });
 
-    expect(errorSpy).toHaveLogLike("404", expect.stringContaining("not found"));
+    expect(log.error).toHaveLogLike(
+      "404",
+      expect.stringContaining("not found")
+    );
   });
 
   it("should print package information", async () => {

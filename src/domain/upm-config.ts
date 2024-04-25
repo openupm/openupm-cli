@@ -1,7 +1,6 @@
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { Base64, decodeBase64, encodeBase64 } from "./base64";
 import { RegistryUrl } from "./registry-url";
-import log from "../cli/logger";
 import { NpmAuth } from "another-npm-registry-client";
 
 /**

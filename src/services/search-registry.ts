@@ -2,10 +2,10 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "../utils/error-type-guards";
-import log from "../cli/logger";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
+import { Logger } from "npmlog";
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -29,9 +29,9 @@ export type SearchRegistryService = (
 
 /**
  * Get npm fetch options.
- * @param registry The registry for which to get the options.
  */
 export const getNpmFetchOptions = function (
+  log: Logger,
   registry: Registry
 ): npmFetch.Options {
   const opts: npmSearch.Options = {
@@ -46,10 +46,10 @@ export const getNpmFetchOptions = function (
 /**
  * Makes a {@link SearchRegistryService} function.
  */
-export function makeSearchRegistryService(): SearchRegistryService {
+export function makeSearchRegistryService(log: Logger): SearchRegistryService {
   return (registry, keyword) => {
     return new AsyncResult(
-      npmSearch(keyword, getNpmFetchOptions(registry))
+      npmSearch(keyword, getNpmFetchOptions(log, registry))
         // NOTE: The results of the search will be packument objects, so we can change the type
         .then((results) => Ok(results as SearchedPackument[]))
         .catch((error) => {

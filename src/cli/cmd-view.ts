@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import log from "./logger";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
@@ -13,6 +12,7 @@ import { recordKeys } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
 import { PackageWithVersionError } from "../common-errors";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
+import { Logger } from "npmlog";
 
 export type ViewOptions = CmdOptions;
 
@@ -102,7 +102,8 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnvService,
-  resolveRemotePackument: ResolveRemotePackumentService
+  resolveRemotePackument: ResolveRemotePackumentService,
+  log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
     // parse env

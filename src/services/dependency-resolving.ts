@@ -1,6 +1,5 @@
 import { DomainName, isInternalPackage } from "../domain/domain-name";
 import { isSemanticVersion, SemanticVersion } from "../domain/semantic-version";
-import log from "../cli/logger";
 import { makePackageReference } from "../domain/package-reference";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
@@ -16,6 +15,7 @@ import assert from "assert";
 import { PackumentNotFoundError } from "../common-errors";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
+import { Logger } from "npmlog";
 
 export type DependencyBase = {
   /**
@@ -79,7 +79,8 @@ export type ResolveDependenciesService = (
  * Makes a {@link ResolveDependenciesService} function.
  */
 export function makeResolveDependenciesService(
-  resolveRemotePackument: ResolveRemotePackumentService
+  resolveRemotePackument: ResolveRemotePackumentService,
+  log: Logger
 ): ResolveDependenciesService {
   return async (registry, upstreamRegistry, name, version, deep) => {
     // a list of pending dependency {name, version}
