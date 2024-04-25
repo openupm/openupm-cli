@@ -13,6 +13,7 @@ import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
+import { spyOnLog } from "../cli/log.mock";
 
 jest.mock("../../src/io/project-version-io");
 jest.mock("../../src/io/upm-config-io");
@@ -370,6 +371,25 @@ describe("env", () => {
 
       expect(result).toBeOk((env: Env) =>
         expect(env.registry.auth).toEqual(null)
+      );
+    });
+
+    it("should notify if upm-config did not have auth", async () => {
+      const { parseEnv } = makeDependencies();
+      const warnSpy = spyOnLog("warn");
+      mockUpmConfig({
+        npmAuth: {},
+      });
+
+      await parseEnv({
+        _global: {
+          registry: exampleRegistryUrl,
+        },
+      });
+
+      expect(warnSpy).toHaveLogLike(
+        "env.auth",
+        expect.stringContaining("failed to parse auth info")
       );
     });
 
