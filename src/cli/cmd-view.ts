@@ -10,9 +10,12 @@ import {
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
-import { PackageWithVersionError } from "../common-errors";
-import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
+import {
+  PackageWithVersionError,
+  PackumentNotFoundError,
+} from "../common-errors";
 import { Logger } from "npmlog";
+import { FetchPackumentService } from "../services/fetch-packument";
 
 export type ViewOptions = CmdOptions;
 
@@ -102,7 +105,7 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnvService,
-  resolveRemotePackument: ResolveRemotePackumentService,
+  fetchPackument: FetchPackumentService,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
@@ -119,22 +122,18 @@ export function makeViewCmd(
     }
 
     // verify name
-    const result = await resolveRemotePackument(
-      pkg,
-      undefined,
-      env.registry
-    ).orElse((error) =>
-      env.upstream
-        ? resolveRemotePackument(pkg, undefined, env.upstreamRegistry)
-        : Err(error)
+    const result = await fetchPackument(env.registry, pkg).orElse((error) =>
+      env.upstream ? fetchPackument(env.upstreamRegistry, pkg) : Err(error)
     ).promise;
+    if (!result.isOk()) return result;
 
-    if (result.isOk()) {
-      printInfo(result.value.packument);
-      return Ok(undefined);
-    } else {
+    const packument = result.value;
+    if (packument === null) {
       log.error("404", `package not found: ${pkg}`);
-      return result;
+      return Err(new PackumentNotFoundError());
     }
+
+    printInfo(packument);
+    return Ok(undefined);
   };
 }
