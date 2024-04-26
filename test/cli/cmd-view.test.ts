@@ -12,10 +12,9 @@ import {
   PackumentNotFoundError,
 } from "../../src/common-errors";
 import { makeMockLogger } from "./log.mock";
-import { ResolvedPackument } from "../../src/packument-resolving";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
-import { ResolveRemotePackumentService } from "../../src/services/resolve-remote-packument";
+import { FetchPackumentService } from "../../src/services/fetch-packument";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -58,17 +57,13 @@ function makeDependencies() {
   const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const resolveRemotePackument = mockService<ResolveRemotePackumentService>();
-  resolveRemotePackument.mockReturnValue(
-    Ok({
-      packument: somePackument,
-    } as ResolvedPackument).toAsyncResult()
-  );
+  const fetchPackument = mockService<FetchPackumentService>();
+  fetchPackument.mockReturnValue(Ok(somePackument).toAsyncResult());
 
   const log = makeMockLogger();
 
-  const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
-  return { viewCmd, parseEnv, resolveRemotePackument, log } as const;
+  const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
+  return { viewCmd, parseEnv, fetchPackument, log } as const;
 }
 
 describe("cmd-view", () => {
@@ -111,8 +106,8 @@ describe("cmd-view", () => {
 
   it("should fail if package could not be resolved", async () => {
     const expected = new PackumentNotFoundError();
-    const { viewCmd, resolveRemotePackument } = makeDependencies();
-    resolveRemotePackument.mockReturnValue(Err(expected).toAsyncResult());
+    const { viewCmd, fetchPackument } = makeDependencies();
+    fetchPackument.mockReturnValue(Ok(null).toAsyncResult());
 
     const result = await viewCmd(somePackage, { _global: {} });
 
@@ -120,10 +115,8 @@ describe("cmd-view", () => {
   });
 
   it("should notify if package could not be resolved", async () => {
-    const { viewCmd, resolveRemotePackument, log } = makeDependencies();
-    resolveRemotePackument.mockReturnValue(
-      Err(new PackumentNotFoundError()).toAsyncResult()
-    );
+    const { viewCmd, fetchPackument, log } = makeDependencies();
+    fetchPackument.mockReturnValue(Ok(null).toAsyncResult());
 
     await viewCmd(somePackage, { _global: {} });
 

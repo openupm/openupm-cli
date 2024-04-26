@@ -71,7 +71,7 @@ const removeCmd = makeRemoveCmd(
   writeProjectManifest,
   log
 );
-const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
+const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
 
 // update-notifier
 
