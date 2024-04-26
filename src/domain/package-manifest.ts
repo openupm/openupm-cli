@@ -129,7 +129,7 @@ export function dependenciesOf(
  * with all Unity version.
  */
 export function tryGetTargetEditorVersionFor(
-  packageManifest: UnityPackageManifest
+  packageManifest: Pick<UnityPackageManifest, "unity" | "unityRelease">
 ): Result<EditorVersion | null, InvalidTargetEditorError> {
   if (packageManifest.unity === undefined) return Ok(null);
 
