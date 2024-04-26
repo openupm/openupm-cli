@@ -6,7 +6,6 @@ import { Dist, Maintainer } from "@npm/types";
 import { Err, Ok, Result } from "ts-results-es";
 import { EditorVersion, tryParseEditorVersion } from "./editor-version";
 import { CustomError } from "ts-custom-error";
-import { constant } from "fast-check";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -143,4 +142,17 @@ export function tryGetTargetEditorVersionFor(
   return parsed !== null
     ? Ok(parsed)
     : Err(new InvalidTargetEditorError(versionString));
+}
+
+/**
+ * Attempts to get a specific version from a packument.
+ * @param packument The packument.
+ * @param version The version to search.
+ * @returns The packument-version or null if not found.
+ */
+export function tryGetPackumentVersion(
+  packument: UnityPackument,
+  version: SemanticVersion
+): UnityPackumentVersion | null {
+  return packument.versions[version] ?? null;
 }
