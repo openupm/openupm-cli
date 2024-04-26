@@ -21,7 +21,7 @@ import {
   makeEmptyScopedRegistryFor,
 } from "../domain/scoped-registry";
 import {
-  addDependency,
+  setDependency,
   addTestable,
   hasDependency,
   mapScopedRegistry,
@@ -262,7 +262,7 @@ export function makeAddCmd(
       const oldVersion = manifest.dependencies[name];
       // Whether a change was made that requires overwriting the manifest
       let dirty = false;
-      manifest = addDependency(
+      manifest = setDependency(
         manifest,
         name,
         versionToAdd as PackageUrl | SemanticVersion

@@ -1,10 +1,10 @@
 import {
-  addDependency,
   addTestable,
   emptyProjectManifest,
   hasDependency,
   mapScopedRegistry,
   removeDependency,
+  setDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
 } from "../../src/domain/project-manifest";
@@ -18,13 +18,13 @@ import { exampleRegistryUrl } from "./data-registry";
 import { buildProjectManifest } from "./data-project-manifest";
 
 describe("project-manifest", () => {
-  describe("dependency", () => {
+  describe("set dependency", () => {
     it("should add dependency when adding first time", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           let manifest = emptyProjectManifest;
 
-          manifest = addDependency(
+          manifest = setDependency(
             manifest,
             packumentName,
             makeSemanticVersion("1.2.3")
@@ -40,12 +40,12 @@ describe("project-manifest", () => {
         fc.property(arbDomainName, (packumentName) => {
           let manifest = emptyProjectManifest;
 
-          manifest = addDependency(
+          manifest = setDependency(
             manifest,
             packumentName,
             makeSemanticVersion("1.2.3")
           );
-          manifest = addDependency(
+          manifest = setDependency(
             manifest,
             packumentName,
             makeSemanticVersion("2.3.4")
@@ -55,13 +55,15 @@ describe("project-manifest", () => {
         })
       );
     });
+  });
 
+  describe("remove dependency", () => {
     it("should remove existing dependency", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           let manifest = emptyProjectManifest;
 
-          manifest = addDependency(
+          manifest = setDependency(
             manifest,
             packumentName,
             makeSemanticVersion("1.2.3")

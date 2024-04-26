@@ -44,13 +44,13 @@ export type UnityProjectManifest = Readonly<{
 export const emptyProjectManifest: UnityProjectManifest = { dependencies: {} };
 
 /**
- * Adds a dependency to the manifest. If a dependency with that name already
+ * Sets a dependency in the manifest. If a dependency with that name already
  * exists, the version is overwritten.
  * @param manifest The manifest.
  * @param name The dependency name.
  * @param version The dependency version or url.
  */
-export function addDependency(
+export function setDependency(
   manifest: UnityProjectManifest,
   name: DomainName,
   version: SemanticVersion | PackageUrl

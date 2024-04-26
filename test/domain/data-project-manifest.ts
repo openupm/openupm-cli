@@ -3,7 +3,7 @@ import { isDomainName } from "../../src/domain/domain-name";
 import { isSemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import {
-  addDependency,
+  setDependency,
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
@@ -68,7 +68,7 @@ class UnityProjectManifestBuilder {
     assert(isSemanticVersion(version), `${version} is semantic version`);
     if (withScope) this.addScope(name);
     if (testable) this.addTestable(name);
-    this.manifest = addDependency(this.manifest, name, version);
+    this.manifest = setDependency(this.manifest, name, version);
     return this;
   }
 }
