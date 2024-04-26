@@ -8,9 +8,12 @@ import { unityRegistryUrl } from "../domain/registry-url";
  */
 export function logValidDependency(log: Logger, dependency: ValidDependency) {
   const packageRef = makePackageReference(dependency.name, dependency.version);
-  const internalTag = dependency.internal ? "[internal] " : "";
-  const upstreamTag =
-    dependency.source === unityRegistryUrl ? "[upstream]" : "";
-  const message = `${packageRef} ${internalTag}${upstreamTag}`;
+  const tag =
+    dependency.source === "built-in"
+      ? "[internal] "
+      : dependency.source === unityRegistryUrl
+      ? "[upstream]"
+      : "";
+  const message = `${packageRef} ${tag}`;
   log.verbose("dependency", message);
 }

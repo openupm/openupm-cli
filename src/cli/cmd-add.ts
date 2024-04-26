@@ -222,8 +222,8 @@ export function makeAddCmd(
           );
           depsValid
             .filter((x) => {
-              if (x.internal) return false;
-              const isUnityPackage = x.source === unityRegistryUrl;
+              const isUnityPackage =
+                x.source === "built-in" || x.source === unityRegistryUrl;
               return !isUnityPackage;
             })
             .map((x) => x.name)

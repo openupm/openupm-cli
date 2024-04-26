@@ -30,14 +30,12 @@ function makeDependencies() {
     [
       {
         source: exampleRegistryUrl,
-        internal: false,
         self: true,
         name: somePackage,
         version: makeSemanticVersion("1.2.3"),
       },
       {
         source: exampleRegistryUrl,
-        internal: false,
         self: false,
         name: otherPackage,
         version: makeSemanticVersion("1.2.3"),
