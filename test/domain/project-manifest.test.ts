@@ -2,6 +2,7 @@ import {
   addDependency,
   addTestable,
   emptyProjectManifest,
+  hasDependency,
   mapScopedRegistry,
   removeDependency,
   setScopedRegistry,
@@ -14,6 +15,7 @@ import { makeRegistryUrl } from "../../src/domain/registry-url";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { exampleRegistryUrl } from "./data-registry";
+import { buildProjectManifest } from "./data-project-manifest";
 
 describe("project-manifest", () => {
   describe("dependency", () => {
@@ -181,6 +183,23 @@ describe("project-manifest", () => {
       manifest = addTestable(manifest, makeDomainName("a"));
 
       expect(manifest.testables).toEqual(["a", "b"]);
+    });
+  });
+
+  describe("has dependency", () => {
+    it("should be true if manifest has dependency", () => {
+      const packageName = makeDomainName("com.some.package");
+      const manifest = buildProjectManifest((manifest) =>
+        manifest.addDependency(packageName, "1.0.0", true, true)
+      );
+
+      expect(hasDependency(manifest, packageName)).toBeTruthy();
+    });
+
+    it("should be false if manifest does not have dependency", () => {
+      const packageName = makeDomainName("com.some.package");
+
+      expect(hasDependency(emptyProjectManifest, packageName)).toBeFalsy();
     });
   });
 });

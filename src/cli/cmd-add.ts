@@ -23,6 +23,7 @@ import {
 import {
   addDependency,
   addTestable,
+  hasDependency,
   mapScopedRegistry,
   UnityProjectManifest,
 } from "../domain/project-manifest";
@@ -231,9 +232,10 @@ export function makeAddCmd(
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
             logPackumentResolveError(log, depObj.name, depObj.reason);
-            const resolvedVersion = manifest.dependencies[depObj.name];
-            const wasResolved = Boolean(resolvedVersion);
-            if (!wasResolved) {
+
+            // If the manifest already has the dependency than it does not
+            // really matter that it was not resolved.
+            if (!hasDependency(manifest, depObj.name)) {
               isAnyDependencyUnresolved = true;
               if (depObj.reason instanceof VersionNotFoundError)
                 log.notice(
