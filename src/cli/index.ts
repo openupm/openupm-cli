@@ -41,13 +41,13 @@ const parseEnv = makeParseEnvService(log);
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
 const npmLogin = makeNpmLoginService(regClient);
-const searchRegistry = makeSearchRegistryService(log);
+const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =
   makeResolveRemotePackumentService(fetchPackument);
 const resolveDependencies = makeResolveDependenciesService(
   resolveRemotePackument
 );
-const getAllPackuments = makeGetAllPackumentsService(log);
+const getAllPackuments = makeGetAllPackumentsService();
 
 const addCmd = makeAddCmd(
   parseEnv,

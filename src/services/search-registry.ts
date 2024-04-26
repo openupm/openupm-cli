@@ -5,7 +5,6 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
-import { Logger } from "npmlog";
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -31,11 +30,9 @@ export type SearchRegistryService = (
  * Get npm fetch options.
  */
 export const getNpmFetchOptions = function (
-  log: Logger,
   registry: Registry
 ): npmFetch.Options {
   const opts: npmSearch.Options = {
-    log,
     registry: registry.url,
   };
   const auth = registry.auth;
@@ -46,10 +43,10 @@ export const getNpmFetchOptions = function (
 /**
  * Makes a {@link SearchRegistryService} function.
  */
-export function makeSearchRegistryService(log: Logger): SearchRegistryService {
+export function makeSearchRegistryService(): SearchRegistryService {
   return (registry, keyword) => {
     return new AsyncResult(
-      npmSearch(keyword, getNpmFetchOptions(log, registry))
+      npmSearch(keyword, getNpmFetchOptions(registry))
         // NOTE: The results of the search will be packument objects, so we can change the type
         .then((results) => Ok(results as SearchedPackument[]))
         .catch((error) => {

@@ -4,7 +4,6 @@ import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { getNpmFetchOptions, SearchedPackument } from "./search-registry";
 import { DomainName } from "../domain/domain-name";
-import { Logger } from "npmlog";
 
 /**
  * The result of querying the /-/all endpoint.
@@ -25,13 +24,11 @@ export type GetAllPackumentsService = (
 /**
  * Makes a {@link GetAllPackumentsService} service.
  */
-export function makeGetAllPackumentsService(
-  log: Logger
-): GetAllPackumentsService {
+export function makeGetAllPackumentsService(): GetAllPackumentsService {
   return (registry) => {
     return new AsyncResult(
       npmFetch
-        .json("/-/all", getNpmFetchOptions(log, registry))
+        .json("/-/all", getNpmFetchOptions(registry))
         .then((result) => Ok(result as AllPackumentsResult))
         .catch((error) => {
           assertIsHttpError(error);
