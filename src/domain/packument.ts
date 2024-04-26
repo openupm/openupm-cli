@@ -3,8 +3,6 @@ import { DomainName } from "./domain-name";
 import { UnityPackageManifest } from "./package-manifest";
 import { PackageId } from "./package-id";
 import { Dist, Maintainer } from "@npm/types";
-import { Err, Ok, Result } from "ts-results-es";
-import { EditorVersion, tryParseEditorVersion } from "./editor-version";
 import { CustomError } from "ts-custom-error";
 
 /**
@@ -119,29 +117,6 @@ export class InvalidTargetEditorError extends CustomError {
   ) {
     super();
   }
-}
-
-/**
- * Extracts the target editor-version from a package-manifest.
- * @param packageManifest The manifest for which to get the editor.
- * @returns The editor-version or null if the package is compatible
- * with all Unity version.
- */
-export function tryGetTargetEditorVersionFor(
-  packageManifest: UnityPackageManifest
-): Result<EditorVersion | null, InvalidTargetEditorError> {
-  if (packageManifest.unity === undefined) return Ok(null);
-
-  const majorMinor = packageManifest.unity;
-  const release =
-    packageManifest.unityRelease !== undefined
-      ? `.${packageManifest.unityRelease}`
-      : "";
-  const versionString = `${majorMinor}${release}`;
-  const parsed = tryParseEditorVersion(versionString);
-  return parsed !== null
-    ? Ok(parsed)
-    : Err(new InvalidTargetEditorError(versionString));
 }
 
 /**

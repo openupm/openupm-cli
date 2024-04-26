@@ -43,12 +43,12 @@ import {
   logManifestSaveError,
   logPackumentResolveError,
 } from "./error-logging";
-import { tryGetTargetEditorVersionFor } from "../domain/packument";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
+import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";

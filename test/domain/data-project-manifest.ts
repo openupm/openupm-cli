@@ -3,10 +3,10 @@ import { isDomainName } from "../../src/domain/domain-name";
 import { isSemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import {
-  setDependency,
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
+  setDependency,
   UnityProjectManifest,
 } from "../../src/domain/project-manifest";
 import { exampleRegistryUrl } from "./data-registry";
