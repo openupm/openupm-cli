@@ -12,6 +12,7 @@ import { recordEntries } from "../utils/record-utils";
 import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
+import { areArraysEqual } from "../utils/array-utils";
 
 export type DependencyBase = {
   /**
@@ -50,10 +51,9 @@ export interface InvalidDependency extends DependencyBase {
   reason: PackumentResolveError;
 }
 
-type NameVersionPair = Readonly<{
-  name: DomainName;
-  version: SemanticVersion | "latest" | undefined;
-}>;
+type NameVersionPair = Readonly<
+  [DomainName, SemanticVersion | "latest" | undefined]
+>;
 
 /**
  * Service function for resolving all dependencies for a package.
@@ -79,7 +79,7 @@ export function makeResolveDependenciesService(
 ): ResolveDependenciesService {
   return async (registry, upstreamRegistry, name, version, deep) => {
     // a list of pending dependency {name, version}
-    const pendingList: NameVersionPair[] = [{ name, version }];
+    const pendingList = Array.of<NameVersionPair>([name, version]);
     // a list of processed dependency {name, version}
     const processedList = Array.of<NameVersionPair>();
     // a list of dependency entry exists on the registry
@@ -110,31 +110,33 @@ export function makeResolveDependenciesService(
 
     while (pendingList.length > 0) {
       // NOTE: Guaranteed defined because of while loop logic
-      const entry = pendingList.shift() as NameVersionPair;
-      const isProcessed = processedList.some(
-        (x) => x.name === entry.name && x.version === entry.version
+      const entry = pendingList.shift()!;
+      const [entryName, entryVersion] = entry;
+
+      const isProcessed = processedList.some((processed) =>
+        areArraysEqual(processed, entry)
       );
       if (!isProcessed) {
         // add entry to processed list
         processedList.push(entry);
-        const isInternal = isInternalPackage(entry.name);
-        const isSelf = entry.name === name;
+        const isInternal = isInternalPackage(entryName);
+        const isSelf = entryName === name;
         let source = upstreamRegistry.url;
-        let resolvedVersion = entry.version;
+        let resolvedVersion = entryVersion;
 
         if (!isInternal) {
           // First primary registry
           let resolveResult = await tryResolveFromRegistry(
             registry,
-            entry.name,
-            entry.version
+            entryName,
+            entryVersion
           );
           // Then upstream registry
           if (resolveResult.isErr()) {
             const upstreamResult = await tryResolveFromRegistry(
               upstreamRegistry,
-              entry.name,
-              entry.version
+              entryName,
+              entryVersion
             );
             if (upstreamResult.isOk()) resolveResult = upstreamResult;
             else resolveResult = pickMostFixable(resolveResult, upstreamResult);
@@ -142,7 +144,7 @@ export function makeResolveDependenciesService(
 
           if (resolveResult.isErr()) {
             depsInvalid.push({
-              name: entry.name,
+              name: entryName,
               self: isSelf,
               reason: resolveResult.error,
             });
@@ -160,26 +162,20 @@ export function makeResolveDependenciesService(
 
           // add dependencies to pending list
           if (isSelf || deep) {
-            const deps = recordEntries(
+            recordEntries(
               resolveResult.value.packumentVersion["dependencies"] || {}
-            ).map((x): NameVersionPair => {
-              return {
-                name: x[0],
-                version: x[1],
-              };
-            });
-            deps.forEach((x) => pendingList.push(x));
+            ).forEach((x) => pendingList.push(x));
           }
         }
 
-        // We can safely assert this. entry.version can only not be a semantic
+        // We can safely assert this. entryVersion can only not be a semantic
         // version for the initial input, but then it should not be internal
         // and thus resolve to a semantic version.
         assert(resolvedVersion !== undefined);
         assert(isSemanticVersion(resolvedVersion));
 
         const dependency: ValidDependency = {
-          name: entry.name,
+          name: entryName,
           version: resolvedVersion,
           internal: isInternal,
           source,
