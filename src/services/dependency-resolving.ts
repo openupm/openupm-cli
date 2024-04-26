@@ -12,8 +12,13 @@ import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
-import { ResolveLatestVersionService } from "./resolve-latest-version";
-import { Ok } from "ts-results-es";
+import {
+  ResolveLatestVersionError,
+  ResolveLatestVersionService,
+} from "./resolve-latest-version";
+import { Ok, Result } from "ts-results-es";
+import { FetchPackumentError } from "./fetch-packument";
+import { HttpErrorBase } from "npm-registry-fetch";
 
 export type DependencyBase = {
   /**
@@ -52,6 +57,13 @@ export interface InvalidDependency extends DependencyBase {
 type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 
 /**
+ * Error which may occur when resolving the dependencies for a package.
+ */
+export type DependencyResolveError =
+  | ResolveLatestVersionError
+  | FetchPackumentError;
+
+/**
  * Service function for resolving all dependencies for a package.
  * @param registry The registry in which to search the dependencies.
  * @param upstreamRegistry The upstream registry in which to search as a backup.
@@ -65,7 +77,9 @@ export type ResolveDependenciesService = (
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean
-) => Promise<[ValidDependency[], InvalidDependency[]]>;
+) => Promise<
+  Result<[ValidDependency[], InvalidDependency[]], DependencyResolveError>
+>;
 
 /**
  * Makes a {@link ResolveDependenciesService} function.
@@ -74,15 +88,15 @@ export function makeResolveDependenciesService(
   resolveRemotePackument: ResolveRemotePackumentService,
   resolveLatestVersion: ResolveLatestVersionService
 ): ResolveDependenciesService {
+  // TODO: Add tests for this service
+
   return async (registry, upstreamRegistry, name, version, deep) => {
     const latestVersionResult =
       version === undefined || version === "latest"
         ? await resolveLatestVersion([registry, upstreamRegistry], name).promise
         : Ok(version);
-    if (latestVersionResult.isErr()) {
-      // TODO: Handle
-      return [[], []];
-    }
+    if (latestVersionResult.isErr()) return latestVersionResult;
+
     const latestVersion = latestVersionResult.value;
 
     // a list of pending dependency {name, version}
@@ -157,6 +171,9 @@ export function makeResolveDependenciesService(
         }
 
         if (resolveResult.isErr()) {
+          if (resolveResult.error instanceof HttpErrorBase)
+            return resolveResult;
+
           depsInvalid.push({
             name: entryName,
             self: isSelf,
@@ -189,6 +206,6 @@ export function makeResolveDependenciesService(
         depsValid.push(dependency);
       }
     }
-    return [depsValid, depsInvalid];
+    return Ok([depsValid, depsInvalid]);
   };
 }

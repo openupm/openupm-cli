@@ -73,23 +73,25 @@ function makeDependencies() {
   );
 
   const resolveDependencies = mockService<ResolveDependenciesService>();
-  resolveDependencies.mockResolvedValue([
-    [
-      {
-        name: somePackage,
-        version: makeSemanticVersion("1.0.0"),
-        source: exampleRegistryUrl,
-        self: true,
-      },
-      {
-        name: otherPackage,
-        version: makeSemanticVersion("1.0.0"),
-        source: exampleRegistryUrl,
-        self: false,
-      },
-    ],
-    [],
-  ]);
+  resolveDependencies.mockResolvedValue(
+    Ok([
+      [
+        {
+          name: somePackage,
+          version: makeSemanticVersion("1.0.0"),
+          source: exampleRegistryUrl,
+          self: true,
+        },
+        {
+          name: otherPackage,
+          version: makeSemanticVersion("1.0.0"),
+          source: exampleRegistryUrl,
+          self: false,
+        },
+      ],
+      [],
+    ])
+  );
 
   const loadProjectManifest = mockService<LoadProjectManifest>();
   mockProjectManifest(loadProjectManifest, emptyProjectManifest);
@@ -358,16 +360,18 @@ describe("cmd-add", () => {
 
   it("should notify of unresolved dependencies", async () => {
     const { addCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+          },
+        ],
+      ])
+    );
 
     await addCmd(somePackage, {
       _global: {},
@@ -398,16 +402,18 @@ describe("cmd-add", () => {
 
   it("should suggest to install missing dependency version manually", async () => {
     const { addCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+          },
+        ],
+      ])
+    );
 
     await addCmd(somePackage, {
       _global: {},
@@ -421,16 +427,18 @@ describe("cmd-add", () => {
 
   it("should suggest to run with force if dependency could not be resolved", async () => {
     const { addCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+          },
+        ],
+      ])
+    );
 
     await addCmd(somePackage, {
       _global: {},
@@ -461,16 +469,18 @@ describe("cmd-add", () => {
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+          },
+        ],
+      ])
+    );
 
     const result = await addCmd(somePackage, {
       _global: {},
@@ -483,16 +493,18 @@ describe("cmd-add", () => {
 
   it("should add package with unresolved dependency when running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+          },
+        ],
+      ])
+    );
 
     const result = await addCmd(somePackage, {
       _global: {},

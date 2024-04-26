@@ -26,23 +26,25 @@ function makeDependencies() {
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
   const resolveDependencies = mockService<ResolveDependenciesService>();
-  resolveDependencies.mockResolvedValue([
-    [
-      {
-        source: exampleRegistryUrl,
-        self: true,
-        name: somePackage,
-        version: makeSemanticVersion("1.2.3"),
-      },
-      {
-        source: exampleRegistryUrl,
-        self: false,
-        name: otherPackage,
-        version: makeSemanticVersion("1.2.3"),
-      },
-    ],
-    [],
-  ]);
+  resolveDependencies.mockResolvedValue(
+    Ok([
+      [
+        {
+          source: exampleRegistryUrl,
+          self: true,
+          name: somePackage,
+          version: makeSemanticVersion("1.2.3"),
+        },
+        {
+          source: exampleRegistryUrl,
+          self: false,
+          name: otherPackage,
+          version: makeSemanticVersion("1.2.3"),
+        },
+      ],
+      [],
+    ])
+  );
 
   const log = makeMockLogger();
 
@@ -135,16 +137,18 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new PackumentNotFoundError(),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new PackumentNotFoundError(),
+          },
+        ],
+      ])
+    );
 
     await depsCmd(somePackage, {
       _global: {},
@@ -158,16 +162,18 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency version", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(makeSemanticVersion("1.2.3"), []),
-        },
-      ],
-    ]);
+    resolveDependencies.mockResolvedValue(
+      Ok([
+        [],
+        [
+          {
+            name: otherPackage,
+            self: false,
+            reason: new VersionNotFoundError(makeSemanticVersion("1.2.3"), []),
+          },
+        ],
+      ])
+    );
 
     await depsCmd(somePackage, {
       _global: {},
