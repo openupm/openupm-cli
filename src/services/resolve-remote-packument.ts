@@ -7,9 +7,8 @@ import {
   ResolvedPackument,
   tryResolveFromPackument,
 } from "../packument-resolving";
-import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "../common-errors";
-import { FetchPackumentService } from "./fetch-packument";
+import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
 
 /**
  * Service function for resolving remove packuments.
@@ -21,7 +20,10 @@ export type ResolveRemotePackumentService = (
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-) => AsyncResult<ResolvedPackument, PackumentResolveError | HttpErrorBase>;
+) => AsyncResult<
+  ResolvedPackument,
+  PackumentResolveError | FetchPackumentError
+>;
 
 /**
  * Makes a {@link ResolveRemotePackumentService} function.
