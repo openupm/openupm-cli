@@ -1,5 +1,5 @@
 import { DomainName, isInternalPackage } from "../domain/domain-name";
-import { isSemanticVersion, SemanticVersion } from "../domain/semantic-version";
+import { SemanticVersion } from "../domain/semantic-version";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
   PackumentResolveError,
@@ -8,7 +8,6 @@ import {
   tryResolveFromCache,
 } from "../packument-resolving";
 import { RegistryUrl } from "../domain/registry-url";
-import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { areArraysEqual } from "../utils/array-utils";
@@ -50,9 +49,7 @@ export interface InvalidDependency extends DependencyBase {
   reason: PackumentResolveError;
 }
 
-type NameVersionPair = Readonly<
-  [DomainName, SemanticVersion | "latest" | undefined]
->;
+type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 
 /**
  * Service function for resolving all dependencies for a package.
@@ -131,62 +128,61 @@ export function makeResolveDependenciesService(
         processedList.push(entry);
         const isInternal = isInternalPackage(entryName);
         const isSelf = entryName === name;
-        let source: ValidDependency["source"] = "built-in";
-        let resolvedVersion = entryVersion;
 
-        if (!isInternal) {
-          // First primary registry
-          let resolveResult = await tryResolveFromRegistry(
-            registry,
+        if (isInternal) {
+          depsValid.push({
+            name: entryName,
+            version: latestVersion,
+            source: "built-in",
+            self: isSelf,
+          });
+          continue;
+        }
+
+        // First primary registry
+        let resolveResult = await tryResolveFromRegistry(
+          registry,
+          entryName,
+          entryVersion
+        );
+        // Then upstream registry
+        if (resolveResult.isErr()) {
+          const upstreamResult = await tryResolveFromRegistry(
+            upstreamRegistry,
             entryName,
             entryVersion
           );
-          // Then upstream registry
-          if (resolveResult.isErr()) {
-            const upstreamResult = await tryResolveFromRegistry(
-              upstreamRegistry,
-              entryName,
-              entryVersion
-            );
-            if (upstreamResult.isOk()) resolveResult = upstreamResult;
-            else resolveResult = pickMostFixable(resolveResult, upstreamResult);
-          }
-
-          if (resolveResult.isErr()) {
-            depsInvalid.push({
-              name: entryName,
-              self: isSelf,
-              reason: resolveResult.error,
-            });
-            continue;
-          }
-
-          // Packument was resolved successfully
-          source = resolveResult.value.source;
-          const resolvedPackumentVersion = resolveResult.value.packumentVersion;
-          resolvedVersion = resolvedPackumentVersion.version;
-          packumentCache = addToCache(
-            packumentCache,
-            resolveResult.value.source,
-            resolveResult.value.packument
-          );
-
-          // add dependencies to pending list
-          if (isSelf || deep) {
-            const dependencies = dependenciesOf(resolvedPackumentVersion);
-            pendingList.push(...dependencies);
-          }
+          if (upstreamResult.isOk()) resolveResult = upstreamResult;
+          else resolveResult = pickMostFixable(resolveResult, upstreamResult);
         }
 
-        // We can safely assert this. entryVersion can only not be a semantic
-        // version for the initial input, but then it should not be internal
-        // and thus resolve to a semantic version.
-        assert(resolvedVersion !== undefined);
-        assert(isSemanticVersion(resolvedVersion));
+        if (resolveResult.isErr()) {
+          depsInvalid.push({
+            name: entryName,
+            self: isSelf,
+            reason: resolveResult.error,
+          });
+          continue;
+        }
+
+        // Packument was resolved successfully
+        const source = resolveResult.value.source;
+        const resolvedPackumentVersion = resolveResult.value.packumentVersion;
+        packumentCache = addToCache(
+          packumentCache,
+          resolveResult.value.source,
+          resolveResult.value.packument
+        );
+
+        // add dependencies to pending list
+        if (isSelf || deep) {
+          const dependencies = dependenciesOf(resolvedPackumentVersion);
+          pendingList.push(...dependencies);
+        }
 
         const dependency: ValidDependency = {
           name: entryName,
-          version: resolvedVersion,
+          version: entryVersion,
           source,
           self: isSelf,
         };
