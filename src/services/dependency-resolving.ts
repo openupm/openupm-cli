@@ -1,6 +1,5 @@
 import { DomainName, isInternalPackage } from "../domain/domain-name";
 import { isSemanticVersion, SemanticVersion } from "../domain/semantic-version";
-import { makePackageReference } from "../domain/package-reference";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
   PackumentResolveError,
@@ -14,6 +13,7 @@ import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { Logger } from "npmlog";
+import { logValidDependency } from "../cli/dependency-logging";
 
 export type DependencyBase = {
   /**
@@ -181,19 +181,15 @@ export function makeResolveDependenciesService(
         assert(resolvedVersion !== undefined);
         assert(isSemanticVersion(resolvedVersion));
 
-        depsValid.push({
+        const dependency: ValidDependency = {
           name: entry.name,
           version: resolvedVersion,
           internal: isInternal,
           upstream: isUpstream,
           self: isSelf,
-        });
-        log.verbose(
-          "dependency",
-          `${makePackageReference(entry.name, resolvedVersion)} ${
-            isInternal ? "[internal] " : ""
-          }${isUpstream ? "[upstream]" : ""}`
-        );
+        };
+        logValidDependency(log, dependency);
+        depsValid.push(dependency);
       }
     }
     return [depsValid, depsInvalid];
