@@ -15,7 +15,6 @@ import { tryGetHomePath } from "./special-paths";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError } from "../utils/process";
-import { Logger } from "npmlog";
 
 const configFileName = ".upmconfig.toml";
 
@@ -118,16 +117,12 @@ export type UpmAuthStoreError = UpmConfigLoadError | IOError;
  * Stores authentication information in the projects upm config.
  */
 export const tryStoreUpmAuth = function (
-  log: Logger,
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
-): AsyncResult<void, UpmAuthStoreError> {
+): AsyncResult<string, UpmAuthStoreError> {
   return tryLoadUpmConfig(configDir)
     .map((maybeConfig) => maybeConfig || {})
     .map((config) => addAuth(registry, auth, config))
-    .andThen((config) => trySaveUpmConfig(config, configDir))
-    .map((configPath) =>
-      log.notice("config", "saved unity config at " + configPath)
-    );
+    .andThen((config) => trySaveUpmConfig(config, configDir));
 };
