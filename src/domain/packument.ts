@@ -122,20 +122,20 @@ export class InvalidTargetEditorError extends CustomError {
 }
 
 /**
- * Extracts the target editor-version from a packument-version.
- * @param packumentVersion The packument-version for which to get the editor.
- * @returns The editor-version or null if the packument is compatible
+ * Extracts the target editor-version from a package-manifest.
+ * @param packageManifest The manifest for which to get the editor.
+ * @returns The editor-version or null if the package is compatible
  * with all Unity version.
  */
 export function tryGetTargetEditorVersionFor(
-  packumentVersion: UnityPackumentVersion
+  packageManifest: UnityPackageManifest
 ): Result<EditorVersion | null, InvalidTargetEditorError> {
-  if (packumentVersion.unity === undefined) return Ok(null);
+  if (packageManifest.unity === undefined) return Ok(null);
 
-  const majorMinor = packumentVersion.unity;
+  const majorMinor = packageManifest.unity;
   const release =
-    packumentVersion.unityRelease !== undefined
-      ? `.${packumentVersion.unityRelease}`
+    packageManifest.unityRelease !== undefined
+      ? `.${packageManifest.unityRelease}`
       : "";
   const versionString = `${majorMinor}${release}`;
   const parsed = tryParseEditorVersion(versionString);
