@@ -3,7 +3,6 @@ import { DomainName } from "./domain-name";
 import { UnityPackageManifest } from "./package-manifest";
 import { PackageId } from "./package-id";
 import { Dist, Maintainer } from "@npm/types";
-import { CustomError } from "ts-custom-error";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -101,23 +100,6 @@ export const tryGetLatestVersion = function (
   if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
   else if (packument.version) return packument.version;
 };
-
-/**
- * Error for when a packument contained an invalid target editor-version.
- */
-export class InvalidTargetEditorError extends CustomError {
-  // noinspection JSUnusedLocalSymbols
-  private readonly _class = "InvalidTargetEditorError";
-
-  constructor(
-    /**
-     * The invalid editor-version string.
-     */
-    public readonly versionString: string
-  ) {
-    super();
-  }
-}
 
 /**
  * Attempts to get a specific version from a packument.

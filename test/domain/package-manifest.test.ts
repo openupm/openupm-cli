@@ -1,9 +1,9 @@
 import {
   dependenciesOf,
+  InvalidTargetEditorError,
   tryGetTargetEditorVersionFor,
 } from "../../src/domain/package-manifest";
 import { makeEditorVersion } from "../../src/domain/editor-version";
-import { InvalidTargetEditorError } from "../../src/domain/packument";
 
 describe("package manifest", () => {
   describe("get dependency list", () => {

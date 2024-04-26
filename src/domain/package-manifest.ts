@@ -4,7 +4,7 @@ import { Maintainer } from "@npm/types";
 import { recordEntries } from "../utils/record-utils";
 import { Err, Ok, Result } from "ts-results-es";
 import { EditorVersion, tryParseEditorVersion } from "./editor-version";
-import { InvalidTargetEditorError } from "./packument";
+import { CustomError } from "ts-custom-error";
 
 type MajorMinor = `${number}.${number}`;
 
@@ -120,6 +120,23 @@ export function dependenciesOf(
   [dependencyName: DomainName, dependencyVersion: SemanticVersion]
 > {
   return recordEntries(packageManifest["dependencies"] || {});
+}
+
+/**
+ * Error for when a packument contained an invalid target editor-version.
+ */
+export class InvalidTargetEditorError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "InvalidTargetEditorError";
+
+  constructor(
+    /**
+     * The invalid editor-version string.
+     */
+    public readonly versionString: string
+  ) {
+    super();
+  }
 }
 
 /**
