@@ -26,40 +26,6 @@ export type SearchCmd = (
   options: SearchOptions
 ) => Promise<Result<void, SearchError>>;
 
-const searchEndpoint = function (
-  log: Logger,
-  searchRegistry: SearchRegistryService,
-  registry: Registry,
-  keyword: string
-): AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase> {
-  return searchRegistry(registry, keyword).map((results) => {
-    log.verbose("npmsearch", results.join(os.EOL));
-    return results;
-  });
-};
-
-const searchOld = function (
-  log: Logger,
-  getAllPackuments: GetAllPackumentsService,
-  registry: Registry,
-  keyword: string
-): AsyncResult<SearchedPackument[], HttpErrorBase> {
-  return getAllPackuments(registry).map((allPackuments) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _updated, ...packumentEntries } = allPackuments;
-    const packuments = Object.values(packumentEntries);
-
-    log.verbose("endpoint.all", packuments.join(os.EOL));
-
-    // filter keyword
-    const klc = keyword.toLowerCase();
-
-    return packuments.filter((packument) =>
-      packument.name.toLowerCase().includes(klc)
-    );
-  });
-};
-
 /**
  * Makes a {@link SearchCmd} function.
  */
@@ -69,6 +35,36 @@ export function makeSearchCmd(
   getAllPackuments: GetAllPackumentsService,
   log: Logger
 ): SearchCmd {
+  function searchEndpoint(
+    registry: Registry,
+    keyword: string
+  ): AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase> {
+    return searchRegistry(registry, keyword).map((results) => {
+      log.verbose("npmsearch", results.join(os.EOL));
+      return results;
+    });
+  }
+
+  function searchOld(
+    registry: Registry,
+    keyword: string
+  ): AsyncResult<SearchedPackument[], HttpErrorBase> {
+    return getAllPackuments(registry).map((allPackuments) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _updated, ...packumentEntries } = allPackuments;
+      const packuments = Object.values(packumentEntries);
+
+      log.verbose("endpoint.all", packuments.join(os.EOL));
+
+      // filter keyword
+      const klc = keyword.toLowerCase();
+
+      return packuments.filter((packument) =>
+        packument.name.toLowerCase().includes(klc)
+      );
+    });
+  }
+
   return async (keyword, options) => {
     // parse env
     const envResult = await parseEnv(options);
@@ -76,18 +72,12 @@ export function makeSearchCmd(
     const env = envResult.value;
 
     // search endpoint
-    let result = await searchEndpoint(
-      log,
-      searchRegistry,
-      env.registry,
-      keyword
-    ).promise;
+    let result = await searchEndpoint(env.registry, keyword).promise;
 
     // search old search
     if (result.isErr()) {
       log.warn("", "fast search endpoint is not available, using old search.");
-      result = await searchOld(log, getAllPackuments, env.registry, keyword)
-        .promise;
+      result = await searchOld(env.registry, keyword).promise;
     }
     if (result.isErr()) {
       log.warn("", "/-/all endpoint is not available");
