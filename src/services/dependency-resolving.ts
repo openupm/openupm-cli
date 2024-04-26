@@ -7,7 +7,7 @@ import {
   ResolvableVersion,
   tryResolveFromCache,
 } from "../packument-resolving";
-import { unityRegistryUrl } from "../domain/registry-url";
+import { RegistryUrl } from "../domain/registry-url";
 import { recordEntries } from "../utils/record-utils";
 import assert from "assert";
 import { Registry } from "../domain/registry";
@@ -30,9 +30,9 @@ export type DependencyBase = {
  */
 export interface ValidDependency extends DependencyBase {
   /**
-   * Whether this dependency was found on the upstream registry.
+   * The source from which this dependency was resolved.
    */
-  readonly upstream: boolean;
+  readonly source: RegistryUrl;
   /**
    * Whether this dependency is an internal package.
    */
@@ -119,7 +119,7 @@ export function makeResolveDependenciesService(
         processedList.push(entry);
         const isInternal = isInternalPackage(entry.name);
         const isSelf = entry.name === name;
-        let isUpstream = false;
+        let source = upstreamRegistry.url;
         let resolvedVersion = entry.version;
 
         if (!isInternal) {
@@ -150,7 +150,7 @@ export function makeResolveDependenciesService(
           }
 
           // Packument was resolved successfully
-          isUpstream = resolveResult.value.source === unityRegistryUrl;
+          source = resolveResult.value.source;
           resolvedVersion = resolveResult.value.packumentVersion.version;
           packumentCache = addToCache(
             packumentCache,
@@ -182,7 +182,7 @@ export function makeResolveDependenciesService(
           name: entry.name,
           version: resolvedVersion,
           internal: isInternal,
-          upstream: isUpstream,
+          source,
           self: isSelf,
         };
         depsValid.push(dependency);

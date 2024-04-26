@@ -78,14 +78,14 @@ function makeDependencies() {
       {
         name: somePackage,
         version: makeSemanticVersion("1.0.0"),
-        upstream: false,
+        source: exampleRegistryUrl,
         internal: false,
         self: true,
       },
       {
         name: otherPackage,
         version: makeSemanticVersion("1.0.0"),
-        upstream: false,
+        source: exampleRegistryUrl,
         internal: false,
         self: false,
       },

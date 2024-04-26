@@ -29,14 +29,14 @@ function makeDependencies() {
   resolveDependencies.mockResolvedValue([
     [
       {
-        upstream: false,
+        source: exampleRegistryUrl,
         internal: false,
         self: true,
         name: somePackage,
         version: makeSemanticVersion("1.2.3"),
       },
       {
-        upstream: false,
+        source: exampleRegistryUrl,
         internal: false,
         self: false,
         name: otherPackage,
