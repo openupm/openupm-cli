@@ -8,11 +8,11 @@ import {
   tryResolveFromCache,
 } from "../packument-resolving";
 import { RegistryUrl } from "../domain/registry-url";
-import { recordEntries } from "../utils/record-utils";
 import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { areArraysEqual } from "../utils/array-utils";
+import { dependenciesOf } from "../domain/package-manifest";
 
 export type DependencyBase = {
   /**
@@ -153,7 +153,8 @@ export function makeResolveDependenciesService(
 
           // Packument was resolved successfully
           source = resolveResult.value.source;
-          resolvedVersion = resolveResult.value.packumentVersion.version;
+          const resolvedPackumentVersion = resolveResult.value.packumentVersion;
+          resolvedVersion = resolvedPackumentVersion.version;
           packumentCache = addToCache(
             packumentCache,
             resolveResult.value.source,
@@ -162,9 +163,8 @@ export function makeResolveDependenciesService(
 
           // add dependencies to pending list
           if (isSelf || deep) {
-            recordEntries(
-              resolveResult.value.packumentVersion["dependencies"] || {}
-            ).forEach((x) => pendingList.push(x));
+            const dependencies = dependenciesOf(resolvedPackumentVersion);
+            pendingList.push(...dependencies);
           }
         }
 

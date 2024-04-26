@@ -1,6 +1,7 @@
 import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { Maintainer } from "@npm/types";
+import { recordEntries } from "../utils/record-utils";
 
 type MajorMinor = `${number}.${number}`;
 
@@ -104,3 +105,16 @@ export type UnityPackageManifest = Readonly<{
    */
   unityRelease?: string;
 }>;
+
+/**
+ * Gets a list of all dependencies for a package.
+ * @param packageManifest The package.
+ * @returns A list of dependencies. The dependencies are in tuple form.
+ */
+export function dependenciesOf(
+  packageManifest: Pick<UnityPackageManifest, "dependencies">
+): ReadonlyArray<
+  [dependencyName: DomainName, dependencyVersion: SemanticVersion]
+> {
+  return recordEntries(packageManifest["dependencies"] || {});
+}
