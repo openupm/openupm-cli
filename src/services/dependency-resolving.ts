@@ -7,15 +7,14 @@ import {
   pickMostFixable,
   ResolvableVersion,
   tryResolveFromCache,
-  VersionNotFoundError,
 } from "../packument-resolving";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { recordEntries } from "../utils/record-utils";
 import assert from "assert";
-import { PackumentNotFoundError } from "../common-errors";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { Logger } from "npmlog";
+import { logPackumentResolveError } from "../cli/error-logging";
 
 export type DependencyBase = {
   /**
@@ -145,19 +144,8 @@ export function makeResolveDependenciesService(
             else resolveResult = pickMostFixable(resolveResult, upstreamResult);
           }
 
-          // If none resolved successfully, log the most fixable failure
           if (resolveResult.isErr()) {
-            if (resolveResult.error instanceof PackumentNotFoundError) {
-              log.warn("404", `package not found: ${entry.name}`);
-            } else if (resolveResult.error instanceof VersionNotFoundError) {
-              const versionList = [...resolveResult.error.availableVersions]
-                .reverse()
-                .join(", ");
-              log.warn(
-                "404",
-                `version ${resolveResult.error.requestedVersion} is not a valid choice of ${versionList}`
-              );
-            }
+            logPackumentResolveError(log, entry.name, resolveResult.error);
             depsInvalid.push({
               name: entry.name,
               self: isSelf,

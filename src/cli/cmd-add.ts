@@ -38,7 +38,11 @@ import { PackumentNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
-import { logManifestLoadError, logManifestSaveError } from "./error-logging";
+import {
+  logManifestLoadError,
+  logManifestSaveError,
+  logPackumentResolveError,
+} from "./error-logging";
 import { tryGetTargetEditorVersionFor } from "../domain/packument";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
@@ -149,17 +153,7 @@ export function makeAddCmd(
         }
 
         if (resolveResult.isErr()) {
-          if (resolveResult.error instanceof PackumentNotFoundError)
-            log.error("404", `package not found: ${name}`);
-          else if (resolveResult.error instanceof VersionNotFoundError) {
-            const versionList = [...resolveResult.error.availableVersions]
-              .reverse()
-              .join(", ");
-            log.warn(
-              "404",
-              `version ${resolveResult.error.requestedVersion} is not a valid choice of: ${versionList}`
-            );
-          }
+          logPackumentResolveError(log, name, resolveResult.error);
           return resolveResult;
         }
 
