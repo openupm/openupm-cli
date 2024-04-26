@@ -6,12 +6,33 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { buildPackument } from "./data-packument";
 
 describe("packument", () => {
-  describe("tryGetLatestVersion", () => {
-    it("should get version from dist-tags", async () => {
-      const version = tryGetLatestVersion({
+  describe("get latest version", () => {
+    it("should first get version from dist-tags", async () => {
+      const packument = {
         "dist-tags": { latest: makeSemanticVersion("1.0.0") },
-      });
+      };
+
+      const version = tryGetLatestVersion(packument);
+
       expect(version).toEqual("1.0.0");
+    });
+
+    it("should then get version from version property", async () => {
+      const packument = {
+        version: makeSemanticVersion("1.0.0"),
+      };
+
+      const version = tryGetLatestVersion(packument);
+
+      expect(version).toEqual("1.0.0");
+    });
+
+    it("should be undefined if version can not be found", () => {
+      const packument = {};
+
+      const version = tryGetLatestVersion(packument);
+
+      expect(version).toBeUndefined();
     });
   });
 

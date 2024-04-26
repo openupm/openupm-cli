@@ -98,7 +98,10 @@ export const tryGetLatestVersion = function (
   packument: VersionedPackument
 ): SemanticVersion | undefined {
   if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
-  else if (packument.version) return packument.version;
+
+  if (packument.version !== undefined) return packument.version;
+
+  return undefined;
 };
 
 /**
