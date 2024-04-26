@@ -1,14 +1,12 @@
 import {
   dependenciesOf,
   tryGetTargetEditorVersionFor,
+  UnityPackageManifest,
 } from "../../src/domain/package-manifest";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { makeEditorVersion } from "../../src/domain/editor-version";
-import {
-  InvalidTargetEditorError,
-  UnityPackumentVersion,
-} from "../../src/domain/packument";
+import { InvalidTargetEditorError } from "../../src/domain/packument";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 
 describe("package manifest", () => {
@@ -45,13 +43,13 @@ describe("package manifest", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const expected = makeEditorVersion(2020, 3);
-          const packumentVersion: UnityPackumentVersion = {
+          const packageManifest: UnityPackageManifest = {
             name: packumentName,
             version: makeSemanticVersion("1.0.0"),
             unity: "2020.3",
           };
 
-          const result = tryGetTargetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packageManifest);
 
           expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
         })
@@ -62,14 +60,14 @@ describe("package manifest", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const expected = makeEditorVersion(2020, 3, 1);
-          const packumentVersion: UnityPackumentVersion = {
+          const packageManifest: UnityPackageManifest = {
             name: packumentName,
             version: makeSemanticVersion("1.0.0"),
             unity: "2020.3",
             unityRelease: "1",
           };
 
-          const result = tryGetTargetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packageManifest);
 
           expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
         })
@@ -79,12 +77,12 @@ describe("package manifest", () => {
     it("should be null for missing major.minor", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          const packumentVersion: UnityPackumentVersion = {
+          const packageManifest: UnityPackageManifest = {
             name: packumentName,
             version: makeSemanticVersion("1.0.0"),
           };
 
-          const result = tryGetTargetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packageManifest);
 
           expect(result).toBeOk((actual) => expect(actual).toBeNull());
         })
@@ -94,7 +92,7 @@ describe("package manifest", () => {
     it("should fail for bad version", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          const packumentVersion: UnityPackumentVersion = {
+          const packageManifest: UnityPackageManifest = {
             name: packumentName,
             version: makeSemanticVersion("1.0.0"),
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -102,7 +100,7 @@ describe("package manifest", () => {
             unity: "bad version",
           };
 
-          const result = tryGetTargetEditorVersionFor(packumentVersion);
+          const result = tryGetTargetEditorVersionFor(packageManifest);
 
           expect(result).toBeError((actual) =>
             expect(actual).toBeInstanceOf(InvalidTargetEditorError)
