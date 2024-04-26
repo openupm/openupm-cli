@@ -48,6 +48,7 @@ import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
+import { unityRegistryUrl } from "../domain/registry-url";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -220,7 +221,11 @@ export function makeAddCmd(
             logValidDependency(log, dependency)
           );
           depsValid
-            .filter((x) => !x.upstream && !x.internal)
+            .filter((x) => {
+              if (x.internal) return false;
+              const isUnityPackage = x.source === unityRegistryUrl;
+              return !isUnityPackage;
+            })
             .map((x) => x.name)
             .forEach((name) => pkgsInScope.push(name));
           // print suggestion for depsInvalid
