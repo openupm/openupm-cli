@@ -1,6 +1,7 @@
 import {
   InvalidTargetEditorError,
   tryGetLatestVersion,
+  tryGetPackumentVersion,
   tryGetTargetEditorVersionFor,
   UnityPackumentVersion,
 } from "../../src/domain/packument";
@@ -8,6 +9,7 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { makeEditorVersion } from "../../src/domain/editor-version";
+import { buildPackument } from "./data-packument";
 
 describe("packument", () => {
   describe("tryGetLatestVersion", () => {
@@ -88,6 +90,28 @@ describe("packument", () => {
           );
         })
       );
+    });
+  });
+
+  describe("get version", () => {
+    it("should find existing packument version", () => {
+      const version = makeSemanticVersion("1.0.0");
+      const packument = buildPackument("com.some.package", (packument) =>
+        packument.addVersion(version)
+      );
+
+      const packumentVersion = tryGetPackumentVersion(packument, version);
+
+      expect(packumentVersion).not.toBeNull();
+    });
+
+    it("should not find missing packument version", () => {
+      const version = makeSemanticVersion("1.0.0");
+      const packument = buildPackument("com.some.package");
+
+      const packumentVersion = tryGetPackumentVersion(packument, version);
+
+      expect(packumentVersion).toBeNull();
     });
   });
 });

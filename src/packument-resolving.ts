@@ -3,6 +3,7 @@ import { DomainName } from "./domain/domain-name";
 import { SemanticVersion } from "./domain/semantic-version";
 import {
   tryGetLatestVersion,
+  tryGetPackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
 } from "./domain/packument";
@@ -100,7 +101,7 @@ export function tryResolveFromPackument(
     return Ok({
       packument,
       source,
-      packumentVersion: packument.versions[latestVersion]!,
+      packumentVersion: tryGetPackumentVersion(packument, latestVersion)!,
     } satisfies ResolvedPackument);
   }
 
@@ -111,7 +112,7 @@ export function tryResolveFromPackument(
   return Ok({
     packument,
     source,
-    packumentVersion: packument.versions[requestedVersion]!,
+    packumentVersion: tryGetPackumentVersion(packument, requestedVersion)!,
   } satisfies ResolvedPackument);
 }
 
