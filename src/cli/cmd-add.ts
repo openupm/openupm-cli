@@ -47,6 +47,7 @@ import { tryGetTargetEditorVersionFor } from "../domain/packument";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 import { Logger } from "npmlog";
+import { logValidDependency } from "./dependency-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -215,6 +216,9 @@ export function makeAddCmd(
             true
           );
           // add depsValid to pkgsInScope.
+          depsValid.forEach((dependency) =>
+            logValidDependency(log, dependency)
+          );
           depsValid
             .filter((x) => !x.upstream && !x.internal)
             .map((x) => x.name)

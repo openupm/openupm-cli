@@ -105,6 +105,23 @@ describe("cmd-deps", () => {
     );
   });
 
+  it("should print verbose information about valid dependencies", async () => {
+    const { depsCmd, log } = makeDependencies();
+
+    await depsCmd(somePackage, {
+      _global: {},
+    });
+
+    expect(log.verbose).toHaveLogLike(
+      "dependency",
+      expect.stringContaining(somePackage)
+    );
+    expect(log.verbose).toHaveLogLike(
+      "dependency",
+      expect.stringContaining(otherPackage)
+    );
+  });
+
   it("should log valid dependencies", async () => {
     const { depsCmd, log } = makeDependencies();
 

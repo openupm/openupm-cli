@@ -14,6 +14,7 @@ import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
 import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
+import { logValidDependency } from "./dependency-logging";
 
 export type DepsError = EnvParseError;
 
@@ -70,6 +71,7 @@ export function makeDepsCmd(
       version,
       deep
     );
+    depsValid.forEach((dependency) => logValidDependency(log, dependency));
     depsValid
       .filter((x) => !x.self)
       .forEach((x) =>

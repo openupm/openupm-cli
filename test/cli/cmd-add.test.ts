@@ -444,6 +444,23 @@ describe("cmd-add", () => {
     );
   });
 
+  it("should print verbose information about valid dependencies", async () => {
+    const { addCmd, log } = makeDependencies();
+
+    await addCmd(somePackage, {
+      _global: {},
+    });
+
+    expect(log.verbose).toHaveLogLike(
+      "dependency",
+      expect.stringContaining(somePackage)
+    );
+    expect(log.verbose).toHaveLogLike(
+      "dependency",
+      expect.stringContaining(otherPackage)
+    );
+  });
+
   it("should fail if dependency could not be resolved and not running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
     resolveDependencies.mockResolvedValue([

@@ -13,7 +13,6 @@ import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { Logger } from "npmlog";
-import { logValidDependency } from "../cli/dependency-logging";
 
 export type DependencyBase = {
   /**
@@ -188,7 +187,6 @@ export function makeResolveDependenciesService(
           upstream: isUpstream,
           self: isSelf,
         };
-        logValidDependency(log, dependency);
         depsValid.push(dependency);
       }
     }
