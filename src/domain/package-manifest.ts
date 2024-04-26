@@ -2,6 +2,9 @@ import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { Maintainer } from "@npm/types";
 import { recordEntries } from "../utils/record-utils";
+import { Err, Ok, Result } from "ts-results-es";
+import { EditorVersion, tryParseEditorVersion } from "./editor-version";
+import { InvalidTargetEditorError } from "./packument";
 
 type MajorMinor = `${number}.${number}`;
 
@@ -117,4 +120,27 @@ export function dependenciesOf(
   [dependencyName: DomainName, dependencyVersion: SemanticVersion]
 > {
   return recordEntries(packageManifest["dependencies"] || {});
+}
+
+/**
+ * Extracts the target editor-version from a package-manifest.
+ * @param packageManifest The manifest for which to get the editor.
+ * @returns The editor-version or null if the package is compatible
+ * with all Unity version.
+ */
+export function tryGetTargetEditorVersionFor(
+  packageManifest: Pick<UnityPackageManifest, "unity" | "unityRelease">
+): Result<EditorVersion | null, InvalidTargetEditorError> {
+  if (packageManifest.unity === undefined) return Ok(null);
+
+  const majorMinor = packageManifest.unity;
+  const release =
+    packageManifest.unityRelease !== undefined
+      ? `.${packageManifest.unityRelease}`
+      : "";
+  const versionString = `${majorMinor}${release}`;
+  const parsed = tryParseEditorVersion(versionString);
+  return parsed !== null
+    ? Ok(parsed)
+    : Err(new InvalidTargetEditorError(versionString));
 }
