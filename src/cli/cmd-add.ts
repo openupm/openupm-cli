@@ -262,8 +262,6 @@ export function makeAddCmd(
       const oldVersion = manifest.dependencies[name];
       // Whether a change was made that requires overwriting the manifest
       let dirty = false;
-      // I am not sure why we need this assertion. I'm pretty sure
-      // code-logic ensures the correct type.
       manifest = addDependency(
         manifest,
         name,
