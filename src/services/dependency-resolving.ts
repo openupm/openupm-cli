@@ -12,7 +12,6 @@ import { recordEntries } from "../utils/record-utils";
 import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
-import { Logger } from "npmlog";
 
 export type DependencyBase = {
   /**
@@ -76,8 +75,7 @@ export type ResolveDependenciesService = (
  * Makes a {@link ResolveDependenciesService} function.
  */
 export function makeResolveDependenciesService(
-  resolveRemotePackument: ResolveRemotePackumentService,
-  log: Logger
+  resolveRemotePackument: ResolveRemotePackumentService
 ): ResolveDependenciesService {
   return async (registry, upstreamRegistry, name, version, deep) => {
     // a list of pending dependency {name, version}
