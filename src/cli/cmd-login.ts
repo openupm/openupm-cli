@@ -87,12 +87,13 @@ export function makeLoginCmd(
     if (options.basicAuth) {
       // basic auth
       const _auth = encodeBasicAuth(username, password);
-      const result = await tryStoreUpmAuth(log, configDir, loginRegistry, {
+      const result = await tryStoreUpmAuth(configDir, loginRegistry, {
         email,
         alwaysAuth,
         _auth,
       } satisfies BasicAuth).promise;
       if (result.isErr()) return result;
+      log.notice("config", "saved unity config at " + result.value);
     } else {
       // npm login
       const loginResult = await npmLogin(
@@ -121,12 +122,13 @@ export function makeLoginCmd(
         log.notice("config", `saved to npm config: ${configPath}`)
       );
 
-      const storeResult = await tryStoreUpmAuth(log, configDir, loginRegistry, {
+      const storeResult = await tryStoreUpmAuth(configDir, loginRegistry, {
         email,
         alwaysAuth,
         token,
       } satisfies TokenAuth).promise;
       if (storeResult.isErr()) return storeResult;
+      log.notice("config", "saved unity config at " + storeResult.value);
     }
 
     return Ok(undefined);
