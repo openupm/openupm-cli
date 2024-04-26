@@ -29,6 +29,7 @@ import {
   makeProjectManifestWriter,
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
+import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
 
 // Composition root
 
@@ -44,8 +45,10 @@ const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =
   makeResolveRemotePackumentService(fetchPackument);
+const resolveLatestVersion = makeResolveLatestVersionService(fetchPackument);
 const resolveDependencies = makeResolveDependenciesService(
-  resolveRemotePackument
+  resolveRemotePackument,
+  resolveLatestVersion
 );
 const getAllPackuments = makeGetAllPackumentsService();
 

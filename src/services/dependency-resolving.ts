@@ -13,6 +13,8 @@ import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
+import { ResolveLatestVersionService } from "./resolve-latest-version";
+import { Ok } from "ts-results-es";
 
 export type DependencyBase = {
   /**
@@ -72,11 +74,22 @@ export type ResolveDependenciesService = (
  * Makes a {@link ResolveDependenciesService} function.
  */
 export function makeResolveDependenciesService(
-  resolveRemotePackument: ResolveRemotePackumentService
+  resolveRemotePackument: ResolveRemotePackumentService,
+  resolveLatestVersion: ResolveLatestVersionService
 ): ResolveDependenciesService {
   return async (registry, upstreamRegistry, name, version, deep) => {
+    const latestVersionResult =
+      version === undefined || version === "latest"
+        ? await resolveLatestVersion([registry, upstreamRegistry], name).promise
+        : Ok(version);
+    if (latestVersionResult.isErr()) {
+      // TODO: Handle
+      return [[], []];
+    }
+    const latestVersion = latestVersionResult.value;
+
     // a list of pending dependency {name, version}
-    const pendingList = Array.of<NameVersionPair>([name, version]);
+    const pendingList = Array.of<NameVersionPair>([name, latestVersion]);
     // a list of processed dependency {name, version}
     const processedList = Array.of<NameVersionPair>();
     // a list of dependency entry exists on the registry
