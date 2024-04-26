@@ -171,3 +171,13 @@ export function pruneManifest(
     ),
   };
 }
+
+/**
+ * Checks if a manifest has a dependency on a specific package.
+ */
+export function hasDependency(
+  manifest: UnityProjectManifest,
+  packageName: DomainName
+): boolean {
+  return packageName in manifest.dependencies;
+}
