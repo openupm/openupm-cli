@@ -34,7 +34,6 @@ import {
 } from "../packument-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
-import { PackumentNotFoundError } from "../common-errors";
 import { Err, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
@@ -232,25 +231,18 @@ export function makeAddCmd(
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
             logPackumentResolveError(log, depObj.name, depObj.reason);
-
-            if (
-              depObj.reason instanceof PackumentNotFoundError ||
-              depObj.reason instanceof VersionNotFoundError
-            ) {
-              // Not sure why it thinks the manifest can be null here.
-              const resolvedVersion = manifest.dependencies[depObj.name];
-              const wasResolved = Boolean(resolvedVersion);
-              if (!wasResolved) {
-                isAnyDependencyUnresolved = true;
-                if (depObj.reason instanceof VersionNotFoundError)
-                  log.notice(
-                    "suggest",
-                    `to install ${makePackageReference(
-                      depObj.name,
-                      depObj.reason.requestedVersion
-                    )} or a replaceable version manually`
-                  );
-              }
+            const resolvedVersion = manifest.dependencies[depObj.name];
+            const wasResolved = Boolean(resolvedVersion);
+            if (!wasResolved) {
+              isAnyDependencyUnresolved = true;
+              if (depObj.reason instanceof VersionNotFoundError)
+                log.notice(
+                  "suggest",
+                  `to install ${makePackageReference(
+                    depObj.name,
+                    depObj.reason.requestedVersion
+                  )} or a replaceable version manually`
+                );
             }
           });
           if (isAnyDependencyUnresolved) {
