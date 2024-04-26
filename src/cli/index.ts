@@ -45,8 +45,7 @@ const searchRegistry = makeSearchRegistryService(log);
 const resolveRemotePackument =
   makeResolveRemotePackumentService(fetchPackument);
 const resolveDependencies = makeResolveDependenciesService(
-  resolveRemotePackument,
-  log
+  resolveRemotePackument
 );
 const getAllPackuments = makeGetAllPackumentsService(log);
 
