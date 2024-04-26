@@ -358,6 +358,29 @@ describe("cmd-add", () => {
     );
   });
 
+  it("should notify of unresolved dependencies", async () => {
+    const { addCmd, resolveDependencies, log } = makeDependencies();
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
+        },
+      ],
+    ]);
+
+    await addCmd(somePackage, {
+      _global: {},
+    });
+
+    expect(log.warn).toHaveLogLike(
+      "404",
+      expect.stringContaining("is not a valid choice")
+    );
+  });
+
   it("should not fetch dependencies for upstream packages", async () => {
     const { addCmd, resolveRemotePackument, log } = makeDependencies();
     mockResolvedPackuments(resolveRemotePackument, [

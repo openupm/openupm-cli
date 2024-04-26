@@ -14,7 +14,6 @@ import assert from "assert";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentService } from "./resolve-remote-packument";
 import { Logger } from "npmlog";
-import { logPackumentResolveError } from "../cli/error-logging";
 
 export type DependencyBase = {
   /**
@@ -145,7 +144,6 @@ export function makeResolveDependenciesService(
           }
 
           if (resolveResult.isErr()) {
-            logPackumentResolveError(log, entry.name, resolveResult.error);
             depsInvalid.push({
               name: entry.name,
               self: isSelf,

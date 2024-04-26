@@ -222,6 +222,8 @@ export function makeAddCmd(
           // print suggestion for depsInvalid
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
+            logPackumentResolveError(log, depObj.name, depObj.reason);
+
             if (
               depObj.reason instanceof PackumentNotFoundError ||
               depObj.reason instanceof VersionNotFoundError
