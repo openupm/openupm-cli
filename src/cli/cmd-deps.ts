@@ -12,11 +12,14 @@ import {
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
-import { ResolveDependenciesService } from "../services/dependency-resolving";
+import {
+  DependencyResolveError,
+  ResolveDependenciesService,
+} from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 
-export type DepsError = EnvParseError;
+export type DepsError = EnvParseError | DependencyResolveError;
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -64,13 +67,19 @@ export function makeDepsCmd(
       "dependency",
       `fetch: ${makePackageReference(name, version)}, deep=${deep}`
     );
-    const [depsValid, depsInvalid] = await resolveDependencies(
+    const resolveResult = await resolveDependencies(
       env.registry,
       env.upstreamRegistry,
       name,
       version,
       deep
     );
+    if (resolveResult.isErr())
+      // TODO: Log errors
+      // TODO: Add tests
+      return resolveResult;
+    const [depsValid, depsInvalid] = resolveResult.value;
+
     depsValid.forEach((dependency) => logValidDependency(log, dependency));
     depsValid
       .filter((x) => !x.self)

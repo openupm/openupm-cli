@@ -21,10 +21,10 @@ import {
   makeEmptyScopedRegistryFor,
 } from "../domain/scoped-registry";
 import {
-  setDependency,
   addTestable,
   hasDependency,
   mapScopedRegistry,
+  setDependency,
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
@@ -36,20 +36,22 @@ import {
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch";
 import { CustomError } from "ts-custom-error";
 import {
   logManifestLoadError,
   logManifestSaveError,
   logPackumentResolveError,
 } from "./error-logging";
-import { ResolveDependenciesService } from "../services/dependency-resolving";
+import {
+  DependencyResolveError,
+  ResolveDependenciesService,
+} from "../services/dependency-resolving";
 import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
-import {FetchPackumentError} from "../services/fetch-packument";
+import { FetchPackumentError } from "../services/fetch-packument";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -87,6 +89,7 @@ export type AddError =
   | InvalidPackumentDataError
   | EditorIncompatibleError
   | UnresolvedDependencyError
+  | DependencyResolveError
   | ManifestWriteError;
 
 /**
@@ -210,13 +213,19 @@ export function makeAddCmd(
             "dependency",
             `fetch: ${makePackageReference(name, requestedVersion)}`
           );
-          const [depsValid, depsInvalid] = await resolveDependencies(
+          const resolveResult = await resolveDependencies(
             env.registry,
             env.upstreamRegistry,
             name,
             requestedVersion,
             true
           );
+          if (resolveResult.isErr())
+            // TODO: Log errors
+            // TODO: Add tests
+            return resolveResult;
+          const [depsValid, depsInvalid] = resolveResult.value;
+
           // add depsValid to pkgsInScope.
           depsValid.forEach((dependency) =>
             logValidDependency(log, dependency)
