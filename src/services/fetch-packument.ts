@@ -7,6 +7,11 @@ import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 
 /**
+ * Error which may occur when fetching a packument from a remote registry.
+ */
+export type FetchPackumentError = HttpErrorBase;
+
+/**
  * Service function for fetching a packument from a registry.
  * @param registry The registry to fetch from.
  * @param name The name of the packument to fetch.
@@ -15,7 +20,7 @@ import { Registry } from "../domain/registry";
 export type FetchPackumentService = (
   registry: Registry,
   name: DomainName
-) => AsyncResult<UnityPackument | null, HttpErrorBase>;
+) => AsyncResult<UnityPackument | null, FetchPackumentError>;
 
 /**
  * Makes a {@link FetchPackumentService} function.
