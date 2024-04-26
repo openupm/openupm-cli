@@ -2,7 +2,6 @@ import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
 import { makeGetAllPackumentsService } from "../../src/services/get-all-packuments";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { makeMockLogger } from "../cli/log.mock";
 
 jest.mock("npm-registry-fetch");
 
@@ -12,9 +11,7 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const log = makeMockLogger();
-
-  const getAllPackuments = makeGetAllPackumentsService(log);
+  const getAllPackuments = makeGetAllPackumentsService();
   return { getAllPackuments } as const;
 }
 
