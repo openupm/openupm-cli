@@ -31,13 +31,10 @@ export type DependencyBase = {
  */
 export interface ValidDependency extends DependencyBase {
   /**
-   * The source from which this dependency was resolved.
+   * The source from which this dependency was resolved. Either the url of the
+   * source registry or "built-in" if the dependency was a built-in package.
    */
-  readonly source: RegistryUrl;
-  /**
-   * Whether this dependency is an internal package.
-   */
-  readonly internal: boolean;
+  readonly source: RegistryUrl | "built-in";
   /**
    * The requested version.
    */
@@ -121,7 +118,7 @@ export function makeResolveDependenciesService(
         processedList.push(entry);
         const isInternal = isInternalPackage(entryName);
         const isSelf = entryName === name;
-        let source = upstreamRegistry.url;
+        let source: ValidDependency["source"] = "built-in";
         let resolvedVersion = entryVersion;
 
         if (!isInternal) {
@@ -177,7 +174,6 @@ export function makeResolveDependenciesService(
         const dependency: ValidDependency = {
           name: entryName,
           version: resolvedVersion,
-          internal: isInternal,
           source,
           self: isSelf,
         };
