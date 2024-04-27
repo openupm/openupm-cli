@@ -68,8 +68,7 @@ export function makeDepsCmd(
       `fetch: ${makePackageReference(name, version)}, deep=${deep}`
     );
     const resolveResult = await resolveDependencies(
-      env.registry,
-      env.upstreamRegistry,
+      [env.registry, env.upstreamRegistry],
       name,
       version,
       deep

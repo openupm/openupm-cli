@@ -214,8 +214,7 @@ export function makeAddCmd(
             `fetch: ${makePackageReference(name, requestedVersion)}`
           );
           const resolveResult = await resolveDependencies(
-            env.registry,
-            env.upstreamRegistry,
+            [env.registry, env.upstreamRegistry],
             name,
             requestedVersion,
             true

@@ -5,6 +5,7 @@ import {
   PackumentResolveError,
   pickMostFixable,
   ResolvableVersion,
+  ResolvedPackument,
   tryResolveFromCache,
 } from "../packument-resolving";
 import { RegistryUrl } from "../domain/registry-url";
@@ -16,9 +17,10 @@ import {
   ResolveLatestVersionError,
   ResolveLatestVersionService,
 } from "./resolve-latest-version";
-import { Ok, Result } from "ts-results-es";
+import { Err, Ok, Result } from "ts-results-es";
 import { FetchPackumentError } from "./fetch-packument";
 import { HttpErrorBase } from "npm-registry-fetch";
+import { PackumentNotFoundError } from "../common-errors";
 
 export type DependencyBase = {
   /**
@@ -65,15 +67,13 @@ export type DependencyResolveError =
 
 /**
  * Service function for resolving all dependencies for a package.
- * @param registry The registry in which to search the dependencies.
- * @param upstreamRegistry The upstream registry in which to search as a backup.
+ * @param sources Sources from which dependencies can be resolved.
  * @param name The name of the package.
  * @param version The version for which to search dependencies.
  * @param deep Whether to search for all dependencies.
  */
 export type ResolveDependenciesService = (
-  registry: Registry,
-  upstreamRegistry: Registry,
+  sources: ReadonlyArray<Registry>,
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean
@@ -90,10 +90,10 @@ export function makeResolveDependenciesService(
 ): ResolveDependenciesService {
   // TODO: Add tests for this service
 
-  return async (registry, upstreamRegistry, name, version, deep) => {
+  return async (sources, name, version, deep) => {
     const latestVersionResult =
       version === undefined || version === "latest"
-        ? await resolveLatestVersion([registry, upstreamRegistry], name).promise
+        ? await resolveLatestVersion(sources, name).promise
         : Ok(version);
     if (latestVersionResult.isErr()) return latestVersionResult;
 
@@ -153,21 +153,24 @@ export function makeResolveDependenciesService(
           continue;
         }
 
-        // First primary registry
-        let resolveResult = await tryResolveFromRegistry(
-          registry,
-          entryName,
-          entryVersion
-        );
-        // Then upstream registry
-        if (resolveResult.isErr()) {
-          const upstreamResult = await tryResolveFromRegistry(
-            upstreamRegistry,
+        // Search all given registries.
+        let resolveResult: Result<
+          ResolvedPackument,
+          PackumentResolveError | HttpErrorBase
+        > = Err(new PackumentNotFoundError());
+        for (const source of sources) {
+          const result = await tryResolveFromRegistry(
+            source,
             entryName,
             entryVersion
           );
-          if (upstreamResult.isOk()) resolveResult = upstreamResult;
-          else resolveResult = pickMostFixable(resolveResult, upstreamResult);
+          if (result.isErr()) {
+            resolveResult = pickMostFixable(resolveResult, result);
+            continue;
+          }
+
+          resolveResult = result;
+          break;
         }
 
         if (resolveResult.isErr()) {
