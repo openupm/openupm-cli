@@ -4,7 +4,6 @@ import {
   tryResolveFromPackument,
   VersionNotFoundError,
 } from "../../src/packument-resolving";
-import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 
@@ -12,7 +11,6 @@ const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
 const someHighVersion = makeSemanticVersion("2.0.0");
 const someLowVersion = makeSemanticVersion("1.0.0");
-const someSource = exampleRegistryUrl;
 const somePackument = buildPackument(somePackage, (packument) =>
   packument
     .addVersion(someLowVersion, (version) =>
@@ -28,11 +26,7 @@ describe("packument resolving", () => {
     it("should fail it packument has no versions", () => {
       const emptyPackument = buildPackument(somePackage);
 
-      const result = tryResolveFromPackument(
-        emptyPackument,
-        "latest",
-        someSource
-      );
+      const result = tryResolveFromPackument(emptyPackument, "latest");
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(NoVersionsError)
@@ -40,50 +34,26 @@ describe("packument resolving", () => {
     });
 
     it("should find latest version when requested", () => {
-      const result = tryResolveFromPackument(
-        somePackument,
-        "latest",
-        someSource
-      );
+      const result = tryResolveFromPackument(somePackument, "latest");
 
       expect(result).toBeOk((value) =>
-        expect(value).toMatchObject({
-          packument: somePackument,
-          packumentVersion: somePackument.versions[someHighVersion]!,
-          source: someSource,
-        })
+        expect(value).toEqual(somePackument.versions[someHighVersion]!)
       );
     });
 
     it("should find latest version when requesting no particular version", () => {
-      const result = tryResolveFromPackument(
-        somePackument,
-        undefined,
-        someSource
-      );
+      const result = tryResolveFromPackument(somePackument, undefined);
 
       expect(result).toBeOk((value) =>
-        expect(value).toMatchObject({
-          packument: somePackument,
-          packumentVersion: somePackument.versions[someHighVersion]!,
-          source: someSource,
-        })
+        expect(value).toEqual(somePackument.versions[someHighVersion]!)
       );
     });
 
     it("should find specific version", () => {
-      const result = tryResolveFromPackument(
-        somePackument,
-        someLowVersion,
-        someSource
-      );
+      const result = tryResolveFromPackument(somePackument, someLowVersion);
 
       expect(result).toBeOk((value) =>
-        expect(value).toMatchObject({
-          packument: somePackument,
-          packumentVersion: somePackument.versions[someLowVersion]!,
-          source: someSource,
-        })
+        expect(value).toEqual(somePackument.versions[someLowVersion]!)
       );
     });
 
@@ -92,8 +62,7 @@ describe("packument resolving", () => {
 
       const result = tryResolveFromPackument(
         somePackument,
-        someNonExistentVersion,
-        someSource
+        someNonExistentVersion
       );
 
       expect(result).toBeError((error) =>

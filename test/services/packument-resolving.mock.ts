@@ -26,12 +26,11 @@ export function mockResolvedPackuments(
       if (matchingEntry === undefined)
         return Err(new PackumentNotFoundError()).toAsyncResult();
 
-      const resolvedVersionResult = tryResolveFromPackument(
-        matchingEntry[1],
-        requestedVersion,
-        matchingEntry[0]
-      );
-      return resolvedVersionResult.toAsyncResult();
+      const source = matchingEntry[0];
+      const packument = matchingEntry[1];
+      return tryResolveFromPackument(packument, requestedVersion)
+        .map((packumentVersion) => ({ packument, packumentVersion, source }))
+        .toAsyncResult();
     }
   );
 }
