@@ -81,7 +81,10 @@ export type PackumentResolveError =
   | VersionNotFoundError;
 
 /**
- * Attempts to resolve a specific version from a packument.
+ * Attempts to resolve a specific version from a packument. Resolve here means
+ * that this function also accepts non-semantic versions and will attempt to
+ * find the correct version from the packument. This differentiates it from
+ * {@link tryGetPackumentVersion}.
  * @param packument The packument to search.
  * @param requestedVersion The requested version.
  */
