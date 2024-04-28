@@ -5,10 +5,11 @@ import {
   PackumentResolveError,
   ResolvableVersion,
   ResolvedPackument,
-  tryResolveFromPackument,
+  
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
+import {tryResolvePackumentVersion} from "../domain/packument";
 
 /**
  * Service function for resolving remove packuments.
@@ -38,7 +39,7 @@ export function makeResolveRemotePackumentService(
         return Ok(maybePackument);
       })
       .andThen((packument) =>
-        tryResolveFromPackument(packument, requestedVersion).map(
+        tryResolvePackumentVersion(packument, requestedVersion).map(
           (packumentVersion) => ({
             packument,
             packumentVersion,
