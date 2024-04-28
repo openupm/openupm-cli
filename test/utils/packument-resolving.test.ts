@@ -1,7 +1,7 @@
 import { buildPackument } from "../domain/data-packument";
 import {
   NoVersionsError,
-  tryResolveFromPackument,
+  tryResolvePackumentVersion,
   VersionNotFoundError,
 } from "../../src/packument-resolving";
 import { makeDomainName } from "../../src/domain/domain-name";
@@ -26,7 +26,7 @@ describe("packument resolving", () => {
     it("should fail it packument has no versions", () => {
       const emptyPackument = buildPackument(somePackage);
 
-      const result = tryResolveFromPackument(emptyPackument, "latest");
+      const result = tryResolvePackumentVersion(emptyPackument, "latest");
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(NoVersionsError)
@@ -34,7 +34,7 @@ describe("packument resolving", () => {
     });
 
     it("should find latest version when requested", () => {
-      const result = tryResolveFromPackument(somePackument, "latest");
+      const result = tryResolvePackumentVersion(somePackument, "latest");
 
       expect(result).toBeOk((value) =>
         expect(value).toEqual(somePackument.versions[someHighVersion]!)
@@ -42,7 +42,7 @@ describe("packument resolving", () => {
     });
 
     it("should find latest version when requesting no particular version", () => {
-      const result = tryResolveFromPackument(somePackument, undefined);
+      const result = tryResolvePackumentVersion(somePackument, undefined);
 
       expect(result).toBeOk((value) =>
         expect(value).toEqual(somePackument.versions[someHighVersion]!)
@@ -50,7 +50,7 @@ describe("packument resolving", () => {
     });
 
     it("should find specific version", () => {
-      const result = tryResolveFromPackument(somePackument, someLowVersion);
+      const result = tryResolvePackumentVersion(somePackument, someLowVersion);
 
       expect(result).toBeOk((value) =>
         expect(value).toEqual(somePackument.versions[someLowVersion]!)
@@ -60,7 +60,7 @@ describe("packument resolving", () => {
     it("should fail if version is not found", () => {
       const someNonExistentVersion = makeSemanticVersion("3.0.0");
 
-      const result = tryResolveFromPackument(
+      const result = tryResolvePackumentVersion(
         somePackument,
         someNonExistentVersion
       );

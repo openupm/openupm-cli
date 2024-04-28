@@ -1,4 +1,4 @@
-import { tryResolveFromPackument } from "../../src/packument-resolving";
+import { tryResolvePackumentVersion } from "../../src/packument-resolving";
 import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { UnityPackument } from "../../src/domain/packument";
@@ -28,7 +28,7 @@ export function mockResolvedPackuments(
 
       const source = matchingEntry[0];
       const packument = matchingEntry[1];
-      return tryResolveFromPackument(packument, requestedVersion)
+      return tryResolvePackumentVersion(packument, requestedVersion)
         .map((packumentVersion) => ({ packument, packumentVersion, source }))
         .toAsyncResult();
     }

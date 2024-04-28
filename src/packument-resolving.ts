@@ -85,7 +85,7 @@ export type PackumentResolveError =
  * @param packument The packument to search.
  * @param requestedVersion The requested version.
  */
-export function tryResolveFromPackument(
+export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion
 ): Result<UnityPackumentVersion, NoVersionsError | VersionNotFoundError> {
@@ -122,7 +122,7 @@ export function tryResolveFromCache(
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
   if (cachedPackument === null) return Err(new PackumentNotFoundError());
 
-  return tryResolveFromPackument(cachedPackument, requestedVersion).map(
+  return tryResolvePackumentVersion(cachedPackument, requestedVersion).map(
     (packumentVersion) => ({
       packument: cachedPackument,
       packumentVersion,
