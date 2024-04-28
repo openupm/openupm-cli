@@ -107,7 +107,7 @@ type AddCmd = (
  */
 export function makeAddCmd(
   parseEnv: ParseEnvService,
-  resolveRemovePackument: ResolveRemotePackumentService,
+  resolveRemotePackument: ResolveRemotePackumentService,
   resolveDependencies: ResolveDependenciesService,
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest,
@@ -139,13 +139,13 @@ export function makeAddCmd(
       const pkgsInScope = Array.of<DomainName>();
       let versionToAdd = requestedVersion;
       if (requestedVersion === undefined || !isPackageUrl(requestedVersion)) {
-        let resolveResult = await resolveRemovePackument(
+        let resolveResult = await resolveRemotePackument(
           name,
           requestedVersion,
           env.registry
         ).promise;
         if (resolveResult.isErr() && env.upstream) {
-          const upstreamResult = await resolveRemovePackument(
+          const upstreamResult = await resolveRemotePackument(
             name,
             requestedVersion,
             env.upstreamRegistry
