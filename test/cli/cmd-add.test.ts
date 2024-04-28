@@ -23,7 +23,6 @@ import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
-import { VersionNotFoundError } from "../../src/packument-resolving";
 import { mockService } from "../services/service.mock";
 import { ResolveRemotePackumentService } from "../../src/services/resolve-remote-packument";
 import {
@@ -31,6 +30,7 @@ import {
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { makePackageReference } from "../../src/domain/package-reference";
+import {VersionNotFoundError} from "../../src/domain/packument";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");

@@ -4,9 +4,8 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackumentNotFoundError } from "../common-errors";
 import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
-import { tryGetLatestVersion } from "../domain/packument";
+import {NoVersionsError, tryGetLatestVersion} from "../domain/packument";
 import { recordKeys } from "../utils/record-utils";
-import { NoVersionsError } from "../packument-resolving";
 
 /**
  * Error which may occur when resolving the latest version for a package.

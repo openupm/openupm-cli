@@ -8,7 +8,7 @@ import {
 import { CmdOptions } from "./options";
 import {
   PackumentResolveError,
-  VersionNotFoundError,
+  
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
@@ -18,6 +18,7 @@ import {
 } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
+import {VersionNotFoundError} from "../domain/packument";
 
 export type DepsError = EnvParseError | DependencyResolveError;
 

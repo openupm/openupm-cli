@@ -1,18 +1,16 @@
 import { VersionReference } from "./domain/package-reference";
 import { DomainName } from "./domain/domain-name";
-import { SemanticVersion } from "./domain/semantic-version";
 import {
-  tryGetLatestVersion,
-  tryGetPackumentVersion,
+  NoVersionsError,
+  tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
+  VersionNotFoundError,
 } from "./domain/packument";
-import { recordKeys } from "./utils/record-utils";
 import { PackageUrl } from "./domain/package-url";
 import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./domain/registry-url";
-import { CustomError } from "ts-custom-error";
-import { Err, Ok, Result } from "ts-results-es";
+import { Err, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
 
 /**
@@ -42,72 +40,12 @@ export interface ResolvedPackument {
 }
 
 /**
- * Error for when a packument with the searched name was found, but it
- * had no versions.
- */
-export class NoVersionsError extends CustomError {
-  private readonly _class = "NoVersionsError";
-  constructor() {
-    super("A packument contained no versions");
-  }
-}
-
-/**
- * Error for when a packument with the searched name was found, but a specific
- * requested version did not exist.
- */
-export class VersionNotFoundError extends CustomError {
-  private readonly _class = "VersionNotFoundError";
-  constructor(
-    /**
-     * The version that was requested.
-     */
-    readonly requestedVersion: SemanticVersion,
-    /**
-     * A list of available versions.
-     */
-    readonly availableVersions: ReadonlyArray<SemanticVersion>
-  ) {
-    super("The requested version was not in the packument.");
-  }
-}
-
-/**
  * A failed attempt at resolving a packument-version.
  */
 export type PackumentResolveError =
   | PackumentNotFoundError
   | NoVersionsError
   | VersionNotFoundError;
-
-/**
- * Attempts to resolve a specific version from a packument. Resolve here means
- * that this function also accepts non-semantic versions and will attempt to
- * find the correct version from the packument. This differentiates it from
- * {@link tryGetPackumentVersion}.
- * @param packument The packument to search.
- * @param requestedVersion The requested version.
- */
-export function tryResolvePackumentVersion(
-  packument: UnityPackument,
-  requestedVersion: ResolvableVersion
-): Result<UnityPackumentVersion, NoVersionsError | VersionNotFoundError> {
-  const availableVersions = recordKeys(packument.versions);
-  if (availableVersions.length === 0) return Err(new NoVersionsError());
-
-  // Find the latest version
-  if (requestedVersion === undefined || requestedVersion === "latest") {
-    let latestVersion = tryGetLatestVersion(packument);
-    if (latestVersion === undefined) latestVersion = availableVersions.at(-1)!;
-    return Ok(tryGetPackumentVersion(packument, latestVersion)!);
-  }
-
-  // Find a specific version
-  if (!availableVersions.includes(requestedVersion))
-    return Err(new VersionNotFoundError(requestedVersion, availableVersions));
-
-  return Ok(tryGetPackumentVersion(packument, requestedVersion)!);
-}
 
 /**
  * Attempts to resolve a packument-version from the cache.

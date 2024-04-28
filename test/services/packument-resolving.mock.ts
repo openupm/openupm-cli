@@ -1,7 +1,9 @@
-import { tryResolvePackumentVersion } from "../../src/packument-resolving";
 import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../../src/common-errors";
-import { UnityPackument } from "../../src/domain/packument";
+import {
+    tryResolvePackumentVersion,
+    UnityPackument
+} from "../../src/domain/packument";
 import { RegistryUrl } from "../../src/domain/registry-url";
 import { ResolveRemotePackumentService } from "../../src/services/resolve-remote-packument";
 
