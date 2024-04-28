@@ -84,13 +84,11 @@ export type PackumentResolveError =
  * Attempts to resolve a specific version from a packument.
  * @param packument The packument to search.
  * @param requestedVersion The requested version.
- * @param source The source from which the packument was resolved.
  */
 export function tryResolveFromPackument(
   packument: UnityPackument,
-  requestedVersion: ResolvableVersion,
-  source: RegistryUrl
-): Result<ResolvedPackument, PackumentResolveError> {
+  requestedVersion: ResolvableVersion
+): Result<UnityPackumentVersion, NoVersionsError | VersionNotFoundError> {
   const availableVersions = recordKeys(packument.versions);
   if (availableVersions.length === 0) return Err(new NoVersionsError());
 
@@ -98,22 +96,14 @@ export function tryResolveFromPackument(
   if (requestedVersion === undefined || requestedVersion === "latest") {
     let latestVersion = tryGetLatestVersion(packument);
     if (latestVersion === undefined) latestVersion = availableVersions.at(-1)!;
-    return Ok({
-      packument,
-      source,
-      packumentVersion: tryGetPackumentVersion(packument, latestVersion)!,
-    } satisfies ResolvedPackument);
+    return Ok(tryGetPackumentVersion(packument, latestVersion)!);
   }
 
   // Find a specific version
   if (!availableVersions.includes(requestedVersion))
     return Err(new VersionNotFoundError(requestedVersion, availableVersions));
 
-  return Ok({
-    packument,
-    source,
-    packumentVersion: tryGetPackumentVersion(packument, requestedVersion)!,
-  } satisfies ResolvedPackument);
+  return Ok(tryGetPackumentVersion(packument, requestedVersion)!);
 }
 
 /**
@@ -132,7 +122,13 @@ export function tryResolveFromCache(
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
   if (cachedPackument === null) return Err(new PackumentNotFoundError());
 
-  return tryResolveFromPackument(cachedPackument, requestedVersion, source);
+  return tryResolveFromPackument(cachedPackument, requestedVersion).map(
+    (packumentVersion) => ({
+      packument: cachedPackument,
+      packumentVersion,
+      source,
+    })
+  );
 }
 
 /**

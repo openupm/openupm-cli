@@ -38,6 +38,12 @@ export function makeResolveRemotePackumentService(
         return Ok(maybePackument);
       })
       .andThen((packument) =>
-        tryResolveFromPackument(packument, requestedVersion, source.url)
+        tryResolveFromPackument(packument, requestedVersion).map(
+          (packumentVersion) => ({
+            packument,
+            packumentVersion,
+            source: source.url,
+          })
+        )
       );
 }
