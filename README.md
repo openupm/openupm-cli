@@ -40,7 +40,7 @@ The command-line tool installs the 3rd-party registry as a scoped registry and m
 
 ## Installation
 
-- Requires [nodejs 16 or above](https://nodejs.org/en/download/).
+- Requires [nodejs 18 or above](https://nodejs.org/en/download/).
 - Install via npm:
 
   ```
@@ -75,7 +75,7 @@ internal/modules/cjs/loader.js:818
 Error: Cannot find module 'node:net'
 ```
 
-Please install [Node.js 16 or above](https://nodejs.org/en/download/).
+Please install [Node.js 18 or above](https://nodejs.org/en/download/).
 
 ## China region
 

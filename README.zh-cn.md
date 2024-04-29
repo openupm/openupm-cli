@@ -39,7 +39,7 @@ openupm-cli基于Unity对带作用域的软件仓库（scoped registry）的支�
 
 ## 安装
 
-- 请先自行安装[nodejs 16或以上版本](https://nodejs.org/en/download/).
+- 请先自行安装[nodejs 18或以上版本](https://nodejs.org/en/download/).
 - 通过npm安装：
 
   ```
@@ -74,7 +74,7 @@ internal/modules/cjs/loader.js:818
 Error: Cannot find module 'node:net'
 ```
 
-请安装[nodejs 16或以上版本](https://nodejs.org/en/download/)。
+请安装[nodejs 18或以上版本](https://nodejs.org/en/download/)。
 
 
 ## 中国区
