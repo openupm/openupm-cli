@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/openupm/openupm-cli/compare/1.23.3...2.0.0) (2024-04-29)
+
+
+### deps
+
+* bump node to 18 ([#315](https://github.com/openupm/openupm-cli/issues/315)) ([51aa180](https://github.com/openupm/openupm-cli/commit/51aa180f8b355202887942e2ec2ab0aaaf39853d))
+
+
+### BREAKING CHANGES
+
+* This change bumps the projects node version to 18 because 16 is no longer maintained. See #282.
+
 ## [1.23.3](https://github.com/openupm/openupm-cli/compare/1.23.2...1.23.3) (2024-04-25)
 
 
