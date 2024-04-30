@@ -1,40 +1,53 @@
 import path from "path";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { FileParseError } from "../common-errors";
-import { FileReadError, tryReadTextFromFile } from "./file-io";
+import { FileReadError, ReadTextFile } from "./file-io";
 import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
-
-export type ProjectVersionLoadError =
-  | FileReadError
-  | StringFormatError
-  | FileParseError;
 
 function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
 }
 
 /**
- * Attempts to load a projects editor-version from ProjectVersion.txt.
- * @param projectDirPath The path to the projects root directory.
+ * Error which may occur when loading a project-version.
  */
-export function tryLoadProjectVersion(
+export type ProjectVersionLoadError =
+  | FileReadError
+  | StringFormatError
+  | FileParseError;
+
+/**
+ * Function for loading a projects editor version string.
+ * @param projectDirPath The path to the projects root directory.
+ * @returns A string describing the projects editor version ie 2020.2.1f1.
+ */
+export type LoadProjectVersion = (
   projectDirPath: string
-): AsyncResult<string, ProjectVersionLoadError> {
-  const filePath = projectVersionTxtPathFor(projectDirPath);
+) => AsyncResult<string, ProjectVersionLoadError>;
 
-  return tryReadTextFromFile(filePath)
-    .andThen(tryParseYaml)
-    .andThen((content) => {
-      if (
-        !(
-          typeof content === "object" &&
-          content !== null &&
-          "m_EditorVersion" in content &&
-          typeof content.m_EditorVersion === "string"
+/**
+ * Makes a {@link LoadProjectVersion} function.
+ */
+export function makeProjectVersionLoader(
+  readFile: ReadTextFile
+): LoadProjectVersion {
+  return (projectDirPath) => {
+    const filePath = projectVersionTxtPathFor(projectDirPath);
+
+    return readFile(filePath)
+      .andThen(tryParseYaml)
+      .andThen((content) => {
+        if (
+          !(
+            typeof content === "object" &&
+            content !== null &&
+            "m_EditorVersion" in content &&
+            typeof content.m_EditorVersion === "string"
+          )
         )
-      )
-        return Err(new FileParseError(filePath, "Project-version"));
+          return Err(new FileParseError(filePath, "Project-version"));
 
-      return Ok(content.m_EditorVersion);
-    });
+        return Ok(content.m_EditorVersion);
+      });
+  };
 }

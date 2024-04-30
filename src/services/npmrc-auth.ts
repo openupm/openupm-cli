@@ -1,11 +1,11 @@
 import { RegistryUrl } from "../domain/registry-url";
 import { AsyncResult } from "ts-results-es";
 import {
+  FindNpmrcPath,
+  LoadNpmrc,
   NpmrcLoadError,
   NpmrcSaveError,
-  tryGetNpmrcPath,
-  tryLoadNpmrc,
-  trySaveNpmrc,
+  SaveNpmrc,
 } from "../io/npmrc-io";
 import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
@@ -30,16 +30,20 @@ export type AuthNpmrcService = (
   token: string
 ) => AsyncResult<string, NpmrcAuthTokenUpdateError>;
 
-export function makeAuthNpmrcService(): AuthNpmrcService {
+export function makeAuthNpmrcService(
+  findPath: FindNpmrcPath,
+  loadNpmrc: LoadNpmrc,
+  saveNpmrc: SaveNpmrc
+): AuthNpmrcService {
   return (registry, token) => {
     // read config
-    return tryGetNpmrcPath()
+    return findPath()
       .toAsyncResult()
       .andThen((configPath) =>
-        tryLoadNpmrc(configPath)
+        loadNpmrc(configPath)
           .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
           .map((npmrc) => setToken(npmrc, registry, token))
-          .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
+          .andThen((npmrc) => saveNpmrc(configPath, npmrc))
           .map(() => configPath)
       );
   };

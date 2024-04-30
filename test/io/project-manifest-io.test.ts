@@ -9,13 +9,18 @@ import {
 } from "../../src/domain/project-manifest";
 import path from "path";
 import { FileParseError } from "../../src/common-errors";
-import * as fileIoModule from "../../src/io/file-io";
-import { IOError, NotFoundError } from "../../src/io/file-io";
+import {
+  IOError,
+  NotFoundError,
+  ReadTextFile,
+  WriteTextFile,
+} from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "../services/service.mock";
 
 describe("project-manifest io", () => {
   describe("path", () => {
@@ -32,15 +37,15 @@ describe("project-manifest io", () => {
 
   describe("load", () => {
     function makeDependencies() {
-      const loadProjectManifest = makeProjectManifestLoader();
-      return { loadProjectManifest } as const;
+      const readFile = mockService<ReadTextFile>();
+
+      const loadProjectManifest = makeProjectManifestLoader(readFile);
+      return { loadProjectManifest, readFile } as const;
     }
 
     it("should fail if file could not be read", async () => {
-      const { loadProjectManifest } = makeDependencies();
-      jest
-        .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(Err(new IOError()).toAsyncResult());
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockReturnValue(Err(new IOError()).toAsyncResult());
 
       const result = await loadProjectManifest("/some/path").promise;
 
@@ -50,10 +55,10 @@ describe("project-manifest io", () => {
     });
 
     it("should fail if file is not found", async () => {
-      const { loadProjectManifest } = makeDependencies();
-      jest
-        .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(Err(new NotFoundError("/some/path")).toAsyncResult());
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockReturnValue(
+        Err(new NotFoundError("/some/path")).toAsyncResult()
+      );
 
       const result = await loadProjectManifest("/some/path").promise;
 
@@ -63,10 +68,10 @@ describe("project-manifest io", () => {
     });
 
     it("should fail if file does not contain json", async () => {
-      const { loadProjectManifest } = makeDependencies();
-      jest
-        .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(Ok("{} dang, this is not json []").toAsyncResult());
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockReturnValue(
+        Ok("{} dang, this is not json []").toAsyncResult()
+      );
 
       const result = await loadProjectManifest("/some/path").promise;
 
@@ -76,12 +81,10 @@ describe("project-manifest io", () => {
     });
 
     it("should load valid manifest", async () => {
-      const { loadProjectManifest } = makeDependencies();
-      jest
-        .spyOn(fileIoModule, "tryReadTextFromFile")
-        .mockReturnValue(
-          Ok(`{ "dependencies": { "com.package.a": "1.0.0"} }`).toAsyncResult()
-        );
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockReturnValue(
+        Ok(`{ "dependencies": { "com.package.a": "1.0.0"} }`).toAsyncResult()
+      );
 
       const result = await loadProjectManifest("/some/path").promise;
 
@@ -97,16 +100,17 @@ describe("project-manifest io", () => {
 
   describe("write", () => {
     function makeDependencies() {
-      const writeProjectManifest = makeProjectManifestWriter();
-      return { writeProjectManifest } as const;
+      const writeFile = mockService<WriteTextFile>();
+      writeFile.mockReturnValue(Ok(undefined).toAsyncResult());
+
+      const writeProjectManifest = makeProjectManifestWriter(writeFile);
+      return { writeProjectManifest, writeFile } as const;
     }
 
     it("should fail if file could not be written", async () => {
       const expected = new IOError();
-      const { writeProjectManifest } = makeDependencies();
-      jest
-        .spyOn(fileIoModule, "tryWriteTextToFile")
-        .mockReturnValue(Err(expected).toAsyncResult());
+      const { writeProjectManifest, writeFile } = makeDependencies();
+      writeFile.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await writeProjectManifest(
         "/some/path",
@@ -117,17 +121,15 @@ describe("project-manifest io", () => {
     });
 
     it("should write manifest json", async () => {
-      const { writeProjectManifest } = makeDependencies();
-      const writeSpy = jest
-        .spyOn(fileIoModule, "tryWriteTextToFile")
-        .mockReturnValue(Ok(undefined).toAsyncResult());
+      const { writeProjectManifest, writeFile } = makeDependencies();
+
       const manifest = buildProjectManifest((manifest) =>
         manifest.addDependency("com.package.a", "1.0.0", true, true)
       );
 
       await writeProjectManifest("/some/path", manifest).promise;
 
-      expect(writeSpy).toHaveBeenCalledWith(
+      expect(writeFile).toHaveBeenCalledWith(
         expect.any(String),
         JSON.stringify(
           {
@@ -150,10 +152,7 @@ describe("project-manifest io", () => {
     });
 
     it("should prune manifest before writing", async () => {
-      const { writeProjectManifest } = makeDependencies();
-      const writeSpy = jest
-        .spyOn(fileIoModule, "tryWriteTextToFile")
-        .mockReturnValue(Ok(undefined).toAsyncResult());
+      const { writeProjectManifest, writeFile } = makeDependencies();
       // Add and then remove a scope to force an empty scoped-registry
       const testDomain = "test" as DomainName;
       let manifest = buildProjectManifest((manifest) =>
@@ -165,7 +164,7 @@ describe("project-manifest io", () => {
 
       await writeProjectManifest("/some/path", manifest).promise;
 
-      expect(writeSpy).toHaveBeenCalledWith(
+      expect(writeFile).toHaveBeenCalledWith(
         expect.any(String),
         JSON.stringify({ dependencies: {}, scopedRegistries: [] }, null, 2)
       );

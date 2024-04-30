@@ -30,19 +30,46 @@ import {
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
-import { makeUpmConfigLoader } from "../io/upm-config-io";
+import {
+  makeUpmConfigDirGetter,
+  makeUpmConfigLoader,
+} from "../io/upm-config-io";
+import { makeTextReader, makeTextWriter } from "../io/file-io";
+import {
+  makeNpmrcLoader,
+  makeNpmrcPathFinder,
+  makeNpmrcSaver,
+} from "../io/npmrc-io";
+import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
+import { makeProjectVersionLoader } from "../io/project-version-io";
+import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
 
 // Composition root
 
 const log = npmlog;
 const regClient = new RegClient({ log });
-const loadProjectManifest = makeProjectManifestLoader();
-const writeProjectManifest = makeProjectManifestWriter();
-const loadUpmConfig = makeUpmConfigLoader();
+const getCwd = makeCwdGetter();
+const getHomePath = makeHomePathGetter();
+const readFile = makeTextReader();
+const writeFile = makeTextWriter();
+const loadProjectManifest = makeProjectManifestLoader(readFile);
+const writeProjectManifest = makeProjectManifestWriter(writeFile);
+const getUpmConfigDir = makeUpmConfigDirGetter(getHomePath);
+const loadUpmConfig = makeUpmConfigLoader(readFile);
+const findNpmrcPath = makeNpmrcPathFinder(getHomePath);
+const loadNpmrc = makeNpmrcLoader(readFile);
+const saveNpmrc = makeNpmrcSaver(writeFile);
+const loadProjectVersion = makeProjectVersionLoader(readFile);
 
-const parseEnv = makeParseEnvService(log, loadUpmConfig);
+const parseEnv = makeParseEnvService(
+  log,
+  getUpmConfigDir,
+  loadUpmConfig,
+  getCwd,
+  loadProjectVersion
+);
 const fetchPackument = makeFetchPackumentService(regClient);
-const authNpmrc = makeAuthNpmrcService();
+const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =
@@ -53,6 +80,10 @@ const resolveDependencies = makeResolveDependenciesService(
   resolveLatestVersion
 );
 const getAllPackuments = makeGetAllPackumentsService();
+const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
+  loadUpmConfig,
+  writeFile
+);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -66,7 +97,8 @@ const loginCmd = makeLoginCmd(
   parseEnv,
   authNpmrc,
   npmLogin,
-  loadUpmConfig,
+  getUpmConfigDir,
+  saveAuthToUpmConfig,
   log
 );
 const searchCmd = makeSearchCmd(

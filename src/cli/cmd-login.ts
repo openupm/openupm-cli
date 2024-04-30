@@ -1,11 +1,5 @@
 import { AuthenticationError, NpmLoginService } from "../services/npm-login";
-import {
-  GetUpmConfigDirError,
-  LoadUpmConfig,
-  tryGetUpmConfigDir,
-  tryStoreUpmAuth,
-  UpmAuthStoreError,
-} from "../io/upm-config-io";
+import { GetUpmConfigDir, GetUpmConfigDirError } from "../io/upm-config-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { coerceRegistryUrl } from "../domain/registry-url";
@@ -20,6 +14,7 @@ import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
 import { AuthNpmrcService } from "../services/npmrc-auth";
 import { Logger } from "npmlog";
+import { SaveAuthToUpmConfig, UpmAuthStoreError } from "../services/upm-auth";
 
 /**
  * Errors which may occur when logging in.
@@ -60,7 +55,8 @@ export function makeLoginCmd(
   parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
   npmLogin: NpmLoginService,
-  loadUpmConfig: LoadUpmConfig,
+  getUpmConfigDir: GetUpmConfigDir,
+  saveAuthToUpmConfig: SaveAuthToUpmConfig,
   log: Logger
 ): LoginCmd {
   return async (options) => {
@@ -81,7 +77,7 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser)
+    const configDirResult = await getUpmConfigDir(env.wsl, env.systemUser)
       .promise;
     if (configDirResult.isErr()) return configDirResult;
     const configDir = configDirResult.value;
@@ -89,16 +85,11 @@ export function makeLoginCmd(
     if (options.basicAuth) {
       // basic auth
       const _auth = encodeBasicAuth(username, password);
-      const result = await tryStoreUpmAuth(
-        loadUpmConfig,
-        configDir,
-        loginRegistry,
-        {
-          email,
-          alwaysAuth,
-          _auth,
-        } satisfies BasicAuth
-      ).promise;
+      const result = await saveAuthToUpmConfig(configDir, loginRegistry, {
+        email,
+        alwaysAuth,
+        _auth,
+      } satisfies BasicAuth).promise;
       if (result.isErr()) return result;
       log.notice("config", "saved unity config at " + result.value);
     } else {
@@ -129,16 +120,11 @@ export function makeLoginCmd(
         log.notice("config", `saved to npm config: ${configPath}`)
       );
 
-      const storeResult = await tryStoreUpmAuth(
-        loadUpmConfig,
-        configDir,
-        loginRegistry,
-        {
-          email,
-          alwaysAuth,
-          token,
-        } satisfies TokenAuth
-      ).promise;
+      const storeResult = await saveAuthToUpmConfig(configDir, loginRegistry, {
+        email,
+        alwaysAuth,
+        token,
+      } satisfies TokenAuth).promise;
       if (storeResult.isErr()) return storeResult;
       log.notice("config", "saved unity config at " + storeResult.value);
     }

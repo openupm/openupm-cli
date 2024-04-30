@@ -1,9 +1,9 @@
 import path from "path";
 import { tryGetEnv } from "../../src/utils/env-util";
 import {
+  makeHomePathGetter,
   OSNotSupportedError,
   tryGetEditorInstallPath,
-  tryGetHomePath,
   VersionNotSupportedOnOsError,
 } from "../../src/io/special-paths";
 import os from "os";
@@ -14,32 +14,41 @@ jest.mock("../../src/utils/env-util");
 
 describe("special-paths", () => {
   describe("home", () => {
+    function makeDependencies() {
+      const getHomePath = makeHomePathGetter();
+
+      return { getHomePath } as const;
+    }
+
     it("should be USERPROFILE if defined", () => {
+      const { getHomePath } = makeDependencies();
       const expected = path.join(path.sep, "user", "dir");
       jest
         .mocked(tryGetEnv)
         .mockImplementation((key) => (key === "USERPROFILE" ? expected : null));
 
-      const result = tryGetHomePath();
+      const result = getHomePath();
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
     it("should be HOME if USERPROFILE is not defined", () => {
+      const { getHomePath } = makeDependencies();
       const expected = path.join(path.sep, "user", "dir");
       jest
         .mocked(tryGetEnv)
         .mockImplementation((key) => (key === "HOME" ? expected : null));
 
-      const result = tryGetHomePath();
+      const result = getHomePath();
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
     it("should fail if HOME and USERPROFILE are not defined", () => {
+      const { getHomePath } = makeDependencies();
       jest.mocked(tryGetEnv).mockReturnValue(null);
 
-      const result = tryGetHomePath();
+      const result = getHomePath();
 
       expect(result).toBeError();
     });

@@ -5,12 +5,7 @@ import {
 import path from "path";
 import { FileParseError } from "../common-errors";
 import { AsyncResult } from "ts-results-es";
-import {
-  IOError,
-  NotFoundError,
-  tryReadTextFromFile,
-  tryWriteTextToFile,
-} from "./file-io";
+import { IOError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
 import { tryParseJson } from "../utils/string-parsing";
 
 /**
@@ -38,11 +33,13 @@ export type LoadProjectManifest = (
 /**
  * Makes a {@link LoadProjectManifest} function.
  */
-export function makeProjectManifestLoader(): LoadProjectManifest {
+export function makeProjectManifestLoader(
+  readFile: ReadTextFile
+): LoadProjectManifest {
   return (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
     return (
-      tryReadTextFromFile(manifestPath)
+      readFile(manifestPath)
         .andThen(tryParseJson)
         // TODO: Actually validate the json structure
         .map((json) => json as unknown as UnityProjectManifest)
@@ -72,12 +69,14 @@ export type WriteProjectManifest = (
 /**
  * Makes a {@link WriteProjectManifest} function.
  */
-export function makeProjectManifestWriter(): WriteProjectManifest {
+export function makeProjectManifestWriter(
+  writeFile: WriteTextFile
+): WriteProjectManifest {
   return (projectPath, manifest) => {
     const manifestPath = manifestPathFor(projectPath);
     manifest = pruneManifest(manifest);
     const json = JSON.stringify(manifest, null, 2);
 
-    return tryWriteTextToFile(manifestPath, json);
+    return writeFile(manifestPath, json);
   };
 }

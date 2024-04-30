@@ -38,16 +38,6 @@ export class IOError extends CustomError {
   }
 }
 
-/**
- * Error for when a file-read failed.
- */
-export type FileReadError = NotFoundError | IOError;
-
-/**
- * Error for when a file-write failed.
- */
-export type FileWriteError = IOError;
-
 function fsOperation<T>(op: () => Promise<T>) {
   return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
     assertIsNodeError(error);
@@ -56,32 +46,54 @@ function fsOperation<T>(op: () => Promise<T>) {
 }
 
 /**
- * Attempts to read the content of a text file.
- * @param path The path to the file.
+ * Error for when a file-read failed.
  */
-export function tryReadTextFromFile(
-  path: string
-): AsyncResult<string, FileReadError> {
-  return fsOperation(() => fs.readFile(path, { encoding: "utf8" })).mapErr(
-    (error) => {
-      if (error.cause!.code === "ENOENT") return new NotFoundError(path);
-      return error;
-    }
-  );
+export type FileReadError = NotFoundError | IOError;
+
+/**
+ * Function for loading the content of a text file.
+ * @param path The path to the file.
+ * @returns The files text content.
+ */
+export type ReadTextFile = (path: string) => AsyncResult<string, FileReadError>;
+
+/**
+ * Makes a {@link ReadTextFile} function.
+ */
+export function makeTextReader(): ReadTextFile {
+  return (path) =>
+    fsOperation(() => fs.readFile(path, { encoding: "utf8" })).mapErr(
+      (error) => {
+        if (error.cause!.code === "ENOENT") return new NotFoundError(path);
+        return error;
+      }
+    );
 }
 
 /**
- * Attempts to overwrite the content of a text file.
+ * Error for when a file-write failed.
+ */
+export type FileWriteError = IOError;
+
+/**
+ * Function for overwriting the content of a text file. Creates the file
+ * if it does not exist.
  * @param filePath The path to the file.
  * @param content The content to write.
  */
-export function tryWriteTextToFile(
+export type WriteTextFile = (
   filePath: string,
   content: string
-): AsyncResult<void, FileWriteError> {
-  return fsOperation(() => fse.ensureDir(path.dirname(filePath))).andThen(() =>
-    fsOperation(() => fs.writeFile(filePath, content))
-  );
+) => AsyncResult<void, FileWriteError>;
+
+/**
+ * Makes a {@link WriteTextFile} function.
+ */
+export function makeTextWriter(): WriteTextFile {
+  return (filePath, content) =>
+    fsOperation(() => fse.ensureDir(path.dirname(filePath))).andThen(() =>
+      fsOperation(() => fs.writeFile(filePath, content))
+    );
 }
 
 /**

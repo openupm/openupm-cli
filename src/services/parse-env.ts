@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import {
+  GetUpmConfigDir,
   GetUpmConfigDirError,
   LoadUpmConfig,
-  tryGetUpmConfigDir,
   UpmConfigLoadError,
 } from "../io/upm-config-io";
 import path from "path";
@@ -12,8 +12,8 @@ import { CmdOptions } from "../cli/options";
 import { FileParseError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
 import {
+  LoadProjectVersion,
   ProjectVersionLoadError,
-  tryLoadProjectVersion,
 } from "../io/project-version-io";
 import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "../utils/env-util";
@@ -24,6 +24,7 @@ import {
 } from "../domain/editor-version";
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
+import { GetCwd } from "../io/special-paths";
 
 export type Env = Readonly<{
   cwd: string;
@@ -44,10 +45,10 @@ export type EnvParseError =
   | UpmConfigLoadError
   | ProjectVersionLoadError;
 
-function determineCwd(options: CmdOptions): string {
+function determineCwd(getCwd: GetCwd, options: CmdOptions): string {
   return options._global.chdir !== undefined
     ? path.resolve(options._global.chdir)
-    : process.cwd();
+    : getCwd();
 }
 
 function determineWsl(options: CmdOptions): boolean {
@@ -118,7 +119,10 @@ export type ParseEnvService = (
  */
 export function makeParseEnvService(
   log: Logger,
-  loadUpmConfig: LoadUpmConfig
+  getUpmConfigDir: GetUpmConfigDir,
+  loadUpmConfig: LoadUpmConfig,
+  getCwd: GetCwd,
+  loadProjectVersion: LoadProjectVersion
 ): ParseEnvService {
   return async (options) => {
     // log level
@@ -142,7 +146,7 @@ export function makeParseEnvService(
     const wsl = determineWsl(options);
 
     // registries
-    const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).andThen(
+    const upmConfigResult = await getUpmConfigDir(wsl, systemUser).andThen(
       loadUpmConfig
     ).promise;
     if (upmConfigResult.isErr()) return upmConfigResult;
@@ -152,10 +156,10 @@ export function makeParseEnvService(
     const upstreamRegistry = determineUpstreamRegistry(options);
 
     // cwd
-    const cwd = determineCwd(options);
+    const cwd = determineCwd(getCwd, options);
 
     // editor version
-    const projectVersionLoadResult = await tryLoadProjectVersion(cwd).promise;
+    const projectVersionLoadResult = await loadProjectVersion(cwd).promise;
     if (projectVersionLoadResult.isErr()) {
       if (projectVersionLoadResult.error instanceof NotFoundError)
         log.warn(
