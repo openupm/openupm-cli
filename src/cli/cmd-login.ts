@@ -1,8 +1,8 @@
 import { AuthenticationError, NpmLoginService } from "../services/npm-login";
 import {
+  GetUpmConfigDir,
   GetUpmConfigDirError,
   LoadUpmConfig,
-  tryGetUpmConfigDir,
   tryStoreUpmAuth,
   UpmAuthStoreError,
 } from "../io/upm-config-io";
@@ -60,6 +60,7 @@ export function makeLoginCmd(
   parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
   npmLogin: NpmLoginService,
+  getUpmConfigDir: GetUpmConfigDir,
   loadUpmConfig: LoadUpmConfig,
   log: Logger
 ): LoginCmd {
@@ -81,7 +82,7 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configDirResult = await tryGetUpmConfigDir(env.wsl, env.systemUser)
+    const configDirResult = await getUpmConfigDir(env.wsl, env.systemUser)
       .promise;
     if (configDirResult.isErr()) return configDirResult;
     const configDir = configDirResult.value;

@@ -30,7 +30,10 @@ import {
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
-import { makeUpmConfigLoader } from "../io/upm-config-io";
+import {
+  makeUpmConfigDirGetter,
+  makeUpmConfigLoader,
+} from "../io/upm-config-io";
 import { makeTextReader } from "../io/file-io";
 import { makeNpmrcPathFinder } from "../io/npmrc-io";
 import { makeCwdGetter } from "../io/special-paths";
@@ -43,10 +46,17 @@ const getCwd = makeCwdGetter();
 const readFile = makeTextReader();
 const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter();
+const getUpmConfigDir = makeUpmConfigDirGetter();
 const loadUpmConfig = makeUpmConfigLoader(readFile);
 const findNpmrcPath = makeNpmrcPathFinder();
 
-const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile, getCwd);
+const parseEnv = makeParseEnvService(
+  log,
+  getUpmConfigDir,
+  loadUpmConfig,
+  readFile,
+  getCwd
+);
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, readFile);
 const npmLogin = makeNpmLoginService(regClient);
@@ -72,6 +82,7 @@ const loginCmd = makeLoginCmd(
   parseEnv,
   authNpmrc,
   npmLogin,
+  getUpmConfigDir,
   loadUpmConfig,
   log
 );

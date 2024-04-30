@@ -3,7 +3,7 @@ import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { tryLoadProjectVersion } from "../../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
-import { LoadUpmConfig, tryGetUpmConfigDir } from "../../src/io/upm-config-io";
+import { GetUpmConfigDir, LoadUpmConfig } from "../../src/io/upm-config-io";
 import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
@@ -16,7 +16,6 @@ import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 
 jest.mock("../../src/io/project-version-io");
-jest.mock("../../src/io/upm-config-io");
 jest.mock("fs");
 jest.spyOn(process, "cwd");
 
@@ -41,6 +40,10 @@ const testProjectVersion = "2021.3.1f1";
 function makeDependencies() {
   const log = makeMockLogger();
 
+  const getUpmConfigDir = mockService<GetUpmConfigDir>();
+  // The root directory does not contain an upm-config
+  getUpmConfigDir.mockReturnValue(Ok(testRootPath).toAsyncResult());
+
   const loadUpmConfig = mockService<LoadUpmConfig>();
   mockUpmConfig(loadUpmConfig, null);
 
@@ -50,19 +53,19 @@ function makeDependencies() {
   const getCwd = mockService<GetCwd>();
   getCwd.mockReturnValue(testRootPath);
 
-  const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile, getCwd);
-  return { parseEnv, log, loadUpmConfig } as const;
+  const parseEnv = makeParseEnvService(
+    log,
+    getUpmConfigDir,
+    loadUpmConfig,
+    readFile,
+    getCwd
+  );
+  return { parseEnv, log, getUpmConfigDir, loadUpmConfig } as const;
 }
 
 describe("env", () => {
   beforeEach(() => {
     // By default, we simulate the following:
-
-    // The root directory does not contain an upm-config
-    jest
-      .mocked(tryGetUpmConfigDir)
-      .mockReturnValue(Ok(testRootPath).toAsyncResult());
-
     // The project has a ProjectVersion.txt
     mockProjectVersion(testProjectVersion);
   });
@@ -289,11 +292,9 @@ describe("env", () => {
 
   describe("upm-config", () => {
     it("should fail if upm-config dir cannot be determined", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, getUpmConfigDir } = makeDependencies();
       const expected = new NoWslError();
-      jest
-        .mocked(tryGetUpmConfigDir)
-        .mockReturnValue(Err(expected).toAsyncResult());
+      getUpmConfigDir.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await parseEnv({ _global: {} });
 

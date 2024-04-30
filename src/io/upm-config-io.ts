@@ -29,41 +29,52 @@ export class RequiredEnvMissingError extends CustomError {
   }
 }
 
+/**
+ * Error which may occur when getting the upmconfig directory.
+ */
 export type GetUpmConfigDirError =
   | WslPathError
   | RequiredEnvMissingError
   | ChildProcessError;
 
 /**
- * Gets the path to directory in which the upm config is stored.
+ * Function which gets the path to directory in which the upm config is stored.
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
+ * @returns The directories path.
  */
-export const tryGetUpmConfigDir = (
+export type GetUpmConfigDir = (
   wsl: boolean,
   systemUser: boolean
-): AsyncResult<string, GetUpmConfigDirError> => {
-  const systemUserSubPath = "Unity/config/ServiceAccounts";
-  if (wsl) {
-    if (systemUser)
-      return tryGetWslPath("ALLUSERSPROFILE").map((it) =>
-        path.join(it, systemUserSubPath)
-      );
+) => AsyncResult<string, GetUpmConfigDirError>;
 
-    return tryGetWslPath("USERPROFILE");
-  }
+/**
+ * Makes a {@link GetUpmConfigDir} function.
+ */
+export function makeUpmConfigDirGetter(): GetUpmConfigDir {
+  return (wsl, systemUser) => {
+    const systemUserSubPath = "Unity/config/ServiceAccounts";
+    if (wsl) {
+      if (systemUser)
+        return tryGetWslPath("ALLUSERSPROFILE").map((it) =>
+          path.join(it, systemUserSubPath)
+        );
 
-  if (systemUser) {
-    const profilePath = tryGetEnv("ALLUSERSPROFILE");
-    if (profilePath === null)
-      return Err(
-        new RequiredEnvMissingError("ALLUSERSPROFILE")
-      ).toAsyncResult();
-    return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
-  }
+      return tryGetWslPath("USERPROFILE");
+    }
 
-  return tryGetHomePath().toAsyncResult();
-};
+    if (systemUser) {
+      const profilePath = tryGetEnv("ALLUSERSPROFILE");
+      if (profilePath === null)
+        return Err(
+          new RequiredEnvMissingError("ALLUSERSPROFILE")
+        ).toAsyncResult();
+      return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
+    }
+
+    return tryGetHomePath().toAsyncResult();
+  };
+}
 
 /**
  * Error which may occur when loading a {@link UPMConfig}.
