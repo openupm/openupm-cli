@@ -7,8 +7,6 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientGetResult } from "./registry-client.mock";
 
-jest.mock("another-npm-registry-client");
-
 const packageA = makeDomainName("package-a");
 const exampleRegistry: Registry = {
   url: exampleRegistryUrl,
