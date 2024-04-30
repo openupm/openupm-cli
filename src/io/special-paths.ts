@@ -76,7 +76,8 @@ const firstSupportedEditorVersion = makeEditorVersion(2018, 1);
 /**
  * Attempts to get the default installation path of a specific Unity editor.
  * Returned paths do not include a trailing slash.
- * @param editorVersion The version-string for the editor e.g. 2022.1.3f1.
+ * @param editorVersion The editor-version to get the path for. Must be a
+ * release version ie 2020.2.1f1.
  */
 export function tryGetEditorInstallPath(
   editorVersion: ReleaseVersion
