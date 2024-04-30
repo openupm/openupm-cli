@@ -102,3 +102,16 @@ export function tryGetEditorInstallPath(
 
   return Err(new OSNotSupportedError(platform));
 }
+
+/**
+ * Function that gets the current working directories path.
+ * @returns The path.
+ */
+export type GetCwd = () => string;
+
+/**
+ * Makes a {@link GetCwd} function.
+ */
+export function makeCwdGetter(): GetCwd {
+  return process.cwd;
+}

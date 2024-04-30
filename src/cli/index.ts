@@ -33,18 +33,20 @@ import { makeResolveLatestVersionService } from "../services/resolve-latest-vers
 import { makeUpmConfigLoader } from "../io/upm-config-io";
 import { makeTextReader } from "../io/file-io";
 import { makeNpmrcPathFinder } from "../io/npmrc-io";
+import { makeCwdGetter } from "../io/special-paths";
 
 // Composition root
 
 const log = npmlog;
 const regClient = new RegClient({ log });
+const getCwd = makeCwdGetter();
 const readFile = makeTextReader();
 const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter();
 const loadUpmConfig = makeUpmConfigLoader(readFile);
 const findNpmrcPath = makeNpmrcPathFinder();
 
-const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile);
+const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile, getCwd);
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, readFile);
 const npmLogin = makeNpmLoginService(regClient);

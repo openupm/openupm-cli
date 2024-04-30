@@ -24,6 +24,7 @@ import {
 } from "../domain/editor-version";
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
+import { GetCwd } from "../io/special-paths";
 
 export type Env = Readonly<{
   cwd: string;
@@ -44,10 +45,10 @@ export type EnvParseError =
   | UpmConfigLoadError
   | ProjectVersionLoadError;
 
-function determineCwd(options: CmdOptions): string {
+function determineCwd(getCwd: GetCwd, options: CmdOptions): string {
   return options._global.chdir !== undefined
     ? path.resolve(options._global.chdir)
-    : process.cwd();
+    : getCwd();
 }
 
 function determineWsl(options: CmdOptions): boolean {
@@ -119,7 +120,8 @@ export type ParseEnvService = (
 export function makeParseEnvService(
   log: Logger,
   loadUpmConfig: LoadUpmConfig,
-  readFile: ReadTextFile
+  readFile: ReadTextFile,
+  getCwd: GetCwd
 ): ParseEnvService {
   return async (options) => {
     // log level
@@ -153,7 +155,7 @@ export function makeParseEnvService(
     const upstreamRegistry = determineUpstreamRegistry(options);
 
     // cwd
-    const cwd = determineCwd(options);
+    const cwd = determineCwd(getCwd, options);
 
     // editor version
     const projectVersionLoadResult = await tryLoadProjectVersion(readFile, cwd)

@@ -4,7 +4,6 @@ import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { tryLoadProjectVersion } from "../../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import { LoadUpmConfig, tryGetUpmConfigDir } from "../../src/io/upm-config-io";
-import fs from "fs";
 import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
@@ -14,6 +13,7 @@ import { mockProjectVersion } from "../io/project-version-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
+import { GetCwd } from "../../src/io/special-paths";
 
 jest.mock("../../src/io/project-version-io");
 jest.mock("../../src/io/upm-config-io");
@@ -46,16 +46,17 @@ function makeDependencies() {
 
   const readFile = mockService<ReadTextFile>();
 
-  const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile);
+  // process.cwd is in the root directory.
+  const getCwd = mockService<GetCwd>();
+  getCwd.mockReturnValue(testRootPath);
+
+  const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile, getCwd);
   return { parseEnv, log, loadUpmConfig } as const;
 }
 
 describe("env", () => {
   beforeEach(() => {
     // By default, we simulate the following:
-
-    // process.cwd is in the root directory.
-    jest.mocked(process.cwd).mockReturnValue(testRootPath);
 
     // The root directory does not contain an upm-config
     jest
