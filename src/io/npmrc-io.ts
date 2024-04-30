@@ -13,11 +13,6 @@ import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetHomePath } from "./special-paths";
 
 /**
- * Error that might occur when saving a npmrc.
- */
-export type NpmrcSaveError = FileWriteError;
-
-/**
  * Error for when npmrc path could not be determined.
  */
 export type FindNpmrcError = RequiredEnvMissingError;
@@ -63,14 +58,26 @@ export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
 }
 
 /**
- * Attempts to save a npmrc. Overwrites the content of the file.
+ * Error that might occur when saving a npmrc.
+ */
+export type NpmrcSaveError = FileWriteError;
+
+/**
+ * Function for saving npmrc files. Overwrites the content of the file.
  * @param path The path to the file.
  * @param npmrc The new lines for the file.
  */
-export function trySaveNpmrc(
+export type SaveNpmrc = (
   path: string,
   npmrc: Npmrc
-): AsyncResult<void, NpmrcSaveError> {
-  const content = npmrc.join(EOL);
-  return tryWriteTextToFile(path, content);
+) => AsyncResult<void, NpmrcSaveError>;
+
+/**
+ * Makes a {@link SaveNpmrc} function.
+ */
+export function makeNpmrcSaver(): SaveNpmrc {
+  return (path, npmrc) => {
+    const content = npmrc.join(EOL);
+    return tryWriteTextToFile(path, content);
+  };
 }

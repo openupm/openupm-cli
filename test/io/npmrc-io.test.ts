@@ -9,7 +9,7 @@ import { EOL } from "node:os";
 import {
   makeNpmrcLoader,
   makeNpmrcPathFinder,
-  trySaveNpmrc,
+  makeNpmrcSaver,
 } from "../../src/io/npmrc-io";
 import path from "path";
 import { tryGetHomePath } from "../../src/io/special-paths";
@@ -83,25 +83,32 @@ describe("npmrc-io", () => {
   });
 
   describe("save", () => {
+    function makeDependencies() {
+      const saveNpmrc = makeNpmrcSaver();
+      return { saveNpmrc } as const;
+    }
+
     it("should be ok when write succeeds", async () => {
+      const { saveNpmrc } = makeDependencies();
       const path = "/valid/path/.npmrc";
       jest
         .mocked(tryWriteTextToFile)
         .mockReturnValue(new AsyncResult(Ok(undefined)));
 
-      const result = await trySaveNpmrc(path, ["key=value"]).promise;
+      const result = await saveNpmrc(path, ["key=value"]).promise;
 
       expect(result).toBeOk();
     });
 
     it("should fail when write fails", async () => {
+      const { saveNpmrc } = makeDependencies();
       const expected = new IOError();
       const path = "/invalid/path/.npmrc";
       jest
         .mocked(tryWriteTextToFile)
         .mockReturnValue(new AsyncResult(Err(expected)));
 
-      const result = await trySaveNpmrc(path, ["key=value"]).promise;
+      const result = await saveNpmrc(path, ["key=value"]).promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });

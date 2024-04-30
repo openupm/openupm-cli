@@ -5,7 +5,7 @@ import {
   LoadNpmrc,
   NpmrcLoadError,
   NpmrcSaveError,
-  trySaveNpmrc,
+  SaveNpmrc,
 } from "../io/npmrc-io";
 import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
@@ -32,7 +32,8 @@ export type AuthNpmrcService = (
 
 export function makeAuthNpmrcService(
   findPath: FindNpmrcPath,
-  loadNpmrc: LoadNpmrc
+  loadNpmrc: LoadNpmrc,
+  saveNpmrc: SaveNpmrc
 ): AuthNpmrcService {
   return (registry, token) => {
     // read config
@@ -42,7 +43,7 @@ export function makeAuthNpmrcService(
         loadNpmrc(configPath)
           .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
           .map((npmrc) => setToken(npmrc, registry, token))
-          .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
+          .andThen((npmrc) => saveNpmrc(configPath, npmrc))
           .map(() => configPath)
       );
   };
