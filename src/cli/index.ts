@@ -40,7 +40,7 @@ import {
   makeNpmrcPathFinder,
   makeNpmrcSaver,
 } from "../io/npmrc-io";
-import { makeCwdGetter } from "../io/special-paths";
+import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
 import { makeProjectVersionLoader } from "../io/project-version-io";
 
 // Composition root
@@ -48,13 +48,14 @@ import { makeProjectVersionLoader } from "../io/project-version-io";
 const log = npmlog;
 const regClient = new RegClient({ log });
 const getCwd = makeCwdGetter();
+const getHomePath = makeHomePathGetter();
 const readFile = makeTextReader();
 const writeFile = makeTextWriter();
 const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter(writeFile);
-const getUpmConfigDir = makeUpmConfigDirGetter();
+const getUpmConfigDir = makeUpmConfigDirGetter(getHomePath);
 const loadUpmConfig = makeUpmConfigLoader(readFile);
-const findNpmrcPath = makeNpmrcPathFinder();
+const findNpmrcPath = makeNpmrcPathFinder(getHomePath);
 const loadNpmrc = makeNpmrcLoader(readFile);
 const saveNpmrc = makeNpmrcSaver(writeFile);
 const loadProjectVersion = makeProjectVersionLoader(readFile);

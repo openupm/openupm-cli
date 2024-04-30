@@ -10,7 +10,7 @@ import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
-import { tryGetHomePath } from "./special-paths";
+import { GetHomePath } from "./special-paths";
 
 /**
  * Error for when npmrc path could not be determined.
@@ -26,9 +26,8 @@ export type FindNpmrcPath = () => Result<string, FindNpmrcError>;
 /**
  * Makes a {@link FindNpmrcPath} function.
  */
-export function makeNpmrcPathFinder(): FindNpmrcPath {
-  return () =>
-    tryGetHomePath().map((homePath) => path.join(homePath, ".npmrc"));
+export function makeNpmrcPathFinder(getHomePath: GetHomePath): FindNpmrcPath {
+  return () => getHomePath().map((homePath) => path.join(homePath, ".npmrc"));
 }
 
 /**

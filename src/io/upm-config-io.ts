@@ -6,10 +6,10 @@ import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
-import { tryGetHomePath } from "./special-paths";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError } from "../utils/process";
+import { GetHomePath } from "./special-paths";
 
 const configFileName = ".upmconfig.toml";
 
@@ -46,7 +46,9 @@ export type GetUpmConfigDir = (
 /**
  * Makes a {@link GetUpmConfigDir} function.
  */
-export function makeUpmConfigDirGetter(): GetUpmConfigDir {
+export function makeUpmConfigDirGetter(
+  getHomePath: GetHomePath
+): GetUpmConfigDir {
   return (wsl, systemUser) => {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (wsl) {
@@ -67,7 +69,7 @@ export function makeUpmConfigDirGetter(): GetUpmConfigDir {
       return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
     }
 
-    return tryGetHomePath().toAsyncResult();
+    return getHomePath().toAsyncResult();
   };
 }
 

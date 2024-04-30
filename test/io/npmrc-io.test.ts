@@ -12,7 +12,7 @@ import {
   makeNpmrcSaver,
 } from "../../src/io/npmrc-io";
 import path from "path";
-import { tryGetHomePath } from "../../src/io/special-paths";
+import { GetHomePath } from "../../src/io/special-paths";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { mockService } from "../services/service.mock";
 
@@ -22,16 +22,18 @@ jest.mock("../../src/io/special-paths");
 describe("npmrc-io", () => {
   describe("get path", () => {
     function makeDependencies() {
-      const findPath = makeNpmrcPathFinder();
+      const getHomePath = mockService<GetHomePath>();
 
-      return { findPath } as const;
+      const findPath = makeNpmrcPathFinder(getHomePath);
+
+      return { findPath, getHomePath } as const;
     }
 
     it("should be [Home]/.npmrc", () => {
-      const { findPath } = makeDependencies();
+      const { findPath, getHomePath } = makeDependencies();
       const home = path.join(path.sep, "user", "dir");
       const expected = path.join(home, ".npmrc");
-      jest.mocked(tryGetHomePath).mockReturnValue(Ok(home));
+      getHomePath.mockReturnValue(Ok(home));
 
       const result = findPath();
 
@@ -39,10 +41,8 @@ describe("npmrc-io", () => {
     });
 
     it("should fail if home could not be determined", () => {
-      const { findPath } = makeDependencies();
-      jest
-        .mocked(tryGetHomePath)
-        .mockReturnValue(Err(new RequiredEnvMissingError()));
+      const { findPath, getHomePath } = makeDependencies();
+      getHomePath.mockReturnValue(Err(new RequiredEnvMissingError()));
 
       const result = findPath();
 

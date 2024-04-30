@@ -3,28 +3,27 @@ import {
   makeUpmConfigLoader,
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
-import { tryGetHomePath } from "../../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
 import { mockService } from "../services/service.mock";
 import { StringFormatError } from "../../src/utils/string-parsing";
-
-jest.mock("../../src/io/file-io");
-jest.mock("../../src/io/special-paths");
+import { GetHomePath } from "../../src/io/special-paths";
 
 describe("upm-config-io", () => {
   describe("get directory", () => {
     function makeDependencies() {
-      const getUpmConfigDir = makeUpmConfigDirGetter();
+      const getHomePath = mockService<GetHomePath>();
 
-      return { getUpmConfigDir } as const;
+      const getUpmConfigDir = makeUpmConfigDirGetter(getHomePath);
+
+      return { getUpmConfigDir, getHomePath } as const;
     }
 
     describe("no wsl and no system-user", () => {
       it("should be home path", async () => {
-        const { getUpmConfigDir } = makeDependencies();
+        const { getUpmConfigDir, getHomePath } = makeDependencies();
         const expected = "/some/home/dir/";
-        jest.mocked(tryGetHomePath).mockReturnValue(Ok(expected));
+        getHomePath.mockReturnValue(Ok(expected));
 
         const result = await getUpmConfigDir(false, false).promise;
 
@@ -32,9 +31,9 @@ describe("upm-config-io", () => {
       });
 
       it("should fail if home could not be determined", async () => {
-        const { getUpmConfigDir } = makeDependencies();
+        const { getUpmConfigDir, getHomePath } = makeDependencies();
         const expected = new RequiredEnvMissingError();
-        jest.mocked(tryGetHomePath).mockReturnValue(Err(expected));
+        getHomePath.mockReturnValue(Err(expected));
 
         const result = await getUpmConfigDir(false, false).promise;
 

@@ -1,6 +1,5 @@
 import { Err, Ok, Result } from "ts-results-es";
 import { RequiredEnvMissingError } from "./upm-config-io";
-import { tryGetEnv } from "../utils/env-util";
 import os from "os";
 import { CustomError } from "ts-custom-error";
 import {
@@ -11,6 +10,7 @@ import {
   stringifyEditorVersion,
 } from "../domain/editor-version";
 import { EditorVersionNotSupportedError } from "../common-errors";
+import { tryGetEnv } from "../utils/env-util";
 
 /**
  * Error for when a specific OS does not support a specific editor-version.
@@ -47,13 +47,26 @@ export class OSNotSupportedError extends CustomError {
 }
 
 /**
- * Attempts to get the current users home-directory.
+ * Error which may occur when getting the users home path.
  */
-export function tryGetHomePath(): Result<string, RequiredEnvMissingError> {
-  const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-  if (homePath === null)
-    return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
-  return Ok(homePath);
+export type GetHomePathError = RequiredEnvMissingError;
+
+/**
+ * Function for getting the path of the users home directory.
+ * @returns The path to the directory.
+ */
+export type GetHomePath = () => Result<string, GetHomePathError>;
+
+/**
+ * Makes a {@link GetHomePath} function.
+ */
+export function makeHomePathGetter(): GetHomePath {
+  return () => {
+    const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
+    if (homePath === null)
+      return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
+    return Ok(homePath);
+  };
 }
 
 /**
