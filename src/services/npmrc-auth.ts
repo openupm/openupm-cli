@@ -2,14 +2,13 @@ import { RegistryUrl } from "../domain/registry-url";
 import { AsyncResult } from "ts-results-es";
 import {
   FindNpmrcPath,
+  LoadNpmrc,
   NpmrcLoadError,
   NpmrcSaveError,
-  tryLoadNpmrc,
   trySaveNpmrc,
 } from "../io/npmrc-io";
 import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
-import { ReadTextFile } from "../io/file-io";
 
 /**
  * Error that might occur when updating an auth-token inside a npmrc file.
@@ -33,14 +32,14 @@ export type AuthNpmrcService = (
 
 export function makeAuthNpmrcService(
   findPath: FindNpmrcPath,
-  readFile: ReadTextFile
+  loadNpmrc: LoadNpmrc
 ): AuthNpmrcService {
   return (registry, token) => {
     // read config
     return findPath()
       .toAsyncResult()
       .andThen((configPath) =>
-        tryLoadNpmrc(readFile, configPath)
+        loadNpmrc(configPath)
           .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
           .map((npmrc) => setToken(npmrc, registry, token))
           .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))

@@ -7,8 +7,8 @@ import {
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
+  makeNpmrcLoader,
   makeNpmrcPathFinder,
-  tryLoadNpmrc,
   trySaveNpmrc,
 } from "../../src/io/npmrc-io";
 import path from "path";
@@ -54,15 +54,16 @@ describe("npmrc-io", () => {
     function makeDependencies() {
       const readText = mockService<ReadTextFile>();
 
-      return { readText } as const;
+      const loadNpmrc = makeNpmrcLoader(readText);
+      return { loadNpmrc, readText } as const;
     }
 
     it("should be ok for valid file", async () => {
       const fileContent = `key1 = value1${EOL}key2 = "value2"`;
-      const { readText } = makeDependencies();
+      const { loadNpmrc, readText } = makeDependencies();
       readText.mockReturnValue(new AsyncResult(Ok(fileContent)));
 
-      const result = await tryLoadNpmrc(readText, "/valid/path/.npmrc").promise;
+      const result = await loadNpmrc("/valid/path/.npmrc").promise;
 
       expect(result).toBeOk((actual) =>
         expect(actual).toEqual(["key1 = value1", 'key2 = "value2"'])
@@ -70,12 +71,12 @@ describe("npmrc-io", () => {
     });
 
     it("should be null for missing file", async () => {
-      const { readText } = makeDependencies();
+      const { loadNpmrc, readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
       const expected = new NotFoundError(path);
       readText.mockReturnValue(new AsyncResult(Err(expected)));
 
-      const result = await tryLoadNpmrc(readText, path).promise;
+      const result = await loadNpmrc(path).promise;
 
       expect(result).toBeOk((actual) => expect(actual).toBeNull());
     });

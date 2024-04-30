@@ -35,7 +35,7 @@ import {
   makeUpmConfigLoader,
 } from "../io/upm-config-io";
 import { makeTextReader } from "../io/file-io";
-import { makeNpmrcPathFinder } from "../io/npmrc-io";
+import { makeNpmrcLoader, makeNpmrcPathFinder } from "../io/npmrc-io";
 import { makeCwdGetter } from "../io/special-paths";
 
 // Composition root
@@ -49,6 +49,7 @@ const writeProjectManifest = makeProjectManifestWriter();
 const getUpmConfigDir = makeUpmConfigDirGetter();
 const loadUpmConfig = makeUpmConfigLoader(readFile);
 const findNpmrcPath = makeNpmrcPathFinder();
+const loadNpmrc = makeNpmrcLoader(readFile);
 
 const parseEnv = makeParseEnvService(
   log,
@@ -58,7 +59,7 @@ const parseEnv = makeParseEnvService(
   getCwd
 );
 const fetchPackument = makeFetchPackumentService(regClient);
-const authNpmrc = makeAuthNpmrcService(findNpmrcPath, readFile);
+const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =

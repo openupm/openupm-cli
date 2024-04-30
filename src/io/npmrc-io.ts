@@ -13,11 +13,6 @@ import { RequiredEnvMissingError } from "./upm-config-io";
 import { tryGetHomePath } from "./special-paths";
 
 /**
- * Error that might occur when loading a npmrc.
- */
-export type NpmrcLoadError = IOError;
-
-/**
  * Error that might occur when saving a npmrc.
  */
 export type NpmrcSaveError = FileWriteError;
@@ -42,18 +37,29 @@ export function makeNpmrcPathFinder(): FindNpmrcPath {
 }
 
 /**
- * Attempts to load an .npmrc. It will load all lines from the file.
- * @param path The path to load from.
+ * Error that might occur when loading a npmrc.
  */
-export function tryLoadNpmrc(
-  readFile: ReadTextFile,
+export type NpmrcLoadError = IOError;
+
+/**
+ * Function for loading npmrc.
+ * @param path The path to load from.
+ * @returns The npmrc's lines or null if not found.
+ */
+export type LoadNpmrc = (
   path: string
-): AsyncResult<Npmrc | null, NpmrcLoadError> {
-  return readFile(path)
-    .map<Npmrc | null>((content) => content.split(EOL))
-    .orElse((error) =>
-      error instanceof NotFoundError ? Ok(null) : Err(error)
-    );
+) => AsyncResult<Npmrc | null, NpmrcLoadError>;
+
+/**
+ * Makes a {@link LoadNpmrc} function.
+ */
+export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
+  return (path) =>
+    readFile(path)
+      .map<Npmrc | null>((content) => content.split(EOL))
+      .orElse((error) =>
+        error instanceof NotFoundError ? Ok(null) : Err(error)
+      );
 }
 
 /**
