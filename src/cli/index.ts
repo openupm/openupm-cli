@@ -42,6 +42,7 @@ import {
 } from "../io/npmrc-io";
 import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
 import { makeProjectVersionLoader } from "../io/project-version-io";
+import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
 
 // Composition root
 
@@ -79,6 +80,10 @@ const resolveDependencies = makeResolveDependenciesService(
   resolveLatestVersion
 );
 const getAllPackuments = makeGetAllPackumentsService();
+const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
+  loadUpmConfig,
+  writeFile
+);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -92,9 +97,8 @@ const loginCmd = makeLoginCmd(
   parseEnv,
   authNpmrc,
   npmLogin,
-  writeFile,
   getUpmConfigDir,
-  loadUpmConfig,
+  saveAuthToUpmConfig,
   log
 );
 const searchCmd = makeSearchCmd(

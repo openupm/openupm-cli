@@ -1,7 +1,6 @@
 import path from "path";
 import TOML from "@iarna/toml";
-import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
-import { RegistryUrl } from "../domain/registry-url";
+import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
@@ -127,23 +126,3 @@ export const trySaveUpmConfig = (
   return writeFile(configPath, content).map(() => configPath);
 };
 
-/**
- * Errors which may occur when storing an {@link UpmAuth} to the file-system.
- */
-export type UpmAuthStoreError = UpmConfigLoadError | IOError;
-
-/**
- * Stores authentication information in the projects upm config.
- */
-export const tryStoreUpmAuth = function (
-  loadUpmConfig: LoadUpmConfig,
-  writeFile: WriteTextFile,
-  configDir: string,
-  registry: RegistryUrl,
-  auth: UpmAuth
-): AsyncResult<string, UpmAuthStoreError> {
-  return loadUpmConfig(configDir)
-    .map((maybeConfig) => maybeConfig || {})
-    .map((config) => addAuth(registry, auth, config))
-    .andThen((config) => trySaveUpmConfig(writeFile, config, configDir));
-};
