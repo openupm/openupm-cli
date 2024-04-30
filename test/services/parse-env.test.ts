@@ -54,9 +54,6 @@ describe("env", () => {
   beforeEach(() => {
     // By default, we simulate the following:
 
-    // The following directories exist
-    jest.mocked(fs.existsSync).mockReturnValue(true);
-
     // process.cwd is in the root directory.
     jest.mocked(process.cwd).mockReturnValue(testRootPath);
 
