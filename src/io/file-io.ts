@@ -32,7 +32,7 @@ export class IOError extends CustomError {
     /**
      * The actual error that caused the failure.
      */
-    cause?: NodeJS.ErrnoException
+    public readonly cause?: NodeJS.ErrnoException
   ) {
     super("An interaction with the file-system caused an error.", { cause });
   }
@@ -48,6 +48,13 @@ export type FileReadError = NotFoundError | IOError;
  */
 export type FileWriteError = IOError;
 
+function fsOperation<T>(op: () => Promise<T>) {
+  return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
+    assertIsNodeError(error);
+    return new IOError(error);
+  });
+}
+
 /**
  * Attempts to read the content of a text file.
  * @param path The path to the file.
@@ -55,13 +62,12 @@ export type FileWriteError = IOError;
 export function tryReadTextFromFile(
   path: string
 ): AsyncResult<string, FileReadError> {
-  return new AsyncResult(
-    Result.wrapAsync(() => fs.readFile(path, { encoding: "utf8" }))
-  ).mapErr((error) => {
-    assertIsNodeError(error);
-    if (error.code === "ENOENT") return new NotFoundError(path);
-    return new IOError(error);
-  });
+  return fsOperation(() => fs.readFile(path, { encoding: "utf8" })).mapErr(
+    (error) => {
+      if (error.cause!.code === "ENOENT") return new NotFoundError(path);
+      return error;
+    }
+  );
 }
 
 /**
@@ -73,14 +79,9 @@ export function tryWriteTextToFile(
   filePath: string,
   content: string
 ): AsyncResult<void, FileWriteError> {
-  return new AsyncResult(
-    Result.wrapAsync(() => fse.ensureDir(path.dirname(filePath)))
-  )
-    .andThen(() => Result.wrapAsync(() => fs.writeFile(filePath, content)))
-    .mapErr((error) => {
-      assertIsNodeError(error);
-      return new IOError(error);
-    });
+  return fsOperation(() => fse.ensureDir(path.dirname(filePath))).andThen(() =>
+    fsOperation(() => fs.writeFile(filePath, content))
+  );
 }
 
 /**
@@ -95,14 +96,12 @@ export type GetDirectoriesError = NotFoundError | IOError;
 export function tryGetDirectoriesIn(
   directoryPath: string
 ): AsyncResult<ReadonlyArray<string>, GetDirectoriesError> {
-  return new AsyncResult(
-    Result.wrapAsync(() => fs.readdir(directoryPath, { withFileTypes: true }))
-  )
+  return fsOperation(() => fs.readdir(directoryPath, { withFileTypes: true }))
     .map((entries) => entries.filter((it) => it.isDirectory()))
     .map((directories) => directories.map((it) => it.name))
     .mapErr((error) => {
-      assertIsNodeError(error);
-      if (error.code === "ENOENT") return new NotFoundError(directoryPath);
-      return new IOError(error);
+      if (error.cause!.code === "ENOENT")
+        return new NotFoundError(directoryPath);
+      return error;
     });
 }
