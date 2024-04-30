@@ -23,10 +23,22 @@ export type NpmrcLoadError = IOError;
 export type NpmrcSaveError = FileWriteError;
 
 /**
- * Tries to get the npmrc path based on env.
+ * Error for when npmrc path could not be determined.
  */
-export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
-  return tryGetHomePath().map((homePath) => path.join(homePath, ".npmrc"));
+export type FindNpmrcError = RequiredEnvMissingError;
+
+/**
+ * Function for determining the path of the users .npmrc file.
+ * @returns The path to the file.
+ */
+export type FindNpmrcPath = () => Result<string, FindNpmrcError>;
+
+/**
+ * Makes a {@link FindNpmrcPath} function.
+ */
+export function makeNpmrcPathFinder(): FindNpmrcPath {
+  return () =>
+    tryGetHomePath().map((homePath) => path.join(homePath, ".npmrc"));
 }
 
 /**

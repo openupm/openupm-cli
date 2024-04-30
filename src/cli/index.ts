@@ -32,6 +32,7 @@ import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
 import { makeUpmConfigLoader } from "../io/upm-config-io";
 import { makeTextReader } from "../io/file-io";
+import { makeNpmrcPathFinder } from "../io/npmrc-io";
 
 // Composition root
 
@@ -41,10 +42,11 @@ const readFile = makeTextReader();
 const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter();
 const loadUpmConfig = makeUpmConfigLoader(readFile);
+const findNpmrcPath = makeNpmrcPathFinder();
 
 const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile);
 const fetchPackument = makeFetchPackumentService(regClient);
-const authNpmrc = makeAuthNpmrcService(readFile);
+const authNpmrc = makeAuthNpmrcService(findNpmrcPath, readFile);
 const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =

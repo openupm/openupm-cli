@@ -1,5 +1,5 @@
 import {
-  tryGetNpmrcPath,
+  FindNpmrcPath,
   tryLoadNpmrc,
   trySaveNpmrc,
 } from "../../src/io/npmrc-io";
@@ -16,25 +16,27 @@ const exampleNpmrcPath = "/users/someuser/.npmrc";
 jest.mock("../../src/io/npmrc-io");
 
 function makeDependencies() {
+  const findPath = mockService<FindNpmrcPath>();
+  findPath.mockReturnValue(Ok(exampleNpmrcPath));
+
   const readFile = mockService<ReadTextFile>();
 
-  const authNpmrc = makeAuthNpmrcService(readFile);
-  return { authNpmrc, readFile } as const;
+  const authNpmrc = makeAuthNpmrcService(findPath, readFile);
+  return { authNpmrc, findPath, readFile } as const;
 }
 
 describe("npmrc-auth", () => {
   describe("set token", () => {
     beforeEach(() => {
       // Mock defaults
-      jest.mocked(tryGetNpmrcPath).mockReturnValue(Ok(exampleNpmrcPath));
       jest.mocked(tryLoadNpmrc).mockReturnValue(new AsyncResult(Ok(null)));
       jest.mocked(trySaveNpmrc).mockReturnValue(new AsyncResult(Ok(undefined)));
     });
 
     it("should fail if path could not be determined", async () => {
       const expected = new RequiredEnvMissingError();
-      const { authNpmrc } = makeDependencies();
-      jest.mocked(tryGetNpmrcPath).mockReturnValue(Err(expected));
+      const { authNpmrc, findPath } = makeDependencies();
+      findPath.mockReturnValue(Err(expected));
 
       const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 

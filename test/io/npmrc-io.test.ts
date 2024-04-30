@@ -7,7 +7,7 @@ import {
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
-  tryGetNpmrcPath,
+  makeNpmrcPathFinder,
   tryLoadNpmrc,
   trySaveNpmrc,
 } from "../../src/io/npmrc-io";
@@ -21,22 +21,30 @@ jest.mock("../../src/io/special-paths");
 
 describe("npmrc-io", () => {
   describe("get path", () => {
+    function makeDependencies() {
+      const findPath = makeNpmrcPathFinder();
+
+      return { findPath } as const;
+    }
+
     it("should be [Home]/.npmrc", () => {
+      const { findPath } = makeDependencies();
       const home = path.join(path.sep, "user", "dir");
       const expected = path.join(home, ".npmrc");
       jest.mocked(tryGetHomePath).mockReturnValue(Ok(home));
 
-      const result = tryGetNpmrcPath();
+      const result = findPath();
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
     it("should fail if home could not be determined", () => {
+      const { findPath } = makeDependencies();
       jest
         .mocked(tryGetHomePath)
         .mockReturnValue(Err(new RequiredEnvMissingError()));
 
-      const result = tryGetNpmrcPath();
+      const result = findPath();
 
       expect(result).toBeError();
     });

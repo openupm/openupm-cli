@@ -1,9 +1,9 @@
 import { RegistryUrl } from "../domain/registry-url";
 import { AsyncResult } from "ts-results-es";
 import {
+  FindNpmrcPath,
   NpmrcLoadError,
   NpmrcSaveError,
-  tryGetNpmrcPath,
   tryLoadNpmrc,
   trySaveNpmrc,
 } from "../io/npmrc-io";
@@ -31,10 +31,13 @@ export type AuthNpmrcService = (
   token: string
 ) => AsyncResult<string, NpmrcAuthTokenUpdateError>;
 
-export function makeAuthNpmrcService(readFile: ReadTextFile): AuthNpmrcService {
+export function makeAuthNpmrcService(
+  findPath: FindNpmrcPath,
+  readFile: ReadTextFile
+): AuthNpmrcService {
   return (registry, token) => {
     // read config
-    return tryGetNpmrcPath()
+    return findPath()
       .toAsyncResult()
       .andThen((configPath) =>
         tryLoadNpmrc(readFile, configPath)
