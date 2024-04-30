@@ -98,12 +98,12 @@ describe("project-manifest io", () => {
   describe("write", () => {
     function makeDependencies() {
       const writeProjectManifest = makeProjectManifestWriter();
-      return [writeProjectManifest] as const;
+      return { writeProjectManifest } as const;
     }
 
     it("should fail if file could not be written", async () => {
       const expected = new IOError();
-      const [writeProjectManifest] = makeDependencies();
+      const { writeProjectManifest } = makeDependencies();
       jest
         .spyOn(fileIoModule, "tryWriteTextToFile")
         .mockReturnValue(Err(expected).toAsyncResult());
@@ -117,7 +117,7 @@ describe("project-manifest io", () => {
     });
 
     it("should write manifest json", async () => {
-      const [writeProjectManifest] = makeDependencies();
+      const { writeProjectManifest } = makeDependencies();
       const writeSpy = jest
         .spyOn(fileIoModule, "tryWriteTextToFile")
         .mockReturnValue(Ok(undefined).toAsyncResult());
@@ -150,7 +150,7 @@ describe("project-manifest io", () => {
     });
 
     it("should prune manifest before writing", async () => {
-      const [writeProjectManifest] = makeDependencies();
+      const { writeProjectManifest } = makeDependencies();
       const writeSpy = jest
         .spyOn(fileIoModule, "tryWriteTextToFile")
         .mockReturnValue(Ok(undefined).toAsyncResult());
