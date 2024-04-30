@@ -1,7 +1,7 @@
 import {
   IOError,
   NotFoundError,
-  tryReadTextFromFile,
+  ReadTextFile,
   tryWriteTextToFile,
 } from "../../src/io/file-io";
 import { AsyncResult, Err, Ok } from "ts-results-es";
@@ -14,6 +14,7 @@ import {
 import path from "path";
 import { tryGetHomePath } from "../../src/io/special-paths";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
+import { mockService } from "../services/service.mock";
 
 jest.mock("../../src/io/file-io");
 jest.mock("../../src/io/special-paths");
@@ -42,13 +43,18 @@ describe("npmrc-io", () => {
   });
 
   describe("load", () => {
+    function makeDependencies() {
+      const readText = mockService<ReadTextFile>();
+
+      return { readText } as const;
+    }
+
     it("should be ok for valid file", async () => {
       const fileContent = `key1 = value1${EOL}key2 = "value2"`;
-      jest
-        .mocked(tryReadTextFromFile)
-        .mockReturnValue(new AsyncResult(Ok(fileContent)));
+      const { readText } = makeDependencies();
+      readText.mockReturnValue(new AsyncResult(Ok(fileContent)));
 
-      const result = await tryLoadNpmrc("/valid/path/.npmrc").promise;
+      const result = await tryLoadNpmrc(readText, "/valid/path/.npmrc").promise;
 
       expect(result).toBeOk((actual) =>
         expect(actual).toEqual(["key1 = value1", 'key2 = "value2"'])
@@ -56,13 +62,12 @@ describe("npmrc-io", () => {
     });
 
     it("should be null for missing file", async () => {
+      const { readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
       const expected = new NotFoundError(path);
-      jest
-        .mocked(tryReadTextFromFile)
-        .mockReturnValue(new AsyncResult(Err(expected)));
+      readText.mockReturnValue(new AsyncResult(Err(expected)));
 
-      const result = await tryLoadNpmrc(path).promise;
+      const result = await tryLoadNpmrc(readText, path).promise;
 
       expect(result).toBeOk((actual) => expect(actual).toBeNull());
     });

@@ -7,7 +7,7 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import {
   IOError,
   NotFoundError,
-  tryReadTextFromFile,
+  ReadTextFile,
   tryWriteTextToFile,
 } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
@@ -82,12 +82,12 @@ export type LoadUpmConfig = (
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
-export function makeUpmConfigLoader(): LoadUpmConfig {
+export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
   return (directory) => {
     const configPath = path.join(directory, configFileName);
 
     return (
-      tryReadTextFromFile(configPath)
+      readFile(configPath)
         .andThen(tryParseToml)
         // TODO: Actually validate
         .map<UPMConfig | null>((toml) => toml as UPMConfig)

@@ -5,15 +5,12 @@ import {
 } from "../../src/io/upm-config-io";
 import { tryGetHomePath } from "../../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
-import {
-  IOError,
-  NotFoundError,
-  tryReadTextFromFile,
-} from "../../src/io/file-io";
+import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
 import {
   StringFormatError,
   tryParseToml,
 } from "../../src/utils/string-parsing";
+import { mockService } from "../services/service.mock";
 
 jest.mock("../../src/io/file-io");
 jest.mock("../../src/io/special-paths");
@@ -44,22 +41,21 @@ describe("upm-config-io", () => {
 
   describe("load", () => {
     function makeDependencies() {
-      const loadUpmConfig = makeUpmConfigLoader();
+      const readFile = mockService<ReadTextFile>();
+      readFile.mockReturnValue(Ok("").toAsyncResult());
 
-      return { loadUpmConfig } as const;
+      const loadUpmConfig = makeUpmConfigLoader(readFile);
+      return { loadUpmConfig, readFile } as const;
     }
 
     beforeEach(() => {
-      jest.mocked(tryReadTextFromFile).mockReturnValue(Ok("").toAsyncResult());
       jest.mocked(tryParseToml).mockReturnValue(Ok({}));
     });
 
     it("should be null if file is not found", async () => {
-      const { loadUpmConfig } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user";
-      jest
-        .mocked(tryReadTextFromFile)
-        .mockReturnValue(Err(new NotFoundError(path)).toAsyncResult());
+      readFile.mockReturnValue(Err(new NotFoundError(path)).toAsyncResult());
 
       const result = await loadUpmConfig(path).promise;
 
@@ -76,12 +72,10 @@ describe("upm-config-io", () => {
     });
 
     it("should fail if file could not be read", async () => {
-      const { loadUpmConfig } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user";
       const expected = new IOError();
-      jest
-        .mocked(tryReadTextFromFile)
-        .mockReturnValue(Err(expected).toAsyncResult());
+      readFile.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await loadUpmConfig(path).promise;
 

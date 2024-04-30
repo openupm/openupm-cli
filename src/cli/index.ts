@@ -31,18 +31,20 @@ import {
 import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
 import { makeUpmConfigLoader } from "../io/upm-config-io";
+import { makeTextReader } from "../io/file-io";
 
 // Composition root
 
 const log = npmlog;
 const regClient = new RegClient({ log });
-const loadProjectManifest = makeProjectManifestLoader();
+const readFile = makeTextReader();
+const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter();
-const loadUpmConfig = makeUpmConfigLoader();
+const loadUpmConfig = makeUpmConfigLoader(readFile);
 
-const parseEnv = makeParseEnvService(log, loadUpmConfig);
+const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile);
 const fetchPackument = makeFetchPackumentService(regClient);
-const authNpmrc = makeAuthNpmrcService();
+const authNpmrc = makeAuthNpmrcService(readFile);
 const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =

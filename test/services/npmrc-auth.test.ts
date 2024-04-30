@@ -7,16 +7,19 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { emptyNpmrc, setToken } from "../../src/domain/npmrc";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { IOError } from "../../src/io/file-io";
+import { IOError, ReadTextFile } from "../../src/io/file-io";
 import { makeAuthNpmrcService } from "../../src/services/npmrc-auth";
+import { mockService } from "./service.mock";
 
 const exampleNpmrcPath = "/users/someuser/.npmrc";
 
 jest.mock("../../src/io/npmrc-io");
 
 function makeDependencies() {
-  const authNpmrc = makeAuthNpmrcService();
-  return { authNpmrc } as const;
+  const readFile = mockService<ReadTextFile>();
+
+  const authNpmrc = makeAuthNpmrcService(readFile);
+  return { authNpmrc, readFile } as const;
 }
 
 describe("npmrc-auth", () => {

@@ -1,7 +1,7 @@
 import path from "path";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { FileParseError } from "../common-errors";
-import { FileReadError, tryReadTextFromFile } from "./file-io";
+import { FileReadError, ReadTextFile } from "./file-io";
 import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
 
 export type ProjectVersionLoadError =
@@ -18,11 +18,12 @@ function projectVersionTxtPathFor(projectDirPath: string) {
  * @param projectDirPath The path to the projects root directory.
  */
 export function tryLoadProjectVersion(
+  readFile: ReadTextFile,
   projectDirPath: string
 ): AsyncResult<string, ProjectVersionLoadError> {
   const filePath = projectVersionTxtPathFor(projectDirPath);
 
-  return tryReadTextFromFile(filePath)
+  return readFile(filePath)
     .andThen(tryParseYaml)
     .andThen((content) => {
       if (

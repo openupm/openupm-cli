@@ -8,7 +8,7 @@ import { AsyncResult } from "ts-results-es";
 import {
   IOError,
   NotFoundError,
-  tryReadTextFromFile,
+  ReadTextFile,
   tryWriteTextToFile,
 } from "./file-io";
 import { tryParseJson } from "../utils/string-parsing";
@@ -38,11 +38,13 @@ export type LoadProjectManifest = (
 /**
  * Makes a {@link LoadProjectManifest} function.
  */
-export function makeProjectManifestLoader(): LoadProjectManifest {
+export function makeProjectManifestLoader(
+  readFile: ReadTextFile
+): LoadProjectManifest {
   return (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
     return (
-      tryReadTextFromFile(manifestPath)
+      readFile(manifestPath)
         .andThen(tryParseJson)
         // TODO: Actually validate the json structure
         .map((json) => json as unknown as UnityProjectManifest)

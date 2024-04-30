@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import {
   IOError,
+  makeTextReader,
   NotFoundError,
   tryGetDirectoriesIn,
-  tryReadTextFromFile,
   tryWriteTextToFile,
 } from "../../src/io/file-io";
 import fse from "fs-extra";
@@ -17,19 +17,27 @@ function makeNodeError(code: string): NodeJS.ErrnoException {
 
 describe("file-io", () => {
   describe("read text", () => {
+    function makeDependencies() {
+      const readFile = makeTextReader();
+
+      return { readFile } as const;
+    }
+
     it("should produce text if file can be read", async () => {
+      const { readFile } = makeDependencies();
       const expected = "content";
       jest.spyOn(fs, "readFile").mockResolvedValue(expected);
 
-      const result = await tryReadTextFromFile("path/to/file.txt").promise;
+      const result = await readFile("path/to/file.txt").promise;
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
     it("should notify of missing file", async () => {
+      const { readFile } = makeDependencies();
       jest.spyOn(fs, "readFile").mockRejectedValue(makeNodeError("ENOENT"));
 
-      const result = await tryReadTextFromFile("path/to/file.txt").promise;
+      const result = await readFile("path/to/file.txt").promise;
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(NotFoundError)
@@ -37,10 +45,11 @@ describe("file-io", () => {
     });
 
     it("should notify of other errors", async () => {
+      const { readFile } = makeDependencies();
       // Example of a code we don't handle in a special way.
       jest.spyOn(fs, "readFile").mockRejectedValue(makeNodeError("EACCES"));
 
-      const result = await tryReadTextFromFile("path/to/file.txt").promise;
+      const result = await readFile("path/to/file.txt").promise;
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(IOError)

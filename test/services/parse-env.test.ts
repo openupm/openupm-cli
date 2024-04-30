@@ -5,7 +5,7 @@ import { tryLoadProjectVersion } from "../../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import { LoadUpmConfig, tryGetUpmConfigDir } from "../../src/io/upm-config-io";
 import fs from "fs";
-import { IOError, NotFoundError } from "../../src/io/file-io";
+import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { NoWslError } from "../../src/io/wsl";
@@ -44,7 +44,9 @@ function makeDependencies() {
   const loadUpmConfig = mockService<LoadUpmConfig>();
   mockUpmConfig(loadUpmConfig, null);
 
-  const parseEnv = makeParseEnvService(log, loadUpmConfig);
+  const readFile = mockService<ReadTextFile>();
+
+  const parseEnv = makeParseEnvService(log, loadUpmConfig, readFile);
   return { parseEnv, log, loadUpmConfig } as const;
 }
 

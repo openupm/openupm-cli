@@ -3,7 +3,7 @@ import {
   FileWriteError,
   IOError,
   NotFoundError,
-  tryReadTextFromFile,
+  ReadTextFile,
   tryWriteTextToFile,
 } from "./file-io";
 import { EOL } from "node:os";
@@ -34,9 +34,10 @@ export function tryGetNpmrcPath(): Result<string, RequiredEnvMissingError> {
  * @param path The path to load from.
  */
 export function tryLoadNpmrc(
+  readFile: ReadTextFile,
   path: string
 ): AsyncResult<Npmrc | null, NpmrcLoadError> {
-  return tryReadTextFromFile(path)
+  return readFile(path)
     .map<Npmrc | null>((content) => content.split(EOL))
     .orElse((error) =>
       error instanceof NotFoundError ? Ok(null) : Err(error)

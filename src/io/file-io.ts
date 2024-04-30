@@ -39,11 +39,6 @@ export class IOError extends CustomError {
 }
 
 /**
- * Error for when a file-read failed.
- */
-export type FileReadError = NotFoundError | IOError;
-
-/**
  * Error for when a file-write failed.
  */
 export type FileWriteError = IOError;
@@ -56,18 +51,28 @@ function fsOperation<T>(op: () => Promise<T>) {
 }
 
 /**
- * Attempts to read the content of a text file.
- * @param path The path to the file.
+ * Error for when a file-read failed.
  */
-export function tryReadTextFromFile(
-  path: string
-): AsyncResult<string, FileReadError> {
-  return fsOperation(() => fs.readFile(path, { encoding: "utf8" })).mapErr(
-    (error) => {
-      if (error.cause!.code === "ENOENT") return new NotFoundError(path);
-      return error;
-    }
-  );
+export type FileReadError = NotFoundError | IOError;
+
+/**
+ * Function for loading the content of a text file.
+ * @param path The path to the file.
+ * @returns The files text content.
+ */
+export type ReadTextFile = (path: string) => AsyncResult<string, FileReadError>;
+
+/**
+ * Makes a {@link ReadTextFile} function.
+ */
+export function makeTextReader(): ReadTextFile {
+  return (path) =>
+    fsOperation(() => fs.readFile(path, { encoding: "utf8" })).mapErr(
+      (error) => {
+        if (error.cause!.code === "ENOENT") return new NotFoundError(path);
+        return error;
+      }
+    );
 }
 
 /**

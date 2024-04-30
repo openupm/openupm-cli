@@ -15,7 +15,7 @@ import {
   ProjectVersionLoadError,
   tryLoadProjectVersion,
 } from "../io/project-version-io";
-import { NotFoundError } from "../io/file-io";
+import { NotFoundError, ReadTextFile } from "../io/file-io";
 import { tryGetEnv } from "../utils/env-util";
 import {
   isRelease,
@@ -118,7 +118,8 @@ export type ParseEnvService = (
  */
 export function makeParseEnvService(
   log: Logger,
-  loadUpmConfig: LoadUpmConfig
+  loadUpmConfig: LoadUpmConfig,
+  readFile: ReadTextFile
 ): ParseEnvService {
   return async (options) => {
     // log level
@@ -155,7 +156,8 @@ export function makeParseEnvService(
     const cwd = determineCwd(options);
 
     // editor version
-    const projectVersionLoadResult = await tryLoadProjectVersion(cwd).promise;
+    const projectVersionLoadResult = await tryLoadProjectVersion(readFile, cwd)
+      .promise;
     if (projectVersionLoadResult.isErr()) {
       if (projectVersionLoadResult.error instanceof NotFoundError)
         log.warn(

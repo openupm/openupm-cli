@@ -9,6 +9,7 @@ import {
 } from "../io/npmrc-io";
 import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
+import { ReadTextFile } from "../io/file-io";
 
 /**
  * Error that might occur when updating an auth-token inside a npmrc file.
@@ -30,13 +31,13 @@ export type AuthNpmrcService = (
   token: string
 ) => AsyncResult<string, NpmrcAuthTokenUpdateError>;
 
-export function makeAuthNpmrcService(): AuthNpmrcService {
+export function makeAuthNpmrcService(readFile: ReadTextFile): AuthNpmrcService {
   return (registry, token) => {
     // read config
     return tryGetNpmrcPath()
       .toAsyncResult()
       .andThen((configPath) =>
-        tryLoadNpmrc(configPath)
+        tryLoadNpmrc(readFile, configPath)
           .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
           .map((npmrc) => setToken(npmrc, registry, token))
           .andThen((npmrc) => trySaveNpmrc(configPath, npmrc))
