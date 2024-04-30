@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import {
   GetUpmConfigDirError,
+  LoadUpmConfig,
   tryGetUpmConfigDir,
-  tryLoadUpmConfig,
   UpmConfigLoadError,
 } from "../io/upm-config-io";
 import path from "path";
@@ -116,7 +116,10 @@ export type ParseEnvService = (
 /**
  * Creates a {@link ParseEnvService} function.
  */
-export function makeParseEnvService(log: Logger): ParseEnvService {
+export function makeParseEnvService(
+  log: Logger,
+  loadUpmConfig: LoadUpmConfig
+): ParseEnvService {
   return async (options) => {
     // log level
     log.level = determineLogLevel(options);
@@ -140,7 +143,7 @@ export function makeParseEnvService(log: Logger): ParseEnvService {
 
     // registries
     const upmConfigResult = await tryGetUpmConfigDir(wsl, systemUser).andThen(
-      tryLoadUpmConfig
+      loadUpmConfig
     ).promise;
     if (upmConfigResult.isErr()) return upmConfigResult;
     const upmConfig = upmConfigResult.value;

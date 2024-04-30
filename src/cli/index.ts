@@ -30,6 +30,7 @@ import {
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
+import { makeUpmConfigLoader } from "../io/upm-config-io";
 
 // Composition root
 
@@ -37,8 +38,9 @@ const log = npmlog;
 const regClient = new RegClient({ log });
 const loadProjectManifest = makeProjectManifestLoader();
 const writeProjectManifest = makeProjectManifestWriter();
+const loadUpmConfig = makeUpmConfigLoader();
 
-const parseEnv = makeParseEnvService(log);
+const parseEnv = makeParseEnvService(log, loadUpmConfig);
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService();
 const npmLogin = makeNpmLoginService(regClient);
@@ -60,7 +62,13 @@ const addCmd = makeAddCmd(
   writeProjectManifest,
   log
 );
-const loginCmd = makeLoginCmd(parseEnv, authNpmrc, npmLogin, log);
+const loginCmd = makeLoginCmd(
+  parseEnv,
+  authNpmrc,
+  npmLogin,
+  loadUpmConfig,
+  log
+);
 const searchCmd = makeSearchCmd(
   parseEnv,
   searchRegistry,

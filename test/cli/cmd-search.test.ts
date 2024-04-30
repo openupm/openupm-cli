@@ -2,7 +2,6 @@ import { makeSearchCmd, SearchOptions } from "../../src/cli/cmd-search";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
-import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import {
   SearchedPackument,
@@ -69,7 +68,6 @@ describe("cmd-search", () => {
   };
 
   beforeEach(() => {
-    mockUpmConfig(null);
     mockProjectVersion("2020.2.1f1");
   });
 

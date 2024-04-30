@@ -3,7 +3,7 @@ import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { tryLoadProjectVersion } from "../../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
-import { tryGetUpmConfigDir } from "../../src/io/upm-config-io";
+import { LoadUpmConfig, tryGetUpmConfigDir } from "../../src/io/upm-config-io";
 import fs from "fs";
 import { IOError, NotFoundError } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
@@ -13,6 +13,7 @@ import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeMockLogger } from "../cli/log.mock";
+import { mockService } from "./service.mock";
 
 jest.mock("../../src/io/project-version-io");
 jest.mock("../../src/io/upm-config-io");
@@ -40,8 +41,11 @@ const testProjectVersion = "2021.3.1f1";
 function makeDependencies() {
   const log = makeMockLogger();
 
-  const parseEnv = makeParseEnvService(log);
-  return { parseEnv, log } as const;
+  const loadUpmConfig = mockService<LoadUpmConfig>();
+  mockUpmConfig(loadUpmConfig, null);
+
+  const parseEnv = makeParseEnvService(log, loadUpmConfig);
+  return { parseEnv, log, loadUpmConfig } as const;
 }
 
 describe("env", () => {
@@ -58,7 +62,6 @@ describe("env", () => {
     jest
       .mocked(tryGetUpmConfigDir)
       .mockReturnValue(Ok(testRootPath).toAsyncResult());
-    mockUpmConfig(null);
 
     // The project has a ProjectVersion.txt
     mockProjectVersion(testProjectVersion);
@@ -352,8 +355,8 @@ describe("env", () => {
     });
 
     it("should have no auth if upm-config had no entry for the url", async () => {
-      const { parseEnv } = makeDependencies();
-      mockUpmConfig({
+      const { parseEnv, loadUpmConfig } = makeDependencies();
+      mockUpmConfig(loadUpmConfig, {
         npmAuth: {},
       });
 
@@ -369,8 +372,8 @@ describe("env", () => {
     });
 
     it("should notify if upm-config did not have auth", async () => {
-      const { parseEnv, log } = makeDependencies();
-      mockUpmConfig({
+      const { parseEnv, log, loadUpmConfig } = makeDependencies();
+      mockUpmConfig(loadUpmConfig, {
         npmAuth: {},
       });
 
@@ -387,8 +390,8 @@ describe("env", () => {
     });
 
     it("should have auth if upm-config had entry for the url", async () => {
-      const { parseEnv } = makeDependencies();
-      mockUpmConfig(testUpmConfig);
+      const { parseEnv, loadUpmConfig } = makeDependencies();
+      mockUpmConfig(loadUpmConfig, testUpmConfig);
 
       const result = await parseEnv({
         _global: {

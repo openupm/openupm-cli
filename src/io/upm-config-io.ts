@@ -34,8 +34,6 @@ export type GetUpmConfigDirError =
   | RequiredEnvMissingError
   | ChildProcessError;
 
-export type UpmConfigLoadError = IOError | StringFormatError;
-
 /**
  * Gets the path to directory in which the upm config is stored.
  * @param wsl Whether WSL should be treated as Windows.
@@ -68,25 +66,37 @@ export const tryGetUpmConfigDir = (
 };
 
 /**
- * Attempts to load the upm config.
- * @param configDir The directory from which to load the config.
- * @returns The config or null if not found.
+ * Error which may occur when loading a {@link UPMConfig}.
  */
-export const tryLoadUpmConfig = (
-  configDir: string
-): AsyncResult<UPMConfig | null, UpmConfigLoadError> => {
-  const configPath = path.join(configDir, configFileName);
+export type UpmConfigLoadError = IOError | StringFormatError;
 
-  return (
-    tryReadTextFromFile(configPath)
-      .andThen(tryParseToml)
-      // TODO: Actually validate
-      .map<UPMConfig | null>((toml) => toml as UPMConfig)
-      .orElse((error) =>
-        error instanceof NotFoundError ? Ok(null) : Err(error)
-      )
-  );
-};
+/**
+ * IO function for loading an upm-config from a directory.
+ * @param directory The directory in which to search for the upm-config.
+ * @returns The config or null if it was not found.
+ */
+export type LoadUpmConfig = (
+  directory: string
+) => AsyncResult<UPMConfig | null, UpmConfigLoadError>;
+
+/**
+ * Makes a {@link LoadUpmConfig} function.
+ */
+export function makeUpmConfigLoader(): LoadUpmConfig {
+  return (directory) => {
+    const configPath = path.join(directory, configFileName);
+
+    return (
+      tryReadTextFromFile(configPath)
+        .andThen(tryParseToml)
+        // TODO: Actually validate
+        .map<UPMConfig | null>((toml) => toml as UPMConfig)
+        .orElse((error) =>
+          error instanceof NotFoundError ? Ok(null) : Err(error)
+        )
+    );
+  };
+}
 
 /**
  * Errors which may occur when saving a UPM-config file.
@@ -117,11 +127,12 @@ export type UpmAuthStoreError = UpmConfigLoadError | IOError;
  * Stores authentication information in the projects upm config.
  */
 export const tryStoreUpmAuth = function (
+  loadUpmConfig: LoadUpmConfig,
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
 ): AsyncResult<string, UpmAuthStoreError> {
-  return tryLoadUpmConfig(configDir)
+  return loadUpmConfig(configDir)
     .map((maybeConfig) => maybeConfig || {})
     .map((config) => addAuth(registry, auth, config))
     .andThen((config) => trySaveUpmConfig(config, configDir));
