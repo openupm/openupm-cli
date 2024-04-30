@@ -12,10 +12,10 @@ import { CmdOptions } from "../cli/options";
 import { FileParseError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
 import {
+  LoadProjectVersion,
   ProjectVersionLoadError,
-  tryLoadProjectVersion,
 } from "../io/project-version-io";
-import { NotFoundError, ReadTextFile } from "../io/file-io";
+import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "../utils/env-util";
 import {
   isRelease,
@@ -121,8 +121,8 @@ export function makeParseEnvService(
   log: Logger,
   getUpmConfigDir: GetUpmConfigDir,
   loadUpmConfig: LoadUpmConfig,
-  readFile: ReadTextFile,
-  getCwd: GetCwd
+  getCwd: GetCwd,
+  loadProjectVersion: LoadProjectVersion
 ): ParseEnvService {
   return async (options) => {
     // log level
@@ -159,8 +159,7 @@ export function makeParseEnvService(
     const cwd = determineCwd(getCwd, options);
 
     // editor version
-    const projectVersionLoadResult = await tryLoadProjectVersion(readFile, cwd)
-      .promise;
+    const projectVersionLoadResult = await loadProjectVersion(cwd).promise;
     if (projectVersionLoadResult.isErr()) {
       if (projectVersionLoadResult.error instanceof NotFoundError)
         log.warn(

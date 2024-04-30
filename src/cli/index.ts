@@ -41,6 +41,7 @@ import {
   makeNpmrcSaver,
 } from "../io/npmrc-io";
 import { makeCwdGetter } from "../io/special-paths";
+import { makeProjectVersionLoader } from "../io/project-version-io";
 
 // Composition root
 
@@ -56,13 +57,14 @@ const loadUpmConfig = makeUpmConfigLoader(readFile);
 const findNpmrcPath = makeNpmrcPathFinder();
 const loadNpmrc = makeNpmrcLoader(readFile);
 const saveNpmrc = makeNpmrcSaver(writeFile);
+const loadProjectVersion = makeProjectVersionLoader(readFile);
 
 const parseEnv = makeParseEnvService(
   log,
   getUpmConfigDir,
   loadUpmConfig,
-  readFile,
-  getCwd
+  getCwd,
+  loadProjectVersion
 );
 const fetchPackument = makeFetchPackumentService(regClient);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);

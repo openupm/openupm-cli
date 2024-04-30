@@ -1,10 +1,9 @@
 import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
-import { tryLoadProjectVersion } from "../../src/io/project-version-io";
 import { Err, Ok } from "ts-results-es";
 import { GetUpmConfigDir, LoadUpmConfig } from "../../src/io/upm-config-io";
-import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
+import { IOError, NotFoundError } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { NoWslError } from "../../src/io/wsl";
@@ -14,10 +13,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
-
-jest.mock("../../src/io/project-version-io");
-jest.mock("fs");
-jest.spyOn(process, "cwd");
+import { LoadProjectVersion } from "../../src/io/project-version-io";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -47,29 +43,30 @@ function makeDependencies() {
   const loadUpmConfig = mockService<LoadUpmConfig>();
   mockUpmConfig(loadUpmConfig, null);
 
-  const readFile = mockService<ReadTextFile>();
-
   // process.cwd is in the root directory.
   const getCwd = mockService<GetCwd>();
   getCwd.mockReturnValue(testRootPath);
+
+  const loadProjectVersion = mockService<LoadProjectVersion>();
+  mockProjectVersion(loadProjectVersion, testProjectVersion);
 
   const parseEnv = makeParseEnvService(
     log,
     getUpmConfigDir,
     loadUpmConfig,
-    readFile,
-    getCwd
+    getCwd,
+    loadProjectVersion
   );
-  return { parseEnv, log, getUpmConfigDir, loadUpmConfig } as const;
+  return {
+    parseEnv,
+    log,
+    getUpmConfigDir,
+    loadUpmConfig,
+    loadProjectVersion,
+  } as const;
 }
 
 describe("env", () => {
-  beforeEach(() => {
-    // By default, we simulate the following:
-    // The project has a ProjectVersion.txt
-    mockProjectVersion(testProjectVersion);
-  });
-
   describe("log-level", () => {
     it("should be verbose if verbose option is true", async () => {
       const { parseEnv, log } = makeDependencies();
@@ -486,9 +483,9 @@ describe("env", () => {
     });
 
     it("should be original string for non-release versions", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, loadProjectVersion } = makeDependencies();
       const expected = "2022.3";
-      mockProjectVersion(expected);
+      mockProjectVersion(loadProjectVersion, expected);
 
       const result = await parseEnv({
         _global: {},
@@ -500,9 +497,9 @@ describe("env", () => {
     });
 
     it("should be original string for non-version string", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, loadProjectVersion } = makeDependencies();
       const expected = "Bad version";
-      mockProjectVersion(expected);
+      mockProjectVersion(loadProjectVersion, expected);
 
       const result = await parseEnv({
         _global: {},
@@ -514,11 +511,9 @@ describe("env", () => {
     });
 
     it("should fail if ProjectVersion.txt could not be loaded", async () => {
-      const { parseEnv } = makeDependencies();
+      const { parseEnv, loadProjectVersion } = makeDependencies();
       const expected = new IOError();
-      jest
-        .mocked(tryLoadProjectVersion)
-        .mockReturnValue(Err(expected).toAsyncResult());
+      loadProjectVersion.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await parseEnv({
         _global: {},
@@ -528,14 +523,10 @@ describe("env", () => {
     });
 
     it("should notify of missing ProjectVersion.txt", async () => {
-      const { parseEnv, log } = makeDependencies();
-      jest
-        .mocked(tryLoadProjectVersion)
-        .mockReturnValue(
-          Err(
-            new NotFoundError("/some/path/ProjectVersion.txt")
-          ).toAsyncResult()
-        );
+      const { parseEnv, log, loadProjectVersion } = makeDependencies();
+      loadProjectVersion.mockReturnValue(
+        Err(new NotFoundError("/some/path/ProjectVersion.txt")).toAsyncResult()
+      );
 
       await parseEnv({
         _global: {},
@@ -548,17 +539,15 @@ describe("env", () => {
     });
 
     it("should notify of parsing issue", async () => {
-      const { parseEnv, log } = makeDependencies();
-      jest
-        .mocked(tryLoadProjectVersion)
-        .mockReturnValue(
-          Err(
-            new FileParseError(
-              "/some/path/ProjectVersion.txt",
-              "ProjectVersion.txt"
-            )
-          ).toAsyncResult()
-        );
+      const { parseEnv, log, loadProjectVersion } = makeDependencies();
+      loadProjectVersion.mockReturnValue(
+        Err(
+          new FileParseError(
+            "/some/path/ProjectVersion.txt",
+            "ProjectVersion.txt"
+          )
+        ).toAsyncResult()
+      );
 
       await parseEnv({
         _global: {},
