@@ -6,15 +6,11 @@ import {
 import { tryGetHomePath } from "../../src/io/special-paths";
 import { Err, Ok } from "ts-results-es";
 import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
-import {
-  StringFormatError,
-  tryParseToml,
-} from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
+import { StringFormatError } from "../../src/utils/string-parsing";
 
 jest.mock("../../src/io/file-io");
 jest.mock("../../src/io/special-paths");
-jest.mock("../../src/utils/string-parsing");
 
 describe("upm-config-io", () => {
   describe("get directory", () => {
@@ -48,10 +44,6 @@ describe("upm-config-io", () => {
       return { loadUpmConfig, readFile } as const;
     }
 
-    beforeEach(() => {
-      jest.mocked(tryParseToml).mockReturnValue(Ok({}));
-    });
-
     it("should be null if file is not found", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user";
@@ -83,14 +75,17 @@ describe("upm-config-io", () => {
     });
 
     it("should fail if file has bad toml content", async () => {
-      const { loadUpmConfig } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
+      readFile.mockReturnValue(
+        Ok("This {\n is not]\n valid TOML").toAsyncResult()
+      );
       const path = "/home/user";
-      const expected = new StringFormatError("Toml", new Error());
-      jest.mocked(tryParseToml).mockReturnValue(Err(expected));
 
       const result = await loadUpmConfig(path).promise;
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(StringFormatError)
+      );
     });
   });
 });
