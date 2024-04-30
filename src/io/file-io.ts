@@ -38,11 +38,6 @@ export class IOError extends CustomError {
   }
 }
 
-/**
- * Error for when a file-write failed.
- */
-export type FileWriteError = IOError;
-
 function fsOperation<T>(op: () => Promise<T>) {
   return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
     assertIsNodeError(error);
@@ -76,17 +71,29 @@ export function makeTextReader(): ReadTextFile {
 }
 
 /**
- * Attempts to overwrite the content of a text file.
+ * Error for when a file-write failed.
+ */
+export type FileWriteError = IOError;
+
+/**
+ * Function for overwriting the content of a text file. Creates the file
+ * if it does not exist.
  * @param filePath The path to the file.
  * @param content The content to write.
  */
-export function tryWriteTextToFile(
+export type WriteTextFile = (
   filePath: string,
   content: string
-): AsyncResult<void, FileWriteError> {
-  return fsOperation(() => fse.ensureDir(path.dirname(filePath))).andThen(() =>
-    fsOperation(() => fs.writeFile(filePath, content))
-  );
+) => AsyncResult<void, FileWriteError>;
+
+/**
+ * Makes a {@link WriteTextFile} function.
+ */
+export function makeTextWriter(): WriteTextFile {
+  return (filePath, content) =>
+    fsOperation(() => fse.ensureDir(path.dirname(filePath))).andThen(() =>
+      fsOperation(() => fs.writeFile(filePath, content))
+    );
 }
 
 /**

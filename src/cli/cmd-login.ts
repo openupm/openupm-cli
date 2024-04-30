@@ -20,6 +20,7 @@ import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
 import { AuthNpmrcService } from "../services/npmrc-auth";
 import { Logger } from "npmlog";
+import { WriteTextFile } from "../io/file-io";
 
 /**
  * Errors which may occur when logging in.
@@ -60,6 +61,7 @@ export function makeLoginCmd(
   parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
   npmLogin: NpmLoginService,
+  writeFile: WriteTextFile,
   getUpmConfigDir: GetUpmConfigDir,
   loadUpmConfig: LoadUpmConfig,
   log: Logger
@@ -92,6 +94,7 @@ export function makeLoginCmd(
       const _auth = encodeBasicAuth(username, password);
       const result = await tryStoreUpmAuth(
         loadUpmConfig,
+        writeFile,
         configDir,
         loginRegistry,
         {
@@ -132,6 +135,7 @@ export function makeLoginCmd(
 
       const storeResult = await tryStoreUpmAuth(
         loadUpmConfig,
+        writeFile,
         configDir,
         loginRegistry,
         {

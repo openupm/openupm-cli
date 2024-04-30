@@ -2,9 +2,9 @@ import fs from "fs/promises";
 import {
   IOError,
   makeTextReader,
+  makeTextWriter,
   NotFoundError,
   tryGetDirectoriesIn,
-  tryWriteTextToFile,
 } from "../../src/io/file-io";
 import fse from "fs-extra";
 import { Dirent } from "node:fs";
@@ -58,51 +58,61 @@ describe("file-io", () => {
   });
 
   describe("write text", () => {
+    function makeDependencies() {
+      const writeFile = makeTextWriter();
+
+      return { writeFile } as const;
+    }
+
     beforeEach(() => {
       jest.spyOn(fse, "ensureDir").mockResolvedValue(undefined!);
       jest.spyOn(fs, "writeFile").mockResolvedValue(undefined);
     });
 
     it("should be ok for valid write", async () => {
-      const result = await tryWriteTextToFile("path/to/file.txt", "content")
-        .promise;
+      const { writeFile } = makeDependencies();
+
+      const result = await writeFile("path/to/file.txt", "content").promise;
 
       expect(result).toBeOk();
     });
 
     it("should write to correct path", async () => {
+      const { writeFile } = makeDependencies();
       const expected = "path/to/file.txt";
       const fsWrite = jest.spyOn(fs, "writeFile");
 
-      await tryWriteTextToFile(expected, "content").promise;
+      await writeFile(expected, "content").promise;
 
       expect(fsWrite).toHaveBeenCalledWith(expected, expect.any(String));
     });
 
     it("should write text to file", async () => {
+      const { writeFile } = makeDependencies();
       const expected = "content";
       const fsWrite = jest.spyOn(fs, "writeFile");
 
-      await tryWriteTextToFile("path/to/file.txt", expected).promise;
+      await writeFile("path/to/file.txt", expected).promise;
 
       expect(fsWrite).toHaveBeenCalledWith(expect.any(String), expected);
     });
 
     it("should ensure directory exists", async () => {
+      const { writeFile } = makeDependencies();
       const fseEnsureDir = jest.spyOn(fse, "ensureDir");
 
-      await tryWriteTextToFile("/path/to/file.txt", "content").promise;
+      await writeFile("/path/to/file.txt", "content").promise;
 
       expect(fseEnsureDir).toHaveBeenCalledWith("/path/to");
     });
 
     it("should notify of directory ensure error", async () => {
+      const { writeFile } = makeDependencies();
       jest
         .spyOn(fse, "ensureDir")
         .mockRejectedValue(makeNodeError("EACCES") as never);
 
-      const result = await tryWriteTextToFile("/path/to/file.txt", "content")
-        .promise;
+      const result = await writeFile("/path/to/file.txt", "content").promise;
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(IOError)
@@ -110,12 +120,12 @@ describe("file-io", () => {
     });
 
     it("should notify of write error", async () => {
+      const { writeFile } = makeDependencies();
       jest
         .spyOn(fs, "writeFile")
         .mockRejectedValue(makeNodeError("EACCES") as never);
 
-      const result = await tryWriteTextToFile("/path/to/file.txt", "content")
-        .promise;
+      const result = await writeFile("/path/to/file.txt", "content").promise;
 
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(IOError)

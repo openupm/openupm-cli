@@ -2,7 +2,7 @@ import {
   IOError,
   NotFoundError,
   ReadTextFile,
-  tryWriteTextToFile,
+  WriteTextFile,
 } from "../../src/io/file-io";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
@@ -84,16 +84,16 @@ describe("npmrc-io", () => {
 
   describe("save", () => {
     function makeDependencies() {
-      const saveNpmrc = makeNpmrcSaver();
-      return { saveNpmrc } as const;
+      const writeFile = mockService<WriteTextFile>();
+      writeFile.mockReturnValue(new AsyncResult(Ok(undefined)));
+
+      const saveNpmrc = makeNpmrcSaver(writeFile);
+      return { saveNpmrc, writeFile } as const;
     }
 
     it("should be ok when write succeeds", async () => {
       const { saveNpmrc } = makeDependencies();
       const path = "/valid/path/.npmrc";
-      jest
-        .mocked(tryWriteTextToFile)
-        .mockReturnValue(new AsyncResult(Ok(undefined)));
 
       const result = await saveNpmrc(path, ["key=value"]).promise;
 
@@ -101,12 +101,10 @@ describe("npmrc-io", () => {
     });
 
     it("should fail when write fails", async () => {
-      const { saveNpmrc } = makeDependencies();
+      const { saveNpmrc, writeFile } = makeDependencies();
       const expected = new IOError();
       const path = "/invalid/path/.npmrc";
-      jest
-        .mocked(tryWriteTextToFile)
-        .mockReturnValue(new AsyncResult(Err(expected)));
+      writeFile.mockReturnValue(new AsyncResult(Err(expected)));
 
       const result = await saveNpmrc(path, ["key=value"]).promise;
 

@@ -4,7 +4,7 @@ import {
   IOError,
   NotFoundError,
   ReadTextFile,
-  tryWriteTextToFile,
+  WriteTextFile,
 } from "./file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
@@ -75,9 +75,9 @@ export type SaveNpmrc = (
 /**
  * Makes a {@link SaveNpmrc} function.
  */
-export function makeNpmrcSaver(): SaveNpmrc {
+export function makeNpmrcSaver(writeFile: WriteTextFile): SaveNpmrc {
   return (path, npmrc) => {
     const content = npmrc.join(EOL);
-    return tryWriteTextToFile(path, content);
+    return writeFile(path, content);
   };
 }

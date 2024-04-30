@@ -34,7 +34,7 @@ import {
   makeUpmConfigDirGetter,
   makeUpmConfigLoader,
 } from "../io/upm-config-io";
-import { makeTextReader } from "../io/file-io";
+import { makeTextReader, makeTextWriter } from "../io/file-io";
 import {
   makeNpmrcLoader,
   makeNpmrcPathFinder,
@@ -48,13 +48,14 @@ const log = npmlog;
 const regClient = new RegClient({ log });
 const getCwd = makeCwdGetter();
 const readFile = makeTextReader();
+const writeFile = makeTextWriter();
 const loadProjectManifest = makeProjectManifestLoader(readFile);
-const writeProjectManifest = makeProjectManifestWriter();
+const writeProjectManifest = makeProjectManifestWriter(writeFile);
 const getUpmConfigDir = makeUpmConfigDirGetter();
 const loadUpmConfig = makeUpmConfigLoader(readFile);
 const findNpmrcPath = makeNpmrcPathFinder();
 const loadNpmrc = makeNpmrcLoader(readFile);
-const saveNpmrc = makeNpmrcSaver();
+const saveNpmrc = makeNpmrcSaver(writeFile);
 
 const parseEnv = makeParseEnvService(
   log,
@@ -88,6 +89,7 @@ const loginCmd = makeLoginCmd(
   parseEnv,
   authNpmrc,
   npmLogin,
+  writeFile,
   getUpmConfigDir,
   loadUpmConfig,
   log

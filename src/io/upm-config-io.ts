@@ -4,12 +4,7 @@ import { addAuth, UpmAuth, UPMConfig } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
-import {
-  IOError,
-  NotFoundError,
-  ReadTextFile,
-  tryWriteTextToFile,
-} from "./file-io";
+import { IOError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetHomePath } from "./special-paths";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
@@ -121,12 +116,13 @@ export type UpmConfigSaveError = IOError;
  * @returns The path to which the file was saved.
  */
 export const trySaveUpmConfig = (
+  writeFile: WriteTextFile,
   config: UPMConfig,
   configDir: string
 ): AsyncResult<string, UpmConfigSaveError> => {
   const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
-  return tryWriteTextToFile(configPath, content).map(() => configPath);
+  return writeFile(configPath, content).map(() => configPath);
 };
 
 /**
@@ -139,6 +135,7 @@ export type UpmAuthStoreError = UpmConfigLoadError | IOError;
  */
 export const tryStoreUpmAuth = function (
   loadUpmConfig: LoadUpmConfig,
+  writeFile: WriteTextFile,
   configDir: string,
   registry: RegistryUrl,
   auth: UpmAuth
@@ -146,5 +143,5 @@ export const tryStoreUpmAuth = function (
   return loadUpmConfig(configDir)
     .map((maybeConfig) => maybeConfig || {})
     .map((config) => addAuth(registry, auth, config))
-    .andThen((config) => trySaveUpmConfig(config, configDir));
+    .andThen((config) => trySaveUpmConfig(writeFile, config, configDir));
 };
