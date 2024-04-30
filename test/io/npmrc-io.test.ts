@@ -16,9 +16,6 @@ import { GetHomePath } from "../../src/io/special-paths";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { mockService } from "../services/service.mock";
 
-jest.mock("../../src/io/file-io");
-jest.mock("../../src/io/special-paths");
-
 describe("npmrc-io", () => {
   describe("get path", () => {
     function makeDependencies() {
