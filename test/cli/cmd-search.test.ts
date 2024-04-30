@@ -2,7 +2,6 @@ import { makeSearchCmd, SearchOptions } from "../../src/cli/cmd-search";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
-import { mockProjectVersion } from "../io/project-version-io.mock";
 import {
   SearchedPackument,
   SearchRegistryService,
@@ -66,10 +65,6 @@ describe("cmd-search", () => {
       upstream: false,
     },
   };
-
-  beforeEach(() => {
-    mockProjectVersion("2020.2.1f1");
-  });
 
   describe("search endpoint", () => {
     it("should print packument information", async () => {
