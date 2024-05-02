@@ -1,5 +1,5 @@
-import { HttpErrorBase } from "npm-registry-fetch";
 import assert, { AssertionError } from "assert";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
 /**
  * @throws {AssertionError} The given parameter is not an error.

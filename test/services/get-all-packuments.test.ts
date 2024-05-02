@@ -1,7 +1,8 @@
-import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
+import npmFetch from "npm-registry-fetch";
 import { makeGetAllPackumentsService } from "../../src/services/get-all-packuments";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
 jest.mock("npm-registry-fetch");
 

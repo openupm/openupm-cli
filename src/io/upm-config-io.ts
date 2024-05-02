@@ -125,4 +125,3 @@ export const trySaveUpmConfig = (
   const content = TOML.stringify(config);
   return writeFile(configPath, content).map(() => configPath);
 };
-

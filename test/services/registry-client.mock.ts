@@ -1,6 +1,6 @@
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
 import { UnityPackument } from "../../src/domain/packument";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Response } from "request";
 
 export function mockRegClientGetResult(

@@ -1,6 +1,6 @@
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { makeSearchRegistryService } from "../../src/services/search-registry";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";

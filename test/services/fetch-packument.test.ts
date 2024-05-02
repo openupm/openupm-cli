@@ -1,6 +1,6 @@
 import { buildPackument } from "../domain/data-packument";
 import { makeFetchPackumentService } from "../../src/services/fetch-packument";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { makeDomainName } from "../../src/domain/domain-name";
 import RegClient from "another-npm-registry-client";
 import { Registry } from "../../src/domain/registry";

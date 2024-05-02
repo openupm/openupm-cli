@@ -11,7 +11,7 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
-import {VersionNotFoundError} from "../../src/domain/packument";
+import { VersionNotFoundError } from "../../src/domain/packument";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");

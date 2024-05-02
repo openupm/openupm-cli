@@ -8,7 +8,7 @@ import {
 } from "../../src/services/search-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import {
   AllPackumentsResult,
   GetAllPackumentsService,

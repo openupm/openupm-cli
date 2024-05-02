@@ -19,8 +19,8 @@ import {
 } from "./resolve-latest-version";
 import { Err, Ok, Result } from "ts-results-es";
 import { FetchPackumentError } from "./fetch-packument";
-import { HttpErrorBase } from "npm-registry-fetch";
 import { PackumentNotFoundError } from "../common-errors";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
 export type DependencyBase = {
   /**
