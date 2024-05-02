@@ -5,11 +5,10 @@ import {
   PackumentResolveError,
   ResolvableVersion,
   ResolvedPackument,
-  
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
-import {tryResolvePackumentVersion} from "../domain/packument";
+import { tryResolvePackumentVersion } from "../domain/packument";
 
 /**
  * Service function for resolving remove packuments.

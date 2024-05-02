@@ -3,7 +3,7 @@ import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import {
   SearchedPackument,
   SearchRegistryService,

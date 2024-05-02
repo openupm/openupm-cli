@@ -28,11 +28,7 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
-import {
-  PackumentResolveError,
-  pickMostFixable,
-  
-} from "../packument-resolving";
+import { PackumentResolveError, pickMostFixable } from "../packument-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
@@ -52,7 +48,7 @@ import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import { FetchPackumentError } from "../services/fetch-packument";
-import {VersionNotFoundError} from "../domain/packument";
+import { VersionNotFoundError } from "../domain/packument";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";

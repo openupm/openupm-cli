@@ -30,7 +30,7 @@ import {
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { makePackageReference } from "../../src/domain/package-reference";
-import {VersionNotFoundError} from "../../src/domain/packument";
+import { VersionNotFoundError } from "../../src/domain/packument";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");

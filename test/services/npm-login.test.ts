@@ -4,7 +4,7 @@ import {
   makeNpmLoginService,
 } from "../../src/services/npm-login";
 import RegClient from "another-npm-registry-client";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
 

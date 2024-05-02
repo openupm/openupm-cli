@@ -4,7 +4,7 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackumentNotFoundError } from "../common-errors";
 import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
-import {NoVersionsError, tryGetLatestVersion} from "../domain/packument";
+import { NoVersionsError, tryGetLatestVersion } from "../domain/packument";
 import { recordKeys } from "../utils/record-utils";
 
 /**

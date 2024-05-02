@@ -2,7 +2,7 @@ import RegClient from "another-npm-registry-client";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
-import { HttpErrorBase } from "npm-registry-fetch";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 

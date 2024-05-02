@@ -4,13 +4,10 @@ import {
 } from "../io/project-manifest-io";
 import { NotFoundError } from "../io/file-io";
 import { Logger } from "npmlog";
-import {
-  PackumentResolveError,
-  
-} from "../packument-resolving";
+import { PackumentResolveError } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
-import {VersionNotFoundError} from "../domain/packument";
+import { VersionNotFoundError } from "../domain/packument";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.

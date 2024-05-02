@@ -1,10 +1,11 @@
 import { AsyncResult, Err, Ok } from "ts-results-es";
-import npmFetch, { HttpErrorBase } from "npm-registry-fetch";
+import npmFetch from "npm-registry-fetch";
 import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
+import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
 /**
  * A type representing a searched packument. Instead of having all versions
