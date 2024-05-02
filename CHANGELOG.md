@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/openupm/openupm-cli/compare/2.0.0...2.0.1) (2024-05-02)
+
+
+### Bug Fixes
+
+* bad declaration file ([#320](https://github.com/openupm/openupm-cli/issues/320)) ([3d6d888](https://github.com/openupm/openupm-cli/commit/3d6d888402a566510f24bd99121e72f33597d4b1)), closes [#319](https://github.com/openupm/openupm-cli/issues/319)
+
 # [2.0.0](https://github.com/openupm/openupm-cli/compare/1.23.3...2.0.0) (2024-04-29)
 
 
