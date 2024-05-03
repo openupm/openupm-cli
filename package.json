@@ -7,7 +7,9 @@
     "node": ">=18"
   },
   "scripts": {
-    "test:full": "cross-env NODE_ENV=test jest",
+    "test:unit": "cross-env NODE_ENV=test jest --testMatch \"**/*.test.ts\"",
+    "test:e2e": "npm run build && cross-env NODE_ENV=test jest --testMatch \"**/*.e2e.ts\" --runInBand",
+    "test:full": "npm run test:unit && npm run test:e2e",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
