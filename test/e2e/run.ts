@@ -1,7 +1,5 @@
 import path from "path";
 import childProcess from "child_process";
-import fse from "fs-extra";
-import os from "os";
 
 export type AppOutput = {
   stdOut: string[];
@@ -9,20 +7,20 @@ export type AppOutput = {
   code: number;
 };
 
-const projectDir = path.join(os.homedir(), "projects/MyUnityProject");
-
 /**
  * Runs openupm. It assumes that it was previously built to the default location.
+ * @param cwd The directory in which to run openupm.
  * @param args Strings containing commands, arguments and options.
  * @returns The runs status-code.
  */
-export async function runOpenupm(args: string[]): Promise<AppOutput> {
-  await fse.ensureDir(projectDir);
-
+export async function runOpenupm(
+  cwd: string,
+  args: string[]
+): Promise<AppOutput> {
   const entryPointPath = path.resolve("./lib/index.js");
   const openupmProcess = childProcess.fork(entryPointPath, args, {
     stdio: "pipe",
-    cwd: projectDir,
+    cwd,
   });
 
   const stdOut = Array.of<string>();

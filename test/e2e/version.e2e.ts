@@ -1,9 +1,11 @@
-import { runOpenupm } from "./common";
+import { runOpenupm } from "./run";
 import pkgJson from "../../package.json";
+import { prepareHomeDirectory } from "./setup/directories";
 
 describe("version", () => {
   it("should print current version", async () => {
-    const output = await runOpenupm(["--version"]);
+    const homeDir = await prepareHomeDirectory();
+    const output = await runOpenupm(homeDir, ["--version"]);
 
     expect(output.stdOut).toEqual(
       expect.arrayContaining([expect.stringContaining(pkgJson.version)])
@@ -11,7 +13,8 @@ describe("version", () => {
   });
 
   it("should exit with 0", async () => {
-    const output = await runOpenupm(["--version"]);
+    const homeDir = await prepareHomeDirectory();
+    const output = await runOpenupm(homeDir, ["--version"]);
 
     expect(output.code).toEqual(0);
   });
