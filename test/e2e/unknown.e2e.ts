@@ -1,8 +1,10 @@
-import { runOpenupm } from "./common";
+import { runOpenupm } from "./run";
+import { prepareHomeDirectory } from "./setup/directories";
 
 describe("unknown command", () => {
   it("should warn of unknown command", async () => {
-    const output = await runOpenupm(["unknown-command"]);
+    const homeDir = await prepareHomeDirectory();
+    const output = await runOpenupm(homeDir, ["unknown-command"]);
 
     expect(output.stdErr).toEqual(
       expect.arrayContaining([expect.stringContaining("unknown command")])
@@ -10,7 +12,8 @@ describe("unknown command", () => {
   });
 
   it("should suggest to run with help", async () => {
-    const output = await runOpenupm(["unknown-command"]);
+    const homeDir = await prepareHomeDirectory();
+    const output = await runOpenupm(homeDir, ["unknown-command"]);
 
     expect(output.stdErr).toEqual(
       expect.arrayContaining([expect.stringContaining("see --help")])
@@ -18,7 +21,8 @@ describe("unknown command", () => {
   });
 
   it("should exit with 1", async () => {
-    const output = await runOpenupm(["unknown-command"]);
+    const homeDir = await prepareHomeDirectory();
+    const output = await runOpenupm(homeDir, ["unknown-command"]);
 
     expect(output.code).toEqual(1);
   });
