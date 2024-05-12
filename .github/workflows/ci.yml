@@ -3,12 +3,12 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18.x]
-    name: CI - node ${{ matrix.node-version }}
+    name: Unit Tests
     steps:
       - uses: actions/checkout@v3
       - name: set node.js ${{ matrix.node-version }}
@@ -19,12 +19,31 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: npm run test
-        run: npm run test:full
-
+      - name: Unit tests
+        run: npm run test:unit
+  e2e-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    name: E2E Tests
+    steps:
+      - uses: actions/checkout@v3
+      - name: set node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install deps
+        run: npm ci
+      - name: build
+        run: npm run build
+      - name: run tests
+        run: npx jest --testMatch "**/*.e2e.ts" --runInBand
   release:
     runs-on: ubuntu-latest
-    needs: test
+    needs: 
+      - unit-test
+      - e2e-test
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v3

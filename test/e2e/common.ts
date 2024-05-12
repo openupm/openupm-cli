@@ -1,17 +1,7 @@
-import os from "os";
 import path from "path";
 import childProcess from "child_process";
-
-const testDirBasePath = path.resolve(os.tmpdir(), "openupm-cli");
-
-/**
- * Makes a temporary directory path for a test.
- * @param testName A short string identifying the test or test-suite.
- * @returns The path.
- */
-export function makeTestDirPath(testName: string): string {
-  return path.join(testDirBasePath, testName);
-}
+import fse from "fs-extra";
+import os from "os";
 
 export type AppOutput = {
   stdOut: string[];
@@ -19,14 +9,20 @@ export type AppOutput = {
   code: number;
 };
 
+const projectDir = path.join(os.homedir(), "projects/MyUnityProject");
+
 /**
- * Runs Openupm.
+ * Runs openupm. It assumes that it was previously built to the default location.
  * @param args Strings containing commands, arguments and options.
  * @returns The runs status-code.
  */
-export function runOpenupm(args: string[]): Promise<AppOutput> {
-  const openupmProcess = childProcess.fork("./lib/index.js", args, {
+export async function runOpenupm(args: string[]): Promise<AppOutput> {
+  await fse.ensureDir(projectDir);
+
+  const entryPointPath = path.resolve("./lib/index.js");
+  const openupmProcess = childProcess.fork(entryPointPath, args, {
     stdio: "pipe",
+    cwd: projectDir,
   });
 
   const stdOut = Array.of<string>();
@@ -35,7 +31,7 @@ export function runOpenupm(args: string[]): Promise<AppOutput> {
   openupmProcess.stdout!.on("data", (data) => stdOut.push(data.toString()));
   openupmProcess.stderr!.on("data", (data) => stdErr.push(data.toString()));
 
-  return new Promise<AppOutput>((resolve) =>
+  return await new Promise<AppOutput>((resolve) =>
     openupmProcess.on("exit", (code) =>
       resolve({
         stdOut,
