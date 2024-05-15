@@ -3,8 +3,6 @@ on:
   push:
     paths:
       - './docker/e2e.linux.Dockerfile'
-    branches:
-      - main
 
 jobs:
   push_to_registry:
