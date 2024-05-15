@@ -18,6 +18,5 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
           push: true
           tags: ghcr.io/${{ github.repository }}-e2e-linux:latest
