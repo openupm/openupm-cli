@@ -1,11 +1,5 @@
 name: Publish Docker e2e.linux image
-on:
-  push:
-    paths:
-      - './docker/e2e.linux.Dockerfile'
-  pull_request:
-    paths:
-      - './docker/e2e.linux.Dockerfile'
+on: pull_request
 jobs:
   push_to_registry:
     name: Push Docker image to package registry
