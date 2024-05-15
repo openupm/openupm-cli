@@ -2,7 +2,7 @@ name: Publish Docker e2e.linux image
 on:
   push:
     paths:
-      - '/docker/e2e.linux.Dockerfile'
+      - './docker/e2e.linux.Dockerfile'
     branches:
       - main
 
