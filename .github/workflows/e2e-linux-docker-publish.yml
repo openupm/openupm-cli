@@ -26,4 +26,6 @@ jobs:
         with:
           file: ./docker/e2e.linux.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}-e2e-linux:latest
+          tags: ghcr.io/${{ github.repository }}-e2e-linux:latest 
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
