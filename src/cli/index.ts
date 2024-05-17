@@ -43,6 +43,7 @@ import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
 import { makeProjectVersionLoader } from "../io/project-version-io";
 import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
 import { makePackumentFetcher } from "../io/packument-io";
+import { makePackagesSearcher } from "../services/search-packages";
 
 // Composition root
 
@@ -84,6 +85,7 @@ const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
   loadUpmConfig,
   writeFile
 );
+const searchPackages = makePackagesSearcher(searchRegistry, fetchAllPackuments);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -101,12 +103,7 @@ const loginCmd = makeLoginCmd(
   saveAuthToUpmConfig,
   log
 );
-const searchCmd = makeSearchCmd(
-  parseEnv,
-  searchRegistry,
-  fetchAllPackuments,
-  log
-);
+const searchCmd = makeSearchCmd(parseEnv, searchPackages, log);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);
 const removeCmd = makeRemoveCmd(
   parseEnv,

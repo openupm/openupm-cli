@@ -7,7 +7,7 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildPackument } from "../domain/data-packument";
-import {FetchPackument} from "../../src/io/packument-io";
+import { FetchPackument } from "../../src/io/packument-io";
 
 describe("resolve remote packument service", () => {
   const somePackage = makeDomainName("com.some.package");

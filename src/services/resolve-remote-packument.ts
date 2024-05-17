@@ -8,7 +8,7 @@ import {
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { tryResolvePackumentVersion } from "../domain/packument";
-import {FetchPackumentError, FetchPackument} from "../io/packument-io";
+import { FetchPackumentError, FetchPackument } from "../io/packument-io";
 
 /**
  * Service function for resolving remove packuments.
