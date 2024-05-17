@@ -3,11 +3,11 @@ on:
   push:
     paths:
       - './docker/e2e.linux.Dockerfile'
-      - './.github/workflows/e2e-linux-docker-publish'
+      - './.github/workflows/e2e-linux-docker-publish.yml'
   pull_request:
     paths:
       - './docker/e2e.linux.Dockerfile'
-      - './.github/workflows/e2e-linux-docker-publish'
+      - './.github/workflows/e2e-linux-docker-publish.yml'
 jobs:
   push_to_registry:
     name: Push Docker image to package registry
