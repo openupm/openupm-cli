@@ -3,11 +3,11 @@ import { AsyncResult } from "ts-results-es";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
-} from "../io/special-paths";
+} from "./special-paths";
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { IOError, NotFoundError, tryGetDirectoriesIn } from "../io/file-io";
+import { IOError, NotFoundError, tryGetDirectoriesIn } from "./file-io";
 
 /**
  * Error for when an editor-version is not installed.
@@ -27,23 +27,23 @@ export class EditorNotInstalledError extends CustomError {
 /**
  * Errors which may occur when getting the builtin packages for an editor-version.
  */
-export type LoadBuiltInPackagesError =
+export type FindBuiltInPackagesError =
   | GetEditorInstallPathError
   | EditorNotInstalledError
   | IOError;
 
 /**
- * Service function for loading all built-in packages for an installed editor.
+ * Function for loading all built-in packages for an installed editor.
  * @param editorVersion The editors version.
  */
-export type GetBuiltInPackagesService = (
+export type FindBuiltInPackages = (
   editorVersion: ReleaseVersion
-) => AsyncResult<ReadonlyArray<DomainName>, LoadBuiltInPackagesError>;
+) => AsyncResult<ReadonlyArray<DomainName>, FindBuiltInPackagesError>;
 
 /**
- * Makes a {@link GetBuiltInPackagesService} function.
+ * Makes a {@link FindBuiltInPackages} function.
  */
-export function makeGetBuiltInPackagesService(): GetBuiltInPackagesService {
+export function makeBuiltInPackagesFinder(): FindBuiltInPackages {
   return (editorVersion) => {
     {
       const pathResult = tryGetEditorInstallPath(editorVersion);

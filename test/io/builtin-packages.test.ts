@@ -5,12 +5,12 @@ import { NotFoundError } from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import {
   EditorNotInstalledError,
-  makeGetBuiltInPackagesService,
-} from "../../src/services/get-builtin-packages";
+  makeBuiltInPackagesFinder,
+} from "../../src/io/builtin-packages";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 
 function makeDependencies() {
-  const getBuiltInPackages = makeGetBuiltInPackagesService();
+  const getBuiltInPackages = makeBuiltInPackagesFinder();
   return { getBuiltInPackages } as const;
 }
 
