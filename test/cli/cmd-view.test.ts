@@ -14,7 +14,8 @@ import {
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
-import { FetchPackumentService } from "../../src/services/fetch-packument";
+
+import {FetchPackument} from "../../src/io/packument-io";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -57,7 +58,7 @@ function makeDependencies() {
   const parseEnv = mockService<ParseEnvService>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const fetchPackument = mockService<FetchPackumentService>();
+  const fetchPackument = mockService<FetchPackument>();
   fetchPackument.mockReturnValue(Ok(somePackument).toAsyncResult());
 
   const log = makeMockLogger();

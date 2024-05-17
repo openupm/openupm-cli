@@ -1,5 +1,4 @@
 import { mockService } from "./service.mock";
-import { FetchPackumentService } from "../../src/services/fetch-packument";
 import { makeResolveRemotePackumentService } from "../../src/services/resolve-remote-packument";
 import { Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
@@ -8,6 +7,7 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildPackument } from "../domain/data-packument";
+import {FetchPackument} from "../../src/io/packument-io";
 
 describe("resolve remote packument service", () => {
   const somePackage = makeDomainName("com.some.package");
@@ -17,7 +17,7 @@ describe("resolve remote packument service", () => {
   const someRegistry: Registry = { url: exampleRegistryUrl, auth: null };
 
   function makeDependencies() {
-    const fetchPackument = mockService<FetchPackumentService>();
+    const fetchPackument = mockService<FetchPackument>();
 
     const resolveRemotePackument =
       makeResolveRemotePackumentService(fetchPackument);
