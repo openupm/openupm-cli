@@ -23,6 +23,7 @@ jobs:
         run: npm run test:unit
   e2e-test:
     runs-on: ubuntu-latest
+    container: ghcr.io/${{ github.repository }}-e2e-linux:latest
     strategy:
       matrix:
         node-version: [18.x]
