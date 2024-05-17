@@ -15,7 +15,7 @@ import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
 
-import {FetchPackument} from "../../src/io/packument-io";
+import { FetchPackument } from "../../src/io/packument-io";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>

@@ -16,7 +16,7 @@ import {
 } from "../common-errors";
 import { Logger } from "npmlog";
 
-import {FetchPackument} from "../io/packument-io";
+import { FetchPackument } from "../io/packument-io";
 
 export type ViewOptions = CmdOptions;
 

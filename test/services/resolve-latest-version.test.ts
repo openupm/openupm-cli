@@ -7,7 +7,7 @@ import { NoVersionsError, UnityPackument } from "../../src/domain/packument";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import {FetchPackument} from "../../src/io/packument-io";
+import { FetchPackument } from "../../src/io/packument-io";
 
 describe("resolve latest version service", () => {
   const somePackage = makeDomainName("com.some.package");

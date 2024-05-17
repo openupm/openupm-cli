@@ -5,7 +5,7 @@ import { SemanticVersion } from "../domain/semantic-version";
 import { PackumentNotFoundError } from "../common-errors";
 import { NoVersionsError, tryGetLatestVersion } from "../domain/packument";
 import { recordKeys } from "../utils/record-utils";
-import {FetchPackumentError, FetchPackument} from "../io/packument-io";
+import { FetchPackumentError, FetchPackument } from "../io/packument-io";
 
 /**
  * Error which may occur when resolving the latest version for a package.

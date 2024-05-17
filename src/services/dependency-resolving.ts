@@ -20,7 +20,7 @@ import {
 import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import {FetchPackumentError} from "../io/packument-io";
+import { FetchPackumentError } from "../io/packument-io";
 
 export type DependencyBase = {
   /**
