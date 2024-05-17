@@ -4,10 +4,7 @@ import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { AsyncResult, Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import {
-  SearchedPackument,
-  SearchRegistryService,
-} from "../services/search-registry";
+import { SearchedPackument, SearchRegistry } from "../io/npm-search";
 import { Registry } from "../domain/registry";
 import { FetchAllPackuments } from "../io/all-packuments-io";
 import { Logger } from "npmlog";
@@ -31,7 +28,7 @@ export type SearchCmd = (
  */
 export function makeSearchCmd(
   parseEnv: ParseEnvService,
-  searchRegistry: SearchRegistryService,
+  searchRegistry: SearchRegistry,
   fetchAllPackuments: FetchAllPackuments,
   log: Logger
 ): SearchCmd {

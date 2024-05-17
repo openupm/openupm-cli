@@ -9,7 +9,7 @@ import { CmdOptions } from "./options";
 import { makeAddCmd } from "./cmd-add";
 import { makeAuthNpmrcService } from "../services/npmrc-auth";
 import { makeNpmLoginService } from "../services/npm-login";
-import { makeSearchRegistryService } from "../services/search-registry";
+import { makeRegistrySearcher } from "../io/npm-search";
 import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
@@ -62,6 +62,7 @@ const saveNpmrc = makeNpmrcSaver(writeFile);
 const loadProjectVersion = makeProjectVersionLoader(readFile);
 const fetchPackument = makePackumentFetcher(regClient);
 const fetchAllPackuments = makeAllPackumentsFetcher();
+const searchRegistry = makeRegistrySearcher();
 
 const parseEnv = makeParseEnvService(
   log,
@@ -72,7 +73,6 @@ const parseEnv = makeParseEnvService(
 );
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
-const searchRegistry = makeSearchRegistryService();
 const resolveRemotePackument =
   makeResolveRemotePackumentService(fetchPackument);
 const resolveLatestVersion = makeResolveLatestVersionService(fetchPackument);
