@@ -3,9 +3,9 @@ import { DomainName } from "../domain/domain-name";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackumentNotFoundError } from "../common-errors";
-import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
 import { NoVersionsError, tryGetLatestVersion } from "../domain/packument";
 import { recordKeys } from "../utils/record-utils";
+import {FetchPackumentError, FetchPackument} from "../io/packument-io";
 
 /**
  * Error which may occur when resolving the latest version for a package.
@@ -26,7 +26,7 @@ export type ResolveLatestVersionService = (
 ) => AsyncResult<SemanticVersion, ResolveLatestVersionError>;
 
 export function makeResolveLatestVersionService(
-  fetchPackument: FetchPackumentService
+  fetchPackument: FetchPackument
 ): ResolveLatestVersionService {
   const resolveLatestVersion: ResolveLatestVersionService = (
     sources,

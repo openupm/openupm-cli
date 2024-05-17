@@ -6,7 +6,6 @@ import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
 import { eachValue } from "./cli-parsing";
 import { CmdOptions } from "./options";
-import { makeFetchPackumentService } from "../services/fetch-packument";
 import { makeAddCmd } from "./cmd-add";
 import { makeAuthNpmrcService } from "../services/npmrc-auth";
 import { makeNpmLoginService } from "../services/npm-login";
@@ -43,6 +42,7 @@ import {
 import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
 import { makeProjectVersionLoader } from "../io/project-version-io";
 import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
+import {makePackumentFetcher} from "../io/packument-io";
 
 // Composition root
 
@@ -68,7 +68,7 @@ const parseEnv = makeParseEnvService(
   getCwd,
   loadProjectVersion
 );
-const fetchPackument = makeFetchPackumentService(regClient);
+const fetchPackument = makePackumentFetcher(regClient);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();

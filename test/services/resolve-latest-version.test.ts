@@ -1,5 +1,4 @@
 import { mockService } from "./service.mock";
-import { FetchPackumentService } from "../../src/services/fetch-packument";
 import { makeResolveLatestVersionService } from "../../src/services/resolve-latest-version";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { PackumentNotFoundError } from "../../src/common-errors";
@@ -8,6 +7,7 @@ import { NoVersionsError, UnityPackument } from "../../src/domain/packument";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
+import {FetchPackument} from "../../src/io/packument-io";
 
 describe("resolve latest version service", () => {
   const somePackage = makeDomainName("com.some.package");
@@ -16,7 +16,7 @@ describe("resolve latest version service", () => {
   const upstreamRegistry: Registry = { url: unityRegistryUrl, auth: null };
 
   function makeDependencies() {
-    const fetchPackument = mockService<FetchPackumentService>();
+    const fetchPackument = mockService<FetchPackument>();
 
     const resolveLatestVersion =
       makeResolveLatestVersionService(fetchPackument);

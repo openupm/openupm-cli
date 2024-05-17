@@ -47,8 +47,8 @@ import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
-import { FetchPackumentError } from "../services/fetch-packument";
 import { VersionNotFoundError } from "../domain/packument";
+import {FetchPackumentError} from "../io/packument-io";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";

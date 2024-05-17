@@ -7,8 +7,8 @@ import {
   ResolvedPackument,
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
-import { FetchPackumentError, FetchPackumentService } from "./fetch-packument";
 import { tryResolvePackumentVersion } from "../domain/packument";
+import {FetchPackumentError, FetchPackument} from "../io/packument-io";
 
 /**
  * Service function for resolving remove packuments.
@@ -29,7 +29,7 @@ export type ResolveRemotePackumentService = (
  * Makes a {@link ResolveRemotePackumentService} function.
  */
 export function makeResolveRemotePackumentService(
-  fetchPackument: FetchPackumentService
+  fetchPackument: FetchPackument
 ): ResolveRemotePackumentService {
   return (packageName, requestedVersion, source) =>
     fetchPackument(source, packageName)

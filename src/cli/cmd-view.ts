@@ -15,7 +15,8 @@ import {
   PackumentNotFoundError,
 } from "../common-errors";
 import { Logger } from "npmlog";
-import { FetchPackumentService } from "../services/fetch-packument";
+
+import {FetchPackument} from "../io/packument-io";
 
 export type ViewOptions = CmdOptions;
 
@@ -105,7 +106,7 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnvService,
-  fetchPackument: FetchPackumentService,
+  fetchPackument: FetchPackument,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {

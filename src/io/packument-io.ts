@@ -1,33 +1,33 @@
 import RegClient from "another-npm-registry-client";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { assertIsHttpError } from "../utils/error-type-guards";
+import { Registry } from "../domain/registry";
+import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { DomainName } from "../domain/domain-name";
-import { Registry } from "../domain/registry";
 
 /**
  * Error which may occur when fetching a packument from a remote registry.
  */
 export type FetchPackumentError = HttpErrorBase;
-
 /**
- * Service function for fetching a packument from a registry.
+ * Function for fetching a packument from a registry.
  * @param registry The registry to fetch from.
  * @param name The name of the packument to fetch.
+ * @returns The packument or null of not found.
  */
 
-export type FetchPackumentService = (
+export type FetchPackument = (
   registry: Registry,
   name: DomainName
 ) => AsyncResult<UnityPackument | null, FetchPackumentError>;
 
 /**
- * Makes a {@link FetchPackumentService} function.
+ * Makes a {@link FetchPackument} function.
  */
-export function makeFetchPackumentService(
+export function makePackumentFetcher(
   registryClient: RegClient.Instance
-): FetchPackumentService {
+): FetchPackument {
   return (registry, name) => {
     const url = `${registry.url}/${name}`;
     return new AsyncResult(
