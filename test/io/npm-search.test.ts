@@ -1,7 +1,7 @@
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { makeSearchRegistryService } from "../../src/services/search-registry";
+import { makeRegistrySearcher } from "../../src/io/npm-search";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 
@@ -13,11 +13,11 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const searchRegistry = makeSearchRegistryService();
+  const searchRegistry = makeRegistrySearcher();
   return { searchRegistry } as const;
 }
 
-describe("search service", () => {
+describe("npm search", () => {
   it("should fail for error response", async () => {
     const expected = {
       message: "Idk, it failed",

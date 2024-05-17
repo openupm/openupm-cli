@@ -5,7 +5,7 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import {
   getNpmFetchOptions,
   SearchedPackument,
-} from "../services/search-registry";
+} from "./npm-search";
 import { DomainName } from "../domain/domain-name";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 

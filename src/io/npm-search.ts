@@ -18,11 +18,11 @@ export type SearchedPackument = Readonly<
 >;
 
 /**
- * Service function for searching packuments on a registry.
+ * Function for searching packuments on a registry.
  * @param registry The registry to search.
  * @param keyword The keyword to search.
  */
-export type SearchRegistryService = (
+export type SearchRegistry = (
   registry: Registry,
   keyword: string
 ) => AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase>;
@@ -42,9 +42,9 @@ export const getNpmFetchOptions = function (
 };
 
 /**
- * Makes a {@link SearchRegistryService} function.
+ * Makes a {@link SearchRegistry} function.
  */
-export function makeSearchRegistryService(): SearchRegistryService {
+export function makeRegistrySearcher(): SearchRegistry {
   return (registry, keyword) => {
     return new AsyncResult(
       npmSearch(keyword, getNpmFetchOptions(registry))

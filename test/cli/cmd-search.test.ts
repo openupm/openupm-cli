@@ -4,8 +4,8 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import {
   SearchedPackument,
-  SearchRegistryService,
-} from "../../src/services/search-registry";
+  SearchRegistry,
+} from "../../src/io/npm-search";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
@@ -30,7 +30,7 @@ function makeDependencies() {
     Ok({ registry: { url: exampleRegistryUrl, auth: null } } as Env)
   );
 
-  const searchRegistry = mockService<SearchRegistryService>();
+  const searchRegistry = mockService<SearchRegistry>();
   searchRegistry.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
 
   const getAllPackuments = mockService<FetchAllPackuments>();
