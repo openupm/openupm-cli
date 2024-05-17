@@ -10,9 +10,9 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import {
-  AllPackumentsResult,
-  GetAllPackumentsService,
-} from "../../src/services/get-all-packuments";
+  AllPackumentsR,
+  FetchAllPackuments,
+} from "../../src/io/all-packuments-io";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 
@@ -33,12 +33,12 @@ function makeDependencies() {
   const searchRegistry = mockService<SearchRegistryService>();
   searchRegistry.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
 
-  const getAllPackuments = mockService<GetAllPackumentsService>();
+  const getAllPackuments = mockService<FetchAllPackuments>();
   getAllPackuments.mockReturnValue(
     Ok({
       _updated: 9999,
       [exampleSearchResult.name]: exampleSearchResult,
-    } as AllPackumentsResult).toAsyncResult()
+    } as AllPackumentsR).toAsyncResult()
   );
 
   const log = makeMockLogger();

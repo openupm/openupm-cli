@@ -9,7 +9,7 @@ import {
   SearchRegistryService,
 } from "../services/search-registry";
 import { Registry } from "../domain/registry";
-import { GetAllPackumentsService } from "../services/get-all-packuments";
+import { FetchAllPackuments } from "../io/all-packuments-io";
 import { Logger } from "npmlog";
 
 export type SearchError = EnvParseError | HttpErrorBase;
@@ -32,7 +32,7 @@ export type SearchCmd = (
 export function makeSearchCmd(
   parseEnv: ParseEnvService,
   searchRegistry: SearchRegistryService,
-  getAllPackuments: GetAllPackumentsService,
+  fetchAllPackuments: FetchAllPackuments,
   log: Logger
 ): SearchCmd {
   function searchEndpoint(
@@ -49,7 +49,7 @@ export function makeSearchCmd(
     registry: Registry,
     keyword: string
   ): AsyncResult<SearchedPackument[], HttpErrorBase> {
-    return getAllPackuments(registry).map((allPackuments) => {
+    return fetchAllPackuments(registry).map((allPackuments) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _updated, ...packumentEntries } = allPackuments;
       const packuments = Object.values(packumentEntries);

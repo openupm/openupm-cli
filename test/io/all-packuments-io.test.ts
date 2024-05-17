@@ -1,5 +1,5 @@
 import npmFetch from "npm-registry-fetch";
-import { makeGetAllPackumentsService } from "../../src/services/get-all-packuments";
+import { makeAllPackumentsFetcher } from "../../src/io/all-packuments-io";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
@@ -12,11 +12,11 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const getAllPackuments = makeGetAllPackumentsService();
+  const getAllPackuments = makeAllPackumentsFetcher();
   return { getAllPackuments } as const;
 }
 
-describe("get all packuments service", () => {
+describe("fetch all packuments", () => {
   it("should fail on error response", async () => {
     const expected = {
       message: "Idk, it failed",
