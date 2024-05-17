@@ -12,7 +12,7 @@ import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 /**
  * The result of querying the /-/all endpoint.
  */
-export type AllPackumentsR = Readonly<{
+export type AllPackuments = Readonly<{
   _updated: number;
   [name: DomainName]: SearchedPackument;
 }>;
@@ -23,7 +23,7 @@ export type AllPackumentsR = Readonly<{
  */
 export type FetchAllPackuments = (
   registry: Registry
-) => AsyncResult<AllPackumentsR, HttpErrorBase>;
+) => AsyncResult<AllPackuments, HttpErrorBase>;
 
 /**
  * Makes a {@link FetchAllPackuments} function.
@@ -33,7 +33,7 @@ export function makeAllPackumentsFetcher(): FetchAllPackuments {
     return new AsyncResult(
       npmFetch
         .json("/-/all", getNpmFetchOptions(registry))
-        .then((result) => Ok(result as AllPackumentsR))
+        .then((result) => Ok(result as AllPackuments))
         .catch((error) => {
           assertIsHttpError(error);
           return Err(error);

@@ -10,7 +10,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import {
-  AllPackumentsR,
+  AllPackuments,
   FetchAllPackuments,
 } from "../../src/io/all-packuments-io";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
@@ -38,7 +38,7 @@ function makeDependencies() {
     Ok({
       _updated: 9999,
       [exampleSearchResult.name]: exampleSearchResult,
-    } as AllPackumentsR).toAsyncResult()
+    } as AllPackuments).toAsyncResult()
   );
 
   const log = makeMockLogger();
