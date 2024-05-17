@@ -14,7 +14,7 @@ import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
 import { makeResolveDependenciesService } from "../services/dependency-resolving";
-import { makeGetAllPackumentsService } from "../services/get-all-packuments";
+import { makeAllPackumentsFetcher } from "../io/all-packuments-io";
 import {
   mustBeDomainName,
   mustBePackageReference,
@@ -42,7 +42,7 @@ import {
 import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
 import { makeProjectVersionLoader } from "../io/project-version-io";
 import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
-import {makePackumentFetcher} from "../io/packument-io";
+import { makePackumentFetcher } from "../io/packument-io";
 
 // Composition root
 
@@ -60,6 +60,8 @@ const findNpmrcPath = makeNpmrcPathFinder(getHomePath);
 const loadNpmrc = makeNpmrcLoader(readFile);
 const saveNpmrc = makeNpmrcSaver(writeFile);
 const loadProjectVersion = makeProjectVersionLoader(readFile);
+const fetchPackument = makePackumentFetcher(regClient);
+const fetchAllPackuments = makeAllPackumentsFetcher();
 
 const parseEnv = makeParseEnvService(
   log,
@@ -68,7 +70,6 @@ const parseEnv = makeParseEnvService(
   getCwd,
   loadProjectVersion
 );
-const fetchPackument = makePackumentFetcher(regClient);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
 const searchRegistry = makeSearchRegistryService();
@@ -79,7 +80,6 @@ const resolveDependencies = makeResolveDependenciesService(
   resolveRemotePackument,
   resolveLatestVersion
 );
-const getAllPackuments = makeGetAllPackumentsService();
 const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
   loadUpmConfig,
   writeFile
@@ -104,7 +104,7 @@ const loginCmd = makeLoginCmd(
 const searchCmd = makeSearchCmd(
   parseEnv,
   searchRegistry,
-  getAllPackuments,
+  fetchAllPackuments,
   log
 );
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);

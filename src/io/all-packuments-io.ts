@@ -2,35 +2,38 @@ import { Registry } from "../domain/registry";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch from "npm-registry-fetch";
 import { assertIsHttpError } from "../utils/error-type-guards";
-import { getNpmFetchOptions, SearchedPackument } from "./search-registry";
+import {
+  getNpmFetchOptions,
+  SearchedPackument,
+} from "../services/search-registry";
 import { DomainName } from "../domain/domain-name";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
 /**
  * The result of querying the /-/all endpoint.
  */
-export type AllPackumentsResult = Readonly<{
+export type AllPackumentsR = Readonly<{
   _updated: number;
   [name: DomainName]: SearchedPackument;
 }>;
 
 /**
- * Service for getting all packuments from a registry.
+ * Function for getting fetching packuments from a npm registry.
  * @param registry The registry to get packuments for.
  */
-export type GetAllPackumentsService = (
+export type FetchAllPackuments = (
   registry: Registry
-) => AsyncResult<AllPackumentsResult, HttpErrorBase>;
+) => AsyncResult<AllPackumentsR, HttpErrorBase>;
 
 /**
- * Makes a {@link GetAllPackumentsService} service.
+ * Makes a {@link FetchAllPackuments} function.
  */
-export function makeGetAllPackumentsService(): GetAllPackumentsService {
+export function makeAllPackumentsFetcher(): FetchAllPackuments {
   return (registry) => {
     return new AsyncResult(
       npmFetch
         .json("/-/all", getNpmFetchOptions(registry))
-        .then((result) => Ok(result as AllPackumentsResult))
+        .then((result) => Ok(result as AllPackumentsR))
         .catch((error) => {
           assertIsHttpError(error);
           return Err(error);
