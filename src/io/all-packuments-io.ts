@@ -2,20 +2,21 @@ import { Registry } from "../domain/registry";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch from "npm-registry-fetch";
 import { assertIsHttpError } from "../utils/error-type-guards";
-import {
-  getNpmFetchOptions,
-  SearchedPackument,
-} from "./npm-search";
+import { getNpmFetchOptions, SearchedPackument } from "./npm-search";
 import { DomainName } from "../domain/domain-name";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
 /**
  * The result of querying the /-/all endpoint.
  */
-export type AllPackuments = Readonly<{
-  _updated: number;
-  [name: DomainName]: SearchedPackument;
-}>;
+export type AllPackuments = Readonly<
+  | {
+      _updated: number;
+    }
+  | {
+      [name: DomainName]: SearchedPackument;
+    }
+>;
 
 /**
  * Function for getting fetching packuments from a npm registry.
