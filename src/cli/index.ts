@@ -44,6 +44,7 @@ import { makeProjectVersionLoader } from "../io/project-version-io";
 import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
 import { makePackumentFetcher } from "../io/packument-io";
 import { makePackagesSearcher } from "../services/search-packages";
+import { makeRemotePackumentResolver } from "../services/resolve-remote-packument";
 
 // Composition root
 
@@ -64,6 +65,7 @@ const loadProjectVersion = makeProjectVersionLoader(readFile);
 const fetchPackument = makePackumentFetcher(regClient);
 const fetchAllPackuments = makeAllPackumentsFetcher();
 const searchRegistry = makeRegistrySearcher();
+const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
 
 const parseEnv = makeParseEnvService(
   log,
@@ -111,7 +113,7 @@ const removeCmd = makeRemoveCmd(
   writeProjectManifest,
   log
 );
-const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
+const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
 
 // update-notifier
 
