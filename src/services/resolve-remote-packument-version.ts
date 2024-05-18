@@ -2,10 +2,10 @@ import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import {
-  PackumentResolveError,
+  PackumentVersionResolveError,
   ResolvableVersion,
-  ResolvedPackument,
-} from "../packument-resolving";
+  ResolvedPackumentVersion,
+} from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { FetchPackument, FetchPackumentError } from "../io/packument-io";
@@ -14,7 +14,7 @@ import { FetchPackument, FetchPackumentError } from "../io/packument-io";
  * Error which may occur when resolving a remove packument version.
  */
 export type ResolveRemotePackumentVersionError =
-  | PackumentResolveError
+  | PackumentVersionResolveError
   | FetchPackumentError;
 
 /**
@@ -27,7 +27,7 @@ export type ResolveRemotePackumentVersionService = (
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-) => AsyncResult<ResolvedPackument, ResolveRemotePackumentVersionError>;
+) => AsyncResult<ResolvedPackumentVersion, ResolveRemotePackumentVersionError>;
 
 /**
  * Makes a {@link ResolveRemotePackumentVersionService} function.

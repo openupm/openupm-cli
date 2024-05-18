@@ -6,7 +6,7 @@ import {
   splitPackageReference,
 } from "../domain/package-reference";
 import { CmdOptions } from "./options";
-import { PackumentResolveError } from "../packument-resolving";
+import { PackumentVersionResolveError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
 import {
@@ -33,7 +33,7 @@ export type DepsCmd = (
   options: DepsOptions
 ) => Promise<Result<void, DepsError>>;
 
-function errorPrefixForError(error: PackumentResolveError): string {
+function errorPrefixForError(error: PackumentVersionResolveError): string {
   if (error instanceof PackumentNotFoundError) return "missing dependency";
   else if (error instanceof VersionNotFoundError)
     return "missing dependency version";

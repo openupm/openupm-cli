@@ -2,12 +2,12 @@ import { DomainName, isInternalPackage } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
-  PackumentResolveError,
+  PackumentVersionResolveError,
   pickMostFixable,
   ResolvableVersion,
-  ResolvedPackument,
+  ResolvedPackumentVersion,
   tryResolveFromCache,
-} from "../packument-resolving";
+} from "../packument-version-resolving";
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentVersionService } from "./resolve-remote-packument-version";
@@ -53,7 +53,7 @@ export interface ValidDependency extends DependencyBase {
  * A dependency that could not be resolved.
  */
 export interface InvalidDependency extends DependencyBase {
-  reason: PackumentResolveError;
+  reason: PackumentVersionResolveError;
 }
 
 type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
@@ -158,8 +158,8 @@ export function makeResolveDependenciesService(
 
         // Search all given registries.
         let resolveResult: Result<
-          ResolvedPackument,
-          PackumentResolveError | HttpErrorBase
+          ResolvedPackumentVersion,
+          PackumentVersionResolveError | HttpErrorBase
         > = Err(new PackumentNotFoundError());
         for (const source of sources) {
           const result = await tryResolveFromRegistry(

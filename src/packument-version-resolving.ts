@@ -24,7 +24,7 @@ export type ResolvableVersion =
 /**
  * A successfully resolved packument-version.
  */
-export interface ResolvedPackument {
+export interface ResolvedPackumentVersion {
   /**
    * The packument from which the version was resolved.
    */
@@ -42,7 +42,7 @@ export interface ResolvedPackument {
 /**
  * A failed attempt at resolving a packument-version.
  */
-export type PackumentResolveError =
+export type PackumentVersionResolveError =
   | PackumentNotFoundError
   | NoVersionsError
   | VersionNotFoundError;
@@ -59,7 +59,7 @@ export function tryResolveFromCache(
   source: RegistryUrl,
   packumentName: DomainName,
   requestedVersion: ResolvableVersion
-): Result<ResolvedPackument, PackumentResolveError> {
+): Result<ResolvedPackumentVersion, PackumentVersionResolveError> {
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
   if (cachedPackument === null) return Err(new PackumentNotFoundError());
 
@@ -79,9 +79,9 @@ export function tryResolveFromCache(
  * @returns The more fixable failure.
  */
 export function pickMostFixable(
-  a: Err<PackumentResolveError>,
-  b: Err<PackumentResolveError>
-): Err<PackumentResolveError> {
+  a: Err<PackumentVersionResolveError>,
+  b: Err<PackumentVersionResolveError>
+): Err<PackumentVersionResolveError> {
   // Anything is more fixable than packument-not-found
   if (
     a.error instanceof PackumentNotFoundError &&
