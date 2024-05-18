@@ -15,8 +15,7 @@ import {
   PackumentNotFoundError,
 } from "../common-errors";
 import { Logger } from "npmlog";
-
-import { FetchPackument } from "../io/packument-io";
+import { ResolveRemotePackument } from "../services/resolve-remote-packument";
 
 export type ViewOptions = CmdOptions;
 
@@ -106,7 +105,7 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnvService,
-  fetchPackument: FetchPackument,
+  resolveRemotePackument: ResolveRemotePackument,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
@@ -123,12 +122,14 @@ export function makeViewCmd(
     }
 
     // verify name
-    const result = await fetchPackument(env.registry, pkg).orElse((error) =>
-      env.upstream ? fetchPackument(env.upstreamRegistry, pkg) : Err(error)
-    ).promise;
-    if (!result.isOk()) return result;
+    const sources = [
+      env.registry,
+      ...(env.upstream ? [env.upstreamRegistry] : []),
+    ];
+    const resolveResult = await resolveRemotePackument(pkg, sources).promise;
+    if (!resolveResult.isOk()) return resolveResult;
 
-    const packument = result.value;
+    const packument = resolveResult.value?.packument ?? null;
     if (packument === null) {
       log.error("404", `package not found: ${pkg}`);
       return Err(new PackumentNotFoundError());
