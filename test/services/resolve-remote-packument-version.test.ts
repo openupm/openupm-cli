@@ -1,5 +1,5 @@
 import { mockService } from "./service.mock";
-import { makeResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument";
+import { makeResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument-version";
 import { Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
@@ -9,7 +9,7 @@ import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildPackument } from "../domain/data-packument";
 import { FetchPackument } from "../../src/io/packument-io";
 
-describe("resolve remote packument service", () => {
+describe("resolve remote packument version", () => {
   const somePackage = makeDomainName("com.some.package");
 
   const someVersion = makeSemanticVersion("1.0.0");

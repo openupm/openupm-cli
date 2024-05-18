@@ -10,7 +10,7 @@ import {
 } from "../packument-resolving";
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
-import { ResolveRemotePackumentVersionService } from "./resolve-remote-packument";
+import { ResolveRemotePackumentVersionService } from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
 import {

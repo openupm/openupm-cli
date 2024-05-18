@@ -5,7 +5,7 @@ import {
   UnityPackument,
 } from "../../src/domain/packument";
 import { RegistryUrl } from "../../src/domain/registry-url";
-import { ResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument";
+import { ResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument-version";
 
 type MockEntry = [RegistryUrl, UnityPackument];
 

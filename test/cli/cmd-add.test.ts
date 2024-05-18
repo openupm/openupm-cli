@@ -24,7 +24,7 @@ import { buildProjectManifest } from "../domain/data-project-manifest";
 import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { mockService } from "../services/service.mock";
-import { ResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument";
+import { ResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument-version";
 import {
   LoadProjectManifest,
   WriteProjectManifest,

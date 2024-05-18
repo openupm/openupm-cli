@@ -42,7 +42,7 @@ import {
   DependencyResolveError,
   ResolveDependenciesService,
 } from "../services/dependency-resolving";
-import { ResolveRemotePackumentVersionService } from "../services/resolve-remote-packument";
+import { ResolveRemotePackumentVersionService } from "../services/resolve-remote-packument-version";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";

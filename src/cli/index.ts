@@ -22,7 +22,7 @@ import {
 } from "./validators";
 import RegClient from "another-npm-registry-client";
 import { makeParseEnvService } from "../services/parse-env";
-import { makeResolveRemotePackumentVersionService } from "../services/resolve-remote-packument";
+import { makeResolveRemotePackumentVersionService } from "../services/resolve-remote-packument-version";
 import {
   makeProjectManifestLoader,
   makeProjectManifestWriter,
