@@ -28,7 +28,10 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
-import { PackumentResolveError, pickMostFixable } from "../packument-resolving";
+import {
+  PackumentVersionResolveError,
+  pickMostFixable,
+} from "../packument-version-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
@@ -81,7 +84,7 @@ export type AddOptions = CmdOptions<{
 export type AddError =
   | EnvParseError
   | ManifestLoadError
-  | PackumentResolveError
+  | PackumentVersionResolveError
   | FetchPackumentError
   | InvalidPackumentDataError
   | EditorIncompatibleError

@@ -4,7 +4,7 @@ import {
 } from "../io/project-manifest-io";
 import { NotFoundError } from "../io/file-io";
 import { Logger } from "npmlog";
-import { PackumentResolveError } from "../packument-resolving";
+import { PackumentVersionResolveError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { VersionNotFoundError } from "../domain/packument";
@@ -32,12 +32,12 @@ export function logManifestSaveError(log: Logger, error: ManifestWriteError) {
 }
 
 /**
- * Logs a {@link PackumentResolveError} to the console.
+ * Logs a {@link PackumentVersionResolveError} to the console.
  */
 export function logPackumentResolveError(
   log: Logger,
   packageName: DomainName,
-  error: PackumentResolveError
+  error: PackumentVersionResolveError
 ) {
   if (error instanceof PackumentNotFoundError)
     log.error("404", `package not found: ${packageName}`);
