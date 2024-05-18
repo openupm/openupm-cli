@@ -63,13 +63,19 @@ export function makeRemotePackumentResolver(
   }
 
   const resolveRecursively: ResolveRemotePackument = (packageName, sources) => {
+    // If there are no more sources to search then can return with no packument
     if (sources.length === 0) return noPackumentResult;
 
+    // Determine current and fallback sources
     const currentSource = sources[0]!;
     const fallbackSources = sources.slice(1);
 
+    // Resolve from the current source first
     return tryResolveFrom(currentSource, packageName).andThen(
       (maybePackument) =>
+        // Afterward check if we got a packument.
+        // If yes we can return it, otherwhise we enter the next level
+        // of the recursion with the remaining registries.
         maybePackument !== null
           ? Ok(maybePackument).toAsyncResult()
           : resolveRecursively(packageName, fallbackSources)
