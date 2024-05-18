@@ -10,7 +10,7 @@ import {
 } from "../packument-resolving";
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
-import { ResolveRemotePackumentService } from "./resolve-remote-packument";
+import { ResolveRemotePackumentVersionService } from "./resolve-remote-packument";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
 import {
@@ -85,7 +85,7 @@ export type ResolveDependenciesService = (
  * Makes a {@link ResolveDependenciesService} function.
  */
 export function makeResolveDependenciesService(
-  resolveRemotePackument: ResolveRemotePackumentService,
+  resolveRemovePackumentVersion: ResolveRemotePackumentVersionService,
   resolveLatestVersion: ResolveLatestVersionService
 ): ResolveDependenciesService {
   // TODO: Add tests for this service
@@ -125,8 +125,11 @@ export function makeResolveDependenciesService(
       if (cacheResult.isOk()) return cacheResult;
 
       // Then registry
-      return await resolveRemotePackument(packumentName, version, registry)
-        .promise;
+      return await resolveRemovePackumentVersion(
+        packumentName,
+        version,
+        registry
+      ).promise;
     }
 
     while (pendingList.length > 0) {

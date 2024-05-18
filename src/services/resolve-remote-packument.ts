@@ -8,29 +8,33 @@ import {
 } from "../packument-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { tryResolvePackumentVersion } from "../domain/packument";
-import { FetchPackumentError, FetchPackument } from "../io/packument-io";
+import { FetchPackument, FetchPackumentError } from "../io/packument-io";
 
 /**
- * Service function for resolving remove packuments.
+ * Error which may occur when resolving a remove packument version.
+ */
+export type ResolveRemotePackumentVersionError =
+  | PackumentResolveError
+  | FetchPackumentError;
+
+/**
+ * Service function for resolving remove packument versions.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
-export type ResolveRemotePackumentService = (
+export type ResolveRemotePackumentVersionService = (
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-) => AsyncResult<
-  ResolvedPackument,
-  PackumentResolveError | FetchPackumentError
->;
+) => AsyncResult<ResolvedPackument, ResolveRemotePackumentVersionError>;
 
 /**
- * Makes a {@link ResolveRemotePackumentService} function.
+ * Makes a {@link ResolveRemotePackumentVersionService} function.
  */
-export function makeResolveRemotePackumentService(
+export function makeResolveRemotePackumentVersionService(
   fetchPackument: FetchPackument
-): ResolveRemotePackumentService {
+): ResolveRemotePackumentVersionService {
   return (packageName, requestedVersion, source) =>
     fetchPackument(source, packageName)
       .andThen((maybePackument) => {

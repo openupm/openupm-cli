@@ -22,7 +22,7 @@ import {
 } from "./validators";
 import RegClient from "another-npm-registry-client";
 import { makeParseEnvService } from "../services/parse-env";
-import { makeResolveRemotePackumentService } from "../services/resolve-remote-packument";
+import { makeResolveRemotePackumentVersionService } from "../services/resolve-remote-packument";
 import {
   makeProjectManifestLoader,
   makeProjectManifestWriter,
@@ -74,11 +74,11 @@ const parseEnv = makeParseEnvService(
 );
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
-const resolveRemotePackument =
-  makeResolveRemotePackumentService(fetchPackument);
+const resolveRemovePackumentVersion =
+  makeResolveRemotePackumentVersionService(fetchPackument);
 const resolveLatestVersion = makeResolveLatestVersionService(fetchPackument);
 const resolveDependencies = makeResolveDependenciesService(
-  resolveRemotePackument,
+  resolveRemovePackumentVersion,
   resolveLatestVersion
 );
 const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
@@ -89,7 +89,7 @@ const searchPackages = makePackagesSearcher(searchRegistry, fetchAllPackuments);
 
 const addCmd = makeAddCmd(
   parseEnv,
-  resolveRemotePackument,
+  resolveRemovePackumentVersion,
   resolveDependencies,
   loadProjectManifest,
   writeProjectManifest,

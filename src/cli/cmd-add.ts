@@ -42,7 +42,7 @@ import {
   DependencyResolveError,
   ResolveDependenciesService,
 } from "../services/dependency-resolving";
-import { ResolveRemotePackumentService } from "../services/resolve-remote-packument";
+import { ResolveRemotePackumentVersionService } from "../services/resolve-remote-packument";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
@@ -104,7 +104,7 @@ type AddCmd = (
  */
 export function makeAddCmd(
   parseEnv: ParseEnvService,
-  resolveRemotePackument: ResolveRemotePackumentService,
+  resolveRemotePackumentVersion: ResolveRemotePackumentVersionService,
   resolveDependencies: ResolveDependenciesService,
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest,
@@ -136,13 +136,13 @@ export function makeAddCmd(
       const pkgsInScope = Array.of<DomainName>();
       let versionToAdd = requestedVersion;
       if (requestedVersion === undefined || !isPackageUrl(requestedVersion)) {
-        let resolveResult = await resolveRemotePackument(
+        let resolveResult = await resolveRemotePackumentVersion(
           name,
           requestedVersion,
           env.registry
         ).promise;
         if (resolveResult.isErr() && env.upstream) {
-          const upstreamResult = await resolveRemotePackument(
+          const upstreamResult = await resolveRemotePackumentVersion(
             name,
             requestedVersion,
             env.upstreamRegistry

@@ -1,5 +1,5 @@
 import { mockService } from "./service.mock";
-import { makeResolveRemotePackumentService } from "../../src/services/resolve-remote-packument";
+import { makeResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument";
 import { Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
@@ -19,16 +19,17 @@ describe("resolve remote packument service", () => {
   function makeDependencies() {
     const fetchPackument = mockService<FetchPackument>();
 
-    const resolveRemotePackument =
-      makeResolveRemotePackumentService(fetchPackument);
-    return { resolveRemotePackument, fetchPackument } as const;
+    const resolveRemovePackumentVersion =
+      makeResolveRemotePackumentVersionService(fetchPackument);
+    return { resolveRemovePackumentVersion, fetchPackument } as const;
   }
 
   it("should fail if packument was not found", async () => {
-    const { resolveRemotePackument, fetchPackument } = makeDependencies();
+    const { resolveRemovePackumentVersion, fetchPackument } =
+      makeDependencies();
     fetchPackument.mockReturnValue(Ok(null).toAsyncResult());
 
-    const result = await resolveRemotePackument(
+    const result = await resolveRemovePackumentVersion(
       somePackage,
       someVersion,
       someRegistry
@@ -40,7 +41,8 @@ describe("resolve remote packument service", () => {
   });
 
   it("should give resolved packument-version", async () => {
-    const { resolveRemotePackument, fetchPackument } = makeDependencies();
+    const { resolveRemovePackumentVersion, fetchPackument } =
+      makeDependencies();
     const packument = buildPackument(somePackage, (packument) =>
       packument.addVersion(someVersion, (version) =>
         version.addDependency("com.other.package", "1.0.0")
@@ -48,7 +50,7 @@ describe("resolve remote packument service", () => {
     );
     fetchPackument.mockReturnValue(Ok(packument).toAsyncResult());
 
-    const result = await resolveRemotePackument(
+    const result = await resolveRemovePackumentVersion(
       somePackage,
       someVersion,
       someRegistry
