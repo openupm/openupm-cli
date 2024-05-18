@@ -36,29 +36,45 @@ export type ResolveRemotePackument = (
   sources: ReadonlyArray<Registry>
 ) => AsyncResult<ResolvedPackument | null, ResolveRemotePackumentError>;
 
+const noPackumentResult = <
+  AsyncResult<ResolvedPackument | null, ResolveRemotePackumentError>
+>Ok(null).toAsyncResult();
+
+function withSource(
+  source: Registry,
+  packument: UnityPackument
+): ResolvedPackument {
+  return {
+    packument,
+    source: source.url,
+  };
+}
+
 /**
  * Makes a {@link ResolveRemotePackument} function.
  */
 export function makeRemotePackumentResolver(
   fetchPackument: FetchPackument
 ): ResolveRemotePackument {
-  return (packageName, sources) =>
-    sources.reduce(
-      (prevResult, source) =>
-        prevResult.andThen((foundPackument) =>
-          foundPackument !== null
-            ? Ok(foundPackument).toAsyncResult()
-            : fetchPackument(source, packageName).map((packument) =>
-                packument !== null
-                  ? {
-                      packument,
-                      source: source.url,
-                    }
-                  : null
-              )
-        ),
-      <AsyncResult<ResolvedPackument | null, ResolveRemotePackumentError>>(
-        Ok(null).toAsyncResult()
-      )
+  function tryResolveFrom(source: Registry, packageName: DomainName) {
+    return fetchPackument(source, packageName).map((packument) =>
+      packument !== null ? withSource(source, packument) : null
     );
+  }
+
+  const resolveRecursively: ResolveRemotePackument = (packageName, sources) => {
+    if (sources.length === 0) return noPackumentResult;
+
+    const currentSource = sources[0]!;
+    const fallbackSources = sources.slice(1);
+
+    return tryResolveFrom(currentSource, packageName).andThen(
+      (maybePackument) =>
+        maybePackument !== null
+          ? Ok(maybePackument).toAsyncResult()
+          : resolveRecursively(packageName, fallbackSources)
+    );
+  };
+
+  return resolveRecursively;
 }
