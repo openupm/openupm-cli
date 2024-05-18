@@ -4,14 +4,27 @@ import { SearchedPackument, SearchRegistry } from "../io/npm-search";
 import { FetchAllPackuments } from "../io/all-packuments-io";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
+/**
+ * Error which may occur when searching for packages.
+ */
 export type SearchPackagesError = HttpErrorBase;
 
+/**
+ * A function for searching packages in a registry.
+ * @param registry The registry to search.
+ * @param keyword A keyword by which to search packages. Usually the name.
+ * @param onUseAllFallback Callback that is used to notify clients when the
+ * search api is not available and the /-/all endpoint is used instead.
+ */
 export type SearchPackages = (
   registry: Registry,
   keyword: string,
   onUseAllFallback?: () => void
 ) => AsyncResult<ReadonlyArray<SearchedPackument>, SearchPackagesError>;
 
+/**
+ * Makes a {@licence SearchPackages} function.
+ */
 export function makePackagesSearcher(
   searchRegistry: SearchRegistry,
   fetchAllPackuments: FetchAllPackuments
