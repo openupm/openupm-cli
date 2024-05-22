@@ -2,7 +2,7 @@ import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
-import { GetUpmConfigDir, LoadUpmConfig } from "../../src/io/upm-config-io";
+import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
 import { IOError, NotFoundError } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
@@ -36,9 +36,9 @@ const testProjectVersion = "2021.3.1f1";
 function makeDependencies() {
   const log = makeMockLogger();
 
-  const getUpmConfigDir = mockService<GetUpmConfigDir>();
+  const getUpmConfigPath = mockService<GetUpmConfigPath>();
   // The root directory does not contain an upm-config
-  getUpmConfigDir.mockReturnValue(Ok(testRootPath).toAsyncResult());
+  getUpmConfigPath.mockReturnValue(Ok(testRootPath).toAsyncResult());
 
   const loadUpmConfig = mockService<LoadUpmConfig>();
   mockUpmConfig(loadUpmConfig, null);
@@ -52,7 +52,7 @@ function makeDependencies() {
 
   const parseEnv = makeParseEnvService(
     log,
-    getUpmConfigDir,
+    getUpmConfigPath,
     loadUpmConfig,
     getCwd,
     loadProjectVersion
@@ -60,7 +60,7 @@ function makeDependencies() {
   return {
     parseEnv,
     log,
-    getUpmConfigDir,
+    getUpmConfigPath,
     loadUpmConfig,
     loadProjectVersion,
   } as const;
@@ -289,9 +289,9 @@ describe("env", () => {
 
   describe("upm-config", () => {
     it("should fail if upm-config dir cannot be determined", async () => {
-      const { parseEnv, getUpmConfigDir } = makeDependencies();
+      const { parseEnv, getUpmConfigPath } = makeDependencies();
       const expected = new NoWslError();
-      getUpmConfigDir.mockReturnValue(Err(expected).toAsyncResult());
+      getUpmConfigPath.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await parseEnv({ _global: {} });
 

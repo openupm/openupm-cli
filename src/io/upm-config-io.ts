@@ -24,31 +24,31 @@ export class RequiredEnvMissingError extends CustomError {
 }
 
 /**
- * Error which may occur when getting the upmconfig directory.
+ * Error which may occur when getting the upmconfig file path.
  */
-export type GetUpmConfigDirError =
+export type GetUpmConfigPathError =
   | WslPathError
   | RequiredEnvMissingError
   | ChildProcessError;
 
 /**
- * Function which gets the path to directory in which the upm config is stored.
+ * Function which gets the path to the upmconfig file.
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
- * @returns The directories path.
+ * @returns The file path.
  */
-export type GetUpmConfigDir = (
+export type GetUpmConfigPath = (
   wsl: boolean,
   systemUser: boolean
-) => AsyncResult<string, GetUpmConfigDirError>;
+) => AsyncResult<string, GetUpmConfigPathError>;
 
 /**
- * Makes a {@link GetUpmConfigDir} function.
+ * Makes a {@link GetUpmConfigPath} function.
  */
-export function makeUpmConfigDirGetter(
+export function makeUpmConfigPathGetter(
   getHomePath: GetHomePath
-): GetUpmConfigDir {
-  return (wsl, systemUser) => {
+): GetUpmConfigPath {
+  function getConfigDirectory(wsl: boolean, systemUser: boolean) {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (wsl) {
       if (systemUser)
@@ -69,6 +69,12 @@ export function makeUpmConfigDirGetter(
     }
 
     return getHomePath().toAsyncResult();
+  }
+
+  return (wsl, systemUser) => {
+    return getConfigDirectory(wsl, systemUser).map((directory) =>
+      path.join(directory, configFileName)
+    );
   };
 }
 
@@ -78,31 +84,26 @@ export function makeUpmConfigDirGetter(
 export type UpmConfigLoadError = IOError | StringFormatError;
 
 /**
- * IO function for loading an upm-config from a directory.
- * @param directory The directory in which to search for the upm-config.
+ * IO function for loading an upm-config file.
+ * @param configFilePath Path of the upm-config file.
  * @returns The config or null if it was not found.
  */
 export type LoadUpmConfig = (
-  directory: string
+  configFilePath: string
 ) => AsyncResult<UPMConfig | null, UpmConfigLoadError>;
 
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
 export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
-  return (directory) => {
-    const configPath = path.join(directory, configFileName);
-
-    return (
-      readFile(configPath)
-        .andThen(tryParseToml)
-        // TODO: Actually validate
-        .map<UPMConfig | null>((toml) => toml as UPMConfig)
-        .orElse((error) =>
-          error instanceof NotFoundError ? Ok(null) : Err(error)
-        )
-    );
-  };
+  return (configFilePath) =>
+    readFile(configFilePath)
+      .andThen(tryParseToml)
+      // TODO: Actually validate
+      .map<UPMConfig | null>((toml) => toml as UPMConfig)
+      .orElse((error) =>
+        error instanceof NotFoundError ? Ok(null) : Err(error)
+      );
 }
 
 /**
@@ -113,15 +114,14 @@ export type UpmConfigSaveError = IOError;
 /**
  * Save the upm config.
  * @param config The config to save.
- * @param configDir The directory in which to save the config.
+ * @param configFilePath The path of the file that should be saved to.
  * @returns The path to which the file was saved.
  */
 export const trySaveUpmConfig = (
   writeFile: WriteTextFile,
   config: UPMConfig,
-  configDir: string
+  configFilePath: string
 ): AsyncResult<string, UpmConfigSaveError> => {
-  const configPath = path.join(configDir, configFileName);
   const content = TOML.stringify(config);
-  return writeFile(configPath, content).map(() => configPath);
+  return writeFile(configFilePath, content).map(() => configFilePath);
 };

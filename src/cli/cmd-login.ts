@@ -1,5 +1,5 @@
 import { AuthenticationError, NpmLoginService } from "../services/npm-login";
-import { GetUpmConfigDir, GetUpmConfigDirError } from "../io/upm-config-io";
+import { GetUpmConfigPath, GetUpmConfigPathError } from "../io/upm-config-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { coerceRegistryUrl } from "../domain/registry-url";
@@ -21,7 +21,7 @@ import { SaveAuthToUpmConfig, UpmAuthStoreError } from "../services/upm-auth";
  */
 export type LoginError =
   | EnvParseError
-  | GetUpmConfigDirError
+  | GetUpmConfigPathError
   | AuthenticationError
   | NpmrcLoadError
   | NpmrcSaveError
@@ -55,7 +55,7 @@ export function makeLoginCmd(
   parseEnv: ParseEnvService,
   authNpmrc: AuthNpmrcService,
   npmLogin: NpmLoginService,
-  getUpmConfigDir: GetUpmConfigDir,
+  getUpmConfigPath: GetUpmConfigPath,
   saveAuthToUpmConfig: SaveAuthToUpmConfig,
   log: Logger
 ): LoginCmd {
@@ -77,15 +77,15 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configDirResult = await getUpmConfigDir(env.wsl, env.systemUser)
+    const configPathResult = await getUpmConfigPath(env.wsl, env.systemUser)
       .promise;
-    if (configDirResult.isErr()) return configDirResult;
-    const configDir = configDirResult.value;
+    if (configPathResult.isErr()) return configPathResult;
+    const configPath = configPathResult.value;
 
     if (options.basicAuth) {
       // basic auth
       const _auth = encodeBasicAuth(username, password);
-      const result = await saveAuthToUpmConfig(configDir, loginRegistry, {
+      const result = await saveAuthToUpmConfig(configPath, loginRegistry, {
         email,
         alwaysAuth,
         _auth,
@@ -120,7 +120,7 @@ export function makeLoginCmd(
         log.notice("config", `saved to npm config: ${configPath}`)
       );
 
-      const storeResult = await saveAuthToUpmConfig(configDir, loginRegistry, {
+      const storeResult = await saveAuthToUpmConfig(configPath, loginRegistry, {
         email,
         alwaysAuth,
         token,
