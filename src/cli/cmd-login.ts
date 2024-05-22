@@ -1,7 +1,6 @@
-import { AuthenticationError, NpmLoginService } from "../services/npm-login";
+import { AuthenticationError } from "../services/npm-login";
 import { GetUpmConfigPath, GetUpmConfigPathError } from "../io/upm-config-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
-import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import {
   promptEmail,
@@ -12,9 +11,9 @@ import {
 import { CmdOptions } from "./options";
 import { Ok, Result } from "ts-results-es";
 import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
-import { AuthNpmrcService } from "../services/npmrc-auth";
 import { Logger } from "npmlog";
-import { SaveAuthToUpmConfig, UpmAuthStoreError } from "../services/upm-auth";
+import { UpmAuthStoreError } from "../services/upm-auth";
+import { LoginService } from "../services/login";
 
 /**
  * Errors which may occur when logging in.
@@ -53,10 +52,8 @@ export type LoginCmd = (
  */
 export function makeLoginCmd(
   parseEnv: ParseEnvService,
-  authNpmrc: AuthNpmrcService,
-  npmLogin: NpmLoginService,
   getUpmConfigPath: GetUpmConfigPath,
-  saveAuthToUpmConfig: SaveAuthToUpmConfig,
+  login: LoginService,
   log: Logger
 ): LoginCmd {
   return async (options) => {
@@ -82,53 +79,30 @@ export function makeLoginCmd(
     if (configPathResult.isErr()) return configPathResult;
     const configPath = configPathResult.value;
 
-    if (options.basicAuth) {
-      // basic auth
-      const _auth = encodeBasicAuth(username, password);
-      const result = await saveAuthToUpmConfig(configPath, loginRegistry, {
-        email,
-        alwaysAuth,
-        _auth,
-      } satisfies BasicAuth).promise;
-      if (result.isErr()) return result;
-      log.notice("config", "saved unity config at " + configPath);
-    } else {
-      // npm login
-      const loginResult = await npmLogin(
-        loginRegistry,
-        username,
-        password,
-        email
-      ).promise;
-      if (loginResult.isErr()) {
-        if (loginResult.error.status === 401)
+    const loginResult = await login(
+      username,
+      password,
+      email,
+      alwaysAuth,
+      loginRegistry,
+      configPath,
+      options.basicAuth ? "basic" : "token",
+      () => log.notice("auth", `you are authenticated as '${username}'`),
+      (npmrcPath) => log.notice("config", `saved to npm config: ${npmrcPath}`)
+    ).promise;
+
+    if (loginResult.isErr()) {
+      const loginError = loginResult.error;
+      if (loginError instanceof AuthenticationError) {
+        if (loginError.status === 401)
           log.warn("401", "Incorrect username or password");
-        else
-          log.error(
-            loginResult.error.status.toString(),
-            loginResult.error.message
-          );
-        return loginResult;
+        else log.error(loginError.status.toString(), loginError.message);
       }
-      log.notice("auth", `you are authenticated as '${username}'`);
-      const token = loginResult.value;
 
-      // write npm token
-      const updateResult = await authNpmrc(loginRegistry, token).promise;
-      if (updateResult.isErr()) return updateResult;
-      updateResult.map((configPath) =>
-        log.notice("config", `saved to npm config: ${configPath}`)
-      );
-
-      const storeResult = await saveAuthToUpmConfig(configPath, loginRegistry, {
-        email,
-        alwaysAuth,
-        token,
-      } satisfies TokenAuth).promise;
-      if (storeResult.isErr()) return storeResult;
-      log.notice("config", "saved unity config at " + configPath);
+      return loginResult;
     }
 
+    log.notice("config", "saved unity config at " + configPath);
     return Ok(undefined);
   };
 }
