@@ -15,17 +15,15 @@ export type UpmAuthStoreError = UpmConfigLoadError | IOError;
 
 /**
  * Service function for storing authentication information in an upmconfig file.
- * @param configDir Path to the directory in which the upmconfig file is
- * located.
+ * @param configPath Path to the upmconfig file.
  * @param registry Url of the registry for which to authenticate.
  * @param auth Authentication information.
- * @returns The path of the upmconfig file.
  */
 export type SaveAuthToUpmConfig = (
-  configDir: string,
+  configPath: string,
   registry: RegistryUrl,
   auth: UpmAuth
-) => AsyncResult<string, UpmAuthStoreError>;
+) => AsyncResult<void, UpmAuthStoreError>;
 
 /**
  * Makes a {@link SaveAuthToUpmConfig} function.
@@ -35,9 +33,9 @@ export function makeSaveAuthToUpmConfigService(
   writeFile: WriteTextFile
 ): SaveAuthToUpmConfig {
   // TODO: Add tests for this service
-  return (configDir, registry, auth) =>
-    loadUpmConfig(configDir)
+  return (configPath, registry, auth) =>
+    loadUpmConfig(configPath)
       .map((maybeConfig) => maybeConfig || {})
       .map((config) => addAuth(registry, auth, config))
-      .andThen((config) => trySaveUpmConfig(writeFile, config, configDir));
+      .andThen((config) => trySaveUpmConfig(writeFile, config, configPath));
 }

@@ -115,13 +115,12 @@ export type UpmConfigSaveError = IOError;
  * Save the upm config.
  * @param config The config to save.
  * @param configFilePath The path of the file that should be saved to.
- * @returns The path to which the file was saved.
  */
 export const trySaveUpmConfig = (
   writeFile: WriteTextFile,
   config: UPMConfig,
   configFilePath: string
-): AsyncResult<string, UpmConfigSaveError> => {
+): AsyncResult<void, UpmConfigSaveError> => {
   const content = TOML.stringify(config);
-  return writeFile(configFilePath, content).map(() => configFilePath);
+  return writeFile(configFilePath, content);
 };

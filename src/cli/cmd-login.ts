@@ -91,7 +91,7 @@ export function makeLoginCmd(
         _auth,
       } satisfies BasicAuth).promise;
       if (result.isErr()) return result;
-      log.notice("config", "saved unity config at " + result.value);
+      log.notice("config", "saved unity config at " + configPath);
     } else {
       // npm login
       const loginResult = await npmLogin(
@@ -126,7 +126,7 @@ export function makeLoginCmd(
         token,
       } satisfies TokenAuth).promise;
       if (storeResult.isErr()) return storeResult;
-      log.notice("config", "saved unity config at " + storeResult.value);
+      log.notice("config", "saved unity config at " + configPath);
     }
 
     return Ok(undefined);
