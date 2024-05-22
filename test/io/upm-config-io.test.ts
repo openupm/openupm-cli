@@ -1,6 +1,6 @@
 import {
-  makeUpmConfigDirGetter,
   makeUpmConfigLoader,
+  makeUpmConfigPathGetter,
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
 import { Err, Ok } from "ts-results-es";
@@ -8,34 +8,35 @@ import { IOError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
 import { mockService } from "../services/service.mock";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { GetHomePath } from "../../src/io/special-paths";
+import path from "path";
 
 describe("upm-config-io", () => {
-  describe("get directory", () => {
+  describe("get path", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
-      const getUpmConfigDir = makeUpmConfigDirGetter(getHomePath);
+      const getUpmConfigPath = makeUpmConfigPathGetter(getHomePath);
 
-      return { getUpmConfigDir, getHomePath } as const;
+      return { getUpmConfigPath, getHomePath } as const;
     }
 
     describe("no wsl and no system-user", () => {
-      it("should be home path", async () => {
-        const { getUpmConfigDir, getHomePath } = makeDependencies();
-        const expected = "/some/home/dir/";
-        getHomePath.mockReturnValue(Ok(expected));
+      it("should be in home path", async () => {
+        const { getUpmConfigPath, getHomePath } = makeDependencies();
+        const expected = "/some/home/dir/.upmconfig.toml";
+        getHomePath.mockReturnValue(Ok(path.dirname(expected)));
 
-        const result = await getUpmConfigDir(false, false).promise;
+        const result = await getUpmConfigPath(false, false).promise;
 
         expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
       });
 
       it("should fail if home could not be determined", async () => {
-        const { getUpmConfigDir, getHomePath } = makeDependencies();
+        const { getUpmConfigPath, getHomePath } = makeDependencies();
         const expected = new RequiredEnvMissingError();
         getHomePath.mockReturnValue(Err(expected));
 
-        const result = await getUpmConfigDir(false, false).promise;
+        const result = await getUpmConfigPath(false, false).promise;
 
         expect(result).toBeError((actual) => expect(actual).toEqual(expected));
       });
@@ -53,7 +54,7 @@ describe("upm-config-io", () => {
 
     it("should be null if file is not found", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
-      const path = "/home/user";
+      const path = "/home/user/.upmconfig.toml";
       readFile.mockReturnValue(Err(new NotFoundError(path)).toAsyncResult());
 
       const result = await loadUpmConfig(path).promise;
@@ -63,7 +64,7 @@ describe("upm-config-io", () => {
 
     it("should be parsed file", async () => {
       const { loadUpmConfig } = makeDependencies();
-      const path = "/home/user";
+      const path = "/home/user/.upmconfig.toml";
 
       const result = await loadUpmConfig(path).promise;
 
@@ -72,7 +73,7 @@ describe("upm-config-io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
-      const path = "/home/user";
+      const path = "/home/user/.upmconfig.toml";
       const expected = new IOError();
       readFile.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -86,7 +87,7 @@ describe("upm-config-io", () => {
       readFile.mockReturnValue(
         Ok("This {\n is not]\n valid TOML").toAsyncResult()
       );
-      const path = "/home/user";
+      const path = "/home/user/.upmconfig.toml";
 
       const result = await loadUpmConfig(path).promise;
 

@@ -30,7 +30,7 @@ import {
 import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
 import {
-  makeUpmConfigDirGetter,
+  makeUpmConfigPathGetter,
   makeUpmConfigLoader,
 } from "../io/upm-config-io";
 import { makeTextReader, makeTextWriter } from "../io/file-io";
@@ -56,7 +56,7 @@ const readFile = makeTextReader();
 const writeFile = makeTextWriter();
 const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter(writeFile);
-const getUpmConfigDir = makeUpmConfigDirGetter(getHomePath);
+const getUpmConfigPath = makeUpmConfigPathGetter(getHomePath);
 const loadUpmConfig = makeUpmConfigLoader(readFile);
 const findNpmrcPath = makeNpmrcPathFinder(getHomePath);
 const loadNpmrc = makeNpmrcLoader(readFile);
@@ -69,7 +69,7 @@ const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
 
 const parseEnv = makeParseEnvService(
   log,
-  getUpmConfigDir,
+  getUpmConfigPath,
   loadUpmConfig,
   getCwd,
   loadProjectVersion
@@ -101,7 +101,7 @@ const loginCmd = makeLoginCmd(
   parseEnv,
   authNpmrc,
   npmLogin,
-  getUpmConfigDir,
+  getUpmConfigPath,
   saveAuthToUpmConfig,
   log
 );
