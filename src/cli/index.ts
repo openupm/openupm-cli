@@ -30,8 +30,8 @@ import {
 import npmlog from "npmlog";
 import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
 import {
-  makeUpmConfigPathGetter,
   makeUpmConfigLoader,
+  makeUpmConfigPathGetter,
 } from "../io/upm-config-io";
 import { makeTextReader, makeTextWriter } from "../io/file-io";
 import {
@@ -45,6 +45,7 @@ import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
 import { makePackumentFetcher } from "../io/packument-io";
 import { makePackagesSearcher } from "../services/search-packages";
 import { makeRemotePackumentResolver } from "../services/resolve-remote-packument";
+import { makeLoginService } from "../services/login";
 
 // Composition root
 
@@ -88,6 +89,7 @@ const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
   writeFile
 );
 const searchPackages = makePackagesSearcher(searchRegistry, fetchAllPackuments);
+const login = makeLoginService(saveAuthToUpmConfig, npmLogin, authNpmrc);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -97,14 +99,7 @@ const addCmd = makeAddCmd(
   writeProjectManifest,
   log
 );
-const loginCmd = makeLoginCmd(
-  parseEnv,
-  authNpmrc,
-  npmLogin,
-  getUpmConfigPath,
-  saveAuthToUpmConfig,
-  log
-);
+const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
 const searchCmd = makeSearchCmd(parseEnv, searchPackages, log);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);
 const removeCmd = makeRemoveCmd(
