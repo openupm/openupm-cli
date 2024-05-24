@@ -138,7 +138,13 @@ export function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
 export function tryGetAuthForRegistry(
   upmConfig: UPMConfig,
   registry: RegistryUrl
-): NpmAuth | null {
+): /*
+ * TODO: Change null return
+ *  The null return here is not good because the function will return both
+ *  for the expected case where the config has no auth information for the
+ *  registry and for the unexpected case where the conversion failed.
+ *  Convert to a result based function instead.*/
+NpmAuth | null {
   const upmAuth =
     upmConfig.npmAuth?.[registry] ||
     // As a backup search for the registry with trailing slash
