@@ -39,7 +39,7 @@ describe("npmrc-io", () => {
 
     it("should fail if home could not be determined", () => {
       const { findPath, getHomePath } = makeDependencies();
-      getHomePath.mockReturnValue(Err(new RequiredEnvMissingError()));
+      getHomePath.mockReturnValue(Err(new RequiredEnvMissingError([])));
 
       const result = findPath();
 

@@ -56,7 +56,7 @@ describe("cmd-login", () => {
   // TODO: Add tests for prompting logic
 
   it("should fail if upm config path could not be determined", async () => {
-    const expected = new RequiredEnvMissingError();
+    const expected = new RequiredEnvMissingError([]);
     const { loginCmd, getUpmConfigPath } = makeDependencies();
     getUpmConfigPath.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -71,7 +71,7 @@ describe("cmd-login", () => {
   });
 
   it("should fail if login failed", async () => {
-    const expected = new RequiredEnvMissingError();
+    const expected = new RequiredEnvMissingError([]);
     const { loginCmd, login } = makeDependencies();
     login.mockReturnValue(Err(expected).toAsyncResult());
 
