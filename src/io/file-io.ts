@@ -23,14 +23,15 @@ export class NotFoundError extends CustomError {
 }
 
 /**
- * Generic IO error for when interacting with the file-system failed.
+ * Generic error for when interacting with the file-system failed.
  */
-export class IOError extends CustomError {
-  private readonly _class = "IOError";
+export class FsError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "FsError";
 
   constructor(
     /**
-     * The actual error that caused the failure.
+     * The error that caused the failure.
      */
     public readonly cause?: NodeJS.ErrnoException
   ) {
@@ -41,14 +42,14 @@ export class IOError extends CustomError {
 function fsOperation<T>(op: () => Promise<T>) {
   return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
     assertIsNodeError(error);
-    return new IOError(error);
+    return new FsError(error);
   });
 }
 
 /**
  * Error for when a file-read failed.
  */
-export type FileReadError = NotFoundError | IOError;
+export type FileReadError = NotFoundError | FsError;
 
 /**
  * Function for loading the content of a text file.
@@ -73,7 +74,7 @@ export function makeTextReader(): ReadTextFile {
 /**
  * Error for when a file-write failed.
  */
-export type FileWriteError = IOError;
+export type FileWriteError = FsError;
 
 /**
  * Function for overwriting the content of a text file. Creates the file
@@ -99,7 +100,7 @@ export function makeTextWriter(): WriteTextFile {
 /**
  * Error which may occur when getting all directory names in a directory.
  */
-export type GetDirectoriesError = NotFoundError | IOError;
+export type GetDirectoriesError = NotFoundError | FsError;
 
 /**
  * Attempts to get the names of all directories in a directory.

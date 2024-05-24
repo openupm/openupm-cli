@@ -7,7 +7,7 @@ import {
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { IOError, NotFoundError, tryGetDirectoriesIn } from "./file-io";
+import { FsError, NotFoundError, tryGetDirectoriesIn } from "./file-io";
 
 /**
  * Error for when an editor-version is not installed.
@@ -30,7 +30,7 @@ export class EditorNotInstalledError extends CustomError {
 export type FindBuiltInPackagesError =
   | GetEditorInstallPathError
   | EditorNotInstalledError
-  | IOError;
+  | FsError;
 
 /**
  * Function for loading all built-in packages for an installed editor.

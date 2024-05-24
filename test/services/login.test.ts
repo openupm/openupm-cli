@@ -8,7 +8,7 @@ import {
 import { AuthNpmrcService } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
-import { IOError } from "../../src/io/file-io";
+import { FsError } from "../../src/io/file-io";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -60,7 +60,7 @@ describe("login", () => {
     });
 
     it("should fail if config write fails", async () => {
-      const expected = new IOError();
+      const expected = new FsError();
       const { login, saveAuthToUpmConfig } = makeDependencies();
       saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -121,7 +121,7 @@ describe("login", () => {
     });
 
     it("should fail if npmrc auth fails", async () => {
-      const expected = new IOError();
+      const expected = new FsError();
       const { login, authNpmrc } = makeDependencies();
       authNpmrc.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -186,7 +186,7 @@ describe("login", () => {
     });
 
     it("should fail if config write fails", async () => {
-      const expected = new IOError();
+      const expected = new FsError();
       const { login, saveAuthToUpmConfig } = makeDependencies();
       saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
 

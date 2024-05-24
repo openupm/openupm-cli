@@ -1,5 +1,5 @@
 import {
-  IOError,
+  FsError,
   NotFoundError,
   ReadTextFile,
   WriteTextFile,
@@ -99,7 +99,7 @@ describe("npmrc-io", () => {
 
     it("should fail when write fails", async () => {
       const { saveNpmrc, writeFile } = makeDependencies();
-      const expected = new IOError();
+      const expected = new FsError();
       const path = "/invalid/path/.npmrc";
       writeFile.mockReturnValue(new AsyncResult(Err(expected)));
 

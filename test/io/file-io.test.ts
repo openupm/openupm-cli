@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import {
-  IOError,
+  FsError,
   makeTextReader,
   makeTextWriter,
   NotFoundError,
@@ -52,7 +52,7 @@ describe("file-io", () => {
       const result = await readFile("path/to/file.txt").promise;
 
       expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(IOError)
+        expect(error).toBeInstanceOf(FsError)
       );
     });
   });
@@ -115,7 +115,7 @@ describe("file-io", () => {
       const result = await writeFile("/path/to/file.txt", "content").promise;
 
       expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(IOError)
+        expect(error).toBeInstanceOf(FsError)
       );
     });
 
@@ -128,7 +128,7 @@ describe("file-io", () => {
       const result = await writeFile("/path/to/file.txt", "content").promise;
 
       expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(IOError)
+        expect(error).toBeInstanceOf(FsError)
       );
     });
   });
@@ -150,7 +150,7 @@ describe("file-io", () => {
       const result = await tryGetDirectoriesIn("/good/path/").promise;
 
       expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(IOError)
+        expect(actual).toBeInstanceOf(FsError)
       );
     });
 

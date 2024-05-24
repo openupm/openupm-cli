@@ -5,7 +5,7 @@ import {
 import path from "path";
 import { FileParseError } from "../common-errors";
 import { AsyncResult } from "ts-results-es";
-import { IOError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
+import { FsError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
 import { tryParseJson } from "../utils/string-parsing";
 
 /**
@@ -54,7 +54,7 @@ export function makeProjectManifestLoader(
 /**
  * Error which may occur when saving a project manifest.
  */
-export type ManifestWriteError = IOError;
+export type ManifestWriteError = FsError;
 
 /**
  * Function for replacing the project manifest for a Unity project.

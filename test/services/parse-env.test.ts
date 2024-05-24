@@ -3,7 +3,7 @@ import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
-import { IOError, NotFoundError } from "../../src/io/file-io";
+import { FsError, NotFoundError } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { NoWslError } from "../../src/io/wsl";
@@ -512,7 +512,7 @@ describe("env", () => {
 
     it("should fail if ProjectVersion.txt could not be loaded", async () => {
       const { parseEnv, loadProjectVersion } = makeDependencies();
-      const expected = new IOError();
+      const expected = new FsError();
       loadProjectVersion.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await parseEnv({

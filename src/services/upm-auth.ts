@@ -1,4 +1,4 @@
-import { IOError, WriteTextFile } from "../io/file-io";
+import { FsError, WriteTextFile } from "../io/file-io";
 import { RegistryUrl } from "../domain/registry-url";
 import { addAuth, UpmAuth } from "../domain/upm-config";
 import { AsyncResult } from "ts-results-es";
@@ -11,7 +11,7 @@ import {
 /**
  * Errors which may occur when storing an {@link UpmAuth} to the file-system.
  */
-export type UpmAuthStoreError = UpmConfigLoadError | IOError;
+export type UpmAuthStoreError = UpmConfigLoadError | FsError;
 
 /**
  * Service function for storing authentication information in an upmconfig file.

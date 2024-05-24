@@ -1,7 +1,7 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import {
   FileWriteError,
-  IOError,
+  FsError,
   NotFoundError,
   ReadTextFile,
   WriteTextFile,
@@ -33,7 +33,7 @@ export function makeNpmrcPathFinder(getHomePath: GetHomePath): FindNpmrcPath {
 /**
  * Error that might occur when loading a npmrc.
  */
-export type NpmrcLoadError = IOError;
+export type NpmrcLoadError = FsError;
 
 /**
  * Function for loading npmrc.

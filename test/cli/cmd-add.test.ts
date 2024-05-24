@@ -10,7 +10,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { Err, Ok } from "ts-results-es";
-import { IOError, NotFoundError } from "../../src/io/file-io";
+import { FsError, NotFoundError } from "../../src/io/file-io";
 import {
   mockProjectManifest,
   mockProjectManifestWriteResult,
@@ -123,7 +123,7 @@ function makeDependencies() {
 
 describe("cmd-add", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new IOError();
+    const expected = new FsError();
     const { addCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
@@ -683,7 +683,7 @@ describe("cmd-add", () => {
   });
 
   it("should fail if manifest could not be saved", async () => {
-    const expected = new IOError();
+    const expected = new FsError();
     const { addCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
@@ -694,7 +694,7 @@ describe("cmd-add", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const { addCmd, writeProjectManifest, log } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, new IOError());
+    mockProjectManifestWriteResult(writeProjectManifest, new FsError());
 
     await addCmd(somePackage, { _global: {} });
 

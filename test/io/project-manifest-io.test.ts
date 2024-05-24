@@ -10,7 +10,7 @@ import {
 import path from "path";
 import { FileParseError } from "../../src/common-errors";
 import {
-  IOError,
+  FsError,
   NotFoundError,
   ReadTextFile,
   WriteTextFile,
@@ -45,7 +45,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(Err(new IOError()).toAsyncResult());
+      readFile.mockReturnValue(Err(new FsError()).toAsyncResult());
 
       const result = await loadProjectManifest("/some/path").promise;
 
@@ -108,7 +108,7 @@ describe("project-manifest io", () => {
     }
 
     it("should fail if file could not be written", async () => {
-      const expected = new IOError();
+      const expected = new FsError();
       const { writeProjectManifest, writeFile } = makeDependencies();
       writeFile.mockReturnValue(Err(expected).toAsyncResult());
 
