@@ -15,7 +15,6 @@ import {
   LoadProjectVersion,
   ProjectVersionLoadError,
 } from "../io/project-version-io";
-import { NotFoundError } from "../io/file-io";
 import { tryGetEnv } from "../utils/env-util";
 import {
   isRelease,
@@ -25,6 +24,7 @@ import {
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
 import { GetCwd } from "../io/special-paths";
+import { FsError, FsErrorReason } from "../io/file-io";
 
 export type Env = Readonly<{
   cwd: string;
@@ -161,12 +161,13 @@ export function makeParseEnvService(
     // editor version
     const projectVersionLoadResult = await loadProjectVersion(cwd).promise;
     if (projectVersionLoadResult.isErr()) {
-      if (projectVersionLoadResult.error instanceof NotFoundError)
+      const error = projectVersionLoadResult.error;
+      if (error instanceof FsError && error.reason === FsErrorReason.Missing)
         log.warn(
           "ProjectVersion",
-          `can not locate ProjectVersion.text at path ${projectVersionLoadResult.error.path}`
+          `can not locate ProjectVersion.text at path ${error.path}`
         );
-      else if (projectVersionLoadResult.error instanceof FileParseError)
+      else if (error instanceof FileParseError)
         log.error(
           "ProjectVersion",
           "ProjectVersion.txt could not be parsed for editor-version!"

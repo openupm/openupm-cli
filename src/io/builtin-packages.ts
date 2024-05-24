@@ -7,7 +7,7 @@ import {
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { FsError, NotFoundError, tryGetDirectoriesIn } from "./file-io";
+import { FsError, FsErrorReason, tryGetDirectoriesIn } from "./file-io";
 
 /**
  * Error for when an editor-version is not installed.
@@ -59,7 +59,7 @@ export function makeBuiltInPackagesFinder(): FindBuiltInPackages {
           // We can assume correct format
           .map((names) => names as DomainName[])
           .mapErr((error) =>
-            error instanceof NotFoundError
+            error.reason === FsErrorReason.Missing
               ? new EditorNotInstalledError(editorVersion)
               : error
           )

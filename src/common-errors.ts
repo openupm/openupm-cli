@@ -1,5 +1,6 @@
 import { CustomError } from "ts-custom-error";
 import { EditorVersion } from "./domain/editor-version";
+import {StringFormatError} from "./utils/string-parsing";
 
 /**
  * Error for when the packument was not found.
@@ -40,7 +41,7 @@ export class FileParseError extends CustomError {
     /**
      * The error that caused this one.
      */
-    readonly cause?: Error
+    readonly cause?: StringFormatError
   ) {
     super("A file could not be parsed into a specific target type.");
   }

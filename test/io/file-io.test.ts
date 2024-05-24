@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import {
   FsError,
+  FsErrorReason,
   makeTextReader,
   makeTextWriter,
-  NotFoundError,
   tryGetDirectoriesIn,
 } from "../../src/io/file-io";
 import fse from "fs-extra";
@@ -39,8 +39,8 @@ describe("file-io", () => {
 
       const result = await readFile("path/to/file.txt").promise;
 
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(NotFoundError)
+      expect(result).toBeError((error: FsError) =>
+        expect(error.reason).toEqual(FsErrorReason.Missing)
       );
     });
 
@@ -51,8 +51,8 @@ describe("file-io", () => {
 
       const result = await readFile("path/to/file.txt").promise;
 
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(FsError)
+      expect(result).toBeError((error: FsError) =>
+        expect(error.reason).toEqual(FsErrorReason.Other)
       );
     });
   });
@@ -139,8 +139,8 @@ describe("file-io", () => {
 
       const result = await tryGetDirectoriesIn("/bad/path/").promise;
 
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(NotFoundError)
+      expect(result).toBeError((actual: FsError) =>
+        expect(actual.reason).toEqual(FsErrorReason.Missing)
       );
     });
 
@@ -149,8 +149,8 @@ describe("file-io", () => {
 
       const result = await tryGetDirectoriesIn("/good/path/").promise;
 
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FsError)
+      expect(result).toBeError((actual: FsError) =>
+        expect(actual.reason).toEqual(FsErrorReason.Other)
       );
     });
 

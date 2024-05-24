@@ -2,7 +2,7 @@ import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import {
   FileWriteError,
   FsError,
-  NotFoundError,
+  FsErrorReason,
   ReadTextFile,
   WriteTextFile,
 } from "./file-io";
@@ -52,7 +52,7 @@ export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
     readFile(path)
       .map<Npmrc | null>((content) => content.split(EOL))
       .orElse((error) =>
-        error instanceof NotFoundError ? Ok(null) : Err(error)
+        error.reason == FsErrorReason.Missing ? Ok(null) : Err(error)
       );
 }
 

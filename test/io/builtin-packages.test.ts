@@ -1,7 +1,7 @@
 import * as specialPaths from "../../src/io/special-paths";
 import { OSNotSupportedError } from "../../src/io/special-paths";
 import * as fileIo from "../../src/io/file-io";
-import { NotFoundError } from "../../src/io/file-io";
+import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import {
   EditorNotInstalledError,
@@ -34,7 +34,9 @@ describe("builtin-packages", () => {
     const { getBuiltInPackages } = makeDependencies();
     jest
       .spyOn(fileIo, "tryGetDirectoriesIn")
-      .mockReturnValue(Err(new NotFoundError("")).toAsyncResult());
+      .mockReturnValue(
+        Err(new FsError("", FsErrorReason.Missing)).toAsyncResult()
+      );
 
     const result = await getBuiltInPackages(version).promise;
 

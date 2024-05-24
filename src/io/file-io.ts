@@ -6,22 +6,17 @@ import fse from "fs-extra";
 import path from "path";
 
 /**
- * Error for when a file or directory did not exist.
+ * Reason why a file-system operation failed.
  */
-export class NotFoundError extends CustomError {
-  // noinspection JSUnusedLocalSymbols
-  private readonly _class = "NotFoundError";
-
-  constructor(
-    /**
-     * The missing path.
-     */
-    public readonly path: string
-  ) {
-    super(
-      "An operation was performed on a file or directory which does not exist."
-    );
-  }
+export enum FsErrorReason {
+  /**
+   * Some generic reason.
+   */
+  Other,
+  /**
+   * The path did not exist.
+   */
+  Missing,
 }
 
 /**
@@ -33,25 +28,31 @@ export class FsError extends CustomError {
 
   constructor(
     /**
-     * The error that caused the failure.
+     * The path of the file or directory which caused the error.
      */
-    public readonly cause?: NodeJS.ErrnoException
+    public readonly path: string,
+    /**
+     * The reason why the operation failed.
+     */
+    public readonly reason: FsErrorReason
   ) {
-    super("An interaction with the file-system caused an error.", { cause });
+    super("An interaction with the file-system caused an error.");
   }
 }
 
-function fsOperation<T>(op: () => Promise<T>) {
+function fsOperation<T>(path: string, op: () => Promise<T>) {
   return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
     assertIsNodeError(error);
-    return new FsError(error);
+    const cause =
+      error.code === "ENOENT" ? FsErrorReason.Missing : FsErrorReason.Other;
+    return new FsError(path, cause);
   });
 }
 
 /**
  * Error for when a file-read failed.
  */
-export type FileReadError = NotFoundError | FsError;
+export type FileReadError = FsError;
 
 /**
  * Function for loading the content of a text file.
@@ -65,12 +66,7 @@ export type ReadTextFile = (path: string) => AsyncResult<string, FileReadError>;
  */
 export function makeTextReader(): ReadTextFile {
   return (path) =>
-    fsOperation(() => fs.readFile(path, { encoding: "utf8" })).mapErr(
-      (error) => {
-        if (error.cause!.code === "ENOENT") return new NotFoundError(path);
-        return error;
-      }
-    );
+    fsOperation(path, () => fs.readFile(path, { encoding: "utf8" }));
 }
 
 /**
@@ -93,16 +89,18 @@ export type WriteTextFile = (
  * Makes a {@link WriteTextFile} function.
  */
 export function makeTextWriter(): WriteTextFile {
-  return (filePath, content) =>
-    fsOperation(() => fse.ensureDir(path.dirname(filePath))).andThen(() =>
-      fsOperation(() => fs.writeFile(filePath, content))
+  return (filePath, content) => {
+    const dirPath = path.dirname(filePath);
+    return fsOperation(dirPath, () => fse.ensureDir(dirPath)).andThen(() =>
+      fsOperation(filePath, () => fs.writeFile(filePath, content))
     );
+  };
 }
 
 /**
  * Error which may occur when getting all directory names in a directory.
  */
-export type GetDirectoriesError = NotFoundError | FsError;
+export type GetDirectoriesError = FsError;
 
 /**
  * Attempts to get the names of all directories in a directory.
@@ -111,12 +109,9 @@ export type GetDirectoriesError = NotFoundError | FsError;
 export function tryGetDirectoriesIn(
   directoryPath: string
 ): AsyncResult<ReadonlyArray<string>, GetDirectoriesError> {
-  return fsOperation(() => fs.readdir(directoryPath, { withFileTypes: true }))
+  return fsOperation(directoryPath, () =>
+    fs.readdir(directoryPath, { withFileTypes: true })
+  )
     .map((entries) => entries.filter((it) => it.isDirectory()))
-    .map((directories) => directories.map((it) => it.name))
-    .mapErr((error) => {
-      if (error.cause!.code === "ENOENT")
-        return new NotFoundError(directoryPath);
-      return error;
-    });
+    .map((directories) => directories.map((it) => it.name));
 }

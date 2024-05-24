@@ -3,7 +3,7 @@ import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { FsError } from "../../src/io/file-io";
+import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeMockLogger } from "./log.mock";
@@ -54,7 +54,7 @@ function makeDependencies() {
 
 describe("cmd-deps", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError();
+    const expected = new FsError("", FsErrorReason.Other);
     const { depsCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 

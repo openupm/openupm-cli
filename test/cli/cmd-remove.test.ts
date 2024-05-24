@@ -1,8 +1,8 @@
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
-import { makeRemoveCmd } from "../../src/cli/cmd-remove";
+import { makeRemoveCmd, RemoveError } from "../../src/cli/cmd-remove";
 import { Err, Ok } from "ts-results-es";
-import { FsError, NotFoundError } from "../../src/io/file-io";
+import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { makeDomainName } from "../../src/domain/domain-name";
 import {
   mockProjectManifest,
@@ -61,7 +61,7 @@ function makeDependencies() {
 
 describe("cmd-remove", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError();
+    const expected = new FsError("", FsErrorReason.Other);
     const { removeCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
@@ -76,8 +76,8 @@ describe("cmd-remove", () => {
 
     const result = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(NotFoundError)
+    expect(result).toBeError((actual: RemoveError) =>
+      expect(actual).toBeInstanceOf(FsError)
     );
   });
 
@@ -187,7 +187,7 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if manifest could not be saved", async () => {
-    const expected = new FsError();
+    const expected = new FsError("", FsErrorReason.Other);
     const { removeCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
@@ -198,7 +198,10 @@ describe("cmd-remove", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const { removeCmd, log, writeProjectManifest } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, new FsError());
+    mockProjectManifestWriteResult(
+      writeProjectManifest,
+      new FsError("", FsErrorReason.Other)
+    );
 
     await removeCmd(somePackage, { _global: {} });
 

@@ -1,4 +1,4 @@
-import { FsError } from "../../src/io/file-io";
+import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { makeLoginCmd } from "../../src/cli/cmd-login";
 import { mockService } from "../services/service.mock";
@@ -44,7 +44,7 @@ describe("cmd-login", () => {
   }
 
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError();
+    const expected = new FsError("", FsErrorReason.Other);
     const { loginCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
