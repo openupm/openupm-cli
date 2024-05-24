@@ -9,15 +9,17 @@ import path from "path";
  * Error for when a file or directory did not exist.
  */
 export class NotFoundError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
   private readonly _class = "NotFoundError";
+
   constructor(
     /**
-     * The path to the missing file.
+     * The missing path.
      */
-    readonly path: string
+    public readonly path: string
   ) {
     super(
-      "An IO operation was performed on a file or directory which does not exist."
+      "An operation was performed on a file or directory which does not exist."
     );
   }
 }
