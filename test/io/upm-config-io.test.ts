@@ -4,7 +4,7 @@ import {
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
 import { Err, Ok } from "ts-results-es";
-import { FsError, NotFoundError, ReadTextFile } from "../../src/io/file-io";
+import { FsError, FsErrorReason, ReadTextFile } from "../../src/io/file-io";
 import { mockService } from "../services/service.mock";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { GetHomePath } from "../../src/io/special-paths";
@@ -55,7 +55,9 @@ describe("upm-config-io", () => {
     it("should be null if file is not found", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
-      readFile.mockReturnValue(Err(new NotFoundError(path)).toAsyncResult());
+      readFile.mockReturnValue(
+        Err(new FsError(path, FsErrorReason.Missing)).toAsyncResult()
+      );
 
       const result = await loadUpmConfig(path).promise;
 
@@ -74,7 +76,7 @@ describe("upm-config-io", () => {
     it("should fail if file could not be read", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
-      const expected = new FsError();
+      const expected = new FsError(path, FsErrorReason.Other);
       readFile.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await loadUpmConfig(path).promise;

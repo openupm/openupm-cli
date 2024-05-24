@@ -11,7 +11,7 @@ import path from "path";
 import { FileParseError } from "../../src/common-errors";
 import {
   FsError,
-  NotFoundError,
+  FsErrorReason,
   ReadTextFile,
   WriteTextFile,
 } from "../../src/io/file-io";
@@ -22,6 +22,7 @@ import { removeScope } from "../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
 
+const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
   describe("path", () => {
     it("should determine correct manifest path", () => {
@@ -45,25 +46,16 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(Err(new FsError()).toAsyncResult());
-
-      const result = await loadProjectManifest("/some/path").promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FileParseError)
-      );
-    });
-
-    it("should fail if file is not found", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
       readFile.mockReturnValue(
-        Err(new NotFoundError("/some/path")).toAsyncResult()
+        Err(
+          new FsError(exampleProjectPath, FsErrorReason.Other)
+        ).toAsyncResult()
       );
 
-      const result = await loadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest(exampleProjectPath).promise;
 
       expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(NotFoundError)
+        expect(actual).toBeInstanceOf(FsError)
       );
     });
 
@@ -73,7 +65,7 @@ describe("project-manifest io", () => {
         Ok("{} dang, this is not json []").toAsyncResult()
       );
 
-      const result = await loadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest(exampleProjectPath).promise;
 
       expect(result).toBeError((actual) =>
         expect(actual).toBeInstanceOf(FileParseError)
@@ -86,7 +78,7 @@ describe("project-manifest io", () => {
         Ok(`{ "dependencies": { "com.package.a": "1.0.0"} }`).toAsyncResult()
       );
 
-      const result = await loadProjectManifest("/some/path").promise;
+      const result = await loadProjectManifest(exampleProjectPath).promise;
 
       expect(result).toBeOk((actual) =>
         expect(actual).toEqual({
@@ -108,12 +100,12 @@ describe("project-manifest io", () => {
     }
 
     it("should fail if file could not be written", async () => {
-      const expected = new FsError();
+      const expected = new FsError(expect.any(String), FsErrorReason.Other);
       const { writeProjectManifest, writeFile } = makeDependencies();
       writeFile.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await writeProjectManifest(
-        "/some/path",
+        exampleProjectPath,
         emptyProjectManifest
       ).promise;
 
@@ -127,7 +119,7 @@ describe("project-manifest io", () => {
         manifest.addDependency("com.package.a", "1.0.0", true, true)
       );
 
-      await writeProjectManifest("/some/path", manifest).promise;
+      await writeProjectManifest(exampleProjectPath, manifest).promise;
 
       expect(writeFile).toHaveBeenCalledWith(
         expect.any(String),
@@ -162,7 +154,7 @@ describe("project-manifest io", () => {
         return removeScope(registry!, testDomain);
       });
 
-      await writeProjectManifest("/some/path", manifest).promise;
+      await writeProjectManifest(exampleProjectPath, manifest).promise;
 
       expect(writeFile).toHaveBeenCalledWith(
         expect.any(String),

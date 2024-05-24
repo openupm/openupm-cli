@@ -3,7 +3,7 @@ import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
-import { FsError, NotFoundError, ReadTextFile, WriteTextFile } from "./file-io";
+import { FsError, FsErrorReason, ReadTextFile, WriteTextFile } from "./file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
@@ -102,7 +102,9 @@ export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
       // TODO: Actually validate
       .map<UPMConfig | null>((toml) => toml as UPMConfig)
       .orElse((error) =>
-        error instanceof NotFoundError ? Ok(null) : Err(error)
+        error instanceof FsError && error.reason === FsErrorReason.Missing
+          ? Ok(null)
+          : Err(error)
       );
 }
 

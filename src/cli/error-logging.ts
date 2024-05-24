@@ -2,21 +2,21 @@ import {
   ManifestLoadError,
   ManifestWriteError,
 } from "../io/project-manifest-io";
-import { NotFoundError } from "../io/file-io";
 import { Logger } from "npmlog";
 import { PackumentVersionResolveError } from "../packument-version-resolving";
-import { PackumentNotFoundError } from "../common-errors";
+import { FileParseError, PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { VersionNotFoundError } from "../domain/packument";
+import { FsError, FsErrorReason } from "../io/file-io";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
  */
 export function logManifestLoadError(log: Logger, error: ManifestLoadError) {
   const prefix = "manifest";
-  if (error instanceof NotFoundError)
+  if (error instanceof FsError && error.reason === FsErrorReason.Missing)
     log.error(prefix, `manifest at ${error.path} does not exist`);
-  else {
+  else if (error instanceof FileParseError) {
     log.error(prefix, `failed to parse manifest at ${error.path}`);
     if (error.cause !== undefined) log.error(prefix, error.cause.message);
   }

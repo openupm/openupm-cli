@@ -1,6 +1,6 @@
 import {
   FsError,
-  NotFoundError,
+  FsErrorReason,
   ReadTextFile,
   WriteTextFile,
 } from "../../src/io/file-io";
@@ -70,7 +70,7 @@ describe("npmrc-io", () => {
     it("should be null for missing file", async () => {
       const { loadNpmrc, readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
-      const expected = new NotFoundError(path);
+      const expected = new FsError(path, FsErrorReason.Missing);
       readText.mockReturnValue(new AsyncResult(Err(expected)));
 
       const result = await loadNpmrc(path).promise;
@@ -99,8 +99,8 @@ describe("npmrc-io", () => {
 
     it("should fail when write fails", async () => {
       const { saveNpmrc, writeFile } = makeDependencies();
-      const expected = new FsError();
       const path = "/invalid/path/.npmrc";
+      const expected = new FsError(path, FsErrorReason.Other);
       writeFile.mockReturnValue(new AsyncResult(Err(expected)));
 
       const result = await saveNpmrc(path, ["key=value"]).promise;

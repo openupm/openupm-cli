@@ -1,4 +1,4 @@
-import { NotFoundError, ReadTextFile } from "../../src/io/file-io";
+import { FsError, FsErrorReason, ReadTextFile } from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { FileParseError } from "../../src/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
@@ -17,7 +17,10 @@ describe("project-version-io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      const expected = new NotFoundError("/some/path/ProjectVersion.txt");
+      const expected = new FsError(
+        "/some/path/ProjectVersion.txt",
+        FsErrorReason.Other
+      );
       readFile.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await loadProjectVersion("/some/bad/path").promise;
