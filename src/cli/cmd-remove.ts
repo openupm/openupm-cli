@@ -24,7 +24,11 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../common-errors";
-import { logManifestLoadError, logManifestSaveError } from "./error-logging";
+import {
+  logEnvParseError,
+  logManifestLoadError,
+  logManifestSaveError,
+} from "./error-logging";
 import { Logger } from "npmlog";
 
 export type RemoveError =
@@ -59,7 +63,10 @@ export function makeRemoveCmd(
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
     // parse env
     const envResult = await parseEnv(options);
-    if (envResult.isErr()) return envResult;
+    if (envResult.isErr()) {
+      logEnvParseError(log, envResult.error);
+      return envResult;
+    }
     const env = envResult.value;
 
     const tryRemoveFromManifest = async function (

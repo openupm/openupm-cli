@@ -8,6 +8,10 @@ import { FileParseError, PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { VersionNotFoundError } from "../domain/packument";
 import { FsError, FsErrorReason } from "../io/file-io";
+import { EnvParseError } from "../services/parse-env";
+import { NoWslError } from "../io/wsl";
+import { ChildProcessError } from "../utils/process";
+import { RequiredEnvMissingError } from "../io/upm-config-io";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
@@ -48,4 +52,31 @@ export function logPackumentResolveError(
       `version ${error.requestedVersion} is not a valid choice of: ${versionList}`
     );
   }
+}
+
+/**
+ * Logs a {@link EnvParseError} to a logger.
+ */
+export function logEnvParseError(log: Logger, error: EnvParseError) {
+  // TODO: Formulate more specific error messages.
+  const reason =
+    error instanceof NoWslError
+      ? "you attempted to use wsl even though you are not running openupm inside wsl."
+      : error instanceof FsError
+      ? error.reason === FsErrorReason.Missing
+        ? `the file or directory at "${error.path}" does not exist.`
+        : `the file or directory at "${error.path}" could not be read.`
+      : error instanceof ChildProcessError
+      ? "a required child process failed."
+      : error instanceof FileParseError
+      ? `the file at ${error.path} could not parsed into a ${error.targetDescription}.`
+      : error instanceof RequiredEnvMissingError
+      ? `none of the following environment variables were set: ${error.keyNames.join(
+          ", "
+        )}`
+      : `a string was malformed. Expected to be ${error.formatName}.`;
+  const errorMessage = `environment information could not be parsed because ${reason}.`;
+  log.error("", errorMessage);
+
+  // TODO: Suggest actions user might take in order to fix the problem.
 }
