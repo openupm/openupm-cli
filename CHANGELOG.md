@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/openupm/openupm-cli/compare/2.0.1...2.1.0) (2024-05-25)
+
+
+### Features
+
+* basic env error logging ([#341](https://github.com/openupm/openupm-cli/issues/341)) ([eaca854](https://github.com/openupm/openupm-cli/commit/eaca854118dc568c7bc647fb14b22263fa73f3f3))
+
 ## [2.0.1](https://github.com/openupm/openupm-cli/compare/2.0.0...2.0.1) (2024-05-02)
 
 
