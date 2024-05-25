@@ -16,6 +16,7 @@ import {
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
+import { logEnvParseError } from "./error-logging";
 
 export type DepsError = EnvParseError | DependencyResolveError;
 
@@ -51,7 +52,10 @@ export function makeDepsCmd(
   return async (pkg, options) => {
     // parse env
     const envResult = await parseEnv(options);
-    if (envResult.isErr()) return envResult;
+    if (envResult.isErr()) {
+      logEnvParseError(log, envResult.error);
+      return envResult;
+    }
     const env = envResult.value;
 
     const [name, version] = splitPackageReference(pkg);

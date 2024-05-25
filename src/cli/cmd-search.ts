@@ -6,6 +6,7 @@ import { Ok, Result } from "ts-results-es";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Logger } from "npmlog";
 import { SearchPackages } from "../services/search-packages";
+import { logEnvParseError } from "./error-logging";
 
 export type SearchError = EnvParseError | HttpErrorBase;
 
@@ -32,7 +33,10 @@ export function makeSearchCmd(
   return async (keyword, options) => {
     // parse env
     const envResult = await parseEnv(options);
-    if (envResult.isErr()) return envResult;
+    if (envResult.isErr()) {
+      logEnvParseError(log, envResult.error);
+      return envResult;
+    }
     const env = envResult.value;
 
     let usedEndpoint = "npmsearch";

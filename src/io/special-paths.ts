@@ -64,7 +64,7 @@ export function makeHomePathGetter(): GetHomePath {
   return () => {
     const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
     if (homePath === null)
-      return Err(new RequiredEnvMissingError("USERPROFILE", "HOME"));
+      return Err(new RequiredEnvMissingError(["USERPROFILE", "HOME"]));
     return Ok(homePath);
   };
 }

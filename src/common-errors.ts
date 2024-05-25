@@ -1,6 +1,6 @@
 import { CustomError } from "ts-custom-error";
 import { EditorVersion } from "./domain/editor-version";
-import {StringFormatError} from "./utils/string-parsing";
+import { StringFormatError } from "./utils/string-parsing";
 
 /**
  * Error for when the packument was not found.

@@ -14,7 +14,7 @@ const configFileName = ".upmconfig.toml";
 
 export class RequiredEnvMissingError extends CustomError {
   private readonly _class = "RequiredEnvMissingError";
-  constructor(...keyNames: string[]) {
+  constructor(public readonly keyNames: string[]) {
     super(
       `Env was required to contain a value for one of the following keys, but all were missing: ${keyNames
         .map((keyName) => `"${keyName}"`)
@@ -63,7 +63,7 @@ export function makeUpmConfigPathGetter(
       const profilePath = tryGetEnv("ALLUSERSPROFILE");
       if (profilePath === null)
         return Err(
-          new RequiredEnvMissingError("ALLUSERSPROFILE")
+          new RequiredEnvMissingError(["ALLUSERSPROFILE"])
         ).toAsyncResult();
       return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
     }

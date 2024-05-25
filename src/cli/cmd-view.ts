@@ -16,6 +16,7 @@ import {
 } from "../common-errors";
 import { Logger } from "npmlog";
 import { ResolveRemotePackument } from "../services/resolve-remote-packument";
+import { logEnvParseError } from "./error-logging";
 
 export type ViewOptions = CmdOptions;
 
@@ -111,7 +112,10 @@ export function makeViewCmd(
   return async (pkg, options) => {
     // parse env
     const envResult = await parseEnv(options);
-    if (envResult.isErr()) return envResult;
+    if (envResult.isErr()) {
+      logEnvParseError(log, envResult.error);
+      return envResult;
+    }
     const env = envResult.value;
 
     // parse name

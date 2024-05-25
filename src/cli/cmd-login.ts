@@ -14,6 +14,7 @@ import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
 import { Logger } from "npmlog";
 import { UpmAuthStoreError } from "../services/upm-auth";
 import { LoginService } from "../services/login";
+import { logEnvParseError } from "./error-logging";
 
 /**
  * Errors which may occur when logging in.
@@ -59,7 +60,10 @@ export function makeLoginCmd(
   return async (options) => {
     // parse env
     const envResult = await parseEnv(options);
-    if (envResult.isErr()) return envResult;
+    if (envResult.isErr()) {
+      logEnvParseError(log, envResult.error);
+      return envResult;
+    }
     const env = envResult.value;
 
     // query parameters

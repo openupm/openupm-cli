@@ -37,6 +37,7 @@ import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import {
+  logEnvParseError,
   logManifestLoadError,
   logManifestSaveError,
   logPackumentResolveError,
@@ -117,7 +118,10 @@ export function makeAddCmd(
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
     // parse env
     const envResult = await parseEnv(options);
-    if (envResult.isErr()) return envResult;
+    if (envResult.isErr()) {
+      logEnvParseError(log, envResult.error);
+      return envResult;
+    }
     const env = envResult.value;
 
     if (typeof env.editorVersion === "string")

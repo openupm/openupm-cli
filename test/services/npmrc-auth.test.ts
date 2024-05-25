@@ -26,7 +26,7 @@ function makeDependencies() {
 describe("npmrc-auth", () => {
   describe("set token", () => {
     it("should fail if path could not be determined", async () => {
-      const expected = new RequiredEnvMissingError();
+      const expected = new RequiredEnvMissingError([]);
       const { authNpmrc, findPath } = makeDependencies();
       findPath.mockReturnValue(Err(expected));
 

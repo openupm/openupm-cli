@@ -33,7 +33,7 @@ describe("upm-config-io", () => {
 
       it("should fail if home could not be determined", async () => {
         const { getUpmConfigPath, getHomePath } = makeDependencies();
-        const expected = new RequiredEnvMissingError();
+        const expected = new RequiredEnvMissingError([]);
         getHomePath.mockReturnValue(Err(expected));
 
         const result = await getUpmConfigPath(false, false).promise;
