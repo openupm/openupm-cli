@@ -8,9 +8,10 @@ import {
   makeBuiltInPackagesFinder,
 } from "../../src/io/builtin-packages";
 import { makeEditorVersion } from "../../src/domain/editor-version";
+import { noopLogger } from "../../src/logging";
 
 function makeDependencies() {
-  const getBuiltInPackages = makeBuiltInPackagesFinder();
+  const getBuiltInPackages = makeBuiltInPackagesFinder(noopLogger);
   return { getBuiltInPackages } as const;
 }
 

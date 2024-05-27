@@ -61,8 +61,8 @@ const debugLog: DebugLog = (message, context) =>
 const regClient = new RegClient({ log });
 const getCwd = makeCwdGetter();
 const getHomePath = makeHomePathGetter();
-const readFile = makeTextReader();
-const writeFile = makeTextWriter();
+const readFile = makeTextReader(debugLog);
+const writeFile = makeTextWriter(debugLog);
 const loadProjectManifest = makeProjectManifestLoader(readFile);
 const writeProjectManifest = makeProjectManifestWriter(writeFile);
 const getUpmConfigPath = makeUpmConfigPathGetter(getHomePath);
