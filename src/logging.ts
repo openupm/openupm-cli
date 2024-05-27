@@ -12,3 +12,5 @@ export type DebugLog = (
   message: string,
   context?: object
 ) => void | Promise<void>;
+
+export const noopLogger: DebugLog = () => {};

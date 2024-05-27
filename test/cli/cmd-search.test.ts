@@ -9,7 +9,7 @@ import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { DebugLog } from "../../src/logging";
+import { DebugLog, noopLogger } from "../../src/logging";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -30,9 +30,7 @@ function makeDependencies() {
 
   const log = makeMockLogger();
 
-  const debugLog = mockService<DebugLog>();
-
-  const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, debugLog);
+  const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, noopLogger);
   return {
     searchCmd,
     parseEnv,

@@ -32,6 +32,7 @@ import {
 import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { DebugLogger } from "node:util";
+import { noopLogger } from "../../src/logging";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -103,8 +104,6 @@ function makeDependencies() {
 
   const log = makeMockLogger();
 
-  const debugLog = mockService<DebugLogger>();
-
   const addCmd = makeAddCmd(
     parseEnv,
     resolveRemovePackumentVersion,
@@ -112,7 +111,7 @@ function makeDependencies() {
     loadProjectManifest,
     writeProjectManifest,
     log,
-    debugLog
+    noopLogger
   );
   return {
     addCmd,

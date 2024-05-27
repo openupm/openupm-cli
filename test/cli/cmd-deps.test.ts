@@ -13,6 +13,7 @@ import { ResolveDependenciesService } from "../../src/services/dependency-resolv
 import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { DebugLogger } from "node:util";
+import { noopLogger } from "../../src/logging";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -49,9 +50,7 @@ function makeDependencies() {
 
   const log = makeMockLogger();
 
-  const debugLog = mockService<DebugLogger>();
-
-  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, debugLog);
+  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, noopLogger);
   return { depsCmd, parseEnv, resolveDependencies, log } as const;
 }
 

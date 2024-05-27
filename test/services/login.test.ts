@@ -9,7 +9,7 @@ import { AuthNpmrcService } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
 import { FsError, FsErrorReason } from "../../src/io/file-io";
-import { DebugLogger } from "node:util";
+import { noopLogger } from "../../src/logging";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -29,13 +29,11 @@ describe("login", () => {
     const authNpmrc = mockService<AuthNpmrcService>();
     authNpmrc.mockReturnValue(Ok(exampleNpmrcPath).toAsyncResult());
 
-    const debugLog = mockService<DebugLogger>();
-
     const login = makeLoginService(
       saveAuthToUpmConfig,
       npmLogin,
       authNpmrc,
-      debugLog
+      noopLogger
     );
     return { login, saveAuthToUpmConfig, npmLogin, authNpmrc } as const;
   }
