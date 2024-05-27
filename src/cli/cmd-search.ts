@@ -7,6 +7,7 @@ import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Logger } from "npmlog";
 import { SearchPackages } from "../services/search-packages";
 import { logEnvParseError } from "./error-logging";
+import { DebugLog } from "../logging";
 
 export type SearchError = EnvParseError | HttpErrorBase;
 
@@ -28,7 +29,8 @@ export type SearchCmd = (
 export function makeSearchCmd(
   parseEnv: ParseEnvService,
   searchPackages: SearchPackages,
-  log: Logger
+  log: Logger,
+  debugLog: DebugLog
 ): SearchCmd {
   return async (keyword, options) => {
     // parse env
@@ -56,7 +58,7 @@ export function makeSearchCmd(
       return Ok(undefined);
     }
 
-    log.verbose(usedEndpoint, results.map((it) => it.name).join(os.EOL));
+    debugLog(`${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`);
     console.log(formatAsTable(results));
     return Ok(undefined);
   };

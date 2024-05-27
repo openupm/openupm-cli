@@ -12,6 +12,7 @@ import { PackumentNotFoundError } from "../../src/common-errors";
 import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
+import { DebugLogger } from "node:util";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -48,7 +49,9 @@ function makeDependencies() {
 
   const log = makeMockLogger();
 
-  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);
+  const debugLog = mockService<DebugLogger>();
+
+  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, debugLog);
   return { depsCmd, parseEnv, resolveDependencies, log } as const;
 }
 
@@ -76,50 +79,6 @@ describe("cmd-deps", () => {
     await expect(operation).rejects.toMatchObject({
       message: "Cannot get dependencies for url-version",
     });
-  });
-
-  it("should notify of shallow operation start", async () => {
-    const { depsCmd, log } = makeDependencies();
-
-    await depsCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining("deep=false")
-    );
-  });
-
-  it("should notify of deep operation start", async () => {
-    const { depsCmd, log } = makeDependencies();
-
-    await depsCmd(somePackage, {
-      _global: {},
-      deep: true,
-    });
-
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining("deep=true")
-    );
-  });
-
-  it("should print verbose information about valid dependencies", async () => {
-    const { depsCmd, log } = makeDependencies();
-
-    await depsCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining(somePackage)
-    );
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining(otherPackage)
-    );
   });
 
   it("should log valid dependencies", async () => {

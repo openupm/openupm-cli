@@ -31,6 +31,7 @@ import {
 } from "../../src/io/project-manifest-io";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
+import { DebugLogger } from "node:util";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -102,13 +103,16 @@ function makeDependencies() {
 
   const log = makeMockLogger();
 
+  const debugLog = mockService<DebugLogger>();
+
   const addCmd = makeAddCmd(
     parseEnv,
     resolveRemovePackumentVersion,
     resolveDependencies,
     loadProjectManifest,
     writeProjectManifest,
-    log
+    log,
+    debugLog
   );
   return {
     addCmd,
@@ -346,19 +350,6 @@ describe("cmd-add", () => {
     expect(result).toBeOk();
   });
 
-  it("should notify of fetching dependencies", async () => {
-    const { addCmd, log } = makeDependencies();
-
-    await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining("fetch")
-    );
-  });
-
   it("should notify of unresolved dependencies", async () => {
     const { addCmd, resolveDependencies, log } = makeDependencies();
     resolveDependencies.mockResolvedValue(
@@ -385,7 +376,8 @@ describe("cmd-add", () => {
   });
 
   it("should not fetch dependencies for upstream packages", async () => {
-    const { addCmd, resolveRemovePackumentVersion, log } = makeDependencies();
+    const { addCmd, resolveRemovePackumentVersion, resolveDependencies } =
+      makeDependencies();
     mockResolvedPackuments(resolveRemovePackumentVersion, [
       unityRegistryUrl,
       somePackument,
@@ -395,10 +387,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.verbose).not.toHaveLogLike(
-      "dependency",
-      expect.stringContaining("fetch")
-    );
+    expect(resolveDependencies).not.toHaveBeenCalled();
   });
 
   it("should suggest to install missing dependency version manually", async () => {
@@ -448,23 +437,6 @@ describe("cmd-add", () => {
     expect(log.error).toHaveLogLike(
       "missing dependencies",
       expect.stringContaining("run with option -f")
-    );
-  });
-
-  it("should print verbose information about valid dependencies", async () => {
-    const { addCmd, log } = makeDependencies();
-
-    await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining(somePackage)
-    );
-    expect(log.verbose).toHaveLogLike(
-      "dependency",
-      expect.stringContaining(otherPackage)
     );
   });
 

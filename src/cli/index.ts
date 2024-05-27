@@ -46,10 +46,12 @@ import { makePackumentFetcher } from "../io/packument-io";
 import { makePackagesSearcher } from "../services/search-packages";
 import { makeRemotePackumentResolver } from "../services/resolve-remote-packument";
 import { makeLoginService } from "../services/login";
+import { DebugLog } from "../logging";
 
 // Composition root
 
 const log = npmlog;
+const debugLog: DebugLog = (message) => log.verbose("openupm-cli", message);
 const regClient = new RegClient({ log });
 const getCwd = makeCwdGetter();
 const getHomePath = makeHomePathGetter();
@@ -89,7 +91,12 @@ const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
   writeFile
 );
 const searchPackages = makePackagesSearcher(searchRegistry, fetchAllPackuments);
-const login = makeLoginService(saveAuthToUpmConfig, npmLogin, authNpmrc);
+const login = makeLoginService(
+  saveAuthToUpmConfig,
+  npmLogin,
+  authNpmrc,
+  debugLog
+);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -97,11 +104,12 @@ const addCmd = makeAddCmd(
   resolveDependencies,
   loadProjectManifest,
   writeProjectManifest,
-  log
+  log,
+  debugLog
 );
 const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
-const searchCmd = makeSearchCmd(parseEnv, searchPackages, log);
-const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log);
+const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, debugLog);
+const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, debugLog);
 const removeCmd = makeRemoveCmd(
   parseEnv,
   loadProjectManifest,

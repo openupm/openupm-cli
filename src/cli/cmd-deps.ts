@@ -17,6 +17,7 @@ import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { logEnvParseError } from "./error-logging";
+import { DebugLog } from "../logging";
 
 export type DepsError = EnvParseError | DependencyResolveError;
 
@@ -47,7 +48,8 @@ function errorPrefixForError(error: PackumentVersionResolveError): string {
 export function makeDepsCmd(
   parseEnv: ParseEnvService,
   resolveDependencies: ResolveDependenciesService,
-  log: Logger
+  log: Logger,
+  debugLog: DebugLog
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
@@ -65,10 +67,7 @@ export function makeDepsCmd(
       throw new Error("Cannot get dependencies for url-version");
 
     const deep = options.deep || false;
-    log.verbose(
-      "dependency",
-      `fetch: ${makePackageReference(name, version)}, deep=${deep}`
-    );
+    debugLog(`fetch: ${makePackageReference(name, version)}, deep=${deep}`);
     const resolveResult = await resolveDependencies(
       [env.registry, env.upstreamRegistry],
       name,
@@ -81,7 +80,7 @@ export function makeDepsCmd(
       return resolveResult;
     const [depsValid, depsInvalid] = resolveResult.value;
 
-    depsValid.forEach((dependency) => logValidDependency(log, dependency));
+    depsValid.forEach((dependency) => logValidDependency(debugLog, dependency));
     depsValid
       .filter((x) => !x.self)
       .forEach((x) =>

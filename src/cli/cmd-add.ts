@@ -53,6 +53,7 @@ import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import { VersionNotFoundError } from "../domain/packument";
 import { FetchPackumentError } from "../io/packument-io";
+import { DebugLog } from "../logging";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -112,7 +113,8 @@ export function makeAddCmd(
   resolveDependencies: ResolveDependenciesService,
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest,
-  log: Logger
+  log: Logger,
+  debugLog: DebugLog
 ): AddCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
@@ -213,10 +215,7 @@ export function makeAddCmd(
 
         // pkgsInScope
         if (!isUpstreamPackage) {
-          log.verbose(
-            "dependency",
-            `fetch: ${makePackageReference(name, requestedVersion)}`
-          );
+          debugLog(`fetch: ${makePackageReference(name, requestedVersion)}`);
           const resolveResult = await resolveDependencies(
             [env.registry, env.upstreamRegistry],
             name,
@@ -231,7 +230,7 @@ export function makeAddCmd(
 
           // add depsValid to pkgsInScope.
           depsValid.forEach((dependency) =>
-            logValidDependency(log, dependency)
+            logValidDependency(debugLog, dependency)
           );
           depsValid
             .filter((x) => {
