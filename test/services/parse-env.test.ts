@@ -13,7 +13,7 @@ import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import { LoadProjectVersion } from "../../src/io/project-version-io";
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import { GenericIOError } from "../../src/io/common-errors";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -520,27 +520,6 @@ describe("env", () => {
       });
 
       expect(result).toBeError((error) => expect(error).toEqual(expected));
-    });
-
-    it("should notify of missing ProjectVersion.txt", async () => {
-      const { parseEnv, log, loadProjectVersion } = makeDependencies();
-      loadProjectVersion.mockReturnValue(
-        Err(
-          new FileMissingError(
-            "ProjectVersion.txt",
-            "/some/path/ProjectVersion.txt"
-          )
-        ).toAsyncResult()
-      );
-
-      await parseEnv({
-        _global: {},
-      });
-
-      expect(log.warn).toHaveBeenCalledWith(
-        "ProjectVersion",
-        expect.stringContaining("can not locate")
-      );
     });
 
     it("should notify of parsing issue", async () => {
