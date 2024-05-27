@@ -1,7 +1,7 @@
 import path from "path";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { FileParseError } from "../common-errors";
-import { FileReadError, ReadTextFile } from "./file-io";
+import { FsError, ReadTextFile } from "./file-io";
 import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
 
 function projectVersionTxtPathFor(projectDirPath: string) {
@@ -12,7 +12,7 @@ function projectVersionTxtPathFor(projectDirPath: string) {
  * Error which may occur when loading a project-version.
  */
 export type ProjectVersionLoadError =
-  | FileReadError
+  | FsError
   | StringFormatError
   | FileParseError;
 

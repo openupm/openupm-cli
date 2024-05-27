@@ -1,11 +1,5 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import {
-  FileWriteError,
-  FsError,
-  FsErrorReason,
-  ReadTextFile,
-  WriteTextFile,
-} from "./file-io";
+import { FsError, FsErrorReason, ReadTextFile, WriteTextFile } from "./file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
@@ -59,7 +53,7 @@ export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
 /**
  * Error that might occur when saving a npmrc.
  */
-export type NpmrcSaveError = FileWriteError;
+export type NpmrcSaveError = FsError;
 
 /**
  * Function for saving npmrc files. Overwrites the content of the file.

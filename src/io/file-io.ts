@@ -52,16 +52,11 @@ function fsOperation<T>(debugLog: DebugLog, op: () => Promise<T>) {
 }
 
 /**
- * Error for when a file-read failed.
- */
-export type FileReadError = FsError;
-
-/**
  * Function for loading the content of a text file.
  * @param path The path to the file.
  * @returns The files text content.
  */
-export type ReadTextFile = (path: string) => AsyncResult<string, FileReadError>;
+export type ReadTextFile = (path: string) => AsyncResult<string, FsError>;
 
 /**
  * Makes a {@link ReadTextFile} function.
@@ -72,11 +67,6 @@ export function makeTextReader(debugLog: DebugLog): ReadTextFile {
 }
 
 /**
- * Error for when a file-write failed.
- */
-export type FileWriteError = FsError;
-
-/**
  * Function for overwriting the content of a text file. Creates the file
  * if it does not exist.
  * @param filePath The path to the file.
@@ -85,7 +75,7 @@ export type FileWriteError = FsError;
 export type WriteTextFile = (
   filePath: string,
   content: string
-) => AsyncResult<void, FileWriteError>;
+) => AsyncResult<void, FsError>;
 
 /**
  * Makes a {@link WriteTextFile} function.
@@ -100,11 +90,6 @@ export function makeTextWriter(debugLog: DebugLog): WriteTextFile {
 }
 
 /**
- * Error which may occur when getting all directory names in a directory.
- */
-export type GetDirectoriesError = FsError;
-
-/**
  * Attempts to get the names of all directories in a directory.
  * @param directoryPath The directories name.
  * @param debugLog Debug-log function.
@@ -113,7 +98,7 @@ export type GetDirectoriesError = FsError;
 export function tryGetDirectoriesIn(
   directoryPath: string,
   debugLog: DebugLog
-): AsyncResult<ReadonlyArray<string>, GetDirectoriesError> {
+): AsyncResult<ReadonlyArray<string>, FsError> {
   return fsOperation(debugLog, () =>
     fs.readdir(directoryPath, { withFileTypes: true })
   )
