@@ -4,6 +4,7 @@ import { CustomError } from "ts-custom-error";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
 import path from "path";
+import { DebugLog } from "../logging";
 
 /**
  * Reason why a file-system operation failed.
@@ -40,12 +41,13 @@ export class FsError extends CustomError {
   }
 }
 
-function fsOperation<T>(path: string, op: () => Promise<T>) {
+function fsOperation<T>(debugLog: DebugLog, op: () => Promise<T>) {
   return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
     assertIsNodeError(error);
+    debugLog("fs-operation failed", error);
     const cause =
       error.code === "ENOENT" ? FsErrorReason.Missing : FsErrorReason.Other;
-    return new FsError(path, cause);
+    return new FsError(error.path!, cause);
   });
 }
 
@@ -64,9 +66,9 @@ export type ReadTextFile = (path: string) => AsyncResult<string, FileReadError>;
 /**
  * Makes a {@link ReadTextFile} function.
  */
-export function makeTextReader(): ReadTextFile {
+export function makeTextReader(debugLog: DebugLog): ReadTextFile {
   return (path) =>
-    fsOperation(path, () => fs.readFile(path, { encoding: "utf8" }));
+    fsOperation(debugLog, () => fs.readFile(path, { encoding: "utf8" }));
 }
 
 /**
@@ -88,11 +90,11 @@ export type WriteTextFile = (
 /**
  * Makes a {@link WriteTextFile} function.
  */
-export function makeTextWriter(): WriteTextFile {
+export function makeTextWriter(debugLog: DebugLog): WriteTextFile {
   return (filePath, content) => {
     const dirPath = path.dirname(filePath);
-    return fsOperation(dirPath, () => fse.ensureDir(dirPath)).andThen(() =>
-      fsOperation(filePath, () => fs.writeFile(filePath, content))
+    return fsOperation(debugLog, () => fse.ensureDir(dirPath)).andThen(() =>
+      fsOperation(debugLog, () => fs.writeFile(filePath, content))
     );
   };
 }
@@ -105,11 +107,14 @@ export type GetDirectoriesError = FsError;
 /**
  * Attempts to get the names of all directories in a directory.
  * @param directoryPath The directories name.
+ * @param debugLog Debug-log function.
+ * TODO: Convert to service function.
  */
 export function tryGetDirectoriesIn(
-  directoryPath: string
+  directoryPath: string,
+  debugLog: DebugLog
 ): AsyncResult<ReadonlyArray<string>, GetDirectoriesError> {
-  return fsOperation(directoryPath, () =>
+  return fsOperation(debugLog, () =>
     fs.readdir(directoryPath, { withFileTypes: true })
   )
     .map((entries) => entries.filter((it) => it.isDirectory()))

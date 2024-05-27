@@ -8,6 +8,7 @@ import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
 import { FsError, FsErrorReason, tryGetDirectoriesIn } from "./file-io";
+import { DebugLog } from "../logging";
 
 /**
  * Error for when an editor-version is not installed.
@@ -43,7 +44,9 @@ export type FindBuiltInPackages = (
 /**
  * Makes a {@link FindBuiltInPackages} function.
  */
-export function makeBuiltInPackagesFinder(): FindBuiltInPackages {
+export function makeBuiltInPackagesFinder(
+  debugLog: DebugLog
+): FindBuiltInPackages {
   return (editorVersion) => {
     {
       const pathResult = tryGetEditorInstallPath(editorVersion);
@@ -55,7 +58,7 @@ export function makeBuiltInPackagesFinder(): FindBuiltInPackages {
       );
 
       return (
-        tryGetDirectoriesIn(packagesDir)
+        tryGetDirectoriesIn(packagesDir, debugLog)
           // We can assume correct format
           .map((names) => names as DomainName[])
           .mapErr((error) =>

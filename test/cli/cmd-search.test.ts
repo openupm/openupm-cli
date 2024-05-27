@@ -9,6 +9,7 @@ import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import { DebugLog, noopLogger } from "../../src/logging";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -29,7 +30,7 @@ function makeDependencies() {
 
   const log = makeMockLogger();
 
-  const searchCmd = makeSearchCmd(parseEnv, searchPackages, log);
+  const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, noopLogger);
   return {
     searchCmd,
     parseEnv,
@@ -58,17 +59,6 @@ describe("cmd-search", () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("1.0.0"));
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining("2019-10-02")
-    );
-  });
-
-  it("should print all found packument names when using new search", async () => {
-    const { searchCmd, log } = makeDependencies();
-
-    await searchCmd("package-a", options);
-
-    expect(log.verbose).toHaveBeenCalledWith(
-      "npmsearch",
-      expect.stringContaining("package-a")
     );
   });
 
@@ -129,23 +119,6 @@ describe("cmd-search", () => {
     expect(log.warn).toHaveBeenCalledWith(
       "",
       expect.stringContaining("using old search")
-    );
-  });
-
-  it("should print all found packument names when using old search", async () => {
-    const { searchCmd, searchPackages, log } = makeDependencies();
-    searchPackages.mockImplementation(
-      (_registry, _keyword, onUseAllFallback) => {
-        onUseAllFallback && onUseAllFallback();
-        return Ok([exampleSearchResult]).toAsyncResult();
-      }
-    );
-
-    await searchCmd("package-a", options);
-
-    expect(log.verbose).toHaveBeenCalledWith(
-      "endpoint.all",
-      expect.stringContaining("package-a")
     );
   });
 });

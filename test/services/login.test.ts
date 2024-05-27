@@ -9,6 +9,7 @@ import { AuthNpmrcService } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
 import { FsError, FsErrorReason } from "../../src/io/file-io";
+import { noopLogger } from "../../src/logging";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -28,7 +29,12 @@ describe("login", () => {
     const authNpmrc = mockService<AuthNpmrcService>();
     authNpmrc.mockReturnValue(Ok(exampleNpmrcPath).toAsyncResult());
 
-    const login = makeLoginService(saveAuthToUpmConfig, npmLogin, authNpmrc);
+    const login = makeLoginService(
+      saveAuthToUpmConfig,
+      npmLogin,
+      authNpmrc,
+      noopLogger
+    );
     return { login, saveAuthToUpmConfig, npmLogin, authNpmrc } as const;
   }
 
@@ -43,9 +49,7 @@ describe("login", () => {
         true,
         exampleRegistryUrl,
         exampleConfigPath,
-        "basic",
-        () => {},
-        () => {}
+        "basic"
       ).promise;
 
       expect(saveAuthToUpmConfig).toHaveBeenCalledWith(
@@ -71,9 +75,7 @@ describe("login", () => {
         true,
         exampleRegistryUrl,
         exampleConfigPath,
-        "basic",
-        () => {},
-        () => {}
+        "basic"
       ).promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
@@ -93,31 +95,10 @@ describe("login", () => {
         true,
         exampleRegistryUrl,
         exampleConfigPath,
-        "token",
-        () => {},
-        () => {}
+        "token"
       ).promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should notify of npm login success", async () => {
-      const { login } = makeDependencies();
-      const onNpmAuthSuccess = jest.fn();
-
-      await login(
-        exampleUser,
-        examplePassword,
-        exampleEmail,
-        true,
-        exampleRegistryUrl,
-        exampleConfigPath,
-        "token",
-        onNpmAuthSuccess,
-        () => {}
-      ).promise;
-
-      expect(onNpmAuthSuccess).toHaveBeenCalled();
     });
 
     it("should fail if npmrc auth fails", async () => {
@@ -132,31 +113,10 @@ describe("login", () => {
         true,
         exampleRegistryUrl,
         exampleConfigPath,
-        "token",
-        () => {},
-        () => {}
+        "token"
       ).promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should notify of npmrc auth success", async () => {
-      const { login } = makeDependencies();
-      const onNpmrcUpdated = jest.fn();
-
-      await login(
-        exampleUser,
-        examplePassword,
-        exampleEmail,
-        true,
-        exampleRegistryUrl,
-        exampleConfigPath,
-        "token",
-        () => {},
-        onNpmrcUpdated
-      ).promise;
-
-      expect(onNpmrcUpdated).toHaveBeenCalledWith(exampleNpmrcPath);
     });
 
     it("should save token", async () => {
@@ -169,9 +129,7 @@ describe("login", () => {
         true,
         exampleRegistryUrl,
         exampleConfigPath,
-        "token",
-        () => {},
-        () => {}
+        "token"
       ).promise;
 
       expect(saveAuthToUpmConfig).toHaveBeenCalledWith(
@@ -197,9 +155,7 @@ describe("login", () => {
         true,
         exampleRegistryUrl,
         exampleConfigPath,
-        "token",
-        () => {},
-        () => {}
+        "token"
       ).promise;
 
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));

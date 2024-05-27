@@ -8,6 +8,8 @@ import {
 } from "../../src/io/file-io";
 import fse from "fs-extra";
 import { Dirent } from "node:fs";
+import { mockService } from "../services/service.mock";
+import { DebugLog, noopLogger } from "../../src/logging";
 
 function makeNodeError(code: string): NodeJS.ErrnoException {
   const error = new Error() as NodeJS.ErrnoException;
@@ -18,7 +20,7 @@ function makeNodeError(code: string): NodeJS.ErrnoException {
 describe("file-io", () => {
   describe("read text", () => {
     function makeDependencies() {
-      const readFile = makeTextReader();
+      const readFile = makeTextReader(noopLogger);
 
       return { readFile } as const;
     }
@@ -59,7 +61,7 @@ describe("file-io", () => {
 
   describe("write text", () => {
     function makeDependencies() {
-      const writeFile = makeTextWriter();
+      const writeFile = makeTextWriter(noopLogger);
 
       return { writeFile } as const;
     }
@@ -137,7 +139,8 @@ describe("file-io", () => {
     it("should fail if directory does not exist", async () => {
       jest.spyOn(fs, "readdir").mockRejectedValue(makeNodeError("ENOENT"));
 
-      const result = await tryGetDirectoriesIn("/bad/path/").promise;
+      const result = await tryGetDirectoriesIn("/bad/path/", noopLogger)
+        .promise;
 
       expect(result).toBeError((actual: FsError) =>
         expect(actual.reason).toEqual(FsErrorReason.Missing)
@@ -147,7 +150,8 @@ describe("file-io", () => {
     it("should fail if directory could not be read", async () => {
       jest.spyOn(fs, "readdir").mockRejectedValue(makeNodeError("EACCES"));
 
-      const result = await tryGetDirectoriesIn("/good/path/").promise;
+      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
+        .promise;
 
       expect(result).toBeError((actual: FsError) =>
         expect(actual.reason).toEqual(FsErrorReason.Other)
@@ -162,7 +166,8 @@ describe("file-io", () => {
           { name: "b", isDirectory: () => true } as Dirent,
         ]);
 
-      const result = await tryGetDirectoriesIn("/good/path/").promise;
+      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
+        .promise;
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(["a", "b"]));
     });
@@ -175,7 +180,8 @@ describe("file-io", () => {
           { name: "b.txt", isDirectory: () => false } as Dirent,
         ]);
 
-      const result = await tryGetDirectoriesIn("/good/path/").promise;
+      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
+        .promise;
 
       expect(result).toBeOk((actual) => expect(actual).toEqual(["a"]));
     });

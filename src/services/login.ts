@@ -4,6 +4,7 @@ import { RegistryUrl } from "../domain/registry-url";
 import { SaveAuthToUpmConfig, UpmAuthStoreError } from "./upm-auth";
 import { NpmLoginError, NpmLoginService } from "./npm-login";
 import { AuthNpmrcService, NpmrcAuthTokenUpdateError } from "./npmrc-auth";
+import { DebugLog } from "../logging";
 
 /**
  * Error which may occur when logging in a user.
@@ -37,9 +38,7 @@ export type LoginService = (
   alwaysAuth: boolean,
   registry: RegistryUrl,
   configPath: string,
-  authMode: "basic" | "token",
-  onNpmAuthSuccess: () => void,
-  onNpmrcUpdated: (npmrcPath: string) => void
+  authMode: "basic" | "token"
 ) => AsyncResult<void, LoginError>;
 
 /**
@@ -48,7 +47,8 @@ export type LoginService = (
 export function makeLoginService(
   saveAuthToUpmConfig: SaveAuthToUpmConfig,
   npmLogin: NpmLoginService,
-  authNpmrc: AuthNpmrcService
+  authNpmrc: AuthNpmrcService,
+  debugLog: DebugLog
 ): LoginService {
   return (
     username,
@@ -57,9 +57,7 @@ export function makeLoginService(
     alwaysAuth,
     registry,
     configPath,
-    authMode,
-    onNpmAuthSuccess,
-    onNpmrcUpdated
+    authMode
   ) => {
     if (authMode === "basic") {
       // basic auth
@@ -73,10 +71,10 @@ export function makeLoginService(
 
     // npm login
     return npmLogin(registry, username, password, email).andThen((token) => {
-      onNpmAuthSuccess();
+      debugLog(`npm login successful`);
       // write npm token
       return authNpmrc(registry, token).andThen((npmrcPath) => {
-        onNpmrcUpdated(npmrcPath);
+        debugLog(`saved to npm config: ${npmrcPath}`);
         // Save config
         return saveAuthToUpmConfig(configPath, registry, {
           email,

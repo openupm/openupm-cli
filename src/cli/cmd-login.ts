@@ -90,9 +90,7 @@ export function makeLoginCmd(
       alwaysAuth,
       loginRegistry,
       configPath,
-      options.basicAuth ? "basic" : "token",
-      () => log.notice("auth", `you are authenticated as '${username}'`),
-      (npmrcPath) => log.notice("config", `saved to npm config: ${npmrcPath}`)
+      options.basicAuth ? "basic" : "token"
     ).promise;
 
     if (loginResult.isErr()) {
@@ -106,6 +104,7 @@ export function makeLoginCmd(
       return loginResult;
     }
 
+    log.notice("auth", `you are authenticated as '${username}'`);
     log.notice("config", "saved unity config at " + configPath);
     return Ok(undefined);
   };
