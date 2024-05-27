@@ -3,9 +3,9 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { emptyNpmrc, setToken } from "../../src/domain/npmrc";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { makeAuthNpmrcService } from "../../src/services/npmrc-auth";
 import { mockService } from "./service.mock";
+import { GenericIOError } from "../../src/io/common-errors";
 
 const exampleNpmrcPath = "/users/someuser/.npmrc";
 
@@ -36,7 +36,7 @@ describe("npmrc-auth", () => {
     });
 
     it("should fail if npmrc load failed", async () => {
-      const expected = new FsError("", FsErrorReason.Other);
+      const expected = new GenericIOError();
       const { authNpmrc, loadNpmrc } = makeDependencies();
       loadNpmrc.mockReturnValue(new AsyncResult(Err(expected)));
 
@@ -46,7 +46,7 @@ describe("npmrc-auth", () => {
     });
 
     it("should fail if npmrc save failed", async () => {
-      const expected = new FsError("", FsErrorReason.Other);
+      const expected = new GenericIOError();
       const { authNpmrc, saveNpmrc } = makeDependencies();
       saveNpmrc.mockReturnValue(new AsyncResult(Err(expected)));
 

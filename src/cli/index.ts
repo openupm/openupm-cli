@@ -33,7 +33,7 @@ import {
   makeUpmConfigLoader,
   makeUpmConfigPathGetter,
 } from "../io/upm-config-io";
-import { makeTextReader, makeTextWriter } from "../io/file-io";
+import { makeTextReader, makeTextWriter } from "../io/fs-result";
 import {
   makeNpmrcLoader,
   makeNpmrcPathFinder,

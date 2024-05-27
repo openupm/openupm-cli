@@ -3,7 +3,6 @@ import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeMockLogger } from "./log.mock";
@@ -12,8 +11,8 @@ import { PackumentNotFoundError } from "../../src/common-errors";
 import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
-import { DebugLogger } from "node:util";
 import { noopLogger } from "../../src/logging";
+import { GenericIOError } from "../../src/io/common-errors";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -56,7 +55,7 @@ function makeDependencies() {
 
 describe("cmd-deps", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { depsCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 

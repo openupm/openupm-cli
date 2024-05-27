@@ -9,7 +9,7 @@ import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { DebugLog, noopLogger } from "../../src/logging";
+import { noopLogger } from "../../src/logging";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),

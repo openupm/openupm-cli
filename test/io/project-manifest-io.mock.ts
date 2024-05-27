@@ -1,12 +1,12 @@
 import {
   LoadProjectManifest,
+  makeProjectManifestMissingError,
   manifestPathFor,
   ManifestWriteError,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { UnityProjectManifest } from "../../src/domain/project-manifest";
 import { Err, Ok } from "ts-results-es";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 
 /**
  * Mocks results for a {@link LoadProjectManifest} function.
@@ -21,7 +21,7 @@ export function mockProjectManifest(
   return loadProjectManifest.mockImplementation((projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
     return manifest === null
-      ? Err(new FsError(manifestPath, FsErrorReason.Missing)).toAsyncResult()
+      ? Err(makeProjectManifestMissingError(manifestPath)).toAsyncResult()
       : Ok(manifest).toAsyncResult();
   });
 }

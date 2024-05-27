@@ -10,7 +10,6 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { Err, Ok } from "ts-results-es";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import {
   mockProjectManifest,
   mockProjectManifestWriteResult,
@@ -31,8 +30,8 @@ import {
 } from "../../src/io/project-manifest-io";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
-import { DebugLogger } from "node:util";
 import { noopLogger } from "../../src/logging";
+import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -126,7 +125,7 @@ function makeDependencies() {
 
 describe("cmd-add", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { addCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
@@ -142,7 +141,7 @@ describe("cmd-add", () => {
     const result = await addCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(FsError)
+      expect(actual).toBeInstanceOf(FileMissingError)
     );
   });
 
@@ -654,7 +653,7 @@ describe("cmd-add", () => {
   });
 
   it("should fail if manifest could not be saved", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { addCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
@@ -665,10 +664,7 @@ describe("cmd-add", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const { addCmd, writeProjectManifest, log } = makeDependencies();
-    mockProjectManifestWriteResult(
-      writeProjectManifest,
-      new FsError("", FsErrorReason.Other)
-    );
+    mockProjectManifestWriteResult(writeProjectManifest, new GenericIOError());
 
     await addCmd(somePackage, { _global: {} });
 

@@ -1,9 +1,11 @@
-import { FsError, FsErrorReason, ReadTextFile } from "../../src/io/file-io";
+import { ReadTextFile } from "../../src/io/fs-result";
 import { Err, Ok } from "ts-results-es";
 import { FileParseError } from "../../src/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
 import { makeProjectVersionLoader } from "../../src/io/project-version-io";
+import { eaccesError, enoentError } from "./node-error.mock";
+import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 
 describe("project-version-io", () => {
   describe("load", () => {
@@ -15,17 +17,26 @@ describe("project-version-io", () => {
       return { loadProjectVersion, readFile } as const;
     }
 
-    it("should fail if file could not be read", async () => {
+    it("should fail if file is missing", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      const expected = new FsError(
-        "/some/path/ProjectVersion.txt",
-        FsErrorReason.Other
-      );
-      readFile.mockReturnValue(Err(expected).toAsyncResult());
+      readFile.mockReturnValue(Err(enoentError).toAsyncResult());
 
       const result = await loadProjectVersion("/some/bad/path").promise;
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(FileMissingError)
+      );
+    });
+
+    it("should fail if file could not be read", async () => {
+      const { loadProjectVersion, readFile } = makeDependencies();
+      readFile.mockReturnValue(Err(eaccesError).toAsyncResult());
+
+      const result = await loadProjectVersion("/some/bad/path").promise;
+
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(GenericIOError)
+      );
     });
 
     it("should fail if file does not contain valid yaml", async () => {

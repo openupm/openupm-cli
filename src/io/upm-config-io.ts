@@ -3,12 +3,13 @@ import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
-import { FsError, FsErrorReason, ReadTextFile, WriteTextFile } from "./file-io";
+import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { tryGetEnv } from "../utils/env-util";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError } from "../utils/process";
 import { GetHomePath } from "./special-paths";
+import { GenericIOError } from "./common-errors";
 
 const configFileName = ".upmconfig.toml";
 
@@ -81,7 +82,7 @@ export function makeUpmConfigPathGetter(
 /**
  * Error which may occur when loading a {@link UPMConfig}.
  */
-export type UpmConfigLoadError = FsError | StringFormatError;
+export type UpmConfigLoadError = GenericIOError | StringFormatError;
 
 /**
  * IO function for loading an upm-config file.
@@ -100,10 +101,12 @@ export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
     readFile(configFilePath)
       .andThen(tryParseToml)
       // TODO: Actually validate
-      .map<UPMConfig | null>((toml) => toml as UPMConfig)
-      .orElse((error) =>
-        error instanceof FsError && error.reason === FsErrorReason.Missing
-          ? Ok(null)
+      .map((toml) => toml as UPMConfig | null)
+      .orElse<UpmConfigLoadError>((error) =>
+        !(error instanceof StringFormatError)
+          ? error.code === "ENOENT"
+            ? Ok(null)
+            : Err(new GenericIOError())
           : Err(error)
       );
 }
@@ -111,7 +114,7 @@ export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
 /**
  * Errors which may occur when saving a UPM-config file.
  */
-export type UpmConfigSaveError = FsError;
+export type UpmConfigSaveError = GenericIOError;
 
 /**
  * Save the upm config.
@@ -124,5 +127,5 @@ export const trySaveUpmConfig = (
   configFilePath: string
 ): AsyncResult<void, UpmConfigSaveError> => {
   const content = TOML.stringify(config);
-  return writeFile(configFilePath, content);
+  return writeFile(configFilePath, content).mapErr(() => new GenericIOError());
 };

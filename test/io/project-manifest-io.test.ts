@@ -9,18 +9,15 @@ import {
 } from "../../src/domain/project-manifest";
 import path from "path";
 import { FileParseError } from "../../src/common-errors";
-import {
-  FsError,
-  FsErrorReason,
-  ReadTextFile,
-  WriteTextFile,
-} from "../../src/io/file-io";
+import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
 import { Err, Ok } from "ts-results-es";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
+import { eaccesError, enoentError } from "./node-error.mock";
+import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
@@ -46,16 +43,23 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(
-        Err(
-          new FsError(exampleProjectPath, FsErrorReason.Other)
-        ).toAsyncResult()
-      );
+      readFile.mockReturnValue(Err(eaccesError).toAsyncResult());
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
       expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FsError)
+        expect(actual).toBeInstanceOf(GenericIOError)
+      );
+    });
+
+    it("should fail if file is missing", async () => {
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockReturnValue(Err(enoentError).toAsyncResult());
+
+      const result = await loadProjectManifest(exampleProjectPath).promise;
+
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(FileMissingError)
       );
     });
 
@@ -100,7 +104,7 @@ describe("project-manifest io", () => {
     }
 
     it("should fail if file could not be written", async () => {
-      const expected = new FsError(expect.any(String), FsErrorReason.Other);
+      const expected = eaccesError;
       const { writeProjectManifest, writeFile } = makeDependencies();
       writeFile.mockReturnValue(Err(expected).toAsyncResult());
 

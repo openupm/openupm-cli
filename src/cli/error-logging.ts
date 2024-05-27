@@ -7,18 +7,18 @@ import { PackumentVersionResolveError } from "../packument-version-resolving";
 import { FileParseError, PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { VersionNotFoundError } from "../domain/packument";
-import { FsError, FsErrorReason } from "../io/file-io";
 import { EnvParseError } from "../services/parse-env";
 import { NoWslError } from "../io/wsl";
 import { ChildProcessError } from "../utils/process";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
+import { FileMissingError, GenericIOError } from "../io/common-errors";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
  */
 export function logManifestLoadError(log: Logger, error: ManifestLoadError) {
   const prefix = "manifest";
-  if (error instanceof FsError && error.reason === FsErrorReason.Missing)
+  if (error instanceof FileMissingError)
     log.error(prefix, `manifest at ${error.path} does not exist`);
   else if (error instanceof FileParseError) {
     log.error(prefix, `failed to parse manifest at ${error.path}`);
@@ -62,10 +62,10 @@ export function logEnvParseError(log: Logger, error: EnvParseError) {
   const reason =
     error instanceof NoWslError
       ? "you attempted to use wsl even though you are not running openupm inside wsl"
-      : error instanceof FsError
-      ? error.reason === FsErrorReason.Missing
-        ? `the file or directory at "${error.path}" does not exist`
-        : `the file or directory at "${error.path}" could not be read`
+      : error instanceof FileMissingError
+      ? `the projects version file (ProjectVersion.txt) could not be found at "${error.path}"`
+      : error instanceof GenericIOError
+      ? `a file-system interaction failed`
       : error instanceof ChildProcessError
       ? "a required child process failed"
       : error instanceof FileParseError
