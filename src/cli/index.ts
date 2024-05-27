@@ -51,7 +51,13 @@ import { DebugLog } from "../logging";
 // Composition root
 
 const log = npmlog;
-const debugLog: DebugLog = (message) => log.verbose("openupm-cli", message);
+const debugLog: DebugLog = (message, context) =>
+  log.verbose(
+    "openupm-cli",
+    `${message}${
+      context !== undefined ? ` context: ${JSON.stringify(context)}` : ""
+    }`
+  );
 const regClient = new RegClient({ log });
 const getCwd = makeCwdGetter();
 const getHomePath = makeHomePathGetter();

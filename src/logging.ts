@@ -4,6 +4,11 @@
  * This interface is supposed to be only used for debug logs, not for
  * user-facing logs.
  * @param message The message to be logged.
+ * @param context Optional context object. Will be stringified and appended
+ * to the message.
  * @returns Nothing. Could be asynchronous.
  */
-export type DebugLog = (message: string) => void | Promise<void>;
+export type DebugLog = (
+  message: string,
+  context?: object
+) => void | Promise<void>;
