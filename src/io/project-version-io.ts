@@ -1,20 +1,37 @@
 import path from "path";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { FileParseError } from "../common-errors";
-import { FsError, ReadTextFile } from "./file-io";
+import { ReadTextFile } from "./fs-result";
 import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
+import { FileMissingError, GenericIOError } from "./common-errors";
 
 function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
 }
 
 /**
+ * Error for when the ProjectVersion.txt is missing.
+ */
+export type ProjectVersionMissingError = FileMissingError<"ProjectVersion.txt">;
+
+/**
+ * Makes a {@link ProjectVersionMissingError} object.
+ * @param filePath The path that was searched.
+ */
+export function makeProjectVersionMissingError(
+  filePath: string
+): ProjectVersionMissingError {
+  return new FileMissingError("ProjectVersion.txt", filePath);
+}
+
+/**
  * Error which may occur when loading a project-version.
  */
 export type ProjectVersionLoadError =
-  | FsError
   | StringFormatError
-  | FileParseError;
+  | FileParseError
+  | ProjectVersionMissingError
+  | GenericIOError;
 
 /**
  * Function for loading a projects editor version string.
@@ -35,6 +52,11 @@ export function makeProjectVersionLoader(
     const filePath = projectVersionTxtPathFor(projectDirPath);
 
     return readFile(filePath)
+      .mapErr((error) =>
+        error.code === "ENOENT"
+          ? makeProjectVersionMissingError(filePath)
+          : new GenericIOError()
+      )
       .andThen(tryParseYaml)
       .andThen((content) => {
         if (

@@ -2,7 +2,6 @@ import { makeViewCmd } from "../../src/cli/cmd-view";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
@@ -16,6 +15,7 @@ import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
 import { ResolveRemotePackument } from "../../src/services/resolve-remote-packument";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import { GenericIOError } from "../../src/io/common-errors";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -71,7 +71,7 @@ function makeDependencies() {
 
 describe("cmd-view", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { viewCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 

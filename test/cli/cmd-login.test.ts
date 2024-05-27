@@ -1,4 +1,3 @@
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { Err, Ok } from "ts-results-es";
 import { makeLoginCmd } from "../../src/cli/cmd-login";
 import { mockService } from "../services/service.mock";
@@ -13,6 +12,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { AuthenticationError } from "../../src/services/npm-login";
+import { GenericIOError } from "../../src/io/common-errors";
 
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
@@ -44,7 +44,7 @@ describe("cmd-login", () => {
   }
 
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { loginCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 

@@ -1,53 +1,18 @@
 import { AsyncResult, Result } from "ts-results-es";
 import fs from "fs/promises";
-import { CustomError } from "ts-custom-error";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
 import path from "path";
 import { DebugLog } from "../logging";
 
-/**
- * Reason why a file-system operation failed.
- */
-export enum FsErrorReason {
-  /**
-   * Some generic reason.
-   */
-  Other,
-  /**
-   * The path did not exist.
-   */
-  Missing,
-}
-
-/**
- * Generic error for when interacting with the file-system failed.
- */
-export class FsError extends CustomError {
-  // noinspection JSUnusedLocalSymbols
-  private readonly _class = "FsError";
-
-  constructor(
-    /**
-     * The path of the file or directory which caused the error.
-     */
-    public readonly path: string,
-    /**
-     * The reason why the operation failed.
-     */
-    public readonly reason: FsErrorReason
-  ) {
-    super("An interaction with the file-system caused an error.");
-  }
-}
-
-function fsOperation<T>(debugLog: DebugLog, op: () => Promise<T>) {
+function resultifyFsOp<T>(
+  debugLog: DebugLog,
+  op: () => Promise<T>
+): AsyncResult<T, NodeJS.ErrnoException> {
   return new AsyncResult(Result.wrapAsync(op)).mapErr((error) => {
     assertIsNodeError(error);
-    debugLog("fs-operation failed", error);
-    const cause =
-      error.code === "ENOENT" ? FsErrorReason.Missing : FsErrorReason.Other;
-    return new FsError(error.path!, cause);
+    debugLog("fs-operation failed.", error);
+    return error;
   });
 }
 
@@ -56,14 +21,16 @@ function fsOperation<T>(debugLog: DebugLog, op: () => Promise<T>) {
  * @param path The path to the file.
  * @returns The files text content.
  */
-export type ReadTextFile = (path: string) => AsyncResult<string, FsError>;
+export type ReadTextFile = (
+  path: string
+) => AsyncResult<string, NodeJS.ErrnoException>;
 
 /**
  * Makes a {@link ReadTextFile} function.
  */
 export function makeTextReader(debugLog: DebugLog): ReadTextFile {
   return (path) =>
-    fsOperation(debugLog, () => fs.readFile(path, { encoding: "utf8" }));
+    resultifyFsOp(debugLog, () => fs.readFile(path, { encoding: "utf8" }));
 }
 
 /**
@@ -75,7 +42,7 @@ export function makeTextReader(debugLog: DebugLog): ReadTextFile {
 export type WriteTextFile = (
   filePath: string,
   content: string
-) => AsyncResult<void, FsError>;
+) => AsyncResult<void, NodeJS.ErrnoException>;
 
 /**
  * Makes a {@link WriteTextFile} function.
@@ -83,8 +50,8 @@ export type WriteTextFile = (
 export function makeTextWriter(debugLog: DebugLog): WriteTextFile {
   return (filePath, content) => {
     const dirPath = path.dirname(filePath);
-    return fsOperation(debugLog, () => fse.ensureDir(dirPath)).andThen(() =>
-      fsOperation(debugLog, () => fs.writeFile(filePath, content))
+    return resultifyFsOp(debugLog, () => fse.ensureDir(dirPath)).andThen(() =>
+      resultifyFsOp(debugLog, () => fs.writeFile(filePath, content))
     );
   };
 }
@@ -98,8 +65,8 @@ export function makeTextWriter(debugLog: DebugLog): WriteTextFile {
 export function tryGetDirectoriesIn(
   directoryPath: string,
   debugLog: DebugLog
-): AsyncResult<ReadonlyArray<string>, FsError> {
-  return fsOperation(debugLog, () =>
+): AsyncResult<ReadonlyArray<string>, NodeJS.ErrnoException> {
+  return resultifyFsOp(debugLog, () =>
     fs.readdir(directoryPath, { withFileTypes: true })
   )
     .map((entries) => entries.filter((it) => it.isDirectory()))

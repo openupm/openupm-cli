@@ -7,8 +7,9 @@ import {
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { FsError, FsErrorReason, tryGetDirectoriesIn } from "./file-io";
+import { tryGetDirectoriesIn } from "./fs-result";
 import { DebugLog } from "../logging";
+import { GenericIOError } from "./common-errors";
 
 /**
  * Error for when an editor-version is not installed.
@@ -31,7 +32,7 @@ export class EditorNotInstalledError extends CustomError {
 export type FindBuiltInPackagesError =
   | GetEditorInstallPathError
   | EditorNotInstalledError
-  | FsError;
+  | GenericIOError;
 
 /**
  * Function for loading all built-in packages for an installed editor.
@@ -62,9 +63,9 @@ export function makeBuiltInPackagesFinder(
           // We can assume correct format
           .map((names) => names as DomainName[])
           .mapErr((error) =>
-            error.reason === FsErrorReason.Missing
+            error.code === "ENOENT"
               ? new EditorNotInstalledError(editorVersion)
-              : error
+              : new GenericIOError()
           )
       );
     }

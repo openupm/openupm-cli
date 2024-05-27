@@ -8,8 +8,8 @@ import {
 import { AuthNpmrcService } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { noopLogger } from "../../src/logging";
+import { GenericIOError } from "../../src/io/common-errors";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -64,7 +64,7 @@ describe("login", () => {
     });
 
     it("should fail if config write fails", async () => {
-      const expected = new FsError("", FsErrorReason.Other);
+      const expected = new GenericIOError();
       const { login, saveAuthToUpmConfig } = makeDependencies();
       saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -102,7 +102,7 @@ describe("login", () => {
     });
 
     it("should fail if npmrc auth fails", async () => {
-      const expected = new FsError("", FsErrorReason.Other);
+      const expected = new GenericIOError();
       const { login, authNpmrc } = makeDependencies();
       authNpmrc.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -144,7 +144,7 @@ describe("login", () => {
     });
 
     it("should fail if config write fails", async () => {
-      const expected = new FsError("", FsErrorReason.Other);
+      const expected = new GenericIOError();
       const { login, saveAuthToUpmConfig } = makeDependencies();
       saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
 

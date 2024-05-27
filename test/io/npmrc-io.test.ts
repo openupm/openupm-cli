@@ -1,9 +1,4 @@
-import {
-  FsError,
-  FsErrorReason,
-  ReadTextFile,
-  WriteTextFile,
-} from "../../src/io/file-io";
+import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
@@ -15,6 +10,8 @@ import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { mockService } from "../services/service.mock";
+import { eaccesError, enoentError } from "./node-error.mock";
+import { GenericIOError } from "../../src/io/common-errors";
 
 describe("npmrc-io", () => {
   describe("get path", () => {
@@ -70,8 +67,7 @@ describe("npmrc-io", () => {
     it("should be null for missing file", async () => {
       const { loadNpmrc, readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
-      const expected = new FsError(path, FsErrorReason.Missing);
-      readText.mockReturnValue(new AsyncResult(Err(expected)));
+      readText.mockReturnValue(new AsyncResult(Err(enoentError)));
 
       const result = await loadNpmrc(path).promise;
 
@@ -100,12 +96,13 @@ describe("npmrc-io", () => {
     it("should fail when write fails", async () => {
       const { saveNpmrc, writeFile } = makeDependencies();
       const path = "/invalid/path/.npmrc";
-      const expected = new FsError(path, FsErrorReason.Other);
-      writeFile.mockReturnValue(new AsyncResult(Err(expected)));
+      writeFile.mockReturnValue(new AsyncResult(Err(eaccesError)));
 
       const result = await saveNpmrc(path, ["key=value"]).promise;
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      expect(result).toBeError((actual) =>
+        expect(actual).toBeInstanceOf(GenericIOError)
+      );
     });
   });
 });

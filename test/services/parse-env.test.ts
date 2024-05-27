@@ -3,7 +3,6 @@ import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { NoWslError } from "../../src/io/wsl";
@@ -14,6 +13,7 @@ import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import { LoadProjectVersion } from "../../src/io/project-version-io";
+import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -512,7 +512,7 @@ describe("env", () => {
 
     it("should fail if ProjectVersion.txt could not be loaded", async () => {
       const { parseEnv, loadProjectVersion } = makeDependencies();
-      const expected = new FsError("", FsErrorReason.Other);
+      const expected = new GenericIOError();
       loadProjectVersion.mockReturnValue(Err(expected).toAsyncResult());
 
       const result = await parseEnv({
@@ -526,7 +526,10 @@ describe("env", () => {
       const { parseEnv, log, loadProjectVersion } = makeDependencies();
       loadProjectVersion.mockReturnValue(
         Err(
-          new FsError("/some/path/ProjectVersion.txt", FsErrorReason.Missing)
+          new FileMissingError(
+            "ProjectVersion.txt",
+            "/some/path/ProjectVersion.txt"
+          )
         ).toAsyncResult()
       );
 

@@ -1,23 +1,15 @@
 import fs from "fs/promises";
 import {
-  FsError,
-  FsErrorReason,
   makeTextReader,
   makeTextWriter,
   tryGetDirectoriesIn,
-} from "../../src/io/file-io";
+} from "../../src/io/fs-result";
 import fse from "fs-extra";
 import { Dirent } from "node:fs";
-import { mockService } from "../services/service.mock";
-import { DebugLog, noopLogger } from "../../src/logging";
+import { noopLogger } from "../../src/logging";
+import { makeNodeError } from "./node-error.mock";
 
-function makeNodeError(code: string): NodeJS.ErrnoException {
-  const error = new Error() as NodeJS.ErrnoException;
-  error.code = code;
-  return error;
-}
-
-describe("file-io", () => {
+describe("fs-result", () => {
   describe("read text", () => {
     function makeDependencies() {
       const readFile = makeTextReader(noopLogger);
@@ -35,27 +27,14 @@ describe("file-io", () => {
       expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
     });
 
-    it("should notify of missing file", async () => {
+    it("should fail if file could not be read", async () => {
       const { readFile } = makeDependencies();
-      jest.spyOn(fs, "readFile").mockRejectedValue(makeNodeError("ENOENT"));
+      const expected = makeNodeError("ENOENT");
+      jest.spyOn(fs, "readFile").mockRejectedValue(expected);
 
       const result = await readFile("path/to/file.txt").promise;
 
-      expect(result).toBeError((error: FsError) =>
-        expect(error.reason).toEqual(FsErrorReason.Missing)
-      );
-    });
-
-    it("should notify of other errors", async () => {
-      const { readFile } = makeDependencies();
-      // Example of a code we don't handle in a special way.
-      jest.spyOn(fs, "readFile").mockRejectedValue(makeNodeError("EACCES"));
-
-      const result = await readFile("path/to/file.txt").promise;
-
-      expect(result).toBeError((error: FsError) =>
-        expect(error.reason).toEqual(FsErrorReason.Other)
-      );
+      expect(result).toBeError((error) => expect(error).toEqual(expected));
     });
   });
 
@@ -110,52 +89,34 @@ describe("file-io", () => {
 
     it("should notify of directory ensure error", async () => {
       const { writeFile } = makeDependencies();
-      jest
-        .spyOn(fse, "ensureDir")
-        .mockRejectedValue(makeNodeError("EACCES") as never);
+      const expected = makeNodeError("EACCES");
+      jest.spyOn(fse, "ensureDir").mockRejectedValue(expected as never);
 
       const result = await writeFile("/path/to/file.txt", "content").promise;
 
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(FsError)
-      );
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
     it("should notify of write error", async () => {
       const { writeFile } = makeDependencies();
-      jest
-        .spyOn(fs, "writeFile")
-        .mockRejectedValue(makeNodeError("EACCES") as never);
+      const expected = makeNodeError("EACCES");
+      jest.spyOn(fs, "writeFile").mockRejectedValue(expected as never);
 
       const result = await writeFile("/path/to/file.txt", "content").promise;
 
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(FsError)
-      );
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
   });
 
   describe("get directories", () => {
-    it("should fail if directory does not exist", async () => {
-      jest.spyOn(fs, "readdir").mockRejectedValue(makeNodeError("ENOENT"));
-
-      const result = await tryGetDirectoriesIn("/bad/path/", noopLogger)
-        .promise;
-
-      expect(result).toBeError((actual: FsError) =>
-        expect(actual.reason).toEqual(FsErrorReason.Missing)
-      );
-    });
-
     it("should fail if directory could not be read", async () => {
-      jest.spyOn(fs, "readdir").mockRejectedValue(makeNodeError("EACCES"));
+      const expected = makeNodeError("EACCES");
+      jest.spyOn(fs, "readdir").mockRejectedValue(expected);
 
       const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
         .promise;
 
-      expect(result).toBeError((actual: FsError) =>
-        expect(actual.reason).toEqual(FsErrorReason.Other)
-      );
+      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
     it("should get names of directories", async () => {

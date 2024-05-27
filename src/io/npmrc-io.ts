@@ -1,10 +1,11 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { FsError, FsErrorReason, ReadTextFile, WriteTextFile } from "./file-io";
+import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { RequiredEnvMissingError } from "./upm-config-io";
 import { GetHomePath } from "./special-paths";
+import { GenericIOError } from "./common-errors";
 
 /**
  * Error for when npmrc path could not be determined.
@@ -27,7 +28,7 @@ export function makeNpmrcPathFinder(getHomePath: GetHomePath): FindNpmrcPath {
 /**
  * Error that might occur when loading a npmrc.
  */
-export type NpmrcLoadError = FsError;
+export type NpmrcLoadError = GenericIOError;
 
 /**
  * Function for loading npmrc.
@@ -46,14 +47,14 @@ export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
     readFile(path)
       .map<Npmrc | null>((content) => content.split(EOL))
       .orElse((error) =>
-        error.reason == FsErrorReason.Missing ? Ok(null) : Err(error)
+        error.code === "ENOENT" ? Ok(null) : Err(new GenericIOError())
       );
 }
 
 /**
  * Error that might occur when saving a npmrc.
  */
-export type NpmrcSaveError = FsError;
+export type NpmrcSaveError = GenericIOError;
 
 /**
  * Function for saving npmrc files. Overwrites the content of the file.
@@ -71,6 +72,6 @@ export type SaveNpmrc = (
 export function makeNpmrcSaver(writeFile: WriteTextFile): SaveNpmrc {
   return (path, npmrc) => {
     const content = npmrc.join(EOL);
-    return writeFile(path, content);
+    return writeFile(path, content).mapErr(() => new GenericIOError());
   };
 }

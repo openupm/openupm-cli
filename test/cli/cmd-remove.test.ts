@@ -2,7 +2,6 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { makeRemoveCmd, RemoveError } from "../../src/cli/cmd-remove";
 import { Err, Ok } from "ts-results-es";
-import { FsError, FsErrorReason } from "../../src/io/file-io";
 import { makeDomainName } from "../../src/domain/domain-name";
 import {
   mockProjectManifest,
@@ -21,6 +20,7 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
+import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -61,7 +61,7 @@ function makeDependencies() {
 
 describe("cmd-remove", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { removeCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
@@ -77,7 +77,7 @@ describe("cmd-remove", () => {
     const result = await removeCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual: RemoveError) =>
-      expect(actual).toBeInstanceOf(FsError)
+      expect(actual).toBeInstanceOf(FileMissingError)
     );
   });
 
@@ -187,7 +187,7 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if manifest could not be saved", async () => {
-    const expected = new FsError("", FsErrorReason.Other);
+    const expected = new GenericIOError();
     const { removeCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
@@ -198,10 +198,7 @@ describe("cmd-remove", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const { removeCmd, log, writeProjectManifest } = makeDependencies();
-    mockProjectManifestWriteResult(
-      writeProjectManifest,
-      new FsError("", FsErrorReason.Other)
-    );
+    mockProjectManifestWriteResult(writeProjectManifest, new GenericIOError());
 
     await removeCmd(somePackage, { _global: {} });
 
