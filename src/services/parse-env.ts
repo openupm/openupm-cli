@@ -24,7 +24,6 @@ import {
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
 import { GetCwd } from "../io/special-paths";
-import { FileMissingError } from "../io/common-errors";
 
 export type Env = Readonly<{
   cwd: string;
