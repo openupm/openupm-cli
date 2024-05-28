@@ -12,6 +12,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { AuthenticationError } from "../../src/services/npm-login";
 import { GenericIOError } from "../../src/io/common-errors";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
@@ -48,7 +49,7 @@ describe("cmd-login", () => {
 
     const result = await loginCmd({ _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   // TODO: Add tests for prompting logic
@@ -65,7 +66,7 @@ describe("cmd-login", () => {
       _global: { registry: exampleRegistryUrl },
     });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should fail if login failed", async () => {
@@ -80,7 +81,7 @@ describe("cmd-login", () => {
       _global: { registry: exampleRegistryUrl },
     });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should notify if unauthorized", async () => {
