@@ -62,9 +62,10 @@ export function makeDepsCmd(
 
     const [name, version] = splitPackageReference(pkg);
 
-    if (version !== undefined && isPackageUrl(version))
-      // TODO: Convert to result
-      throw new Error("Cannot get dependencies for url-version");
+    if (version !== undefined && isPackageUrl(version)) {
+      log.error("", "cannot get dependencies for url-version");
+      return ResultCodes.Error;
+    }
 
     const deep = options.deep || false;
     debugLog(`fetch: ${makePackageReference(name, version)}, deep=${deep}`);

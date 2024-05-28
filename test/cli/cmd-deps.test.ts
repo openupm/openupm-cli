@@ -68,16 +68,30 @@ describe("cmd-deps", () => {
   it("should fail if package-reference has url-version", async () => {
     const { depsCmd } = makeDependencies();
 
-    const operation = depsCmd(
+    const resultCode = await depsCmd(
       makePackageReference(somePackage, "https://some.registry.com"),
       {
         _global: {},
       }
     );
 
-    await expect(operation).rejects.toMatchObject({
-      message: "Cannot get dependencies for url-version",
-    });
+    expect(resultCode).toEqual(ResultCodes.Error);
+  });
+
+  it("should notify if package-reference has url-version", async () => {
+    const { depsCmd, log } = makeDependencies();
+
+    await depsCmd(
+      makePackageReference(somePackage, "https://some.registry.com"),
+      {
+        _global: {},
+      }
+    );
+
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("url-version")
+    );
   });
 
   it("should log valid dependencies", async () => {
