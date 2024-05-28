@@ -14,6 +14,7 @@ import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import { LoadProjectVersion } from "../../src/io/project-version-io";
 import { GenericIOError } from "../../src/io/common-errors";
+import path from "path";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -457,7 +458,7 @@ describe("env", () => {
     it("should be specified path if overridden", async () => {
       const { parseEnv } = makeDependencies();
 
-      const expected = "/some/other/path";
+      const expected = path.resolve("/some/other/path");
 
       const result = await parseEnv({
         _global: {

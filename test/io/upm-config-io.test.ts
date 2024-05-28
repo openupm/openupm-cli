@@ -25,7 +25,7 @@ describe("upm-config-io", () => {
     describe("no wsl and no system-user", () => {
       it("should be in home path", async () => {
         const { getUpmConfigPath, getHomePath } = makeDependencies();
-        const expected = "/some/home/dir/.upmconfig.toml";
+        const expected = path.resolve("/some/home/dir/.upmconfig.toml");
         getHomePath.mockReturnValue(Ok(path.dirname(expected)));
 
         const result = await getUpmConfigPath(false, false).promise;
