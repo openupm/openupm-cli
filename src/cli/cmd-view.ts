@@ -11,8 +11,8 @@ import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Logger } from "npmlog";
 import { ResolveRemotePackument } from "../services/resolve-remote-packument";
-import { logEnvParseError } from "./error-logging";
 import { ResultCodes } from "./result-codes";
+import { notifyEnvParsingFailed } from "./error-logging";
 
 export type ViewOptions = CmdOptions;
 
@@ -112,7 +112,7 @@ export function makeViewCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
+      notifyEnvParsingFailed(log, envResult.error);
       return ResultCodes.Error;
     }
     const env = envResult.value;

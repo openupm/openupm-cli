@@ -24,13 +24,13 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../common-errors";
-import {
-  logEnvParseError,
-  logManifestLoadError,
-  logManifestSaveError,
-} from "./error-logging";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
+import {
+  notifyEnvParsingFailed,
+  notifyManifestLoadFailed,
+  notifyManifestWriteFailed,
+} from "./error-logging";
 
 /**
  * The possible result codes with which the remove command can exit.
@@ -70,7 +70,7 @@ export function makeRemoveCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
+      notifyEnvParsingFailed(log, envResult.error);
       return ResultCodes.Error;
     }
     const env = envResult.value;
@@ -110,7 +110,7 @@ export function makeRemoveCmd(
     // load manifest
     const manifestResult = await loadProjectManifest(env.cwd).promise;
     if (manifestResult.isErr()) {
-      logManifestLoadError(log, manifestResult.error);
+      notifyManifestLoadFailed(log, manifestResult.error);
       return ResultCodes.Error;
     }
     let manifest = manifestResult.value;
@@ -125,7 +125,7 @@ export function makeRemoveCmd(
     // save manifest
     const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
-      logManifestSaveError(log, saveResult.error);
+      notifyManifestWriteFailed(log);
       return ResultCodes.Error;
     }
 

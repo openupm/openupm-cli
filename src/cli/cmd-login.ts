@@ -10,9 +10,9 @@ import {
 import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
 import { LoginService } from "../services/login";
-import { logEnvParseError } from "./error-logging";
 import { ResultCodes } from "./result-codes";
 import { RegistryAuthenticationError } from "../io/common-errors";
+import { notifyEnvParsingFailed } from "./error-logging";
 
 /**
  * Options for logging in a user. These come from the CLI.
@@ -51,7 +51,7 @@ export function makeLoginCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
+      notifyEnvParsingFailed(log, envResult.error);
       return ResultCodes.Error;
     }
     const env = envResult.value;

@@ -82,7 +82,10 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveBeenCalledWith("manifest", expect.any(String));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("Could not locate")
+    );
   });
 
   it("should fail if package version was specified", async () => {
@@ -193,7 +196,10 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveBeenCalledWith("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("file-system error")
+    );
   });
 
   it("should suggest to open Unity after save", async () => {
@@ -201,6 +207,9 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.notice).toHaveBeenCalledWith("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveBeenCalledWith(
+      "",
+      expect.stringContaining("open Unity")
+    );
   });
 });

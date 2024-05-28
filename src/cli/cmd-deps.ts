@@ -12,9 +12,12 @@ import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
-import { logEnvParseError, logPackumentResolveError } from "./error-logging";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
+import {
+  notifyEnvParsingFailed,
+  notifyRemotePackumentVersionResolvingFailed,
+} from "./error-logging";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -55,7 +58,7 @@ export function makeDepsCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
+      notifyEnvParsingFailed(log, envResult.error);
       return ResultCodes.Error;
     }
     const env = envResult.value;
@@ -76,7 +79,11 @@ export function makeDepsCmd(
       deep
     );
     if (resolveResult.isErr()) {
-      logPackumentResolveError(log, name, resolveResult.error);
+      notifyRemotePackumentVersionResolvingFailed(
+        log,
+        name,
+        resolveResult.error
+      );
       return ResultCodes.Error;
     }
 

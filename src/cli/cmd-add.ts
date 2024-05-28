@@ -35,13 +35,6 @@ import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import {
-  logDetermineEditorError,
-  logEnvParseError,
-  logManifestLoadError,
-  logManifestSaveError,
-  logPackumentResolveError,
-} from "./error-logging";
-import {
   DependencyResolveError,
   ResolveDependenciesService,
 } from "../services/dependency-resolving";
@@ -55,6 +48,13 @@ import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { FetchPackumentError } from "../io/packument-io";
 import { ResultCodes } from "./result-codes";
+import {
+  notifyEnvParsingFailed,
+  notifyManifestLoadFailed,
+  notifyManifestWriteFailed,
+  notifyProjectVersionLoadFailed,
+  notifyRemotePackumentVersionResolvingFailed,
+} from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -126,14 +126,14 @@ export function makeAddCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
+      notifyEnvParsingFailed(log, envResult.error);
       return ResultCodes.Error;
     }
     const env = envResult.value;
 
     const editorVersionResult = await determineEditorVersion(env.cwd).promise;
     if (editorVersionResult.isErr()) {
-      logDetermineEditorError(log, editorVersionResult.error);
+      notifyProjectVersionLoadFailed(log, editorVersionResult.error);
       return ResultCodes.Error;
     }
     const editorVersion = editorVersionResult.value;
@@ -177,7 +177,11 @@ export function makeAddCmd(
         }
 
         if (resolveResult.isErr()) {
-          logPackumentResolveError(log, name, resolveResult.error);
+          notifyRemotePackumentVersionResolvingFailed(
+            log,
+            name,
+            resolveResult.error
+          );
           return resolveResult;
         }
 
@@ -235,7 +239,11 @@ export function makeAddCmd(
             true
           );
           if (resolveResult.isErr()) {
-            logPackumentResolveError(log, name, resolveResult.error);
+            notifyRemotePackumentVersionResolvingFailed(
+              log,
+              name,
+              resolveResult.error
+            );
             return resolveResult;
           }
           const [depsValid, depsInvalid] = resolveResult.value;
@@ -255,7 +263,11 @@ export function makeAddCmd(
           // print suggestion for depsInvalid
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
-            logPackumentResolveError(log, depObj.name, depObj.reason);
+            notifyRemotePackumentVersionResolvingFailed(
+              log,
+              depObj.name,
+              depObj.reason
+            );
 
             // If the manifest already has the dependency than it does not
             // really matter that it was not resolved.
@@ -332,7 +344,7 @@ export function makeAddCmd(
     // load manifest
     const loadResult = await loadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
-      logManifestLoadError(log, loadResult.error);
+      notifyManifestLoadFailed(log, loadResult.error);
       return ResultCodes.Error;
     }
     let manifest = loadResult.value;
@@ -354,7 +366,7 @@ export function makeAddCmd(
     if (dirty) {
       const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
       if (saveResult.isErr()) {
-        logManifestSaveError(log, saveResult.error);
+        notifyManifestWriteFailed(log);
         return ResultCodes.Error;
       }
 

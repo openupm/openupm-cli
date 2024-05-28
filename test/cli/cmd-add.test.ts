@@ -144,7 +144,7 @@ describe("cmd-add", () => {
 
     expect(log.error).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining("environment information could not be parsed")
+      expect.stringContaining("file-system error")
     );
   });
 
@@ -169,7 +169,7 @@ describe("cmd-add", () => {
 
     expect(log.error).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining("editor version could be determined")
+      expect.stringContaining("file-system error")
     );
   });
 
@@ -190,7 +190,7 @@ describe("cmd-add", () => {
 
     expect(log.error).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining("could not load project manifest")
+      expect.stringContaining("Could not locate")
     );
   });
 
@@ -210,7 +210,7 @@ describe("cmd-add", () => {
     await addCmd(somePackage, { _global: {} });
 
     expect(log.error).toHaveBeenCalledWith(
-      "404",
+      expect.any(String),
       expect.stringContaining("not found")
     );
   });
@@ -235,9 +235,9 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveBeenCalledWith(
-      "404",
-      expect.stringContaining("is not a valid choice")
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("has no published version")
     );
   });
 
@@ -400,9 +400,9 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveBeenCalledWith(
-      "404",
-      expect.stringContaining("is not a valid choice")
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("has no published version")
     );
   });
 
@@ -680,7 +680,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveBeenCalledWith("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveBeenCalledWith(
+      "",
+      expect.stringContaining("open Unity")
+    );
   });
 
   it("should fail if manifest could not be saved", async () => {
@@ -699,6 +702,9 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveBeenCalledWith("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("file-system error")
+    );
   });
 });

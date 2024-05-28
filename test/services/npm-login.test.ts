@@ -1,13 +1,11 @@
 import "assert";
-import {
-  makeNpmLoginService,
-} from "../../src/services/npm-login";
+import { makeNpmLoginService } from "../../src/services/npm-login";
 import RegClient from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
-import {RegistryAuthenticationError} from "../../src/io/common-errors";
-import {noopLogger} from "../../src/logging";
+import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import { noopLogger } from "../../src/logging";
 
 function makeDependencies() {
   const registryClient: jest.Mocked<RegClient.Instance> = {
