@@ -10,7 +10,6 @@ import { LoginService } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { makeEditorVersion } from "../../src/domain/editor-version";
 import { AuthenticationError } from "../../src/services/npm-login";
 import { GenericIOError } from "../../src/io/common-errors";
 
@@ -19,7 +18,6 @@ const defaultEnv = {
   upstream: true,
   registry: { url: exampleRegistryUrl, auth: null },
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
-  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
 } as Env;
 const exampleUser = "user";
 const examplePassword = "pass";

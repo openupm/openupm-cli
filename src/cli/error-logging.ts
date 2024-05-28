@@ -13,6 +13,7 @@ import { ChildProcessError } from "../utils/process";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
 import { FileMissingError, GenericIOError } from "../io/common-errors";
 import { StringFormatError } from "../utils/string-parsing";
+import { DetermineEditorVersionError } from "../services/determine-editor-version";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
@@ -70,20 +71,38 @@ export function logEnvParseError(log: Logger, error: EnvParseError) {
   const reason =
     error instanceof NoWslError
       ? "you attempted to use wsl even though you are not running openupm inside wsl"
-      : error instanceof FileMissingError
-      ? `the projects version file (ProjectVersion.txt) could not be found at "${error.path}"`
       : error instanceof GenericIOError
       ? `a file-system interaction failed`
       : error instanceof ChildProcessError
       ? "a required child process failed"
-      : error instanceof FileParseError
-      ? `the project version file (ProjectVersion.txt) has an invalid structure`
       : error instanceof RequiredEnvMissingError
       ? `none of the following environment variables were set: ${error.keyNames.join(
           ", "
         )}`
       : `a string was malformed. Expected to be ${error.formatName}`;
   const errorMessage = `environment information could not be parsed because ${reason}.`;
+  log.error("", errorMessage);
+
+  // TODO: Suggest actions user might take in order to fix the problem.
+}
+
+/**
+ * Logs a {@link DetermineEditorVersionError} to a logger.
+ */
+export function logDetermineEditorError(
+  log: Logger,
+  error: DetermineEditorVersionError
+) {
+  const reason =
+    error instanceof FileMissingError
+      ? `the projects version file (ProjectVersion.txt) could not be found at "${error.path}"`
+      : error instanceof GenericIOError
+      ? `a file-system interaction failed`
+      : error instanceof FileParseError
+      ? `the project version file (ProjectVersion.txt) has an invalid structure`
+      : `the project versions file (ProjectVersion.txt) did not contain valid yaml`;
+
+  const errorMessage = `editor version could be determined because ${reason}.`;
   log.error("", errorMessage);
 
   // TODO: Suggest actions user might take in order to fix the problem.

@@ -3,16 +3,12 @@ import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
-import { makeEditorVersion } from "../../src/domain/editor-version";
 import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
-import { mockProjectVersion } from "../io/project-version-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
-import { LoadProjectVersion } from "../../src/io/project-version-io";
-import { GenericIOError } from "../../src/io/common-errors";
 import path from "path";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
@@ -31,8 +27,6 @@ const testUpmConfig: UPMConfig = {
   npmAuth: { [exampleRegistryUrl]: testUpmAuth },
 };
 
-const testProjectVersion = "2021.3.1f1";
-
 function makeDependencies() {
   const log = makeMockLogger();
 
@@ -47,22 +41,17 @@ function makeDependencies() {
   const getCwd = mockService<GetCwd>();
   getCwd.mockReturnValue(testRootPath);
 
-  const loadProjectVersion = mockService<LoadProjectVersion>();
-  mockProjectVersion(loadProjectVersion, testProjectVersion);
-
   const parseEnv = makeParseEnvService(
     log,
     getUpmConfigPath,
     loadUpmConfig,
-    getCwd,
-    loadProjectVersion
+    getCwd
   );
   return {
     parseEnv,
     log,
     getUpmConfigPath,
     loadUpmConfig,
-    loadProjectVersion,
   } as const;
 }
 
@@ -466,60 +455,6 @@ describe("env", () => {
       });
 
       expect(result).toBeOk((env: Env) => expect(env.cwd).toEqual(expected));
-    });
-  });
-
-  describe("editor-version", () => {
-    it("should be parsed object for valid release versions", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const result = await parseEnv({
-        _global: {},
-      });
-
-      expect(result).toBeOk((env: Env) =>
-        expect(env.editorVersion).toEqual(makeEditorVersion(2021, 3, 1, "f", 1))
-      );
-    });
-
-    it("should be original string for non-release versions", async () => {
-      const { parseEnv, loadProjectVersion } = makeDependencies();
-      const expected = "2022.3";
-      mockProjectVersion(loadProjectVersion, expected);
-
-      const result = await parseEnv({
-        _global: {},
-      });
-
-      expect(result).toBeOk((env: Env) =>
-        expect(env.editorVersion).toEqual(expected)
-      );
-    });
-
-    it("should be original string for non-version string", async () => {
-      const { parseEnv, loadProjectVersion } = makeDependencies();
-      const expected = "Bad version";
-      mockProjectVersion(loadProjectVersion, expected);
-
-      const result = await parseEnv({
-        _global: {},
-      });
-
-      expect(result).toBeOk((env: Env) =>
-        expect(env.editorVersion).toEqual(expected)
-      );
-    });
-
-    it("should fail if ProjectVersion.txt could not be loaded", async () => {
-      const { parseEnv, loadProjectVersion } = makeDependencies();
-      const expected = new GenericIOError();
-      loadProjectVersion.mockReturnValue(Err(expected).toAsyncResult());
-
-      const result = await parseEnv({
-        _global: {},
-      });
-
-      expect(result).toBeError((error) => expect(error).toEqual(expected));
     });
   });
 });

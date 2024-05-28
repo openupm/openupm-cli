@@ -37,6 +37,7 @@ import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import {
+  logDetermineEditorError,
   logEnvParseError,
   logManifestLoadError,
   logManifestSaveError,
@@ -54,6 +55,7 @@ import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import { VersionNotFoundError } from "../domain/packument";
 import { FetchPackumentError } from "../io/packument-io";
 import { DebugLog } from "../logging";
+import { DetermineEditorVersion } from "../services/determine-editor-version";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -113,6 +115,7 @@ export function makeAddCmd(
   resolveDependencies: ResolveDependenciesService,
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest,
+  determineEditorVersion: DetermineEditorVersion,
   log: Logger,
   debugLog: DebugLog
 ): AddCmd {
@@ -126,10 +129,17 @@ export function makeAddCmd(
     }
     const env = envResult.value;
 
-    if (typeof env.editorVersion === "string")
+    const editorVersionResult = await determineEditorVersion(env.cwd).promise;
+    if (editorVersionResult.isErr()) {
+      logDetermineEditorError(log, editorVersionResult.error);
+      return editorVersionResult;
+    }
+    const editorVersion = editorVersionResult.value;
+
+    if (typeof editorVersion === "string")
       log.warn(
         "editor.version",
-        `${env.editorVersion} is unknown, the editor version check is disabled`
+        `${editorVersion} is unknown, the editor version check is disabled`
       );
 
     const tryAddToManifest = async function (
@@ -194,13 +204,13 @@ export function makeAddCmd(
           // verify editor version
           if (
             targetEditorVersion !== null &&
-            typeof env.editorVersion !== "string" &&
-            compareEditorVersion(env.editorVersion, targetEditorVersion) < 0
+            typeof editorVersion !== "string" &&
+            compareEditorVersion(editorVersion, targetEditorVersion) < 0
           ) {
             log.warn(
               "editor.version",
               `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
-                env.editorVersion
+                editorVersion
               )}`
             );
             if (!options.force) {
