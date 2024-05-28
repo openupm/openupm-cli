@@ -1,6 +1,6 @@
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
-import { makeRemoveCmd, RemoveError } from "../../src/cli/cmd-remove";
+import { makeRemoveCmd } from "../../src/cli/cmd-remove";
 import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import {
@@ -10,17 +10,14 @@ import {
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
-import {
-  PackageWithVersionError,
-  PackumentNotFoundError,
-} from "../../src/common-errors";
 import { makeMockLogger } from "./log.mock";
 import { mockService } from "../services/service.mock";
 import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import { GenericIOError } from "../../src/io/common-errors";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -67,7 +64,7 @@ describe("cmd-remove", () => {
 
     const result = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should fail if manifest could not be loaded", async () => {
@@ -76,9 +73,7 @@ describe("cmd-remove", () => {
 
     const result = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual: RemoveError) =>
-      expect(actual).toBeInstanceOf(FileMissingError)
-    );
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be loaded", async () => {
@@ -98,9 +93,7 @@ describe("cmd-remove", () => {
       { _global: {} }
     );
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(PackageWithVersionError)
-    );
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package version was specified", async () => {
@@ -122,9 +115,7 @@ describe("cmd-remove", () => {
 
     const result = await removeCmd(otherPackage, { _global: {} });
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(PackumentNotFoundError)
-    );
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package is not in manifest", async () => {
@@ -193,7 +184,7 @@ describe("cmd-remove", () => {
 
     const result = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be saved", async () => {
