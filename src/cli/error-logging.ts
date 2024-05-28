@@ -12,18 +12,26 @@ import { NoWslError } from "../io/wsl";
 import { ChildProcessError } from "../utils/process";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
 import { FileMissingError, GenericIOError } from "../io/common-errors";
+import { StringFormatError } from "../utils/string-parsing";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
  */
 export function logManifestLoadError(log: Logger, error: ManifestLoadError) {
+  const reason =
+    error instanceof FileMissingError
+      ? `it could not be found at "${error.path}"`
+      : error instanceof GenericIOError
+      ? "a file-system interaction failed"
+      : error instanceof StringFormatError
+      ? "the manifest file did not contain valid json"
+      : "the manifest file did not contain a valid project manifest";
+
   const prefix = "manifest";
-  if (error instanceof FileMissingError)
-    log.error(prefix, `manifest at ${error.path} does not exist`);
-  else if (error instanceof FileParseError) {
-    log.error(prefix, `failed to parse manifest at ${error.path}`);
-    if (error.cause !== undefined) log.error(prefix, error.cause.message);
-  }
+  const errorMessage = `Could not load project manifest because ${reason}.`;
+  log.error(prefix, errorMessage);
+
+  // TODO: Print fix suggestions
 }
 
 /**
@@ -69,7 +77,7 @@ export function logEnvParseError(log: Logger, error: EnvParseError) {
       : error instanceof ChildProcessError
       ? "a required child process failed"
       : error instanceof FileParseError
-      ? `the file at ${error.path} could not parsed into a ${error.targetDescription}`
+      ? `the project version file (ProjectVersion.txt) has an invalid structure`
       : error instanceof RequiredEnvMissingError
       ? `none of the following environment variables were set: ${error.keyNames.join(
           ", "

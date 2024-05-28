@@ -1,6 +1,5 @@
 import { CustomError } from "ts-custom-error";
 import { EditorVersion } from "./domain/editor-version";
-import { StringFormatError } from "./utils/string-parsing";
 
 /**
  * Error for when the packument was not found.
@@ -27,21 +26,18 @@ export class PackageWithVersionError extends CustomError {
 /**
  * Error for when a file could not be parsed into a specific target type.
  */
-export class FileParseError extends CustomError {
+export class FileParseError<const TTarget extends string> extends CustomError {
   constructor(
     /**
      * The path to the file that could not be parsed.
      */
-    readonly path: string,
+    public readonly filePath: string,
     /**
      * A description or name of the thing that the file was supposed to be
-     * parsed to.
+     * parsed to. This should be a constant string that can be used in ifs
+     * and switches.
      */
-    readonly targetDescription: string,
-    /**
-     * The error that caused this one.
-     */
-    readonly cause?: StringFormatError
+    public readonly targetDescription: TTarget
   ) {
     super("A file could not be parsed into a specific target type.");
   }

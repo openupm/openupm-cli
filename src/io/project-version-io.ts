@@ -25,13 +25,28 @@ export function makeProjectVersionMissingError(
 }
 
 /**
+ * Error for when the project version could not be parsed.
+ */
+export type ProjectVersionParseError = FileParseError<"ProjectVersion.txt">;
+
+/**
+ * Makes a {@link ProjectVersionParseError} object.
+ * @param filePath The path of the file.
+ */
+export function makeProjectVersionParseError(
+  filePath: string
+): ProjectVersionParseError {
+  return new FileParseError(filePath, "ProjectVersion.txt");
+}
+
+/**
  * Error which may occur when loading a project-version.
  */
 export type ProjectVersionLoadError =
-  | StringFormatError
-  | FileParseError
   | ProjectVersionMissingError
-  | GenericIOError;
+  | GenericIOError
+  | StringFormatError
+  | ProjectVersionParseError;
 
 /**
  * Function for loading a projects editor version string.
@@ -67,7 +82,7 @@ export function makeProjectVersionLoader(
             typeof content.m_EditorVersion === "string"
           )
         )
-          return Err(new FileParseError(filePath, "Project-version"));
+          return Err(makeProjectVersionParseError(filePath));
 
         return Ok(content.m_EditorVersion);
       });
