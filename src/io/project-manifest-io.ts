@@ -3,7 +3,7 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import path from "path";
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Err, Ok } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { StringFormatError, tryParseJson } from "../utils/string-parsing";
 import { FileParseError } from "../common-errors";
@@ -34,12 +34,28 @@ export function makeProjectManifestMissingError(
 }
 
 /**
+ * Error for when the project manifest could not be parsed.
+ */
+export type ProjectManifestParseError = FileParseError<"ProjectManifest">;
+
+/**
+ * Makes a {@link ProjectManifestParseError} object.
+ * @param filePath The path of the file.
+ */
+export function makeProjectManifestParseError(
+  filePath: string
+): ProjectManifestParseError {
+  return new FileParseError(filePath, "ProjectManifest");
+}
+
+/**
  * Error which may occur when loading a project manifest.
  */
 export type ManifestLoadError =
   | ProjectManifestMissingError
   | GenericIOError
-  | FileParseError;
+  | StringFormatError
+  | ProjectManifestParseError;
 
 /**
  * Function for loading the project manifest for a Unity project.
@@ -57,22 +73,19 @@ export function makeProjectManifestLoader(
 ): LoadProjectManifest {
   return (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
-    return (
-      readFile(manifestPath)
-        .mapErr((error) =>
-          error.code === "ENOENT"
-            ? makeProjectManifestMissingError(manifestPath)
-            : new GenericIOError()
-        )
-        .andThen(tryParseJson)
-        // TODO: Actually validate the json structure
-        .map((json) => json as unknown as UnityProjectManifest)
-        .mapErr((error) =>
-          error instanceof StringFormatError
-            ? new FileParseError(manifestPath, "Project-manifest", error)
-            : error
-        )
-    );
+    return readFile(manifestPath)
+      .mapErr((error) =>
+        error.code === "ENOENT"
+          ? makeProjectManifestMissingError(manifestPath)
+          : new GenericIOError()
+      )
+      .andThen(tryParseJson)
+      .andThen((json) =>
+        typeof json === "object"
+          ? // TODO: Actually validate the json structure
+            Ok(json as unknown as UnityProjectManifest)
+          : Err(makeProjectManifestParseError(manifestPath))
+      );
   };
 }
 

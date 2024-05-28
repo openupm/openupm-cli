@@ -8,7 +8,6 @@ import {
   mapScopedRegistry,
 } from "../../src/domain/project-manifest";
 import path from "path";
-import { FileParseError } from "../../src/common-errors";
 import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
 import { Err, Ok } from "ts-results-es";
 import { buildProjectManifest } from "../domain/data-project-manifest";
@@ -18,6 +17,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
 import { eaccesError, enoentError } from "./node-error.mock";
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import { StringFormatError } from "../../src/utils/string-parsing";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
@@ -72,7 +72,7 @@ describe("project-manifest io", () => {
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
       expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FileParseError)
+        expect(actual).toBeInstanceOf(StringFormatError)
       );
     });
 

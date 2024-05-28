@@ -3,7 +3,6 @@ import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
-import { FileParseError } from "../../src/common-errors";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
@@ -521,27 +520,6 @@ describe("env", () => {
       });
 
       expect(result).toBeError((error) => expect(error).toEqual(expected));
-    });
-
-    it("should notify of parsing issue", async () => {
-      const { parseEnv, log, loadProjectVersion } = makeDependencies();
-      loadProjectVersion.mockReturnValue(
-        Err(
-          new FileParseError(
-            "/some/path/ProjectVersion.txt",
-            "ProjectVersion.txt"
-          )
-        ).toAsyncResult()
-      );
-
-      await parseEnv({
-        _global: {},
-      });
-
-      expect(log.error).toHaveBeenCalledWith(
-        "ProjectVersion",
-        expect.stringContaining("could not be parsed")
-      );
     });
   });
 });

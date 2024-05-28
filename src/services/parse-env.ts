@@ -158,15 +158,8 @@ export function makeParseEnvService(
 
     // editor version
     const projectVersionLoadResult = await loadProjectVersion(cwd).promise;
-    if (projectVersionLoadResult.isErr()) {
-      const error = projectVersionLoadResult.error;
-      if (error instanceof FileParseError)
-        log.error(
-          "ProjectVersion",
-          "ProjectVersion.txt could not be parsed for editor-version!"
-        );
-      return projectVersionLoadResult;
-    }
+    if (projectVersionLoadResult.isErr()) return projectVersionLoadResult;
+
     const unparsedEditorVersion = projectVersionLoadResult.value;
     const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
     const editorVersion =
