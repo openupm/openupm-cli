@@ -29,7 +29,7 @@ export function logManifestLoadError(log: Logger, error: ManifestLoadError) {
       : "the manifest file did not contain a valid project manifest";
 
   const prefix = "manifest";
-  const errorMessage = `Could not load project manifest because ${reason}.`;
+  const errorMessage = `could not load project manifest because ${reason}.`;
   log.error(prefix, errorMessage);
 
   // TODO: Print fix suggestions

@@ -179,8 +179,8 @@ openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const addResult = await addCmd(pkgs, makeCmdOptions(options));
-    if (addResult.isErr()) process.exit(1);
+    const resultCode = await addCmd(pkgs, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
