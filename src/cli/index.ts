@@ -230,8 +230,8 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    const depsResult = await depsCmd(pkg, makeCmdOptions(options));
-    if (depsResult.isErr()) process.exit(1);
+    const resultCode = await depsCmd(pkg, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program

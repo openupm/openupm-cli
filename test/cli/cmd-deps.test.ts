@@ -13,6 +13,7 @@ import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { GenericIOError } from "../../src/io/common-errors";
+import {ResultCodes} from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -61,7 +62,7 @@ describe("cmd-deps", () => {
 
     const result = await depsCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should fail if package-reference has url-version", async () => {
