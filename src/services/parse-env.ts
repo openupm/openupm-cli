@@ -44,67 +44,6 @@ export type EnvParseError =
   | UpmConfigLoadError
   | ProjectVersionLoadError;
 
-function determineCwd(getCwd: GetCwd, options: CmdOptions): string {
-  return options._global.chdir !== undefined
-    ? path.resolve(options._global.chdir)
-    : getCwd();
-}
-
-function determineWsl(options: CmdOptions): boolean {
-  return options._global.wsl === true;
-}
-
-function determinePrimaryRegistry(
-  log: Logger,
-  options: CmdOptions,
-  upmConfig: UPMConfig | null
-): Registry {
-  const url =
-    options._global.registry !== undefined
-      ? coerceRegistryUrl(options._global.registry)
-      : options._global.cn === true
-      ? makeRegistryUrl("https://package.openupm.cn")
-      : makeRegistryUrl("https://package.openupm.com");
-
-  if (upmConfig === null) return { url, auth: null };
-
-  const auth = tryGetAuthForRegistry(upmConfig, url);
-
-  if (auth === null) {
-    log.warn(
-      "env.auth",
-      `failed to parse auth info for ${url} in .upmconfig.toml: missing token or _auth fields`
-    );
-  }
-
-  return { url, auth };
-}
-
-function determineUpstreamRegistry(options: CmdOptions): Registry {
-  const url =
-    options._global.cn === true
-      ? makeRegistryUrl("https://packages.unity.cn")
-      : makeRegistryUrl("https://packages.unity.com");
-
-  return { url, auth: null };
-}
-
-function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
-  return options._global.verbose ? "verbose" : "notice";
-}
-
-function determineUseColor(options: CmdOptions): boolean {
-  return options._global.color !== false && tryGetEnv("NODE_ENV") !== "test";
-}
-
-function determineUseUpstream(options: CmdOptions): boolean {
-  return options._global.upstream !== false;
-}
-
-function determineIsSystemUser(options: CmdOptions): boolean {
-  return options._global.systemUser === true;
-}
-
 /**
  * Service function for parsing environment information and global
  * command-options for further usage.
@@ -123,6 +62,66 @@ export function makeParseEnvService(
   getCwd: GetCwd,
   loadProjectVersion: LoadProjectVersion
 ): ParseEnvService {
+  function determineCwd(options: CmdOptions): string {
+    return options._global.chdir !== undefined
+      ? path.resolve(options._global.chdir)
+      : getCwd();
+  }
+
+  function determineWsl(options: CmdOptions): boolean {
+    return options._global.wsl === true;
+  }
+
+  function determinePrimaryRegistry(
+    options: CmdOptions,
+    upmConfig: UPMConfig | null
+  ): Registry {
+    const url =
+      options._global.registry !== undefined
+        ? coerceRegistryUrl(options._global.registry)
+        : options._global.cn === true
+        ? makeRegistryUrl("https://package.openupm.cn")
+        : makeRegistryUrl("https://package.openupm.com");
+
+    if (upmConfig === null) return { url, auth: null };
+
+    const auth = tryGetAuthForRegistry(upmConfig, url);
+
+    if (auth === null) {
+      log.warn(
+        "env.auth",
+        `failed to parse auth info for ${url} in .upmconfig.toml: missing token or _auth fields`
+      );
+    }
+
+    return { url, auth };
+  }
+
+  function determineUpstreamRegistry(options: CmdOptions): Registry {
+    const url =
+      options._global.cn === true
+        ? makeRegistryUrl("https://packages.unity.cn")
+        : makeRegistryUrl("https://packages.unity.com");
+
+    return { url, auth: null };
+  }
+
+  function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
+    return options._global.verbose ? "verbose" : "notice";
+  }
+
+  function determineUseColor(options: CmdOptions): boolean {
+    return options._global.color !== false && tryGetEnv("NODE_ENV") !== "test";
+  }
+
+  function determineUseUpstream(options: CmdOptions): boolean {
+    return options._global.upstream !== false;
+  }
+
+  function determineIsSystemUser(options: CmdOptions): boolean {
+    return options._global.systemUser === true;
+  }
+
   return async (options) => {
     // log level
     log.level = determineLogLevel(options);
@@ -151,11 +150,11 @@ export function makeParseEnvService(
     if (upmConfigResult.isErr()) return upmConfigResult;
     const upmConfig = upmConfigResult.value;
 
-    const registry = determinePrimaryRegistry(log, options, upmConfig);
+    const registry = determinePrimaryRegistry(options, upmConfig);
     const upstreamRegistry = determineUpstreamRegistry(options);
 
     // cwd
-    const cwd = determineCwd(getCwd, options);
+    const cwd = determineCwd(options);
 
     // editor version
     const projectVersionLoadResult = await loadProjectVersion(cwd).promise;
