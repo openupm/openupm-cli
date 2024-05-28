@@ -77,7 +77,7 @@ describe("cmd-search", () => {
 
     await searchCmd("pkg-not-exist", options);
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "",
       expect.stringContaining("No matches found")
     );

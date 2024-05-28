@@ -101,7 +101,7 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "dependency",
       expect.stringContaining(otherPackage)
     );
@@ -126,7 +126,7 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "missing dependency",
       expect.stringContaining(otherPackage)
     );
@@ -151,7 +151,7 @@ describe("cmd-deps", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "missing dependency version",
       expect.stringContaining(otherPackage)
     );

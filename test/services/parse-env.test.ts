@@ -370,7 +370,7 @@ describe("env", () => {
         },
       });
 
-      expect(log.warn).toHaveLogLike(
+      expect(log.warn).toHaveBeenCalledWith(
         "env.auth",
         expect.stringContaining("failed to parse auth info")
       );

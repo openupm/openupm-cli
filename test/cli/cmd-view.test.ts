@@ -96,7 +96,7 @@ describe("cmd-view", () => {
       { _global: {} }
     );
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "",
       expect.stringContaining("please do not specify")
     );
@@ -127,7 +127,7 @@ describe("cmd-view", () => {
 
     await viewCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("not found")
     );

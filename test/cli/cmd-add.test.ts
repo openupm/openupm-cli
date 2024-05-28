@@ -188,7 +188,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining("could not load project manifest")
     );
@@ -209,7 +209,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("not found")
     );
@@ -235,7 +235,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("is not a valid choice")
     );
@@ -249,7 +249,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
       expect.stringContaining("unknown")
     );
@@ -266,7 +266,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "package.unity",
       expect.stringContaining("not valid")
     );
@@ -283,7 +283,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "suggest",
       expect.stringContaining("run with option -f")
     );
@@ -329,7 +329,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
       expect.stringContaining("requires")
     );
@@ -346,7 +346,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "suggest",
       expect.stringContaining("run with option -f")
     );
@@ -400,7 +400,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("is not a valid choice")
     );
@@ -440,7 +440,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "suggest",
       expect.stringContaining("manually")
     );
@@ -465,7 +465,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "missing dependencies",
       expect.stringContaining("run with option -f")
     );
@@ -538,7 +538,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("added")
     );
@@ -579,7 +579,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("modified")
     );
@@ -598,7 +598,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("existed")
     );
@@ -680,7 +680,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveBeenCalledWith("", expect.stringContaining("open Unity"));
   });
 
   it("should fail if manifest could not be saved", async () => {
@@ -699,6 +699,6 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveBeenCalledWith("manifest", expect.stringContaining(""));
   });
 });

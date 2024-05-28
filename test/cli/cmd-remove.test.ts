@@ -82,7 +82,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.any(String));
+    expect(log.error).toHaveBeenCalledWith("manifest", expect.any(String));
   });
 
   it("should fail if package version was specified", async () => {
@@ -104,7 +104,7 @@ describe("cmd-remove", () => {
       { _global: {} }
     );
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "",
       expect.stringContaining("please do not specify")
     );
@@ -123,7 +123,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(otherPackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("not found")
     );
@@ -134,7 +134,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("removed")
     );
@@ -193,7 +193,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveBeenCalledWith("manifest", expect.stringContaining(""));
   });
 
   it("should suggest to open Unity after save", async () => {
@@ -201,6 +201,6 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.notice).toHaveLogLike("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveBeenCalledWith("", expect.stringContaining("open Unity"));
   });
 });
