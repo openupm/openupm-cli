@@ -215,8 +215,8 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    const result = await viewCmd(pkg, makeCmdOptions(options));
-    if (result.isErr()) process.exit(1);
+    const resultCode = await viewCmd(pkg, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
