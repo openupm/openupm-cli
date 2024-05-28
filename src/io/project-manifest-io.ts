@@ -54,7 +54,7 @@ export function makeProjectManifestParseError(
 export type ManifestLoadError =
   | ProjectManifestMissingError
   | GenericIOError
-  | StringFormatError
+  | StringFormatError<"Json">
   | ProjectManifestParseError;
 
 /**

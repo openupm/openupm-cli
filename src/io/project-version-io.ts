@@ -45,7 +45,7 @@ export function makeProjectVersionParseError(
 export type ProjectVersionLoadError =
   | ProjectVersionMissingError
   | GenericIOError
-  | StringFormatError
+  | StringFormatError<"Yaml">
   | ProjectVersionParseError;
 
 /**

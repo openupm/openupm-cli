@@ -7,7 +7,9 @@ import { assertIsError } from "./error-type-guards";
 /**
  * Error for when a string could not be parsed to a specific format.
  */
-export class StringFormatError extends CustomError {
+export class StringFormatError<
+  const TFormat extends string
+> extends CustomError {
   // noinspection JSUnusedLocalSymbols
   private readonly _class = "StringFormatError";
 
@@ -15,7 +17,7 @@ export class StringFormatError extends CustomError {
     /**
      * Description of the format the string was supposed to be parsed to.
      */
-    public readonly formatName: string,
+    public readonly formatName: TFormat,
     /**
      * The error which caused the parsing failure.
      */
@@ -25,10 +27,10 @@ export class StringFormatError extends CustomError {
   }
 }
 
-function makeParser<T>(
-  formatName: string,
+function makeParser<const TFormat extends string, T>(
+  formatName: TFormat,
   parsingFunction: (x: string) => T
-): (x: string) => Result<T, StringFormatError> {
+): (x: string) => Result<T, StringFormatError<TFormat>> {
   return (input) =>
     Result.wrap(() => parsingFunction(input)).mapErr((error) => {
       assertIsError(error);
@@ -40,16 +42,16 @@ function makeParser<T>(
  * Attempts to parse a json-string.
  * @param json The string to be parsed.
  */
-export const tryParseJson = makeParser<AnyJson>("Json", JSON.parse);
+export const tryParseJson = makeParser<"Json", AnyJson>("Json", JSON.parse);
 
 /**
  * Attempts to parse a toml-string.
  * @param toml The string to be parsed.
  */
-export const tryParseToml = makeParser<JsonMap>("Toml", TOML.parse);
+export const tryParseToml = makeParser<"Toml", JsonMap>("Toml", TOML.parse);
 
 /**
  * Attempts to parse a yaml-string.
  * @param input The string to be parsed.
  */
-export const tryParseYaml = makeParser<AnyJson>("Yaml", yaml.parse);
+export const tryParseYaml = makeParser<"Yaml", AnyJson>("Yaml", yaml.parse);

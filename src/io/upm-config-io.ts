@@ -82,7 +82,7 @@ export function makeUpmConfigPathGetter(
 /**
  * Error which may occur when loading a {@link UPMConfig}.
  */
-export type UpmConfigLoadError = GenericIOError | StringFormatError;
+export type UpmConfigLoadError = GenericIOError | StringFormatError<"Toml">;
 
 /**
  * IO function for loading an upm-config file.
