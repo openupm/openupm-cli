@@ -10,6 +10,7 @@ import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { noopLogger } from "../../src/logging";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -67,7 +68,7 @@ describe("cmd-search", () => {
 
     const result = await searchCmd("pkg-not-exist", options);
 
-    expect(result).toBeOk();
+    expect(result).toEqual(ResultCodes.Ok);
   });
 
   it("should notify of unknown packument", async () => {
@@ -89,7 +90,7 @@ describe("cmd-search", () => {
 
     const result = await searchCmd("package-a", options);
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toEqual(ResultCodes.Error);
   });
 
   it("should notify if packuments could not be searched", async () => {

@@ -205,8 +205,8 @@ program
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
-    const searchResult = await searchCmd(keyword, makeCmdOptions(options));
-    if (searchResult.isErr()) process.exit(1);
+    const resultCode = await searchCmd(keyword, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program

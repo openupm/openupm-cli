@@ -1,15 +1,17 @@
 import * as os from "os";
-import { EnvParseError, ParseEnvService } from "../services/parse-env";
+import { ParseEnvService } from "../services/parse-env";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
-import { Ok, Result } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Logger } from "npmlog";
 import { SearchPackages } from "../services/search-packages";
 import { logEnvParseError } from "./error-logging";
 import { DebugLog } from "../logging";
+import { ResultCodes } from "./result-codes";
 
-export type SearchError = EnvParseError | HttpErrorBase;
+/**
+ * The possible result codes with which the search command can exit.
+ */
+export type SearchResultCode = ResultCodes.Ok | ResultCodes.Error;
 
 export type SearchOptions = CmdOptions;
 
@@ -21,7 +23,7 @@ export type SearchOptions = CmdOptions;
 export type SearchCmd = (
   keyword: string,
   options: SearchOptions
-) => Promise<Result<void, SearchError>>;
+) => Promise<SearchResultCode>;
 
 /**
  * Makes a {@link SearchCmd} function.
@@ -37,7 +39,7 @@ export function makeSearchCmd(
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
       logEnvParseError(log, envResult.error);
-      return envResult;
+      return ResultCodes.Error;
     }
     const env = envResult.value;
 
@@ -49,17 +51,17 @@ export function makeSearchCmd(
 
     if (searchResult.isErr()) {
       log.warn("", "/-/all endpoint is not available");
-      return searchResult;
+      return ResultCodes.Error;
     }
 
     const results = searchResult.value;
     if (results.length === 0) {
       log.notice("", `No matches found for "${keyword}"`);
-      return Ok(undefined);
+      return ResultCodes.Ok;
     }
 
     debugLog(`${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`);
     console.log(formatAsTable(results));
-    return Ok(undefined);
+    return ResultCodes.Ok;
   };
 }
