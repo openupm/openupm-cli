@@ -47,9 +47,9 @@ describe("cmd-login", () => {
     const { loginCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
-    const result = await loginCmd({ _global: {} });
+    const resultCode = await loginCmd({ _global: {} });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   // TODO: Add tests for prompting logic
@@ -59,14 +59,14 @@ describe("cmd-login", () => {
     const { loginCmd, getUpmConfigPath } = makeDependencies();
     getUpmConfigPath.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await loginCmd({
+    const resultCode = await loginCmd({
       username: exampleUser,
       password: examplePassword,
       email: exampleEmail,
       _global: { registry: exampleRegistryUrl },
     });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should fail if login failed", async () => {
@@ -74,14 +74,14 @@ describe("cmd-login", () => {
     const { loginCmd, login } = makeDependencies();
     login.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await loginCmd({
+    const resultCode = await loginCmd({
       username: exampleUser,
       password: examplePassword,
       email: exampleEmail,
       _global: { registry: exampleRegistryUrl },
     });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if unauthorized", async () => {

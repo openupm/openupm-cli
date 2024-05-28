@@ -66,9 +66,9 @@ describe("cmd-search", () => {
   it("should be ok if no network error occurred", async () => {
     const { searchCmd } = makeDependencies();
 
-    const result = await searchCmd("pkg-not-exist", options);
+    const resultCode = await searchCmd("pkg-not-exist", options);
 
-    expect(result).toEqual(ResultCodes.Ok);
+    expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
   it("should notify of unknown packument", async () => {
@@ -88,9 +88,9 @@ describe("cmd-search", () => {
     const { searchCmd, searchPackages } = makeDependencies();
     searchPackages.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await searchCmd("package-a", options);
+    const resultCode = await searchCmd("package-a", options);
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if packuments could not be searched", async () => {

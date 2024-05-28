@@ -62,18 +62,18 @@ describe("cmd-remove", () => {
     const { removeCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
-    const result = await removeCmd(somePackage, { _global: {} });
+    const resultCode = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should fail if manifest could not be loaded", async () => {
     const { removeCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
-    const result = await removeCmd(somePackage, { _global: {} });
+    const resultCode = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be loaded", async () => {
@@ -88,12 +88,12 @@ describe("cmd-remove", () => {
   it("should fail if package version was specified", async () => {
     const { removeCmd } = makeDependencies();
 
-    const result = await removeCmd(
+    const resultCode = await removeCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
       { _global: {} }
     );
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package version was specified", async () => {
@@ -113,9 +113,9 @@ describe("cmd-remove", () => {
   it("should fail if package is not in manifest", async () => {
     const { removeCmd } = makeDependencies();
 
-    const result = await removeCmd(otherPackage, { _global: {} });
+    const resultCode = await removeCmd(otherPackage, { _global: {} });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package is not in manifest", async () => {
@@ -182,9 +182,9 @@ describe("cmd-remove", () => {
     const { removeCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
-    const result = await removeCmd(somePackage, { _global: {} });
+    const resultCode = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toEqual(ResultCodes.Error);
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be saved", async () => {
