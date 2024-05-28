@@ -6,21 +6,21 @@ type LogSpy = jest.MockedFunctionDeep<Logger[LogLevels]>;
 expect.extend({
   toHaveLogLike(
     spy: LogSpy,
-    prefix: string,
+    prefix: string | AsymmetricMatcher,
     expected: string | AsymmetricMatcher,
     count: number = 1
   ) {
-    const matches = (s: string) =>
+    const stringMatches = (s: string, expected: string | AsymmetricMatcher) =>
       typeof expected === "string"
         ? s === expected
         : expected.asymmetricMatch(s);
 
     const calls = spy.mock.calls;
-    const callsWithPrefix = calls.filter(
-      ([actualPrefix]) => actualPrefix === prefix
+    const callsWithPrefix = calls.filter(([actualPrefix]) =>
+      stringMatches(actualPrefix, prefix)
     );
     const matchingCalls = callsWithPrefix.filter(([, actualMessage]) =>
-      matches(actualMessage)
+      stringMatches(actualMessage, expected)
     );
     const hasMatch = matchingCalls.length >= count;
     return {

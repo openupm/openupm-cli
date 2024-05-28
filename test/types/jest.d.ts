@@ -31,7 +31,7 @@ declare global {
        * should have been logged. Defaults to 1 if omitted.
        */
       toHaveLogLike(
-        prefix: string,
+        prefix: string | AsymmetricMatcher,
         expected: string | AsymmetricMatcher,
         count?: number
       ): R;
