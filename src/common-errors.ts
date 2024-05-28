@@ -5,6 +5,8 @@ import { EditorVersion } from "./domain/editor-version";
  * Error for when the packument was not found.
  */
 export class PackumentNotFoundError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "PackumentNotFoundError";
   constructor() {
     super("A packument was not found.");
   }
@@ -16,6 +18,8 @@ export class PackumentNotFoundError extends CustomError {
  * "com.my-package@1.2.3".
  */
 export class PackageWithVersionError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "PackageWithVersionError";
   constructor() {
     super(
       "A package-reference including a version was specified when only a name was expected."
@@ -27,6 +31,8 @@ export class PackageWithVersionError extends CustomError {
  * Error for when a file could not be parsed into a specific target type.
  */
 export class FileParseError<const TTarget extends string> extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+  private readonly _class = "FileParseError";
   constructor(
     /**
      * The path to the file that could not be parsed.
