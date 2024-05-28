@@ -32,6 +32,7 @@ import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -59,7 +60,6 @@ const defaultEnv = {
   upstream: true,
   registry: { url: exampleRegistryUrl, auth: null },
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
-  editorVersion: makeEditorVersion(2022, 2, 1, "f", 2),
 } as Env;
 
 function makeDependencies() {
@@ -101,6 +101,11 @@ function makeDependencies() {
   const writeProjectManifest = mockService<WriteProjectManifest>();
   mockProjectManifestWriteResult(writeProjectManifest);
 
+  const determineEditorVersion = mockService<DetermineEditorVersion>();
+  determineEditorVersion.mockReturnValue(
+    Ok(makeEditorVersion(2022, 2, 1, "f", 2)).toAsyncResult()
+  );
+
   const log = makeMockLogger();
 
   const addCmd = makeAddCmd(
@@ -109,6 +114,7 @@ function makeDependencies() {
     resolveDependencies,
     loadProjectManifest,
     writeProjectManifest,
+    determineEditorVersion,
     log,
     noopLogger
   );
@@ -119,6 +125,7 @@ function makeDependencies() {
     resolveDependencies,
     loadProjectManifest,
     writeProjectManifest,
+    determineEditorVersion,
     log,
   } as const;
 }
@@ -132,6 +139,19 @@ describe("cmd-add", () => {
     const result = await addCmd(somePackage, { _global: {} });
 
     expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
+
+  it("should fail if editor-version could not be determined", async () => {
+    const { addCmd, determineEditorVersion } = makeDependencies();
+    determineEditorVersion.mockReturnValue(
+      Err(new GenericIOError()).toAsyncResult()
+    );
+
+    const result = await addCmd(somePackage, { _global: {} });
+
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(GenericIOError)
+    );
   });
 
   it("should fail if manifest could not be loaded", async () => {
@@ -203,10 +223,8 @@ describe("cmd-add", () => {
   });
 
   it("should notify if editor-version is unknown", async () => {
-    const { addCmd, parseEnv, log } = makeDependencies();
-    parseEnv.mockResolvedValue(
-      Ok({ ...defaultEnv, editorVersion: "bad version" })
-    );
+    const { addCmd, determineEditorVersion, log } = makeDependencies();
+    determineEditorVersion.mockReturnValue(Ok("bad version").toAsyncResult());
 
     await addCmd(somePackage, {
       _global: {},

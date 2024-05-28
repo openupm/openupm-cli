@@ -47,6 +47,7 @@ import { makePackagesSearcher } from "../services/search-packages";
 import { makeRemotePackumentResolver } from "../services/resolve-remote-packument";
 import { makeLoginService } from "../services/login";
 import { DebugLog } from "../logging";
+import { makeEditorVersionDeterminer } from "../services/determine-editor-version";
 
 // Composition root
 
@@ -80,9 +81,9 @@ const parseEnv = makeParseEnvService(
   log,
   getUpmConfigPath,
   loadUpmConfig,
-  getCwd,
-  loadProjectVersion
+  getCwd
 );
+const determineEditorVersion = makeEditorVersionDeterminer(loadProjectVersion);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLoginService(regClient);
 const resolveRemovePackumentVersion =
@@ -110,6 +111,7 @@ const addCmd = makeAddCmd(
   resolveDependencies,
   loadProjectManifest,
   writeProjectManifest,
+  determineEditorVersion,
   log,
   debugLog
 );

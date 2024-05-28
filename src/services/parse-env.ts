@@ -9,18 +9,8 @@ import path from "path";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
-import { FileParseError } from "../common-errors";
 import { Ok, Result } from "ts-results-es";
-import {
-  LoadProjectVersion,
-  ProjectVersionLoadError,
-} from "../io/project-version-io";
 import { tryGetEnv } from "../utils/env-util";
-import {
-  isRelease,
-  ReleaseVersion,
-  tryParseEditorVersion,
-} from "../domain/editor-version";
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
 import { GetCwd } from "../io/special-paths";
@@ -32,17 +22,9 @@ export type Env = Readonly<{
   upstream: boolean;
   upstreamRegistry: Registry;
   registry: Registry;
-  /**
-   * The current project's editor version. Either a parsed {@link EditorVersion}
-   * object if parsing was successful or the unparsed string.
-   */
-  editorVersion: ReleaseVersion | string;
 }>;
 
-export type EnvParseError =
-  | GetUpmConfigPathError
-  | UpmConfigLoadError
-  | ProjectVersionLoadError;
+export type EnvParseError = GetUpmConfigPathError | UpmConfigLoadError;
 
 /**
  * Service function for parsing environment information and global
@@ -59,8 +41,7 @@ export function makeParseEnvService(
   log: Logger,
   getUpmConfigPath: GetUpmConfigPath,
   loadUpmConfig: LoadUpmConfig,
-  getCwd: GetCwd,
-  loadProjectVersion: LoadProjectVersion
+  getCwd: GetCwd
 ): ParseEnvService {
   function determineCwd(options: CmdOptions): string {
     return options._global.chdir !== undefined
@@ -156,20 +137,8 @@ export function makeParseEnvService(
     // cwd
     const cwd = determineCwd(options);
 
-    // editor version
-    const projectVersionLoadResult = await loadProjectVersion(cwd).promise;
-    if (projectVersionLoadResult.isErr()) return projectVersionLoadResult;
-
-    const unparsedEditorVersion = projectVersionLoadResult.value;
-    const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
-    const editorVersion =
-      parsedEditorVersion !== null && isRelease(parsedEditorVersion)
-        ? parsedEditorVersion
-        : unparsedEditorVersion;
-
     return Ok({
       cwd,
-      editorVersion,
       registry,
       systemUser,
       upstream,
