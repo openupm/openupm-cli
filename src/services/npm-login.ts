@@ -1,28 +1,16 @@
 import RegClient from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
-import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok } from "ts-results-es";
-
-/**
- * Error for when authentication failed.
- */
-export class AuthenticationError extends CustomError {
-  private readonly _class = "AuthenticationError";
-  constructor(
-    /**
-     * The http-response code returned by the server.
-     */
-    readonly status: number,
-    message: string
-  ) {
-    super(message);
-  }
-}
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "../io/common-errors";
+import { DebugLog } from "../logging";
 
 /**
  * Error which may occur when logging a user into a npm registry.
  */
-export type NpmLoginError = AuthenticationError;
+export type NpmLoginError = GenericNetworkError | RegistryAuthenticationError;
 
 /**
  * A token authenticating a user.
@@ -48,7 +36,8 @@ export type NpmLoginService = (
  * Makes a new {@link NpmLoginService} function.
  */
 export function makeNpmLoginService(
-  registryClient: RegClient.Instance
+  registryClient: RegClient.Instance,
+  debugLog: DebugLog
 ): NpmLoginService {
   return (registryUrl, username, email, password) => {
     return new AsyncResult(
@@ -57,16 +46,16 @@ export function makeNpmLoginService(
           registryUrl,
           { auth: { username, email, password } },
           (error, responseData, _, response) => {
-            if (response !== undefined && !responseData.ok)
+            if (response !== undefined && !responseData.ok) {
+              debugLog("A http request failed.", response);
               resolve(
                 Err(
-                  new AuthenticationError(
-                    response.statusCode,
-                    response.statusMessage
-                  )
+                  response.statusCode === 401
+                    ? new RegistryAuthenticationError()
+                    : new GenericNetworkError()
                 )
               );
-            else if (responseData.ok) resolve(Ok(responseData.token));
+            } else if (responseData.ok) resolve(Ok(responseData.token));
 
             // TODO: Handle error
           }

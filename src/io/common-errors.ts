@@ -29,3 +29,21 @@ export class FileMissingError<const TName extends string> extends CustomError {
     super();
   }
 }
+
+/**
+ * Generic error for when some non-specific network operation failed.
+ */
+export class GenericNetworkError extends CustomError {
+  private readonly _class = "GenericNetworkError";
+}
+
+/**
+ * Error for when authentication with a registry failed.
+ */
+export class RegistryAuthenticationError extends CustomError {
+  private readonly _class = "RegistryAuthenticationError";
+
+  constructor() {
+    super();
+  }
+}

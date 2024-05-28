@@ -7,10 +7,10 @@ import {
 import { makePackagesSearcher } from "../../src/services/search-packages";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { GenericNetworkError } from "../../src/io/common-errors";
 
 describe("search packages", () => {
   const exampleRegistry: Registry = {
@@ -19,8 +19,6 @@ describe("search packages", () => {
   };
 
   const exampleKeyword = "package-a";
-
-  const exampleHttpError = { statusCode: 500 } as HttpErrorBase;
 
   const exampleSearchResult: SearchedPackument = {
     name: makeDomainName("com.example.package-a"),
@@ -73,7 +71,9 @@ describe("search packages", () => {
 
   it("should search using old search if search api is not available", async () => {
     const { searchPackages, searchRegistry } = makeDependencies();
-    searchRegistry.mockReturnValue(Err(exampleHttpError).toAsyncResult());
+    searchRegistry.mockReturnValue(
+      Err(new GenericNetworkError()).toAsyncResult()
+    );
 
     const result = await searchPackages(exampleRegistry, exampleKeyword)
       .promise;
@@ -85,7 +85,9 @@ describe("search packages", () => {
 
   it("should notify of using old search", async () => {
     const { searchPackages, searchRegistry } = makeDependencies();
-    searchRegistry.mockReturnValue(Err(exampleHttpError).toAsyncResult());
+    searchRegistry.mockReturnValue(
+      Err(new GenericNetworkError()).toAsyncResult()
+    );
 
     const fallback = jest.fn();
     await searchPackages(exampleRegistry, exampleKeyword, fallback).promise;
@@ -95,7 +97,9 @@ describe("search packages", () => {
 
   it("should not find packages not matching the keyword using old search", async () => {
     const { searchPackages, searchRegistry } = makeDependencies();
-    searchRegistry.mockReturnValue(Err(exampleHttpError).toAsyncResult());
+    searchRegistry.mockReturnValue(
+      Err(new GenericNetworkError()).toAsyncResult()
+    );
 
     const result = await searchPackages(exampleRegistry, "some other keyword")
       .promise;
@@ -106,8 +110,12 @@ describe("search packages", () => {
   it("should fail if both search strategies fail", async () => {
     const { searchPackages, searchRegistry, fetchAllPackument } =
       makeDependencies();
-    searchRegistry.mockReturnValue(Err(exampleHttpError).toAsyncResult());
-    fetchAllPackument.mockReturnValue(Err(exampleHttpError).toAsyncResult());
+    searchRegistry.mockReturnValue(
+      Err(new GenericNetworkError()).toAsyncResult()
+    );
+    fetchAllPackument.mockReturnValue(
+      Err(new GenericNetworkError()).toAsyncResult()
+    );
 
     const result = await searchPackages(exampleRegistry, exampleKeyword)
       .promise;

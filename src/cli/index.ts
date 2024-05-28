@@ -73,8 +73,8 @@ const loadNpmrc = makeNpmrcLoader(readFile);
 const saveNpmrc = makeNpmrcSaver(writeFile);
 const loadProjectVersion = makeProjectVersionLoader(readFile);
 const fetchPackument = makePackumentFetcher(regClient);
-const fetchAllPackuments = makeAllPackumentsFetcher();
-const searchRegistry = makeRegistrySearcher();
+const fetchAllPackuments = makeAllPackumentsFetcher(debugLog);
+const searchRegistry = makeRegistrySearcher(debugLog);
 const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
 
 const parseEnv = makeParseEnvService(
@@ -85,7 +85,7 @@ const parseEnv = makeParseEnvService(
 );
 const determineEditorVersion = makeEditorVersionDeterminer(loadProjectVersion);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
-const npmLogin = makeNpmLoginService(regClient);
+const npmLogin = makeNpmLoginService(regClient, debugLog);
 const resolveRemovePackumentVersion =
   makeResolveRemotePackumentVersionService(fetchPackument);
 const resolveLatestVersion = makeResolveLatestVersionService(fetchPackument);

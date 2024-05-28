@@ -10,8 +10,10 @@ import { LoginService } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { AuthenticationError } from "../../src/services/npm-login";
-import { GenericIOError } from "../../src/io/common-errors";
+import {
+  GenericIOError,
+  RegistryAuthenticationError,
+} from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 const defaultEnv = {
@@ -87,7 +89,7 @@ describe("cmd-login", () => {
   it("should notify if unauthorized", async () => {
     const { loginCmd, login, log } = makeDependencies();
     login.mockReturnValue(
-      Err(new AuthenticationError(401, "oof")).toAsyncResult()
+      Err(new RegistryAuthenticationError()).toAsyncResult()
     );
 
     await loginCmd({
@@ -101,22 +103,6 @@ describe("cmd-login", () => {
       "401",
       "Incorrect username or password"
     );
-  });
-
-  it("should notify of other login errors", async () => {
-    const { loginCmd, login, log } = makeDependencies();
-    login.mockReturnValue(
-      Err(new AuthenticationError(500, "oof")).toAsyncResult()
-    );
-
-    await loginCmd({
-      username: exampleUser,
-      password: examplePassword,
-      email: exampleEmail,
-      _global: { registry: exampleRegistryUrl },
-    });
-
-    expect(log.error).toHaveBeenCalledWith("500", "oof");
   });
 
   it("should notify of success", async () => {

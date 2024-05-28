@@ -14,6 +14,7 @@ import { RequiredEnvMissingError } from "../io/upm-config-io";
 import { FileMissingError, GenericIOError } from "../io/common-errors";
 import { StringFormatError } from "../utils/string-parsing";
 import { DetermineEditorVersionError } from "../services/determine-editor-version";
+import { ResolveRemotePackumentVersionError } from "../services/resolve-remote-packument-version";
 
 /**
  * Logs a {@link ManifestLoadError} to the console.
@@ -50,7 +51,7 @@ export function logManifestSaveError(log: Logger, error: ManifestWriteError) {
 export function logPackumentResolveError(
   log: Logger,
   packageName: DomainName,
-  error: PackumentVersionResolveError
+  error: ResolveRemotePackumentVersionError
 ) {
   if (error instanceof PackumentNotFoundError)
     log.error("404", `package not found: ${packageName}`);

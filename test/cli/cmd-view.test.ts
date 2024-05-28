@@ -10,8 +10,10 @@ import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
 import { ResolveRemotePackument } from "../../src/services/resolve-remote-packument";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { GenericIOError } from "../../src/io/common-errors";
+import {
+  GenericIOError,
+  GenericNetworkError,
+} from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
@@ -112,7 +114,7 @@ describe("cmd-view", () => {
   });
 
   it("should fail if package could not be resolved", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { viewCmd, resolveRemotePackument } = makeDependencies();
     resolveRemotePackument.mockReturnValue(Err(expected).toAsyncResult());
 

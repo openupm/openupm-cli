@@ -1,15 +1,15 @@
 import { makeLoginService } from "../../src/services/login";
 import { mockService } from "./service.mock";
 import { SaveAuthToUpmConfig } from "../../src/services/upm-auth";
-import {
-  AuthenticationError,
-  NpmLoginService,
-} from "../../src/services/npm-login";
+import { NpmLoginService } from "../../src/services/npm-login";
 import { AuthNpmrcService } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err, Ok } from "ts-results-es";
 import { noopLogger } from "../../src/logging";
-import { GenericIOError } from "../../src/io/common-errors";
+import {
+  RegistryAuthenticationError,
+  GenericIOError,
+} from "../../src/io/common-errors";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -84,7 +84,7 @@ describe("login", () => {
 
   describe("token auth", () => {
     it("should fail if npm login fails", async () => {
-      const expected = new AuthenticationError(401, "uh oh");
+      const expected = new RegistryAuthenticationError();
       const { login, npmLogin } = makeDependencies();
       npmLogin.mockReturnValue(Err(expected).toAsyncResult());
 

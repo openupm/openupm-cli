@@ -12,6 +12,7 @@ import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./domain/registry-url";
 import { Err, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
+import { ResolveRemotePackumentVersionError } from "./services/resolve-remote-packument-version";
 
 /**
  * A version-reference that is resolvable.
@@ -79,9 +80,9 @@ export function tryResolveFromCache(
  * @returns The more fixable failure.
  */
 export function pickMostFixable(
-  a: Err<PackumentVersionResolveError>,
-  b: Err<PackumentVersionResolveError>
-): Err<PackumentVersionResolveError> {
+  a: Err<ResolveRemotePackumentVersionError>,
+  b: Err<ResolveRemotePackumentVersionError>
+): Err<ResolveRemotePackumentVersionError> {
   // Anything is more fixable than packument-not-found
   if (
     a.error instanceof PackumentNotFoundError &&

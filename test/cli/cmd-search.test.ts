@@ -8,9 +8,9 @@ import { Err, Ok } from "ts-results-es";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { GenericNetworkError } from "../../src/io/common-errors";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -84,7 +84,7 @@ describe("cmd-search", () => {
   });
 
   it("should fail if packuments could not be searched", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { searchCmd, searchPackages } = makeDependencies();
     searchPackages.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -94,7 +94,7 @@ describe("cmd-search", () => {
   });
 
   it("should notify if packuments could not be searched", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { searchCmd, searchPackages, log } = makeDependencies();
     searchPackages.mockReturnValue(Err(expected).toAsyncResult());
 

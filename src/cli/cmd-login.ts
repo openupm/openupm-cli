@@ -1,4 +1,3 @@
-import { AuthenticationError } from "../services/npm-login";
 import { GetUpmConfigPath } from "../io/upm-config-io";
 import { ParseEnvService } from "../services/parse-env";
 import { coerceRegistryUrl } from "../domain/registry-url";
@@ -13,6 +12,7 @@ import { Logger } from "npmlog";
 import { LoginService } from "../services/login";
 import { logEnvParseError } from "./error-logging";
 import { ResultCodes } from "./result-codes";
+import { RegistryAuthenticationError } from "../io/common-errors";
 
 /**
  * Options for logging in a user. These come from the CLI.
@@ -88,11 +88,8 @@ export function makeLoginCmd(
 
     if (loginResult.isErr()) {
       const loginError = loginResult.error;
-      if (loginError instanceof AuthenticationError) {
-        if (loginError.status === 401)
-          log.warn("401", "Incorrect username or password");
-        else log.error(loginError.status.toString(), loginError.message);
-      }
+      if (loginError instanceof RegistryAuthenticationError)
+        log.warn("401", "Incorrect username or password");
 
       // TODO: Log all errors
       return ResultCodes.Error;
