@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/openupm/openupm-cli/compare/2.1.0...2.1.1) (2024-05-28)
+
+
+### Bug Fixes
+
+* improve file-parse error logs ([#345](https://github.com/openupm/openupm-cli/issues/345)) ([c8bc860](https://github.com/openupm/openupm-cli/commit/c8bc860fe99f75cf85ca87d82a238cbd66436d68))
+
 # [2.1.0](https://github.com/openupm/openupm-cli/compare/2.0.1...2.1.0) (2024-05-25)
 
 
