@@ -33,7 +33,7 @@ export function makeResolveLatestVersionService(
     packageName
   ) => {
     if (sources.length === 0)
-      return Err(new PackumentNotFoundError()).toAsyncResult();
+      return Err(new PackumentNotFoundError(packageName)).toAsyncResult();
 
     const sourceToCheck = sources[0]!;
     return fetchPackument(sourceToCheck, packageName).andThen(

@@ -38,7 +38,8 @@ export function makeResolveRemotePackumentVersionService(
   return (packageName, requestedVersion, source) =>
     fetchPackument(source, packageName)
       .andThen((maybePackument) => {
-        if (maybePackument === null) return Err(new PackumentNotFoundError());
+        if (maybePackument === null)
+          return Err(new PackumentNotFoundError(packageName));
         return Ok(maybePackument);
       })
       .andThen((packument) =>

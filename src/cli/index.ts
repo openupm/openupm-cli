@@ -48,6 +48,7 @@ import { makeRemotePackumentResolver } from "../services/resolve-remote-packumen
 import { makeLoginService } from "../services/login";
 import { DebugLog } from "../logging";
 import { makeEditorVersionDeterminer } from "../services/determine-editor-version";
+import { makePackageRemover } from "../services/remove-packages";
 
 // Composition root
 
@@ -76,6 +77,10 @@ const fetchPackument = makePackumentFetcher(regClient);
 const fetchAllPackuments = makeAllPackumentsFetcher(debugLog);
 const searchRegistry = makeRegistrySearcher(debugLog);
 const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
+const removePackages = makePackageRemover(
+  loadProjectManifest,
+  writeProjectManifest
+);
 
 const parseEnv = makeParseEnvService(
   log,
@@ -118,12 +123,7 @@ const addCmd = makeAddCmd(
 const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
 const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, debugLog);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, debugLog);
-const removeCmd = makeRemoveCmd(
-  parseEnv,
-  loadProjectManifest,
-  writeProjectManifest,
-  log
-);
+const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
 const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
 
 // update-notifier
@@ -193,9 +193,9 @@ program
   )
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
-  .action(async function (pkg, otherPkgs, options) {
-    const pkgs = [pkg].concat(otherPkgs);
-    const resultCode = await removeCmd(pkgs, makeCmdOptions(options));
+  .action(async function (packageName, otherPackageNames, options) {
+    const packageNames = [packageName].concat(otherPackageNames);
+    const resultCode = await removeCmd(packageNames, makeCmdOptions(options));
     process.exit(resultCode);
   });
 

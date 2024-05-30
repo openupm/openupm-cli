@@ -116,7 +116,7 @@ describe("cmd-deps", () => {
           {
             name: otherPackage,
             self: false,
-            reason: new PackumentNotFoundError(),
+            reason: new PackumentNotFoundError(otherPackage),
           },
         ],
       ])

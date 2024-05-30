@@ -166,7 +166,7 @@ export function makeResolveDependenciesService(
         let resolveResult: Result<
           ResolvedPackumentVersion,
           ResolveRemotePackumentVersionError
-        > = Err(new PackumentNotFoundError());
+        > = Err(new PackumentNotFoundError(entryName));
         for (const source of sources) {
           const result = await tryResolveFromRegistry(
             source,

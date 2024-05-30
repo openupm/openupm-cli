@@ -62,7 +62,8 @@ export function tryResolveFromCache(
   requestedVersion: ResolvableVersion
 ): Result<ResolvedPackumentVersion, PackumentVersionResolveError> {
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
-  if (cachedPackument === null) return Err(new PackumentNotFoundError());
+  if (cachedPackument === null)
+    return Err(new PackumentNotFoundError(packumentName));
 
   return tryResolvePackumentVersion(cachedPackument, requestedVersion).map(
     (packumentVersion) => ({
