@@ -70,7 +70,7 @@ function makeDependencies() {
 
 describe("cmd-view", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Read");
     const { viewCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 

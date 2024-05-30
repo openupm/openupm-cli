@@ -64,7 +64,7 @@ describe("login", () => {
     });
 
     it("should fail if config write fails", async () => {
-      const expected = new GenericIOError();
+      const expected = new GenericIOError("Write");
       const { login, saveAuthToUpmConfig } = makeDependencies();
       saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -102,7 +102,7 @@ describe("login", () => {
     });
 
     it("should fail if npmrc auth fails", async () => {
-      const expected = new GenericIOError();
+      const expected = new GenericIOError("Read");
       const { login, authNpmrc } = makeDependencies();
       authNpmrc.mockReturnValue(Err(expected).toAsyncResult());
 
@@ -144,7 +144,7 @@ describe("login", () => {
     });
 
     it("should fail if config write fails", async () => {
-      const expected = new GenericIOError();
+      const expected = new GenericIOError("Write");
       const { login, saveAuthToUpmConfig } = makeDependencies();
       saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
 

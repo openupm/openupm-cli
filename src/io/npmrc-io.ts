@@ -47,7 +47,7 @@ export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
     readFile(path)
       .map<Npmrc | null>((content) => content.split(EOL))
       .orElse((error) =>
-        error.code === "ENOENT" ? Ok(null) : Err(new GenericIOError())
+        error.code === "ENOENT" ? Ok(null) : Err(new GenericIOError("Read"))
       );
 }
 
@@ -72,6 +72,6 @@ export type SaveNpmrc = (
 export function makeNpmrcSaver(writeFile: WriteTextFile): SaveNpmrc {
   return (path, npmrc) => {
     const content = npmrc.join(EOL);
-    return writeFile(path, content).mapErr(() => new GenericIOError());
+    return writeFile(path, content).mapErr(() => new GenericIOError("Write"));
   };
 }

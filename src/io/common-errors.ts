@@ -6,6 +6,15 @@ import { CustomError } from "ts-custom-error";
 export class GenericIOError extends CustomError {
   // noinspection JSUnusedLocalSymbols
   private readonly _class = "GenericIOError";
+
+  public constructor(
+    /**
+     * The type of operation that failed. Either a read or write operation.
+     */
+    public readonly operationType: "Read" | "Write"
+  ) {
+    super();
+  }
 }
 
 /**

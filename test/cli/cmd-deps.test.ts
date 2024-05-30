@@ -56,7 +56,7 @@ function makeDependencies() {
 
 describe("cmd-deps", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Read");
     const { depsCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 

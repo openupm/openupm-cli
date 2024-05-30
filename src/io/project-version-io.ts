@@ -73,7 +73,7 @@ export function makeProjectVersionLoader(
       .mapErr((error) =>
         error.code === "ENOENT"
           ? makeProjectVersionMissingError(filePath)
-          : new GenericIOError()
+          : new GenericIOError("Read")
       )
       .andThen(tryParseYaml)
       .andThen((content) => {

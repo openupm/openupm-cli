@@ -80,7 +80,7 @@ export function makeProjectManifestLoader(
       .mapErr((error) =>
         error.code === "ENOENT"
           ? makeProjectManifestMissingError(manifestPath)
-          : new GenericIOError()
+          : new GenericIOError("Read")
       )
       .andThen(tryParseJson)
       .andThen((json) =>
@@ -118,6 +118,8 @@ export function makeProjectManifestWriter(
     manifest = pruneManifest(manifest);
     const json = JSON.stringify(manifest, null, 2);
 
-    return writeFile(manifestPath, json).mapErr(() => new GenericIOError());
+    return writeFile(manifestPath, json).mapErr(
+      () => new GenericIOError("Write")
+    );
   };
 }

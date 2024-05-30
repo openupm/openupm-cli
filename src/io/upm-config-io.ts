@@ -106,7 +106,7 @@ export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
         !(error instanceof StringFormatError)
           ? error.code === "ENOENT"
             ? Ok(null)
-            : Err(new GenericIOError())
+            : Err(new GenericIOError("Read"))
           : Err(error)
       );
 }
@@ -127,5 +127,7 @@ export const trySaveUpmConfig = (
   configFilePath: string
 ): AsyncResult<void, UpmConfigSaveError> => {
   const content = TOML.stringify(config);
-  return writeFile(configFilePath, content).mapErr(() => new GenericIOError());
+  return writeFile(configFilePath, content).mapErr(
+    () => new GenericIOError("Write")
+  );
 };

@@ -36,7 +36,7 @@ describe("npmrc-auth", () => {
     });
 
     it("should fail if npmrc load failed", async () => {
-      const expected = new GenericIOError();
+      const expected = new GenericIOError("Read");
       const { authNpmrc, loadNpmrc } = makeDependencies();
       loadNpmrc.mockReturnValue(new AsyncResult(Err(expected)));
 
@@ -46,7 +46,7 @@ describe("npmrc-auth", () => {
     });
 
     it("should fail if npmrc save failed", async () => {
-      const expected = new GenericIOError();
+      const expected = new GenericIOError("Write");
       const { authNpmrc, saveNpmrc } = makeDependencies();
       saveNpmrc.mockReturnValue(new AsyncResult(Err(expected)));
 

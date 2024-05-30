@@ -58,7 +58,7 @@ function makeDependencies() {
 
 describe("cmd-remove", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Read");
     const { removeCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
@@ -181,7 +181,7 @@ describe("cmd-remove", () => {
   });
 
   it("should fail if manifest could not be saved", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Write");
     const { removeCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
@@ -192,7 +192,10 @@ describe("cmd-remove", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const { removeCmd, log, writeProjectManifest } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, new GenericIOError());
+    mockProjectManifestWriteResult(
+      writeProjectManifest,
+      new GenericIOError("Write")
+    );
 
     await removeCmd(somePackage, { _global: {} });
 

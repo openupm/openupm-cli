@@ -65,7 +65,7 @@ export function makeBuiltInPackagesFinder(
           .mapErr((error) =>
             error.code === "ENOENT"
               ? new EditorNotInstalledError(editorVersion)
-              : new GenericIOError()
+              : new GenericIOError("Read")
           )
       );
     }

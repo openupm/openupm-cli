@@ -127,7 +127,7 @@ function makeDependencies() {
 
 describe("cmd-add", () => {
   it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Read");
     const { addCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
@@ -138,7 +138,7 @@ describe("cmd-add", () => {
 
   it("should notify if env could not be parsed", async () => {
     const { addCmd, parseEnv, log } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(new GenericIOError()));
+    parseEnv.mockResolvedValue(Err(new GenericIOError("Read")));
 
     await addCmd(somePackage, { _global: {} });
 
@@ -151,7 +151,7 @@ describe("cmd-add", () => {
   it("should fail if editor-version could not be determined", async () => {
     const { addCmd, determineEditorVersion } = makeDependencies();
     determineEditorVersion.mockReturnValue(
-      Err(new GenericIOError()).toAsyncResult()
+      Err(new GenericIOError("Read")).toAsyncResult()
     );
 
     const resultCode = await addCmd(somePackage, { _global: {} });
@@ -162,7 +162,7 @@ describe("cmd-add", () => {
   it("should notify if editor-version could not be determined", async () => {
     const { addCmd, determineEditorVersion, log } = makeDependencies();
     determineEditorVersion.mockReturnValue(
-      Err(new GenericIOError()).toAsyncResult()
+      Err(new GenericIOError("Read")).toAsyncResult()
     );
 
     await addCmd(somePackage, { _global: {} });
@@ -687,7 +687,7 @@ describe("cmd-add", () => {
   });
 
   it("should fail if manifest could not be saved", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Write");
     const { addCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
@@ -698,7 +698,10 @@ describe("cmd-add", () => {
 
   it("should notify if manifest could not be saved", async () => {
     const { addCmd, writeProjectManifest, log } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, new GenericIOError());
+    mockProjectManifestWriteResult(
+      writeProjectManifest,
+      new GenericIOError("Write")
+    );
 
     await addCmd(somePackage, { _global: {} });
 

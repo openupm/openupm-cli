@@ -45,7 +45,7 @@ describe("cmd-login", () => {
   }
 
   it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError();
+    const expected = new GenericIOError("Read");
     const { loginCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
