@@ -21,7 +21,7 @@ const exampleToken = "some token";
 describe("login", () => {
   function makeDependencies() {
     const saveAuthToUpmConfig = mockService<SaveAuthToUpmConfig>();
-    saveAuthToUpmConfig.mockReturnValue(AsyncOk(undefined));
+    saveAuthToUpmConfig.mockReturnValue(AsyncOk());
 
     const npmLogin = mockService<NpmLoginService>();
     npmLogin.mockReturnValue(AsyncOk(exampleToken));

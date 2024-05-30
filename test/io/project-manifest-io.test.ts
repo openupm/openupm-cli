@@ -95,7 +95,7 @@ describe("project-manifest io", () => {
   describe("write", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
-      writeFile.mockReturnValue(AsyncOk(undefined));
+      writeFile.mockReturnValue(AsyncOk());
 
       const writeProjectManifest = makeProjectManifestWriter(writeFile);
       return { writeProjectManifest, writeFile } as const;

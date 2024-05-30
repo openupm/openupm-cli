@@ -37,7 +37,7 @@ describe("cmd-login", () => {
     getUpmConfigPath.mockReturnValue(AsyncOk(exampleUpmConfigPath));
 
     const login = mockService<LoginService>();
-    login.mockReturnValue(AsyncOk(undefined));
+    login.mockReturnValue(AsyncOk());
 
     const log = makeMockLogger();
 

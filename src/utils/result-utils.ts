@@ -5,7 +5,13 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
  * Shorthand for `Ok(value).toAsyncResult()`.
  * @param value The results value.
  */
-export function AsyncOk<T>(value: T): AsyncResult<T, never> {
+export function AsyncOk<T>(value: T): AsyncResult<T, never>;
+/**
+ * Creates an empty {@link AsyncResult}.
+ * Shorthand for `Ok(undefined).toAsyncResult()`.
+ */
+export function AsyncOk(): AsyncResult<void, never>;
+export function AsyncOk(value?: unknown) {
   return Ok(value).toAsyncResult();
 }
 
