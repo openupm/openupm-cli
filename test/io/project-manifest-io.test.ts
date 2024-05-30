@@ -9,7 +9,6 @@ import {
 } from "../../src/domain/project-manifest";
 import path from "path";
 import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
-import { Err, Ok } from "ts-results-es";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";
@@ -18,6 +17,7 @@ import { mockService } from "../services/service.mock";
 import { eaccesError, enoentError } from "./node-error.mock";
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
@@ -43,7 +43,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(Err(eaccesError).toAsyncResult());
+      readFile.mockReturnValue(AsyncErr(eaccesError));
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
@@ -54,7 +54,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file is missing", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(Err(enoentError).toAsyncResult());
+      readFile.mockReturnValue(AsyncErr(enoentError));
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
@@ -65,9 +65,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file does not contain json", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(
-        Ok("{} dang, this is not json []").toAsyncResult()
-      );
+      readFile.mockReturnValue(AsyncOk("{} dang, this is not json []"));
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
@@ -79,7 +77,7 @@ describe("project-manifest io", () => {
     it("should load valid manifest", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
       readFile.mockReturnValue(
-        Ok(`{ "dependencies": { "com.package.a": "1.0.0"} }`).toAsyncResult()
+        AsyncOk(`{ "dependencies": { "com.package.a": "1.0.0"} }`)
       );
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
@@ -97,7 +95,7 @@ describe("project-manifest io", () => {
   describe("write", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
-      writeFile.mockReturnValue(Ok(undefined).toAsyncResult());
+      writeFile.mockReturnValue(AsyncOk(undefined));
 
       const writeProjectManifest = makeProjectManifestWriter(writeFile);
       return { writeProjectManifest, writeFile } as const;
@@ -106,7 +104,7 @@ describe("project-manifest io", () => {
     it("should fail if file could not be written", async () => {
       const expected = eaccesError;
       const { writeProjectManifest, writeFile } = makeDependencies();
-      writeFile.mockReturnValue(Err(expected).toAsyncResult());
+      writeFile.mockReturnValue(AsyncErr(expected));
 
       const result = await writeProjectManifest(
         exampleProjectPath,

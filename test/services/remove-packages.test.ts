@@ -1,5 +1,4 @@
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
-import { ResultCodes } from "../../src/cli/result-codes";
 import {
   mockProjectManifest,
   mockProjectManifestWriteResult,

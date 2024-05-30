@@ -15,6 +15,7 @@ import {
   RegistryAuthenticationError,
 } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
@@ -33,10 +34,10 @@ describe("cmd-login", () => {
     parseEnv.mockResolvedValue(Ok(defaultEnv));
 
     const getUpmConfigPath = mockService<GetUpmConfigPath>();
-    getUpmConfigPath.mockReturnValue(Ok(exampleUpmConfigPath).toAsyncResult());
+    getUpmConfigPath.mockReturnValue(AsyncOk(exampleUpmConfigPath));
 
     const login = mockService<LoginService>();
-    login.mockReturnValue(Ok(undefined).toAsyncResult());
+    login.mockReturnValue(AsyncOk(undefined));
 
     const log = makeMockLogger();
 
@@ -59,7 +60,7 @@ describe("cmd-login", () => {
   it("should fail if upm config path could not be determined", async () => {
     const expected = new RequiredEnvMissingError([]);
     const { loginCmd, getUpmConfigPath } = makeDependencies();
-    getUpmConfigPath.mockReturnValue(Err(expected).toAsyncResult());
+    getUpmConfigPath.mockReturnValue(AsyncErr(expected));
 
     const resultCode = await loginCmd({
       username: exampleUser,
@@ -74,7 +75,7 @@ describe("cmd-login", () => {
   it("should fail if login failed", async () => {
     const expected = new RequiredEnvMissingError([]);
     const { loginCmd, login } = makeDependencies();
-    login.mockReturnValue(Err(expected).toAsyncResult());
+    login.mockReturnValue(AsyncErr(expected));
 
     const resultCode = await loginCmd({
       username: exampleUser,

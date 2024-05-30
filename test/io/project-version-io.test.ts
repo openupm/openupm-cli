@@ -1,5 +1,4 @@
 import { ReadTextFile } from "../../src/io/fs-result";
-import { Err, Ok } from "ts-results-es";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
 import { makeProjectVersionLoader } from "../../src/io/project-version-io";
@@ -9,6 +8,7 @@ import {
   FileParseError,
   GenericIOError,
 } from "../../src/io/common-errors";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 describe("project-version-io", () => {
   describe("load", () => {
@@ -22,7 +22,7 @@ describe("project-version-io", () => {
 
     it("should fail if file is missing", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      readFile.mockReturnValue(Err(enoentError).toAsyncResult());
+      readFile.mockReturnValue(AsyncErr(enoentError));
 
       const result = await loadProjectVersion("/some/bad/path").promise;
 
@@ -33,7 +33,7 @@ describe("project-version-io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      readFile.mockReturnValue(Err(eaccesError).toAsyncResult());
+      readFile.mockReturnValue(AsyncErr(eaccesError));
 
       const result = await loadProjectVersion("/some/bad/path").promise;
 
@@ -44,7 +44,7 @@ describe("project-version-io", () => {
 
     it("should fail if file does not contain valid yaml", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      readFile.mockReturnValue(Ok("{ this is not valid yaml").toAsyncResult());
+      readFile.mockReturnValue(AsyncOk("{ this is not valid yaml"));
 
       const result = await loadProjectVersion("/some/path").promise;
 
@@ -55,9 +55,7 @@ describe("project-version-io", () => {
 
     it("should fail if yaml does not contain editor-version", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      readFile.mockReturnValue(
-        Ok("thisIsYaml: but not what we want").toAsyncResult()
-      );
+      readFile.mockReturnValue(AsyncOk("thisIsYaml: but not what we want"));
 
       const result = await loadProjectVersion("/some/path").promise;
 
@@ -69,9 +67,7 @@ describe("project-version-io", () => {
     it("should load valid version strings", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
       const expected = "2022.1.2f1";
-      readFile.mockReturnValue(
-        Ok(`m_EditorVersion: ${expected}`).toAsyncResult()
-      );
+      readFile.mockReturnValue(AsyncOk(`m_EditorVersion: ${expected}`));
 
       const result = await loadProjectVersion("/some/path").promise;
 

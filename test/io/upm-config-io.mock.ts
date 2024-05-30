@@ -1,6 +1,6 @@
 import { UPMConfig } from "../../src/domain/upm-config";
 import { LoadUpmConfig } from "../../src/io/upm-config-io";
-import { Ok } from "ts-results-es";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 /**
  * Mocks return value for calls to {@link LoadUpmConfig} function.
@@ -11,5 +11,5 @@ export function mockUpmConfig(
   loadUpmConfig: jest.MockedFunction<LoadUpmConfig>,
   config: UPMConfig | null
 ) {
-  loadUpmConfig.mockReturnValue(Ok(config).toAsyncResult());
+  loadUpmConfig.mockReturnValue(AsyncOk(config));
 }

@@ -9,6 +9,7 @@ import { mockService } from "../services/service.mock";
 import { GenericIOError } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { RemovePackages } from "../../src/services/remove-packages";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 const somePackage = makeDomainName("com.some.package");
 const defaultEnv = {
@@ -22,9 +23,7 @@ function makeDependencies() {
 
   const removePackages = mockService<RemovePackages>();
   removePackages.mockReturnValue(
-    Ok([
-      { name: somePackage, version: "1.0.0" as SemanticVersion },
-    ]).toAsyncResult()
+    AsyncOk([{ name: somePackage, version: "1.0.0" as SemanticVersion }])
   );
 
   const log = makeMockLogger();
