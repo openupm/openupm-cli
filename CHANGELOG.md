@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/openupm/openupm-cli/compare/2.2.0...2.3.0) (2024-05-30)
+
+
+### Features
+
+* extract remove service ([#352](https://github.com/openupm/openupm-cli/issues/352)) ([61ebed9](https://github.com/openupm/openupm-cli/commit/61ebed9f3613f8cfb82321faa2634cc2dda8d769))
+
 # [2.2.0](https://github.com/openupm/openupm-cli/compare/2.1.1...2.2.0) (2024-05-30)
 
 
