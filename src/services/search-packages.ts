@@ -1,13 +1,21 @@
 import { Registry } from "../domain/registry";
 import { AsyncResult } from "ts-results-es";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import { FetchAllPackuments } from "../io/all-packuments-io";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import {
+  FetchAllPackuments,
+  FetchAllPackumentsError,
+} from "../io/all-packuments-io";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "../io/common-errors";
 
 /**
  * Error which may occur when searching for packages.
  */
-export type SearchPackagesError = HttpErrorBase;
+export type SearchPackagesError =
+  | RegistryAuthenticationError
+  | GenericNetworkError;
 
 /**
  * A function for searching packages in a registry.
@@ -32,7 +40,7 @@ export function makePackagesSearcher(
   function searchInAll(
     registry: Registry,
     keyword: string
-  ): AsyncResult<SearchedPackument[], HttpErrorBase> {
+  ): AsyncResult<SearchedPackument[], FetchAllPackumentsError> {
     return fetchAllPackuments(registry).map((allPackuments) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _updated, ...packumentEntries } = allPackuments;

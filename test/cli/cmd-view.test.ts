@@ -6,16 +6,15 @@ import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
-import {
-  PackageWithVersionError,
-  PackumentNotFoundError,
-} from "../../src/common-errors";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
 import { ResolveRemotePackument } from "../../src/services/resolve-remote-packument";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { GenericIOError } from "../../src/io/common-errors";
+import {
+  GenericIOError,
+  GenericNetworkError,
+} from "../../src/io/common-errors";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -75,22 +74,20 @@ describe("cmd-view", () => {
     const { viewCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
-    const result = await viewCmd(somePackage, { _global: {} });
+    const resultCode = await viewCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should fail if package version was specified", async () => {
     const { viewCmd } = makeDependencies();
 
-    const result = await viewCmd(
+    const resultCode = await viewCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
       { _global: {} }
     );
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(PackageWithVersionError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package version was specified", async () => {
@@ -101,30 +98,29 @@ describe("cmd-view", () => {
       { _global: {} }
     );
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "",
       expect.stringContaining("please do not specify")
     );
   });
 
   it("should fail if package was not found", async () => {
-    const expected = new PackumentNotFoundError();
     const { viewCmd, resolveRemotePackument } = makeDependencies();
     resolveRemotePackument.mockReturnValue(Ok(null).toAsyncResult());
 
-    const result = await viewCmd(somePackage, { _global: {} });
+    const resultCode = await viewCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should fail if package could not be resolved", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { viewCmd, resolveRemotePackument } = makeDependencies();
     resolveRemotePackument.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await viewCmd(somePackage, { _global: {} });
+    const resultCode = await viewCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package could not be resolved", async () => {
@@ -133,7 +129,7 @@ describe("cmd-view", () => {
 
     await viewCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("not found")
     );

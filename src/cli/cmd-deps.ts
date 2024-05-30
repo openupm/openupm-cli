@@ -1,4 +1,4 @@
-import { EnvParseError, ParseEnvService } from "../services/parse-env";
+import { ParseEnvService } from "../services/parse-env";
 import { isPackageUrl } from "../domain/package-url";
 import {
   makePackageReference,
@@ -8,22 +8,25 @@ import {
 import { CmdOptions } from "./options";
 import { PackumentVersionResolveError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
-import { Ok, Result } from "ts-results-es";
-import {
-  DependencyResolveError,
-  ResolveDependenciesService,
-} from "../services/dependency-resolving";
+import { ResolveDependenciesService } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
-import { logEnvParseError } from "./error-logging";
 import { DebugLog } from "../logging";
-
-export type DepsError = EnvParseError | DependencyResolveError;
+import { ResultCodes } from "./result-codes";
+import {
+  notifyEnvParsingFailed,
+  notifyRemotePackumentVersionResolvingFailed,
+} from "./error-logging";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
+
+/**
+ * The possible result codes with which the deps command can exit.
+ */
+export type DepsResultCode = ResultCodes.Ok | ResultCodes.Error;
 
 /**
  * Cmd-handler for listing dependencies for a package.
@@ -33,7 +36,7 @@ export type DepsOptions = CmdOptions<{
 export type DepsCmd = (
   pkg: PackageReference,
   options: DepsOptions
-) => Promise<Result<void, DepsError>>;
+) => Promise<DepsResultCode>;
 
 function errorPrefixForError(error: PackumentVersionResolveError): string {
   if (error instanceof PackumentNotFoundError) return "missing dependency";
@@ -55,16 +58,17 @@ export function makeDepsCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
-      return envResult;
+      notifyEnvParsingFailed(log, envResult.error);
+      return ResultCodes.Error;
     }
     const env = envResult.value;
 
     const [name, version] = splitPackageReference(pkg);
 
-    if (version !== undefined && isPackageUrl(version))
-      // TODO: Convert to result
-      throw new Error("Cannot get dependencies for url-version");
+    if (version !== undefined && isPackageUrl(version)) {
+      log.error("", "cannot get dependencies for url-version");
+      return ResultCodes.Error;
+    }
 
     const deep = options.deep || false;
     debugLog(`fetch: ${makePackageReference(name, version)}, deep=${deep}`);
@@ -74,10 +78,15 @@ export function makeDepsCmd(
       version,
       deep
     );
-    if (resolveResult.isErr())
-      // TODO: Log errors
-      // TODO: Add tests
-      return resolveResult;
+    if (resolveResult.isErr()) {
+      notifyRemotePackumentVersionResolvingFailed(
+        log,
+        name,
+        resolveResult.error
+      );
+      return ResultCodes.Error;
+    }
+
     const [depsValid, depsInvalid] = resolveResult.value;
 
     depsValid.forEach((dependency) => logValidDependency(debugLog, dependency));
@@ -93,6 +102,6 @@ export function makeDepsCmd(
         log.warn(prefix, x.name);
       });
 
-    return Ok(undefined);
+    return ResultCodes.Ok;
   };
 }

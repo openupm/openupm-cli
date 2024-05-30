@@ -4,6 +4,11 @@ import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { makeRegistrySearcher } from "../../src/io/npm-search";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
+import { noopLogger } from "../../src/logging";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "../../src/io/common-errors";
 
 jest.mock("libnpmsearch");
 
@@ -13,12 +18,12 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const searchRegistry = makeRegistrySearcher();
+  const searchRegistry = makeRegistrySearcher(noopLogger);
   return { searchRegistry } as const;
 }
 
 describe("npm search", () => {
-  it("should fail for error response", async () => {
+  it("should fail for non-auth error response", async () => {
     const expected = {
       message: "Idk, it failed",
       name: "FakeError",
@@ -29,7 +34,25 @@ describe("npm search", () => {
 
     const result = await searchRegistry(exampleRegistry, "wow").promise;
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(GenericNetworkError)
+    );
+  });
+
+  it("should fail for auth error response", async () => {
+    const expected = {
+      message: "Idk, it failed",
+      name: "FakeError",
+      statusCode: 401,
+    } as HttpErrorBase;
+    jest.mocked(npmSearch).mockRejectedValue(expected);
+    const { searchRegistry } = makeDependencies();
+
+    const result = await searchRegistry(exampleRegistry, "wow").promise;
+
+    expect(result).toBeError((actual) =>
+      expect(actual).toBeInstanceOf(RegistryAuthenticationError)
+    );
   });
 
   it("should succeed for ok response", async () => {

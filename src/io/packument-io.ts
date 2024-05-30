@@ -4,12 +4,17 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "./common-errors";
 
 /**
  * Error which may occur when fetching a packument from a remote registry.
  */
-export type FetchPackumentError = HttpErrorBase;
+export type FetchPackumentError =
+  | GenericNetworkError
+  | RegistryAuthenticationError;
 /**
  * Function for fetching a packument from a registry.
  * @param registry The registry to fetch from.
@@ -39,7 +44,14 @@ export function makePackumentFetcher(
             if (error !== null) {
               assertIsHttpError(error);
               if (error.statusCode === 404) resolve(Ok(null));
-              else resolve(Err(error));
+              else
+                resolve(
+                  Err(
+                    error.statusCode === 401
+                      ? new RegistryAuthenticationError()
+                      : new GenericNetworkError()
+                  )
+                );
             } else resolve(Ok(packument));
           }
         );

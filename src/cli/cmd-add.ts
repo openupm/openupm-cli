@@ -1,11 +1,9 @@
 import { isPackageUrl, PackageUrl } from "../domain/package-url";
 import {
   LoadProjectManifest,
-  ManifestLoadError,
-  ManifestWriteError,
   WriteProjectManifest,
 } from "../io/project-manifest-io";
-import { EnvParseError, ParseEnvService } from "../services/parse-env";
+import { ParseEnvService } from "../services/parse-env";
 import {
   compareEditorVersion,
   stringifyEditorVersion,
@@ -37,13 +35,6 @@ import { areArraysEqual } from "../utils/array-utils";
 import { Err, Ok, Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import {
-  logDetermineEditorError,
-  logEnvParseError,
-  logManifestLoadError,
-  logManifestSaveError,
-  logPackumentResolveError,
-} from "./error-logging";
-import {
   DependencyResolveError,
   ResolveDependenciesService,
 } from "../services/dependency-resolving";
@@ -53,9 +44,17 @@ import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import { VersionNotFoundError } from "../domain/packument";
-import { FetchPackumentError } from "../io/packument-io";
 import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
+import { FetchPackumentError } from "../io/packument-io";
+import { ResultCodes } from "./result-codes";
+import {
+  notifyEnvParsingFailed,
+  notifyManifestLoadFailed,
+  notifyManifestWriteFailed,
+  notifyProjectVersionLoadFailed,
+  notifyRemotePackumentVersionResolvingFailed,
+} from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -85,16 +84,18 @@ export type AddOptions = CmdOptions<{
   force?: boolean;
 }>;
 
-export type AddError =
-  | EnvParseError
-  | ManifestLoadError
+type AddError =
   | PackumentVersionResolveError
   | FetchPackumentError
   | InvalidPackumentDataError
   | EditorIncompatibleError
   | UnresolvedDependencyError
-  | DependencyResolveError
-  | ManifestWriteError;
+  | DependencyResolveError;
+
+/**
+ * The different command result codes for the add command.
+ */
+export type AddResultCode = ResultCodes.Ok | ResultCodes.Error;
 
 /**
  * Cmd-handler for adding packages.
@@ -104,7 +105,7 @@ export type AddError =
 type AddCmd = (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
-) => Promise<Result<void, AddError>>;
+) => Promise<AddResultCode>;
 
 /**
  * Makes a {@link AddCmd} function.
@@ -121,18 +122,19 @@ export function makeAddCmd(
 ): AddCmd {
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
+
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
-      return envResult;
+      notifyEnvParsingFailed(log, envResult.error);
+      return ResultCodes.Error;
     }
     const env = envResult.value;
 
     const editorVersionResult = await determineEditorVersion(env.cwd).promise;
     if (editorVersionResult.isErr()) {
-      logDetermineEditorError(log, editorVersionResult.error);
-      return editorVersionResult;
+      notifyProjectVersionLoadFailed(log, editorVersionResult.error);
+      return ResultCodes.Error;
     }
     const editorVersion = editorVersionResult.value;
 
@@ -175,7 +177,11 @@ export function makeAddCmd(
         }
 
         if (resolveResult.isErr()) {
-          logPackumentResolveError(log, name, resolveResult.error);
+          notifyRemotePackumentVersionResolvingFailed(
+            log,
+            name,
+            resolveResult.error
+          );
           return resolveResult;
         }
 
@@ -232,10 +238,14 @@ export function makeAddCmd(
             requestedVersion,
             true
           );
-          if (resolveResult.isErr())
-            // TODO: Log errors
-            // TODO: Add tests
+          if (resolveResult.isErr()) {
+            notifyRemotePackumentVersionResolvingFailed(
+              log,
+              name,
+              resolveResult.error
+            );
             return resolveResult;
+          }
           const [depsValid, depsInvalid] = resolveResult.value;
 
           // add depsValid to pkgsInScope.
@@ -253,7 +263,11 @@ export function makeAddCmd(
           // print suggestion for depsInvalid
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
-            logPackumentResolveError(log, depObj.name, depObj.reason);
+            notifyRemotePackumentVersionResolvingFailed(
+              log,
+              depObj.name,
+              depObj.reason
+            );
 
             // If the manifest already has the dependency than it does not
             // really matter that it was not resolved.
@@ -330,8 +344,8 @@ export function makeAddCmd(
     // load manifest
     const loadResult = await loadProjectManifest(env.cwd).promise;
     if (loadResult.isErr()) {
-      logManifestLoadError(log, loadResult.error);
-      return loadResult;
+      notifyManifestLoadFailed(log, loadResult.error);
+      return ResultCodes.Error;
     }
     let manifest = loadResult.value;
 
@@ -339,7 +353,7 @@ export function makeAddCmd(
     let dirty = false;
     for (const pkg of pkgs) {
       const result = await tryAddToManifest(manifest, pkg);
-      if (result.isErr()) return result;
+      if (result.isErr()) return ResultCodes.Error;
 
       const [newManifest, manifestChanged] = result.value;
       if (manifestChanged) {
@@ -352,14 +366,14 @@ export function makeAddCmd(
     if (dirty) {
       const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
       if (saveResult.isErr()) {
-        logManifestSaveError(log, saveResult.error);
-        return saveResult;
+        notifyManifestWriteFailed(log);
+        return ResultCodes.Error;
       }
 
       // print manifest notice
       log.notice("", "please open Unity project to apply changes");
     }
 
-    return Ok(undefined);
+    return ResultCodes.Ok;
   };
 }

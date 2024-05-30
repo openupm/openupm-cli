@@ -5,7 +5,11 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "./common-errors";
+import { DebugLog } from "../logging";
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -18,6 +22,13 @@ export type SearchedPackument = Readonly<
 >;
 
 /**
+ * Error which may occur when searching a npm registry.
+ */
+export type SearchRegistryError =
+  | RegistryAuthenticationError
+  | GenericNetworkError;
+
+/**
  * Function for searching packuments on a registry.
  * @param registry The registry to search.
  * @param keyword The keyword to search.
@@ -25,7 +36,7 @@ export type SearchedPackument = Readonly<
 export type SearchRegistry = (
   registry: Registry,
   keyword: string
-) => AsyncResult<ReadonlyArray<SearchedPackument>, HttpErrorBase>;
+) => AsyncResult<ReadonlyArray<SearchedPackument>, SearchRegistryError>;
 
 /**
  * Get npm fetch options.
@@ -44,7 +55,7 @@ export const getNpmFetchOptions = function (
 /**
  * Makes a {@link SearchRegistry} function.
  */
-export function makeRegistrySearcher(): SearchRegistry {
+export function makeRegistrySearcher(debugLog: DebugLog): SearchRegistry {
   return (registry, keyword) => {
     return new AsyncResult(
       npmSearch(keyword, getNpmFetchOptions(registry))
@@ -52,7 +63,12 @@ export function makeRegistrySearcher(): SearchRegistry {
         .then((results) => Ok(results as SearchedPackument[]))
         .catch((error) => {
           assertIsHttpError(error);
-          return Err(error);
+          debugLog("A http request failed.", error);
+          return Err(
+            error.statusCode === 401
+              ? new RegistryAuthenticationError()
+              : new GenericNetworkError()
+          );
         })
     );
   };

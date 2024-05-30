@@ -1,6 +1,6 @@
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
-import { makeRemoveCmd, RemoveError } from "../../src/cli/cmd-remove";
+import { makeRemoveCmd } from "../../src/cli/cmd-remove";
 import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import {
@@ -10,17 +10,14 @@ import {
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
-import {
-  PackageWithVersionError,
-  PackumentNotFoundError,
-} from "../../src/common-errors";
 import { makeMockLogger } from "./log.mock";
 import { mockService } from "../services/service.mock";
 import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import { GenericIOError } from "../../src/io/common-errors";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -65,20 +62,18 @@ describe("cmd-remove", () => {
     const { removeCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
-    const result = await removeCmd(somePackage, { _global: {} });
+    const resultCode = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should fail if manifest could not be loaded", async () => {
     const { removeCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
-    const result = await removeCmd(somePackage, { _global: {} });
+    const resultCode = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual: RemoveError) =>
-      expect(actual).toBeInstanceOf(FileMissingError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be loaded", async () => {
@@ -87,20 +82,21 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.any(String));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("Could not locate")
+    );
   });
 
   it("should fail if package version was specified", async () => {
     const { removeCmd } = makeDependencies();
 
-    const result = await removeCmd(
+    const resultCode = await removeCmd(
       makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
       { _global: {} }
     );
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(PackageWithVersionError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package version was specified", async () => {
@@ -111,7 +107,7 @@ describe("cmd-remove", () => {
       { _global: {} }
     );
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "",
       expect.stringContaining("please do not specify")
     );
@@ -120,11 +116,9 @@ describe("cmd-remove", () => {
   it("should fail if package is not in manifest", async () => {
     const { removeCmd } = makeDependencies();
 
-    const result = await removeCmd(otherPackage, { _global: {} });
+    const resultCode = await removeCmd(otherPackage, { _global: {} });
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(PackumentNotFoundError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package is not in manifest", async () => {
@@ -132,7 +126,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(otherPackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "404",
       expect.stringContaining("not found")
     );
@@ -143,7 +137,7 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("removed")
     );
@@ -191,9 +185,9 @@ describe("cmd-remove", () => {
     const { removeCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
-    const result = await removeCmd(somePackage, { _global: {} });
+    const resultCode = await removeCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be saved", async () => {
@@ -202,7 +196,10 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("file-system error")
+    );
   });
 
   it("should suggest to open Unity after save", async () => {
@@ -210,6 +207,9 @@ describe("cmd-remove", () => {
 
     await removeCmd(somePackage, { _global: {} });
 
-    expect(log.notice).toHaveLogLike("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveBeenCalledWith(
+      "",
+      expect.stringContaining("open Unity")
+    );
   });
 });

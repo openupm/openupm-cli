@@ -7,7 +7,7 @@ import { buildPackument } from "../domain/data-packument";
 import { mockService } from "./service.mock";
 import { FetchPackument } from "../../src/io/packument-io";
 import { Err, Ok } from "ts-results-es";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import { GenericNetworkError } from "../../src/io/common-errors";
 
 describe("resolve remove packument", () => {
   const exampleName = makeDomainName("com.some.package");
@@ -84,7 +84,7 @@ describe("resolve remove packument", () => {
   });
 
   it("should fail if any packument fetch failed", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { resolveRemotePackument, fetchPackument } = makeDependencies();
     fetchPackument.mockReturnValue(Err(expected).toAsyncResult());
 

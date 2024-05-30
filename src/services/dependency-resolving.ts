@@ -10,7 +10,10 @@ import {
 } from "../packument-version-resolving";
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
-import { ResolveRemotePackumentVersionService } from "./resolve-remote-packument-version";
+import {
+  ResolveRemotePackumentVersionError,
+  ResolveRemotePackumentVersionService,
+} from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
 import {
@@ -19,8 +22,11 @@ import {
 } from "./resolve-latest-version";
 import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { FetchPackumentError } from "../io/packument-io";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "../io/common-errors";
 
 export type DependencyBase = {
   /**
@@ -159,7 +165,7 @@ export function makeResolveDependenciesService(
         // Search all given registries.
         let resolveResult: Result<
           ResolvedPackumentVersion,
-          PackumentVersionResolveError | HttpErrorBase
+          ResolveRemotePackumentVersionError
         > = Err(new PackumentNotFoundError());
         for (const source of sources) {
           const result = await tryResolveFromRegistry(
@@ -177,13 +183,17 @@ export function makeResolveDependenciesService(
         }
 
         if (resolveResult.isErr()) {
-          if (resolveResult.error instanceof HttpErrorBase)
-            return resolveResult;
+          const error = resolveResult.error;
+          if (
+            error instanceof GenericNetworkError ||
+            error instanceof RegistryAuthenticationError
+          )
+            return Err(error);
 
           depsInvalid.push({
             name: entryName,
             self: isSelf,
-            reason: resolveResult.error,
+            reason: error,
           });
           continue;
         }

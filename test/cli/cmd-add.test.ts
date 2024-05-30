@@ -1,15 +1,9 @@
-import {
-  EditorIncompatibleError,
-  InvalidPackumentDataError,
-  makeAddCmd,
-  UnresolvedDependencyError,
-} from "../../src/cli/cmd-add";
+import { makeAddCmd } from "../../src/cli/cmd-add";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
-import { Err, Ok } from "ts-results-es";
 import {
   mockProjectManifest,
   mockProjectManifestWriteResult,
@@ -18,7 +12,6 @@ import { emptyProjectManifest } from "../../src/domain/project-manifest";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockResolvedPackuments } from "../services/packument-resolving.mock";
-import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
@@ -31,8 +24,10 @@ import {
 import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import { GenericIOError } from "../../src/io/common-errors";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
+import { Err, Ok } from "ts-results-es";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -136,9 +131,21 @@ describe("cmd-add", () => {
     const { addCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
-    const result = await addCmd(somePackage, { _global: {} });
+    const resultCode = await addCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
+  });
+
+  it("should notify if env could not be parsed", async () => {
+    const { addCmd, parseEnv, log } = makeDependencies();
+    parseEnv.mockResolvedValue(Err(new GenericIOError()));
+
+    await addCmd(somePackage, { _global: {} });
+
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("file-system error")
+    );
   });
 
   it("should fail if editor-version could not be determined", async () => {
@@ -147,10 +154,22 @@ describe("cmd-add", () => {
       Err(new GenericIOError()).toAsyncResult()
     );
 
-    const result = await addCmd(somePackage, { _global: {} });
+    const resultCode = await addCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(GenericIOError)
+    expect(resultCode).toEqual(ResultCodes.Error);
+  });
+
+  it("should notify if editor-version could not be determined", async () => {
+    const { addCmd, determineEditorVersion, log } = makeDependencies();
+    determineEditorVersion.mockReturnValue(
+      Err(new GenericIOError()).toAsyncResult()
+    );
+
+    await addCmd(somePackage, { _global: {} });
+
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("file-system error")
     );
   });
 
@@ -158,11 +177,9 @@ describe("cmd-add", () => {
     const { addCmd, loadProjectManifest } = makeDependencies();
     mockProjectManifest(loadProjectManifest, null);
 
-    const result = await addCmd(somePackage, { _global: {} });
+    const resultCode = await addCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(FileMissingError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be loaded", async () => {
@@ -171,18 +188,19 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.any(String));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("Could not locate")
+    );
   });
 
   it("should fail if package could not be resolved", async () => {
     const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
     mockResolvedPackuments(resolveRemovePackumentVersion);
 
-    const result = await addCmd(somePackage, { _global: {} });
+    const resultCode = await addCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(PackumentNotFoundError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package could not be resolved", async () => {
@@ -191,8 +209,8 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike(
-      "404",
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
       expect.stringContaining("not found")
     );
   });
@@ -200,13 +218,14 @@ describe("cmd-add", () => {
   it("should fail if package version could not be resolved", async () => {
     const { addCmd } = makeDependencies();
 
-    const result = await addCmd(makePackageReference(somePackage, "2.0.0"), {
-      _global: {},
-    });
-
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(VersionNotFoundError)
+    const resultCode = await addCmd(
+      makePackageReference(somePackage, "2.0.0"),
+      {
+        _global: {},
+      }
     );
+
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if package version could not be resolved", async () => {
@@ -216,9 +235,9 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
-      "404",
-      expect.stringContaining("is not a valid choice")
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("has no published version")
     );
   });
 
@@ -230,7 +249,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
       expect.stringContaining("unknown")
     );
@@ -247,7 +266,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "package.unity",
       expect.stringContaining("not valid")
     );
@@ -264,7 +283,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "suggest",
       expect.stringContaining("run with option -f")
     );
@@ -277,13 +296,11 @@ describe("cmd-add", () => {
       badEditorPackument,
     ]);
 
-    const result = await addCmd(somePackage, {
+    const resultCode = await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(InvalidPackumentDataError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should add package with invalid editor version when running with force", async () => {
@@ -293,12 +310,12 @@ describe("cmd-add", () => {
       badEditorPackument,
     ]);
 
-    const result = await addCmd(somePackage, {
+    const resultCode = await addCmd(somePackage, {
       _global: {},
       force: true,
     });
 
-    expect(result).toBeOk();
+    expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
   it("should notify if package is incompatible with editor", async () => {
@@ -312,7 +329,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
+    expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
       expect.stringContaining("requires")
     );
@@ -329,7 +346,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "suggest",
       expect.stringContaining("run with option -f")
     );
@@ -342,13 +359,11 @@ describe("cmd-add", () => {
       incompatiblePackument,
     ]);
 
-    const result = await addCmd(somePackage, {
+    const resultCode = await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(EditorIncompatibleError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should add package with incompatible with editor when running with force", async () => {
@@ -358,12 +373,12 @@ describe("cmd-add", () => {
       incompatiblePackument,
     ]);
 
-    const result = await addCmd(somePackage, {
+    const resultCode = await addCmd(somePackage, {
       _global: {},
       force: true,
     });
 
-    expect(result).toBeOk();
+    expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
   it("should notify of unresolved dependencies", async () => {
@@ -385,9 +400,9 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.warn).toHaveLogLike(
-      "404",
-      expect.stringContaining("is not a valid choice")
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("has no published version")
     );
   });
 
@@ -425,7 +440,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "suggest",
       expect.stringContaining("manually")
     );
@@ -450,7 +465,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.error).toHaveLogLike(
+    expect(log.error).toHaveBeenCalledWith(
       "missing dependencies",
       expect.stringContaining("run with option -f")
     );
@@ -471,13 +486,11 @@ describe("cmd-add", () => {
       ])
     );
 
-    const result = await addCmd(somePackage, {
+    const resultCode = await addCmd(somePackage, {
       _global: {},
     });
 
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(UnresolvedDependencyError)
-    );
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
@@ -495,12 +508,12 @@ describe("cmd-add", () => {
       ])
     );
 
-    const result = await addCmd(somePackage, {
+    const resultCode = await addCmd(somePackage, {
       _global: {},
       force: true,
     });
 
-    expect(result).toBeOk();
+    expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
   it("should add package", async () => {
@@ -525,7 +538,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("added")
     );
@@ -566,7 +579,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("modified")
     );
@@ -585,7 +598,7 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "manifest",
       expect.stringContaining("existed")
     );
@@ -667,7 +680,10 @@ describe("cmd-add", () => {
       _global: {},
     });
 
-    expect(log.notice).toHaveLogLike("", expect.stringContaining("open Unity"));
+    expect(log.notice).toHaveBeenCalledWith(
+      "",
+      expect.stringContaining("open Unity")
+    );
   });
 
   it("should fail if manifest could not be saved", async () => {
@@ -675,9 +691,9 @@ describe("cmd-add", () => {
     const { addCmd, writeProjectManifest } = makeDependencies();
     mockProjectManifestWriteResult(writeProjectManifest, expected);
 
-    const result = await addCmd(somePackage, { _global: {} });
+    const resultCode = await addCmd(somePackage, { _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if manifest could not be saved", async () => {
@@ -686,6 +702,9 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, { _global: {} });
 
-    expect(log.error).toHaveLogLike("manifest", expect.stringContaining(""));
+    expect(log.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("file-system error")
+    );
   });
 });

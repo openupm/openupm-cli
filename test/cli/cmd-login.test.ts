@@ -10,8 +10,11 @@ import { LoginService } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { AuthenticationError } from "../../src/services/npm-login";
-import { GenericIOError } from "../../src/io/common-errors";
+import {
+  GenericIOError,
+  RegistryAuthenticationError,
+} from "../../src/io/common-errors";
+import { ResultCodes } from "../../src/cli/result-codes";
 
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
@@ -46,9 +49,9 @@ describe("cmd-login", () => {
     const { loginCmd, parseEnv } = makeDependencies();
     parseEnv.mockResolvedValue(Err(expected));
 
-    const result = await loginCmd({ _global: {} });
+    const resultCode = await loginCmd({ _global: {} });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   // TODO: Add tests for prompting logic
@@ -58,14 +61,14 @@ describe("cmd-login", () => {
     const { loginCmd, getUpmConfigPath } = makeDependencies();
     getUpmConfigPath.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await loginCmd({
+    const resultCode = await loginCmd({
       username: exampleUser,
       password: examplePassword,
       email: exampleEmail,
       _global: { registry: exampleRegistryUrl },
     });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should fail if login failed", async () => {
@@ -73,20 +76,20 @@ describe("cmd-login", () => {
     const { loginCmd, login } = makeDependencies();
     login.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await loginCmd({
+    const resultCode = await loginCmd({
       username: exampleUser,
       password: examplePassword,
       email: exampleEmail,
       _global: { registry: exampleRegistryUrl },
     });
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if unauthorized", async () => {
     const { loginCmd, login, log } = makeDependencies();
     login.mockReturnValue(
-      Err(new AuthenticationError(401, "oof")).toAsyncResult()
+      Err(new RegistryAuthenticationError()).toAsyncResult()
     );
 
     await loginCmd({
@@ -100,22 +103,6 @@ describe("cmd-login", () => {
       "401",
       "Incorrect username or password"
     );
-  });
-
-  it("should notify of other login errors", async () => {
-    const { loginCmd, login, log } = makeDependencies();
-    login.mockReturnValue(
-      Err(new AuthenticationError(500, "oof")).toAsyncResult()
-    );
-
-    await loginCmd({
-      username: exampleUser,
-      password: examplePassword,
-      email: exampleEmail,
-      _global: { registry: exampleRegistryUrl },
-    });
-
-    expect(log.error).toHaveBeenCalledWith("500", "oof");
   });
 
   it("should notify of success", async () => {

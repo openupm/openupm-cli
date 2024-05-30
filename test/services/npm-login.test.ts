@@ -1,12 +1,11 @@
 import "assert";
-import {
-  AuthenticationError,
-  makeNpmLoginService,
-} from "../../src/services/npm-login";
+import { makeNpmLoginService } from "../../src/services/npm-login";
 import RegClient from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
+import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import { noopLogger } from "../../src/logging";
 
 function makeDependencies() {
   const registryClient: jest.Mocked<RegClient.Instance> = {
@@ -14,7 +13,7 @@ function makeDependencies() {
     get: jest.fn(),
   };
 
-  const addUser = makeNpmLoginService(registryClient);
+  const addUser = makeNpmLoginService(registryClient, noopLogger);
   return { addUser, registryClient } as const;
 }
 
@@ -64,7 +63,7 @@ describe("npm-login service", () => {
     ).promise;
 
     expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(AuthenticationError)
+      expect(error).toBeInstanceOf(RegistryAuthenticationError)
     );
   });
 
@@ -88,7 +87,7 @@ describe("npm-login service", () => {
     ).promise;
 
     expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(AuthenticationError)
+      expect(error).toBeInstanceOf(RegistryAuthenticationError)
     );
   });
 });

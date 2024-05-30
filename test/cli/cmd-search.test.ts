@@ -8,8 +8,9 @@ import { Err, Ok } from "ts-results-es";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { noopLogger } from "../../src/logging";
+import { ResultCodes } from "../../src/cli/result-codes";
+import { GenericNetworkError } from "../../src/io/common-errors";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -65,9 +66,9 @@ describe("cmd-search", () => {
   it("should be ok if no network error occurred", async () => {
     const { searchCmd } = makeDependencies();
 
-    const result = await searchCmd("pkg-not-exist", options);
+    const resultCode = await searchCmd("pkg-not-exist", options);
 
-    expect(result).toBeOk();
+    expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
   it("should notify of unknown packument", async () => {
@@ -76,24 +77,24 @@ describe("cmd-search", () => {
 
     await searchCmd("pkg-not-exist", options);
 
-    expect(log.notice).toHaveLogLike(
+    expect(log.notice).toHaveBeenCalledWith(
       "",
       expect.stringContaining("No matches found")
     );
   });
 
   it("should fail if packuments could not be searched", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { searchCmd, searchPackages } = makeDependencies();
     searchPackages.mockReturnValue(Err(expected).toAsyncResult());
 
-    const result = await searchCmd("package-a", options);
+    const resultCode = await searchCmd("package-a", options);
 
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should notify if packuments could not be searched", async () => {
-    const expected = { statusCode: 500 } as HttpErrorBase;
+    const expected = new GenericNetworkError();
     const { searchCmd, searchPackages, log } = makeDependencies();
     searchPackages.mockReturnValue(Err(expected).toAsyncResult());
 

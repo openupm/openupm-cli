@@ -4,7 +4,11 @@ import npmFetch from "npm-registry-fetch";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { getNpmFetchOptions, SearchedPackument } from "./npm-search";
 import { DomainName } from "../domain/domain-name";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "./common-errors";
+import { DebugLog } from "../logging";
 
 /**
  * The result of querying the /-/all endpoint.
@@ -15,17 +19,26 @@ export type AllPackuments = Readonly<{
 }>;
 
 /**
+ * Error for when the request to get all packuments failed.
+ */
+export type FetchAllPackumentsError =
+  | GenericNetworkError
+  | RegistryAuthenticationError;
+
+/**
  * Function for getting fetching packuments from a npm registry.
  * @param registry The registry to get packuments for.
  */
 export type FetchAllPackuments = (
   registry: Registry
-) => AsyncResult<AllPackuments, HttpErrorBase>;
+) => AsyncResult<AllPackuments, FetchAllPackumentsError>;
 
 /**
  * Makes a {@link FetchAllPackuments} function.
  */
-export function makeAllPackumentsFetcher(): FetchAllPackuments {
+export function makeAllPackumentsFetcher(
+  debugLog: DebugLog
+): FetchAllPackuments {
   return (registry) => {
     return new AsyncResult(
       npmFetch
@@ -33,7 +46,12 @@ export function makeAllPackumentsFetcher(): FetchAllPackuments {
         .then((result) => Ok(result as AllPackuments))
         .catch((error) => {
           assertIsHttpError(error);
-          return Err(error);
+          debugLog("A http request failed.", error);
+          return Err(
+            error.statusCode === 401
+              ? new RegistryAuthenticationError()
+              : new GenericNetworkError()
+          );
         })
     );
   };

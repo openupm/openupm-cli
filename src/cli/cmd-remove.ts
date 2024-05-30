@@ -24,14 +24,20 @@ import {
   PackageWithVersionError,
   PackumentNotFoundError,
 } from "../common-errors";
-import {
-  logEnvParseError,
-  logManifestLoadError,
-  logManifestSaveError,
-} from "./error-logging";
 import { Logger } from "npmlog";
+import { ResultCodes } from "./result-codes";
+import {
+  notifyEnvParsingFailed,
+  notifyManifestLoadFailed,
+  notifyManifestWriteFailed,
+} from "./error-logging";
 
-export type RemoveError =
+/**
+ * The possible result codes with which the remove command can exit.
+ */
+export type RemoveResultCode = ResultCodes.Ok | ResultCodes.Error;
+
+type RemoveError =
   | EnvParseError
   | PackageWithVersionError
   | PackumentNotFoundError
@@ -48,7 +54,7 @@ export type RemoveOptions = CmdOptions;
 export type RemoveCmd = (
   pkgs: PackageReference[] | PackageReference,
   options: RemoveOptions
-) => Promise<Result<void, RemoveError>>;
+) => Promise<RemoveResultCode>;
 
 /**
  * Makes a {@link RemoveCmd} function.
@@ -64,8 +70,8 @@ export function makeRemoveCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
-      return envResult;
+      notifyEnvParsingFailed(log, envResult.error);
+      return ResultCodes.Error;
     }
     const env = envResult.value;
 
@@ -104,28 +110,28 @@ export function makeRemoveCmd(
     // load manifest
     const manifestResult = await loadProjectManifest(env.cwd).promise;
     if (manifestResult.isErr()) {
-      logManifestLoadError(log, manifestResult.error);
-      return manifestResult;
+      notifyManifestLoadFailed(log, manifestResult.error);
+      return ResultCodes.Error;
     }
     let manifest = manifestResult.value;
 
     // remove
     for (const pkg of pkgs) {
       const result = await tryRemoveFromManifest(manifest, pkg);
-      if (result.isErr()) return result;
+      if (result.isErr()) return ResultCodes.Error;
       manifest = result.value;
     }
 
     // save manifest
     const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
     if (saveResult.isErr()) {
-      logManifestSaveError(log, saveResult.error);
-      return saveResult;
+      notifyManifestWriteFailed(log);
+      return ResultCodes.Error;
     }
 
     // print manifest notice
     log.notice("", "please open Unity project to apply changes");
 
-    return Ok(undefined);
+    return ResultCodes.Ok;
   };
 }

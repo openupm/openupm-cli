@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
-import { EnvParseError, ParseEnvService } from "../services/parse-env";
+import { ParseEnvService } from "../services/parse-env";
 import {
   hasVersion,
   PackageReference,
@@ -9,18 +9,17 @@ import {
 } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
-import { Err, Ok, Result } from "ts-results-es";
-import {
-  PackageWithVersionError,
-  PackumentNotFoundError,
-} from "../common-errors";
 import { Logger } from "npmlog";
 import { ResolveRemotePackument } from "../services/resolve-remote-packument";
-import { logEnvParseError } from "./error-logging";
+import { ResultCodes } from "./result-codes";
+import { notifyEnvParsingFailed } from "./error-logging";
 
 export type ViewOptions = CmdOptions;
 
-export type ViewError = EnvParseError | PackageWithVersionError;
+/**
+ * The possible result codes with which the view command can exit.
+ */
+export type ViewResultCode = ResultCodes.Ok | ResultCodes.Error;
 
 /**
  * Cmd-handler for viewing package information.
@@ -30,7 +29,7 @@ export type ViewError = EnvParseError | PackageWithVersionError;
 export type ViewCmd = (
   pkg: PackageReference,
   options: ViewOptions
-) => Promise<Result<void, ViewError>>;
+) => Promise<ViewResultCode>;
 
 const printInfo = function (packument: UnityPackument) {
   const versionCount = recordKeys(packument.versions).length;
@@ -113,8 +112,8 @@ export function makeViewCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
-      return envResult;
+      notifyEnvParsingFailed(log, envResult.error);
+      return ResultCodes.Error;
     }
     const env = envResult.value;
 
@@ -122,7 +121,7 @@ export function makeViewCmd(
     if (hasVersion(pkg)) {
       const [name] = splitPackageReference(pkg);
       log.warn("", `please do not specify a version (Write only '${name}').`);
-      return Err(new PackageWithVersionError());
+      return ResultCodes.Error;
     }
 
     // verify name
@@ -131,15 +130,18 @@ export function makeViewCmd(
       ...(env.upstream ? [env.upstreamRegistry] : []),
     ];
     const resolveResult = await resolveRemotePackument(pkg, sources).promise;
-    if (!resolveResult.isOk()) return resolveResult;
+    if (!resolveResult.isOk()) {
+      // TODO: Print error
+      return ResultCodes.Error;
+    }
 
     const packument = resolveResult.value?.packument ?? null;
     if (packument === null) {
       log.error("404", `package not found: ${pkg}`);
-      return Err(new PackumentNotFoundError());
+      return ResultCodes.Error;
     }
 
     printInfo(packument);
-    return Ok(undefined);
+    return ResultCodes.Ok;
   };
 }

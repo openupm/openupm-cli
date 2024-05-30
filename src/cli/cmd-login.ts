@@ -1,6 +1,5 @@
-import { AuthenticationError } from "../services/npm-login";
-import { GetUpmConfigPath, GetUpmConfigPathError } from "../io/upm-config-io";
-import { EnvParseError, ParseEnvService } from "../services/parse-env";
+import { GetUpmConfigPath } from "../io/upm-config-io";
+import { ParseEnvService } from "../services/parse-env";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import {
   promptEmail,
@@ -9,23 +8,11 @@ import {
   promptUsername,
 } from "./prompts";
 import { CmdOptions } from "./options";
-import { Ok, Result } from "ts-results-es";
-import { NpmrcLoadError, NpmrcSaveError } from "../io/npmrc-io";
 import { Logger } from "npmlog";
-import { UpmAuthStoreError } from "../services/upm-auth";
 import { LoginService } from "../services/login";
-import { logEnvParseError } from "./error-logging";
-
-/**
- * Errors which may occur when logging in.
- */
-export type LoginError =
-  | EnvParseError
-  | GetUpmConfigPathError
-  | AuthenticationError
-  | NpmrcLoadError
-  | NpmrcSaveError
-  | UpmAuthStoreError;
+import { ResultCodes } from "./result-codes";
+import { RegistryAuthenticationError } from "../io/common-errors";
+import { notifyEnvParsingFailed } from "./error-logging";
 
 /**
  * Options for logging in a user. These come from the CLI.
@@ -41,12 +28,15 @@ export type LoginOptions = CmdOptions<{
 }>;
 
 /**
+ * The possible result codes with which the login command can exit.
+ */
+export type LoginResultCode = ResultCodes.Ok | ResultCodes.Error;
+
+/**
  * Cmd-handler for logging in users.
  * @param options Options for logging in.
  */
-export type LoginCmd = (
-  options: LoginOptions
-) => Promise<Result<void, LoginError>>;
+export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
 
 /**
  * Makes a {@link LoginCmd} function.
@@ -61,8 +51,8 @@ export function makeLoginCmd(
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
-      logEnvParseError(log, envResult.error);
-      return envResult;
+      notifyEnvParsingFailed(log, envResult.error);
+      return ResultCodes.Error;
     }
     const env = envResult.value;
 
@@ -80,7 +70,10 @@ export function makeLoginCmd(
 
     const configPathResult = await getUpmConfigPath(env.wsl, env.systemUser)
       .promise;
-    if (configPathResult.isErr()) return configPathResult;
+    if (configPathResult.isErr()) {
+      // TODO: Log error
+      return ResultCodes.Error;
+    }
     const configPath = configPathResult.value;
 
     const loginResult = await login(
@@ -95,17 +88,15 @@ export function makeLoginCmd(
 
     if (loginResult.isErr()) {
       const loginError = loginResult.error;
-      if (loginError instanceof AuthenticationError) {
-        if (loginError.status === 401)
-          log.warn("401", "Incorrect username or password");
-        else log.error(loginError.status.toString(), loginError.message);
-      }
+      if (loginError instanceof RegistryAuthenticationError)
+        log.warn("401", "Incorrect username or password");
 
-      return loginResult;
+      // TODO: Log all errors
+      return ResultCodes.Error;
     }
 
     log.notice("auth", `you are authenticated as '${username}'`);
     log.notice("config", "saved unity config at " + configPath);
-    return Ok(undefined);
+    return ResultCodes.Ok;
   };
 }

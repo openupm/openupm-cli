@@ -73,8 +73,8 @@ const loadNpmrc = makeNpmrcLoader(readFile);
 const saveNpmrc = makeNpmrcSaver(writeFile);
 const loadProjectVersion = makeProjectVersionLoader(readFile);
 const fetchPackument = makePackumentFetcher(regClient);
-const fetchAllPackuments = makeAllPackumentsFetcher();
-const searchRegistry = makeRegistrySearcher();
+const fetchAllPackuments = makeAllPackumentsFetcher(debugLog);
+const searchRegistry = makeRegistrySearcher(debugLog);
 const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
 
 const parseEnv = makeParseEnvService(
@@ -85,7 +85,7 @@ const parseEnv = makeParseEnvService(
 );
 const determineEditorVersion = makeEditorVersionDeterminer(loadProjectVersion);
 const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
-const npmLogin = makeNpmLoginService(regClient);
+const npmLogin = makeNpmLoginService(regClient, debugLog);
 const resolveRemovePackumentVersion =
   makeResolveRemotePackumentVersionService(fetchPackument);
 const resolveLatestVersion = makeResolveLatestVersionService(fetchPackument);
@@ -179,8 +179,8 @@ openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const addResult = await addCmd(pkgs, makeCmdOptions(options));
-    if (addResult.isErr()) process.exit(1);
+    const resultCode = await addCmd(pkgs, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
@@ -195,8 +195,8 @@ program
   .description("remove package from manifest json")
   .action(async function (pkg, otherPkgs, options) {
     const pkgs = [pkg].concat(otherPkgs);
-    const removeResult = await removeCmd(pkgs, makeCmdOptions(options));
-    if (removeResult.isErr()) process.exit(1);
+    const resultCode = await removeCmd(pkgs, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
@@ -205,8 +205,8 @@ program
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(async function (keyword, options) {
-    const searchResult = await searchCmd(keyword, makeCmdOptions(options));
-    if (searchResult.isErr()) process.exit(1);
+    const resultCode = await searchCmd(keyword, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
@@ -215,8 +215,8 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(async function (pkg, options) {
-    const result = await viewCmd(pkg, makeCmdOptions(options));
-    if (result.isErr()) process.exit(1);
+    const resultCode = await viewCmd(pkg, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
@@ -230,8 +230,8 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(async function (pkg, options) {
-    const depsResult = await depsCmd(pkg, makeCmdOptions(options));
-    if (depsResult.isErr()) process.exit(1);
+    const resultCode = await depsCmd(pkg, makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 program
@@ -247,8 +247,8 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(async function (options) {
-    const loginResult = await loginCmd(makeCmdOptions(options));
-    if (loginResult.isErr()) process.exit(1);
+    const resultCode = await loginCmd(makeCmdOptions(options));
+    process.exit(resultCode);
   });
 
 // prompt for invalid command
