@@ -1,24 +1,10 @@
 import {
-  LoadProjectManifest,
   ManifestLoadError,
   ManifestWriteError,
-  WriteProjectManifest,
 } from "../io/project-manifest-io";
 import { EnvParseError, ParseEnvService } from "../services/parse-env";
-import {
-  hasVersion,
-  makePackageReference,
-  PackageReference,
-  splitPackageReference,
-} from "../domain/package-reference";
-import { removeScope } from "../domain/scoped-registry";
-import {
-  mapScopedRegistry,
-  removeDependency,
-  UnityProjectManifest,
-} from "../domain/project-manifest";
+import { makePackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
-import { Err, Ok, Result } from "ts-results-es";
 
 import {
   PackageWithVersionError,
@@ -28,8 +14,6 @@ import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import {
   notifyEnvParsingFailed,
-  notifyManifestLoadFailed,
-  notifyManifestWriteFailed,
   notifyPackageRemoveFailed,
 } from "./error-logging";
 import { DomainName } from "../domain/domain-name";

@@ -7,7 +7,7 @@ import { eaccesError, enoentError } from "./node-error.mock";
 import {
   FileMissingError,
   FileParseError,
-  GenericIOError
+  GenericIOError,
 } from "../../src/io/common-errors";
 
 describe("project-version-io", () => {
