@@ -28,6 +28,7 @@ import { GenericIOError } from "../../src/io/common-errors";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
 import { Err, Ok } from "ts-results-es";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -243,7 +244,7 @@ describe("cmd-add", () => {
 
   it("should notify if editor-version is unknown", async () => {
     const { addCmd, determineEditorVersion, log } = makeDependencies();
-    determineEditorVersion.mockReturnValue(Ok("bad version").toAsyncResult());
+    determineEditorVersion.mockReturnValue(AsyncOk("bad version"));
 
     await addCmd(somePackage, {
       _global: {},

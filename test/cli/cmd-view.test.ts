@@ -15,6 +15,7 @@ import {
   GenericNetworkError,
 } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -59,7 +60,7 @@ function makeDependencies() {
 
   const resolveRemotePackument = mockService<ResolveRemotePackument>();
   resolveRemotePackument.mockReturnValue(
-    Ok({ packument: somePackument, source: exampleRegistryUrl }).toAsyncResult()
+    AsyncOk({ packument: somePackument, source: exampleRegistryUrl })
   );
 
   const log = makeMockLogger();
@@ -106,7 +107,7 @@ describe("cmd-view", () => {
 
   it("should fail if package was not found", async () => {
     const { viewCmd, resolveRemotePackument } = makeDependencies();
-    resolveRemotePackument.mockReturnValue(Ok(null).toAsyncResult());
+    resolveRemotePackument.mockReturnValue(AsyncOk(null));
 
     const resultCode = await viewCmd(somePackage, { _global: {} });
 
@@ -116,7 +117,7 @@ describe("cmd-view", () => {
   it("should fail if package could not be resolved", async () => {
     const expected = new GenericNetworkError();
     const { viewCmd, resolveRemotePackument } = makeDependencies();
-    resolveRemotePackument.mockReturnValue(Err(expected).toAsyncResult());
+    resolveRemotePackument.mockReturnValue(AsyncErr(expected));
 
     const resultCode = await viewCmd(somePackage, { _global: {} });
 
@@ -125,7 +126,7 @@ describe("cmd-view", () => {
 
   it("should notify if package could not be resolved", async () => {
     const { viewCmd, resolveRemotePackument, log } = makeDependencies();
-    resolveRemotePackument.mockReturnValue(Ok(null).toAsyncResult());
+    resolveRemotePackument.mockReturnValue(AsyncOk(null));
 
     await viewCmd(somePackage, { _global: {} });
 

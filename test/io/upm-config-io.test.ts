@@ -11,6 +11,7 @@ import { GetHomePath } from "../../src/io/special-paths";
 import path from "path";
 import { eaccesError, enoentError } from "./node-error.mock";
 import { GenericIOError } from "../../src/io/common-errors";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 describe("upm-config-io", () => {
   describe("get path", () => {
@@ -48,7 +49,7 @@ describe("upm-config-io", () => {
   describe("load", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
-      readFile.mockReturnValue(Ok("").toAsyncResult());
+      readFile.mockReturnValue(AsyncOk(""));
 
       const loadUpmConfig = makeUpmConfigLoader(readFile);
       return { loadUpmConfig, readFile } as const;
@@ -57,7 +58,7 @@ describe("upm-config-io", () => {
     it("should be null if file is not found", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
-      readFile.mockReturnValue(Err(enoentError).toAsyncResult());
+      readFile.mockReturnValue(AsyncErr(enoentError));
 
       const result = await loadUpmConfig(path).promise;
 
@@ -76,7 +77,7 @@ describe("upm-config-io", () => {
     it("should fail if file could not be read", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
-      readFile.mockReturnValue(Err(eaccesError).toAsyncResult());
+      readFile.mockReturnValue(AsyncErr(eaccesError));
 
       const result = await loadUpmConfig(path).promise;
 
@@ -87,9 +88,7 @@ describe("upm-config-io", () => {
 
     it("should fail if file has bad toml content", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
-      readFile.mockReturnValue(
-        Ok("This {\n is not]\n valid TOML").toAsyncResult()
-      );
+      readFile.mockReturnValue(AsyncOk("This {\n is not]\n valid TOML"));
       const path = "/home/user/.upmconfig.toml";
 
       const result = await loadUpmConfig(path).promise;

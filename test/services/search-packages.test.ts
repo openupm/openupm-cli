@@ -7,10 +7,11 @@ import {
 import { makePackagesSearcher } from "../../src/services/search-packages";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { Err, Ok } from "ts-results-es";
+import { Err } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { GenericNetworkError } from "../../src/io/common-errors";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 describe("search packages", () => {
   const exampleRegistry: Registry = {
@@ -35,12 +36,10 @@ describe("search packages", () => {
 
   function makeDependencies() {
     const searchRegistry = mockService<SearchRegistry>();
-    searchRegistry.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
+    searchRegistry.mockReturnValue(AsyncOk([exampleSearchResult]));
 
     const fetchAllPackument = mockService<FetchAllPackuments>();
-    fetchAllPackument.mockReturnValue(
-      Ok(exampleAllPackumentsResult).toAsyncResult()
-    );
+    fetchAllPackument.mockReturnValue(AsyncOk(exampleAllPackumentsResult));
 
     const searchPackages = makePackagesSearcher(
       searchRegistry,

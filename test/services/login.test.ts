@@ -4,12 +4,12 @@ import { SaveAuthToUpmConfig } from "../../src/services/upm-auth";
 import { NpmLoginService } from "../../src/services/npm-login";
 import { AuthNpmrcService } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { Err, Ok } from "ts-results-es";
 import { noopLogger } from "../../src/logging";
 import {
-  RegistryAuthenticationError,
   GenericIOError,
+  RegistryAuthenticationError,
 } from "../../src/io/common-errors";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -21,13 +21,13 @@ const exampleToken = "some token";
 describe("login", () => {
   function makeDependencies() {
     const saveAuthToUpmConfig = mockService<SaveAuthToUpmConfig>();
-    saveAuthToUpmConfig.mockReturnValue(Ok(undefined).toAsyncResult());
+    saveAuthToUpmConfig.mockReturnValue(AsyncOk());
 
     const npmLogin = mockService<NpmLoginService>();
-    npmLogin.mockReturnValue(Ok(exampleToken).toAsyncResult());
+    npmLogin.mockReturnValue(AsyncOk(exampleToken));
 
     const authNpmrc = mockService<AuthNpmrcService>();
-    authNpmrc.mockReturnValue(Ok(exampleNpmrcPath).toAsyncResult());
+    authNpmrc.mockReturnValue(AsyncOk(exampleNpmrcPath));
 
     const login = makeLoginService(
       saveAuthToUpmConfig,
@@ -66,7 +66,7 @@ describe("login", () => {
     it("should fail if config write fails", async () => {
       const expected = new GenericIOError("Write");
       const { login, saveAuthToUpmConfig } = makeDependencies();
-      saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
+      saveAuthToUpmConfig.mockReturnValue(AsyncErr(expected));
 
       const result = await login(
         exampleUser,
@@ -86,7 +86,7 @@ describe("login", () => {
     it("should fail if npm login fails", async () => {
       const expected = new RegistryAuthenticationError();
       const { login, npmLogin } = makeDependencies();
-      npmLogin.mockReturnValue(Err(expected).toAsyncResult());
+      npmLogin.mockReturnValue(AsyncErr(expected));
 
       const result = await login(
         exampleUser,
@@ -104,7 +104,7 @@ describe("login", () => {
     it("should fail if npmrc auth fails", async () => {
       const expected = new GenericIOError("Read");
       const { login, authNpmrc } = makeDependencies();
-      authNpmrc.mockReturnValue(Err(expected).toAsyncResult());
+      authNpmrc.mockReturnValue(AsyncErr(expected));
 
       const result = await login(
         exampleUser,
@@ -146,7 +146,7 @@ describe("login", () => {
     it("should fail if config write fails", async () => {
       const expected = new GenericIOError("Write");
       const { login, saveAuthToUpmConfig } = makeDependencies();
-      saveAuthToUpmConfig.mockReturnValue(Err(expected).toAsyncResult());
+      saveAuthToUpmConfig.mockReturnValue(AsyncErr(expected));
 
       const result = await login(
         exampleUser,

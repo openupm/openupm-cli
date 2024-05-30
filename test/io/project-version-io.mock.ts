@@ -2,8 +2,8 @@ import {
   ReleaseVersion,
   stringifyEditorVersion,
 } from "../../src/domain/editor-version";
-import { Ok } from "ts-results-es";
 import { LoadProjectVersion } from "../../src/io/project-version-io";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 /**
  * Mocks return values for calls to a {@link LoadProjectVersion} function.
@@ -20,5 +20,5 @@ export function mockProjectVersion(
       ? editorVersion
       : stringifyEditorVersion(editorVersion);
 
-  loadProjectVersion.mockReturnValue(Ok(versionString).toAsyncResult());
+  loadProjectVersion.mockReturnValue(AsyncOk(versionString));
 }

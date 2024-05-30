@@ -1,7 +1,6 @@
 import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnvService } from "../../src/services/parse-env";
-import { Err, Ok } from "ts-results-es";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
 import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
@@ -10,6 +9,7 @@ import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import path from "path";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -32,7 +32,7 @@ function makeDependencies() {
 
   const getUpmConfigPath = mockService<GetUpmConfigPath>();
   // The root directory does not contain an upm-config
-  getUpmConfigPath.mockReturnValue(Ok(testRootPath).toAsyncResult());
+  getUpmConfigPath.mockReturnValue(AsyncOk(testRootPath));
 
   const loadUpmConfig = mockService<LoadUpmConfig>();
   mockUpmConfig(loadUpmConfig, null);
@@ -280,7 +280,7 @@ describe("env", () => {
     it("should fail if upm-config dir cannot be determined", async () => {
       const { parseEnv, getUpmConfigPath } = makeDependencies();
       const expected = new NoWslError();
-      getUpmConfigPath.mockReturnValue(Err(expected).toAsyncResult());
+      getUpmConfigPath.mockReturnValue(AsyncErr(expected));
 
       const result = await parseEnv({ _global: {} });
 

@@ -1,9 +1,10 @@
-import { AsyncResult, Ok } from "ts-results-es";
+import { AsyncResult } from "ts-results-es";
 import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
 import { FetchPackument, FetchPackumentError } from "../io/packument-io";
 import { RegistryUrl } from "../domain/registry-url";
+import { AsyncOk } from "../utils/result-utils";
 
 /**
  * A resolved remote Unity packument.
@@ -38,7 +39,7 @@ export type ResolveRemotePackument = (
 
 const noPackumentResult = <
   AsyncResult<ResolvedPackument | null, ResolveRemotePackumentError>
->Ok(null).toAsyncResult();
+>AsyncOk(null);
 
 function withSource(
   source: Registry,
@@ -77,7 +78,7 @@ export function makeRemotePackumentResolver(
         // If yes we can return it, otherwhise we enter the next level
         // of the recursion with the remaining registries.
         maybePackument !== null
-          ? Ok(maybePackument).toAsyncResult()
+          ? AsyncOk(maybePackument)
           : resolveRecursively(packageName, fallbackSources)
     );
   };

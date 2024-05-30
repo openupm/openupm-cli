@@ -7,6 +7,7 @@ import {
 } from "../../src/io/project-manifest-io";
 import { UnityProjectManifest } from "../../src/domain/project-manifest";
 import { Err, Ok } from "ts-results-es";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 /**
  * Mocks results for a {@link LoadProjectManifest} function.
@@ -22,7 +23,7 @@ export function mockProjectManifest(
     const manifestPath = manifestPathFor(projectPath);
     return manifest === null
       ? Err(makeProjectManifestMissingError(manifestPath)).toAsyncResult()
-      : Ok(manifest).toAsyncResult();
+      : AsyncOk(manifest);
   });
 }
 

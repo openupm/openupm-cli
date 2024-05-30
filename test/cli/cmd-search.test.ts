@@ -4,13 +4,14 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { SearchedPackument } from "../../src/io/npm-search";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { Err, Ok } from "ts-results-es";
+import { Ok } from "ts-results-es";
 import { Env, ParseEnvService } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { GenericNetworkError } from "../../src/io/common-errors";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -27,7 +28,7 @@ function makeDependencies() {
   );
 
   const searchPackages = mockService<SearchPackages>();
-  searchPackages.mockReturnValue(Ok([exampleSearchResult]).toAsyncResult());
+  searchPackages.mockReturnValue(AsyncOk([exampleSearchResult]));
 
   const log = makeMockLogger();
 
@@ -73,7 +74,7 @@ describe("cmd-search", () => {
 
   it("should notify of unknown packument", async () => {
     const { searchCmd, searchPackages, log } = makeDependencies();
-    searchPackages.mockReturnValue(Ok([]).toAsyncResult());
+    searchPackages.mockReturnValue(AsyncOk([]));
 
     await searchCmd("pkg-not-exist", options);
 
@@ -86,7 +87,7 @@ describe("cmd-search", () => {
   it("should fail if packuments could not be searched", async () => {
     const expected = new GenericNetworkError();
     const { searchCmd, searchPackages } = makeDependencies();
-    searchPackages.mockReturnValue(Err(expected).toAsyncResult());
+    searchPackages.mockReturnValue(AsyncErr(expected));
 
     const resultCode = await searchCmd("package-a", options);
 
@@ -96,7 +97,7 @@ describe("cmd-search", () => {
   it("should notify if packuments could not be searched", async () => {
     const expected = new GenericNetworkError();
     const { searchCmd, searchPackages, log } = makeDependencies();
-    searchPackages.mockReturnValue(Err(expected).toAsyncResult());
+    searchPackages.mockReturnValue(AsyncErr(expected));
 
     await searchCmd("package-a", options);
 
@@ -111,7 +112,7 @@ describe("cmd-search", () => {
     searchPackages.mockImplementation(
       (_registry, _keyword, onUseAllFallback) => {
         onUseAllFallback && onUseAllFallback();
-        return Ok([]).toAsyncResult();
+        return AsyncOk([]);
       }
     );
 

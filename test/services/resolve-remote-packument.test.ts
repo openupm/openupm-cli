@@ -6,8 +6,8 @@ import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "./service.mock";
 import { FetchPackument } from "../../src/io/packument-io";
-import { Err, Ok } from "ts-results-es";
 import { GenericNetworkError } from "../../src/io/common-errors";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 describe("resolve remove packument", () => {
   const exampleName = makeDomainName("com.some.package");
@@ -20,7 +20,7 @@ describe("resolve remove packument", () => {
 
   function makeDependencies() {
     const fetchPackument = mockService<FetchPackument>();
-    fetchPackument.mockReturnValue(Ok(examplePackument).toAsyncResult());
+    fetchPackument.mockReturnValue(AsyncOk(examplePackument));
 
     const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
     return { resolveRemotePackument, fetchPackument } as const;
@@ -45,9 +45,7 @@ describe("resolve remove packument", () => {
   it("should find packument in first registry if possible", async () => {
     const { resolveRemotePackument, fetchPackument } = makeDependencies();
     fetchPackument.mockImplementation((registry) =>
-      Ok(
-        registry === exampleRegistryB ? examplePackument : null
-      ).toAsyncResult()
+      AsyncOk(registry === exampleRegistryB ? examplePackument : null)
     );
 
     const result = await resolveRemotePackument(exampleName, [
@@ -73,7 +71,7 @@ describe("resolve remove packument", () => {
 
   it("should be null if packument is not found in any registry", async () => {
     const { resolveRemotePackument, fetchPackument } = makeDependencies();
-    fetchPackument.mockReturnValue(Ok(null).toAsyncResult());
+    fetchPackument.mockReturnValue(AsyncOk(null));
 
     const result = await resolveRemotePackument(exampleName, [
       exampleRegistryA,
@@ -86,7 +84,7 @@ describe("resolve remove packument", () => {
   it("should fail if any packument fetch failed", async () => {
     const expected = new GenericNetworkError();
     const { resolveRemotePackument, fetchPackument } = makeDependencies();
-    fetchPackument.mockReturnValue(Err(expected).toAsyncResult());
+    fetchPackument.mockReturnValue(AsyncErr(expected));
 
     const result = await resolveRemotePackument(exampleName, [
       exampleRegistryA,
