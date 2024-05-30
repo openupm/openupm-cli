@@ -26,7 +26,7 @@ export function mockResolvedPackuments(
         (entry) => entry[0] === registry.url && entry[1].name === name
       );
       if (matchingEntry === undefined)
-        return Err(new PackumentNotFoundError()).toAsyncResult();
+        return Err(new PackumentNotFoundError(name)).toAsyncResult();
 
       const source = matchingEntry[0];
       const packument = matchingEntry[1];

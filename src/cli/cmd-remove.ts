@@ -30,7 +30,10 @@ import {
   notifyEnvParsingFailed,
   notifyManifestLoadFailed,
   notifyManifestWriteFailed,
+  notifyPackageRemoveFailed,
 } from "./error-logging";
+import { DomainName } from "../domain/domain-name";
+import { RemovePackages } from "../services/remove-packages";
 
 /**
  * The possible result codes with which the remove command can exit.
@@ -48,11 +51,11 @@ export type RemoveOptions = CmdOptions;
 
 /**
  * Cmd-handler for removing packages.
- * @param pkgs One or multiple package-references to remove.
+ * @param pkgs One or multiple packages to remove.
  * @param options Command options.
  */
 export type RemoveCmd = (
-  pkgs: PackageReference[] | PackageReference,
+  pkgs: ReadonlyArray<DomainName>,
   options: RemoveOptions
 ) => Promise<RemoveResultCode>;
 
@@ -61,12 +64,10 @@ export type RemoveCmd = (
  */
 export function makeRemoveCmd(
   parseEnv: ParseEnvService,
-  loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest,
+  removePackages: RemovePackages,
   log: Logger
 ): RemoveCmd {
   return async (pkgs, options) => {
-    if (!Array.isArray(pkgs)) pkgs = [pkgs];
     // parse env
     const envResult = await parseEnv(options);
     if (envResult.isErr()) {
@@ -75,59 +76,22 @@ export function makeRemoveCmd(
     }
     const env = envResult.value;
 
-    const tryRemoveFromManifest = async function (
-      manifest: UnityProjectManifest,
-      pkg: PackageReference
-    ): Promise<Result<UnityProjectManifest, RemoveError>> {
-      // parse name
-      if (hasVersion(pkg)) {
-        const [name] = splitPackageReference(pkg);
-        log.warn("", `please do not specify a version (Write only '${name}').`);
-        return Err(new PackageWithVersionError());
-      }
+    const removeResult = await removePackages(env.cwd, pkgs).promise;
+    if (removeResult.isErr()) {
+      notifyPackageRemoveFailed(log, removeResult.error);
+      return ResultCodes.Error;
+    }
+    const removedPackages = removeResult.value;
 
-      // not found array
-      const versionInManifest = manifest.dependencies[pkg];
-      if (versionInManifest === undefined) {
-        log.error("404", `package not found: ${pkg}`);
-        return Err(new PackumentNotFoundError());
-      }
-
-      manifest = removeDependency(manifest, pkg);
-
-      manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
-        if (initial === null) return null;
-        return removeScope(initial, pkg);
-      });
-
+    removedPackages.forEach((removedPackage) => {
       log.notice(
-        "manifest",
-        `removed ${makePackageReference(pkg, versionInManifest)}`
+        "",
+        `Removed "${makePackageReference(
+          removedPackage.name,
+          removedPackage.version
+        )}".`
       );
-      return Ok(manifest);
-    };
-
-    // load manifest
-    const manifestResult = await loadProjectManifest(env.cwd).promise;
-    if (manifestResult.isErr()) {
-      notifyManifestLoadFailed(log, manifestResult.error);
-      return ResultCodes.Error;
-    }
-    let manifest = manifestResult.value;
-
-    // remove
-    for (const pkg of pkgs) {
-      const result = await tryRemoveFromManifest(manifest, pkg);
-      if (result.isErr()) return ResultCodes.Error;
-      manifest = result.value;
-    }
-
-    // save manifest
-    const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
-    if (saveResult.isErr()) {
-      notifyManifestWriteFailed(log);
-      return ResultCodes.Error;
-    }
+    });
 
     // print manifest notice
     log.notice("", "please open Unity project to apply changes");

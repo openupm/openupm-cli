@@ -1,5 +1,6 @@
 import { CustomError } from "ts-custom-error";
 import { EditorVersion } from "./domain/editor-version";
+import { DomainName } from "./domain/domain-name";
 
 /**
  * Error for when the packument was not found.
@@ -7,7 +8,12 @@ import { EditorVersion } from "./domain/editor-version";
 export class PackumentNotFoundError extends CustomError {
   // noinspection JSUnusedLocalSymbols
   private readonly _class = "PackumentNotFoundError";
-  constructor() {
+  constructor(
+    /**
+     * The name of the missing package.
+     */
+    public packageName: DomainName
+  ) {
     super("A packument was not found.");
   }
 }

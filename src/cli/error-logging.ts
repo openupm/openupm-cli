@@ -19,6 +19,7 @@ import { SemanticVersion } from "../domain/semantic-version";
 import { EOL } from "node:os";
 import { ResolveRemotePackumentVersionError } from "../services/resolve-remote-packument-version";
 import { ManifestLoadError } from "../io/project-manifest-io";
+import { RemovePackagesError } from "../services/remove-packages";
 
 export function suggestCheckingWorkingDirectory(log: Logger) {
   log.notice("", "Are you in the correct working directory?");
@@ -182,6 +183,17 @@ export function notifyPackumentNotFoundInAnyRegistry(
   );
 }
 
+export function notifyPackumentNotFoundInManifest(
+  log: Logger,
+  packageName: DomainName
+) {
+  log.error(
+    "",
+    `The package "${packageName}" was not found in your project manifest.`
+  );
+  log.notice("", "Please make sure you have spelled the name correctly.");
+}
+
 export function notifyNoVersions(log: Logger, packageName: DomainName) {
   log.error("", `The package ${packageName} has no versions.`);
 }
@@ -240,4 +252,20 @@ export function notifyRemotePackumentVersionResolvingFailed(
     notifyRegistryCallFailedBecauseHttp(log);
   else if (error instanceof RegistryAuthenticationError)
     notifyRegistryCallFailedBecauseUnauthorized(log);
+}
+
+export function notifyPackageRemoveFailed(
+  log: Logger,
+  error: RemovePackagesError
+) {
+  if (error instanceof FileMissingError) notifyManifestMissing(log, error.path);
+  else if (error instanceof StringFormatError)
+    notifySyntacticallyMalformedProjectManifest(log);
+  else if (error instanceof FileParseError)
+    notifySemanticallyMalformedProjectManifest(log);
+  else if (error instanceof GenericIOError) {
+    if (error.operationType === "Read") notifyManifestLoadFailedBecauseIO(log);
+    else notifyManifestWriteFailed(log);
+  } else if (error instanceof PackumentNotFoundError)
+    notifyPackumentNotFoundInManifest(log, error.packageName);
 }
