@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/openupm/openupm-cli/compare/2.1.1...2.2.0) (2024-05-30)
+
+
+### Features
+
+* improve error messages ([#347](https://github.com/openupm/openupm-cli/issues/347)) ([069970e](https://github.com/openupm/openupm-cli/commit/069970eef08f171f94baa2bd548cc0eaa3329946))
+
 ## [2.1.1](https://github.com/openupm/openupm-cli/compare/2.1.0...2.1.1) (2024-05-28)
 
 
