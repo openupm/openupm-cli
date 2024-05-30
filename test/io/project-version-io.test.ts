@@ -1,11 +1,14 @@
 import { ReadTextFile } from "../../src/io/fs-result";
 import { Err, Ok } from "ts-results-es";
-import { FileParseError } from "../../src/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
 import { makeProjectVersionLoader } from "../../src/io/project-version-io";
 import { eaccesError, enoentError } from "./node-error.mock";
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
+import {
+  FileMissingError,
+  FileParseError,
+  GenericIOError
+} from "../../src/io/common-errors";
 
 describe("project-version-io", () => {
   describe("load", () => {

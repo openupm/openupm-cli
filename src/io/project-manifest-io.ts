@@ -6,8 +6,11 @@ import path from "path";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { StringFormatError, tryParseJson } from "../utils/string-parsing";
-import { FileParseError } from "../common-errors";
-import { FileMissingError, GenericIOError } from "./common-errors";
+import {
+  FileMissingError,
+  FileParseError,
+  GenericIOError,
+} from "./common-errors";
 
 /**
  * Determines the path to the package manifest based on the project

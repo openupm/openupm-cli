@@ -5,13 +5,14 @@ import { ChildProcessError } from "../utils/process";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
 import {
   FileMissingError,
+  FileParseError,
   GenericIOError,
   GenericNetworkError,
   RegistryAuthenticationError,
 } from "../io/common-errors";
 import { StringFormatError } from "../utils/string-parsing";
 import { ProjectVersionLoadError } from "../io/project-version-io";
-import { FileParseError, PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";

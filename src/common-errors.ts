@@ -28,28 +28,6 @@ export class PackageWithVersionError extends CustomError {
 }
 
 /**
- * Error for when a file could not be parsed into a specific target type.
- */
-export class FileParseError<const TTarget extends string> extends CustomError {
-  // noinspection JSUnusedLocalSymbols
-  private readonly _class = "FileParseError";
-  constructor(
-    /**
-     * The path to the file that could not be parsed.
-     */
-    public readonly filePath: string,
-    /**
-     * A description or name of the thing that the file was supposed to be
-     * parsed to. This should be a constant string that can be used in ifs
-     * and switches.
-     */
-    public readonly targetDescription: TTarget
-  ) {
-    super("A file could not be parsed into a specific target type.");
-  }
-}
-
-/**
  * Error for when OpenUPM was used with an editor-version that is not supported.
  */
 export class EditorVersionNotSupportedError extends CustomError {
