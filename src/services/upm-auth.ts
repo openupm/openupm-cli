@@ -15,7 +15,7 @@ import { GenericIOError } from "../io/common-errors";
 export type UpmAuthStoreError = UpmConfigLoadError | GenericIOError;
 
 /**
- * Service function for storing authentication information in an upmconfig file.
+ * Function for storing authentication information in an upmconfig file.
  * @param configPath Path to the upmconfig file.
  * @param registry Url of the registry for which to authenticate.
  * @param auth Authentication information.
@@ -29,7 +29,7 @@ export type SaveAuthToUpmConfig = (
 /**
  * Makes a {@link SaveAuthToUpmConfig} function.
  */
-export function makeSaveAuthToUpmConfigService(
+export function makeSaveAuthToUpmConfig(
   loadUpmConfig: LoadUpmConfig,
   writeFile: WriteTextFile
 ): SaveAuthToUpmConfig {

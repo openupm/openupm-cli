@@ -55,7 +55,7 @@ export const getNpmFetchOptions = function (
 /**
  * Makes a {@link SearchRegistry} function.
  */
-export function makeRegistrySearcher(debugLog: DebugLog): SearchRegistry {
+export function makeSearchRegistry(debugLog: DebugLog): SearchRegistry {
   return (registry, keyword) => {
     return new AsyncResult(
       npmSearch(keyword, getNpmFetchOptions(registry))

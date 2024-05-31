@@ -1,5 +1,5 @@
 import { mockService } from "./service.mock";
-import { makeResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument-version";
+import { makeResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { Registry } from "../../src/domain/registry";
@@ -20,7 +20,7 @@ describe("resolve remote packument version", () => {
     const fetchPackument = mockService<FetchPackument>();
 
     const resolveRemovePackumentVersion =
-      makeResolveRemotePackumentVersionService(fetchPackument);
+      makeResolveRemotePackumentVersion(fetchPackument);
     return { resolveRemovePackumentVersion, fetchPackument } as const;
   }
 

@@ -2,8 +2,8 @@ import { AsyncResult } from "ts-results-es";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { SaveAuthToUpmConfig, UpmAuthStoreError } from "./upm-auth";
-import { NpmLoginError, NpmLoginService } from "./npm-login";
-import { AuthNpmrcService, NpmrcAuthTokenUpdateError } from "./npmrc-auth";
+import { NpmLogin, NpmLoginError } from "./npm-login";
+import { AuthNpmrc, NpmrcAuthTokenUpdateError } from "./npmrc-auth";
 import { DebugLog } from "../logging";
 
 /**
@@ -31,7 +31,7 @@ export type LoginError =
  * @param onNpmrcUpdated Callback that notifies when the .npmrc file was
  * updated. Only called with token-based authentication.
  */
-export type LoginService = (
+export type Login = (
   username: string,
   password: string,
   email: string,
@@ -42,14 +42,14 @@ export type LoginService = (
 ) => AsyncResult<void, LoginError>;
 
 /**
- * Makes a {@link LoginService} function.
+ * Makes a {@link Login} function.
  */
-export function makeLoginService(
+export function makeLogin(
   saveAuthToUpmConfig: SaveAuthToUpmConfig,
-  npmLogin: NpmLoginService,
-  authNpmrc: AuthNpmrcService,
+  npmLogin: NpmLogin,
+  authNpmrc: AuthNpmrc,
   debugLog: DebugLog
-): LoginService {
+): Login {
   return (
     username,
     password,

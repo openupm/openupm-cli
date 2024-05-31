@@ -45,7 +45,7 @@ export type FindBuiltInPackages = (
 /**
  * Makes a {@link FindBuiltInPackages} function.
  */
-export function makeBuiltInPackagesFinder(
+export function makeFindBuiltInPackages(
   debugLog: DebugLog
 ): FindBuiltInPackages {
   return (editorVersion) => {

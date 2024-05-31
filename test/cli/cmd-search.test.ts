@@ -5,7 +5,7 @@ import { makeMockLogger } from "./log.mock";
 import { SearchedPackument } from "../../src/io/npm-search";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Ok } from "ts-results-es";
-import { Env, ParseEnvService } from "../../src/services/parse-env";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { noopLogger } from "../../src/logging";
@@ -22,7 +22,7 @@ const exampleSearchResult: SearchedPackument = {
 };
 
 function makeDependencies() {
-  const parseEnv = mockService<ParseEnvService>();
+  const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(
     Ok({ registry: { url: exampleRegistryUrl, auth: null } } as Env)
   );

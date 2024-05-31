@@ -1,5 +1,5 @@
 import "assert";
-import { makeNpmLoginService } from "../../src/services/npm-login";
+import { makeNpmLogin } from "../../src/services/npm-login";
 import RegClient from "another-npm-registry-client";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -13,7 +13,7 @@ function makeDependencies() {
     get: jest.fn(),
   };
 
-  const addUser = makeNpmLoginService(registryClient, noopLogger);
+  const addUser = makeNpmLogin(registryClient, noopLogger);
   return { addUser, registryClient } as const;
 }
 

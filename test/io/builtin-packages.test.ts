@@ -4,7 +4,7 @@ import * as fileIo from "../../src/io/fs-result";
 import { Err, Ok } from "ts-results-es";
 import {
   EditorNotInstalledError,
-  makeBuiltInPackagesFinder,
+  makeFindBuiltInPackages,
 } from "../../src/io/builtin-packages";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { noopLogger } from "../../src/logging";
@@ -12,7 +12,7 @@ import { enoentError } from "./node-error.mock";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 function makeDependencies() {
-  const getBuiltInPackages = makeBuiltInPackagesFinder(noopLogger);
+  const getBuiltInPackages = makeFindBuiltInPackages(noopLogger);
   return { getBuiltInPackages } as const;
 }
 

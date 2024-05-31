@@ -1,8 +1,8 @@
-import { makeLoginService } from "../../src/services/login";
+import { makeLogin } from "../../src/services/login";
 import { mockService } from "./service.mock";
 import { SaveAuthToUpmConfig } from "../../src/services/upm-auth";
-import { NpmLoginService } from "../../src/services/npm-login";
-import { AuthNpmrcService } from "../../src/services/npmrc-auth";
+import { NpmLogin } from "../../src/services/npm-login";
+import { AuthNpmrc } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
 import {
@@ -23,13 +23,13 @@ describe("login", () => {
     const saveAuthToUpmConfig = mockService<SaveAuthToUpmConfig>();
     saveAuthToUpmConfig.mockReturnValue(AsyncOk());
 
-    const npmLogin = mockService<NpmLoginService>();
+    const npmLogin = mockService<NpmLogin>();
     npmLogin.mockReturnValue(AsyncOk(exampleToken));
 
-    const authNpmrc = mockService<AuthNpmrcService>();
+    const authNpmrc = mockService<AuthNpmrc>();
     authNpmrc.mockReturnValue(AsyncOk(exampleNpmrcPath));
 
-    const login = makeLoginService(
+    const login = makeLogin(
       saveAuthToUpmConfig,
       npmLogin,
       authNpmrc,

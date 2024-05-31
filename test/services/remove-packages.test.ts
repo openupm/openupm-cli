@@ -4,7 +4,7 @@ import {
   mockProjectManifestWriteResult,
 } from "../io/project-manifest-io.mock";
 import {
-  makePackageRemover,
+  makeRemovePackages,
   RemovedPackage,
 } from "../../src/services/remove-packages";
 import { mockService } from "./service.mock";
@@ -33,7 +33,7 @@ describe("remove packages", () => {
     const writeProjectManifest = mockService<WriteProjectManifest>();
     mockProjectManifestWriteResult(writeProjectManifest);
 
-    const removePackages = makePackageRemover(
+    const removePackages = makeRemovePackages(
       loadProjectManifest,
       writeProjectManifest
     );

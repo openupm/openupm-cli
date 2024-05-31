@@ -1,5 +1,5 @@
 import { GetUpmConfigPath } from "../io/upm-config-io";
-import { ParseEnvService } from "../services/parse-env";
+import { ParseEnv } from "../services/parse-env";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import {
   promptEmail,
@@ -9,7 +9,7 @@ import {
 } from "./prompts";
 import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
-import { LoginService } from "../services/login";
+import { Login } from "../services/login";
 import { ResultCodes } from "./result-codes";
 import { RegistryAuthenticationError } from "../io/common-errors";
 import { notifyEnvParsingFailed } from "./error-logging";
@@ -42,9 +42,9 @@ export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
  * Makes a {@link LoginCmd} function.
  */
 export function makeLoginCmd(
-  parseEnv: ParseEnvService,
+  parseEnv: ParseEnv,
   getUpmConfigPath: GetUpmConfigPath,
-  login: LoginService,
+  login: Login,
   log: Logger
 ): LoginCmd {
   return async (options) => {

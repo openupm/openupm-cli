@@ -27,22 +27,22 @@ export type Env = Readonly<{
 export type EnvParseError = GetUpmConfigPathError | UpmConfigLoadError;
 
 /**
- * Service function for parsing environment information and global
+ * Function for parsing environment information and global
  * command-options for further usage.
  */
-export type ParseEnvService = (
+export type ParseEnv = (
   options: CmdOptions
 ) => Promise<Result<Env, EnvParseError>>;
 
 /**
- * Creates a {@link ParseEnvService} function.
+ * Creates a {@link ParseEnv} function.
  */
-export function makeParseEnvService(
+export function makeParseEnv(
   log: Logger,
   getUpmConfigPath: GetUpmConfigPath,
   loadUpmConfig: LoadUpmConfig,
   getCwd: GetCwd
-): ParseEnvService {
+): ParseEnv {
   function determineCwd(options: CmdOptions): string {
     return options._global.chdir !== undefined
       ? path.resolve(options._global.chdir)

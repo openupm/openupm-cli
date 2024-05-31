@@ -19,22 +19,22 @@ export type NpmrcAuthTokenUpdateError =
   | NpmrcSaveError;
 
 /**
- * Service function for updating the user-wide npm-auth token inside a users
+ * Function for updating the user-wide npm-auth token inside a users
  * npmrc file.
  * @param registry The registry for which to set the auth token.
  * @param token The auth token.
  * @returns The path of the file to which the token was ultimately saved.
  */
-export type AuthNpmrcService = (
+export type AuthNpmrc = (
   registry: RegistryUrl,
   token: string
 ) => AsyncResult<string, NpmrcAuthTokenUpdateError>;
 
-export function makeAuthNpmrcService(
+export function makeAuthNpmrc(
   findPath: FindNpmrcPath,
   loadNpmrc: LoadNpmrc,
   saveNpmrc: SaveNpmrc
-): AuthNpmrcService {
+): AuthNpmrc {
   return (registry, token) => {
     // read config
     return findPath()

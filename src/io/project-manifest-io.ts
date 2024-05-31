@@ -71,7 +71,7 @@ export type LoadProjectManifest = (
 /**
  * Makes a {@link LoadProjectManifest} function.
  */
-export function makeProjectManifestLoader(
+export function makeLoadProjectManifest(
   readFile: ReadTextFile
 ): LoadProjectManifest {
   return (projectPath) => {
@@ -110,7 +110,7 @@ export type WriteProjectManifest = (
 /**
  * Makes a {@link WriteProjectManifest} function.
  */
-export function makeProjectManifestWriter(
+export function makeWriteProjectManifest(
   writeFile: WriteTextFile
 ): WriteProjectManifest {
   return (projectPath, manifest) => {

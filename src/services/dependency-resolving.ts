@@ -11,14 +11,14 @@ import {
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
 import {
+  ResolveRemotePackumentVersion,
   ResolveRemotePackumentVersionError,
-  ResolveRemotePackumentVersionService,
 } from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
 import {
+  ResolveLatestVersion,
   ResolveLatestVersionError,
-  ResolveLatestVersionService,
 } from "./resolve-latest-version";
 import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
@@ -72,13 +72,13 @@ export type DependencyResolveError =
   | FetchPackumentError;
 
 /**
- * Service function for resolving all dependencies for a package.
+ * Function for resolving all dependencies for a package.
  * @param sources Sources from which dependencies can be resolved.
  * @param name The name of the package.
  * @param version The version for which to search dependencies.
  * @param deep Whether to search for all dependencies.
  */
-export type ResolveDependenciesService = (
+export type ResolveDependencies = (
   sources: ReadonlyArray<Registry>,
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
@@ -88,12 +88,12 @@ export type ResolveDependenciesService = (
 >;
 
 /**
- * Makes a {@link ResolveDependenciesService} function.
+ * Makes a {@link ResolveDependencies} function.
  */
-export function makeResolveDependenciesService(
-  resolveRemovePackumentVersion: ResolveRemotePackumentVersionService,
-  resolveLatestVersion: ResolveLatestVersionService
-): ResolveDependenciesService {
+export function makeResolveDependency(
+  resolveRemovePackumentVersion: ResolveRemotePackumentVersion,
+  resolveLatestVersion: ResolveLatestVersion
+): ResolveDependencies {
   // TODO: Add tests for this service
 
   return async (sources, name, version, deep) => {

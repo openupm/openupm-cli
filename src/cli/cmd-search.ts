@@ -1,5 +1,5 @@
 import * as os from "os";
-import { ParseEnvService } from "../services/parse-env";
+import { ParseEnv } from "../services/parse-env";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { Logger } from "npmlog";
@@ -29,7 +29,7 @@ export type SearchCmd = (
  * Makes a {@link SearchCmd} function.
  */
 export function makeSearchCmd(
-  parseEnv: ParseEnvService,
+  parseEnv: ParseEnv,
   searchPackages: SearchPackages,
   log: Logger,
   debugLog: DebugLog

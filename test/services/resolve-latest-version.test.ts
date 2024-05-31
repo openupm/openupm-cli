@@ -1,5 +1,5 @@
 import { mockService } from "./service.mock";
-import { makeResolveLatestVersionService } from "../../src/services/resolve-latest-version";
+import { makeResolveLatestVersion } from "../../src/services/resolve-latest-version";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { NoVersionsError, UnityPackument } from "../../src/domain/packument";
@@ -18,8 +18,7 @@ describe("resolve latest version service", () => {
   function makeDependencies() {
     const fetchPackument = mockService<FetchPackument>();
 
-    const resolveLatestVersion =
-      makeResolveLatestVersionService(fetchPackument);
+    const resolveLatestVersion = makeResolveLatestVersion(fetchPackument);
     return { resolveLatestVersion, fetchPackument } as const;
   }
 

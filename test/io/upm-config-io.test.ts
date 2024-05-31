@@ -1,6 +1,6 @@
 import {
-  makeUpmConfigLoader,
-  makeUpmConfigPathGetter,
+  makeLoadUpmConfig,
+  makeGetUpmConfigPath,
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
 import { Err, Ok } from "ts-results-es";
@@ -18,7 +18,7 @@ describe("upm-config-io", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
-      const getUpmConfigPath = makeUpmConfigPathGetter(getHomePath);
+      const getUpmConfigPath = makeGetUpmConfigPath(getHomePath);
 
       return { getUpmConfigPath, getHomePath } as const;
     }
@@ -51,7 +51,7 @@ describe("upm-config-io", () => {
       const readFile = mockService<ReadTextFile>();
       readFile.mockReturnValue(AsyncOk(""));
 
-      const loadUpmConfig = makeUpmConfigLoader(readFile);
+      const loadUpmConfig = makeLoadUpmConfig(readFile);
       return { loadUpmConfig, readFile } as const;
     }
 

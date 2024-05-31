@@ -54,7 +54,7 @@ function withSource(
 /**
  * Makes a {@link ResolveRemotePackument} function.
  */
-export function makeRemotePackumentResolver(
+export function makeResolveRemotePackument(
   fetchPackument: FetchPackument
 ): ResolveRemotePackument {
   function tryResolveFrom(source: Registry, packageName: DomainName) {

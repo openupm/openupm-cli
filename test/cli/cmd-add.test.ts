@@ -1,6 +1,6 @@
 import { makeAddCmd } from "../../src/cli/cmd-add";
 import { makeDomainName } from "../../src/domain/domain-name";
-import { Env, ParseEnvService } from "../../src/services/parse-env";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
@@ -13,10 +13,10 @@ import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockResolvedPackuments } from "../services/packument-resolving.mock";
 import { buildProjectManifest } from "../domain/data-project-manifest";
-import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
+import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { mockService } from "../services/service.mock";
-import { ResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument-version";
+import { ResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
 import {
   LoadProjectManifest,
   WriteProjectManifest,
@@ -59,18 +59,18 @@ const defaultEnv = {
 } as Env;
 
 function makeDependencies() {
-  const parseEnv = mockService<ParseEnvService>();
+  const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
   const resolveRemovePackumentVersion =
-    mockService<ResolveRemotePackumentVersionService>();
+    mockService<ResolveRemotePackumentVersion>();
   mockResolvedPackuments(
     resolveRemovePackumentVersion,
     [exampleRegistryUrl, somePackument],
     [exampleRegistryUrl, otherPackument]
   );
 
-  const resolveDependencies = mockService<ResolveDependenciesService>();
+  const resolveDependencies = mockService<ResolveDependencies>();
   resolveDependencies.mockResolvedValue(
     Ok([
       [

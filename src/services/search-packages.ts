@@ -33,7 +33,7 @@ export type SearchPackages = (
 /**
  * Makes a {@licence SearchPackages} function.
  */
-export function makePackagesSearcher(
+export function makeSearchPackages(
   searchRegistry: SearchRegistry,
   fetchAllPackuments: FetchAllPackuments
 ): SearchPackages {

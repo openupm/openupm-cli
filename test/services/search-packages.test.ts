@@ -4,7 +4,7 @@ import {
   AllPackuments,
   FetchAllPackuments,
 } from "../../src/io/all-packuments-io";
-import { makePackagesSearcher } from "../../src/services/search-packages";
+import { makeSearchPackages } from "../../src/services/search-packages";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Err } from "ts-results-es";
@@ -41,7 +41,7 @@ describe("search packages", () => {
     const fetchAllPackument = mockService<FetchAllPackuments>();
     fetchAllPackument.mockReturnValue(AsyncOk(exampleAllPackumentsResult));
 
-    const searchPackages = makePackagesSearcher(
+    const searchPackages = makeSearchPackages(
       searchRegistry,
       fetchAllPackument
     );

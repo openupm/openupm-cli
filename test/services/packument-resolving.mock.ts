@@ -5,19 +5,19 @@ import {
   UnityPackument,
 } from "../../src/domain/packument";
 import { RegistryUrl } from "../../src/domain/registry-url";
-import { ResolveRemotePackumentVersionService } from "../../src/services/resolve-remote-packument-version";
+import { ResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
 
 type MockEntry = [RegistryUrl, UnityPackument];
 
 /**
- * Mocks the results of a {@link ResolveRemotePackumentVersionService}.
+ * Mocks the results of a {@link ResolveRemotePackumentVersion}.
  * @param resolveRemovePackumentVersion The service to mock.
  * @param entries The entries of the mocked registry. Each entry contains
  * the url under which the packument is registered and the packument. All
  * packuments not given in this list are assumed to not exist.
  */
 export function mockResolvedPackuments(
-  resolveRemovePackumentVersion: jest.MockedFunction<ResolveRemotePackumentVersionService>,
+  resolveRemovePackumentVersion: jest.MockedFunction<ResolveRemotePackumentVersion>,
   ...entries: MockEntry[]
 ) {
   return resolveRemovePackumentVersion.mockImplementation(

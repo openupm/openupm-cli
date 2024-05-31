@@ -1,7 +1,7 @@
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { makeRegistrySearcher } from "../../src/io/npm-search";
+import { makeSearchRegistry } from "../../src/io/npm-search";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
@@ -18,7 +18,7 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const searchRegistry = makeRegistrySearcher(noopLogger);
+  const searchRegistry = makeSearchRegistry(noopLogger);
   return { searchRegistry } as const;
 }
 

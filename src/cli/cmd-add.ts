@@ -3,7 +3,7 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../io/project-manifest-io";
-import { ParseEnvService } from "../services/parse-env";
+import { ParseEnv } from "../services/parse-env";
 import {
   compareEditorVersion,
   stringifyEditorVersion,
@@ -36,9 +36,9 @@ import { Err, Ok, Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import {
   DependencyResolveError,
-  ResolveDependenciesService,
+  ResolveDependencies,
 } from "../services/dependency-resolving";
-import { ResolveRemotePackumentVersionService } from "../services/resolve-remote-packument-version";
+import { ResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
@@ -111,9 +111,9 @@ type AddCmd = (
  * Makes a {@link AddCmd} function.
  */
 export function makeAddCmd(
-  parseEnv: ParseEnvService,
-  resolveRemotePackumentVersion: ResolveRemotePackumentVersionService,
-  resolveDependencies: ResolveDependenciesService,
+  parseEnv: ParseEnv,
+  resolveRemotePackumentVersion: ResolveRemotePackumentVersion,
+  resolveDependencies: ResolveDependencies,
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest,
   determineEditorVersion: DetermineEditorVersion,
