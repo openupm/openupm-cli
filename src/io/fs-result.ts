@@ -28,7 +28,7 @@ export type ReadTextFile = (
 /**
  * Makes a {@link ReadTextFile} function.
  */
-export function makeTextReader(debugLog: DebugLog): ReadTextFile {
+export function makeReadText(debugLog: DebugLog): ReadTextFile {
   return (path) =>
     resultifyFsOp(debugLog, () => fs.readFile(path, { encoding: "utf8" }));
 }
@@ -47,7 +47,7 @@ export type WriteTextFile = (
 /**
  * Makes a {@link WriteTextFile} function.
  */
-export function makeTextWriter(debugLog: DebugLog): WriteTextFile {
+export function makeWriteText(debugLog: DebugLog): WriteTextFile {
   return (filePath, content) => {
     const dirPath = path.dirname(filePath);
     return resultifyFsOp(debugLog, () => fse.ensureDir(dirPath)).andThen(() =>

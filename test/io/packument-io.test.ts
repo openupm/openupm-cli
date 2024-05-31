@@ -5,7 +5,7 @@ import RegClient from "another-npm-registry-client";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientGetResult } from "../services/registry-client.mock";
-import { makePackumentFetcher } from "../../src/io/packument-io";
+import { makeFetchPackument } from "../../src/io/packument-io";
 
 describe("packument io", () => {
   describe("fetch", () => {
@@ -21,7 +21,7 @@ describe("packument io", () => {
         get: jest.fn(),
       };
 
-      const fetchPackument = makePackumentFetcher(regClient);
+      const fetchPackument = makeFetchPackument(regClient);
       return { fetchPackument, regClient } as const;
     }
     it("should get existing packument", async () => {

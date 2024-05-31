@@ -1,4 +1,4 @@
-import { makeEditorVersionDeterminer } from "../../src/services/determine-editor-version";
+import { makeDetermineEditorVersion } from "../../src/services/determine-editor-version";
 import { mockService } from "./service.mock";
 import { LoadProjectVersion } from "../../src/io/project-version-io";
 import { makeEditorVersion } from "../../src/domain/editor-version";
@@ -13,7 +13,7 @@ describe("determine editor version", () => {
     const loadProjectVersion = mockService<LoadProjectVersion>();
 
     const determineEditorVersion =
-      makeEditorVersionDeterminer(loadProjectVersion);
+      makeDetermineEditorVersion(loadProjectVersion);
     return { determineEditorVersion, loadProjectVersion } as const;
   }
 

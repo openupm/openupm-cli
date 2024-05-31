@@ -1,5 +1,5 @@
 import { makeViewCmd } from "../../src/cli/cmd-view";
-import { Env, ParseEnvService } from "../../src/services/parse-env";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { Err, Ok } from "ts-results-es";
@@ -55,7 +55,7 @@ const defaultEnv = {
 } as Env;
 
 function makeDependencies() {
-  const parseEnv = mockService<ParseEnvService>();
+  const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
   const resolveRemotePackument = mockService<ResolveRemotePackument>();

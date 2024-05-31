@@ -20,18 +20,15 @@ export type ResolveLatestVersionError =
  * @param sources All sources to check for the package.
  * @param packageName The name of the package to search.
  */
-export type ResolveLatestVersionService = (
+export type ResolveLatestVersion = (
   sources: ReadonlyArray<Registry>,
   packageName: DomainName
 ) => AsyncResult<SemanticVersion, ResolveLatestVersionError>;
 
-export function makeResolveLatestVersionService(
+export function makeResolveLatestVersion(
   fetchPackument: FetchPackument
-): ResolveLatestVersionService {
-  const resolveLatestVersion: ResolveLatestVersionService = (
-    sources,
-    packageName
-  ) => {
+): ResolveLatestVersion {
+  const resolveLatestVersion: ResolveLatestVersion = (sources, packageName) => {
     if (sources.length === 0)
       return Err(new PackumentNotFoundError(packageName)).toAsyncResult();
 

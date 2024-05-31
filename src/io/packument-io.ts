@@ -30,7 +30,7 @@ export type FetchPackument = (
 /**
  * Makes a {@link FetchPackument} function.
  */
-export function makePackumentFetcher(
+export function makeFetchPackument(
   registryClient: RegClient.Instance
 ): FetchPackument {
   return (registry, name) => {

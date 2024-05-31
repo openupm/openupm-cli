@@ -18,23 +18,23 @@ export type ResolveRemotePackumentVersionError =
   | FetchPackumentError;
 
 /**
- * Service function for resolving remove packument versions.
+ * Function for resolving remove packument versions.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
-export type ResolveRemotePackumentVersionService = (
+export type ResolveRemotePackumentVersion = (
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
 ) => AsyncResult<ResolvedPackumentVersion, ResolveRemotePackumentVersionError>;
 
 /**
- * Makes a {@link ResolveRemotePackumentVersionService} function.
+ * Makes a {@link ResolveRemotePackumentVersion} function.
  */
-export function makeResolveRemotePackumentVersionService(
+export function makeResolveRemotePackumentVersion(
   fetchPackument: FetchPackument
-): ResolveRemotePackumentVersionService {
+): ResolveRemotePackumentVersion {
   return (packageName, requestedVersion, source) =>
     fetchPackument(source, packageName)
       .andThen((maybePackument) => {

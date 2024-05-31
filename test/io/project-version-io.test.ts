@@ -1,7 +1,7 @@
 import { ReadTextFile } from "../../src/io/fs-result";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
-import { makeProjectVersionLoader } from "../../src/io/project-version-io";
+import { makeLoadProjectVersion } from "../../src/io/project-version-io";
 import { eaccesError, enoentError } from "./node-error.mock";
 import {
   FileMissingError,
@@ -15,7 +15,7 @@ describe("project-version-io", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
 
-      const loadProjectVersion = makeProjectVersionLoader(readFile);
+      const loadProjectVersion = makeLoadProjectVersion(readFile);
 
       return { loadProjectVersion, readFile } as const;
     }

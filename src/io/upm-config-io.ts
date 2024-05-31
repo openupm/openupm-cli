@@ -46,7 +46,7 @@ export type GetUpmConfigPath = (
 /**
  * Makes a {@link GetUpmConfigPath} function.
  */
-export function makeUpmConfigPathGetter(
+export function makeGetUpmConfigPath(
   getHomePath: GetHomePath
 ): GetUpmConfigPath {
   function getConfigDirectory(wsl: boolean, systemUser: boolean) {
@@ -96,7 +96,7 @@ export type LoadUpmConfig = (
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
-export function makeUpmConfigLoader(readFile: ReadTextFile): LoadUpmConfig {
+export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
   return (configFilePath) =>
     readFile(configFilePath)
       .andThen(tryParseToml)

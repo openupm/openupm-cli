@@ -21,7 +21,7 @@ export type FindNpmrcPath = () => Result<string, FindNpmrcError>;
 /**
  * Makes a {@link FindNpmrcPath} function.
  */
-export function makeNpmrcPathFinder(getHomePath: GetHomePath): FindNpmrcPath {
+export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
   return () => getHomePath().map((homePath) => path.join(homePath, ".npmrc"));
 }
 
@@ -42,7 +42,7 @@ export type LoadNpmrc = (
 /**
  * Makes a {@link LoadNpmrc} function.
  */
-export function makeNpmrcLoader(readFile: ReadTextFile): LoadNpmrc {
+export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
   return (path) =>
     readFile(path)
       .map<Npmrc | null>((content) => content.split(EOL))
@@ -69,7 +69,7 @@ export type SaveNpmrc = (
 /**
  * Makes a {@link SaveNpmrc} function.
  */
-export function makeNpmrcSaver(writeFile: WriteTextFile): SaveNpmrc {
+export function makeSaveNpmrc(writeFile: WriteTextFile): SaveNpmrc {
   return (path, npmrc) => {
     const content = npmrc.join(EOL);
     return writeFile(path, content).mapErr(() => new GenericIOError("Write"));

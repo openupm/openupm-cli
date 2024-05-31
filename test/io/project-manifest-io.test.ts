@@ -1,6 +1,6 @@
 import {
-  makeProjectManifestLoader,
-  makeProjectManifestWriter,
+  makeLoadProjectManifest,
+  makeWriteProjectManifest,
   manifestPathFor,
 } from "../../src/io/project-manifest-io";
 import {
@@ -37,7 +37,7 @@ describe("project-manifest io", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
 
-      const loadProjectManifest = makeProjectManifestLoader(readFile);
+      const loadProjectManifest = makeLoadProjectManifest(readFile);
       return { loadProjectManifest, readFile } as const;
     }
 
@@ -97,7 +97,7 @@ describe("project-manifest io", () => {
       const writeFile = mockService<WriteTextFile>();
       writeFile.mockReturnValue(AsyncOk());
 
-      const writeProjectManifest = makeProjectManifestWriter(writeFile);
+      const writeProjectManifest = makeWriteProjectManifest(writeFile);
       return { writeProjectManifest, writeFile } as const;
     }
 

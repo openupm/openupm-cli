@@ -27,7 +27,7 @@ export type DetermineEditorVersion = (
 /**
  * Makes a {@link DetermineEditorVersion} function.
  */
-export function makeEditorVersionDeterminer(
+export function makeDetermineEditorVersion(
   loadProjectVersion: LoadProjectVersion
 ): DetermineEditorVersion {
   return (projectPath) => {

@@ -1,6 +1,6 @@
 import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
-import { Env, makeParseEnvService } from "../../src/services/parse-env";
+import { Env, makeParseEnv } from "../../src/services/parse-env";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
 import { NoWslError } from "../../src/io/wsl";
 import { mockUpmConfig } from "../io/upm-config-io.mock";
@@ -41,12 +41,7 @@ function makeDependencies() {
   const getCwd = mockService<GetCwd>();
   getCwd.mockReturnValue(testRootPath);
 
-  const parseEnv = makeParseEnvService(
-    log,
-    getUpmConfigPath,
-    loadUpmConfig,
-    getCwd
-  );
+  const parseEnv = makeParseEnv(log, getUpmConfigPath, loadUpmConfig, getCwd);
   return {
     parseEnv,
     log,

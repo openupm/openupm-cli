@@ -7,48 +7,45 @@ import { makeLoginCmd } from "./cmd-login";
 import { eachValue } from "./cli-parsing";
 import { CmdOptions } from "./options";
 import { makeAddCmd } from "./cmd-add";
-import { makeAuthNpmrcService } from "../services/npmrc-auth";
-import { makeNpmLoginService } from "../services/npm-login";
-import { makeRegistrySearcher } from "../io/npm-search";
+import { makeAuthNpmrc } from "../services/npmrc-auth";
+import { makeNpmLogin } from "../services/npm-login";
+import { makeSearchRegistry } from "../io/npm-search";
 import pkg from "../../package.json";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
-import { makeResolveDependenciesService } from "../services/dependency-resolving";
-import { makeAllPackumentsFetcher } from "../io/all-packuments-io";
+import { makeResolveDependency } from "../services/dependency-resolving";
+import { makeFetchAllPackuments } from "../io/all-packuments-io";
 import {
   mustBeDomainName,
   mustBePackageReference,
   mustBeRegistryUrl,
 } from "./validators";
 import RegClient from "another-npm-registry-client";
-import { makeParseEnvService } from "../services/parse-env";
-import { makeResolveRemotePackumentVersionService } from "../services/resolve-remote-packument-version";
+import { makeParseEnv } from "../services/parse-env";
+import { makeResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
 import {
-  makeProjectManifestLoader,
-  makeProjectManifestWriter,
+  makeLoadProjectManifest,
+  makeWriteProjectManifest,
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
-import { makeResolveLatestVersionService } from "../services/resolve-latest-version";
+import { makeResolveLatestVersion } from "../services/resolve-latest-version";
+import { makeLoadUpmConfig, makeGetUpmConfigPath } from "../io/upm-config-io";
+import { makeReadText, makeWriteText } from "../io/fs-result";
 import {
-  makeUpmConfigLoader,
-  makeUpmConfigPathGetter,
-} from "../io/upm-config-io";
-import { makeTextReader, makeTextWriter } from "../io/fs-result";
-import {
-  makeNpmrcLoader,
-  makeNpmrcPathFinder,
-  makeNpmrcSaver,
+  makeLoadNpmrc,
+  makeFindNpmrcPath,
+  makeSaveNpmrc,
 } from "../io/npmrc-io";
-import { makeCwdGetter, makeHomePathGetter } from "../io/special-paths";
-import { makeProjectVersionLoader } from "../io/project-version-io";
-import { makeSaveAuthToUpmConfigService } from "../services/upm-auth";
-import { makePackumentFetcher } from "../io/packument-io";
-import { makePackagesSearcher } from "../services/search-packages";
-import { makeRemotePackumentResolver } from "../services/resolve-remote-packument";
-import { makeLoginService } from "../services/login";
+import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
+import { makeLoadProjectVersion } from "../io/project-version-io";
+import { makeSaveAuthToUpmConfig } from "../services/upm-auth";
+import { makeFetchPackument } from "../io/packument-io";
+import { makeSearchPackages } from "../services/search-packages";
+import { makeResolveRemotePackument } from "../services/resolve-remote-packument";
+import { makeLogin } from "../services/login";
 import { DebugLog } from "../logging";
-import { makeEditorVersionDeterminer } from "../services/determine-editor-version";
-import { makePackageRemover } from "../services/remove-packages";
+import { makeDetermineEditorVersion } from "../services/determine-editor-version";
+import { makeRemovePackages } from "../services/remove-packages";
 
 // Composition root
 
@@ -61,54 +58,41 @@ const debugLog: DebugLog = (message, context) =>
     }`
   );
 const regClient = new RegClient({ log });
-const getCwd = makeCwdGetter();
-const getHomePath = makeHomePathGetter();
-const readFile = makeTextReader(debugLog);
-const writeFile = makeTextWriter(debugLog);
-const loadProjectManifest = makeProjectManifestLoader(readFile);
-const writeProjectManifest = makeProjectManifestWriter(writeFile);
-const getUpmConfigPath = makeUpmConfigPathGetter(getHomePath);
-const loadUpmConfig = makeUpmConfigLoader(readFile);
-const findNpmrcPath = makeNpmrcPathFinder(getHomePath);
-const loadNpmrc = makeNpmrcLoader(readFile);
-const saveNpmrc = makeNpmrcSaver(writeFile);
-const loadProjectVersion = makeProjectVersionLoader(readFile);
-const fetchPackument = makePackumentFetcher(regClient);
-const fetchAllPackuments = makeAllPackumentsFetcher(debugLog);
-const searchRegistry = makeRegistrySearcher(debugLog);
-const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
-const removePackages = makePackageRemover(
+const getCwd = makeGetCwd();
+const getHomePath = makeGetHomePath();
+const readFile = makeReadText(debugLog);
+const writeFile = makeWriteText(debugLog);
+const loadProjectManifest = makeLoadProjectManifest(readFile);
+const writeProjectManifest = makeWriteProjectManifest(writeFile);
+const getUpmConfigPath = makeGetUpmConfigPath(getHomePath);
+const loadUpmConfig = makeLoadUpmConfig(readFile);
+const findNpmrcPath = makeFindNpmrcPath(getHomePath);
+const loadNpmrc = makeLoadNpmrc(readFile);
+const saveNpmrc = makeSaveNpmrc(writeFile);
+const loadProjectVersion = makeLoadProjectVersion(readFile);
+const fetchPackument = makeFetchPackument(regClient);
+const fetchAllPackuments = makeFetchAllPackuments(debugLog);
+const searchRegistry = makeSearchRegistry(debugLog);
+const resolveRemotePackument = makeResolveRemotePackument(fetchPackument);
+const removePackages = makeRemovePackages(
   loadProjectManifest,
   writeProjectManifest
 );
 
-const parseEnv = makeParseEnvService(
-  log,
-  getUpmConfigPath,
-  loadUpmConfig,
-  getCwd
-);
-const determineEditorVersion = makeEditorVersionDeterminer(loadProjectVersion);
-const authNpmrc = makeAuthNpmrcService(findNpmrcPath, loadNpmrc, saveNpmrc);
-const npmLogin = makeNpmLoginService(regClient, debugLog);
+const parseEnv = makeParseEnv(log, getUpmConfigPath, loadUpmConfig, getCwd);
+const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
+const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
+const npmLogin = makeNpmLogin(regClient, debugLog);
 const resolveRemovePackumentVersion =
-  makeResolveRemotePackumentVersionService(fetchPackument);
-const resolveLatestVersion = makeResolveLatestVersionService(fetchPackument);
-const resolveDependencies = makeResolveDependenciesService(
+  makeResolveRemotePackumentVersion(fetchPackument);
+const resolveLatestVersion = makeResolveLatestVersion(fetchPackument);
+const resolveDependencies = makeResolveDependency(
   resolveRemovePackumentVersion,
   resolveLatestVersion
 );
-const saveAuthToUpmConfig = makeSaveAuthToUpmConfigService(
-  loadUpmConfig,
-  writeFile
-);
-const searchPackages = makePackagesSearcher(searchRegistry, fetchAllPackuments);
-const login = makeLoginService(
-  saveAuthToUpmConfig,
-  npmLogin,
-  authNpmrc,
-  debugLog
-);
+const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(loadUpmConfig, writeFile);
+const searchPackages = makeSearchPackages(searchRegistry, fetchAllPackuments);
+const login = makeLogin(saveAuthToUpmConfig, npmLogin, authNpmrc, debugLog);
 
 const addCmd = makeAddCmd(
   parseEnv,

@@ -29,7 +29,7 @@ export type RemovePackages = (
   packageNames: ReadonlyArray<DomainName>
 ) => AsyncResult<ReadonlyArray<RemovedPackage>, RemovePackagesError>;
 
-export function makePackageRemover(
+export function makeRemovePackages(
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest
 ): RemovePackages {

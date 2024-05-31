@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import assert from "assert";
 import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
-import { ParseEnvService } from "../services/parse-env";
+import { ParseEnv } from "../services/parse-env";
 import {
   hasVersion,
   PackageReference,
@@ -104,7 +104,7 @@ const printInfo = function (packument: UnityPackument) {
  * Makes a {@link ViewCmd} function.
  */
 export function makeViewCmd(
-  parseEnv: ParseEnvService,
+  parseEnv: ParseEnv,
   resolveRemotePackument: ResolveRemotePackument,
   log: Logger
 ): ViewCmd {

@@ -2,7 +2,7 @@ import {
   ManifestLoadError,
   ManifestWriteError,
 } from "../io/project-manifest-io";
-import { EnvParseError, ParseEnvService } from "../services/parse-env";
+import { EnvParseError, ParseEnv } from "../services/parse-env";
 import { makePackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 
@@ -47,7 +47,7 @@ export type RemoveCmd = (
  * Makes a {@link RemoveCmd} function.
  */
 export function makeRemoveCmd(
-  parseEnv: ParseEnvService,
+  parseEnv: ParseEnv,
   removePackages: RemovePackages,
   log: Logger
 ): RemoveCmd {

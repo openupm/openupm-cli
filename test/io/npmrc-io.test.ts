@@ -2,9 +2,9 @@ import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
-  makeNpmrcLoader,
-  makeNpmrcPathFinder,
-  makeNpmrcSaver,
+  makeLoadNpmrc,
+  makeFindNpmrcPath,
+  makeSaveNpmrc,
 } from "../../src/io/npmrc-io";
 import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
@@ -18,7 +18,7 @@ describe("npmrc-io", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
-      const findPath = makeNpmrcPathFinder(getHomePath);
+      const findPath = makeFindNpmrcPath(getHomePath);
 
       return { findPath, getHomePath } as const;
     }
@@ -48,7 +48,7 @@ describe("npmrc-io", () => {
     function makeDependencies() {
       const readText = mockService<ReadTextFile>();
 
-      const loadNpmrc = makeNpmrcLoader(readText);
+      const loadNpmrc = makeLoadNpmrc(readText);
       return { loadNpmrc, readText } as const;
     }
 
@@ -80,7 +80,7 @@ describe("npmrc-io", () => {
       const writeFile = mockService<WriteTextFile>();
       writeFile.mockReturnValue(new AsyncResult(Ok(undefined)));
 
-      const saveNpmrc = makeNpmrcSaver(writeFile);
+      const saveNpmrc = makeSaveNpmrc(writeFile);
       return { saveNpmrc, writeFile } as const;
     }
 

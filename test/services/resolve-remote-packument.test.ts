@@ -1,4 +1,4 @@
-import { makeRemotePackumentResolver } from "../../src/services/resolve-remote-packument";
+import { makeResolveRemotePackument } from "../../src/services/resolve-remote-packument";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -22,7 +22,7 @@ describe("resolve remove packument", () => {
     const fetchPackument = mockService<FetchPackument>();
     fetchPackument.mockReturnValue(AsyncOk(examplePackument));
 
-    const resolveRemotePackument = makeRemotePackumentResolver(fetchPackument);
+    const resolveRemotePackument = makeResolveRemotePackument(fetchPackument);
     return { resolveRemotePackument, fetchPackument } as const;
   }
 

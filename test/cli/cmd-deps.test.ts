@@ -1,5 +1,5 @@
 import { makeDepsCmd } from "../../src/cli/cmd-deps";
-import { Env, ParseEnvService } from "../../src/services/parse-env";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import { Err, Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
@@ -8,7 +8,7 @@ import { makePackageReference } from "../../src/domain/package-reference";
 import { makeMockLogger } from "./log.mock";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../../src/common-errors";
-import { ResolveDependenciesService } from "../../src/services/dependency-resolving";
+import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
@@ -24,10 +24,10 @@ const defaultEnv = {
 } as Env;
 
 function makeDependencies() {
-  const parseEnv = mockService<ParseEnvService>();
+  const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(Ok(defaultEnv));
 
-  const resolveDependencies = mockService<ResolveDependenciesService>();
+  const resolveDependencies = mockService<ResolveDependencies>();
   resolveDependencies.mockResolvedValue(
     Ok([
       [

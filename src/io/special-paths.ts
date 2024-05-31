@@ -60,7 +60,7 @@ export type GetHomePath = () => Result<string, GetHomePathError>;
 /**
  * Makes a {@link GetHomePath} function.
  */
-export function makeHomePathGetter(): GetHomePath {
+export function makeGetHomePath(): GetHomePath {
   return () => {
     const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
     if (homePath === null)
@@ -125,6 +125,6 @@ export type GetCwd = () => string;
 /**
  * Makes a {@link GetCwd} function.
  */
-export function makeCwdGetter(): GetCwd {
+export function makeGetCwd(): GetCwd {
   return process.cwd;
 }

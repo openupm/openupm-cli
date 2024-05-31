@@ -1,4 +1,4 @@
-import { ParseEnvService } from "../services/parse-env";
+import { ParseEnv } from "../services/parse-env";
 import { isPackageUrl } from "../domain/package-url";
 import {
   makePackageReference,
@@ -8,7 +8,7 @@ import {
 import { CmdOptions } from "./options";
 import { PackumentVersionResolveError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
-import { ResolveDependenciesService } from "../services/dependency-resolving";
+import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
@@ -49,8 +49,8 @@ function errorPrefixForError(error: PackumentVersionResolveError): string {
  * Makes a {@link DepsCmd} function.
  */
 export function makeDepsCmd(
-  parseEnv: ParseEnvService,
-  resolveDependencies: ResolveDependenciesService,
+  parseEnv: ParseEnv,
+  resolveDependencies: ResolveDependencies,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {

@@ -36,9 +36,7 @@ export type FetchAllPackuments = (
 /**
  * Makes a {@link FetchAllPackuments} function.
  */
-export function makeAllPackumentsFetcher(
-  debugLog: DebugLog
-): FetchAllPackuments {
+export function makeFetchAllPackuments(debugLog: DebugLog): FetchAllPackuments {
   return (registry) => {
     return new AsyncResult(
       npmFetch

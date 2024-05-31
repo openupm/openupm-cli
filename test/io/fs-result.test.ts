@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import {
-  makeTextReader,
-  makeTextWriter,
+  makeReadText,
+  makeWriteText,
   tryGetDirectoriesIn,
 } from "../../src/io/fs-result";
 import fse from "fs-extra";
@@ -12,7 +12,7 @@ import { makeNodeError } from "./node-error.mock";
 describe("fs-result", () => {
   describe("read text", () => {
     function makeDependencies() {
-      const readFile = makeTextReader(noopLogger);
+      const readFile = makeReadText(noopLogger);
 
       return { readFile } as const;
     }
@@ -40,7 +40,7 @@ describe("fs-result", () => {
 
   describe("write text", () => {
     function makeDependencies() {
-      const writeFile = makeTextWriter(noopLogger);
+      const writeFile = makeWriteText(noopLogger);
 
       return { writeFile } as const;
     }

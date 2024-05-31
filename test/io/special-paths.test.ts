@@ -1,7 +1,7 @@
 import path from "path";
 import { tryGetEnv } from "../../src/utils/env-util";
 import {
-  makeHomePathGetter,
+  makeGetHomePath,
   OSNotSupportedError,
   tryGetEditorInstallPath,
   VersionNotSupportedOnOsError,
@@ -15,7 +15,7 @@ jest.mock("../../src/utils/env-util");
 describe("special-paths", () => {
   describe("home", () => {
     function makeDependencies() {
-      const getHomePath = makeHomePathGetter();
+      const getHomePath = makeGetHomePath();
 
       return { getHomePath } as const;
     }

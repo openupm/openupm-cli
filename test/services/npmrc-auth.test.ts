@@ -3,7 +3,7 @@ import { AsyncResult, Err, Ok } from "ts-results-es";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { emptyNpmrc, setToken } from "../../src/domain/npmrc";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { makeAuthNpmrcService } from "../../src/services/npmrc-auth";
+import { makeAuthNpmrc } from "../../src/services/npmrc-auth";
 import { mockService } from "./service.mock";
 import { GenericIOError } from "../../src/io/common-errors";
 
@@ -19,7 +19,7 @@ function makeDependencies() {
   const saveNpmrc = mockService<SaveNpmrc>();
   saveNpmrc.mockReturnValue(new AsyncResult(Ok(undefined)));
 
-  const authNpmrc = makeAuthNpmrcService(findPath, loadNpmrc, saveNpmrc);
+  const authNpmrc = makeAuthNpmrc(findPath, loadNpmrc, saveNpmrc);
   return { authNpmrc, findPath, loadNpmrc, saveNpmrc } as const;
 }
 

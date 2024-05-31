@@ -1,12 +1,12 @@
 import { Err, Ok } from "ts-results-es";
 import { makeLoginCmd } from "../../src/cli/cmd-login";
 import { mockService } from "../services/service.mock";
-import { Env, ParseEnvService } from "../../src/services/parse-env";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import {
   GetUpmConfigPath,
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
-import { LoginService } from "../../src/services/login";
+import { Login } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
@@ -30,13 +30,13 @@ const exampleUpmConfigPath = "/user/home/.upmconfig.toml";
 
 describe("cmd-login", () => {
   function makeDependencies() {
-    const parseEnv = mockService<ParseEnvService>();
+    const parseEnv = mockService<ParseEnv>();
     parseEnv.mockResolvedValue(Ok(defaultEnv));
 
     const getUpmConfigPath = mockService<GetUpmConfigPath>();
     getUpmConfigPath.mockReturnValue(AsyncOk(exampleUpmConfigPath));
 
-    const login = mockService<LoginService>();
+    const login = mockService<Login>();
     login.mockReturnValue(AsyncOk());
 
     const log = makeMockLogger();

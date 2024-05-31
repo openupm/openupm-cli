@@ -1,5 +1,5 @@
 import npmFetch from "npm-registry-fetch";
-import { makeAllPackumentsFetcher } from "../../src/io/all-packuments-io";
+import { makeFetchAllPackuments } from "../../src/io/all-packuments-io";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
@@ -17,7 +17,7 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const getAllPackuments = makeAllPackumentsFetcher(noopLogger);
+  const getAllPackuments = makeFetchAllPackuments(noopLogger);
   return { getAllPackuments } as const;
 }
 

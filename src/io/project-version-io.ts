@@ -63,7 +63,7 @@ export type LoadProjectVersion = (
 /**
  * Makes a {@link LoadProjectVersion} function.
  */
-export function makeProjectVersionLoader(
+export function makeLoadProjectVersion(
   readFile: ReadTextFile
 ): LoadProjectVersion {
   return (projectDirPath) => {
