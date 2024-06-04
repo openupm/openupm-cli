@@ -1,10 +1,9 @@
-import { WriteTextFile } from "../io/fs-result";
 import { RegistryUrl } from "../domain/registry-url";
 import { addAuth, UpmAuth } from "../domain/upm-config";
 import { AsyncResult } from "ts-results-es";
 import {
   LoadUpmConfig,
-  trySaveUpmConfig,
+  SaveUpmConfig,
   UpmConfigLoadError,
 } from "../io/upm-config-io";
 import { GenericIOError } from "../io/common-errors";
@@ -31,12 +30,12 @@ export type SaveAuthToUpmConfig = (
  */
 export function makeSaveAuthToUpmConfig(
   loadUpmConfig: LoadUpmConfig,
-  writeFile: WriteTextFile
+  saveUpmConfig: SaveUpmConfig
 ): SaveAuthToUpmConfig {
   // TODO: Add tests for this service
   return (configPath, registry, auth) =>
     loadUpmConfig(configPath)
       .map((maybeConfig) => maybeConfig || {})
       .map((config) => addAuth(registry, auth, config))
-      .andThen((config) => trySaveUpmConfig(writeFile, config, configPath));
+      .andThen((config) => saveUpmConfig(config, configPath));
 }

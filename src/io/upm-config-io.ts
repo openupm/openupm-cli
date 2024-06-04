@@ -122,13 +122,19 @@ export type UpmConfigSaveError = GenericIOError;
  * @param config The config to save.
  * @param configFilePath The path of the file that should be saved to.
  */
-export const trySaveUpmConfig = (
-  writeFile: WriteTextFile,
+export type SaveUpmConfig = (
   config: UPMConfig,
   configFilePath: string
-): AsyncResult<void, UpmConfigSaveError> => {
-  const content = TOML.stringify(config);
-  return writeFile(configFilePath, content).mapErr(
-    () => new GenericIOError("Write")
-  );
-};
+) => AsyncResult<void, UpmConfigSaveError>;
+
+/**
+ * Creates a {@link SaveUpmConfig} function.
+ */
+export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
+  return (config, configFilePath) => {
+    const content = TOML.stringify(config);
+    return writeFile(configFilePath, content).mapErr(
+      () => new GenericIOError("Write")
+    );
+  };
+}
