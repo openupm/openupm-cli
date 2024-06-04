@@ -1,4 +1,4 @@
-import { ChildProcessError, RunChildProcess } from "../../src/utils/process";
+import { ChildProcessError, RunChildProcess } from "../../src/io/process";
 import { tryGetWslPath } from "../../src/io/wsl";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { mockService } from "../services/service.mock";

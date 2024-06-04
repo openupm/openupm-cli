@@ -7,7 +7,7 @@ import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { tryGetEnv } from "../utils/env-util";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
-import { ChildProcessError, RunChildProcess } from "../utils/process";
+import { ChildProcessError, RunChildProcess } from "./process";
 import { GetHomePath } from "./special-paths";
 import { GenericIOError } from "./common-errors";
 
