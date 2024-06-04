@@ -1,7 +1,7 @@
 import { AsyncResult, Err } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import isWsl from "is-wsl";
-import execute, { ChildProcessError } from "../utils/process";
+import { ChildProcessError, RunChildProcess } from "../utils/process";
 
 /**
  * Error for when attempting to interact with wsl on a non-wsl system.
@@ -23,11 +23,12 @@ export type WslPathError = NoWslError | ChildProcessError;
  * @param varName The variable name.
  */
 export function tryGetWslPath(
-  varName: string
+  varName: string,
+  runChildProcess: RunChildProcess
 ): AsyncResult<string, WslPathError> {
   if (!isWsl) return Err(new NoWslError()).toAsyncResult();
 
-  return execute(`wslpath "$(wslvar ${varName})"`, {
-    trim: true,
-  });
+  return runChildProcess(`wslpath "$(wslvar ${varName})"`).map((output) =>
+    output.trim()
+  );
 }

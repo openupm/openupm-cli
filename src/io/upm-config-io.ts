@@ -7,7 +7,7 @@ import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { tryGetEnv } from "../utils/env-util";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
-import { ChildProcessError } from "../utils/process";
+import { ChildProcessError, RunChildProcess } from "../utils/process";
 import { GetHomePath } from "./special-paths";
 import { GenericIOError } from "./common-errors";
 
@@ -47,17 +47,18 @@ export type GetUpmConfigPath = (
  * Makes a {@link GetUpmConfigPath} function.
  */
 export function makeGetUpmConfigPath(
-  getHomePath: GetHomePath
+  getHomePath: GetHomePath,
+  runChildProcess: RunChildProcess
 ): GetUpmConfigPath {
   function getConfigDirectory(wsl: boolean, systemUser: boolean) {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (wsl) {
       if (systemUser)
-        return tryGetWslPath("ALLUSERSPROFILE").map((it) =>
+        return tryGetWslPath("ALLUSERSPROFILE", runChildProcess).map((it) =>
           path.join(it, systemUserSubPath)
         );
 
-      return tryGetWslPath("USERPROFILE");
+      return tryGetWslPath("USERPROFILE", runChildProcess);
     }
 
     if (systemUser) {

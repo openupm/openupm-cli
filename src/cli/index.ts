@@ -29,11 +29,11 @@ import {
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
 import { makeResolveLatestVersion } from "../services/resolve-latest-version";
-import { makeLoadUpmConfig, makeGetUpmConfigPath } from "../io/upm-config-io";
+import { makeGetUpmConfigPath, makeLoadUpmConfig } from "../io/upm-config-io";
 import { makeReadText, makeWriteText } from "../io/fs-result";
 import {
-  makeLoadNpmrc,
   makeFindNpmrcPath,
+  makeLoadNpmrc,
   makeSaveNpmrc,
 } from "../io/npmrc-io";
 import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
@@ -46,6 +46,7 @@ import { makeLogin } from "../services/login";
 import { DebugLog } from "../logging";
 import { makeDetermineEditorVersion } from "../services/determine-editor-version";
 import { makeRemovePackages } from "../services/remove-packages";
+import { makeRunChildProcess } from "../utils/process";
 
 // Composition root
 
@@ -59,12 +60,13 @@ const debugLog: DebugLog = (message, context) =>
   );
 const regClient = new RegClient({ log });
 const getCwd = makeGetCwd();
+const runChildProcess = makeRunChildProcess(debugLog);
 const getHomePath = makeGetHomePath();
 const readFile = makeReadText(debugLog);
 const writeFile = makeWriteText(debugLog);
 const loadProjectManifest = makeLoadProjectManifest(readFile);
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
-const getUpmConfigPath = makeGetUpmConfigPath(getHomePath);
+const getUpmConfigPath = makeGetUpmConfigPath(getHomePath, runChildProcess);
 const loadUpmConfig = makeLoadUpmConfig(readFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePath);
 const loadNpmrc = makeLoadNpmrc(readFile);
