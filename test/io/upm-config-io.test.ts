@@ -1,6 +1,6 @@
 import {
-  makeLoadUpmConfig,
   makeGetUpmConfigPath,
+  makeLoadUpmConfig,
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
 import { Err, Ok } from "ts-results-es";
@@ -12,13 +12,19 @@ import path from "path";
 import { eaccesError, enoentError } from "./node-error.mock";
 import { GenericIOError } from "../../src/io/common-errors";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
+import { RunChildProcess } from "../../src/io/child-process";
 
 describe("upm-config-io", () => {
   describe("get path", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
-      const getUpmConfigPath = makeGetUpmConfigPath(getHomePath);
+      const runChildProcess = mockService<RunChildProcess>();
+
+      const getUpmConfigPath = makeGetUpmConfigPath(
+        getHomePath,
+        runChildProcess
+      );
 
       return { getUpmConfigPath, getHomePath } as const;
     }
