@@ -46,7 +46,7 @@ import { makeLogin } from "../services/login";
 import { DebugLog } from "../logging";
 import { makeDetermineEditorVersion } from "../services/determine-editor-version";
 import { makeRemovePackages } from "../services/remove-packages";
-import { makeRunChildProcess } from "../io/process";
+import { makeRunChildProcess } from "../io/child-process";
 
 // Composition root
 

@@ -1,7 +1,7 @@
 import { Logger } from "npmlog";
 import { EnvParseError } from "../services/parse-env";
 import { NoWslError } from "../io/wsl";
-import { ChildProcessError } from "../io/process";
+import { ChildProcessError } from "../io/child-process";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
 import {
   FileMissingError,

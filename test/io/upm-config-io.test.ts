@@ -12,7 +12,7 @@ import path from "path";
 import { eaccesError, enoentError } from "./node-error.mock";
 import { GenericIOError } from "../../src/io/common-errors";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
-import { RunChildProcess } from "../../src/io/process";
+import { RunChildProcess } from "../../src/io/child-process";
 
 describe("upm-config-io", () => {
   describe("get path", () => {

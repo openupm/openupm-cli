@@ -1,7 +1,7 @@
 import { AsyncResult, Err } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import isWsl from "is-wsl";
-import { ChildProcessError, RunChildProcess } from "./process";
+import { ChildProcessError, RunChildProcess } from "./child-process";
 
 /**
  * Error for when attempting to interact with wsl on a non-wsl system.
