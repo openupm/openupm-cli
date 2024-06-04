@@ -29,7 +29,11 @@ import {
 } from "../io/project-manifest-io";
 import npmlog from "npmlog";
 import { makeResolveLatestVersion } from "../services/resolve-latest-version";
-import { makeGetUpmConfigPath, makeLoadUpmConfig } from "../io/upm-config-io";
+import {
+  makeGetUpmConfigPath,
+  makeLoadUpmConfig,
+  makeSaveUpmConfig,
+} from "../io/upm-config-io";
 import { makeReadText, makeWriteText } from "../io/fs-result";
 import {
   makeFindNpmrcPath,
@@ -68,6 +72,7 @@ const loadProjectManifest = makeLoadProjectManifest(readFile);
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 const getUpmConfigPath = makeGetUpmConfigPath(getHomePath, runChildProcess);
 const loadUpmConfig = makeLoadUpmConfig(readFile);
+const saveUpmConfig = makeSaveUpmConfig(writeFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePath);
 const loadNpmrc = makeLoadNpmrc(readFile);
 const saveNpmrc = makeSaveNpmrc(writeFile);
@@ -92,7 +97,10 @@ const resolveDependencies = makeResolveDependency(
   resolveRemovePackumentVersion,
   resolveLatestVersion
 );
-const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(loadUpmConfig, writeFile);
+const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(
+  loadUpmConfig,
+  saveUpmConfig
+);
 const searchPackages = makeSearchPackages(searchRegistry, fetchAllPackuments);
 const login = makeLogin(saveAuthToUpmConfig, npmLogin, authNpmrc, debugLog);
 
