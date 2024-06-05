@@ -99,7 +99,7 @@ function makeDependencies() {
 
   const determineEditorVersion = mockService<DetermineEditorVersion>();
   determineEditorVersion.mockReturnValue(
-    Ok(makeEditorVersion(2022, 2, 1, "f", 2)).toAsyncResult()
+    AsyncOk(makeEditorVersion(2022, 2, 1, "f", 2))
   );
 
   const log = makeMockLogger();
