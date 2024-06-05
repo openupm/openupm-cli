@@ -17,8 +17,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: npm ci
         run: npm ci
-      - name: Build
-        run: npm run build
       - name: Unit tests
         run: npm run test:unit
   e2e-test:
