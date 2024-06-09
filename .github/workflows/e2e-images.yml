@@ -1,5 +1,5 @@
 name: Publish e2e images
-on: workflow_dispatch
+on: [pull_request]
 
 env:
   REGISTRY: ghcr.io
