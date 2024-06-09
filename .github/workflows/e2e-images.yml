@@ -7,7 +7,7 @@ env:
 
 jobs: 
   publish_e2e_images:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}-latest
     
     permissions:
       contents: read
