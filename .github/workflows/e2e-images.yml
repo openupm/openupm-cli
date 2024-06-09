@@ -28,7 +28,7 @@ jobs:
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          image: ${{ env.REGISTRY }}/e2e-${{matrix.os}}-${{ env.IMAGE_NAME }}
+          image: e2e-${{matrix.os}}
           dockerfile: docker/e2e/${{matrix.os}}/Dockerfile
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
