@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/openupm/openupm-cli/compare/2.3.0...3.0.0) (2024-06-10)
+
+
+### Bug Fixes
+
+* remove the support for region CN ([#360](https://github.com/openupm/openupm-cli/issues/360)) ([02735ec](https://github.com/openupm/openupm-cli/commit/02735ecc52fd55e1acaae3efd8b646c58ee2765b))
+
+
+### BREAKING CHANGES
+
+* this change removed the `--cn` parameter and the `openupm-cn` bin script.
+
 # [2.3.0](https://github.com/openupm/openupm-cli/compare/2.2.0...2.3.0) (2024-05-30)
 
 
