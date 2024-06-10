@@ -60,8 +60,6 @@ export function makeParseEnv(
     const url =
       options._global.registry !== undefined
         ? coerceRegistryUrl(options._global.registry)
-        : options._global.cn === true
-        ? makeRegistryUrl("https://package.openupm.cn")
         : makeRegistryUrl("https://package.openupm.com");
 
     if (upmConfig === null) return { url, auth: null };
@@ -79,10 +77,7 @@ export function makeParseEnv(
   }
 
   function determineUpstreamRegistry(options: CmdOptions): Registry {
-    const url =
-      options._global.cn === true
-        ? makeRegistryUrl("https://packages.unity.cn")
-        : makeRegistryUrl("https://packages.unity.com");
+    const url = makeRegistryUrl("https://packages.unity.com");
 
     return { url, auth: null };
   }
@@ -116,9 +111,6 @@ export function makeParseEnv(
 
     // upstream
     const upstream = determineUseUpstream(options);
-
-    // region cn
-    if (options._global.cn === true) log.notice("region", "cn");
 
     // auth
     const systemUser = determineIsSystemUser(options);

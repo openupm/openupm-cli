@@ -165,40 +165,6 @@ describe("env", () => {
     });
   });
 
-  describe("region log", () => {
-    it("should notify of china region if cn option is true", async () => {
-      const { parseEnv, log } = makeDependencies();
-
-      await parseEnv({
-        _global: {
-          cn: true,
-        },
-      });
-
-      expect(log.notice).toHaveBeenCalledWith("region", "cn");
-    });
-
-    it("should not notify of china region if cn option is missing", async () => {
-      const { parseEnv, log } = makeDependencies();
-
-      await parseEnv({
-        _global: {},
-      });
-
-      expect(log.notice).not.toHaveBeenCalledWith("region", "cn");
-    });
-
-    it("should not notify of china region if cn option is false", async () => {
-      const { parseEnv, log } = makeDependencies();
-
-      await parseEnv({
-        _global: { cn: false },
-      });
-
-      expect(log.notice).not.toHaveBeenCalledWith("region", "cn");
-    });
-  });
-
   describe("system-user", () => {
     it("should be system-user if option is true", async () => {
       const { parseEnv } = makeDependencies();
@@ -294,20 +260,6 @@ describe("env", () => {
       );
     });
 
-    it("should be chinese openupm for chinese locale", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const result = await parseEnv({
-        _global: {
-          cn: true,
-        },
-      });
-
-      expect(result).toBeOk((env: Env) =>
-        expect(env.registry.url).toEqual("https://package.openupm.cn")
-      );
-    });
-
     it("should be custom registry if overridden", async () => {
       const { parseEnv } = makeDependencies();
 
@@ -395,20 +347,6 @@ describe("env", () => {
 
       expect(result).toBeOk((env: Env) =>
         expect(env.upstreamRegistry.url).toEqual("https://packages.unity.com")
-      );
-    });
-
-    it("should be chinese unity for chinese locale", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const result = await parseEnv({
-        _global: {
-          cn: true,
-        },
-      });
-
-      expect(result).toBeOk((env: Env) =>
-        expect(env.upstreamRegistry.url).toEqual("https://packages.unity.cn")
       );
     });
 

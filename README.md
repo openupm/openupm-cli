@@ -1,7 +1,5 @@
 # openupm-cli
 
-*Read this in other languages: [English](README.md), [简体中文](README.zh-cn.md).*
-
 ![npm](https://img.shields.io/npm/v/openupm-cli) ![NPM](https://img.shields.io/npm/l/openupm-cli) ![npm](https://img.shields.io/npm/dm/openupm-cli)
 
 The command-line tool to maintain the Unity manifest file for 3rd-party upm registries, offering a similar but lighter experience like *npm* or *yarn* for Node.js.
@@ -13,7 +11,6 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
   - [Installation](#installation)
     - [Windows platform troubleshooting](#windows-platform-troubleshooting)
     - [Cannot find module 'node:net'](#cannot-find-module-nodenet)
-  - [China region](#china-region)
   - [Commands](#commands)
     - [Add packages](#add-packages)
     - [Remove packages](#remove-packages)
@@ -76,19 +73,6 @@ Error: Cannot find module 'node:net'
 ```
 
 Please install [Node.js 18 or above](https://nodejs.org/en/download/).
-
-## China region
-
-To use the region CN, replace the command `openupm` with `openupm-cn` or add the option `--cn`. Then the CLI will query both the Unity China region registry (`https://packages.unity.cn`) and the OpenUPM China region registry (`https://package.openupm.cn`).
-
-```
-# Region us
-openupm view com.littlebigfun.addressable-importer
-
-# Region cn
-openupm view com.littlebigfun.addressable-importer --cn
-openupm-cn view com.littlebigfun.addressable-importer
-```
 
 ## Commands
 
