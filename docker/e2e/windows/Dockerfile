@@ -1,6 +1,10 @@
-FROM unityci/hub:windows-latest as unityhub
+FROM mcr.microsoft.com/windows:ltsc2019 as os
 LABEL authors="comradevanti"
 
-FROM unityhub as editors
+FROM os as install-os-deps
 
-RUN unity-hub install --version 2021.3.38f1 --changeset 7a2fa5d8d101
+FROM install-os-deps as editor
+
+ENV UNITY_VERSION=2022.3.32f1
+
+RUN curl -O installer.exe https://download.unity3d.com/download_unity/c8300dc0a3fa/Windows64EditorInstaller/UnitySetup64-${UNITY_VERSION}.exe
