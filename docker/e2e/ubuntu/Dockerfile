@@ -1,6 +1,17 @@
-FROM unityci/hub:ubuntu-latest as unityhub
+FROM ubuntu:latest as os
 LABEL authors="comradevanti"
 
-FROM unityhub as editors
+FROM os as install-os-deps
 
-RUN unity-hub install --version 2021.3.38f1 --changeset 7a2fa5d8d101
+RUN apt-get -y update
+RUN apt-get -y install wget  
+RUN apt-get -y install xz-utils
+
+FROM install-os-deps as editor
+
+ENV UNITY_VERSION=2022.3.32f1
+RUN mkdir -p ~/Unity/Hub/Editor/${UNITY_VERSION}/Editor
+RUN cd ~/Unity/Hub/Editor/${UNITY_VERSION}/Editor
+RUN wget -O - https://download.unity3d.com/download_unity/c8300dc0a3fa/LinuxEditorInstaller/Unity-${UNITY_VERSION}.tar.xz > ./editor.tar.xz
+RUN tar -xJf ./editor.tar.xz
+RUN rm ./editor.tar.xz
