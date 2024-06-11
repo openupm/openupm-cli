@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/windows:ltsc2019 as os
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2022 as os
 LABEL authors="comradevanti"
 
 FROM os as install-os-deps
