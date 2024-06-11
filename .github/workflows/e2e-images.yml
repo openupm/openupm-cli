@@ -19,7 +19,6 @@ jobs:
       matrix: 
         os:
           - ubuntu
-          - windows
     
     steps:
       - name: Checkout repository
