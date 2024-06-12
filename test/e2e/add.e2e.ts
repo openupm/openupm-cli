@@ -235,4 +235,21 @@ describe("add packages", () => {
       ])
     );
   });
+
+  it("should not add syntactically bad package", async () => {
+    const homeDir = await prepareHomeDirectory();
+    const projectDir = await prepareUnityProject(homeDir);
+
+    const output = await runOpenupm(projectDir, ["add", "1,2,3"]);
+    const projectManifest = await getProjectManifest(projectDir);
+
+    expect(output.code).toEqual(ResultCodes.Error);
+    expect(projectManifest).toEqual(emptyProjectManifest);
+    expect(output.stdOut).toEqual([]);
+    expect(output.stdErr).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(`"1,2,3" is not a valid package-reference`),
+      ])
+    );
+  });
 });
