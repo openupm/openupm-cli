@@ -21,7 +21,7 @@ jobs:
         run: npm run test:unit
         
   e2e-test:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ubuntu-latest
     container: ghcr.io/openupm/openupm-cli-e2e-${{ matrix.os }}:latest
     strategy:
       matrix:
