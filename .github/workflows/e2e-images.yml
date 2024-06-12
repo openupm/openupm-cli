@@ -32,6 +32,7 @@ jobs:
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
+          tags: latest
           image: openupm-cli-e2e-${{matrix.os}}
           dockerfile: docker/e2e/${{matrix.os}}/Dockerfile
           registry: ${{ env.REGISTRY }}
