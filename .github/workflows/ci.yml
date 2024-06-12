@@ -19,15 +19,19 @@ jobs:
         run: npm ci
       - name: Unit tests
         run: npm run test:unit
+        
   e2e-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}-latest
+    container: ghcr.io/openupm/openupm-cli-e2e-${{ matrix.os }}:latest
     strategy:
       matrix:
-        node-version: [18.x]
+        os: 
+          - ubuntu
+          - windows
     name: E2E Tests
     steps:
       - uses: actions/checkout@v3
-      - name: set node.js ${{ matrix.node-version }}
+      - name: set node.js 18
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -37,6 +41,7 @@ jobs:
         run: npm run build
       - name: run tests
         run: npx jest --testMatch "**/*.e2e.ts" --runInBand
+        
   release:
     runs-on: ubuntu-latest
     needs: 
