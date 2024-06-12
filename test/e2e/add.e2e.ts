@@ -121,6 +121,19 @@ describe("add packages", () => {
     );
   });
 
+  it("should add local", async () => {
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          expectedVersion: "file://SomePackage/package.json",
+          addVersion: "file://SomePackage/package.json",
+        },
+      ],
+      []
+    );
+  });
+
   it("should add remote https", async () => {
     await testSuccessfulAdd(
       [
