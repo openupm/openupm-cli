@@ -3,6 +3,7 @@ import { runOpenupm } from "./run";
 import { prepareUnityProject } from "./setup/project";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { getProjectManifest } from "./check/project-manifest";
+import { emptyProjectManifest } from "../../src/domain/project-manifest";
 
 describe("add packages", () => {
   type SuccessfullAddCase = {
@@ -160,6 +161,28 @@ describe("add packages", () => {
         },
       ],
       []
+    );
+  });
+
+  it("should not add non-existent", async () => {
+    const homeDir = await prepareHomeDirectory();
+    const projectDir = await prepareUnityProject(homeDir);
+
+    const output = await runOpenupm(projectDir, [
+      "add",
+      "does.not.exist@latest",
+    ]);
+    const projectManifest = await getProjectManifest(projectDir);
+
+    expect(output.code).toEqual(ResultCodes.Error);
+    expect(projectManifest).toEqual(emptyProjectManifest);
+    expect(output.stdOut).toEqual([]);
+    expect(output.stdErr).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          `The package "does.not.exist" was not found in any of the provided registries.`
+        ),
+      ])
     );
   });
 });
