@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/openupm/openupm-cli/compare/3.0.0...3.1.0) (2024-06-12)
+
+
+### Features
+
+* **ci:** unity in e2e environment ([#359](https://github.com/openupm/openupm-cli/issues/359)) ([154d827](https://github.com/openupm/openupm-cli/commit/154d827f37d2cc941c0984be800ad3193ad608ac))
+
 # [3.0.0](https://github.com/openupm/openupm-cli/compare/2.3.0...3.0.0) (2024-06-10)
 
 
