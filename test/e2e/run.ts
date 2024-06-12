@@ -26,16 +26,8 @@ export async function runOpenupm(
   const stdOut = Array.of<string>();
   const stdErr = Array.of<string>();
 
-  openupmProcess.stdout!.on("data", (data) => {
-    const line = data.toString();
-    console.log(line);
-    return stdOut.push(line);
-  });
-  openupmProcess.stderr!.on("data", (data) => {
-    const line = data.toString();
-    console.log(line);
-    return stdErr.push(line);
-  });
+  openupmProcess.stdout!.on("data", (data) => stdOut.push(data.toString()));
+  openupmProcess.stderr!.on("data", (data) => stdErr.push(data.toString()));
 
   return await new Promise<AppOutput>((resolve) =>
     openupmProcess.on("exit", (code) =>
