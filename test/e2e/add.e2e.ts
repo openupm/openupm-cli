@@ -25,7 +25,7 @@ describe("add packages", () => {
     expect(projectManifest).toEqual(
       expect.objectContaining({
         dependencies: {
-          packageName: expectedVersion,
+          [packageName]: expectedVersion,
         },
         scopedRegistries: [
           {
