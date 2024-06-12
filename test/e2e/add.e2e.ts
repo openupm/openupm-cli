@@ -164,6 +164,19 @@ describe("add packages", () => {
     );
   });
 
+  it("should add remote unity package", async () => {
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "com.unity.xr.interaction.toolkit",
+          expectedVersion: "3.0.3",
+          addVersion: "3.0.3",
+        },
+      ],
+      []
+    );
+  });
+
   it("should be atomic", async () => {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
