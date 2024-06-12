@@ -1,5 +1,9 @@
 name: Publish e2e images
-on: [pull_request]
+on:
+  push: 
+    paths:
+      - "docker/e2e/**"
+      - ".github/workflows/e2e-images.yml"
 
 env:
   REGISTRY: ghcr.io
