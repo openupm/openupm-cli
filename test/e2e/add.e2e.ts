@@ -32,15 +32,20 @@ describe("add packages", () => {
         dependencies: Object.fromEntries(
           cases.map((it) => [it.packageName, it.expectedVersion])
         ),
-        scopedRegistries: [
-          {
-            name: "package.openupm.com",
-            url: "https://package.openupm.com",
-            scopes: expect.arrayContaining(expectedScopes),
-          },
-        ],
       })
     );
+    if (expectedScopes.length > 0)
+      expect(projectManifest).toEqual(
+        expect.objectContaining({
+          scopedRegistries: [
+            {
+              name: "package.openupm.com",
+              url: "https://package.openupm.com",
+              scopes: expect.arrayContaining(expectedScopes),
+            },
+          ],
+        })
+      );
     expect(output.stdOut).toEqual([]);
     expect(output.stdErr).toEqual(
       expect.arrayContaining([
@@ -127,11 +132,11 @@ describe("add packages", () => {
             "https://github.com/ComradeVanti/ToTask.AsyncOperation.git",
         },
       ],
-      ["dev.comradevanti.totask.asyncoperation"]
+      []
     );
   });
 
-  it("should add remote get", async () => {
+  it("should add remote git", async () => {
     await testSuccessfulAdd(
       [
         {
@@ -141,7 +146,7 @@ describe("add packages", () => {
           addVersion: "git@github.com:ComradeVanti/ToTask.AsyncOperation.git",
         },
       ],
-      ["dev.comradevanti.totask.asyncoperation"]
+      []
     );
   });
 });
