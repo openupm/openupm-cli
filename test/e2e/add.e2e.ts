@@ -115,4 +115,33 @@ describe("add packages", () => {
       ]
     );
   });
+
+  it("should add remote https", async () => {
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          expectedVersion:
+            "https://github.com/ComradeVanti/ToTask.AsyncOperation.git",
+          addVersion:
+            "https://github.com/ComradeVanti/ToTask.AsyncOperation.git",
+        },
+      ],
+      ["dev.comradevanti.totask.asyncoperation"]
+    );
+  });
+
+  it("should add remote get", async () => {
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          expectedVersion:
+            "git@github.com:ComradeVanti/ToTask.AsyncOperation.git",
+          addVersion: "git@github.com:ComradeVanti/ToTask.AsyncOperation.git",
+        },
+      ],
+      ["dev.comradevanti.totask.asyncoperation"]
+    );
+  });
 });
