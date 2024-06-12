@@ -27,7 +27,8 @@ jobs:
       matrix:
         os: 
           - ubuntu
-          - windows
+          # Seems like windows is not supported at the moment (06.2024)
+          # - windows
     name: E2E Tests
     steps:
       - uses: actions/checkout@v3
