@@ -1,7 +1,6 @@
 import { prepareHomeDirectory } from "./setup/directories";
 import { runOpenupm } from "./run";
 import { prepareUnityProject } from "./setup/project";
-import { makeDomainName } from "../../src/domain/domain-name";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { getProjectManifest } from "./check/project-manifest";
 
@@ -14,11 +13,12 @@ describe("add packages", () => {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
 
-    const output = await runOpenupm(projectDir, [
-      "add",
-      packageName,
-      ...(addVersion !== undefined ? [addVersion] : []),
-    ]);
+    const output = await runOpenupm(
+      projectDir,
+      addVersion !== undefined
+        ? ["add", packageName, addVersion]
+        : ["add", packageName]
+    );
     const projectManifest = await getProjectManifest(projectDir);
 
     expect(output.code).toEqual(ResultCodes.Ok);
@@ -56,8 +56,8 @@ describe("add packages", () => {
   it("should add remote package with specified version", async () => {
     await testAddSingle(
       "dev.comradevanti.totask.asyncoperation",
-      "2.0.0",
-      "2.0.0"
+      "2.0.1",
+      "2.0.1"
     );
   });
 
