@@ -200,4 +200,26 @@ describe("add packages", () => {
       ])
     );
   });
+
+  it("should not add unknown version", async () => {
+    const homeDir = await prepareHomeDirectory();
+    const projectDir = await prepareUnityProject(homeDir);
+
+    const output = await runOpenupm(projectDir, [
+      "add",
+      "dev.comradevanti.opt-unity@100.1.1",
+    ]);
+    const projectManifest = await getProjectManifest(projectDir);
+
+    expect(output.code).toEqual(ResultCodes.Error);
+    expect(projectManifest).toEqual(emptyProjectManifest);
+    expect(output.stdOut).toEqual([]);
+    expect(output.stdErr).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          `The package "dev.comradevanti.opt-unity" has no published version "100.1.1".`
+        ),
+      ])
+    );
+  });
 });
