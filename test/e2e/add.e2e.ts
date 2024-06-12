@@ -164,6 +164,21 @@ describe("add packages", () => {
     );
   });
 
+  it("should be atomic", async () => {
+    const homeDir = await prepareHomeDirectory();
+    const projectDir = await prepareUnityProject(homeDir);
+
+    const output = await runOpenupm(projectDir, [
+      "add",
+      "dev.comradevanti.opt-unity",
+      "does.not.exist",
+    ]);
+    const projectManifest = await getProjectManifest(projectDir);
+
+    expect(output.code).toEqual(ResultCodes.Error);
+    expect(projectManifest).toEqual(emptyProjectManifest);
+  });
+
   it("should not add non-existent", async () => {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
