@@ -11,7 +11,10 @@ describe("add packages", () => {
     expectedVersion: string;
   };
 
-  async function testSuccessfulAdd(...cases: SuccessfullAddCase[]) {
+  async function testSuccessfulAdd(
+    cases: SuccessfullAddCase[],
+    expectedScopes: string[]
+  ) {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
 
@@ -33,7 +36,7 @@ describe("add packages", () => {
           {
             name: "package.openupm.com",
             url: "https://package.openupm.com",
-            scopes: cases.map((it) => it.packageName),
+            scopes: expect.arrayContaining(expectedScopes),
           },
         ],
       })
@@ -52,40 +55,64 @@ describe("add packages", () => {
   }
 
   it("should add remote package without specified version", async () => {
-    await testSuccessfulAdd({
-      packageName: "dev.comradevanti.totask.asyncoperation",
-      expectedVersion: "2.0.1",
-    });
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          expectedVersion: "2.0.1",
+        },
+      ],
+      ["dev.comradevanti.totask.asyncoperation"]
+    );
   });
 
   it("should add remote package with specified version", async () => {
-    await testSuccessfulAdd({
-      packageName: "dev.comradevanti.totask.asyncoperation",
-      addVersion: "2.0.1",
-      expectedVersion: "2.0.1",
-    });
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          addVersion: "2.0.1",
+          expectedVersion: "2.0.1",
+        },
+      ],
+      ["dev.comradevanti.totask.asyncoperation"]
+    );
   });
 
   it("should add remote package with latest tag", async () => {
-    await testSuccessfulAdd({
-      packageName: "dev.comradevanti.totask.asyncoperation",
-      addVersion: "latest",
-      expectedVersion: "2.0.1",
-    });
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          addVersion: "latest",
+          expectedVersion: "2.0.1",
+        },
+      ],
+      ["dev.comradevanti.totask.asyncoperation"]
+    );
   });
 
   it("should add multiple packages", async () => {
     await testSuccessfulAdd(
-      {
-        packageName: "dev.comradevanti.totask.asyncoperation",
-        addVersion: "latest",
-        expectedVersion: "2.0.1",
-      },
-      {
-        packageName: "dev.comradevanti.opt-unity",
-        addVersion: "latest",
-        expectedVersion: "3.5.0",
-      }
+      [
+        {
+          packageName: "dev.comradevanti.totask.asyncoperation",
+          addVersion: "latest",
+          expectedVersion: "2.0.1",
+        },
+        {
+          packageName: "dev.comradevanti.opt-unity",
+          addVersion: "latest",
+          expectedVersion: "3.5.0",
+        },
+      ],
+      [
+        "dev.comradevanti.totask.asyncoperation",
+        "dev.comradevanti.opt-unity",
+        "dev.comradevanti.rect-constraints",
+        "dev.comradevanti.totask.asyncoperation",
+        "org.nuget.comradevanti.csharptools.opt",
+      ]
     );
   });
 });
