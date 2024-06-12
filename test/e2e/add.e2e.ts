@@ -16,7 +16,7 @@ describe("add packages", () => {
     const output = await runOpenupm(
       projectDir,
       addVersion !== undefined
-        ? ["add", packageName, addVersion]
+        ? ["add", `${packageName}@${addVersion}`]
         : ["add", packageName]
     );
     const projectManifest = await getProjectManifest(projectDir);
