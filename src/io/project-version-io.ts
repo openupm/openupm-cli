@@ -8,7 +8,7 @@ import {
   GenericIOError,
 } from "./common-errors";
 
-function projectVersionTxtPathFor(projectDirPath: string) {
+export function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
 }
 

@@ -10,3 +10,7 @@ export async function prepareHomeDirectory(): Promise<string> {
   await fse.ensureDir(homePath);
   return homePath;
 }
+
+export async function dropDirectory(dir: string): Promise<void> {
+  await fse.remove(dir);
+}
