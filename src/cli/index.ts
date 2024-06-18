@@ -45,7 +45,6 @@ import { makeLoadProjectVersion } from "../io/project-version-io";
 import { makeSaveAuthToUpmConfig } from "../services/upm-auth";
 import { makeFetchPackument } from "../io/packument-io";
 import { makeSearchPackages } from "../services/search-packages";
-import { makeResolveRemotePackument } from "../services/resolve-remote-packument";
 import { makeLogin } from "../services/login";
 import { DebugLog } from "../logging";
 import { makeDetermineEditorVersion } from "../services/determine-editor-version";
@@ -80,7 +79,6 @@ const loadProjectVersion = makeLoadProjectVersion(readFile);
 const fetchPackument = makeFetchPackument(regClient);
 const fetchAllPackuments = makeFetchAllPackuments(debugLog);
 const searchRegistry = makeSearchRegistry(debugLog);
-const resolveRemotePackument = makeResolveRemotePackument(fetchPackument);
 const removePackages = makeRemovePackages(
   loadProjectManifest,
   writeProjectManifest
@@ -118,7 +116,7 @@ const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
 const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, debugLog);
 const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, debugLog);
 const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
-const viewCmd = makeViewCmd(parseEnv, resolveRemotePackument, log);
+const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
 
 // update-notifier
 

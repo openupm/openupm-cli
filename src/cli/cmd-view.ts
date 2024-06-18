@@ -10,9 +10,10 @@ import {
 import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Logger } from "npmlog";
-import { ResolveRemotePackument } from "../services/resolve-remote-packument";
 import { ResultCodes } from "./result-codes";
 import { notifyEnvParsingFailed } from "./error-logging";
+import { FetchPackument } from "../io/packument-io";
+import { queryAllRegistriesLazy } from "../utils/sources";
 
 export type ViewOptions = CmdOptions;
 
@@ -105,7 +106,7 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnv,
-  resolveRemotePackument: ResolveRemotePackument,
+  fetchPackument: FetchPackument,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
@@ -129,7 +130,9 @@ export function makeViewCmd(
       env.registry,
       ...(env.upstream ? [env.upstreamRegistry] : []),
     ];
-    const resolveResult = await resolveRemotePackument(pkg, sources).promise;
+    const resolveResult = await queryAllRegistriesLazy(sources, (source) =>
+      fetchPackument(source, pkg)
+    ).promise;
     if (!resolveResult.isOk()) {
       // TODO: Print error
       return ResultCodes.Error;
