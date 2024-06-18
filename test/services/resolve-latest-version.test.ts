@@ -8,6 +8,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { FetchPackument } from "../../src/io/packument-io";
 import { AsyncOk } from "../../src/utils/result-utils";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 
 describe("resolve latest version service", () => {
   const somePackage = makeDomainName("com.some.package");
@@ -34,7 +35,10 @@ describe("resolve latest version service", () => {
 
   it("should get specified latest version from first packument", async () => {
     const { resolveLatestVersion, fetchPackument } = makeDependencies();
-    const packument = { "dist-tags": { latest: "1.0.0" } } as UnityPackument;
+    const packument = {
+      versions: { ["1.0.0" as SemanticVersion]: { version: "1.0.0" } },
+      "dist-tags": { latest: "1.0.0" },
+    } as UnityPackument;
     fetchPackument.mockReturnValue(AsyncOk(packument));
 
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
@@ -48,8 +52,8 @@ describe("resolve latest version service", () => {
   it("should get latest listed version from first packument if no latest was specified", async () => {
     const { resolveLatestVersion, fetchPackument } = makeDependencies();
     const packument = {
-      versions: { ["1.0.0"]: {} },
-    } as unknown as UnityPackument;
+      versions: { ["1.0.0" as SemanticVersion]: { version: "1.0.0" } },
+    } as UnityPackument;
     fetchPackument.mockReturnValue(AsyncOk(packument));
 
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
@@ -75,7 +79,10 @@ describe("resolve latest version service", () => {
 
   it("should check all registries", async () => {
     const { resolveLatestVersion, fetchPackument } = makeDependencies();
-    const packument = { "dist-tags": { latest: "1.0.0" } } as UnityPackument;
+    const packument = {
+      versions: { ["1.0.0" as SemanticVersion]: { version: "1.0.0" } },
+      "dist-tags": { latest: "1.0.0" },
+    } as UnityPackument;
     fetchPackument.mockReturnValueOnce(AsyncOk(null));
     fetchPackument.mockReturnValueOnce(AsyncOk(packument));
 

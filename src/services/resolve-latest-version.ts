@@ -3,8 +3,10 @@ import { DomainName } from "../domain/domain-name";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackumentNotFoundError } from "../common-errors";
-import { NoVersionsError, tryGetLatestVersion } from "../domain/packument";
-import { recordKeys } from "../utils/record-utils";
+import {
+  NoVersionsError,
+  tryResolvePackumentVersion,
+} from "../domain/packument";
 import { FetchPackument, FetchPackumentError } from "../io/packument-io";
 import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
 
@@ -35,15 +37,9 @@ export function makeResolveLatestVersion(
   ): AsyncResult<SemanticVersion | null, ResolveLatestVersionError> {
     return fetchPackument(source, packageName).andThen((maybePackument) => {
       if (maybePackument === null) return Ok(null);
-
-      const latestVersion = tryGetLatestVersion(maybePackument);
-      if (latestVersion !== undefined) return Ok(latestVersion);
-
-      const availableVersions = recordKeys(maybePackument.versions);
-      if (availableVersions.length === 0)
-        return Err(new NoVersionsError()).toAsyncResult();
-
-      return Ok(availableVersions.at(-1)!);
+      return tryResolvePackumentVersion(maybePackument, "latest").map(
+        (it) => it.version
+      );
     });
   }
 
