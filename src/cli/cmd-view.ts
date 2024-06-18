@@ -135,7 +135,7 @@ export function makeViewCmd(
       return ResultCodes.Error;
     }
 
-    const packument = resolveResult.value?.packument ?? null;
+    const packument = resolveResult.value?.value ?? null;
     if (packument === null) {
       log.error("404", `package not found: ${pkg}`);
       return ResultCodes.Error;

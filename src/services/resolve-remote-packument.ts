@@ -3,22 +3,7 @@ import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
 import { FetchPackument, FetchPackumentError } from "../io/packument-io";
-import { RegistryUrl } from "../domain/registry-url";
-import { AsyncOk } from "../utils/result-utils";
-
-/**
- * A resolved remote Unity packument.
- */
-export type ResolvedPackument = {
-  /**
-   * The packument.
-   */
-  packument: UnityPackument;
-  /**
-   * The url of the registry from which the packument was resolved.
-   */
-  source: RegistryUrl;
-};
+import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
 
 /**
  * Error which may occur when resolving a remote packument.
@@ -35,21 +20,10 @@ export type ResolveRemotePackumentError = FetchPackumentError;
 export type ResolveRemotePackument = (
   packageName: DomainName,
   sources: ReadonlyArray<Registry>
-) => AsyncResult<ResolvedPackument | null, ResolveRemotePackumentError>;
-
-const noPackumentResult = <
-  AsyncResult<ResolvedPackument | null, ResolveRemotePackumentError>
->AsyncOk(null);
-
-function withSource(
-  source: Registry,
-  packument: UnityPackument
-): ResolvedPackument {
-  return {
-    packument,
-    source: source.url,
-  };
-}
+) => AsyncResult<
+  FromRegistry<UnityPackument> | null,
+  ResolveRemotePackumentError
+>;
 
 /**
  * Makes a {@link ResolveRemotePackument} function.
@@ -57,31 +31,8 @@ function withSource(
 export function makeResolveRemotePackument(
   fetchPackument: FetchPackument
 ): ResolveRemotePackument {
-  function tryResolveFrom(source: Registry, packageName: DomainName) {
-    return fetchPackument(source, packageName).map((packument) =>
-      packument !== null ? withSource(source, packument) : null
+  return (packageName, sources) =>
+    queryAllRegistriesLazy(sources, (source) =>
+      fetchPackument(source, packageName)
     );
-  }
-
-  const resolveRecursively: ResolveRemotePackument = (packageName, sources) => {
-    // If there are no more sources to search then can return with no packument
-    if (sources.length === 0) return noPackumentResult;
-
-    // Determine current and fallback sources
-    const currentSource = sources[0]!;
-    const fallbackSources = sources.slice(1);
-
-    // Resolve from the current source first
-    return tryResolveFrom(currentSource, packageName).andThen(
-      (maybePackument) =>
-        // Afterward check if we got a packument.
-        // If yes we can return it, otherwhise we enter the next level
-        // of the recursion with the remaining registries.
-        maybePackument !== null
-          ? AsyncOk(maybePackument)
-          : resolveRecursively(packageName, fallbackSources)
-    );
-  };
-
-  return resolveRecursively;
 }

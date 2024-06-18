@@ -60,7 +60,7 @@ function makeDependencies() {
 
   const resolveRemotePackument = mockService<ResolveRemotePackument>();
   resolveRemotePackument.mockReturnValue(
-    AsyncOk({ packument: somePackument, source: exampleRegistryUrl })
+    AsyncOk({ value: somePackument, source: exampleRegistryUrl })
   );
 
   const log = makeMockLogger();

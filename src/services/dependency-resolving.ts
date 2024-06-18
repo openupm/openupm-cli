@@ -99,7 +99,8 @@ export function makeResolveDependency(
   return async (sources, name, version, deep) => {
     const latestVersionResult =
       version === undefined || version === "latest"
-        ? await resolveLatestVersion(sources, name).promise
+        ? await resolveLatestVersion(sources, name).map((it) => it.value)
+            .promise
         : Ok(version);
     if (latestVersionResult.isErr()) return latestVersionResult;
 

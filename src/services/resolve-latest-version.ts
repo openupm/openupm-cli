@@ -6,7 +6,7 @@ import { PackumentNotFoundError } from "../common-errors";
 import { NoVersionsError, tryGetLatestVersion } from "../domain/packument";
 import { recordKeys } from "../utils/record-utils";
 import { FetchPackument, FetchPackumentError } from "../io/packument-io";
-import { AsyncOk } from "../utils/result-utils";
+import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
 
 /**
  * Error which may occur when resolving the latest version for a package.
@@ -24,14 +24,14 @@ export type ResolveLatestVersionError =
 export type ResolveLatestVersion = (
   sources: ReadonlyArray<Registry>,
   packageName: DomainName
-) => AsyncResult<SemanticVersion, ResolveLatestVersionError>;
+) => AsyncResult<FromRegistry<SemanticVersion>, ResolveLatestVersionError>;
 
 export function makeResolveLatestVersion(
   fetchPackument: FetchPackument
 ): ResolveLatestVersion {
   function tryResolveFrom(
-    packageName: DomainName,
-    source: Registry
+    source: Registry,
+    packageName: DomainName
   ): AsyncResult<SemanticVersion | null, ResolveLatestVersionError> {
     return fetchPackument(source, packageName).andThen((maybePackument) => {
       if (maybePackument === null) return Ok(null);
@@ -47,23 +47,12 @@ export function makeResolveLatestVersion(
     });
   }
 
-  const resolveRecursively: ResolveLatestVersion = (sources, packageName) => {
-    if (sources.length === 0)
-      return Err(new PackumentNotFoundError(packageName)).toAsyncResult();
-
-    const currentSource = sources[0]!;
-    const fallbackSources = sources.slice(1);
-
-    return tryResolveFrom(packageName, currentSource).andThen(
-      (maybePackument) =>
-        // Afterward check if we got a packument.
-        // If yes we can return it, otherwhise we enter the next level
-        // of the recursion with the remaining registries.
-        maybePackument !== null
-          ? AsyncOk(maybePackument)
-          : resolveRecursively(fallbackSources, packageName)
+  return (sources, packageName) =>
+    queryAllRegistriesLazy(sources, (source) =>
+      tryResolveFrom(source, packageName)
+    ).andThen((resolved) =>
+      resolved !== null
+        ? Ok(resolved)
+        : Err(new PackumentNotFoundError(packageName))
     );
-  };
-
-  return resolveRecursively;
 }

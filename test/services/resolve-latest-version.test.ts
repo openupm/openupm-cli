@@ -40,7 +40,9 @@ describe("resolve latest version service", () => {
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
       .promise;
 
-    expect(result).toBeOk((value) => expect(value).toEqual("1.0.0"));
+    expect(result).toBeOk((value) =>
+      expect(value).toEqual({ value: "1.0.0", source: exampleRegistry.url })
+    );
   });
 
   it("should get latest listed version from first packument if no latest was specified", async () => {
@@ -53,7 +55,9 @@ describe("resolve latest version service", () => {
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
       .promise;
 
-    expect(result).toBeOk((value) => expect(value).toEqual("1.0.0"));
+    expect(result).toBeOk((value) =>
+      expect(value).toEqual({ value: "1.0.0", source: exampleRegistry.url })
+    );
   });
 
   it("should fail if packument had no versions", async () => {
@@ -80,6 +84,8 @@ describe("resolve latest version service", () => {
       somePackage
     ).promise;
 
-    expect(result).toBeOk((value) => expect(value).toEqual("1.0.0"));
+    expect(result).toBeOk((value) =>
+      expect(value).toEqual({ value: "1.0.0", source: upstreamRegistry.url })
+    );
   });
 });

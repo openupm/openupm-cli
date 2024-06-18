@@ -36,13 +36,13 @@ describe("resolve remove packument", () => {
 
     expect(result).toBeOk((actual) =>
       expect(actual).toEqual({
-        packument: examplePackument,
+        value: examplePackument,
         source: exampleRegistryA.url,
       })
     );
   });
 
-  it("should find packument in first registry if possible", async () => {
+  it("should find packument in fallback registry if its not in first", async () => {
     const { resolveRemotePackument, fetchPackument } = makeDependencies();
     fetchPackument.mockImplementation((registry) =>
       AsyncOk(registry === exampleRegistryB ? examplePackument : null)
@@ -55,7 +55,7 @@ describe("resolve remove packument", () => {
 
     expect(result).toBeOk((actual) =>
       expect(actual).toEqual({
-        packument: examplePackument,
+        value: examplePackument,
         source: exampleRegistryB.url,
       })
     );
