@@ -1,5 +1,6 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { GenericNetworkError } from "./common-errors";
+import fetch from "node-fetch";
 
 /**
  * Function for checking if an url exists.
