@@ -1,10 +1,17 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { GenericNetworkError } from "./common-errors";
 
+/**
+ * Function for checking if an url exists.
+ * @param url The url to check.
+ */
 export type CheckUrlExists = (
   url: string
 ) => AsyncResult<boolean, GenericNetworkError>;
 
+/**
+ * Makes a {@link CheckUrlExists} function.
+ */
 export function makeCheckUrlExists(): CheckUrlExists {
   return (url) => {
     return new AsyncResult(
