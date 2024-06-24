@@ -1,11 +1,11 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { GenericNetworkError } from "./common-errors";
 
-export type CheckPage = (
+export type CheckUrlExists = (
   url: string
 ) => AsyncResult<boolean, GenericNetworkError>;
 
-export function makeCheckPage(): CheckPage {
+export function makeCheckUrlExists(): CheckUrlExists {
   return (url) => {
     return new AsyncResult(
       Result.wrapAsync(() => fetch(url, { method: "HEAD" }))

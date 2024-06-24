@@ -52,7 +52,7 @@ import { makeRemovePackages } from "../services/remove-packages";
 import { makeRunChildProcess } from "../io/child-process";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
-import { makeCheckPage } from "../io/check-page";
+import { makeCheckUrlExists } from "../io/check-url";
 
 // Composition root
 
@@ -86,7 +86,7 @@ const removePackages = makeRemovePackages(
   loadProjectManifest,
   writeProjectManifest
 );
-const checkPage = makeCheckPage();
+const checkUrlExists = makeCheckUrlExists();
 
 const parseEnv = makeParseEnv(log, getUpmConfigPath, loadUpmConfig, getCwd);
 const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
@@ -95,7 +95,7 @@ const npmLogin = makeNpmLogin(regClient, debugLog);
 const resolveRemovePackumentVersion =
   makeResolveRemotePackumentVersion(fetchPackument);
 const resolveLatestVersion = makeResolveLatestVersion(fetchPackument);
-const checkIsUnityPackage = makeCheckIsUnityPackage(checkPage);
+const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
 const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
   checkIsUnityPackage,
   fetchPackument
