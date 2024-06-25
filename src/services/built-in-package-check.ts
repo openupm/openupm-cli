@@ -15,15 +15,27 @@ import {
 } from "../io/common-errors";
 import { FetchAllPackumentsError } from "../io/all-packuments-io";
 
+/**
+ * Error which may occur when checking whether a package is built-in.
+ */
 export type CheckIsBuiltInPackageError =
   | CheckIsUnityPackageError
   | FetchAllPackumentsError;
 
+/**
+ * Function for checking whether a specific package version is built-in.
+ * @param packageName The packages name.
+ * @param version The specific version to check.
+ * @returns A boolean indicating whether the package version is built-in.
+ */
 export type CheckIsBuiltInPackage = (
   packageName: DomainName,
   version: SemanticVersion
 ) => AsyncResult<boolean, CheckIsBuiltInPackageError>;
 
+/**
+ * Makes a {@link CheckIsBuiltInPackage} function.
+ */
 export function makeCheckIsBuiltInPackage(
   checkIsUnityPackage: CheckIsUnityPackage,
   fetchPackument: FetchPackument
