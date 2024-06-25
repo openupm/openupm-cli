@@ -1,7 +1,10 @@
 import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { AsyncResult } from "ts-results-es";
-import { CheckIsUnityPackage } from "./unity-package-check";
+import {
+  CheckIsUnityPackage,
+  CheckIsUnityPackageError,
+} from "./unity-package-check";
 import { FetchPackument } from "../io/packument-io";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { recordKeys } from "../utils/record-utils";
@@ -10,8 +13,11 @@ import {
   GenericNetworkError,
   RegistryAuthenticationError,
 } from "../io/common-errors";
+import { FetchAllPackumentsError } from "../io/all-packuments-io";
 
-export type CheckIsBuiltInPackageError = GenericNetworkError;
+export type CheckIsBuiltInPackageError =
+  | CheckIsUnityPackageError
+  | FetchAllPackumentsError;
 
 export type CheckIsBuiltInPackage = (
   packageName: DomainName,
