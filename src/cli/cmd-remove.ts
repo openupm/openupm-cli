@@ -1,15 +1,6 @@
-import {
-  ManifestLoadError,
-  ManifestWriteError,
-} from "../io/project-manifest-io";
-import { EnvParseError, ParseEnv } from "../services/parse-env";
+import { ParseEnv } from "../services/parse-env";
 import { makePackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
-
-import {
-  PackageWithVersionError,
-  PackumentNotFoundError,
-} from "../common-errors";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import {
@@ -23,13 +14,6 @@ import { RemovePackages } from "../services/remove-packages";
  * The possible result codes with which the remove command can exit.
  */
 export type RemoveResultCode = ResultCodes.Ok | ResultCodes.Error;
-
-type RemoveError =
-  | EnvParseError
-  | PackageWithVersionError
-  | PackumentNotFoundError
-  | ManifestLoadError
-  | ManifestWriteError;
 
 export type RemoveOptions = CmdOptions;
 
