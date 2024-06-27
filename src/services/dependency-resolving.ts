@@ -167,7 +167,7 @@ export function makeResolveDependency(
         if (isInternal) {
           depsValid.push({
             name: entryName,
-            version: latestVersion,
+            version: entryVersion,
             source: "built-in",
             self: isSelf,
           });
