@@ -252,4 +252,18 @@ describe("add packages", () => {
       ])
     );
   });
+
+  it("should add package with built-in dependencies", async () => {
+    // See https://github.com/openupm/openupm-cli/issues/155
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "org.khronos.unitygltf",
+          expectedVersion: "2.12.0",
+          addVersion: "2.12.0",
+        },
+      ],
+      ["org.khronos.unitygltf"]
+    );
+  });
 });
