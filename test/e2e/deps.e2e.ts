@@ -3,6 +3,41 @@ import { runOpenupm } from "./run";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 describe("print package dependencies", () => {
+  it("should print dependencies for an openupm package with version", async () => {
+    const homeDir = await prepareHomeDirectory();
+
+    const output = await runOpenupm(homeDir, [
+      "deps",
+      "dev.comradevanti.opt-unity@2.0.0",
+    ]);
+
+    expect(output.code).toEqual(ResultCodes.Ok);
+    expect(output.stdErr).toEqual(
+      expect.arrayContaining([
+        // Taken from https://package.openupm.com/dev.comradevanti.opt-unity
+        expect.stringContaining("org.nuget.comradevanti.csharptools.opt@1.1.2"),
+      ])
+    );
+  });
+
+  it("should print dependencies for an openupm package without version (latest)", async () => {
+    const homeDir = await prepareHomeDirectory();
+
+    const output = await runOpenupm(homeDir, [
+      "deps",
+      "dev.comradevanti.opt-unity",
+    ]);
+
+    expect(output.code).toEqual(ResultCodes.Ok);
+    expect(output.stdErr).toEqual(
+      expect.arrayContaining([
+        // Taken from https://package.openupm.com/dev.comradevanti.opt-unity
+        expect.stringContaining("org.nuget.comradevanti.csharptools.opt@3.0.0"),
+        expect.stringContaining("dev.comradevanti.rect-constraints@1.4.1"),
+      ])
+    );
+  });
+
   it("should print built-in dependencies", async () => {
     // See https://github.com/openupm/openupm-cli/issues/133
     const homeDir = await prepareHomeDirectory();
