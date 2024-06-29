@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/openupm/openupm-cli/compare/3.1.0...3.2.0) (2024-06-29)
+
+
+### Features
+
+* built-in package resolution ([#364](https://github.com/openupm/openupm-cli/issues/364)) ([64e37d9](https://github.com/openupm/openupm-cli/commit/64e37d98ad7a9225bcefd2f8b1859f44a4a1b76e))
+
 # [3.1.0](https://github.com/openupm/openupm-cli/compare/3.0.0...3.1.0) (2024-06-12)
 
 
