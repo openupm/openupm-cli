@@ -1,4 +1,4 @@
-import { DomainName, isInternalPackage } from "../domain/domain-name";
+import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
@@ -27,6 +27,10 @@ import {
   GenericNetworkError,
   RegistryAuthenticationError,
 } from "../io/common-errors";
+import {
+  CheckIsBuiltInPackage,
+  CheckIsBuiltInPackageError,
+} from "./built-in-package-check";
 
 export type DependencyBase = {
   /**
@@ -69,7 +73,8 @@ type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
  */
 export type DependencyResolveError =
   | ResolveLatestVersionError
-  | FetchPackumentError;
+  | FetchPackumentError
+  | CheckIsBuiltInPackageError;
 
 /**
  * Function for resolving all dependencies for a package.
@@ -92,7 +97,8 @@ export type ResolveDependencies = (
  */
 export function makeResolveDependency(
   resolveRemovePackumentVersion: ResolveRemotePackumentVersion,
-  resolveLatestVersion: ResolveLatestVersion
+  resolveLatestVersion: ResolveLatestVersion,
+  checkIsBuiltInPackage: CheckIsBuiltInPackage
 ): ResolveDependencies {
   // TODO: Add tests for this service
 
@@ -150,13 +156,18 @@ export function makeResolveDependency(
       if (!isProcessed) {
         // add entry to processed list
         processedList.push(entry);
-        const isInternal = isInternalPackage(entryName);
+        const isInternalResult = await checkIsBuiltInPackage(
+          entryName,
+          entryVersion
+        ).promise;
+        if (isInternalResult.isErr()) return isInternalResult;
+        const isInternal = isInternalResult.value;
         const isSelf = entryName === name;
 
         if (isInternal) {
           depsValid.push({
             name: entryName,
-            version: latestVersion,
+            version: entryVersion,
             source: "built-in",
             self: isSelf,
           });

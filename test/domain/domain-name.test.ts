@@ -1,8 +1,4 @@
-import {
-  isDomainName,
-  isInternalPackage,
-  makeDomainName,
-} from "../../src/domain/domain-name";
+import { isDomainName } from "../../src/domain/domain-name";
 
 describe("domain-name", () => {
   describe("validation", () => {
@@ -29,22 +25,6 @@ describe("domain-name", () => {
       "com.unity-",
     ])(`should not be ok for "%s"`, (s) => {
       expect(isDomainName(s)).toBeFalsy();
-    });
-  });
-
-  describe("internal package", () => {
-    it("test com.otherorg.software", () => {
-      expect(
-        isInternalPackage(makeDomainName("com.otherorg.software"))
-      ).not.toBeTruthy();
-    });
-    it("test com.unity.ugui", () => {
-      expect(isInternalPackage(makeDomainName("com.unity.ugui"))).toBeTruthy();
-    });
-    it("test com.unity.modules.tilemap", () => {
-      expect(
-        isInternalPackage(makeDomainName("com.unity.modules.tilemap"))
-      ).toBeTruthy();
     });
   });
 });
