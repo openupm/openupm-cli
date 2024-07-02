@@ -12,8 +12,13 @@ import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
-import { GenericIOError } from "../../src/io/common-errors";
+import {
+  GenericIOError,
+  GenericNetworkError,
+} from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { ResolveLatestVersion } from "../../src/services/resolve-latest-version";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -48,10 +53,27 @@ function makeDependencies() {
     ])
   );
 
+  const resolveLatestVersion = mockService<ResolveLatestVersion>();
+  resolveLatestVersion.mockReturnValue(
+    AsyncOk({ value: makeSemanticVersion("1.2.3"), source: exampleRegistryUrl })
+  );
+
   const log = makeMockLogger();
 
-  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, noopLogger);
-  return { depsCmd, parseEnv, resolveDependencies, log } as const;
+  const depsCmd = makeDepsCmd(
+    parseEnv,
+    resolveDependencies,
+    resolveLatestVersion,
+    log,
+    noopLogger
+  );
+  return {
+    depsCmd,
+    parseEnv,
+    resolveDependencies,
+    resolveLatestVersion,
+    log,
+  } as const;
 }
 
 describe("cmd-deps", () => {
@@ -92,6 +114,20 @@ describe("cmd-deps", () => {
       expect.any(String),
       expect.stringContaining("url-version")
     );
+  });
+
+  it("should fail if latest version could not be determined", async () => {
+    const { depsCmd, resolveLatestVersion } = makeDependencies();
+    resolveLatestVersion.mockReturnValue(AsyncErr(new GenericNetworkError()));
+
+    const resultCode = await depsCmd(
+      makePackageReference(somePackage, "latest"),
+      {
+        _global: {},
+      }
+    );
+
+    expect(resultCode).toEqual(ResultCodes.Error);
   });
 
   it("should log valid dependencies", async () => {
