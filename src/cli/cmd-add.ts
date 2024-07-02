@@ -231,11 +231,11 @@ export function makeAddCmd(
 
         // pkgsInScope
         if (!isUpstreamPackage) {
-          debugLog(`fetch: ${makePackageReference(name, requestedVersion)}`);
+          debugLog(`fetch: ${makePackageReference(name, versionToAdd)}`);
           const resolveResult = await resolveDependencies(
             [env.registry, env.upstreamRegistry],
             name,
-            requestedVersion,
+            versionToAdd,
             true
           );
           if (resolveResult.isErr()) {
