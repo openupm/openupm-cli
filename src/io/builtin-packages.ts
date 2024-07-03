@@ -33,8 +33,7 @@ export class EditorNotInstalledError extends CustomError {
  */
 export type FindBuiltInPackagesError =
   | GetEditorInstallPathError
-  | EditorNotInstalledError
-  | GenericIOError;
+  | EditorNotInstalledError;
 
 /**
  * Function for loading all built-in packages for an installed editor.
@@ -68,9 +67,9 @@ export function makeFindBuiltInPackages(
           .map((names) => names as DomainName[])
           .mapErr((error) => {
             assertIsNodeError(error);
-            return error.code === "ENOENT"
-              ? new EditorNotInstalledError(editorVersion)
-              : new GenericIOError("Read");
+            if (error.code === "ENOENT")
+              return new EditorNotInstalledError(editorVersion);
+            throw new GenericIOError("Read");
           })
       );
     }
