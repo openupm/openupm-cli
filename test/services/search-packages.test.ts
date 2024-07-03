@@ -11,7 +11,7 @@ import { Err } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { GenericNetworkError } from "../../src/io/common-errors";
-import { AsyncOk } from "../../src/utils/result-utils";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 describe("search packages", () => {
   const exampleRegistry: Registry = {
@@ -39,7 +39,7 @@ describe("search packages", () => {
     searchRegistry.mockReturnValue(AsyncOk([exampleSearchResult]));
 
     const fetchAllPackument = mockService<FetchAllPackuments>();
-    fetchAllPackument.mockReturnValue(AsyncOk(exampleAllPackumentsResult));
+    fetchAllPackument.mockResolvedValue(exampleAllPackumentsResult);
 
     const searchPackages = makeSearchPackages(
       searchRegistry,
@@ -109,12 +109,8 @@ describe("search packages", () => {
   it("should fail if both search strategies fail", async () => {
     const { searchPackages, searchRegistry, fetchAllPackument } =
       makeDependencies();
-    searchRegistry.mockReturnValue(
-      Err(new GenericNetworkError()).toAsyncResult()
-    );
-    fetchAllPackument.mockReturnValue(
-      Err(new GenericNetworkError()).toAsyncResult()
-    );
+    searchRegistry.mockReturnValue(AsyncErr(new GenericNetworkError()));
+    fetchAllPackument.mockRejectedValue(new GenericNetworkError());
 
     const result = await searchPackages(exampleRegistry, exampleKeyword)
       .promise;

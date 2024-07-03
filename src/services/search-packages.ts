@@ -1,10 +1,7 @@
 import { Registry } from "../domain/registry";
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import {
-  FetchAllPackuments,
-  FetchAllPackumentsError,
-} from "../io/all-packuments-io";
+import { FetchAllPackuments } from "../io/all-packuments-io";
 import {
   GenericNetworkError,
   RegistryAuthenticationError,
@@ -37,22 +34,18 @@ export function makeSearchPackages(
   searchRegistry: SearchRegistry,
   fetchAllPackuments: FetchAllPackuments
 ): SearchPackages {
-  function searchInAll(
+  async function searchInAll(
     registry: Registry,
     keyword: string
-  ): AsyncResult<SearchedPackument[], FetchAllPackumentsError> {
-    return fetchAllPackuments(registry).map((allPackuments) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _updated, ...packumentEntries } = allPackuments;
-      const packuments = Object.values(packumentEntries);
-
-      // filter keyword
-      const klc = keyword.toLowerCase();
-
-      return packuments.filter((packument) =>
-        packument.name.toLowerCase().includes(klc)
-      );
-    });
+  ): Promise<SearchedPackument[]> {
+    const allPackuments = await fetchAllPackuments(registry);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _updated, ...packumentEntries } = allPackuments;
+    const packuments = Object.values(packumentEntries);
+    const klc = keyword.toLowerCase();
+    return packuments.filter((packument) =>
+      packument.name.toLowerCase().includes(klc)
+    );
   }
 
   return (registry, keyword, onUseOldSearch) => {
@@ -60,7 +53,7 @@ export function makeSearchPackages(
     return searchRegistry(registry, keyword).orElse(() => {
       // search old search
       onUseOldSearch && onUseOldSearch();
-      return searchInAll(registry, keyword);
+      return Result.wrapAsync(() => searchInAll(registry, keyword));
     });
   };
 }

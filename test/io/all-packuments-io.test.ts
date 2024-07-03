@@ -31,10 +31,8 @@ describe("fetch all packuments", () => {
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
     const { getAllPackuments } = makeDependencies();
 
-    const result = await getAllPackuments(exampleRegistry).promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(GenericNetworkError)
+    await expect(getAllPackuments(exampleRegistry)).rejects.toBeInstanceOf(
+      GenericNetworkError
     );
   });
 
@@ -47,10 +45,8 @@ describe("fetch all packuments", () => {
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
     const { getAllPackuments } = makeDependencies();
 
-    const result = await getAllPackuments(exampleRegistry).promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(RegistryAuthenticationError)
+    await expect(getAllPackuments(exampleRegistry)).rejects.toBeInstanceOf(
+      RegistryAuthenticationError
     );
   });
 
@@ -61,8 +57,8 @@ describe("fetch all packuments", () => {
     jest.mocked(npmFetch.json).mockResolvedValue(expected);
     const { getAllPackuments } = makeDependencies();
 
-    const result = await getAllPackuments(exampleRegistry).promise;
+    const actual = await getAllPackuments(exampleRegistry);
 
-    expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    expect(actual).toEqual(expected);
   });
 });
