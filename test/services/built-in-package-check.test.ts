@@ -38,9 +38,9 @@ describe("is built-in package", () => {
     const { checkIsBuiltInPackage, checkIsUnityPackage, fetchPackument } =
       makeDependencies();
     checkIsUnityPackage.mockReturnValue(AsyncOk(true));
-    fetchPackument.mockReturnValue(
-      AsyncOk({ versions: { [someVersion]: {} } } as UnityPackument)
-    );
+    fetchPackument.mockResolvedValue({
+      versions: { [someVersion]: {} },
+    } as UnityPackument);
 
     const result = await checkIsBuiltInPackage(somePackage, someVersion)
       .promise;
@@ -52,7 +52,7 @@ describe("is built-in package", () => {
     const { checkIsBuiltInPackage, checkIsUnityPackage, fetchPackument } =
       makeDependencies();
     checkIsUnityPackage.mockReturnValue(AsyncOk(true));
-    fetchPackument.mockReturnValue(AsyncOk(null));
+    fetchPackument.mockResolvedValue(null);
 
     const result = await checkIsBuiltInPackage(somePackage, someVersion)
       .promise;
@@ -64,19 +64,6 @@ describe("is built-in package", () => {
     const expected = new GenericNetworkError();
     const { checkIsBuiltInPackage, checkIsUnityPackage } = makeDependencies();
     checkIsUnityPackage.mockReturnValue(AsyncErr(expected));
-
-    const result = await checkIsBuiltInPackage(somePackage, someVersion)
-      .promise;
-
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-  });
-
-  it("should fail if Unity registry check failed", async () => {
-    const expected = new GenericNetworkError();
-    const { checkIsBuiltInPackage, checkIsUnityPackage, fetchPackument } =
-      makeDependencies();
-    checkIsUnityPackage.mockReturnValue(AsyncOk(true));
-    fetchPackument.mockReturnValue(AsyncErr(expected));
 
     const result = await checkIsBuiltInPackage(somePackage, someVersion)
       .promise;

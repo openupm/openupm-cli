@@ -18,6 +18,7 @@ import {
   notifyEnvParsingFailed,
   notifyRemotePackumentVersionResolvingFailed,
 } from "./error-logging";
+import { GenericNetworkError } from "../io/common-errors";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -79,11 +80,12 @@ export function makeDepsCmd(
       deep
     );
     if (resolveResult.isErr()) {
-      notifyRemotePackumentVersionResolvingFailed(
-        log,
-        name,
-        resolveResult.error
-      );
+      if (!(resolveResult.error instanceof GenericNetworkError))
+        notifyRemotePackumentVersionResolvingFailed(
+          log,
+          name,
+          resolveResult.error
+        );
       return ResultCodes.Error;
     }
 

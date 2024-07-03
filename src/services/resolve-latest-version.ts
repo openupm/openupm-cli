@@ -7,7 +7,7 @@ import {
   NoVersionsError,
   tryResolvePackumentVersion,
 } from "../domain/packument";
-import { FetchPackument, FetchPackumentError } from "../io/packument-io";
+import { FetchPackument } from "../io/packument-io";
 import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
 
 /**
@@ -15,7 +15,6 @@ import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
  */
 export type ResolveLatestVersionError =
   | PackumentNotFoundError
-  | FetchPackumentError
   | NoVersionsError;
 
 /**
@@ -35,12 +34,14 @@ export function makeResolveLatestVersion(
     source: Registry,
     packageName: DomainName
   ): AsyncResult<SemanticVersion | null, ResolveLatestVersionError> {
-    return fetchPackument(source, packageName).andThen((maybePackument) => {
-      if (maybePackument === null) return Ok(null);
-      return tryResolvePackumentVersion(maybePackument, "latest").map(
-        (it) => it.version
-      );
-    });
+    return new AsyncResult(
+      fetchPackument(source, packageName).then((maybePackument) => {
+        if (maybePackument === null) return Ok(null);
+        return tryResolvePackumentVersion(maybePackument, "latest").map(
+          (it) => it.version
+        );
+      })
+    );
   }
 
   return (sources, packageName) =>

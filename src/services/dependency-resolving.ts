@@ -22,7 +22,6 @@ import {
 } from "./resolve-latest-version";
 import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
-import { FetchPackumentError } from "../io/packument-io";
 import {
   GenericNetworkError,
   RegistryAuthenticationError,
@@ -73,7 +72,6 @@ type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
  */
 export type DependencyResolveError =
   | ResolveLatestVersionError
-  | FetchPackumentError
   | CheckIsBuiltInPackageError;
 
 /**

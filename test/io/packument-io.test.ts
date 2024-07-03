@@ -30,9 +30,9 @@ describe("packument io", () => {
       const { fetchPackument, regClient } = makeDependencies();
       mockRegClientGetResult(regClient, null, packument);
 
-      const result = await fetchPackument(exampleRegistry, packageA).promise;
+      const actual = await fetchPackument(exampleRegistry, packageA);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(packument));
+      expect(actual).toEqual(packument);
     });
 
     it("should not find unknown packument", async () => {
@@ -47,9 +47,9 @@ describe("packument io", () => {
         null
       );
 
-      const result = await fetchPackument(exampleRegistry, packageA).promise;
+      const actual = await fetchPackument(exampleRegistry, packageA);
 
-      expect(result).toBeOk((actual) => expect(actual).toBeNull());
+      expect(actual).toBeNull();
     });
 
     it("should fail for errors", async () => {
@@ -64,9 +64,9 @@ describe("packument io", () => {
         null
       );
 
-      const result = await fetchPackument(exampleRegistry, packageA).promise;
-
-      expect(result).toBeError();
+      await expect(
+        fetchPackument(exampleRegistry, packageA)
+      ).rejects.toBeInstanceOf(Error);
     });
   });
 });

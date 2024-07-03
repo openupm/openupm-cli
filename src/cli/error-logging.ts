@@ -7,8 +7,6 @@ import {
   FileMissingError,
   FileParseError,
   GenericIOError,
-  GenericNetworkError,
-  RegistryAuthenticationError,
 } from "../io/common-errors";
 import { StringFormatError } from "../utils/string-parsing";
 import { ProjectVersionLoadError } from "../io/project-version-io";
@@ -215,24 +213,6 @@ export function notifyOfMissingVersion(
   log.notice("", `Maybe you meant one of the following:${EOL}${versionList}`);
 }
 
-export function notifyRegistryCallFailedBecauseHttp(log: Logger) {
-  log.error(
-    "",
-    "Could not communicate with registry because of an http error."
-  );
-}
-
-export function notifyRegistryCallFailedBecauseUnauthorized(log: Logger) {
-  log.error(
-    "",
-    "An npm registry rejected your request, because you are unauthorized."
-  );
-  log.notice(
-    "",
-    "Please make sure you are correctly authenticated for the registry."
-  );
-}
-
 export function notifyRemotePackumentVersionResolvingFailed(
   log: Logger,
   packageName: DomainName,
@@ -248,10 +228,6 @@ export function notifyRemotePackumentVersionResolvingFailed(
       error.requestedVersion,
       error.availableVersions
     );
-  else if (error instanceof GenericNetworkError)
-    notifyRegistryCallFailedBecauseHttp(log);
-  else if (error instanceof RegistryAuthenticationError)
-    notifyRegistryCallFailedBecauseUnauthorized(log);
 }
 
 export function notifyPackageRemoveFailed(

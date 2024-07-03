@@ -53,6 +53,10 @@ import { makeRunChildProcess } from "../io/child-process";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { makeCheckUrlExists } from "../io/check-url";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "../io/common-errors";
 
 // Composition root
 
@@ -155,6 +159,20 @@ function makeCmdOptions<T extends Record<string, unknown>>(
   return { ...specificOptions, _global: program.opts() };
 }
 
+function withGlobalErrorHandler<TArgs extends unknown[], TOut>(
+  cmd: (...args: TArgs) => Promise<TOut>
+): (...args: TArgs) => Promise<TOut | void> {
+  return (...args) =>
+    cmd(...args).catch((error) => {
+      if (error instanceof GenericNetworkError)
+        log.error("", "A http request failed.");
+      else if (error instanceof RegistryAuthenticationError)
+        log.error("", "Failed to authenticate with a package registry.");
+      else log.error("", "An unknown error occurred.");
+      log.notice("", "Run with --verbose to get more information.");
+    });
+}
+
 program
   .command("add")
   .argument(
@@ -178,11 +196,13 @@ program
 openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
   )
-  .action(async function (pkg, otherPkgs, options) {
-    const pkgs = [pkg].concat(otherPkgs);
-    const resultCode = await addCmd(pkgs, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withGlobalErrorHandler(async function (pkg, otherPkgs, options) {
+      const pkgs = [pkg].concat(otherPkgs);
+      const resultCode = await addCmd(pkgs, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("remove")
@@ -194,31 +214,41 @@ program
   )
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
-  .action(async function (packageName, otherPackageNames, options) {
-    const packageNames = [packageName].concat(otherPackageNames);
-    const resultCode = await removeCmd(packageNames, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withGlobalErrorHandler(async function (
+      packageName,
+      otherPackageNames,
+      options
+    ) {
+      const packageNames = [packageName].concat(otherPackageNames);
+      const resultCode = await removeCmd(packageNames, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("search")
   .argument("<keyword>", "The keyword to search")
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
-  .action(async function (keyword, options) {
-    const resultCode = await searchCmd(keyword, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withGlobalErrorHandler(async function (keyword, options) {
+      const resultCode = await searchCmd(keyword, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("view")
   .argument("<pkg>", "Reference to a package", mustBePackageReference)
   .aliases(["v", "info", "show"])
   .description("view package information")
-  .action(async function (pkg, options) {
-    const resultCode = await viewCmd(pkg, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withGlobalErrorHandler(async function (pkg, options) {
+      const resultCode = await viewCmd(pkg, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("deps")
@@ -230,10 +260,12 @@ program
 openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
-  .action(async function (pkg, options) {
-    const resultCode = await depsCmd(pkg, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withGlobalErrorHandler(async function (pkg, options) {
+      const resultCode = await depsCmd(pkg, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("login")
@@ -247,10 +279,12 @@ program
     "always auth for tarball hosted on a different domain"
   )
   .description("authenticate with a scoped registry")
-  .action(async function (options) {
-    const resultCode = await loginCmd(makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withGlobalErrorHandler(async function (options) {
+      const resultCode = await loginCmd(makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 // prompt for invalid command
 program.on("command:*", function () {

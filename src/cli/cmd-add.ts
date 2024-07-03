@@ -46,7 +46,6 @@ import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
-import { FetchPackumentError } from "../io/packument-io";
 import { ResultCodes } from "./result-codes";
 import {
   notifyEnvParsingFailed,
@@ -55,6 +54,7 @@ import {
   notifyProjectVersionLoadFailed,
   notifyRemotePackumentVersionResolvingFailed,
 } from "./error-logging";
+import { GenericNetworkError } from "../io/common-errors";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -86,7 +86,6 @@ export type AddOptions = CmdOptions<{
 
 type AddError =
   | PackumentVersionResolveError
-  | FetchPackumentError
   | InvalidPackumentDataError
   | EditorIncompatibleError
   | UnresolvedDependencyError
@@ -239,11 +238,12 @@ export function makeAddCmd(
             true
           );
           if (resolveResult.isErr()) {
-            notifyRemotePackumentVersionResolvingFailed(
-              log,
-              name,
-              resolveResult.error
-            );
+            if (!(resolveResult.error instanceof GenericNetworkError))
+              notifyRemotePackumentVersionResolvingFailed(
+                log,
+                name,
+                resolveResult.error
+              );
             return resolveResult;
           }
           const [depsValid, depsInvalid] = resolveResult.value;

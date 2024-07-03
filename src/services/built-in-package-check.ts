@@ -1,6 +1,6 @@
 import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Ok } from "ts-results-es";
 import {
   CheckIsUnityPackage,
   CheckIsUnityPackageError,
@@ -9,18 +9,12 @@ import { FetchPackument } from "../io/packument-io";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { recordKeys } from "../utils/record-utils";
 import { AsyncOk } from "../utils/result-utils";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
-import { FetchAllPackumentsError } from "../io/all-packuments-io";
+import { GenericNetworkError } from "../io/common-errors";
 
 /**
  * Error which may occur when checking whether a package is built-in.
  */
-export type CheckIsBuiltInPackageError =
-  | CheckIsUnityPackageError
-  | FetchAllPackumentsError;
+export type CheckIsBuiltInPackageError = CheckIsUnityPackageError;
 
 /**
  * Function for checking whether a specific package version is built-in.
@@ -44,20 +38,15 @@ export function makeCheckIsBuiltInPackage(
     packageName: DomainName,
     version: SemanticVersion
   ): AsyncResult<boolean, GenericNetworkError> {
-    return fetchPackument({ url: unityRegistryUrl, auth: null }, packageName)
-      .map((maybePackument) => {
-        if (maybePackument === null) return false;
-        const versions = recordKeys(maybePackument.versions);
-        return versions.includes(version);
-      })
-      .mapErr((error) => {
-        if (error instanceof RegistryAuthenticationError)
-          throw new Error(
-            "Authentication with Unity registry failed, even though it does not require authentication."
-          );
-
-        return error;
-      });
+    return new AsyncResult(
+      fetchPackument({ url: unityRegistryUrl, auth: null }, packageName).then(
+        (maybePackument) => {
+          if (maybePackument === null) return Ok(false);
+          const versions = recordKeys(maybePackument.versions);
+          return Ok(versions.includes(version));
+        }
+      )
+    );
   }
 
   return (packageName, version) => {

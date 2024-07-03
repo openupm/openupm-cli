@@ -7,7 +7,6 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { FetchPackument } from "../../src/io/packument-io";
-import { AsyncOk } from "../../src/utils/result-utils";
 import { SemanticVersion } from "../../src/domain/semantic-version";
 
 describe("resolve latest version service", () => {
@@ -39,7 +38,7 @@ describe("resolve latest version service", () => {
       versions: { ["1.0.0" as SemanticVersion]: { version: "1.0.0" } },
       "dist-tags": { latest: "1.0.0" },
     } as UnityPackument;
-    fetchPackument.mockReturnValue(AsyncOk(packument));
+    fetchPackument.mockResolvedValue(packument);
 
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
       .promise;
@@ -54,7 +53,7 @@ describe("resolve latest version service", () => {
     const packument = {
       versions: { ["1.0.0" as SemanticVersion]: { version: "1.0.0" } },
     } as UnityPackument;
-    fetchPackument.mockReturnValue(AsyncOk(packument));
+    fetchPackument.mockResolvedValue(packument);
 
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
       .promise;
@@ -67,7 +66,7 @@ describe("resolve latest version service", () => {
   it("should fail if packument had no versions", async () => {
     const { resolveLatestVersion, fetchPackument } = makeDependencies();
     const packument = { versions: {} } as UnityPackument;
-    fetchPackument.mockReturnValue(AsyncOk(packument));
+    fetchPackument.mockResolvedValue(packument);
 
     const result = await resolveLatestVersion([exampleRegistry], somePackage)
       .promise;
@@ -83,8 +82,8 @@ describe("resolve latest version service", () => {
       versions: { ["1.0.0" as SemanticVersion]: { version: "1.0.0" } },
       "dist-tags": { latest: "1.0.0" },
     } as UnityPackument;
-    fetchPackument.mockReturnValueOnce(AsyncOk(null));
-    fetchPackument.mockReturnValueOnce(AsyncOk(packument));
+    fetchPackument.mockResolvedValueOnce(null);
+    fetchPackument.mockResolvedValueOnce(packument);
 
     const result = await resolveLatestVersion(
       [exampleRegistry, upstreamRegistry],

@@ -2,8 +2,8 @@ import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
 import { AsyncResult, Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
-  makeLoadNpmrc,
   makeFindNpmrcPath,
+  makeLoadNpmrc,
   makeSaveNpmrc,
 } from "../../src/io/npmrc-io";
 import path from "path";

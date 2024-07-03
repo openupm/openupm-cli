@@ -1,6 +1,6 @@
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { AsyncResult, Err } from "ts-results-es";
 import {
   PackumentVersionResolveError,
   ResolvableVersion,
@@ -8,14 +8,12 @@ import {
 } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { tryResolvePackumentVersion } from "../domain/packument";
-import { FetchPackument, FetchPackumentError } from "../io/packument-io";
+import { FetchPackument } from "../io/packument-io";
 
 /**
  * Error which may occur when resolving a remove packument version.
  */
-export type ResolveRemotePackumentVersionError =
-  | PackumentVersionResolveError
-  | FetchPackumentError;
+export type ResolveRemotePackumentVersionError = PackumentVersionResolveError;
 
 /**
  * Function for resolving remove packument versions.
@@ -36,19 +34,17 @@ export function makeResolveRemotePackumentVersion(
   fetchPackument: FetchPackument
 ): ResolveRemotePackumentVersion {
   return (packageName, requestedVersion, source) =>
-    fetchPackument(source, packageName)
-      .andThen((maybePackument) => {
-        if (maybePackument === null)
+    new AsyncResult(
+      fetchPackument(source, packageName).then((packument) => {
+        if (packument === null)
           return Err(new PackumentNotFoundError(packageName));
-        return Ok(maybePackument);
-      })
-      .andThen((packument) =>
-        tryResolvePackumentVersion(packument, requestedVersion).map(
+        return tryResolvePackumentVersion(packument, requestedVersion).map(
           (packumentVersion) => ({
             packument,
             packumentVersion,
             source: source.url,
           })
-        )
-      );
+        );
+      })
+    );
 }

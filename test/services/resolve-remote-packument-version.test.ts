@@ -27,7 +27,7 @@ describe("resolve remote packument version", () => {
   it("should fail if packument was not found", async () => {
     const { resolveRemovePackumentVersion, fetchPackument } =
       makeDependencies();
-    fetchPackument.mockReturnValue(AsyncOk(null));
+    fetchPackument.mockResolvedValue(null);
 
     const result = await resolveRemovePackumentVersion(
       somePackage,
@@ -48,7 +48,7 @@ describe("resolve remote packument version", () => {
         version.addDependency("com.other.package", "1.0.0")
       )
     );
-    fetchPackument.mockReturnValue(AsyncOk(packument));
+    fetchPackument.mockResolvedValue(packument);
 
     const result = await resolveRemovePackumentVersion(
       somePackage,
