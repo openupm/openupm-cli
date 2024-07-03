@@ -23,7 +23,6 @@ import { noopLogger } from "../../src/logging";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
 import { Ok } from "ts-results-es";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { AsyncOk } from "../../src/utils/result-utils";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -93,8 +92,8 @@ function makeDependencies() {
   writeProjectManifest.mockResolvedValue(undefined);
 
   const determineEditorVersion = mockService<DetermineEditorVersion>();
-  determineEditorVersion.mockReturnValue(
-    AsyncOk(makeEditorVersion(2022, 2, 1, "f", 2))
+  determineEditorVersion.mockResolvedValue(
+    makeEditorVersion(2022, 2, 1, "f", 2)
   );
 
   const log = makeMockLogger();
@@ -171,7 +170,7 @@ describe("cmd-add", () => {
 
   it("should notify if editor-version is unknown", async () => {
     const { addCmd, determineEditorVersion, log } = makeDependencies();
-    determineEditorVersion.mockReturnValue(AsyncOk("bad version"));
+    determineEditorVersion.mockResolvedValue("bad version");
 
     await addCmd(somePackage, {
       _global: {},

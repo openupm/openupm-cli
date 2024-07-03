@@ -1,16 +1,9 @@
-import { AsyncResult, Result } from "ts-results-es";
 import {
   isRelease,
   ReleaseVersion,
   tryParseEditorVersion,
 } from "../domain/editor-version";
 import { LoadProjectVersion } from "../io/project-version-io";
-import { resultifyAsyncOp } from "../utils/result-utils";
-
-/**
- * Error which may occur when determining the editor-version.
- */
-export type DetermineEditorVersionError = never;
 
 /**
  * Function for determining the editor-version for a Unity project.
@@ -20,7 +13,7 @@ export type DetermineEditorVersionError = never;
  */
 export type DetermineEditorVersion = (
   projectPath: string
-) => AsyncResult<ReleaseVersion | string, DetermineEditorVersionError>;
+) => Promise<ReleaseVersion | string>;
 
 /**
  * Makes a {@link DetermineEditorVersion} function.
@@ -28,16 +21,11 @@ export type DetermineEditorVersion = (
 export function makeDetermineEditorVersion(
   loadProjectVersion: LoadProjectVersion
 ): DetermineEditorVersion {
-  return (projectPath) => {
-    return resultifyAsyncOp(
-      loadProjectVersion(projectPath).then((unparsedEditorVersion) => {
-        const parsedEditorVersion = tryParseEditorVersion(
-          unparsedEditorVersion
-        );
-        return parsedEditorVersion !== null && isRelease(parsedEditorVersion)
-          ? parsedEditorVersion
-          : unparsedEditorVersion;
-      })
-    );
+  return async (projectPath) => {
+    const unparsedEditorVersion = await loadProjectVersion(projectPath);
+    const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
+    return parsedEditorVersion !== null && isRelease(parsedEditorVersion)
+      ? parsedEditorVersion
+      : unparsedEditorVersion;
   };
 }

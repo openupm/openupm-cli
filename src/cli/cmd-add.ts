@@ -118,11 +118,7 @@ export function makeAddCmd(
     // parse env
     const env = await parseEnv(options);
 
-    const editorVersionResult = await determineEditorVersion(env.cwd).promise;
-    if (editorVersionResult.isErr()) {
-      return ResultCodes.Error;
-    }
-    const editorVersion = editorVersionResult.value;
+    const editorVersion = await determineEditorVersion(env.cwd);
 
     if (typeof editorVersion === "string")
       log.warn(
