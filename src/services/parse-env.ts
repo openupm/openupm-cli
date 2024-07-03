@@ -1,7 +1,6 @@
 import chalk from "chalk";
 import {
   GetUpmConfigPath,
-  GetUpmConfigPathError,
   LoadUpmConfig,
   UpmConfigLoadError,
 } from "../io/upm-config-io";
@@ -24,7 +23,7 @@ export type Env = Readonly<{
   registry: Registry;
 }>;
 
-export type EnvParseError = GetUpmConfigPathError | UpmConfigLoadError;
+export type EnvParseError = UpmConfigLoadError;
 
 /**
  * Function for parsing environment information and global
@@ -117,9 +116,8 @@ export function makeParseEnv(
     const wsl = determineWsl(options);
 
     // registries
-    const upmConfigResult = await getUpmConfigPath(wsl, systemUser).andThen(
-      loadUpmConfig
-    ).promise;
+    const upmConfigPath = await getUpmConfigPath(wsl, systemUser);
+    const upmConfigResult = await loadUpmConfig(upmConfigPath).promise;
     if (upmConfigResult.isErr()) return upmConfigResult;
     const upmConfig = upmConfigResult.value;
 

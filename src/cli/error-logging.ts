@@ -1,9 +1,5 @@
 import { Logger } from "npmlog";
 import { EnvParseError } from "../services/parse-env";
-import { NoWslError } from "../io/wsl";
-import { ChildProcessError } from "../io/child-process";
-import { RequiredEnvMissingError } from "../io/upm-config-io";
-import { GenericIOError } from "../io/common-errors";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
@@ -88,12 +84,7 @@ function notifyUpmConfigLoadFailedBecauseIO(log: Logger) {
 }
 
 export function notifyEnvParsingFailed(log: Logger, error: EnvParseError) {
-  if (error instanceof NoWslError) notifyNotUsingWsl(log);
-  else if (error instanceof ChildProcessError) notifyChildProcessError(log);
-  else if (error instanceof RequiredEnvMissingError)
-    notifyMissingEnvForUpmConfigPath(log, error.keyNames);
-  else if (error instanceof GenericIOError)
-    notifyUpmConfigLoadFailedBecauseIO(log);
+  notifyUpmConfigLoadFailedBecauseIO(log);
 }
 
 export function notifyProjectVersionMissing(log: Logger, filePath: string) {

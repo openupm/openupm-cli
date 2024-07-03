@@ -31,9 +31,9 @@ describe("upm-config-io", () => {
         const expected = path.resolve("/some/home/dir/.upmconfig.toml");
         getHomePath.mockReturnValue(path.dirname(expected));
 
-        const result = await getUpmConfigPath(false, false).promise;
+        const actual = await getUpmConfigPath(false, false);
 
-        expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+        expect(actual).toEqual(expected);
       });
     });
   });

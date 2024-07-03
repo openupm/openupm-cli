@@ -2,15 +2,14 @@ import path from "path";
 import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryParseToml } from "../utils/string-parsing";
-import { tryGetWslPath, WslPathError } from "./wsl";
-import { ChildProcessError, RunChildProcess } from "./child-process";
+import { tryGetWslPath } from "./wsl";
+import { RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
 import { GenericIOError } from "./common-errors";
-import { AsyncOk } from "../utils/result-utils";
 
 const configFileName = ".upmconfig.toml";
 
@@ -26,14 +25,6 @@ export class RequiredEnvMissingError extends CustomError {
 }
 
 /**
- * Error which may occur when getting the upmconfig file path.
- */
-export type GetUpmConfigPathError =
-  | WslPathError
-  | RequiredEnvMissingError
-  | ChildProcessError;
-
-/**
  * Function which gets the path to the upmconfig file.
  * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
@@ -42,7 +33,7 @@ export type GetUpmConfigPathError =
 export type GetUpmConfigPath = (
   wsl: boolean,
   systemUser: boolean
-) => AsyncResult<string, GetUpmConfigPathError>;
+) => Promise<string>;
 
 /**
  * Makes a {@link GetUpmConfigPath} function.
@@ -51,41 +42,30 @@ export function makeGetUpmConfigPath(
   getHomePath: GetHomePath,
   runChildProcess: RunChildProcess
 ): GetUpmConfigPath {
-  function getConfigDirectory(wsl: boolean, systemUser: boolean) {
+  async function getConfigDirectory(wsl: boolean, systemUser: boolean) {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (wsl) {
       if (systemUser)
-        return new AsyncResult(
-          Result.wrapAsync<string, WslPathError | RequiredEnvMissingError>(() =>
-            tryGetWslPath("ALLUSERSPROFILE", runChildProcess).then((it) =>
-              path.join(it, systemUserSubPath)
-            )
-          )
+        return await tryGetWslPath("ALLUSERSPROFILE", runChildProcess).then(
+          (it) => path.join(it, systemUserSubPath)
         );
 
-      return new AsyncResult(
-        Result.wrapAsync<string, WslPathError | RequiredEnvMissingError>(() =>
-          tryGetWslPath("USERPROFILE", runChildProcess)
-        )
-      );
+      return await tryGetWslPath("USERPROFILE", runChildProcess);
     }
 
     if (systemUser) {
       const profilePath = tryGetEnv("ALLUSERSPROFILE");
       if (profilePath === null)
-        return Err(
-          new RequiredEnvMissingError(["ALLUSERSPROFILE"])
-        ).toAsyncResult();
-      return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
+        throw new RequiredEnvMissingError(["ALLUSERSPROFILE"]);
+      return path.join(profilePath, systemUserSubPath);
     }
 
-    return AsyncOk(getHomePath());
+    return getHomePath();
   }
 
-  return (wsl, systemUser) => {
-    return getConfigDirectory(wsl, systemUser).map((directory) =>
-      path.join(directory, configFileName)
-    );
+  return async (wsl, systemUser) => {
+    const directory = await getConfigDirectory(wsl, systemUser);
+    return path.join(directory, configFileName);
   };
 }
 

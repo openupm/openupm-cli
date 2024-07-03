@@ -34,7 +34,7 @@ describe("cmd-login", () => {
     parseEnv.mockResolvedValue(Ok(defaultEnv));
 
     const getUpmConfigPath = mockService<GetUpmConfigPath>();
-    getUpmConfigPath.mockReturnValue(AsyncOk(exampleUpmConfigPath));
+    getUpmConfigPath.mockResolvedValue(exampleUpmConfigPath);
 
     const login = mockService<Login>();
     login.mockReturnValue(AsyncOk());
@@ -56,21 +56,6 @@ describe("cmd-login", () => {
   });
 
   // TODO: Add tests for prompting logic
-
-  it("should fail if upm config path could not be determined", async () => {
-    const expected = new RequiredEnvMissingError([]);
-    const { loginCmd, getUpmConfigPath } = makeDependencies();
-    getUpmConfigPath.mockReturnValue(AsyncErr(expected));
-
-    const resultCode = await loginCmd({
-      username: exampleUser,
-      password: examplePassword,
-      email: exampleEmail,
-      _global: { registry: exampleRegistryUrl },
-    });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
 
   it("should fail if login failed", async () => {
     const expected = new RequiredEnvMissingError([]);
