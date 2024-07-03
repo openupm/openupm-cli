@@ -49,7 +49,6 @@ import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
 import {
   notifyEnvParsingFailed,
-  notifyProjectVersionLoadFailed,
   notifyRemotePackumentVersionResolvingFailed,
 } from "./error-logging";
 import { GenericNetworkError } from "../io/common-errors";
@@ -130,7 +129,6 @@ export function makeAddCmd(
 
     const editorVersionResult = await determineEditorVersion(env.cwd).promise;
     if (editorVersionResult.isErr()) {
-      notifyProjectVersionLoadFailed(log, editorVersionResult.error);
       return ResultCodes.Error;
     }
     const editorVersion = editorVersionResult.value;

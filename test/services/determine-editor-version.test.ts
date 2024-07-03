@@ -4,7 +4,6 @@ import { LoadProjectVersion } from "../../src/io/project-version-io";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { mockProjectVersion } from "../io/project-version-io.mock";
 import { GenericIOError } from "../../src/io/common-errors";
-import { AsyncErr } from "../../src/utils/result-utils";
 
 describe("determine editor version", () => {
   const exampleProjectPath = "/home/my-project/";
@@ -51,7 +50,7 @@ describe("determine editor version", () => {
   it("should fail if ProjectVersion.txt could not be loaded", async () => {
     const { determineEditorVersion, loadProjectVersion } = makeDependencies();
     const expected = new GenericIOError("Read");
-    loadProjectVersion.mockReturnValue(AsyncErr(expected));
+    loadProjectVersion.mockRejectedValue(expected);
 
     const result = await determineEditorVersion(exampleProjectPath).promise;
 

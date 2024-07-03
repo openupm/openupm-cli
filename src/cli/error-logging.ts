@@ -3,13 +3,7 @@ import { EnvParseError } from "../services/parse-env";
 import { NoWslError } from "../io/wsl";
 import { ChildProcessError } from "../io/child-process";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
-import {
-  FileMissingError,
-  FileParseError,
-  GenericIOError,
-} from "../io/common-errors";
-import { StringFormatError } from "../utils/string-parsing";
-import { ProjectVersionLoadError } from "../io/project-version-io";
+import { GenericIOError } from "../io/common-errors";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
@@ -131,23 +125,6 @@ export function notifySemanticallyMalformedProjectVersion(log: Logger) {
     "Project version file (ProjectVersion.txt) file is valid yaml but was not of the correct shape."
   );
   suggestFixErrorsInProjectVersionFile(log);
-}
-
-export function notifyProjectVersionLoadFailed(
-  log: Logger,
-  error: ProjectVersionLoadError
-) {
-  if (error instanceof FileMissingError)
-    notifyProjectVersionMissing(log, error.path);
-  else if (error instanceof GenericIOError)
-    log.error(
-      "",
-      "Could not load project version file (ProjectVersion.txt) because of a file-system error."
-    );
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedProjectVersion(log);
-  else if (error instanceof FileParseError)
-    notifySemanticallyMalformedProjectVersion(log);
 }
 
 export function notifyPackumentNotFoundInAnyRegistry(

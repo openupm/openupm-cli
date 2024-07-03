@@ -145,31 +145,6 @@ describe("cmd-add", () => {
     );
   });
 
-  it("should fail if editor-version could not be determined", async () => {
-    const { addCmd, determineEditorVersion } = makeDependencies();
-    determineEditorVersion.mockReturnValue(
-      Err(new GenericIOError("Read")).toAsyncResult()
-    );
-
-    const resultCode = await addCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if editor-version could not be determined", async () => {
-    const { addCmd, determineEditorVersion, log } = makeDependencies();
-    determineEditorVersion.mockReturnValue(
-      Err(new GenericIOError("Read")).toAsyncResult()
-    );
-
-    await addCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("file-system error")
-    );
-  });
-
   it("should fail if package could not be resolved", async () => {
     const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
     mockResolvedPackuments(resolveRemovePackumentVersion);
