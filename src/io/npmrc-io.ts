@@ -1,4 +1,3 @@
-import { AsyncResult, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
@@ -38,28 +37,22 @@ export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
 }
 
 /**
- * Error that might occur when saving a npmrc.
- */
-export type NpmrcSaveError = GenericIOError;
-
-/**
  * Function for saving npmrc files. Overwrites the content of the file.
  * @param path The path to the file.
  * @param npmrc The new lines for the file.
  */
-export type SaveNpmrc = (
-  path: string,
-  npmrc: Npmrc
-) => AsyncResult<void, NpmrcSaveError>;
+export type SaveNpmrc = (path: string, npmrc: Npmrc) => Promise<void>;
 
 /**
  * Makes a {@link SaveNpmrc} function.
  */
 export function makeSaveNpmrc(writeFile: WriteTextFile): SaveNpmrc {
-  return (path, npmrc) => {
+  return async (path, npmrc) => {
     const content = npmrc.join(EOL);
-    return new AsyncResult(
-      Result.wrapAsync(() => writeFile(path, content))
-    ).mapErr(() => new GenericIOError("Write"));
+    try {
+      return await writeFile(path, content);
+    } catch {
+      throw new GenericIOError("Write");
+    }
   };
 }

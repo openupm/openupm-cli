@@ -1,5 +1,4 @@
 import { FindNpmrcPath, LoadNpmrc, SaveNpmrc } from "../../src/io/npmrc-io";
-import { AsyncResult, Ok } from "ts-results-es";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { emptyNpmrc, setToken } from "../../src/domain/npmrc";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -16,7 +15,7 @@ function makeDependencies() {
   loadNpmrc.mockResolvedValue(null);
 
   const saveNpmrc = mockService<SaveNpmrc>();
-  saveNpmrc.mockReturnValue(new AsyncResult(Ok(undefined)));
+  saveNpmrc.mockResolvedValue(undefined);
 
   const authNpmrc = makeAuthNpmrc(findPath, loadNpmrc, saveNpmrc);
   return { authNpmrc, findPath, loadNpmrc, saveNpmrc } as const;

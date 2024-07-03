@@ -84,9 +84,7 @@ describe("npmrc-io", () => {
       const { saveNpmrc } = makeDependencies();
       const path = "/valid/path/.npmrc";
 
-      const result = await saveNpmrc(path, ["key=value"]).promise;
-
-      expect(result).toBeOk();
+      await saveNpmrc(path, ["key=value"]);
     });
 
     it("should fail when write fails", async () => {
@@ -94,10 +92,8 @@ describe("npmrc-io", () => {
       const path = "/invalid/path/.npmrc";
       writeFile.mockRejectedValue(eaccesError);
 
-      const result = await saveNpmrc(path, ["key=value"]).promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(GenericIOError)
+      await expect(saveNpmrc(path, ["key=value"])).rejects.toBeInstanceOf(
+        GenericIOError
       );
     });
   });
