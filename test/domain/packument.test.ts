@@ -80,11 +80,9 @@ describe("packument", () => {
     it("should fail it packument has no versions", () => {
       const emptyPackument = buildPackument(somePackage);
 
-      const result = tryResolvePackumentVersion(emptyPackument, "latest");
-
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(NoVersionsError)
-      );
+      expect(() =>
+        tryResolvePackumentVersion(emptyPackument, "latest")
+      ).toThrow(NoVersionsError);
     });
 
     it("should find latest version when requested", () => {

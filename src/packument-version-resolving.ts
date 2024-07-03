@@ -1,18 +1,19 @@
-import { VersionReference } from "./domain/package-reference";
-import { DomainName } from "./domain/domain-name";
+import {VersionReference} from "./domain/package-reference";
+import {DomainName} from "./domain/domain-name";
 import {
-  NoVersionsError,
   tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
   VersionNotFoundError,
 } from "./domain/packument";
-import { PackageUrl } from "./domain/package-url";
-import { PackumentCache, tryGetFromCache } from "./packument-cache";
-import { RegistryUrl } from "./domain/registry-url";
-import { Err, Result } from "ts-results-es";
-import { PackumentNotFoundError } from "./common-errors";
-import { ResolveRemotePackumentVersionError } from "./services/resolve-remote-packument-version";
+import {PackageUrl} from "./domain/package-url";
+import {PackumentCache, tryGetFromCache} from "./packument-cache";
+import {RegistryUrl} from "./domain/registry-url";
+import {Err, Result} from "ts-results-es";
+import {PackumentNotFoundError} from "./common-errors";
+import {
+  ResolveRemotePackumentVersionError
+} from "./services/resolve-remote-packument-version";
 
 /**
  * A version-reference that is resolvable.
@@ -45,7 +46,6 @@ export interface ResolvedPackumentVersion {
  */
 export type PackumentVersionResolveError =
   | PackumentNotFoundError
-  | NoVersionsError
   | VersionNotFoundError;
 
 /**

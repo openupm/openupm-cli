@@ -166,17 +166,17 @@ export class VersionNotFoundError extends CustomError {
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: undefined | "latest"
-): Result<UnityPackumentVersion, NoVersionsError>;
+): Result<UnityPackumentVersion, never>;
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion
-): Result<UnityPackumentVersion, NoVersionsError | VersionNotFoundError>;
+): Result<UnityPackumentVersion, VersionNotFoundError>;
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion
 ) {
   const availableVersions = recordKeys(packument.versions);
-  if (availableVersions.length === 0) return Err(new NoVersionsError());
+  if (availableVersions.length === 0) throw new NoVersionsError();
 
   // Find the latest version
   if (requestedVersion === undefined || requestedVersion === "latest") {
