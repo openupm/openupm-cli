@@ -3,10 +3,7 @@ import {
   makeWriteProjectManifest,
   manifestPathFor,
 } from "../../src/io/project-manifest-io";
-import {
-  emptyProjectManifest,
-  mapScopedRegistry,
-} from "../../src/domain/project-manifest";
+import { mapScopedRegistry } from "../../src/domain/project-manifest";
 import path from "path";
 import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { buildProjectManifest } from "../domain/data-project-manifest";
@@ -14,7 +11,6 @@ import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
-import { eaccesError } from "./node-error.mock";
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
 
@@ -92,19 +88,6 @@ describe("project-manifest io", () => {
       return { writeProjectManifest, writeFile } as const;
     }
 
-    it("should fail if file could not be written", async () => {
-      const expected = eaccesError;
-      const { writeProjectManifest, writeFile } = makeDependencies();
-      writeFile.mockRejectedValue(expected);
-
-      const result = await writeProjectManifest(
-        exampleProjectPath,
-        emptyProjectManifest
-      ).promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
     it("should write manifest json", async () => {
       const { writeProjectManifest, writeFile } = makeDependencies();
 
@@ -112,7 +95,7 @@ describe("project-manifest io", () => {
         manifest.addDependency("com.package.a", "1.0.0", true, true)
       );
 
-      await writeProjectManifest(exampleProjectPath, manifest).promise;
+      await writeProjectManifest(exampleProjectPath, manifest);
 
       expect(writeFile).toHaveBeenCalledWith(
         expect.any(String),
@@ -147,7 +130,7 @@ describe("project-manifest io", () => {
         return removeScope(registry!, testDomain);
       });
 
-      await writeProjectManifest(exampleProjectPath, manifest).promise;
+      await writeProjectManifest(exampleProjectPath, manifest);
 
       expect(writeFile).toHaveBeenCalledWith(
         expect.any(String),

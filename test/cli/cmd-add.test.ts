@@ -91,7 +91,7 @@ function makeDependencies() {
   loadProjectManifest.mockResolvedValue(emptyProjectManifest);
 
   const writeProjectManifest = mockService<WriteProjectManifest>();
-  writeProjectManifest.mockReturnValue(AsyncOk());
+  writeProjectManifest.mockResolvedValue(undefined);
 
   const determineEditorVersion = mockService<DetermineEditorVersion>();
   determineEditorVersion.mockReturnValue(

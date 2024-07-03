@@ -49,7 +49,6 @@ import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
 import {
   notifyEnvParsingFailed,
-  notifyManifestWriteFailed,
   notifyProjectVersionLoadFailed,
   notifyRemotePackumentVersionResolvingFailed,
 } from "./error-logging";
@@ -358,12 +357,7 @@ export function makeAddCmd(
 
     // Save manifest
     if (dirty) {
-      const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
-      if (saveResult.isErr()) {
-        notifyManifestWriteFailed(log);
-        return ResultCodes.Error;
-      }
-
+      await writeProjectManifest(env.cwd, manifest);
       // print manifest notice
       log.notice("", "please open Unity project to apply changes");
     }

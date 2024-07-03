@@ -13,7 +13,6 @@ import { makeDomainName } from "../../src/domain/domain-name";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import path from "path";
 import { PackumentNotFoundError } from "../../src/common-errors";
-import { AsyncOk } from "../../src/utils/result-utils";
 
 describe("remove packages", () => {
   const someProjectPath = path.resolve("/home/projects/MyUnityProject");
@@ -29,7 +28,7 @@ describe("remove packages", () => {
     loadProjectManifest.mockResolvedValue(defaultManifest);
 
     const writeProjectManifest = mockService<WriteProjectManifest>();
-    writeProjectManifest.mockReturnValue(AsyncOk());
+    writeProjectManifest.mockResolvedValue(undefined);
 
     const removePackages = makeRemovePackages(
       loadProjectManifest,

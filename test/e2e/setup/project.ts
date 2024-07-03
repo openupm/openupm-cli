@@ -32,7 +32,7 @@ export async function prepareUnityProject(
   );
 
   const manifest = emptyProjectManifest;
-  (await writeProjectManifest(projectDir, manifest).promise).unwrap();
+  await writeProjectManifest(projectDir, manifest);
 
   return projectDir;
 }

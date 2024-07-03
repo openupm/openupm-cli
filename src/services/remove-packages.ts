@@ -7,18 +7,18 @@ import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import {
   LoadProjectManifest,
-  ManifestWriteError,
   WriteProjectManifest,
 } from "../io/project-manifest-io";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackageUrl } from "../domain/package-url";
+import { AsyncOk } from "../utils/result-utils";
 
 export type RemovedPackage = {
   name: DomainName;
   version: SemanticVersion | PackageUrl;
 };
 
-export type RemovePackagesError = PackumentNotFoundError | ManifestWriteError;
+export type RemovePackagesError = PackumentNotFoundError;
 
 export type RemovePackages = (
   projectPath: string,
@@ -93,8 +93,8 @@ export function makeRemovePackages(
     );
 
     return removeResult.andThen(([updatedManifest, removedPackages]) =>
-      writeProjectManifest(projectPath, updatedManifest).map(
-        () => removedPackages
+      writeProjectManifest(projectPath, updatedManifest).then(() =>
+        Ok(removedPackages)
       )
     );
   };

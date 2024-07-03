@@ -3,7 +3,6 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import path from "path";
-import { AsyncResult, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryParseJson } from "../utils/string-parsing";
 import { FileMissingError, FileParseError } from "./common-errors";
@@ -81,11 +80,6 @@ export function makeLoadProjectManifest(
 }
 
 /**
- * Error which may occur when saving a project manifest.
- */
-export type ManifestWriteError = never;
-
-/**
  * Function for replacing the project manifest for a Unity project.
  * @param projectPath The path to the project's directory.
  * @param manifest The manifest to write to the project.
@@ -93,7 +87,7 @@ export type ManifestWriteError = never;
 export type WriteProjectManifest = (
   projectPath: string,
   manifest: UnityProjectManifest
-) => AsyncResult<void, ManifestWriteError>;
+) => Promise<void>;
 
 /**
  * Makes a {@link WriteProjectManifest} function.
@@ -101,13 +95,11 @@ export type WriteProjectManifest = (
 export function makeWriteProjectManifest(
   writeFile: WriteTextFile
 ): WriteProjectManifest {
-  return (projectPath, manifest) => {
+  return async (projectPath, manifest) => {
     const manifestPath = manifestPathFor(projectPath);
     manifest = pruneManifest(manifest);
     const json = JSON.stringify(manifest, null, 2);
 
-    return new AsyncResult(
-      Result.wrapAsync(() => writeFile(manifestPath, json))
-    );
+    return await writeFile(manifestPath, json);
   };
 }
