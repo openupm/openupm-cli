@@ -1,4 +1,5 @@
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { isPromise } from "node:util/types";
 
 /**
  * Creates an ok {@link AsyncResult} with a given value.
@@ -22,4 +23,16 @@ export function AsyncOk(value?: unknown) {
  */
 export function AsyncErr<T>(error: T): AsyncResult<never, T> {
   return Err(error).toAsyncResult();
+}
+
+/**
+ * Wraps a promise or operation returning a promise into an {@link AsyncResult}.
+ * @param op The operation to wrap.
+ */
+export function resultifyAsyncOp<T, TError = never>(
+  op: (() => Promise<T>) | Promise<T>
+): AsyncResult<T, TError> {
+  return new AsyncResult(
+    Result.wrapAsync<T, TError>(isPromise(op) ? () => op : op)
+  );
 }

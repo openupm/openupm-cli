@@ -11,7 +11,7 @@ import {
 } from "../io/project-manifest-io";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackageUrl } from "../domain/package-url";
-import { AsyncOk } from "../utils/result-utils";
+import { AsyncOk, resultifyAsyncOp } from "../utils/result-utils";
 
 export type RemovedPackage = {
   name: DomainName;
@@ -81,11 +81,7 @@ export function makeRemovePackages(
 
   return (projectPath, packageNames) => {
     // load manifest
-    const initialManifest = new AsyncResult(
-      Result.wrapAsync<UnityProjectManifest, never>(() =>
-        loadProjectManifest(projectPath)
-      )
-    );
+    const initialManifest = resultifyAsyncOp(loadProjectManifest(projectPath));
 
     // remove
     const removeResult = initialManifest.andThen((it) =>

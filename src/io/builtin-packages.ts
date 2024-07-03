@@ -1,5 +1,5 @@
 import { ReleaseVersion } from "../domain/editor-version";
-import { AsyncResult, Result } from "ts-results-es";
+import { AsyncResult } from "ts-results-es";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
@@ -11,6 +11,7 @@ import { DebugLog } from "../logging";
 import { GenericIOError } from "./common-errors";
 import { tryGetDirectoriesIn } from "./directory-io";
 import { assertIsNodeError } from "../utils/error-type-guards";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
  * Error for when an editor-version is not installed.
@@ -60,8 +61,8 @@ export function makeFindBuiltInPackages(
       );
 
       return (
-        new AsyncResult(
-          Result.wrapAsync(() => tryGetDirectoriesIn(packagesDir, debugLog))
+        resultifyAsyncOp<readonly string[], NodeJS.ErrnoException>(
+          tryGetDirectoriesIn(packagesDir, debugLog)
         )
           // We can assume correct format
           .map((names) => names as DomainName[])

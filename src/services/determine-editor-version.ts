@@ -5,6 +5,7 @@ import {
   tryParseEditorVersion,
 } from "../domain/editor-version";
 import { LoadProjectVersion } from "../io/project-version-io";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
  * Error which may occur when determining the editor-version.
@@ -28,17 +29,15 @@ export function makeDetermineEditorVersion(
   loadProjectVersion: LoadProjectVersion
 ): DetermineEditorVersion {
   return (projectPath) => {
-    return new AsyncResult(
-      Result.wrapAsync(() =>
-        loadProjectVersion(projectPath).then((unparsedEditorVersion) => {
-          const parsedEditorVersion = tryParseEditorVersion(
-            unparsedEditorVersion
-          );
-          return parsedEditorVersion !== null && isRelease(parsedEditorVersion)
-            ? parsedEditorVersion
-            : unparsedEditorVersion;
-        })
-      )
+    return resultifyAsyncOp(
+      loadProjectVersion(projectPath).then((unparsedEditorVersion) => {
+        const parsedEditorVersion = tryParseEditorVersion(
+          unparsedEditorVersion
+        );
+        return parsedEditorVersion !== null && isRelease(parsedEditorVersion)
+          ? parsedEditorVersion
+          : unparsedEditorVersion;
+      })
     );
   };
 }

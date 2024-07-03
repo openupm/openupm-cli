@@ -1,10 +1,11 @@
-import { AsyncResult, Result } from "ts-results-es";
+import { AsyncResult } from "ts-results-es";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { SaveAuthToUpmConfig } from "./upm-auth";
 import { NpmLogin, NpmLoginError } from "./npm-login";
 import { AuthNpmrc } from "./npmrc-auth";
 import { DebugLog } from "../logging";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
  * Error which may occur when logging in a user.
@@ -59,14 +60,12 @@ export function makeLogin(
     if (authMode === "basic") {
       // basic auth
       const _auth = encodeBasicAuth(username, password);
-      return new AsyncResult(
-        Result.wrapAsync<void, never>(() =>
-          saveAuthToUpmConfig(configPath, registry, {
-            email,
-            alwaysAuth,
-            _auth,
-          } satisfies BasicAuth)
-        )
+      return resultifyAsyncOp(
+        saveAuthToUpmConfig(configPath, registry, {
+          email,
+          alwaysAuth,
+          _auth,
+        } satisfies BasicAuth)
       );
     }
 
@@ -74,21 +73,19 @@ export function makeLogin(
     return npmLogin(registry, username, password, email).andThen((token) => {
       debugLog(`npm login successful`);
       // write npm token
-      return new AsyncResult(
-        Result.wrapAsync<string, never>(() => authNpmrc(registry, token))
-      ).andThen((npmrcPath) => {
-        debugLog(`saved to npm config: ${npmrcPath}`);
-        // Save config
-        return new AsyncResult(
-          Result.wrapAsync<void, never>(() =>
+      return resultifyAsyncOp(authNpmrc(registry, token)).andThen(
+        (npmrcPath) => {
+          debugLog(`saved to npm config: ${npmrcPath}`);
+          // Save config
+          return resultifyAsyncOp(
             saveAuthToUpmConfig(configPath, registry, {
               email,
               alwaysAuth,
               token,
             } satisfies TokenAuth)
-          )
-        );
-      });
+          );
+        }
+      );
     });
   };
 }

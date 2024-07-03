@@ -13,7 +13,7 @@ import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import { FetchPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
-import { AsyncResult, Result } from "ts-results-es";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 export type ViewOptions = CmdOptions;
 
@@ -125,10 +125,8 @@ export function makeViewCmd(
       env.registry,
       ...(env.upstream ? [env.upstreamRegistry] : []),
     ];
-    const resolveResult = await queryAllRegistriesLazy(
-      sources,
-      (source) =>
-        new AsyncResult(Result.wrapAsync(() => fetchPackument(source, pkg)))
+    const resolveResult = await queryAllRegistriesLazy(sources, (source) =>
+      resultifyAsyncOp(() => fetchPackument(source, pkg))
     ).promise;
     if (!resolveResult.isOk()) {
       // TODO: Print error
