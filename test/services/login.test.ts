@@ -21,7 +21,7 @@ const exampleToken = "some token";
 describe("login", () => {
   function makeDependencies() {
     const saveAuthToUpmConfig = mockService<SaveAuthToUpmConfig>();
-    saveAuthToUpmConfig.mockReturnValue(AsyncOk());
+    saveAuthToUpmConfig.mockResolvedValue(undefined);
 
     const npmLogin = mockService<NpmLogin>();
     npmLogin.mockReturnValue(AsyncOk(exampleToken));
@@ -66,7 +66,7 @@ describe("login", () => {
     it("should fail if config write fails", async () => {
       const expected = new GenericIOError("Write");
       const { login, saveAuthToUpmConfig } = makeDependencies();
-      saveAuthToUpmConfig.mockReturnValue(AsyncErr(expected));
+      saveAuthToUpmConfig.mockRejectedValue(expected);
 
       const result = await login(
         exampleUser,
@@ -128,7 +128,7 @@ describe("login", () => {
     it("should fail if config write fails", async () => {
       const expected = new GenericIOError("Write");
       const { login, saveAuthToUpmConfig } = makeDependencies();
-      saveAuthToUpmConfig.mockReturnValue(AsyncErr(expected));
+      saveAuthToUpmConfig.mockRejectedValue(expected);
 
       const result = await login(
         exampleUser,
