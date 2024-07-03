@@ -15,7 +15,6 @@ import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { notifyPackumentVersionResolvingFailed } from "./error-logging";
-import { GenericNetworkError } from "../io/common-errors";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -72,11 +71,7 @@ export function makeDepsCmd(
       deep
     );
     if (resolveResult.isErr()) {
-      notifyPackumentVersionResolvingFailed(
-        log,
-        name,
-        resolveResult.error
-      );
+      notifyPackumentVersionResolvingFailed(log, name, resolveResult.error);
       return ResultCodes.Error;
     }
 

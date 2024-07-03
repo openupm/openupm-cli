@@ -27,8 +27,8 @@ import {
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
 import {
-  ResolvePackumentVersionError,
   pickMostFixable,
+  ResolvePackumentVersionError,
 } from "../packument-version-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
@@ -159,11 +159,7 @@ export function makeAddCmd(
         }
 
         if (resolveResult.isErr()) {
-          notifyPackumentVersionResolvingFailed(
-            log,
-            name,
-            resolveResult.error
-          );
+          notifyPackumentVersionResolvingFailed(log, name, resolveResult.error);
           return resolveResult;
         }
 

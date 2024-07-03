@@ -7,7 +7,6 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildPackument } from "../domain/data-packument";
 import { FetchPackument } from "../../src/io/packument-io";
-import { AsyncOk } from "../../src/utils/result-utils";
 
 describe("resolve remote packument version", () => {
   const somePackage = makeDomainName("com.some.package");

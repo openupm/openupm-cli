@@ -11,7 +11,7 @@ import {
 } from "../io/project-manifest-io";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackageUrl } from "../domain/package-url";
-import { AsyncOk, resultifyAsyncOp } from "../utils/result-utils";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 export type RemovedPackage = {
   name: DomainName;

@@ -1,6 +1,6 @@
-import {RegistryUrl} from "../domain/registry-url";
-import {FindNpmrcPath, LoadNpmrc, SaveNpmrc} from "../io/npmrc-io";
-import {emptyNpmrc, setToken} from "../domain/npmrc";
+import { RegistryUrl } from "../domain/registry-url";
+import { FindNpmrcPath, LoadNpmrc, SaveNpmrc } from "../io/npmrc-io";
+import { emptyNpmrc, setToken } from "../domain/npmrc";
 
 /**
  * Function for updating the user-wide npm-auth token inside a users

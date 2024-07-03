@@ -4,7 +4,6 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { SearchedPackument } from "../../src/io/npm-search";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { Ok } from "ts-results-es";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";

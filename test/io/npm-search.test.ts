@@ -58,6 +58,6 @@ describe("npm search", () => {
 
     const actual = await searchRegistry(exampleRegistry, "wow");
 
-     expect(actual).toEqual(expected);
+    expect(actual).toEqual(expected);
   });
 });

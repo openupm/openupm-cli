@@ -1,6 +1,5 @@
 import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
-import { AsyncResult, Result } from "ts-results-es";
 import { SemanticVersion } from "../domain/semantic-version";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
