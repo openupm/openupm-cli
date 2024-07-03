@@ -49,7 +49,7 @@ import { makeLogin } from "../services/login";
 import { DebugLog } from "../logging";
 import { makeDetermineEditorVersion } from "../services/determine-editor-version";
 import { makeRemovePackages } from "../services/remove-packages";
-import { makeRunChildProcess } from "../io/child-process";
+import { ChildProcessError, makeRunChildProcess } from "../io/child-process";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { makeCheckUrlExists } from "../io/check-url";
@@ -171,6 +171,8 @@ function withGlobalErrorHandler<TArgs extends unknown[], TOut>(
         log.error("", "Failed to authenticate with a package registry.");
       else if (error instanceof GenericIOError)
         log.error("", "An interaction with the file-system failed.");
+      else if (error instanceof ChildProcessError)
+        log.error("", "A child process failed.");
       else log.error("", "An unknown error occurred.");
       log.notice("", "Run with --verbose to get more information.");
     });
