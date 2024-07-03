@@ -1,9 +1,5 @@
 import chalk from "chalk";
-import {
-  GetUpmConfigPath,
-  LoadUpmConfig,
-  UpmConfigLoadError,
-} from "../io/upm-config-io";
+import { GetUpmConfigPath, LoadUpmConfig } from "../io/upm-config-io";
 import path from "path";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
@@ -23,7 +19,7 @@ export type Env = Readonly<{
   registry: Registry;
 }>;
 
-export type EnvParseError = UpmConfigLoadError;
+export type EnvParseError = never;
 
 /**
  * Function for parsing environment information and global
@@ -117,9 +113,7 @@ export function makeParseEnv(
 
     // registries
     const upmConfigPath = await getUpmConfigPath(wsl, systemUser);
-    const upmConfigResult = await loadUpmConfig(upmConfigPath).promise;
-    if (upmConfigResult.isErr()) return upmConfigResult;
-    const upmConfig = upmConfigResult.value;
+    const upmConfig = await loadUpmConfig(upmConfigPath);
 
     const registry = determinePrimaryRegistry(options, upmConfig);
     const upstreamRegistry = determineUpstreamRegistry(options);

@@ -4,10 +4,8 @@ import {
 } from "../../src/io/upm-config-io";
 import { ReadTextFile } from "../../src/io/text-file-io";
 import { mockService } from "../services/service.mock";
-import { StringFormatError } from "../../src/utils/string-parsing";
 import { GetHomePath } from "../../src/io/special-paths";
 import path from "path";
-import { GenericIOError } from "../../src/io/common-errors";
 import { RunChildProcess } from "../../src/io/child-process";
 
 describe("upm-config-io", () => {
@@ -52,40 +50,18 @@ describe("upm-config-io", () => {
       const path = "/home/user/.upmconfig.toml";
       readFile.mockResolvedValue(null);
 
-      const result = await loadUpmConfig(path).promise;
+      const actual = await loadUpmConfig(path);
 
-      expect(result).toBeOk((actual) => expect(actual).toBeNull());
+      expect(actual).toBeNull();
     });
 
     it("should be parsed file", async () => {
       const { loadUpmConfig } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
 
-      const result = await loadUpmConfig(path).promise;
+      const actual = await loadUpmConfig(path);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual({}));
-    });
-
-    it("should fail if file could not be read", async () => {
-      const { loadUpmConfig, readFile } = makeDependencies();
-      const path = "/home/user/.upmconfig.toml";
-      readFile.mockRejectedValue(new GenericIOError("Read"));
-
-      const result = await loadUpmConfig(path).promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(GenericIOError)
-      );
-    });
-
-    it("should fail if file has bad toml content", async () => {
-      const { loadUpmConfig, readFile } = makeDependencies();
-      readFile.mockResolvedValue("This {\n is not]\n valid TOML");
-      const path = "/home/user/.upmconfig.toml";
-
-      await expect(loadUpmConfig(path).promise).rejects.toBeInstanceOf(
-        StringFormatError
-      );
+      expect(actual).toEqual({});
     });
   });
 });

@@ -10,10 +10,7 @@ import { Login } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import {
-  GenericIOError,
-  RegistryAuthenticationError,
-} from "../../src/io/common-errors";
+import { RegistryAuthenticationError } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
@@ -44,16 +41,6 @@ describe("cmd-login", () => {
     const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
     return { loginCmd, parseEnv, getUpmConfigPath, login, log } as const;
   }
-
-  it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError("Read");
-    const { loginCmd, parseEnv } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(expected));
-
-    const resultCode = await loginCmd({ _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
 
   // TODO: Add tests for prompting logic
 

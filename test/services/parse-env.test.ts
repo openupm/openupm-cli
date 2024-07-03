@@ -2,7 +2,6 @@ import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { Env, makeParseEnv } from "../../src/services/parse-env";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
-import { mockUpmConfig } from "../io/upm-config-io.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
@@ -33,7 +32,7 @@ function makeDependencies() {
   getUpmConfigPath.mockResolvedValue(testRootPath);
 
   const loadUpmConfig = mockService<LoadUpmConfig>();
-  mockUpmConfig(loadUpmConfig, null);
+  loadUpmConfig.mockResolvedValue(null);
 
   // process.cwd is in the root directory.
   const getCwd = mockService<GetCwd>();
@@ -276,7 +275,7 @@ describe("env", () => {
 
     it("should have no auth if upm-config had no entry for the url", async () => {
       const { parseEnv, loadUpmConfig } = makeDependencies();
-      mockUpmConfig(loadUpmConfig, {
+      loadUpmConfig.mockResolvedValue({
         npmAuth: {},
       });
 
@@ -293,7 +292,7 @@ describe("env", () => {
 
     it("should notify if upm-config did not have auth", async () => {
       const { parseEnv, log, loadUpmConfig } = makeDependencies();
-      mockUpmConfig(loadUpmConfig, {
+      loadUpmConfig.mockResolvedValue({
         npmAuth: {},
       });
 
@@ -311,7 +310,7 @@ describe("env", () => {
 
     it("should have auth if upm-config had entry for the url", async () => {
       const { parseEnv, loadUpmConfig } = makeDependencies();
-      mockUpmConfig(loadUpmConfig, testUpmConfig);
+      loadUpmConfig.mockResolvedValue(testUpmConfig);
 
       const result = await parseEnv({
         _global: {

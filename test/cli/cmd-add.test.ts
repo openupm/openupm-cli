@@ -20,9 +20,8 @@ import {
 import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
-import { GenericIOError } from "../../src/io/common-errors";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
-import { Err, Ok } from "ts-results-es";
+import { Ok } from "ts-results-es";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { AsyncOk } from "../../src/utils/result-utils";
 
@@ -123,28 +122,6 @@ function makeDependencies() {
 }
 
 describe("cmd-add", () => {
-  it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError("Read");
-    const { addCmd, parseEnv } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(expected));
-
-    const resultCode = await addCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if env could not be parsed", async () => {
-    const { addCmd, parseEnv, log } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(new GenericIOError("Read")));
-
-    await addCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("file-system error")
-    );
-  });
-
   it("should fail if package could not be resolved", async () => {
     const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
     mockResolvedPackuments(resolveRemovePackumentVersion);

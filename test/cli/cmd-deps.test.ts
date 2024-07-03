@@ -1,6 +1,6 @@
 import { makeDepsCmd } from "../../src/cli/cmd-deps";
 import { Env, ParseEnv } from "../../src/services/parse-env";
-import { Err, Ok } from "ts-results-es";
+import { Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeDomainName } from "../../src/domain/domain-name";
@@ -12,7 +12,6 @@ import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
-import { GenericIOError } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
@@ -55,16 +54,6 @@ function makeDependencies() {
 }
 
 describe("cmd-deps", () => {
-  it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError("Read");
-    const { depsCmd, parseEnv } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(expected));
-
-    const resultCode = await depsCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
   it("should fail if package-reference has url-version", async () => {
     const { depsCmd } = makeDependencies();
 

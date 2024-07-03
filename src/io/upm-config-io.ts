@@ -9,7 +9,6 @@ import { tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath } from "./wsl";
 import { RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
-import { GenericIOError } from "./common-errors";
 
 const configFileName = ".upmconfig.toml";
 
@@ -70,32 +69,24 @@ export function makeGetUpmConfigPath(
 }
 
 /**
- * Error which may occur when loading a {@link UPMConfig}.
- */
-export type UpmConfigLoadError = GenericIOError;
-
-/**
  * IO function for loading an upm-config file.
  * @param configFilePath Path of the upm-config file.
  * @returns The config or null if it was not found.
  */
 export type LoadUpmConfig = (
   configFilePath: string
-) => AsyncResult<UPMConfig | null, UpmConfigLoadError>;
+) => Promise<UPMConfig | null>;
 
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
 export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
-  return (configFilePath) =>
-    new AsyncResult(
-      Result.wrapAsync<string | null, GenericIOError>(() =>
-        readFile(configFilePath, true)
-      )
-    )
-      .map((content) => (content !== null ? tryParseToml(content) : null))
-      // TODO: Actually validate
-      .map((toml) => toml as UPMConfig | null);
+  return async (configFilePath) => {
+    const content = await readFile(configFilePath, true);
+    if (content === null) return null;
+    const toml = tryParseToml(content);
+    return toml as UPMConfig;
+  };
 }
 
 /**

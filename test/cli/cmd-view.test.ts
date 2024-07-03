@@ -2,17 +2,14 @@ import { makeViewCmd } from "../../src/cli/cmd-view";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { Err, Ok } from "ts-results-es";
+import { Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
-import {
-  GenericIOError,
-  GenericNetworkError,
-} from "../../src/io/common-errors";
+import { GenericNetworkError } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { FetchPackument } from "../../src/io/packument-io";
 
@@ -72,16 +69,6 @@ function makeDependencies() {
 }
 
 describe("cmd-view", () => {
-  it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError("Read");
-    const { viewCmd, parseEnv } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(expected));
-
-    const resultCode = await viewCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
   it("should fail if package version was specified", async () => {
     const { viewCmd } = makeDependencies();
 
