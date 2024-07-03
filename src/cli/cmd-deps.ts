@@ -6,7 +6,7 @@ import {
   splitPackageReference,
 } from "../domain/package-reference";
 import { CmdOptions } from "./options";
-import { PackumentVersionResolveError } from "../packument-version-resolving";
+import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
@@ -14,7 +14,7 @@ import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import { notifyRemotePackumentVersionResolvingFailed } from "./error-logging";
+import { notifyPackumentVersionResolvingFailed } from "./error-logging";
 import { GenericNetworkError } from "../io/common-errors";
 
 export type DepsOptions = CmdOptions<{
@@ -36,7 +36,7 @@ export type DepsCmd = (
   options: DepsOptions
 ) => Promise<DepsResultCode>;
 
-function errorPrefixForError(error: PackumentVersionResolveError): string {
+function errorPrefixForError(error: ResolvePackumentVersionError): string {
   if (error instanceof PackumentNotFoundError) return "missing dependency";
   else if (error instanceof VersionNotFoundError)
     return "missing dependency version";
@@ -72,7 +72,7 @@ export function makeDepsCmd(
       deep
     );
     if (resolveResult.isErr()) {
-      notifyRemotePackumentVersionResolvingFailed(
+      notifyPackumentVersionResolvingFailed(
         log,
         name,
         resolveResult.error

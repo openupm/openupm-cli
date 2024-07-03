@@ -1,10 +1,10 @@
 import { Logger } from "npmlog";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
-import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
+import { VersionNotFoundError } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { EOL } from "node:os";
-import { ResolveRemotePackumentVersionError } from "../services/resolve-remote-packument-version";
+import { ResolvePackumentVersionError } from "../packument-version-resolving";
 
 export function suggestCheckingWorkingDirectory(log: Logger) {
   log.notice("", "Are you in the correct working directory?");
@@ -155,14 +155,13 @@ export function notifyOfMissingVersion(
   log.notice("", `Maybe you meant one of the following:${EOL}${versionList}`);
 }
 
-export function notifyRemotePackumentVersionResolvingFailed(
+export function notifyPackumentVersionResolvingFailed(
   log: Logger,
   packageName: DomainName,
-  error: ResolveRemotePackumentVersionError
+  error: ResolvePackumentVersionError
 ) {
   if (error instanceof PackumentNotFoundError)
     notifyPackumentNotFoundInAnyRegistry(log, packageName);
-  else if (error instanceof NoVersionsError) notifyNoVersions(log, packageName);
   else if (error instanceof VersionNotFoundError)
     notifyOfMissingVersion(
       log,

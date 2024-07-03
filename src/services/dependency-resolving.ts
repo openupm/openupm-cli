@@ -2,18 +2,15 @@ import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
-  PackumentVersionResolveError,
   pickMostFixable,
   ResolvableVersion,
   ResolvedPackumentVersion,
+  ResolvePackumentVersionError,
   tryResolveFromCache,
 } from "../packument-version-resolving";
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
-import {
-  ResolveRemotePackumentVersion,
-  ResolveRemotePackumentVersionError,
-} from "./resolve-remote-packument-version";
+import { ResolveRemotePackumentVersion } from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
 import { ResolveLatestVersion } from "./resolve-latest-version";
@@ -56,7 +53,7 @@ export interface ValidDependency extends DependencyBase {
  * A dependency that could not be resolved.
  */
 export interface InvalidDependency extends DependencyBase {
-  reason: PackumentVersionResolveError;
+  reason: ResolvePackumentVersionError;
 }
 
 type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
@@ -162,7 +159,7 @@ export function makeResolveDependency(
         // Search all given registries.
         let resolveResult: Result<
           ResolvedPackumentVersion,
-          ResolveRemotePackumentVersionError
+          ResolvePackumentVersionError
         > = Err(new PackumentNotFoundError(entryName));
         for (const source of sources) {
           const result = await tryResolveFromRegistry(

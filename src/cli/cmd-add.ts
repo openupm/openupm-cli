@@ -27,7 +27,7 @@ import {
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
 import {
-  PackumentVersionResolveError,
+  ResolvePackumentVersionError,
   pickMostFixable,
 } from "../packument-version-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
@@ -47,7 +47,7 @@ import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
-import { notifyRemotePackumentVersionResolvingFailed } from "./error-logging";
+import { notifyPackumentVersionResolvingFailed } from "./error-logging";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -78,7 +78,7 @@ export type AddOptions = CmdOptions<{
 }>;
 
 type AddError =
-  | PackumentVersionResolveError
+  | ResolvePackumentVersionError
   | InvalidPackumentDataError
   | EditorIncompatibleError
   | UnresolvedDependencyError
@@ -159,7 +159,7 @@ export function makeAddCmd(
         }
 
         if (resolveResult.isErr()) {
-          notifyRemotePackumentVersionResolvingFailed(
+          notifyPackumentVersionResolvingFailed(
             log,
             name,
             resolveResult.error
@@ -221,7 +221,7 @@ export function makeAddCmd(
             true
           );
           if (resolveResult.isErr()) {
-            notifyRemotePackumentVersionResolvingFailed(
+            notifyPackumentVersionResolvingFailed(
               log,
               name,
               resolveResult.error
@@ -245,7 +245,7 @@ export function makeAddCmd(
           // print suggestion for depsInvalid
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
-            notifyRemotePackumentVersionResolvingFailed(
+            notifyPackumentVersionResolvingFailed(
               log,
               depObj.name,
               depObj.reason
