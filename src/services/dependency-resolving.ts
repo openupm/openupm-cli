@@ -26,10 +26,7 @@ import {
   GenericNetworkError,
   RegistryAuthenticationError,
 } from "../io/common-errors";
-import {
-  CheckIsBuiltInPackage,
-  CheckIsBuiltInPackageError,
-} from "./built-in-package-check";
+import { CheckIsBuiltInPackage } from "./built-in-package-check";
 
 export type DependencyBase = {
   /**
@@ -70,9 +67,7 @@ type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 /**
  * Error which may occur when resolving the dependencies for a package.
  */
-export type DependencyResolveError =
-  | ResolveLatestVersionError
-  | CheckIsBuiltInPackageError;
+export type DependencyResolveError = ResolveLatestVersionError;
 
 /**
  * Function for resolving all dependencies for a package.
@@ -154,12 +149,7 @@ export function makeResolveDependency(
       if (!isProcessed) {
         // add entry to processed list
         processedList.push(entry);
-        const isInternalResult = await checkIsBuiltInPackage(
-          entryName,
-          entryVersion
-        ).promise;
-        if (isInternalResult.isErr()) return isInternalResult;
-        const isInternal = isInternalResult.value;
+        const isInternal = await checkIsBuiltInPackage(entryName, entryVersion);
         const isSelf = entryName === name;
 
         if (isInternal) {
