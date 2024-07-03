@@ -1,9 +1,7 @@
 import {
   makeGetUpmConfigPath,
   makeLoadUpmConfig,
-  RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
-import { Err, Ok } from "ts-results-es";
 import { ReadTextFile } from "../../src/io/text-file-io";
 import { mockService } from "../services/service.mock";
 import { StringFormatError } from "../../src/utils/string-parsing";
@@ -31,21 +29,11 @@ describe("upm-config-io", () => {
       it("should be in home path", async () => {
         const { getUpmConfigPath, getHomePath } = makeDependencies();
         const expected = path.resolve("/some/home/dir/.upmconfig.toml");
-        getHomePath.mockReturnValue(Ok(path.dirname(expected)));
+        getHomePath.mockReturnValue(path.dirname(expected));
 
         const result = await getUpmConfigPath(false, false).promise;
 
         expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
-      });
-
-      it("should fail if home could not be determined", async () => {
-        const { getUpmConfigPath, getHomePath } = makeDependencies();
-        const expected = new RequiredEnvMissingError([]);
-        getHomePath.mockReturnValue(Err(expected));
-
-        const result = await getUpmConfigPath(false, false).promise;
-
-        expect(result).toBeError((actual) => expect(actual).toEqual(expected));
       });
     });
   });

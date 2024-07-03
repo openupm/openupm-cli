@@ -10,6 +10,7 @@ import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError, RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
 import { GenericIOError } from "./common-errors";
+import { AsyncOk } from "../utils/result-utils";
 
 const configFileName = ".upmconfig.toml";
 
@@ -70,7 +71,7 @@ export function makeGetUpmConfigPath(
       return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
     }
 
-    return getHomePath().toAsyncResult();
+    return AsyncOk(getHomePath());
   }
 
   return (wsl, systemUser) => {

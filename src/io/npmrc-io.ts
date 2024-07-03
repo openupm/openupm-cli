@@ -16,7 +16,7 @@ export type FindNpmrcPath = () => string;
  */
 export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
   return () => {
-    const homePath = getHomePath().unwrap();
+    const homePath = getHomePath();
     return path.join(homePath, ".npmrc");
   };
 }

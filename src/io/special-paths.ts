@@ -47,15 +47,10 @@ export class OSNotSupportedError extends CustomError {
 }
 
 /**
- * Error which may occur when getting the users home path.
- */
-export type GetHomePathError = RequiredEnvMissingError;
-
-/**
  * Function for getting the path of the users home directory.
  * @returns The path to the directory.
  */
-export type GetHomePath = () => Result<string, GetHomePathError>;
+export type GetHomePath = () => string;
 
 /**
  * Makes a {@link GetHomePath} function.
@@ -64,8 +59,8 @@ export function makeGetHomePath(): GetHomePath {
   return () => {
     const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
     if (homePath === null)
-      return Err(new RequiredEnvMissingError(["USERPROFILE", "HOME"]));
-    return Ok(homePath);
+      throw new RequiredEnvMissingError(["USERPROFILE", "HOME"]);
+    return homePath;
   };
 }
 

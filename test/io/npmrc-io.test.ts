@@ -1,5 +1,4 @@
 import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
-import { Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
   makeFindNpmrcPath,
@@ -8,7 +7,6 @@ import {
 } from "../../src/io/npmrc-io";
 import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
-import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { mockService } from "../services/service.mock";
 import { eaccesError } from "./node-error.mock";
 import { GenericIOError } from "../../src/io/common-errors";
@@ -27,18 +25,11 @@ describe("npmrc-io", () => {
       const { findPath, getHomePath } = makeDependencies();
       const home = path.join(path.sep, "user", "dir");
       const expected = path.join(home, ".npmrc");
-      getHomePath.mockReturnValue(Ok(home));
+      getHomePath.mockReturnValue(home);
 
       const actual = findPath();
 
       expect(actual).toEqual(expected);
-    });
-
-    it("should fail if home could not be determined", () => {
-      const { findPath, getHomePath } = makeDependencies();
-      getHomePath.mockReturnValue(Err(new RequiredEnvMissingError([])));
-
-      expect(() => findPath()).toThrow();
     });
   });
 
