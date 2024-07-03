@@ -13,19 +13,15 @@ describe("string-parsing", () => {
       const expected = { test: 123 };
       const json = JSON.stringify(expected);
 
-      const result = tryParseJson(json);
+      const actual = tryParseJson(json);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
     it("should fail for bad data", () => {
       const json = "{ invalid json ";
 
-      const result = tryParseJson(json);
-
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(StringFormatError)
-      );
+      expect(() => tryParseJson(json)).toThrow(StringFormatError);
     });
   });
 
@@ -34,19 +30,15 @@ describe("string-parsing", () => {
       const expected = { test: 123 };
       const toml = TOML.stringify(expected);
 
-      const result = tryParseToml(toml);
+      const actual = tryParseToml(toml);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
     it("should fail for bad data", () => {
       const toml = "{ invalid toml ";
 
-      const result = tryParseToml(toml);
-
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(StringFormatError)
-      );
+      expect(() => tryParseToml(toml)).toThrow(StringFormatError);
     });
   });
 
@@ -55,19 +47,15 @@ describe("string-parsing", () => {
       const expected = { test: 123 };
       const text = yaml.stringify(expected);
 
-      const result = tryParseYaml(text);
+      const actual = tryParseYaml(text);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
     it("should fail for bad yaml", () => {
       const yaml = "{ invalid yaml ";
 
-      const result = tryParseYaml(yaml);
-
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(StringFormatError)
-      );
+      expect(() => tryParseYaml(yaml)).toThrow(StringFormatError);
     });
   });
 });

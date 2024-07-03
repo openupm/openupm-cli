@@ -66,11 +66,9 @@ describe("project-manifest io", () => {
       const { loadProjectManifest, readFile } = makeDependencies();
       readFile.mockResolvedValue("{} dang, this is not json []");
 
-      const result = await loadProjectManifest(exampleProjectPath).promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(StringFormatError)
-      );
+      await expect(
+        loadProjectManifest(exampleProjectPath).promise
+      ).rejects.toBeInstanceOf(StringFormatError);
     });
 
     it("should load valid manifest", async () => {

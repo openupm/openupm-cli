@@ -1,5 +1,4 @@
 import TOML, { AnyJson, JsonMap } from "@iarna/toml";
-import { Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
 import yaml from "yaml";
 import { assertIsError } from "./error-type-guards";
@@ -30,12 +29,15 @@ export class StringFormatError<
 function makeParser<const TFormat extends string, T>(
   formatName: TFormat,
   parsingFunction: (x: string) => T
-): (x: string) => Result<T, StringFormatError<TFormat>> {
-  return (input) =>
-    Result.wrap(() => parsingFunction(input)).mapErr((error) => {
+): (x: string) => T {
+  return (input) => {
+    try {
+      return parsingFunction(input);
+    } catch (error) {
       assertIsError(error);
-      return new StringFormatError(formatName, error);
-    });
+      throw new StringFormatError(formatName, error);
+    }
+  };
 }
 
 /**

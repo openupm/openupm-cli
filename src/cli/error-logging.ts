@@ -115,8 +115,6 @@ export function notifyEnvParsingFailed(log: Logger, error: EnvParseError) {
     notifyMissingEnvForUpmConfigPath(log, error.keyNames);
   else if (error instanceof GenericIOError)
     notifyUpmConfigLoadFailedBecauseIO(log);
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedUpmConfig(log);
 }
 
 export function notifyProjectVersionMissing(log: Logger, filePath: string) {

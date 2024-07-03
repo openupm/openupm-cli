@@ -5,7 +5,7 @@ import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
-import { StringFormatError, tryParseToml } from "../utils/string-parsing";
+import { tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";
 import { ChildProcessError, RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
@@ -83,7 +83,7 @@ export function makeGetUpmConfigPath(
 /**
  * Error which may occur when loading a {@link UPMConfig}.
  */
-export type UpmConfigLoadError = GenericIOError | StringFormatError<"Toml">;
+export type UpmConfigLoadError = GenericIOError;
 
 /**
  * IO function for loading an upm-config file.
@@ -99,17 +99,14 @@ export type LoadUpmConfig = (
  */
 export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
   return (configFilePath) =>
-    new AsyncResult(Result.wrapAsync(() => readFile(configFilePath, true)))
-      .andThen((content) =>
-        content !== null ? tryParseToml(content) : Ok(null)
+    new AsyncResult(
+      Result.wrapAsync<string | null, GenericIOError>(() =>
+        readFile(configFilePath, true)
       )
+    )
+      .map((content) => (content !== null ? tryParseToml(content) : null))
       // TODO: Actually validate
-      .map((toml) => toml as UPMConfig | null)
-      .mapErr((error) =>
-        !(error instanceof StringFormatError)
-          ? new GenericIOError("Read")
-          : error
-      );
+      .map((toml) => toml as UPMConfig | null);
 }
 
 /**

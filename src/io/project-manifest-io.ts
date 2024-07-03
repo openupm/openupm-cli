@@ -12,6 +12,7 @@ import {
   GenericIOError,
 } from "./common-errors";
 import { assertIsNodeError } from "../utils/error-type-guards";
+import { AnyJson } from "@iarna/toml";
 
 /**
  * Determines the path to the package manifest based on the project
@@ -57,7 +58,6 @@ export function makeProjectManifestParseError(
  */
 export type ManifestLoadError =
   | ProjectManifestMissingError
-  | StringFormatError<"Json">
   | GenericIOError
   | ProjectManifestParseError;
 
@@ -86,7 +86,7 @@ export function makeLoadProjectManifest(
           ? makeProjectManifestMissingError(manifestPath)
           : new GenericIOError("Read");
       })
-      .andThen(tryParseJson)
+      .map(tryParseJson)
       .andThen((json) =>
         typeof json === "object"
           ? // TODO: Actually validate the json structure

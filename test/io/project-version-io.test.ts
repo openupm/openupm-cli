@@ -2,7 +2,6 @@ import { ReadTextFile } from "../../src/io/text-file-io";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
 import { makeLoadProjectVersion } from "../../src/io/project-version-io";
-import { eaccesError, enoentError } from "./node-error.mock";
 import {
   FileMissingError,
   FileParseError,
@@ -21,7 +20,7 @@ describe("project-version-io", () => {
 
     it("should fail if file is missing", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      readFile.mockRejectedValue(enoentError);
+      readFile.mockResolvedValue(null);
 
       const result = await loadProjectVersion("/some/bad/path").promise;
 
@@ -32,7 +31,7 @@ describe("project-version-io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
-      readFile.mockRejectedValue(eaccesError);
+      readFile.mockRejectedValue(new GenericIOError("Read"));
 
       const result = await loadProjectVersion("/some/bad/path").promise;
 
@@ -45,11 +44,9 @@ describe("project-version-io", () => {
       const { loadProjectVersion, readFile } = makeDependencies();
       readFile.mockResolvedValue("{ this is not valid yaml");
 
-      const result = await loadProjectVersion("/some/path").promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(StringFormatError)
-      );
+      await expect(
+        loadProjectVersion("/some/path").promise
+      ).rejects.toBeInstanceOf(StringFormatError);
     });
 
     it("should fail if yaml does not contain editor-version", async () => {

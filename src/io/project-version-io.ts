@@ -7,7 +7,6 @@ import {
   FileParseError,
   GenericIOError,
 } from "./common-errors";
-import { assertIsNodeError } from "../utils/error-type-guards";
 
 export function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
@@ -70,14 +69,17 @@ export function makeLoadProjectVersion(
   return (projectDirPath) => {
     const filePath = projectVersionTxtPathFor(projectDirPath);
 
-    return new AsyncResult(Result.wrapAsync(() => readFile(filePath, false)))
-      .mapErr((error) => {
-        assertIsNodeError(error);
-        return error.code === "ENOENT"
-          ? makeProjectVersionMissingError(filePath)
-          : new GenericIOError("Read");
-      })
-      .andThen(tryParseYaml)
+    return new AsyncResult(
+      Result.wrapAsync<string | null, GenericIOError>(() =>
+        readFile(filePath, true)
+      )
+    )
+      .andThen((maybeContent) =>
+        maybeContent !== null
+          ? Ok(maybeContent)
+          : Err(makeProjectVersionMissingError(filePath))
+      )
+      .map(tryParseYaml)
       .andThen((content) => {
         if (
           !(
