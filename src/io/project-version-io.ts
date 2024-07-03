@@ -1,5 +1,5 @@
 import path from "path";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { ReadTextFile } from "./fs-result";
 import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
 import {
@@ -7,6 +7,7 @@ import {
   FileParseError,
   GenericIOError,
 } from "./common-errors";
+import { assertIsNodeError } from "../utils/error-type-guards";
 
 export function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
@@ -69,12 +70,13 @@ export function makeLoadProjectVersion(
   return (projectDirPath) => {
     const filePath = projectVersionTxtPathFor(projectDirPath);
 
-    return readFile(filePath)
-      .mapErr((error) =>
-        error.code === "ENOENT"
+    return new AsyncResult(Result.wrapAsync(() => readFile(filePath, false)))
+      .mapErr((error) => {
+        assertIsNodeError(error);
+        return error.code === "ENOENT"
           ? makeProjectVersionMissingError(filePath)
-          : new GenericIOError("Read")
-      )
+          : new GenericIOError("Read");
+      })
       .andThen(tryParseYaml)
       .andThen((content) => {
         if (

@@ -54,6 +54,7 @@ import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { makeCheckUrlExists } from "../io/check-url";
 import {
+  GenericIOError,
   GenericNetworkError,
   RegistryAuthenticationError,
 } from "../io/common-errors";
@@ -168,6 +169,8 @@ function withGlobalErrorHandler<TArgs extends unknown[], TOut>(
         log.error("", "A http request failed.");
       else if (error instanceof RegistryAuthenticationError)
         log.error("", "Failed to authenticate with a package registry.");
+      else if (error instanceof GenericIOError)
+        log.error("", "An interaction with the file-system failed.");
       else log.error("", "An unknown error occurred.");
       log.notice("", "Run with --verbose to get more information.");
     });

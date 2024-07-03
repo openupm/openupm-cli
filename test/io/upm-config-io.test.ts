@@ -9,9 +9,8 @@ import { mockService } from "../services/service.mock";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { GetHomePath } from "../../src/io/special-paths";
 import path from "path";
-import { eaccesError, enoentError } from "./node-error.mock";
+import { eaccesError } from "./node-error.mock";
 import { GenericIOError } from "../../src/io/common-errors";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { RunChildProcess } from "../../src/io/child-process";
 
 describe("upm-config-io", () => {
@@ -55,7 +54,7 @@ describe("upm-config-io", () => {
   describe("load", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
-      readFile.mockReturnValue(AsyncOk(""));
+      readFile.mockResolvedValue("");
 
       const loadUpmConfig = makeLoadUpmConfig(readFile);
       return { loadUpmConfig, readFile } as const;
@@ -64,7 +63,7 @@ describe("upm-config-io", () => {
     it("should be null if file is not found", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
-      readFile.mockReturnValue(AsyncErr(enoentError));
+      readFile.mockResolvedValue(null);
 
       const result = await loadUpmConfig(path).promise;
 
@@ -83,7 +82,7 @@ describe("upm-config-io", () => {
     it("should fail if file could not be read", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       const path = "/home/user/.upmconfig.toml";
-      readFile.mockReturnValue(AsyncErr(eaccesError));
+      readFile.mockRejectedValue(eaccesError);
 
       const result = await loadUpmConfig(path).promise;
 
@@ -94,7 +93,7 @@ describe("upm-config-io", () => {
 
     it("should fail if file has bad toml content", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
-      readFile.mockReturnValue(AsyncOk("This {\n is not]\n valid TOML"));
+      readFile.mockResolvedValue("This {\n is not]\n valid TOML");
       const path = "/home/user/.upmconfig.toml";
 
       const result = await loadUpmConfig(path).promise;

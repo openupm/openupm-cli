@@ -35,16 +35,6 @@ describe("npmrc-auth", () => {
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
-    it("should fail if npmrc load failed", async () => {
-      const expected = new GenericIOError("Read");
-      const { authNpmrc, loadNpmrc } = makeDependencies();
-      loadNpmrc.mockReturnValue(new AsyncResult(Err(expected)));
-
-      const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
     it("should fail if npmrc save failed", async () => {
       const expected = new GenericIOError("Write");
       const { authNpmrc, saveNpmrc } = makeDependencies();

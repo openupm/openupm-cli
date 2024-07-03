@@ -1,4 +1,4 @@
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Ok, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
@@ -28,7 +28,7 @@ export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
 /**
  * Error that might occur when loading a npmrc.
  */
-export type NpmrcLoadError = GenericIOError;
+export type NpmrcLoadError = never;
 
 /**
  * Function for loading npmrc.
@@ -44,11 +44,9 @@ export type LoadNpmrc = (
  */
 export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
   return (path) =>
-    readFile(path)
-      .map<Npmrc | null>((content) => content.split(EOL))
-      .orElse((error) =>
-        error.code === "ENOENT" ? Ok(null) : Err(new GenericIOError("Read"))
-      );
+    new AsyncResult(
+      readFile(path, true).then((content) => Ok(content?.split(EOL) ?? null))
+    );
 }
 
 /**

@@ -3,7 +3,7 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import path from "path";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { StringFormatError, tryParseJson } from "../utils/string-parsing";
 import {
@@ -11,6 +11,7 @@ import {
   FileParseError,
   GenericIOError,
 } from "./common-errors";
+import { assertIsNodeError } from "../utils/error-type-guards";
 
 /**
  * Determines the path to the package manifest based on the project
@@ -56,8 +57,8 @@ export function makeProjectManifestParseError(
  */
 export type ManifestLoadError =
   | ProjectManifestMissingError
-  | GenericIOError
   | StringFormatError<"Json">
+  | GenericIOError
   | ProjectManifestParseError;
 
 /**
@@ -76,12 +77,15 @@ export function makeLoadProjectManifest(
 ): LoadProjectManifest {
   return (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
-    return readFile(manifestPath)
-      .mapErr((error) =>
-        error.code === "ENOENT"
+    return new AsyncResult(
+      Result.wrapAsync(() => readFile(manifestPath, false))
+    )
+      .mapErr((error) => {
+        assertIsNodeError(error);
+        return error.code === "ENOENT"
           ? makeProjectManifestMissingError(manifestPath)
-          : new GenericIOError("Read")
-      )
+          : new GenericIOError("Read");
+      })
       .andThen(tryParseJson)
       .andThen((json) =>
         typeof json === "object"

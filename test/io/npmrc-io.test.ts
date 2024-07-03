@@ -10,7 +10,7 @@ import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { mockService } from "../services/service.mock";
-import { eaccesError, enoentError } from "./node-error.mock";
+import { eaccesError } from "./node-error.mock";
 import { GenericIOError } from "../../src/io/common-errors";
 
 describe("npmrc-io", () => {
@@ -55,7 +55,7 @@ describe("npmrc-io", () => {
     it("should be ok for valid file", async () => {
       const fileContent = `key1 = value1${EOL}key2 = "value2"`;
       const { loadNpmrc, readText } = makeDependencies();
-      readText.mockReturnValue(new AsyncResult(Ok(fileContent)));
+      readText.mockResolvedValue(fileContent);
 
       const result = await loadNpmrc("/valid/path/.npmrc").promise;
 
@@ -67,7 +67,7 @@ describe("npmrc-io", () => {
     it("should be null for missing file", async () => {
       const { loadNpmrc, readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
-      readText.mockReturnValue(new AsyncResult(Err(enoentError)));
+      readText.mockResolvedValue(null);
 
       const result = await loadNpmrc(path).promise;
 

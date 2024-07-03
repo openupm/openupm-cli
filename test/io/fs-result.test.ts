@@ -22,19 +22,38 @@ describe("fs-result", () => {
       const expected = "content";
       jest.spyOn(fs, "readFile").mockResolvedValue(expected);
 
-      const result = await readFile("path/to/file.txt").promise;
+      const actual = await readFile("path/to/file.txt", false);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
-    it("should fail if file could not be read", async () => {
+    it("should be null if optional file is missing", async () => {
+      const { readFile } = makeDependencies();
+      jest.spyOn(fs, "readFile").mockRejectedValue(makeNodeError("ENOENT"));
+
+      const content = await readFile("path/to/file.txt", true);
+
+      expect(content).toBeNull();
+    });
+
+    it("should fail if non-optional file is missing", async () => {
       const { readFile } = makeDependencies();
       const expected = makeNodeError("ENOENT");
       jest.spyOn(fs, "readFile").mockRejectedValue(expected);
 
-      const result = await readFile("path/to/file.txt").promise;
+      await expect(readFile("path/to/file.txt", false)).rejects.toEqual(
+        expected
+      );
+    });
 
-      expect(result).toBeError((error) => expect(error).toEqual(expected));
+    it("should fail if file could not be read", async () => {
+      const { readFile } = makeDependencies();
+      const expected = makeNodeError("EACCES");
+      jest.spyOn(fs, "readFile").mockRejectedValue(expected);
+
+      await expect(readFile("path/to/file.txt", false)).rejects.toEqual(
+        expected
+      );
     });
   });
 

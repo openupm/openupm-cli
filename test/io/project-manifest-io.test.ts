@@ -43,7 +43,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(AsyncErr(eaccesError));
+      readFile.mockRejectedValue(eaccesError);
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
@@ -54,7 +54,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file is missing", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(AsyncErr(enoentError));
+      readFile.mockRejectedValue(enoentError);
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
@@ -65,7 +65,7 @@ describe("project-manifest io", () => {
 
     it("should fail if file does not contain json", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(AsyncOk("{} dang, this is not json []"));
+      readFile.mockResolvedValue("{} dang, this is not json []");
 
       const result = await loadProjectManifest(exampleProjectPath).promise;
 
@@ -76,8 +76,8 @@ describe("project-manifest io", () => {
 
     it("should load valid manifest", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockReturnValue(
-        AsyncOk(`{ "dependencies": { "com.package.a": "1.0.0"} }`)
+      readFile.mockResolvedValue(
+        `{ "dependencies": { "com.package.a": "1.0.0"} }`
       );
 
       const result = await loadProjectManifest(exampleProjectPath).promise;

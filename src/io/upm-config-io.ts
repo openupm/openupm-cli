@@ -2,7 +2,7 @@ import path from "path";
 import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { AsyncResult, Err, Ok, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./fs-result";
 import { tryGetEnv } from "../utils/env-util";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
@@ -99,16 +99,16 @@ export type LoadUpmConfig = (
  */
 export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
   return (configFilePath) =>
-    readFile(configFilePath)
-      .andThen(tryParseToml)
+    new AsyncResult(Result.wrapAsync(() => readFile(configFilePath, true)))
+      .andThen((content) =>
+        content !== null ? tryParseToml(content) : Ok(null)
+      )
       // TODO: Actually validate
       .map((toml) => toml as UPMConfig | null)
-      .orElse<UpmConfigLoadError>((error) =>
+      .mapErr((error) =>
         !(error instanceof StringFormatError)
-          ? error.code === "ENOENT"
-            ? Ok(null)
-            : Err(new GenericIOError("Read"))
-          : Err(error)
+          ? new GenericIOError("Read")
+          : error
       );
 }
 
