@@ -59,6 +59,7 @@ import {
   GenericNetworkError,
   RegistryAuthenticationError,
 } from "../io/common-errors";
+import { ResultCodes } from "./result-codes";
 
 // Composition root
 
@@ -161,9 +162,12 @@ function makeCmdOptions<T extends Record<string, unknown>>(
   return { ...specificOptions, _global: program.opts() };
 }
 
-function withGlobalErrorHandler<TArgs extends unknown[], TOut>(
+function withGlobalErrorHandler<
+  TArgs extends unknown[],
+  TOut extends ResultCodes
+>(
   cmd: (...args: TArgs) => Promise<TOut>
-): (...args: TArgs) => Promise<TOut | void> {
+): (...args: TArgs) => Promise<TOut | ResultCodes.Error> {
   return (...args) =>
     cmd(...args).catch((error) => {
       if (error instanceof GenericNetworkError)
@@ -182,6 +186,7 @@ function withGlobalErrorHandler<TArgs extends unknown[], TOut>(
         );
       } else log.error("", "An unknown error occurred.");
       log.notice("", "Run with --verbose to get more information.");
+      return ResultCodes.Error;
     });
 }
 
