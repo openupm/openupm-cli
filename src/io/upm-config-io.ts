@@ -55,11 +55,19 @@ export function makeGetUpmConfigPath(
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (wsl) {
       if (systemUser)
-        return tryGetWslPath("ALLUSERSPROFILE", runChildProcess).map((it) =>
-          path.join(it, systemUserSubPath)
+        return new AsyncResult(
+          Result.wrapAsync<string, WslPathError | RequiredEnvMissingError>(() =>
+            tryGetWslPath("ALLUSERSPROFILE", runChildProcess).then((it) =>
+              path.join(it, systemUserSubPath)
+            )
+          )
         );
 
-      return tryGetWslPath("USERPROFILE", runChildProcess);
+      return new AsyncResult(
+        Result.wrapAsync<string, WslPathError | RequiredEnvMissingError>(() =>
+          tryGetWslPath("USERPROFILE", runChildProcess)
+        )
+      );
     }
 
     if (systemUser) {

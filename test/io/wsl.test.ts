@@ -1,4 +1,4 @@
-import { ChildProcessError, RunChildProcess } from "../../src/io/child-process";
+import { RunChildProcess } from "../../src/io/child-process";
 import { tryGetWslPath } from "../../src/io/wsl";
 import { mockService } from "../services/service.mock";
 
@@ -14,18 +14,9 @@ describe("wsl", () => {
       const runChildProcess = mockService<RunChildProcess>();
       runChildProcess.mockResolvedValue(expected);
 
-      const result = await tryGetWslPath("SOMEVAR", runChildProcess).promise;
+      const actual = await tryGetWslPath("SOMEVAR", runChildProcess);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should fail if wslpath fails", async () => {
-      const runChildProcess = mockService<RunChildProcess>();
-      runChildProcess.mockRejectedValue(new ChildProcessError());
-
-      const result = await tryGetWslPath("SOMEVAR", runChildProcess).promise;
-
-      expect(result).toBeError();
+      expect(actual).toEqual(expected);
     });
 
     /*
