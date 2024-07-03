@@ -9,7 +9,6 @@ import {
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { noopLogger } from "../../src/logging";
 import { enoentError } from "./node-error.mock";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 function makeDependencies() {
   const getBuiltInPackages = makeFindBuiltInPackages(noopLogger);
@@ -36,7 +35,7 @@ describe("builtin-packages", () => {
     const { getBuiltInPackages } = makeDependencies();
     jest
       .spyOn(directoryIO, "tryGetDirectoriesIn")
-      .mockReturnValue(AsyncErr(enoentError));
+      .mockRejectedValue(enoentError);
 
     const result = await getBuiltInPackages(version).promise;
 
@@ -50,9 +49,7 @@ describe("builtin-packages", () => {
     jest
       .spyOn(specialPaths, "tryGetEditorInstallPath")
       .mockReturnValue(Ok("/some/path"));
-    jest
-      .spyOn(directoryIO, "tryGetDirectoriesIn")
-      .mockReturnValue(AsyncOk(expected));
+    jest.spyOn(directoryIO, "tryGetDirectoriesIn").mockResolvedValue(expected);
 
     const result = await getBuiltInPackages(version).promise;
 

@@ -10,10 +10,9 @@ describe("directory io", () => {
       const expected = makeNodeError("EACCES");
       jest.spyOn(fs, "readdir").mockRejectedValue(expected);
 
-      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
-        .promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      await expect(
+        tryGetDirectoriesIn("/good/path/", noopLogger)
+      ).rejects.toEqual(expected);
     });
 
     it("should get names of directories", async () => {
@@ -24,10 +23,9 @@ describe("directory io", () => {
           { name: "b", isDirectory: () => true } as Dirent,
         ]);
 
-      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
-        .promise;
+      const actual = await tryGetDirectoriesIn("/good/path/", noopLogger);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(["a", "b"]));
+      expect(actual).toEqual(["a", "b"]);
     });
 
     it("should get only directories", async () => {
@@ -38,10 +36,9 @@ describe("directory io", () => {
           { name: "b.txt", isDirectory: () => false } as Dirent,
         ]);
 
-      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
-        .promise;
+      const actual = await tryGetDirectoriesIn("/good/path/", noopLogger);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(["a"]));
+      expect(actual).toEqual(["a"]);
     });
   });
 });

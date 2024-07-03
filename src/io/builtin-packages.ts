@@ -1,5 +1,5 @@
 import { ReleaseVersion } from "../domain/editor-version";
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
@@ -10,6 +10,7 @@ import path from "path";
 import { DebugLog } from "../logging";
 import { GenericIOError } from "./common-errors";
 import { tryGetDirectoriesIn } from "./directory-io";
+import { assertIsNodeError } from "../utils/error-type-guards";
 
 /**
  * Error for when an editor-version is not installed.
@@ -59,14 +60,17 @@ export function makeFindBuiltInPackages(
       );
 
       return (
-        tryGetDirectoriesIn(packagesDir, debugLog)
+        new AsyncResult(
+          Result.wrapAsync(() => tryGetDirectoriesIn(packagesDir, debugLog))
+        )
           // We can assume correct format
           .map((names) => names as DomainName[])
-          .mapErr((error) =>
-            error.code === "ENOENT"
+          .mapErr((error) => {
+            assertIsNodeError(error);
+            return error.code === "ENOENT"
               ? new EditorNotInstalledError(editorVersion)
-              : new GenericIOError("Read")
-          )
+              : new GenericIOError("Read");
+          })
       );
     }
   };
