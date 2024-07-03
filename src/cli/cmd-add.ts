@@ -48,7 +48,6 @@ import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
 import { notifyRemotePackumentVersionResolvingFailed } from "./error-logging";
-import { GenericNetworkError } from "../io/common-errors";
 
 export class InvalidPackumentDataError extends CustomError {
   private readonly _class = "InvalidPackumentDataError";
@@ -226,12 +225,11 @@ export function makeAddCmd(
             true
           );
           if (resolveResult.isErr()) {
-            if (!(resolveResult.error instanceof GenericNetworkError))
-              notifyRemotePackumentVersionResolvingFailed(
-                log,
-                name,
-                resolveResult.error
-              );
+            notifyRemotePackumentVersionResolvingFailed(
+              log,
+              name,
+              resolveResult.error
+            );
             return resolveResult;
           }
           const [depsValid, depsInvalid] = resolveResult.value;

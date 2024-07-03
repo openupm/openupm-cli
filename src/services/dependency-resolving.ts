@@ -16,10 +16,7 @@ import {
 } from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
-import {
-  ResolveLatestVersion,
-  ResolveLatestVersionError,
-} from "./resolve-latest-version";
+import { ResolveLatestVersion } from "./resolve-latest-version";
 import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import {
@@ -67,7 +64,7 @@ type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 /**
  * Error which may occur when resolving the dependencies for a package.
  */
-export type DependencyResolveError = ResolveLatestVersionError;
+export type DependencyResolveError = PackumentNotFoundError;
 
 /**
  * Function for resolving all dependencies for a package.
@@ -96,14 +93,14 @@ export function makeResolveDependency(
   // TODO: Add tests for this service
 
   return async (sources, name, version, deep) => {
-    const latestVersionResult =
+    const latestVersion =
       version === undefined || version === "latest"
-        ? await resolveLatestVersion(sources, name).map((it) => it.value)
-            .promise
-        : Ok(version);
-    if (latestVersionResult.isErr()) return latestVersionResult;
+        ? await resolveLatestVersion(sources, name).then(
+            (it) => it?.value || null
+          )
+        : version;
 
-    const latestVersion = latestVersionResult.value;
+    if (latestVersion == null) return Err(new PackumentNotFoundError(name));
 
     // a list of pending dependency {name, version}
     const pendingList = Array.of<NameVersionPair>([name, latestVersion]);

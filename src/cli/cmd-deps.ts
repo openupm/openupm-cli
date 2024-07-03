@@ -72,12 +72,11 @@ export function makeDepsCmd(
       deep
     );
     if (resolveResult.isErr()) {
-      if (!(resolveResult.error instanceof GenericNetworkError))
-        notifyRemotePackumentVersionResolvingFailed(
-          log,
-          name,
-          resolveResult.error
-        );
+      notifyRemotePackumentVersionResolvingFailed(
+        log,
+        name,
+        resolveResult.error
+      );
       return ResultCodes.Error;
     }
 
