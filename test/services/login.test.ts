@@ -124,23 +124,5 @@ describe("login", () => {
         }
       );
     });
-
-    it("should fail if config write fails", async () => {
-      const expected = new GenericIOError("Write");
-      const { login, saveAuthToUpmConfig } = makeDependencies();
-      saveAuthToUpmConfig.mockRejectedValue(expected);
-
-      const result = await login(
-        exampleUser,
-        examplePassword,
-        exampleEmail,
-        true,
-        exampleRegistryUrl,
-        exampleConfigPath,
-        "token"
-      ).promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
   });
 });

@@ -70,22 +70,15 @@ export function makeLogin(
     }
 
     // npm login
-    return npmLogin(registry, username, password, email).andThen((token) => {
+    return npmLogin(registry, username, password, email).map(async (token) => {
       debugLog(`npm login successful`);
-      // write npm token
-      return resultifyAsyncOp(authNpmrc(registry, token)).andThen(
-        (npmrcPath) => {
-          debugLog(`saved to npm config: ${npmrcPath}`);
-          // Save config
-          return resultifyAsyncOp(
-            saveAuthToUpmConfig(configPath, registry, {
-              email,
-              alwaysAuth,
-              token,
-            } satisfies TokenAuth)
-          );
-        }
-      );
+      const npmrcPath = await authNpmrc(registry, token);
+      debugLog(`saved to npm config: ${npmrcPath}`);
+      await saveAuthToUpmConfig(configPath, registry, {
+        email,
+        alwaysAuth,
+        token,
+      } satisfies TokenAuth);
     });
   };
 }
