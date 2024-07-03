@@ -50,10 +50,14 @@ export function makeSearchPackages(
 
   return (registry, keyword, onUseOldSearch) => {
     // search endpoint
-    return searchRegistry(registry, keyword).orElse(() => {
-      // search old search
-      onUseOldSearch && onUseOldSearch();
-      return Result.wrapAsync(() => searchInAll(registry, keyword));
-    });
+    return new AsyncResult(
+      Result.wrapAsync(() =>
+        searchRegistry(registry, keyword).catch(() => {
+          // search old search
+          onUseOldSearch && onUseOldSearch();
+          return searchInAll(registry, keyword);
+        })
+      )
+    );
   };
 }

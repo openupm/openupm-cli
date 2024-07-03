@@ -32,10 +32,8 @@ describe("npm search", () => {
     jest.mocked(npmSearch).mockRejectedValue(expected);
     const { searchRegistry } = makeDependencies();
 
-    const result = await searchRegistry(exampleRegistry, "wow").promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(GenericNetworkError)
+    await expect(searchRegistry(exampleRegistry, "wow")).rejects.toBeInstanceOf(
+      GenericNetworkError
     );
   });
 
@@ -48,10 +46,8 @@ describe("npm search", () => {
     jest.mocked(npmSearch).mockRejectedValue(expected);
     const { searchRegistry } = makeDependencies();
 
-    const result = await searchRegistry(exampleRegistry, "wow").promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(RegistryAuthenticationError)
+    await expect(searchRegistry(exampleRegistry, "wow")).rejects.toBeInstanceOf(
+      RegistryAuthenticationError
     );
   });
 
@@ -60,8 +56,8 @@ describe("npm search", () => {
     jest.mocked(npmSearch).mockResolvedValue(expected);
     const { searchRegistry } = makeDependencies();
 
-    const result = await searchRegistry(exampleRegistry, "wow").promise;
+    const actual = await searchRegistry(exampleRegistry, "wow");
 
-    expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+     expect(actual).toEqual(expected);
   });
 });
