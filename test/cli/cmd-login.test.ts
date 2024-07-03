@@ -7,10 +7,7 @@ import { Login } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../../src/io/common-errors";
+import { RegistryAuthenticationError } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
@@ -45,7 +42,7 @@ describe("cmd-login", () => {
   // TODO: Add tests for prompting logic
 
   it("should fail if login failed", async () => {
-    const expected = new GenericNetworkError();
+    const expected = new RegistryAuthenticationError();
     const { loginCmd, login } = makeDependencies();
     login.mockReturnValue(AsyncErr(expected));
 

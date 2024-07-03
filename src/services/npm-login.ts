@@ -10,7 +10,7 @@ import { DebugLog } from "../logging";
 /**
  * Error which may occur when logging a user into a npm registry.
  */
-export type NpmLoginError = GenericNetworkError | RegistryAuthenticationError;
+export type NpmLoginError = RegistryAuthenticationError;
 
 /**
  * A token authenticating a user.
@@ -41,20 +41,16 @@ export function makeNpmLogin(
 ): NpmLogin {
   return (registryUrl, username, email, password) => {
     return new AsyncResult(
-      new Promise((resolve) => {
+      new Promise((resolve, reject) => {
         registryClient.adduser(
           registryUrl,
           { auth: { username, email, password } },
           (error, responseData, _, response) => {
             if (response !== undefined && !responseData.ok) {
               debugLog("A http request failed.", response);
-              resolve(
-                Err(
-                  response.statusCode === 401
-                    ? new RegistryAuthenticationError()
-                    : new GenericNetworkError()
-                )
-              );
+              if (response.statusCode === 401)
+                resolve(Err(new RegistryAuthenticationError()));
+              else reject(new GenericNetworkError());
             } else if (responseData.ok) resolve(Ok(responseData.token));
 
             // TODO: Handle error
