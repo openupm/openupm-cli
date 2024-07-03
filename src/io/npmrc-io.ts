@@ -3,26 +3,23 @@ import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
-import { RequiredEnvMissingError } from "./upm-config-io";
 import { GetHomePath } from "./special-paths";
 import { GenericIOError } from "./common-errors";
-
-/**
- * Error for when npmrc path could not be determined.
- */
-export type FindNpmrcError = RequiredEnvMissingError;
 
 /**
  * Function for determining the path of the users .npmrc file.
  * @returns The path to the file.
  */
-export type FindNpmrcPath = () => Result<string, FindNpmrcError>;
+export type FindNpmrcPath = () => string;
 
 /**
  * Makes a {@link FindNpmrcPath} function.
  */
 export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
-  return () => getHomePath().map((homePath) => path.join(homePath, ".npmrc"));
+  return () => {
+    const homePath = getHomePath().unwrap();
+    return path.join(homePath, ".npmrc");
+  };
 }
 
 /**

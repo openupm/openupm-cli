@@ -29,18 +29,16 @@ describe("npmrc-io", () => {
       const expected = path.join(home, ".npmrc");
       getHomePath.mockReturnValue(Ok(home));
 
-      const result = findPath();
+      const actual = findPath();
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
     it("should fail if home could not be determined", () => {
       const { findPath, getHomePath } = makeDependencies();
       getHomePath.mockReturnValue(Err(new RequiredEnvMissingError([])));
 
-      const result = findPath();
-
-      expect(result).toBeError();
+      expect(() => findPath()).toThrow();
     });
   });
 

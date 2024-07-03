@@ -1,5 +1,5 @@
 import { RegistryUrl } from "../domain/registry-url";
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 import {
   FindNpmrcPath,
   LoadNpmrc,
@@ -9,6 +9,7 @@ import {
 } from "../io/npmrc-io";
 import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RequiredEnvMissingError } from "../io/upm-config-io";
+import assert from "assert";
 
 /**
  * Error that might occur when updating an auth-token inside a npmrc file.
@@ -37,7 +38,11 @@ export function makeAuthNpmrc(
 ): AuthNpmrc {
   return (registry, token) => {
     // read config
-    return findPath()
+    return Result.wrap(findPath)
+      .mapErr((error) => {
+        assert(error instanceof RequiredEnvMissingError);
+        return error;
+      })
       .toAsyncResult()
       .andThen((configPath) =>
         loadNpmrc(configPath)

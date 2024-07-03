@@ -33,6 +33,7 @@ import {
   makeGetUpmConfigPath,
   makeLoadUpmConfig,
   makeSaveUpmConfig,
+  RequiredEnvMissingError,
 } from "../io/upm-config-io";
 import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
@@ -173,7 +174,13 @@ function withGlobalErrorHandler<TArgs extends unknown[], TOut>(
         log.error("", "An interaction with the file-system failed.");
       else if (error instanceof ChildProcessError)
         log.error("", "A child process failed.");
-      else log.error("", "An unknown error occurred.");
+      else if (error instanceof RequiredEnvMissingError) {
+        const keyList = error.keyNames.map((name) => `"${name}"`).join(", ");
+        log.error(
+          "",
+          `One or more required environment variables were not set: ${keyList}`
+        );
+      } else log.error("", "An unknown error occurred.");
       log.notice("", "Run with --verbose to get more information.");
     });
 }

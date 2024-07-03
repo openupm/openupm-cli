@@ -1,5 +1,5 @@
 import { FindNpmrcPath, LoadNpmrc, SaveNpmrc } from "../../src/io/npmrc-io";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { AsyncResult, Ok } from "ts-results-es";
 import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { emptyNpmrc, setToken } from "../../src/domain/npmrc";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -10,7 +10,7 @@ const exampleNpmrcPath = "/users/someuser/.npmrc";
 
 function makeDependencies() {
   const findPath = mockService<FindNpmrcPath>();
-  findPath.mockReturnValue(Ok(exampleNpmrcPath));
+  findPath.mockReturnValue(exampleNpmrcPath);
 
   const loadNpmrc = mockService<LoadNpmrc>();
   loadNpmrc.mockReturnValue(new AsyncResult(Ok(null)));
@@ -27,7 +27,9 @@ describe("npmrc-auth", () => {
     it("should fail if path could not be determined", async () => {
       const expected = new RequiredEnvMissingError([]);
       const { authNpmrc, findPath } = makeDependencies();
-      findPath.mockReturnValue(Err(expected));
+      findPath.mockImplementation(() => {
+        throw expected;
+      });
 
       const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 
