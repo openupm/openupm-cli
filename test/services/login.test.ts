@@ -27,7 +27,7 @@ describe("login", () => {
     npmLogin.mockReturnValue(AsyncOk(exampleToken));
 
     const authNpmrc = mockService<AuthNpmrc>();
-    authNpmrc.mockReturnValue(AsyncOk(exampleNpmrcPath));
+    authNpmrc.mockResolvedValue(exampleNpmrcPath);
 
     const login = makeLogin(
       saveAuthToUpmConfig,

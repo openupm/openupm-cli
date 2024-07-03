@@ -1,17 +1,6 @@
-import { RegistryUrl } from "../domain/registry-url";
-import { AsyncResult, Result } from "ts-results-es";
-import { FindNpmrcPath, LoadNpmrc, SaveNpmrc } from "../io/npmrc-io";
-import { emptyNpmrc, setToken } from "../domain/npmrc";
-import { RequiredEnvMissingError } from "../io/upm-config-io";
-import assert from "assert";
-import { GenericIOError } from "../io/common-errors";
-
-/**
- * Error that might occur when updating an auth-token inside a npmrc file.
- */
-export type NpmrcAuthTokenUpdateError =
-  | RequiredEnvMissingError
-  | GenericIOError;
+import {RegistryUrl} from "../domain/registry-url";
+import {FindNpmrcPath, LoadNpmrc, SaveNpmrc} from "../io/npmrc-io";
+import {emptyNpmrc, setToken} from "../domain/npmrc";
 
 /**
  * Function for updating the user-wide npm-auth token inside a users
@@ -23,38 +12,18 @@ export type NpmrcAuthTokenUpdateError =
 export type AuthNpmrc = (
   registry: RegistryUrl,
   token: string
-) => AsyncResult<string, NpmrcAuthTokenUpdateError>;
+) => Promise<string>;
 
 export function makeAuthNpmrc(
   findPath: FindNpmrcPath,
   loadNpmrc: LoadNpmrc,
   saveNpmrc: SaveNpmrc
 ): AuthNpmrc {
-  return (registry, token) => {
-    // read config
-    return Result.wrap(findPath)
-      .mapErr((error) => {
-        assert(error instanceof RequiredEnvMissingError);
-        return error;
-      })
-      .toAsyncResult()
-      .andThen((configPath) =>
-        new AsyncResult(Result.wrapAsync(() => loadNpmrc(configPath)))
-          .map((maybeNpmrc) => maybeNpmrc ?? emptyNpmrc)
-          .map((npmrc) => setToken(npmrc, registry, token))
-          .andThen((npmrc) =>
-            new AsyncResult(
-              Result.wrapAsync(() => saveNpmrc(configPath, npmrc))
-            ).mapErr((error) => {
-              assert(error instanceof GenericIOError);
-              return error;
-            })
-          )
-          .map(() => configPath)
-          .mapErr((error) => {
-            assert(error instanceof GenericIOError);
-            return error;
-          })
-      );
+  return async (registry, token) => {
+    const configPath = findPath();
+    const initial = (await loadNpmrc(configPath)) || emptyNpmrc;
+    const updated = setToken(initial, registry, token);
+    await saveNpmrc(configPath, updated);
+    return configPath;
   };
 }

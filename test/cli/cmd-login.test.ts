@@ -1,16 +1,16 @@
-import { Err, Ok } from "ts-results-es";
+import { Err } from "ts-results-es";
 import { makeLoginCmd } from "../../src/cli/cmd-login";
 import { mockService } from "../services/service.mock";
 import { Env, ParseEnv } from "../../src/services/parse-env";
-import {
-  GetUpmConfigPath,
-  RequiredEnvMissingError,
-} from "../../src/io/upm-config-io";
+import { GetUpmConfigPath } from "../../src/io/upm-config-io";
 import { Login } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import {
+  GenericNetworkError,
+  RegistryAuthenticationError,
+} from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
@@ -45,7 +45,7 @@ describe("cmd-login", () => {
   // TODO: Add tests for prompting logic
 
   it("should fail if login failed", async () => {
-    const expected = new RequiredEnvMissingError([]);
+    const expected = new GenericNetworkError();
     const { loginCmd, login } = makeDependencies();
     login.mockReturnValue(AsyncErr(expected));
 

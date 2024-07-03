@@ -3,13 +3,13 @@ import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
 import { SaveAuthToUpmConfig } from "./upm-auth";
 import { NpmLogin, NpmLoginError } from "./npm-login";
-import { AuthNpmrc, NpmrcAuthTokenUpdateError } from "./npmrc-auth";
+import { AuthNpmrc } from "./npmrc-auth";
 import { DebugLog } from "../logging";
 
 /**
  * Error which may occur when logging in a user.
  */
-export type LoginError = NpmLoginError | NpmrcAuthTokenUpdateError;
+export type LoginError = NpmLoginError;
 
 /**
  * Function for logging in a user to a npm registry. Supports both basic and
@@ -74,7 +74,9 @@ export function makeLogin(
     return npmLogin(registry, username, password, email).andThen((token) => {
       debugLog(`npm login successful`);
       // write npm token
-      return authNpmrc(registry, token).andThen((npmrcPath) => {
+      return new AsyncResult(
+        Result.wrapAsync<string, never>(() => authNpmrc(registry, token))
+      ).andThen((npmrcPath) => {
         debugLog(`saved to npm config: ${npmrcPath}`);
         // Save config
         return new AsyncResult(
