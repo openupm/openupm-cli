@@ -59,7 +59,7 @@ export function makeWriteText(debugLog: DebugLog): WriteTextFile {
     } catch (error) {
       assertIsNodeError(error);
       debugLog("Text file write failed.", error);
-      throw error;
+      throw new GenericIOError("Write");
     }
   };
 }
