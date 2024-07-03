@@ -1,7 +1,8 @@
 import { DomainName } from "../domain/domain-name";
-import { AsyncResult } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 import { CheckUrlExists } from "../io/check-url";
 import { GenericNetworkError } from "../io/common-errors";
+import assert from "assert";
 
 /**
  * Error which may occur when checking whether a package is a Unity package.
@@ -26,6 +27,11 @@ export function makeCheckIsUnityPackage(
   return (packageName) => {
     // A package is an official Unity package if it has a documentation page
     const url = `https://docs.unity3d.com/Manual/${packageName}.html`;
-    return checkUrlExists(url);
+    return new AsyncResult(Result.wrapAsync(() => checkUrlExists(url))).mapErr(
+      (error) => {
+        assert(error instanceof GenericNetworkError);
+        return error;
+      }
+    );
   };
 }

@@ -16,9 +16,9 @@ describe("check url exists", () => {
     } as Response);
     const { checkUrlExists } = makeDependencies();
 
-    const result = await checkUrlExists("https://some.url.com").promise;
+    const actual = await checkUrlExists("https://some.url.com");
 
-    expect(result).toBeOk((actual) => expect(actual).toBeTruthy());
+    expect(actual).toBeTruthy();
   });
 
   it("should be false if url responds with 404", async () => {
@@ -27,9 +27,9 @@ describe("check url exists", () => {
     } as Response);
     const { checkUrlExists } = makeDependencies();
 
-    const result = await checkUrlExists("https://some.url.com").promise;
+    const actual = await checkUrlExists("https://some.url.com");
 
-    expect(result).toBeOk((actual) => expect(actual).toBeFalsy());
+    expect(actual).toBeFalsy();
   });
 
   it.each([100, 201, 301, 401, 500])(
@@ -40,11 +40,9 @@ describe("check url exists", () => {
       } as Response);
       const { checkUrlExists } = makeDependencies();
 
-      const result = await checkUrlExists("https://some.url.com").promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(GenericNetworkError)
-      );
+      await expect(
+        checkUrlExists("https://some.url.com")
+      ).rejects.toBeInstanceOf(GenericNetworkError);
     }
   );
 
@@ -52,10 +50,8 @@ describe("check url exists", () => {
     jest.mocked(fetch).mockRejectedValueOnce(new Error("Network bad"));
     const { checkUrlExists } = makeDependencies();
 
-    const result = await checkUrlExists("https://some.url.com").promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(GenericNetworkError)
+    await expect(checkUrlExists("https://some.url.com")).rejects.toBeInstanceOf(
+      GenericNetworkError
     );
   });
 });
