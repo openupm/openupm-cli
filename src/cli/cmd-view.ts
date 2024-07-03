@@ -13,7 +13,6 @@ import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import { FetchPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
-import { resultifyAsyncOp } from "../utils/result-utils";
 
 export type ViewOptions = CmdOptions;
 
@@ -125,15 +124,11 @@ export function makeViewCmd(
       env.registry,
       ...(env.upstream ? [env.upstreamRegistry] : []),
     ];
-    const resolveResult = await queryAllRegistriesLazy(sources, (source) =>
-      resultifyAsyncOp(() => fetchPackument(source, pkg))
-    ).promise;
-    if (!resolveResult.isOk()) {
-      // TODO: Print error
-      return ResultCodes.Error;
-    }
-
-    const packument = resolveResult.value?.value ?? null;
+    const packumentFromRegistry = await queryAllRegistriesLazy(
+      sources,
+      (source) => fetchPackument(source, pkg)
+    );
+    const packument = packumentFromRegistry?.value ?? null;
     if (packument === null) {
       log.error("404", `package not found: ${pkg}`);
       return ResultCodes.Error;

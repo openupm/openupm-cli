@@ -8,7 +8,6 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
-import { GenericNetworkError } from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { FetchPackument } from "../../src/io/packument-io";
 
@@ -96,16 +95,6 @@ describe("cmd-view", () => {
   it("should fail if package was not found", async () => {
     const { viewCmd, fetchPackument } = makeDependencies();
     fetchPackument.mockResolvedValue(null);
-
-    const resultCode = await viewCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should fail if package could not be resolved", async () => {
-    const expected = new GenericNetworkError();
-    const { viewCmd, fetchPackument } = makeDependencies();
-    fetchPackument.mockRejectedValue(expected);
 
     const resultCode = await viewCmd(somePackage, { _global: {} });
 

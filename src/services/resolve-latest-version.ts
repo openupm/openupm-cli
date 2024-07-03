@@ -4,7 +4,6 @@ import { SemanticVersion } from "../domain/semantic-version";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
 import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
-import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
  * Service for resolving the latest published version of a package.
@@ -30,11 +29,9 @@ export function makeResolveLatestVersion(
     return tryResolvePackumentVersion(packument, "latest").unwrap().version;
   }
 
-  return async (sources, packageName) => {
-    return (
-      await queryAllRegistriesLazy(sources, (source) =>
-        resultifyAsyncOp(tryResolveFrom(source, packageName))
-      ).promise
-    ).unwrap();
+  return (sources, packageName) => {
+    return queryAllRegistriesLazy(sources, (source) =>
+      tryResolveFrom(source, packageName)
+    );
   };
 }
