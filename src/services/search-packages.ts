@@ -1,18 +1,6 @@
 import { Registry } from "../domain/registry";
-import { AsyncResult, Result } from "ts-results-es";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
 import { FetchAllPackuments } from "../io/all-packuments-io";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
-
-/**
- * Error which may occur when searching for packages.
- */
-export type SearchPackagesError =
-  | RegistryAuthenticationError
-  | GenericNetworkError;
 
 /**
  * A function for searching packages in a registry.
@@ -25,7 +13,7 @@ export type SearchPackages = (
   registry: Registry,
   keyword: string,
   onUseAllFallback?: () => void
-) => AsyncResult<ReadonlyArray<SearchedPackument>, SearchPackagesError>;
+) => Promise<ReadonlyArray<SearchedPackument>>;
 
 /**
  * Makes a {@licence SearchPackages} function.
@@ -48,16 +36,14 @@ export function makeSearchPackages(
     );
   }
 
-  return (registry, keyword, onUseOldSearch) => {
-    // search endpoint
-    return new AsyncResult(
-      Result.wrapAsync(() =>
-        searchRegistry(registry, keyword).catch(() => {
-          // search old search
-          onUseOldSearch && onUseOldSearch();
-          return searchInAll(registry, keyword);
-        })
-      )
-    );
+  return async (registry, keyword, onUseOldSearch) => {
+    try {
+      // search endpoint
+      return await searchRegistry(registry, keyword);
+    } catch {
+      // search old search
+      onUseOldSearch && onUseOldSearch();
+      return await searchInAll(registry, keyword);
+    }
   };
 }

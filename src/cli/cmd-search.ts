@@ -44,17 +44,11 @@ export function makeSearchCmd(
     const env = envResult.value;
 
     let usedEndpoint = "npmsearch";
-    const searchResult = await searchPackages(env.registry, keyword, () => {
+    const results = await searchPackages(env.registry, keyword, () => {
       usedEndpoint = "endpoint.all";
       log.warn("", "fast search endpoint is not available, using old search.");
-    }).promise;
+    });
 
-    if (searchResult.isErr()) {
-      log.warn("", "/-/all endpoint is not available");
-      return ResultCodes.Error;
-    }
-
-    const results = searchResult.value;
     if (results.length === 0) {
       log.notice("", `No matches found for "${keyword}"`);
       return ResultCodes.Ok;

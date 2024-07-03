@@ -49,19 +49,16 @@ describe("search packages", () => {
   it("should search using search api first", async () => {
     const { searchPackages } = makeDependencies();
 
-    const result = await searchPackages(exampleRegistry, exampleKeyword)
-      .promise;
+    const actual = await searchPackages(exampleRegistry, exampleKeyword);
 
-    expect(result).toBeOk((actual) =>
-      expect(actual).toEqual([exampleSearchResult])
-    );
+    expect(actual).toEqual([exampleSearchResult]);
   });
 
   it("should not notify of fallback when using search api", async () => {
     const { searchPackages } = makeDependencies();
 
     const fallback = jest.fn();
-    await searchPackages(exampleRegistry, exampleKeyword, fallback).promise;
+    await searchPackages(exampleRegistry, exampleKeyword, fallback);
 
     expect(fallback).not.toHaveBeenCalled();
   });
@@ -70,12 +67,9 @@ describe("search packages", () => {
     const { searchPackages, searchRegistry } = makeDependencies();
     searchRegistry.mockRejectedValue(new GenericNetworkError());
 
-    const result = await searchPackages(exampleRegistry, exampleKeyword)
-      .promise;
+    const actual = await searchPackages(exampleRegistry, exampleKeyword);
 
-    expect(result).toBeOk((actual) =>
-      expect(actual).toEqual([exampleSearchResult])
-    );
+    expect(actual).toEqual([exampleSearchResult]);
   });
 
   it("should notify of using old search", async () => {
@@ -83,7 +77,7 @@ describe("search packages", () => {
     searchRegistry.mockRejectedValue(new GenericNetworkError());
 
     const fallback = jest.fn();
-    await searchPackages(exampleRegistry, exampleKeyword, fallback).promise;
+    await searchPackages(exampleRegistry, exampleKeyword, fallback);
 
     expect(fallback).toHaveBeenCalled();
   });
@@ -92,21 +86,8 @@ describe("search packages", () => {
     const { searchPackages, searchRegistry } = makeDependencies();
     searchRegistry.mockRejectedValue(new GenericNetworkError());
 
-    const result = await searchPackages(exampleRegistry, "some other keyword")
-      .promise;
+    const actual = await searchPackages(exampleRegistry, "some other keyword");
 
-    expect(result).toBeOk((actual) => expect(actual).toEqual([]));
-  });
-
-  it("should fail if both search strategies fail", async () => {
-    const { searchPackages, searchRegistry, fetchAllPackument } =
-      makeDependencies();
-    searchRegistry.mockRejectedValue(new GenericNetworkError());
-    fetchAllPackument.mockRejectedValue(new GenericNetworkError());
-
-    const result = await searchPackages(exampleRegistry, exampleKeyword)
-      .promise;
-
-    expect(result).toBeError();
+    expect(actual).toEqual([]);
   });
 });

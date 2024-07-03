@@ -10,8 +10,6 @@ import { mockService } from "../services/service.mock";
 import { SearchPackages } from "../../src/services/search-packages";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { GenericNetworkError } from "../../src/io/common-errors";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const exampleSearchResult: SearchedPackument = {
   name: makeDomainName("com.example.package-a"),
@@ -28,7 +26,7 @@ function makeDependencies() {
   );
 
   const searchPackages = mockService<SearchPackages>();
-  searchPackages.mockReturnValue(AsyncOk([exampleSearchResult]));
+  searchPackages.mockResolvedValue([exampleSearchResult]);
 
   const log = makeMockLogger();
 
@@ -74,7 +72,7 @@ describe("cmd-search", () => {
 
   it("should notify of unknown packument", async () => {
     const { searchCmd, searchPackages, log } = makeDependencies();
-    searchPackages.mockReturnValue(AsyncOk([]));
+    searchPackages.mockResolvedValue([]);
 
     await searchCmd("pkg-not-exist", options);
 
@@ -84,35 +82,12 @@ describe("cmd-search", () => {
     );
   });
 
-  it("should fail if packuments could not be searched", async () => {
-    const expected = new GenericNetworkError();
-    const { searchCmd, searchPackages } = makeDependencies();
-    searchPackages.mockReturnValue(AsyncErr(expected));
-
-    const resultCode = await searchCmd("package-a", options);
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if packuments could not be searched", async () => {
-    const expected = new GenericNetworkError();
-    const { searchCmd, searchPackages, log } = makeDependencies();
-    searchPackages.mockReturnValue(AsyncErr(expected));
-
-    await searchCmd("package-a", options);
-
-    expect(log.warn).toHaveBeenCalledWith(
-      "",
-      "/-/all endpoint is not available"
-    );
-  });
-
   it("should notify when falling back to old search", async () => {
     const { searchCmd, searchPackages, log } = makeDependencies();
     searchPackages.mockImplementation(
-      (_registry, _keyword, onUseAllFallback) => {
+      async (_registry, _keyword, onUseAllFallback) => {
         onUseAllFallback && onUseAllFallback();
-        return AsyncOk([]);
+        return [];
       }
     );
 
