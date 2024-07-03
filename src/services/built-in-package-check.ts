@@ -37,9 +37,7 @@ export function makeCheckIsBuiltInPackage(
   }
 
   return async (packageName, version) => {
-    const isUnityPackage = (
-      await checkIsUnityPackage(packageName).promise
-    ).unwrap();
+    const isUnityPackage = await checkIsUnityPackage(packageName);
     if (!isUnityPackage) return false;
     return !(await checkExistsOnUnityRegistry(packageName, version));
   };
