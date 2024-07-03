@@ -8,7 +8,7 @@ import {
   mapScopedRegistry,
 } from "../../src/domain/project-manifest";
 import path from "path";
-import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
+import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";

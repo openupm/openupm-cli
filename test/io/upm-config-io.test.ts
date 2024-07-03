@@ -4,7 +4,7 @@ import {
   RequiredEnvMissingError,
 } from "../../src/io/upm-config-io";
 import { Err, Ok } from "ts-results-es";
-import { ReadTextFile } from "../../src/io/fs-result";
+import { ReadTextFile } from "../../src/io/text-file-io";
 import { mockService } from "../services/service.mock";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { GetHomePath } from "../../src/io/special-paths";

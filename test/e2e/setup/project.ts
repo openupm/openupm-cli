@@ -4,7 +4,7 @@ import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
 import yaml from "yaml";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { makeWriteProjectManifest } from "../../../src/io/project-manifest-io";
-import { makeWriteText } from "../../../src/io/fs-result";
+import { makeWriteText } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
 import { dropDirectory } from "./directories";
 

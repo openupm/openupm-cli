@@ -1,6 +1,6 @@
 import { UnityProjectManifest } from "../../../src/domain/project-manifest";
 import { makeLoadProjectManifest } from "../../../src/io/project-manifest-io";
-import { makeReadText } from "../../../src/io/fs-result";
+import { makeReadText } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
 
 const readText = makeReadText(noopLogger);

@@ -1,5 +1,5 @@
 import { AsyncResult, Ok, Result } from "ts-results-es";
-import { ReadTextFile, WriteTextFile } from "./fs-result";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";

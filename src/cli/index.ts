@@ -34,7 +34,7 @@ import {
   makeLoadUpmConfig,
   makeSaveUpmConfig,
 } from "../io/upm-config-io";
-import { makeReadText, makeWriteText } from "../io/fs-result";
+import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
   makeFindNpmrcPath,
   makeLoadNpmrc,

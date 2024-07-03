@@ -3,7 +3,7 @@ import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { ReadTextFile, WriteTextFile } from "./fs-result";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { StringFormatError, tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath, WslPathError } from "./wsl";

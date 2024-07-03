@@ -7,9 +7,9 @@ import {
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { tryGetDirectoriesIn } from "./fs-result";
 import { DebugLog } from "../logging";
 import { GenericIOError } from "./common-errors";
+import { tryGetDirectoriesIn } from "./directory-io";
 
 /**
  * Error for when an editor-version is not installed.

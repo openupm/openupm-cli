@@ -1,6 +1,6 @@
 import path from "path";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { ReadTextFile } from "./fs-result";
+import { ReadTextFile } from "./text-file-io";
 import { StringFormatError, tryParseYaml } from "../utils/string-parsing";
 import {
   FileMissingError,

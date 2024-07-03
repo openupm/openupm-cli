@@ -1,4 +1,4 @@
-import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
+import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {

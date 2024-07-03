@@ -4,7 +4,7 @@ import {
 } from "../domain/project-manifest";
 import path from "path";
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { ReadTextFile, WriteTextFile } from "./fs-result";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { StringFormatError, tryParseJson } from "../utils/string-parsing";
 import {
   FileMissingError,

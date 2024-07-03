@@ -1,15 +1,10 @@
 import fs from "fs/promises";
-import {
-  makeReadText,
-  makeWriteText,
-  tryGetDirectoriesIn,
-} from "../../src/io/fs-result";
+import { makeReadText, makeWriteText } from "../../src/io/text-file-io";
 import fse from "fs-extra";
-import { Dirent } from "node:fs";
 import { noopLogger } from "../../src/logging";
 import { makeNodeError } from "./node-error.mock";
 
-describe("fs-result", () => {
+describe("text file io", () => {
   describe("read text", () => {
     function makeDependencies() {
       const readFile = makeReadText(noopLogger);
@@ -124,46 +119,6 @@ describe("fs-result", () => {
       await expect(writeFile("/path/to/file.txt", "content")).rejects.toEqual(
         expected
       );
-    });
-  });
-
-  describe("get directories", () => {
-    it("should fail if directory could not be read", async () => {
-      const expected = makeNodeError("EACCES");
-      jest.spyOn(fs, "readdir").mockRejectedValue(expected);
-
-      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
-        .promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should get names of directories", async () => {
-      jest
-        .spyOn(fs, "readdir")
-        .mockResolvedValue([
-          { name: "a", isDirectory: () => true } as Dirent,
-          { name: "b", isDirectory: () => true } as Dirent,
-        ]);
-
-      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
-        .promise;
-
-      expect(result).toBeOk((actual) => expect(actual).toEqual(["a", "b"]));
-    });
-
-    it("should get only directories", async () => {
-      jest
-        .spyOn(fs, "readdir")
-        .mockResolvedValue([
-          { name: "a", isDirectory: () => true } as Dirent,
-          { name: "b.txt", isDirectory: () => false } as Dirent,
-        ]);
-
-      const result = await tryGetDirectoriesIn("/good/path/", noopLogger)
-        .promise;
-
-      expect(result).toBeOk((actual) => expect(actual).toEqual(["a"]));
     });
   });
 });

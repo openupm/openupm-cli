@@ -1,4 +1,4 @@
-import { ReadTextFile } from "../../src/io/fs-result";
+import { ReadTextFile } from "../../src/io/text-file-io";
 import { StringFormatError } from "../../src/utils/string-parsing";
 import { mockService } from "../services/service.mock";
 import { makeLoadProjectVersion } from "../../src/io/project-version-io";
