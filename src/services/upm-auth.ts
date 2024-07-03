@@ -35,5 +35,12 @@ export function makeSaveAuthToUpmConfig(
     )
       .map((maybeConfig) => maybeConfig || {})
       .map((config) => addAuth(registry, auth, config))
-      .andThen((config) => saveUpmConfig(config, configPath));
+      .andThen(
+        (config) =>
+          new AsyncResult(
+            Result.wrapAsync<void, never>(() =>
+              saveUpmConfig(config, configPath)
+            )
+          )
+      );
 }

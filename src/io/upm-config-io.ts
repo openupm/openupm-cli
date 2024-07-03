@@ -2,7 +2,6 @@ import path from "path";
 import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
 import { CustomError } from "ts-custom-error";
-import { AsyncResult, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryParseToml } from "../utils/string-parsing";
@@ -90,11 +89,6 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
 }
 
 /**
- * Errors which may occur when saving a UPM-config file.
- */
-export type UpmConfigSaveError = never;
-
-/**
  * Save the upm config.
  * @param config The config to save.
  * @param configFilePath The path of the file that should be saved to.
@@ -102,7 +96,7 @@ export type UpmConfigSaveError = never;
 export type SaveUpmConfig = (
   config: UPMConfig,
   configFilePath: string
-) => AsyncResult<void, UpmConfigSaveError>;
+) => Promise<void>;
 
 /**
  * Creates a {@link SaveUpmConfig} function.
@@ -110,8 +104,6 @@ export type SaveUpmConfig = (
 export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
   return (config, configFilePath) => {
     const content = TOML.stringify(config);
-    return new AsyncResult(
-      Result.wrapAsync(() => writeFile(configFilePath, content))
-    );
+    return writeFile(configFilePath, content);
   };
 }
