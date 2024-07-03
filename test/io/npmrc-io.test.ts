@@ -55,11 +55,9 @@ describe("npmrc-io", () => {
       const { loadNpmrc, readText } = makeDependencies();
       readText.mockResolvedValue(fileContent);
 
-      const result = await loadNpmrc("/valid/path/.npmrc").promise;
+      const actual = await loadNpmrc("/valid/path/.npmrc");
 
-      expect(result).toBeOk((actual) =>
-        expect(actual).toEqual(["key1 = value1", 'key2 = "value2"'])
-      );
+      expect(actual).toEqual(["key1 = value1", 'key2 = "value2"']);
     });
 
     it("should be null for missing file", async () => {
@@ -67,9 +65,9 @@ describe("npmrc-io", () => {
       const path = "/invalid/path/.npmrc";
       readText.mockResolvedValue(null);
 
-      const result = await loadNpmrc(path).promise;
+      const actual = await loadNpmrc(path);
 
-      expect(result).toBeOk((actual) => expect(actual).toBeNull());
+      expect(actual).toBeNull();
     });
   });
 

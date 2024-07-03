@@ -1,4 +1,4 @@
-import { AsyncResult, Ok, Result } from "ts-results-es";
+import { AsyncResult, Result } from "ts-results-es";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
@@ -23,27 +23,18 @@ export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
 }
 
 /**
- * Error that might occur when loading a npmrc.
- */
-export type NpmrcLoadError = never;
-
-/**
  * Function for loading npmrc.
  * @param path The path to load from.
  * @returns The npmrc's lines or null if not found.
  */
-export type LoadNpmrc = (
-  path: string
-) => AsyncResult<Npmrc | null, NpmrcLoadError>;
+export type LoadNpmrc = (path: string) => Promise<Npmrc | null>;
 
 /**
  * Makes a {@link LoadNpmrc} function.
  */
 export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
   return (path) =>
-    new AsyncResult(
-      readFile(path, true).then((content) => Ok(content?.split(EOL) ?? null))
-    );
+    readFile(path, true).then((content) => content?.split(EOL) ?? null);
 }
 
 /**

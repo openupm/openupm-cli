@@ -13,7 +13,7 @@ function makeDependencies() {
   findPath.mockReturnValue(exampleNpmrcPath);
 
   const loadNpmrc = mockService<LoadNpmrc>();
-  loadNpmrc.mockReturnValue(new AsyncResult(Ok(null)));
+  loadNpmrc.mockResolvedValue(null);
 
   const saveNpmrc = mockService<SaveNpmrc>();
   saveNpmrc.mockReturnValue(new AsyncResult(Ok(undefined)));
@@ -63,7 +63,7 @@ describe("npmrc-auth", () => {
         "some old token"
       );
       const expected = setToken(initial, exampleRegistryUrl, "some token");
-      loadNpmrc.mockReturnValue(new AsyncResult(Ok(initial)));
+      loadNpmrc.mockResolvedValue(initial);
 
       await authNpmrc(exampleRegistryUrl, "some token").promise;
 
