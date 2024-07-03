@@ -2,7 +2,6 @@ import { makeViewCmd } from "../../src/cli/cmd-view";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
@@ -52,7 +51,7 @@ const defaultEnv = {
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
-  parseEnv.mockResolvedValue(Ok(defaultEnv));
+  parseEnv.mockResolvedValue(defaultEnv);
 
   const fetchPackument = mockService<FetchPackument>();
   fetchPackument.mockResolvedValue(somePackument);

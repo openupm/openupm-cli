@@ -1,7 +1,6 @@
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { makeRemoveCmd } from "../../src/cli/cmd-remove";
-import { Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { SemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
@@ -17,7 +16,7 @@ const defaultEnv = {
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
-  parseEnv.mockResolvedValue(Ok(defaultEnv));
+  parseEnv.mockResolvedValue(defaultEnv);
 
   const removePackages = mockService<RemovePackages>();
   removePackages.mockReturnValue(

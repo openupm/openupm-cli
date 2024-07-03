@@ -21,9 +21,9 @@ const exampleSearchResult: SearchedPackument = {
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
-  parseEnv.mockResolvedValue(
-    Ok({ registry: { url: exampleRegistryUrl, auth: null } } as Env)
-  );
+  parseEnv.mockResolvedValue({
+    registry: { url: exampleRegistryUrl, auth: null },
+  } as Env);
 
   const searchPackages = mockService<SearchPackages>();
   searchPackages.mockResolvedValue([exampleSearchResult]);

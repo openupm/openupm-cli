@@ -14,10 +14,7 @@ import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import {
-  notifyEnvParsingFailed,
-  notifyRemotePackumentVersionResolvingFailed,
-} from "./error-logging";
+import { notifyRemotePackumentVersionResolvingFailed } from "./error-logging";
 import { GenericNetworkError } from "../io/common-errors";
 
 export type DepsOptions = CmdOptions<{
@@ -57,12 +54,7 @@ export function makeDepsCmd(
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     const [name, version] = splitPackageReference(pkg);
 

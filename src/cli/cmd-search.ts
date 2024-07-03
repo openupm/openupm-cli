@@ -6,7 +6,6 @@ import { Logger } from "npmlog";
 import { SearchPackages } from "../services/search-packages";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import { notifyEnvParsingFailed } from "./error-logging";
 
 /**
  * The possible result codes with which the search command can exit.
@@ -36,12 +35,7 @@ export function makeSearchCmd(
 ): SearchCmd {
   return async (keyword, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     let usedEndpoint = "npmsearch";
     const results = await searchPackages(env.registry, keyword, () => {

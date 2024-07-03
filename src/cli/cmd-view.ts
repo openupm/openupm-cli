@@ -11,7 +11,6 @@ import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
-import { notifyEnvParsingFailed } from "./error-logging";
 import { FetchPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { AsyncResult, Result } from "ts-results-es";
@@ -112,12 +111,7 @@ export function makeViewCmd(
 ): ViewCmd {
   return async (pkg, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     // parse name
     if (hasVersion(pkg)) {

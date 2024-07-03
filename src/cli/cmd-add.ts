@@ -47,10 +47,7 @@ import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
-import {
-  notifyEnvParsingFailed,
-  notifyRemotePackumentVersionResolvingFailed,
-} from "./error-logging";
+import { notifyRemotePackumentVersionResolvingFailed } from "./error-logging";
 import { GenericNetworkError } from "../io/common-errors";
 
 export class InvalidPackumentDataError extends CustomError {
@@ -120,12 +117,7 @@ export function makeAddCmd(
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
 
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     const editorVersionResult = await determineEditorVersion(env.cwd).promise;
     if (editorVersionResult.isErr()) {

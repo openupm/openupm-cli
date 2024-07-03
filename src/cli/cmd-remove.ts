@@ -3,10 +3,7 @@ import { makePackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
-import {
-  notifyEnvParsingFailed,
-  notifyPackumentNotFoundInManifest,
-} from "./error-logging";
+import { notifyPackumentNotFoundInManifest } from "./error-logging";
 import { DomainName } from "../domain/domain-name";
 import { RemovePackages } from "../services/remove-packages";
 
@@ -37,12 +34,7 @@ export function makeRemoveCmd(
 ): RemoveCmd {
   return async (pkgs, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     const removeResult = await removePackages(env.cwd, pkgs).promise;
     if (removeResult.isErr()) {

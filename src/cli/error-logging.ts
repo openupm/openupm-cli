@@ -1,5 +1,4 @@
 import { Logger } from "npmlog";
-import { EnvParseError } from "../services/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
@@ -77,14 +76,6 @@ export function notifyMissingEnvForUpmConfigPath(
 export function notifySyntacticallyMalformedUpmConfig(log: Logger) {
   log.error("", "Upm-config file contained toml syntax errors.");
   log.notice("", "Please fix the errors in your upm-config and try again.");
-}
-
-function notifyUpmConfigLoadFailedBecauseIO(log: Logger) {
-  log.error("", "Could not load upm-config because of a file-system error.");
-}
-
-export function notifyEnvParsingFailed(log: Logger, error: EnvParseError) {
-  notifyUpmConfigLoadFailedBecauseIO(log);
 }
 
 export function notifyProjectVersionMissing(log: Logger, filePath: string) {

@@ -4,7 +4,6 @@ import path from "path";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
-import { Ok, Result } from "ts-results-es";
 import { tryGetEnv } from "../utils/env-util";
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
@@ -19,15 +18,13 @@ export type Env = Readonly<{
   registry: Registry;
 }>;
 
-export type EnvParseError = never;
-
 /**
  * Function for parsing environment information and global
  * command-options for further usage.
+ * @param options The options passed to the current command.
+ * @returns Environment information.
  */
-export type ParseEnv = (
-  options: CmdOptions
-) => Promise<Result<Env, EnvParseError>>;
+export type ParseEnv = (options: CmdOptions) => Promise<Env>;
 
 /**
  * Creates a {@link ParseEnv} function.
@@ -121,13 +118,13 @@ export function makeParseEnv(
     // cwd
     const cwd = determineCwd(options);
 
-    return Ok({
+    return {
       cwd,
       registry,
       systemUser,
       upstream,
       upstreamRegistry,
       wsl,
-    });
+    };
   };
 }

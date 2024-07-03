@@ -24,7 +24,7 @@ const defaultEnv = {
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
-  parseEnv.mockResolvedValue(Ok(defaultEnv));
+  parseEnv.mockResolvedValue(defaultEnv);
 
   const resolveDependencies = mockService<ResolveDependencies>();
   resolveDependencies.mockResolvedValue(

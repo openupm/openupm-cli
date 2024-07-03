@@ -28,7 +28,7 @@ const exampleUpmConfigPath = "/user/home/.upmconfig.toml";
 describe("cmd-login", () => {
   function makeDependencies() {
     const parseEnv = mockService<ParseEnv>();
-    parseEnv.mockResolvedValue(Ok(defaultEnv));
+    parseEnv.mockResolvedValue(defaultEnv);
 
     const getUpmConfigPath = mockService<GetUpmConfigPath>();
     getUpmConfigPath.mockResolvedValue(exampleUpmConfigPath);
