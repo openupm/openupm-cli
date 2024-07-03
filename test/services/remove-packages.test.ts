@@ -1,5 +1,4 @@
 import { FileMissingError } from "../../src/io/common-errors";
-import { mockProjectManifest } from "../io/project-manifest-io.mock";
 import {
   makeRemovePackages,
   RemovedPackage,
@@ -7,6 +6,7 @@ import {
 import { mockService } from "./service.mock";
 import {
   LoadProjectManifest,
+  makeProjectManifestMissingError,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { makeDomainName } from "../../src/domain/domain-name";
@@ -26,7 +26,7 @@ describe("remove packages", () => {
 
   function makeDependencies() {
     const loadProjectManifest = mockService<LoadProjectManifest>();
-    mockProjectManifest(loadProjectManifest, defaultManifest);
+    loadProjectManifest.mockResolvedValue(defaultManifest);
 
     const writeProjectManifest = mockService<WriteProjectManifest>();
     writeProjectManifest.mockReturnValue(AsyncOk());
@@ -44,7 +44,9 @@ describe("remove packages", () => {
 
   it("should fail if manifest could not be loaded", async () => {
     const { removePackages, loadProjectManifest } = makeDependencies();
-    mockProjectManifest(loadProjectManifest, null);
+    loadProjectManifest.mockRejectedValue(
+      makeProjectManifestMissingError("some path")
+    );
 
     const result = await removePackages(someProjectPath, [somePackage]).promise;
 

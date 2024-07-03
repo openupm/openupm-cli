@@ -49,7 +49,6 @@ import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
 import {
   notifyEnvParsingFailed,
-  notifyManifestLoadFailed,
   notifyManifestWriteFailed,
   notifyProjectVersionLoadFailed,
   notifyRemotePackumentVersionResolvingFailed,
@@ -342,12 +341,7 @@ export function makeAddCmd(
     };
 
     // load manifest
-    const loadResult = await loadProjectManifest(env.cwd).promise;
-    if (loadResult.isErr()) {
-      notifyManifestLoadFailed(log, loadResult.error);
-      return ResultCodes.Error;
-    }
-    let manifest = loadResult.value;
+    let manifest = await loadProjectManifest(env.cwd);
 
     // add
     let dirty = false;

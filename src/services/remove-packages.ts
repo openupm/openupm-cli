@@ -7,7 +7,6 @@ import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import {
   LoadProjectManifest,
-  ManifestLoadError,
   ManifestWriteError,
   WriteProjectManifest,
 } from "../io/project-manifest-io";
@@ -19,10 +18,7 @@ export type RemovedPackage = {
   version: SemanticVersion | PackageUrl;
 };
 
-export type RemovePackagesError =
-  | ManifestLoadError
-  | PackumentNotFoundError
-  | ManifestWriteError;
+export type RemovePackagesError = PackumentNotFoundError | ManifestWriteError;
 
 export type RemovePackages = (
   projectPath: string,
@@ -85,7 +81,11 @@ export function makeRemovePackages(
 
   return (projectPath, packageNames) => {
     // load manifest
-    const initialManifest = loadProjectManifest(projectPath);
+    const initialManifest = new AsyncResult(
+      Result.wrapAsync<UnityProjectManifest, never>(() =>
+        loadProjectManifest(projectPath)
+      )
+    );
 
     // remove
     const removeResult = initialManifest.andThen((it) =>

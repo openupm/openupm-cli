@@ -5,7 +5,7 @@ import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import {
   notifyEnvParsingFailed,
-  notifyPackageRemoveFailed,
+  notifyPackumentNotFoundInManifest,
 } from "./error-logging";
 import { DomainName } from "../domain/domain-name";
 import { RemovePackages } from "../services/remove-packages";
@@ -46,7 +46,7 @@ export function makeRemoveCmd(
 
     const removeResult = await removePackages(env.cwd, pkgs).promise;
     if (removeResult.isErr()) {
-      notifyPackageRemoveFailed(log, removeResult.error);
+      notifyPackumentNotFoundInManifest(log, removeResult.error.packageName);
       return ResultCodes.Error;
     }
     const removedPackages = removeResult.value;

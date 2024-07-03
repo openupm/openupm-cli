@@ -9,5 +9,5 @@ const loadProjectManifest = makeLoadProjectManifest(readText);
 export async function getProjectManifest(
   projectDirectory: string
 ): Promise<UnityProjectManifest> {
-  return (await loadProjectManifest(projectDirectory).promise).unwrap();
+  return await loadProjectManifest(projectDirectory);
 }

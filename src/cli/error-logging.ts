@@ -16,8 +16,6 @@ import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { EOL } from "node:os";
 import { ResolveRemotePackumentVersionError } from "../services/resolve-remote-packument-version";
-import { ManifestLoadError } from "../io/project-manifest-io";
-import { RemovePackagesError } from "../services/remove-packages";
 
 export function suggestCheckingWorkingDirectory(log: Logger) {
   log.notice("", "Are you in the correct working directory?");
@@ -53,19 +51,6 @@ export function notifyManifestLoadFailedBecauseIO(log: Logger) {
     "",
     "Could not load project manifest because of a file-system error."
   );
-}
-
-export function notifyManifestLoadFailed(
-  log: Logger,
-  error: ManifestLoadError
-) {
-  if (error instanceof FileMissingError) notifyManifestMissing(log, error.path);
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedProjectManifest(log);
-  else if (error instanceof FileParseError)
-    notifySemanticallyMalformedProjectManifest(log);
-  else if (error instanceof GenericIOError)
-    notifyManifestLoadFailedBecauseIO(log);
 }
 
 export function notifyManifestWriteFailed(log: Logger) {
@@ -226,20 +211,4 @@ export function notifyRemotePackumentVersionResolvingFailed(
       error.requestedVersion,
       error.availableVersions
     );
-}
-
-export function notifyPackageRemoveFailed(
-  log: Logger,
-  error: RemovePackagesError
-) {
-  if (error instanceof FileMissingError) notifyManifestMissing(log, error.path);
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedProjectManifest(log);
-  else if (error instanceof FileParseError)
-    notifySemanticallyMalformedProjectManifest(log);
-  else if (error instanceof GenericIOError) {
-    if (error.operationType === "Read") notifyManifestLoadFailedBecauseIO(log);
-    else notifyManifestWriteFailed(log);
-  } else if (error instanceof PackumentNotFoundError)
-    notifyPackumentNotFoundInManifest(log, error.packageName);
 }

@@ -4,7 +4,6 @@ import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
-import { mockProjectManifest } from "../io/project-manifest-io.mock";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
@@ -89,7 +88,7 @@ function makeDependencies() {
   );
 
   const loadProjectManifest = mockService<LoadProjectManifest>();
-  mockProjectManifest(loadProjectManifest, emptyProjectManifest);
+  loadProjectManifest.mockResolvedValue(emptyProjectManifest);
 
   const writeProjectManifest = mockService<WriteProjectManifest>();
   writeProjectManifest.mockReturnValue(AsyncOk());
@@ -168,27 +167,6 @@ describe("cmd-add", () => {
     expect(log.error).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining("file-system error")
-    );
-  });
-
-  it("should fail if manifest could not be loaded", async () => {
-    const { addCmd, loadProjectManifest } = makeDependencies();
-    mockProjectManifest(loadProjectManifest, null);
-
-    const resultCode = await addCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if manifest could not be loaded", async () => {
-    const { addCmd, loadProjectManifest, log } = makeDependencies();
-    mockProjectManifest(loadProjectManifest, null);
-
-    await addCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("Could not locate")
     );
   });
 
@@ -545,8 +523,7 @@ describe("cmd-add", () => {
   it("should replace package", async () => {
     const { addCmd, writeProjectManifest, loadProjectManifest } =
       makeDependencies();
-    mockProjectManifest(
-      loadProjectManifest,
+    loadProjectManifest.mockResolvedValue(
       buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "0.1.0", true, true)
       )
@@ -566,8 +543,7 @@ describe("cmd-add", () => {
 
   it("should notify if package was replaced", async () => {
     const { addCmd, loadProjectManifest, log } = makeDependencies();
-    mockProjectManifest(
-      loadProjectManifest,
+    loadProjectManifest.mockResolvedValue(
       buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "0.1.0", true, true)
       )
@@ -585,8 +561,7 @@ describe("cmd-add", () => {
 
   it("should notify if package is already in manifest", async () => {
     const { addCmd, loadProjectManifest, log } = makeDependencies();
-    mockProjectManifest(
-      loadProjectManifest,
+    loadProjectManifest.mockResolvedValue(
       buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "1.0.0", true, true)
       )
@@ -642,8 +617,7 @@ describe("cmd-add", () => {
   it("should not save if nothing changed", async () => {
     const { addCmd, loadProjectManifest, writeProjectManifest } =
       makeDependencies();
-    mockProjectManifest(
-      loadProjectManifest,
+    loadProjectManifest.mockResolvedValue(
       buildProjectManifest((manifest) =>
         manifest
           .addDependency(somePackage, "1.0.0", true, false)

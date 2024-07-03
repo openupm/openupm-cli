@@ -48,17 +48,6 @@ describe("cmd-remove", () => {
     expect(resultCode).toEqual(ResultCodes.Error);
   });
 
-  it("should fail if package could not be removed", async () => {
-    const { removeCmd, removePackages } = makeDependencies();
-    removePackages.mockReturnValue(
-      Err(new GenericIOError("Read")).toAsyncResult()
-    );
-
-    const resultCode = await removeCmd([somePackage], { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
   it("should print removed packages", async () => {
     const { removeCmd, log } = makeDependencies();
 

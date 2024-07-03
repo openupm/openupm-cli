@@ -14,7 +14,7 @@ import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
-import { eaccesError, enoentError } from "./node-error.mock";
+import { eaccesError } from "./node-error.mock";
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
 
@@ -42,24 +42,20 @@ describe("project-manifest io", () => {
 
     it("should fail if file could not be read", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockRejectedValue(eaccesError);
+      readFile.mockRejectedValue(new GenericIOError("Read"));
 
-      const result = await loadProjectManifest(exampleProjectPath).promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(GenericIOError)
-      );
+      await expect(
+        loadProjectManifest(exampleProjectPath)
+      ).rejects.toBeInstanceOf(GenericIOError);
     });
 
     it("should fail if file is missing", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockRejectedValue(enoentError);
+      readFile.mockResolvedValue(null);
 
-      const result = await loadProjectManifest(exampleProjectPath).promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(FileMissingError)
-      );
+      await expect(
+        loadProjectManifest(exampleProjectPath)
+      ).rejects.toBeInstanceOf(FileMissingError);
     });
 
     it("should fail if file does not contain json", async () => {
@@ -67,7 +63,7 @@ describe("project-manifest io", () => {
       readFile.mockResolvedValue("{} dang, this is not json []");
 
       await expect(
-        loadProjectManifest(exampleProjectPath).promise
+        loadProjectManifest(exampleProjectPath)
       ).rejects.toBeInstanceOf(StringFormatError);
     });
 
@@ -77,15 +73,13 @@ describe("project-manifest io", () => {
         `{ "dependencies": { "com.package.a": "1.0.0"} }`
       );
 
-      const result = await loadProjectManifest(exampleProjectPath).promise;
+      const actual = await loadProjectManifest(exampleProjectPath);
 
-      expect(result).toBeOk((actual) =>
-        expect(actual).toEqual({
-          dependencies: {
-            "com.package.a": "1.0.0",
-          },
-        })
-      );
+      expect(actual).toEqual({
+        dependencies: {
+          "com.package.a": "1.0.0",
+        },
+      });
     });
   });
 
