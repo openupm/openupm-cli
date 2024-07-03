@@ -4,10 +4,7 @@ import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeEditorVersion } from "../../src/domain/editor-version";
-import {
-  mockProjectManifest,
-  mockProjectManifestWriteResult,
-} from "../io/project-manifest-io.mock";
+import { mockProjectManifest } from "../io/project-manifest-io.mock";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
@@ -95,7 +92,7 @@ function makeDependencies() {
   mockProjectManifest(loadProjectManifest, emptyProjectManifest);
 
   const writeProjectManifest = mockService<WriteProjectManifest>();
-  mockProjectManifestWriteResult(writeProjectManifest);
+  writeProjectManifest.mockReturnValue(AsyncOk());
 
   const determineEditorVersion = mockService<DetermineEditorVersion>();
   determineEditorVersion.mockReturnValue(
@@ -684,31 +681,6 @@ describe("cmd-add", () => {
     expect(log.notice).toHaveBeenCalledWith(
       "",
       expect.stringContaining("open Unity")
-    );
-  });
-
-  it("should fail if manifest could not be saved", async () => {
-    const expected = new GenericIOError("Write");
-    const { addCmd, writeProjectManifest } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, expected);
-
-    const resultCode = await addCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if manifest could not be saved", async () => {
-    const { addCmd, writeProjectManifest, log } = makeDependencies();
-    mockProjectManifestWriteResult(
-      writeProjectManifest,
-      new GenericIOError("Write")
-    );
-
-    await addCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("file-system error")
     );
   });
 });

@@ -1,8 +1,5 @@
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
-import {
-  mockProjectManifest,
-  mockProjectManifestWriteResult,
-} from "../io/project-manifest-io.mock";
+import { FileMissingError } from "../../src/io/common-errors";
+import { mockProjectManifest } from "../io/project-manifest-io.mock";
 import {
   makeRemovePackages,
   RemovedPackage,
@@ -16,6 +13,7 @@ import { makeDomainName } from "../../src/domain/domain-name";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import path from "path";
 import { PackumentNotFoundError } from "../../src/common-errors";
+import { AsyncOk } from "../../src/utils/result-utils";
 
 describe("remove packages", () => {
   const someProjectPath = path.resolve("/home/projects/MyUnityProject");
@@ -31,7 +29,7 @@ describe("remove packages", () => {
     mockProjectManifest(loadProjectManifest, defaultManifest);
 
     const writeProjectManifest = mockService<WriteProjectManifest>();
-    mockProjectManifestWriteResult(writeProjectManifest);
+    writeProjectManifest.mockReturnValue(AsyncOk());
 
     const removePackages = makeRemovePackages(
       loadProjectManifest,
@@ -111,15 +109,5 @@ describe("remove packages", () => {
         scopes: [somePackage],
       })
     );
-  });
-
-  it("should fail if manifest could not be saved", async () => {
-    const expected = new GenericIOError("Write");
-    const { removePackages, writeProjectManifest } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, expected);
-
-    const result = await removePackages(someProjectPath, [somePackage]).promise;
-
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
   });
 });

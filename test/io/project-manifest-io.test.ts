@@ -17,7 +17,6 @@ import { mockService } from "../services/service.mock";
 import { eaccesError, enoentError } from "./node-error.mock";
 import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
 import { StringFormatError } from "../../src/utils/string-parsing";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
@@ -95,7 +94,7 @@ describe("project-manifest io", () => {
   describe("write", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
-      writeFile.mockReturnValue(AsyncOk());
+      writeFile.mockResolvedValue(undefined);
 
       const writeProjectManifest = makeWriteProjectManifest(writeFile);
       return { writeProjectManifest, writeFile } as const;
@@ -104,7 +103,7 @@ describe("project-manifest io", () => {
     it("should fail if file could not be written", async () => {
       const expected = eaccesError;
       const { writeProjectManifest, writeFile } = makeDependencies();
-      writeFile.mockReturnValue(AsyncErr(expected));
+      writeFile.mockRejectedValue(expected);
 
       const result = await writeProjectManifest(
         exampleProjectPath,

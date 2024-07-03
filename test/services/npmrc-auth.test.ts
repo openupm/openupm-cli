@@ -5,7 +5,6 @@ import { emptyNpmrc, setToken } from "../../src/domain/npmrc";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeAuthNpmrc } from "../../src/services/npmrc-auth";
 import { mockService } from "./service.mock";
-import { GenericIOError } from "../../src/io/common-errors";
 
 const exampleNpmrcPath = "/users/someuser/.npmrc";
 
@@ -29,16 +28,6 @@ describe("npmrc-auth", () => {
       const expected = new RequiredEnvMissingError([]);
       const { authNpmrc, findPath } = makeDependencies();
       findPath.mockReturnValue(Err(expected));
-
-      const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should fail if npmrc save failed", async () => {
-      const expected = new GenericIOError("Write");
-      const { authNpmrc, saveNpmrc } = makeDependencies();
-      saveNpmrc.mockReturnValue(new AsyncResult(Err(expected)));
 
       const result = await authNpmrc(exampleRegistryUrl, "some token").promise;
 

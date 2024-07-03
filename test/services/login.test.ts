@@ -101,24 +101,6 @@ describe("login", () => {
       expect(result).toBeError((actual) => expect(actual).toEqual(expected));
     });
 
-    it("should fail if npmrc auth fails", async () => {
-      const expected = new GenericIOError("Read");
-      const { login, authNpmrc } = makeDependencies();
-      authNpmrc.mockReturnValue(AsyncErr(expected));
-
-      const result = await login(
-        exampleUser,
-        examplePassword,
-        exampleEmail,
-        true,
-        exampleRegistryUrl,
-        exampleConfigPath,
-        "token"
-      ).promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
-    });
-
     it("should save token", async () => {
       const { login, saveAuthToUpmConfig } = makeDependencies();
 

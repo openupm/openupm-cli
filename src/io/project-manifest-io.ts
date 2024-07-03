@@ -99,7 +99,7 @@ export function makeLoadProjectManifest(
 /**
  * Error which may occur when saving a project manifest.
  */
-export type ManifestWriteError = GenericIOError;
+export type ManifestWriteError = never;
 
 /**
  * Function for replacing the project manifest for a Unity project.
@@ -122,8 +122,8 @@ export function makeWriteProjectManifest(
     manifest = pruneManifest(manifest);
     const json = JSON.stringify(manifest, null, 2);
 
-    return writeFile(manifestPath, json).mapErr(
-      () => new GenericIOError("Write")
+    return new AsyncResult(
+      Result.wrapAsync(() => writeFile(manifestPath, json))
     );
   };
 }

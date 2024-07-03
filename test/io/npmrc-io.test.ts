@@ -1,5 +1,5 @@
 import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { Err, Ok } from "ts-results-es";
 import { EOL } from "node:os";
 import {
   makeFindNpmrcPath,
@@ -78,7 +78,7 @@ describe("npmrc-io", () => {
   describe("save", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
-      writeFile.mockReturnValue(new AsyncResult(Ok(undefined)));
+      writeFile.mockResolvedValue(undefined);
 
       const saveNpmrc = makeSaveNpmrc(writeFile);
       return { saveNpmrc, writeFile } as const;
@@ -96,7 +96,7 @@ describe("npmrc-io", () => {
     it("should fail when write fails", async () => {
       const { saveNpmrc, writeFile } = makeDependencies();
       const path = "/invalid/path/.npmrc";
-      writeFile.mockReturnValue(new AsyncResult(Err(eaccesError)));
+      writeFile.mockRejectedValue(eaccesError);
 
       const result = await saveNpmrc(path, ["key=value"]).promise;
 

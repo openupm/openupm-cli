@@ -70,6 +70,8 @@ export type SaveNpmrc = (
 export function makeSaveNpmrc(writeFile: WriteTextFile): SaveNpmrc {
   return (path, npmrc) => {
     const content = npmrc.join(EOL);
-    return writeFile(path, content).mapErr(() => new GenericIOError("Write"));
+    return new AsyncResult(
+      Result.wrapAsync(() => writeFile(path, content))
+    ).mapErr(() => new GenericIOError("Write"));
   };
 }

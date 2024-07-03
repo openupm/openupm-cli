@@ -72,9 +72,9 @@ describe("fs-result", () => {
     it("should be ok for valid write", async () => {
       const { writeFile } = makeDependencies();
 
-      const result = await writeFile("path/to/file.txt", "content").promise;
-
-      expect(result).toBeOk();
+      await expect(
+        writeFile("path/to/file.txt", "content")
+      ).resolves.toBeUndefined();
     });
 
     it("should write to correct path", async () => {
@@ -82,7 +82,7 @@ describe("fs-result", () => {
       const expected = "path/to/file.txt";
       const fsWrite = jest.spyOn(fs, "writeFile");
 
-      await writeFile(expected, "content").promise;
+      await writeFile(expected, "content");
 
       expect(fsWrite).toHaveBeenCalledWith(expected, expect.any(String));
     });
@@ -92,7 +92,7 @@ describe("fs-result", () => {
       const expected = "content";
       const fsWrite = jest.spyOn(fs, "writeFile");
 
-      await writeFile("path/to/file.txt", expected).promise;
+      await writeFile("path/to/file.txt", expected);
 
       expect(fsWrite).toHaveBeenCalledWith(expect.any(String), expected);
     });
@@ -101,29 +101,29 @@ describe("fs-result", () => {
       const { writeFile } = makeDependencies();
       const fseEnsureDir = jest.spyOn(fse, "ensureDir");
 
-      await writeFile("/path/to/file.txt", "content").promise;
+      await writeFile("/path/to/file.txt", "content");
 
       expect(fseEnsureDir).toHaveBeenCalledWith("/path/to");
     });
 
-    it("should notify of directory ensure error", async () => {
+    it("should fail if directory could not be ensured", async () => {
       const { writeFile } = makeDependencies();
       const expected = makeNodeError("EACCES");
       jest.spyOn(fse, "ensureDir").mockRejectedValue(expected as never);
 
-      const result = await writeFile("/path/to/file.txt", "content").promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      await expect(writeFile("/path/to/file.txt", "content")).rejects.toEqual(
+        expected
+      );
     });
 
-    it("should notify of write error", async () => {
+    it("should fail if file could not be written", async () => {
       const { writeFile } = makeDependencies();
       const expected = makeNodeError("EACCES");
       jest.spyOn(fs, "writeFile").mockRejectedValue(expected as never);
 
-      const result = await writeFile("/path/to/file.txt", "content").promise;
-
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      await expect(writeFile("/path/to/file.txt", "content")).rejects.toEqual(
+        expected
+      );
     });
   });
 

@@ -115,7 +115,7 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
 /**
  * Errors which may occur when saving a UPM-config file.
  */
-export type UpmConfigSaveError = GenericIOError;
+export type UpmConfigSaveError = never;
 
 /**
  * Save the upm config.
@@ -133,8 +133,8 @@ export type SaveUpmConfig = (
 export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
   return (config, configFilePath) => {
     const content = TOML.stringify(config);
-    return writeFile(configFilePath, content).mapErr(
-      () => new GenericIOError("Write")
+    return new AsyncResult(
+      Result.wrapAsync(() => writeFile(configFilePath, content))
     );
   };
 }

@@ -2,11 +2,9 @@ import {
   LoadProjectManifest,
   makeProjectManifestMissingError,
   manifestPathFor,
-  ManifestWriteError,
-  WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { UnityProjectManifest } from "../../src/domain/project-manifest";
-import { Err, Ok } from "ts-results-es";
+import { Err } from "ts-results-es";
 import { AsyncOk } from "../../src/utils/result-utils";
 
 /**
@@ -25,18 +23,4 @@ export function mockProjectManifest(
       ? Err(makeProjectManifestMissingError(manifestPath)).toAsyncResult()
       : AsyncOk(manifest);
   });
-}
-
-/**
- * Mocks the result of writing the project manifest.
- * @param writeProjectManifest The write function.
- * @param error The error that should be returned by the write operation. If
- * omitted the operation will be mocked to succeed.
- */
-export function mockProjectManifestWriteResult(
-  writeProjectManifest: jest.MockedFunction<WriteProjectManifest>,
-  error?: ManifestWriteError
-) {
-  const result = error !== undefined ? Err(error) : Ok(undefined);
-  return writeProjectManifest.mockReturnValue(result.toAsyncResult());
 }

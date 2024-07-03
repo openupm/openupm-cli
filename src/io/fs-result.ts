@@ -57,17 +57,22 @@ export function makeReadText(debugLog: DebugLog): ReadTextFile {
 export type WriteTextFile = (
   filePath: string,
   content: string
-) => AsyncResult<void, NodeJS.ErrnoException>;
+) => Promise<void>;
 
 /**
  * Makes a {@link WriteTextFile} function.
  */
 export function makeWriteText(debugLog: DebugLog): WriteTextFile {
-  return (filePath, content) => {
+  return async (filePath, content) => {
     const dirPath = path.dirname(filePath);
-    return resultifyFsOp(debugLog, () => fse.ensureDir(dirPath)).andThen(() =>
-      resultifyFsOp(debugLog, () => fs.writeFile(filePath, content))
-    );
+    try {
+      await fse.ensureDir(dirPath);
+      await fs.writeFile(filePath, content);
+    } catch (error) {
+      assertIsNodeError(error);
+      debugLog("Text file write failed.", error);
+      throw error;
+    }
   };
 }
 
