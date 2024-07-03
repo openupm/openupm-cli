@@ -35,9 +35,8 @@ export function makeRemovePackages(
   ): Result<[UnityProjectManifest, RemovedPackage], PackumentNotFoundError> {
     // not found array
     const versionInManifest = manifest.dependencies[packageName];
-    if (versionInManifest === undefined) {
+    if (versionInManifest === undefined)
       return Err(new PackumentNotFoundError(packageName));
-    }
 
     manifest = removeDependency(manifest, packageName);
 
@@ -88,10 +87,9 @@ export function makeRemovePackages(
       tryRemoveAll(it, packageNames)
     );
 
-    return removeResult.andThen(([updatedManifest, removedPackages]) =>
-      writeProjectManifest(projectPath, updatedManifest).then(() =>
-        Ok(removedPackages)
-      )
-    );
+    return removeResult.map(async ([updatedManifest, removedPackages]) => {
+      await writeProjectManifest(projectPath, updatedManifest);
+      return removedPackages;
+    });
   };
 }
