@@ -79,9 +79,7 @@ export type AddOptions = CmdOptions<{
 
 type AddError =
   | ResolvePackumentVersionError
-  | InvalidPackumentDataError
   | EditorIncompatibleError
-  | UnresolvedDependencyError
   | DependencyResolveError;
 
 /**
@@ -178,9 +176,7 @@ export function makeAddCmd(
               "suggest",
               "contact the package author to fix the issue, or run with option -f to ignore the warning"
             );
-            return Err(
-              new InvalidPackumentDataError("Editor-version not valid.")
-            );
+            throw new InvalidPackumentDataError("Editor-version not valid.");
           }
         } else {
           const targetEditorVersion = targetEditorVersionResult.value;
@@ -267,7 +263,7 @@ export function makeAddCmd(
                 "missing dependencies",
                 "please resolve the issue or run with option -f to ignore the warning"
               );
-              return Err(new UnresolvedDependencyError());
+              throw new UnresolvedDependencyError();
             }
           }
         } else pkgsInScope.push(name);

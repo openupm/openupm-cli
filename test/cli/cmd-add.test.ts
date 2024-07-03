@@ -1,4 +1,8 @@
-import { makeAddCmd } from "../../src/cli/cmd-add";
+import {
+  InvalidPackumentDataError,
+  makeAddCmd,
+  UnresolvedDependencyError,
+} from "../../src/cli/cmd-add";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -191,7 +195,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, {
       _global: {},
-    });
+    }).catch(() => {});
 
     expect(log.warn).toHaveBeenCalledWith(
       "package.unity",
@@ -208,7 +212,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, {
       _global: {},
-    });
+    }).catch(() => {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "suggest",
@@ -223,11 +227,11 @@ describe("cmd-add", () => {
       badEditorPackument,
     ]);
 
-    const resultCode = await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
+    await expect(() =>
+      addCmd(somePackage, {
+        _global: {},
+      })
+    ).rejects.toBeInstanceOf(InvalidPackumentDataError);
   });
 
   it("should add package with invalid editor version when running with force", async () => {
@@ -325,7 +329,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, {
       _global: {},
-    });
+    }).catch(() => {});
 
     expect(log.error).toHaveBeenCalledWith(
       expect.any(String),
@@ -365,7 +369,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, {
       _global: {},
-    });
+    }).catch(() => {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "suggest",
@@ -390,7 +394,7 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, {
       _global: {},
-    });
+    }).catch(() => {});
 
     expect(log.error).toHaveBeenCalledWith(
       "missing dependencies",
@@ -413,11 +417,11 @@ describe("cmd-add", () => {
       ])
     );
 
-    const resultCode = await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
+    await expect(() =>
+      addCmd(somePackage, {
+        _global: {},
+      })
+    ).rejects.toBeInstanceOf(UnresolvedDependencyError);
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
