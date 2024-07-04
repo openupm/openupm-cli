@@ -16,10 +16,6 @@ import { dependenciesOf } from "../domain/package-manifest";
 import { ResolveLatestVersion } from "./resolve-latest-version";
 import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
 import { CheckIsBuiltInPackage } from "./built-in-package-check";
 
 export type DependencyBase = {
@@ -177,17 +173,10 @@ export function makeResolveDependency(
         }
 
         if (resolveResult.isErr()) {
-          const error = resolveResult.error;
-          if (
-            error instanceof GenericNetworkError ||
-            error instanceof RegistryAuthenticationError
-          )
-            return Err(error);
-
           depsInvalid.push({
             name: entryName,
             self: isSelf,
-            reason: error,
+            reason: resolveResult.error,
           });
           continue;
         }
