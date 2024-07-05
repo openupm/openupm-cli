@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/openupm/openupm-cli/compare/3.2.0...3.3.0) (2024-07-05)
+
+
+### Features
+
+* add more error messages ([#368](https://github.com/openupm/openupm-cli/issues/368)) ([44ba315](https://github.com/openupm/openupm-cli/commit/44ba315e8f444dbe09455a7ef9acbeb2876aa73a))
+
 # [3.2.0](https://github.com/openupm/openupm-cli/compare/3.1.0...3.2.0) (2024-06-29)
 
 
