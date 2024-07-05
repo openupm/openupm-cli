@@ -4,13 +4,12 @@ import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
 import yaml from "yaml";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { makeWriteProjectManifest } from "../../../src/io/project-manifest-io";
-import { makeWriteText } from "../../../src/io/fs-result";
-import { noopLogger } from "../../../src/logging";
+import { makeWriteText } from "../../../src/io/text-file-io";
 import { dropDirectory } from "./directories";
 
 export type ProjectOptions = {};
 
-const writeFile = makeWriteText(noopLogger);
+const writeFile = makeWriteText();
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 
 export async function prepareUnityProject(
@@ -32,7 +31,7 @@ export async function prepareUnityProject(
   );
 
   const manifest = emptyProjectManifest;
-  (await writeProjectManifest(projectDir, manifest).promise).unwrap();
+  await writeProjectManifest(projectDir, manifest);
 
   return projectDir;
 }

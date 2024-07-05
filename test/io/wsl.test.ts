@@ -1,6 +1,5 @@
-import { ChildProcessError, RunChildProcess } from "../../src/io/child-process";
+import { RunChildProcess } from "../../src/io/child-process";
 import { tryGetWslPath } from "../../src/io/wsl";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { mockService } from "../services/service.mock";
 
 jest.mock("is-wsl", () => ({
@@ -13,20 +12,11 @@ describe("wsl", () => {
     it("should be result of wslpath command", async () => {
       const expected = "/some/path";
       const runChildProcess = mockService<RunChildProcess>();
-      runChildProcess.mockReturnValue(AsyncOk(expected));
+      runChildProcess.mockResolvedValue(expected);
 
-      const result = await tryGetWslPath("SOMEVAR", runChildProcess).promise;
+      const actual = await tryGetWslPath("SOMEVAR", runChildProcess);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should fail if wslpath fails", async () => {
-      const runChildProcess = mockService<RunChildProcess>();
-      runChildProcess.mockReturnValue(AsyncErr(new ChildProcessError()));
-
-      const result = await tryGetWslPath("SOMEVAR", runChildProcess).promise;
-
-      expect(result).toBeError();
+      expect(actual).toEqual(expected);
     });
 
     /*

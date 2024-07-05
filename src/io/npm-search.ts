@@ -1,14 +1,10 @@
-import { AsyncResult, Err, Ok } from "ts-results-es";
 import npmFetch from "npm-registry-fetch";
 import npmSearch from "libnpmsearch";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "./common-errors";
+import { RegistryAuthenticationError } from "./common-errors";
 import { DebugLog } from "../logging";
 
 /**
@@ -22,21 +18,15 @@ export type SearchedPackument = Readonly<
 >;
 
 /**
- * Error which may occur when searching a npm registry.
- */
-export type SearchRegistryError =
-  | RegistryAuthenticationError
-  | GenericNetworkError;
-
-/**
  * Function for searching packuments on a registry.
  * @param registry The registry to search.
  * @param keyword The keyword to search.
+ * @returns The search results.
  */
 export type SearchRegistry = (
   registry: Registry,
   keyword: string
-) => AsyncResult<ReadonlyArray<SearchedPackument>, SearchRegistryError>;
+) => Promise<ReadonlyArray<SearchedPackument>>;
 
 /**
  * Get npm fetch options.
@@ -56,20 +46,15 @@ export const getNpmFetchOptions = function (
  * Makes a {@link SearchRegistry} function.
  */
 export function makeSearchRegistry(debugLog: DebugLog): SearchRegistry {
-  return (registry, keyword) => {
-    return new AsyncResult(
-      npmSearch(keyword, getNpmFetchOptions(registry))
-        // NOTE: The results of the search will be packument objects, so we can change the type
-        .then((results) => Ok(results as SearchedPackument[]))
-        .catch((error) => {
-          assertIsHttpError(error);
-          debugLog("A http request failed.", error);
-          return Err(
-            error.statusCode === 401
-              ? new RegistryAuthenticationError()
-              : new GenericNetworkError()
-          );
-        })
-    );
-  };
+  return (registry, keyword) =>
+    npmSearch(keyword, getNpmFetchOptions(registry))
+      // NOTE: The results of the search will be packument objects, so we can change the type
+      .then((results) => results as SearchedPackument[])
+      .catch((error) => {
+        assertIsHttpError(error);
+        debugLog("A http request failed.", error);
+        throw error.statusCode === 401
+          ? new RegistryAuthenticationError(registry.url)
+          : error;
+      });
 }

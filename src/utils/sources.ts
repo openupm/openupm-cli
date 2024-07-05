@@ -1,7 +1,5 @@
 import { Registry } from "../domain/registry";
-import { AsyncResult } from "ts-results-es";
 import { RegistryUrl } from "../domain/registry-url";
-import { AsyncOk } from "./result-utils";
 
 /**
  * A value that was resolved from a remote registry.
@@ -25,29 +23,28 @@ export type FromRegistry<T> = {
  * @returns The first resolved value or null if no registry matched the query.
  * Can also return the first error that caused a query to fail.
  */
-export function queryAllRegistriesLazy<TValue, TError>(
+export function queryAllRegistriesLazy<TValue>(
   sources: ReadonlyArray<Registry>,
-  query: (source: Registry) => AsyncResult<TValue | null, TError>
-): AsyncResult<FromRegistry<TValue> | null, TError> {
-  function queryRecursively(
+  query: (source: Registry) => Promise<TValue | null>
+): Promise<FromRegistry<TValue> | null> {
+  async function queryRecursively(
     remainingSources: ReadonlyArray<Registry>
-  ): AsyncResult<FromRegistry<TValue> | null, TError> {
+  ): Promise<FromRegistry<TValue> | null> {
     // If there are no more sources to search then can return with null
-    if (remainingSources.length === 0) return AsyncOk(null);
+    if (remainingSources.length === 0) return null;
 
     // Determine current and fallback sources
     const currentSource = remainingSources[0]!;
     const fallbackSources = remainingSources.slice(1);
 
     // Query the current source first
-    return query(currentSource).andThen((maybeValue) =>
-      // Afterward check if we got a value.
-      // If yes we can return it, otherwise we enter the next level
-      // of the recursion with the remaining registries.
-      maybeValue !== null
-        ? AsyncOk({ value: maybeValue, source: currentSource.url })
-        : queryRecursively(fallbackSources)
-    );
+    const maybeValue = await query(currentSource);
+    // Afterward check if we got a value.
+    // If yes we can return it, otherwise we enter the next level
+    // of the recursion with the remaining registries.
+    return maybeValue !== null
+      ? { value: maybeValue, source: currentSource.url }
+      : await queryRecursively(fallbackSources);
   }
 
   return queryRecursively(sources);

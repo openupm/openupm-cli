@@ -2,6 +2,7 @@ import path from "path";
 import { tryGetEnv } from "../../src/utils/env-util";
 import {
   makeGetHomePath,
+  NoHomePathError,
   OSNotSupportedError,
   tryGetEditorInstallPath,
   VersionNotSupportedOnOsError,
@@ -27,9 +28,9 @@ describe("special-paths", () => {
         .mocked(tryGetEnv)
         .mockImplementation((key) => (key === "USERPROFILE" ? expected : null));
 
-      const result = getHomePath();
+      const actual = getHomePath();
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
     it("should be HOME if USERPROFILE is not defined", () => {
@@ -39,18 +40,16 @@ describe("special-paths", () => {
         .mocked(tryGetEnv)
         .mockImplementation((key) => (key === "HOME" ? expected : null));
 
-      const result = getHomePath();
+      const actual = getHomePath();
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(actual).toEqual(expected);
     });
 
     it("should fail if HOME and USERPROFILE are not defined", () => {
       const { getHomePath } = makeDependencies();
       jest.mocked(tryGetEnv).mockReturnValue(null);
 
-      const result = getHomePath();
-
-      expect(result).toBeError();
+      expect(() => getHomePath()).toThrow(NoHomePathError);
     });
   });
 

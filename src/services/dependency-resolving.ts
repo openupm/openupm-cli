@@ -2,35 +2,21 @@ import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { addToCache, emptyPackumentCache } from "../packument-cache";
 import {
-  PackumentVersionResolveError,
   pickMostFixable,
   ResolvableVersion,
   ResolvedPackumentVersion,
+  ResolvePackumentVersionError,
   tryResolveFromCache,
 } from "../packument-version-resolving";
 import { RegistryUrl } from "../domain/registry-url";
 import { Registry } from "../domain/registry";
-import {
-  ResolveRemotePackumentVersion,
-  ResolveRemotePackumentVersionError,
-} from "./resolve-remote-packument-version";
+import { ResolveRemotePackumentVersion } from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
-import {
-  ResolveLatestVersion,
-  ResolveLatestVersionError,
-} from "./resolve-latest-version";
-import { Err, Ok, Result } from "ts-results-es";
+import { ResolveLatestVersion } from "./resolve-latest-version";
+import { Err, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
-import { FetchPackumentError } from "../io/packument-io";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
-import {
-  CheckIsBuiltInPackage,
-  CheckIsBuiltInPackageError,
-} from "./built-in-package-check";
+import { CheckIsBuiltInPackage } from "./built-in-package-check";
 
 export type DependencyBase = {
   /**
@@ -63,18 +49,10 @@ export interface ValidDependency extends DependencyBase {
  * A dependency that could not be resolved.
  */
 export interface InvalidDependency extends DependencyBase {
-  reason: PackumentVersionResolveError;
+  reason: ResolvePackumentVersionError;
 }
 
 type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
-
-/**
- * Error which may occur when resolving the dependencies for a package.
- */
-export type DependencyResolveError =
-  | ResolveLatestVersionError
-  | FetchPackumentError
-  | CheckIsBuiltInPackageError;
 
 /**
  * Function for resolving all dependencies for a package.
@@ -88,9 +66,7 @@ export type ResolveDependencies = (
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean
-) => Promise<
-  Result<[ValidDependency[], InvalidDependency[]], DependencyResolveError>
->;
+) => Promise<[ValidDependency[], InvalidDependency[]]>;
 
 /**
  * Makes a {@link ResolveDependencies} function.
@@ -103,14 +79,14 @@ export function makeResolveDependency(
   // TODO: Add tests for this service
 
   return async (sources, name, version, deep) => {
-    const latestVersionResult =
+    const latestVersion =
       version === undefined || version === "latest"
-        ? await resolveLatestVersion(sources, name).map((it) => it.value)
-            .promise
-        : Ok(version);
-    if (latestVersionResult.isErr()) return latestVersionResult;
+        ? await resolveLatestVersion(sources, name).then(
+            (it) => it?.value || null
+          )
+        : version;
 
-    const latestVersion = latestVersionResult.value;
+    if (latestVersion == null) throw new PackumentNotFoundError(name);
 
     // a list of pending dependency {name, version}
     const pendingList = Array.of<NameVersionPair>([name, latestVersion]);
@@ -156,12 +132,7 @@ export function makeResolveDependency(
       if (!isProcessed) {
         // add entry to processed list
         processedList.push(entry);
-        const isInternalResult = await checkIsBuiltInPackage(
-          entryName,
-          entryVersion
-        ).promise;
-        if (isInternalResult.isErr()) return isInternalResult;
-        const isInternal = isInternalResult.value;
+        const isInternal = await checkIsBuiltInPackage(entryName, entryVersion);
         const isSelf = entryName === name;
 
         if (isInternal) {
@@ -177,7 +148,7 @@ export function makeResolveDependency(
         // Search all given registries.
         let resolveResult: Result<
           ResolvedPackumentVersion,
-          ResolveRemotePackumentVersionError
+          ResolvePackumentVersionError
         > = Err(new PackumentNotFoundError(entryName));
         for (const source of sources) {
           const result = await tryResolveFromRegistry(
@@ -195,17 +166,10 @@ export function makeResolveDependency(
         }
 
         if (resolveResult.isErr()) {
-          const error = resolveResult.error;
-          if (
-            error instanceof GenericNetworkError ||
-            error instanceof RegistryAuthenticationError
-          )
-            return Err(error);
-
           depsInvalid.push({
             name: entryName,
             self: isSelf,
-            reason: error,
+            reason: resolveResult.error,
           });
           continue;
         }
@@ -234,6 +198,6 @@ export function makeResolveDependency(
         depsValid.push(dependency);
       }
     }
-    return Ok([depsValid, depsInvalid]);
+    return [depsValid, depsInvalid];
   };
 }

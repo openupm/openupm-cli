@@ -1,7 +1,6 @@
 import { VersionReference } from "./domain/package-reference";
 import { DomainName } from "./domain/domain-name";
 import {
-  NoVersionsError,
   tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
@@ -12,7 +11,6 @@ import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./domain/registry-url";
 import { Err, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
-import { ResolveRemotePackumentVersionError } from "./services/resolve-remote-packument-version";
 
 /**
  * A version-reference that is resolvable.
@@ -43,9 +41,8 @@ export interface ResolvedPackumentVersion {
 /**
  * A failed attempt at resolving a packument-version.
  */
-export type PackumentVersionResolveError =
+export type ResolvePackumentVersionError =
   | PackumentNotFoundError
-  | NoVersionsError
   | VersionNotFoundError;
 
 /**
@@ -60,7 +57,7 @@ export function tryResolveFromCache(
   source: RegistryUrl,
   packumentName: DomainName,
   requestedVersion: ResolvableVersion
-): Result<ResolvedPackumentVersion, PackumentVersionResolveError> {
+): Result<ResolvedPackumentVersion, ResolvePackumentVersionError> {
   const cachedPackument = tryGetFromCache(cache, source, packumentName);
   if (cachedPackument === null)
     return Err(new PackumentNotFoundError(packumentName));
@@ -81,9 +78,9 @@ export function tryResolveFromCache(
  * @returns The more fixable failure.
  */
 export function pickMostFixable(
-  a: Err<ResolveRemotePackumentVersionError>,
-  b: Err<ResolveRemotePackumentVersionError>
-): Err<ResolveRemotePackumentVersionError> {
+  a: Err<ResolvePackumentVersionError>,
+  b: Err<ResolvePackumentVersionError>
+): Err<ResolvePackumentVersionError> {
   // Anything is more fixable than packument-not-found
   if (
     a.error instanceof PackumentNotFoundError &&

@@ -3,7 +3,6 @@ import {
   stringifyEditorVersion,
 } from "../../src/domain/editor-version";
 import { LoadProjectVersion } from "../../src/io/project-version-io";
-import { AsyncOk } from "../../src/utils/result-utils";
 
 /**
  * Mocks return values for calls to a {@link LoadProjectVersion} function.
@@ -20,5 +19,5 @@ export function mockProjectVersion(
       ? editorVersion
       : stringifyEditorVersion(editorVersion);
 
-  loadProjectVersion.mockReturnValue(AsyncOk(versionString));
+  loadProjectVersion.mockResolvedValue(versionString);
 }

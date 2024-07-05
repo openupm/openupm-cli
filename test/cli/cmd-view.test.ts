@@ -2,20 +2,15 @@ import { makeViewCmd } from "../../src/cli/cmd-view";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { Err, Ok } from "ts-results-es";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
-import {
-  GenericIOError,
-  GenericNetworkError,
-} from "../../src/io/common-errors";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { FetchPackument } from "../../src/io/packument-io";
+import { PackumentNotFoundError } from "../../src/common-errors";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -56,10 +51,10 @@ const defaultEnv = {
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
-  parseEnv.mockResolvedValue(Ok(defaultEnv));
+  parseEnv.mockResolvedValue(defaultEnv);
 
   const fetchPackument = mockService<FetchPackument>();
-  fetchPackument.mockReturnValue(AsyncOk(somePackument));
+  fetchPackument.mockResolvedValue(somePackument);
 
   const log = makeMockLogger();
 
@@ -73,16 +68,6 @@ function makeDependencies() {
 }
 
 describe("cmd-view", () => {
-  it("should fail if env could not be parsed", async () => {
-    const expected = new GenericIOError("Read");
-    const { viewCmd, parseEnv } = makeDependencies();
-    parseEnv.mockResolvedValue(Err(expected));
-
-    const resultCode = await viewCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
   it("should fail if package version was specified", async () => {
     const { viewCmd } = makeDependencies();
 
@@ -92,6 +77,15 @@ describe("cmd-view", () => {
     );
 
     expect(resultCode).toEqual(ResultCodes.Error);
+  });
+
+  it("should fail if package is not found", async () => {
+    const { viewCmd, fetchPackument } = makeDependencies();
+    fetchPackument.mockResolvedValue(null);
+
+    await expect(viewCmd(somePackage, { _global: {} })).rejects.toBeInstanceOf(
+      PackumentNotFoundError
+    );
   });
 
   it("should notify if package version was specified", async () => {
@@ -105,37 +99,6 @@ describe("cmd-view", () => {
     expect(log.warn).toHaveBeenCalledWith(
       "",
       expect.stringContaining("please do not specify")
-    );
-  });
-
-  it("should fail if package was not found", async () => {
-    const { viewCmd, fetchPackument } = makeDependencies();
-    fetchPackument.mockReturnValue(AsyncOk(null));
-
-    const resultCode = await viewCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should fail if package could not be resolved", async () => {
-    const expected = new GenericNetworkError();
-    const { viewCmd, fetchPackument } = makeDependencies();
-    fetchPackument.mockReturnValue(AsyncErr(expected));
-
-    const resultCode = await viewCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if package could not be resolved", async () => {
-    const { viewCmd, fetchPackument, log } = makeDependencies();
-    fetchPackument.mockReturnValue(AsyncOk(null));
-
-    await viewCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      "404",
-      expect.stringContaining("not found")
     );
   });
 

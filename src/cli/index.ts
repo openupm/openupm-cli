@@ -34,7 +34,7 @@ import {
   makeLoadUpmConfig,
   makeSaveUpmConfig,
 } from "../io/upm-config-io";
-import { makeReadText, makeWriteText } from "../io/fs-result";
+import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
   makeFindNpmrcPath,
   makeLoadNpmrc,
@@ -53,24 +53,27 @@ import { makeRunChildProcess } from "../io/child-process";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { makeCheckUrlExists } from "../io/check-url";
+import { withErrorLogger } from "./error-logging";
 
 // Composition root
 
 const log = npmlog;
 const debugLog: DebugLog = (message, context) =>
   log.verbose(
-    "openupm-cli",
+    "",
     `${message}${
-      context !== undefined ? ` context: ${JSON.stringify(context)}` : ""
+      context !== undefined
+        ? ` context: ${JSON.stringify(context, null, 2)}`
+        : ""
     }`
   );
 const regClient = new RegClient({ log });
 const getCwd = makeGetCwd();
 const runChildProcess = makeRunChildProcess(debugLog);
 const getHomePath = makeGetHomePath();
-const readFile = makeReadText(debugLog);
-const writeFile = makeWriteText(debugLog);
-const loadProjectManifest = makeLoadProjectManifest(readFile);
+const readFile = makeReadText();
+const writeFile = makeWriteText();
+const loadProjectManifest = makeLoadProjectManifest(readFile, debugLog);
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 const getUpmConfigPath = makeGetUpmConfigPath(getHomePath, runChildProcess);
 const loadUpmConfig = makeLoadUpmConfig(readFile);
@@ -78,8 +81,8 @@ const saveUpmConfig = makeSaveUpmConfig(writeFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePath);
 const loadNpmrc = makeLoadNpmrc(readFile);
 const saveNpmrc = makeSaveNpmrc(writeFile);
-const loadProjectVersion = makeLoadProjectVersion(readFile);
-const fetchPackument = makeFetchPackument(regClient);
+const loadProjectVersion = makeLoadProjectVersion(readFile, debugLog);
+const fetchPackument = makeFetchPackument(regClient, debugLog);
 const fetchAllPackuments = makeFetchAllPackuments(debugLog);
 const searchRegistry = makeSearchRegistry(debugLog);
 const removePackages = makeRemovePackages(
@@ -88,7 +91,13 @@ const removePackages = makeRemovePackages(
 );
 const checkUrlExists = makeCheckUrlExists();
 
-const parseEnv = makeParseEnv(log, getUpmConfigPath, loadUpmConfig, getCwd);
+const parseEnv = makeParseEnv(
+  log,
+  getUpmConfigPath,
+  loadUpmConfig,
+  getCwd,
+  debugLog
+);
 const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
 const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLogin(regClient, debugLog);
@@ -109,7 +118,11 @@ const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(
   loadUpmConfig,
   saveUpmConfig
 );
-const searchPackages = makeSearchPackages(searchRegistry, fetchAllPackuments);
+const searchPackages = makeSearchPackages(
+  searchRegistry,
+  fetchAllPackuments,
+  debugLog
+);
 const login = makeLogin(saveAuthToUpmConfig, npmLogin, authNpmrc, debugLog);
 
 const addCmd = makeAddCmd(
@@ -178,11 +191,13 @@ program
 openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
   )
-  .action(async function (pkg, otherPkgs, options) {
-    const pkgs = [pkg].concat(otherPkgs);
-    const resultCode = await addCmd(pkgs, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withErrorLogger(log, async function (pkg, otherPkgs, options) {
+      const pkgs = [pkg].concat(otherPkgs);
+      const resultCode = await addCmd(pkgs, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("remove")
@@ -194,31 +209,43 @@ program
   )
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
-  .action(async function (packageName, otherPackageNames, options) {
-    const packageNames = [packageName].concat(otherPackageNames);
-    const resultCode = await removeCmd(packageNames, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withErrorLogger(
+      log,
+      async function (packageName, otherPackageNames, options) {
+        const packageNames = [packageName].concat(otherPackageNames);
+        const resultCode = await removeCmd(
+          packageNames,
+          makeCmdOptions(options)
+        );
+        process.exit(resultCode);
+      }
+    )
+  );
 
 program
   .command("search")
   .argument("<keyword>", "The keyword to search")
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
-  .action(async function (keyword, options) {
-    const resultCode = await searchCmd(keyword, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withErrorLogger(log, async function (keyword, options) {
+      const resultCode = await searchCmd(keyword, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("view")
   .argument("<pkg>", "Reference to a package", mustBePackageReference)
   .aliases(["v", "info", "show"])
   .description("view package information")
-  .action(async function (pkg, options) {
-    const resultCode = await viewCmd(pkg, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withErrorLogger(log, async function (pkg, options) {
+      const resultCode = await viewCmd(pkg, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("deps")
@@ -230,10 +257,12 @@ program
 openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
-  .action(async function (pkg, options) {
-    const resultCode = await depsCmd(pkg, makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withErrorLogger(log, async function (pkg, options) {
+      const resultCode = await depsCmd(pkg, makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 program
   .command("login")
@@ -247,10 +276,12 @@ program
     "always auth for tarball hosted on a different domain"
   )
   .description("authenticate with a scoped registry")
-  .action(async function (options) {
-    const resultCode = await loginCmd(makeCmdOptions(options));
-    process.exit(resultCode);
-  });
+  .action(
+    withErrorLogger(log, async function (options) {
+      const resultCode = await loginCmd(makeCmdOptions(options));
+      process.exit(resultCode);
+    })
+  );
 
 // prompt for invalid command
 program.on("command:*", function () {

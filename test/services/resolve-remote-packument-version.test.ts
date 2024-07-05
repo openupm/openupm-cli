@@ -7,7 +7,6 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildPackument } from "../domain/data-packument";
 import { FetchPackument } from "../../src/io/packument-io";
-import { AsyncOk } from "../../src/utils/result-utils";
 
 describe("resolve remote packument version", () => {
   const somePackage = makeDomainName("com.some.package");
@@ -27,7 +26,7 @@ describe("resolve remote packument version", () => {
   it("should fail if packument was not found", async () => {
     const { resolveRemovePackumentVersion, fetchPackument } =
       makeDependencies();
-    fetchPackument.mockReturnValue(AsyncOk(null));
+    fetchPackument.mockResolvedValue(null);
 
     const result = await resolveRemovePackumentVersion(
       somePackage,
@@ -48,7 +47,7 @@ describe("resolve remote packument version", () => {
         version.addDependency("com.other.package", "1.0.0")
       )
     );
-    fetchPackument.mockReturnValue(AsyncOk(packument));
+    fetchPackument.mockResolvedValue(packument);
 
     const result = await resolveRemovePackumentVersion(
       somePackage,

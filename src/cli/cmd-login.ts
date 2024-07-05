@@ -11,8 +11,6 @@ import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
 import { Login } from "../services/login";
 import { ResultCodes } from "./result-codes";
-import { RegistryAuthenticationError } from "../io/common-errors";
-import { notifyEnvParsingFailed } from "./error-logging";
 
 /**
  * Options for logging in a user. These come from the CLI.
@@ -49,12 +47,7 @@ export function makeLoginCmd(
 ): LoginCmd {
   return async (options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     // query parameters
     const username = options.username ?? (await promptUsername());
@@ -68,15 +61,9 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configPathResult = await getUpmConfigPath(env.wsl, env.systemUser)
-      .promise;
-    if (configPathResult.isErr()) {
-      // TODO: Log error
-      return ResultCodes.Error;
-    }
-    const configPath = configPathResult.value;
+    const configPath = await getUpmConfigPath(env.wsl, env.systemUser);
 
-    const loginResult = await login(
+    await login(
       username,
       password,
       email,
@@ -84,16 +71,7 @@ export function makeLoginCmd(
       loginRegistry,
       configPath,
       options.basicAuth ? "basic" : "token"
-    ).promise;
-
-    if (loginResult.isErr()) {
-      const loginError = loginResult.error;
-      if (loginError instanceof RegistryAuthenticationError)
-        log.warn("401", "Incorrect username or password");
-
-      // TODO: Log all errors
-      return ResultCodes.Error;
-    }
+    );
 
     log.notice("auth", `you are authenticated as '${username}'`);
     log.notice("config", "saved unity config at " + configPath);

@@ -6,7 +6,7 @@ import {
   splitPackageReference,
 } from "../domain/package-reference";
 import { CmdOptions } from "./options";
-import { PackumentVersionResolveError } from "../packument-version-resolving";
+import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
@@ -14,10 +14,6 @@ import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import {
-  notifyEnvParsingFailed,
-  notifyRemotePackumentVersionResolvingFailed,
-} from "./error-logging";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -38,7 +34,7 @@ export type DepsCmd = (
   options: DepsOptions
 ) => Promise<DepsResultCode>;
 
-function errorPrefixForError(error: PackumentVersionResolveError): string {
+function errorPrefixForError(error: ResolvePackumentVersionError): string {
   if (error instanceof PackumentNotFoundError) return "missing dependency";
   else if (error instanceof VersionNotFoundError)
     return "missing dependency version";
@@ -56,12 +52,7 @@ export function makeDepsCmd(
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     const [name, version] = splitPackageReference(pkg);
 
@@ -72,22 +63,12 @@ export function makeDepsCmd(
 
     const deep = options.deep || false;
     debugLog(`fetch: ${makePackageReference(name, version)}, deep=${deep}`);
-    const resolveResult = await resolveDependencies(
+    const [depsValid, depsInvalid] = await resolveDependencies(
       [env.registry, env.upstreamRegistry],
       name,
       version,
       deep
     );
-    if (resolveResult.isErr()) {
-      notifyRemotePackumentVersionResolvingFailed(
-        log,
-        name,
-        resolveResult.error
-      );
-      return ResultCodes.Error;
-    }
-
-    const [depsValid, depsInvalid] = resolveResult.value;
 
     depsValid.forEach((dependency) => logValidDependency(debugLog, dependency));
     depsValid

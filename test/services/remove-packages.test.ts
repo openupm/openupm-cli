@@ -1,8 +1,3 @@
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
-import {
-  mockProjectManifest,
-  mockProjectManifestWriteResult,
-} from "../io/project-manifest-io.mock";
 import {
   makeRemovePackages,
   RemovedPackage,
@@ -28,10 +23,10 @@ describe("remove packages", () => {
 
   function makeDependencies() {
     const loadProjectManifest = mockService<LoadProjectManifest>();
-    mockProjectManifest(loadProjectManifest, defaultManifest);
+    loadProjectManifest.mockResolvedValue(defaultManifest);
 
     const writeProjectManifest = mockService<WriteProjectManifest>();
-    mockProjectManifestWriteResult(writeProjectManifest);
+    writeProjectManifest.mockResolvedValue(undefined);
 
     const removePackages = makeRemovePackages(
       loadProjectManifest,
@@ -43,17 +38,6 @@ describe("remove packages", () => {
       writeProjectManifest,
     } as const;
   }
-
-  it("should fail if manifest could not be loaded", async () => {
-    const { removePackages, loadProjectManifest } = makeDependencies();
-    mockProjectManifest(loadProjectManifest, null);
-
-    const result = await removePackages(someProjectPath, [somePackage]).promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(FileMissingError)
-    );
-  });
 
   it("should fail if package is not in manifest", async () => {
     const { removePackages } = makeDependencies();
@@ -111,15 +95,5 @@ describe("remove packages", () => {
         scopes: [somePackage],
       })
     );
-  });
-
-  it("should fail if manifest could not be saved", async () => {
-    const expected = new GenericIOError("Write");
-    const { removePackages, writeProjectManifest } = makeDependencies();
-    mockProjectManifestWriteResult(writeProjectManifest, expected);
-
-    const result = await removePackages(someProjectPath, [somePackage]).promise;
-
-    expect(result).toBeError((actual) => expect(actual).toEqual(expected));
   });
 });

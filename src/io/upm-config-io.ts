@@ -1,36 +1,16 @@
 import path from "path";
 import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
-import { CustomError } from "ts-custom-error";
-import { AsyncResult, Err, Ok } from "ts-results-es";
-import { ReadTextFile, WriteTextFile } from "./fs-result";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
-import { StringFormatError, tryParseToml } from "../utils/string-parsing";
-import { tryGetWslPath, WslPathError } from "./wsl";
-import { ChildProcessError, RunChildProcess } from "./child-process";
+import { tryGetWslPath } from "./wsl";
+import { RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
-import { GenericIOError } from "./common-errors";
+import { CustomError } from "ts-custom-error";
 
 const configFileName = ".upmconfig.toml";
 
-export class RequiredEnvMissingError extends CustomError {
-  private readonly _class = "RequiredEnvMissingError";
-  constructor(public readonly keyNames: string[]) {
-    super(
-      `Env was required to contain a value for one of the following keys, but all were missing: ${keyNames
-        .map((keyName) => `"${keyName}"`)
-        .join(", ")}.`
-    );
-  }
-}
-
-/**
- * Error which may occur when getting the upmconfig file path.
- */
-export type GetUpmConfigPathError =
-  | WslPathError
-  | RequiredEnvMissingError
-  | ChildProcessError;
+export class NoSystemUserProfilePath extends CustomError {}
 
 /**
  * Function which gets the path to the upmconfig file.
@@ -41,7 +21,7 @@ export type GetUpmConfigPathError =
 export type GetUpmConfigPath = (
   wsl: boolean,
   systemUser: boolean
-) => AsyncResult<string, GetUpmConfigPathError>;
+) => Promise<string>;
 
 /**
  * Makes a {@link GetUpmConfigPath} function.
@@ -50,40 +30,31 @@ export function makeGetUpmConfigPath(
   getHomePath: GetHomePath,
   runChildProcess: RunChildProcess
 ): GetUpmConfigPath {
-  function getConfigDirectory(wsl: boolean, systemUser: boolean) {
+  async function getConfigDirectory(wsl: boolean, systemUser: boolean) {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (wsl) {
       if (systemUser)
-        return tryGetWslPath("ALLUSERSPROFILE", runChildProcess).map((it) =>
-          path.join(it, systemUserSubPath)
+        return await tryGetWslPath("ALLUSERSPROFILE", runChildProcess).then(
+          (it) => path.join(it, systemUserSubPath)
         );
 
-      return tryGetWslPath("USERPROFILE", runChildProcess);
+      return await tryGetWslPath("USERPROFILE", runChildProcess);
     }
 
     if (systemUser) {
       const profilePath = tryGetEnv("ALLUSERSPROFILE");
-      if (profilePath === null)
-        return Err(
-          new RequiredEnvMissingError(["ALLUSERSPROFILE"])
-        ).toAsyncResult();
-      return Ok(path.join(profilePath, systemUserSubPath)).toAsyncResult();
+      if (profilePath === null) throw new NoSystemUserProfilePath();
+      return path.join(profilePath, systemUserSubPath);
     }
 
-    return getHomePath().toAsyncResult();
+    return getHomePath();
   }
 
-  return (wsl, systemUser) => {
-    return getConfigDirectory(wsl, systemUser).map((directory) =>
-      path.join(directory, configFileName)
-    );
+  return async (wsl, systemUser) => {
+    const directory = await getConfigDirectory(wsl, systemUser);
+    return path.join(directory, configFileName);
   };
 }
-
-/**
- * Error which may occur when loading a {@link UPMConfig}.
- */
-export type UpmConfigLoadError = GenericIOError | StringFormatError<"Toml">;
 
 /**
  * IO function for loading an upm-config file.
@@ -92,30 +63,19 @@ export type UpmConfigLoadError = GenericIOError | StringFormatError<"Toml">;
  */
 export type LoadUpmConfig = (
   configFilePath: string
-) => AsyncResult<UPMConfig | null, UpmConfigLoadError>;
+) => Promise<UPMConfig | null>;
 
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
 export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
-  return (configFilePath) =>
-    readFile(configFilePath)
-      .andThen(tryParseToml)
-      // TODO: Actually validate
-      .map((toml) => toml as UPMConfig | null)
-      .orElse<UpmConfigLoadError>((error) =>
-        !(error instanceof StringFormatError)
-          ? error.code === "ENOENT"
-            ? Ok(null)
-            : Err(new GenericIOError("Read"))
-          : Err(error)
-      );
+  return async (configFilePath) => {
+    const content = await readFile(configFilePath, true);
+    if (content === null) return null;
+    const toml = TOML.parse(content);
+    return toml as UPMConfig;
+  };
 }
-
-/**
- * Errors which may occur when saving a UPM-config file.
- */
-export type UpmConfigSaveError = GenericIOError;
 
 /**
  * Save the upm config.
@@ -125,7 +85,7 @@ export type UpmConfigSaveError = GenericIOError;
 export type SaveUpmConfig = (
   config: UPMConfig,
   configFilePath: string
-) => AsyncResult<void, UpmConfigSaveError>;
+) => Promise<void>;
 
 /**
  * Creates a {@link SaveUpmConfig} function.
@@ -133,8 +93,6 @@ export type SaveUpmConfig = (
 export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
   return (config, configFilePath) => {
     const content = TOML.stringify(config);
-    return writeFile(configFilePath, content).mapErr(
-      () => new GenericIOError("Write")
-    );
+    return writeFile(configFilePath, content);
   };
 }

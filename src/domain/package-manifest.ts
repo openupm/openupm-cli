@@ -2,9 +2,9 @@ import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { Maintainer } from "@npm/types";
 import { recordEntries } from "../utils/record-utils";
-import { Err, Ok, Result } from "ts-results-es";
 import { EditorVersion, tryParseEditorVersion } from "./editor-version";
-import { CustomError } from "ts-custom-error";
+
+import { MalformedPackumentError } from "../common-errors";
 
 type MajorMinor = `${number}.${number}`;
 
@@ -123,23 +123,6 @@ export function dependenciesOf(
 }
 
 /**
- * Error for when a packument contained an invalid target editor-version.
- */
-export class InvalidTargetEditorError extends CustomError {
-  // noinspection JSUnusedLocalSymbols
-  private readonly _class = "InvalidTargetEditorError";
-
-  constructor(
-    /**
-     * The invalid editor-version string.
-     */
-    public readonly versionString: string
-  ) {
-    super();
-  }
-}
-
-/**
  * Extracts the target editor-version from a package-manifest.
  * @param packageManifest The manifest for which to get the editor.
  * @returns The editor-version or null if the package is compatible
@@ -147,8 +130,8 @@ export class InvalidTargetEditorError extends CustomError {
  */
 export function tryGetTargetEditorVersionFor(
   packageManifest: Pick<UnityPackageManifest, "unity" | "unityRelease">
-): Result<EditorVersion | null, InvalidTargetEditorError> {
-  if (packageManifest.unity === undefined) return Ok(null);
+): EditorVersion | null {
+  if (packageManifest.unity === undefined) return null;
 
   const majorMinor = packageManifest.unity;
   const release =
@@ -157,7 +140,8 @@ export function tryGetTargetEditorVersionFor(
       : "";
   const versionString = `${majorMinor}${release}`;
   const parsed = tryParseEditorVersion(versionString);
-  return parsed !== null
-    ? Ok(parsed)
-    : Err(new InvalidTargetEditorError(versionString));
+
+  if (parsed === null) throw new MalformedPackumentError();
+
+  return parsed;
 }

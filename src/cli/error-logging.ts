@@ -1,271 +1,145 @@
 import { Logger } from "npmlog";
-import { EnvParseError } from "../services/parse-env";
+import { ResultCodes } from "./result-codes";
+import { RegistryAuthLoadError } from "../services/parse-env";
 import { NoWslError } from "../io/wsl";
-import { ChildProcessError } from "../io/child-process";
-import { RequiredEnvMissingError } from "../io/upm-config-io";
 import {
-  FileMissingError,
-  FileParseError,
-  GenericIOError,
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
-import { StringFormatError } from "../utils/string-parsing";
-import { ProjectVersionLoadError } from "../io/project-version-io";
-import { PackumentNotFoundError } from "../common-errors";
-import { DomainName } from "../domain/domain-name";
+  EditorVersionNotSupportedError,
+  PackumentNotFoundError,
+} from "../common-errors";
+import { stringifyEditorVersion } from "../domain/editor-version";
+import {
+  CompatibilityCheckFailedError,
+  PackageIncompatibleError,
+  UnresolvedDependenciesError,
+} from "./cmd-add";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
-import { SemanticVersion } from "../domain/semantic-version";
 import { EOL } from "node:os";
-import { ResolveRemotePackumentVersionError } from "../services/resolve-remote-packument-version";
-import { ManifestLoadError } from "../io/project-manifest-io";
-import { RemovePackagesError } from "../services/remove-packages";
+import { EditorNotInstalledError } from "../io/builtin-packages";
+import { RegistryAuthenticationError } from "../io/common-errors";
+import {
+  NoHomePathError,
+  OSNotSupportedError,
+  VersionNotSupportedOnOsError,
+} from "../io/special-paths";
+import {
+  ManifestMalformedError,
+  ManifestMissingError,
+} from "../io/project-manifest-io";
+import {
+  ProjectVersionMalformedError,
+  ProjectVersionMissingError,
+} from "../io/project-version-io";
+import { NoSystemUserProfilePath } from "../io/upm-config-io";
 
-export function suggestCheckingWorkingDirectory(log: Logger) {
-  log.notice("", "Are you in the correct working directory?");
-}
-
-export function notifyManifestMissing(log: Logger, filePath: string) {
-  log.error("", `Could not locate your project manifest at "${filePath}".`);
-  suggestCheckingWorkingDirectory(log);
-}
-
-export function suggestFixErrorsInProjectManifest(log: Logger) {
-  log.notice(
-    "",
-    "Please fix the errors in your project manifest and try again."
-  );
-}
-
-export function notifySyntacticallyMalformedProjectManifest(log: Logger) {
-  log.error("", "Project manifest file contained json syntax errors.");
-  suggestFixErrorsInProjectManifest(log);
-}
-
-export function notifySemanticallyMalformedProjectManifest(log: Logger) {
-  log.error(
-    "",
-    "Project manifest is valid json but was not of the correct shape."
-  );
-  suggestFixErrorsInProjectManifest(log);
-}
-
-export function notifyManifestLoadFailedBecauseIO(log: Logger) {
-  log.error(
-    "",
-    "Could not load project manifest because of a file-system error."
-  );
-}
-
-export function notifyManifestLoadFailed(
-  log: Logger,
-  error: ManifestLoadError
-) {
-  if (error instanceof FileMissingError) notifyManifestMissing(log, error.path);
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedProjectManifest(log);
-  else if (error instanceof FileParseError)
-    notifySemanticallyMalformedProjectManifest(log);
-  else if (error instanceof GenericIOError)
-    notifyManifestLoadFailedBecauseIO(log);
-}
-
-export function notifyManifestWriteFailed(log: Logger) {
-  log.error(
-    "",
-    "Could not save project manifest because of a file-system error."
-  );
-}
-
-export function notifyNotUsingWsl(log: Logger) {
-  log.error("", "No wsl detected.");
-  log.notice("", "Please make sure you are actually running openupm in wsl.");
-}
-
-export function notifyChildProcessError(log: Logger) {
-  log.error("", "A child process encountered an error.");
-}
-
-export function notifyMissingEnvForUpmConfigPath(
-  log: Logger,
-  variableNames: string[]
-) {
-  const nameList = variableNames.map((name) => `"${name}"`).join(", ");
-  log.error(
-    "",
-    "Could not determine upm-config path because of missing home environment variables."
-  );
-  log.notice(
-    "",
-    `Please make sure that you set one of the following environment variables: ${nameList}.`
-  );
-}
-
-export function notifySyntacticallyMalformedUpmConfig(log: Logger) {
-  log.error("", "Upm-config file contained toml syntax errors.");
-  log.notice("", "Please fix the errors in your upm-config and try again.");
-}
-
-function notifyUpmConfigLoadFailedBecauseIO(log: Logger) {
-  log.error("", "Could not load upm-config because of a file-system error.");
-}
-
-export function notifyEnvParsingFailed(log: Logger, error: EnvParseError) {
-  if (error instanceof NoWslError) notifyNotUsingWsl(log);
-  else if (error instanceof ChildProcessError) notifyChildProcessError(log);
-  else if (error instanceof RequiredEnvMissingError)
-    notifyMissingEnvForUpmConfigPath(log, error.keyNames);
-  else if (error instanceof GenericIOError)
-    notifyUpmConfigLoadFailedBecauseIO(log);
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedUpmConfig(log);
-}
-
-export function notifyProjectVersionMissing(log: Logger, filePath: string) {
-  log.error(
-    "",
-    `Could not locate your projects version file (ProjectVersion.txt) at "${filePath}".`
-  );
-  suggestCheckingWorkingDirectory(log);
-}
-
-export function suggestFixErrorsInProjectVersionFile(log: Logger) {
-  log.notice(
-    "",
-    "Please fix the errors in your project version file and try again."
-  );
-}
-
-export function notifySyntacticallyMalformedProjectVersion(log: Logger) {
-  log.error(
-    "",
-    "Project version file (ProjectVersion.txt) file contained yaml syntax errors."
-  );
-  suggestFixErrorsInProjectVersionFile(log);
-}
-
-export function notifySemanticallyMalformedProjectVersion(log: Logger) {
-  log.error(
-    "",
-    "Project version file (ProjectVersion.txt) file is valid yaml but was not of the correct shape."
-  );
-  suggestFixErrorsInProjectVersionFile(log);
-}
-
-export function notifyProjectVersionLoadFailed(
-  log: Logger,
-  error: ProjectVersionLoadError
-) {
-  if (error instanceof FileMissingError)
-    notifyProjectVersionMissing(log, error.path);
-  else if (error instanceof GenericIOError)
-    log.error(
-      "",
-      "Could not load project version file (ProjectVersion.txt) because of a file-system error."
-    );
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedProjectVersion(log);
-  else if (error instanceof FileParseError)
-    notifySemanticallyMalformedProjectVersion(log);
-}
-
-export function notifyPackumentNotFoundInAnyRegistry(
-  log: Logger,
-  packageName: DomainName
-) {
-  log.error(
-    "",
-    `The package "${packageName}" was not found in any of the provided registries.`
-  );
-  log.notice(
-    "",
-    "Please make sure you have spelled the name and registry urls correctly."
-  );
-}
-
-export function notifyPackumentNotFoundInManifest(
-  log: Logger,
-  packageName: DomainName
-) {
-  log.error(
-    "",
-    `The package "${packageName}" was not found in your project manifest.`
-  );
-  log.notice("", "Please make sure you have spelled the name correctly.");
-}
-
-export function notifyNoVersions(log: Logger, packageName: DomainName) {
-  log.error("", `The package ${packageName} has no versions.`);
-}
-
-export function notifyOfMissingVersion(
-  log: Logger,
-  packageName: DomainName,
-  requestedVersion: SemanticVersion,
-  availableVersions: ReadonlyArray<SemanticVersion>
-) {
-  const versionList = availableVersions
-    .map((version) => `\t- ${version}`)
-    .join(EOL);
-
-  log.error(
-    "",
-    `The package "${packageName}" has no published version "${requestedVersion}".`
-  );
-  log.notice("", `Maybe you meant one of the following:${EOL}${versionList}`);
-}
-
-export function notifyRegistryCallFailedBecauseHttp(log: Logger) {
-  log.error(
-    "",
-    "Could not communicate with registry because of an http error."
-  );
-}
-
-export function notifyRegistryCallFailedBecauseUnauthorized(log: Logger) {
-  log.error(
-    "",
-    "An npm registry rejected your request, because you are unauthorized."
-  );
-  log.notice(
-    "",
-    "Please make sure you are correctly authenticated for the registry."
-  );
-}
-
-export function notifyRemotePackumentVersionResolvingFailed(
-  log: Logger,
-  packageName: DomainName,
-  error: ResolveRemotePackumentVersionError
-) {
+function makeErrorMessageFor(error: unknown): string {
+  if (error instanceof RegistryAuthLoadError)
+    return "Could not load registry authentication information.";
+  if (error instanceof NoWslError) return "Not running in wsl.";
   if (error instanceof PackumentNotFoundError)
-    notifyPackumentNotFoundInAnyRegistry(log, packageName);
-  else if (error instanceof NoVersionsError) notifyNoVersions(log, packageName);
-  else if (error instanceof VersionNotFoundError)
-    notifyOfMissingVersion(
-      log,
-      packageName,
-      error.requestedVersion,
-      error.availableVersions
-    );
-  else if (error instanceof GenericNetworkError)
-    notifyRegistryCallFailedBecauseHttp(log);
-  else if (error instanceof RegistryAuthenticationError)
-    notifyRegistryCallFailedBecauseUnauthorized(log);
+    return `Package "${error.packageName}" could not be found.`;
+  if (error instanceof EditorVersionNotSupportedError)
+    return `OpenUPM is not compatible with Unity ${stringifyEditorVersion(
+      error.version
+    )}.`;
+  if (error instanceof CompatibilityCheckFailedError)
+    return `Could not confirm editor compatibility for ${error.packageRef}.`;
+  if (error instanceof PackageIncompatibleError)
+    return `"${
+      error.packageRef
+    }" is not compatible with Unity ${stringifyEditorVersion(
+      error.editorVersion
+    )}.`;
+  if (error instanceof UnresolvedDependenciesError)
+    return `"${error.packageRef}" has one or more unresolved dependencies and was not added.`;
+  if (error instanceof NoVersionsError)
+    return `"${error.packageName}" can not be added because it has no published versions.`;
+  if (error instanceof VersionNotFoundError)
+    return `Can not add "${error.packageName}" because version ${error.requestedVersion} could not be found in any registry.`;
+  if (error instanceof EditorNotInstalledError)
+    return "Your projects Unity editor version is not installed.";
+  if (error instanceof RegistryAuthenticationError)
+    return `The registry at "${error.registryUrl}" refused your request because you are not authenticated.`;
+  if (error instanceof VersionNotSupportedOnOsError)
+    return "Your projects Unity editor version is not supported on your OS.";
+  if (error instanceof OSNotSupportedError)
+    return "Unity does not support your OS.";
+  if (error instanceof ManifestMissingError)
+    return `Project manifest could not be found at "${error.expectedPath}".`;
+  if (error instanceof ManifestMalformedError)
+    return "Project manifest could not be parsed because it has malformed content.";
+  if (error instanceof ProjectVersionMissingError)
+    return `Project version could not be found at "${error.expectedPath}".`;
+  if (error instanceof ProjectVersionMalformedError)
+    return "Project version could not be parsed because it has malformed content.";
+  if (error instanceof NoHomePathError)
+    return "Could not determine path of home directory.";
+  if (error instanceof NoSystemUserProfilePath)
+    return "Could not determine path of system user directory.";
+  return "A fatal error occurred.";
 }
 
-export function notifyPackageRemoveFailed(
+function tryMakeFixSuggestionFor(error: unknown): string | null {
+  if (error instanceof RegistryAuthLoadError)
+    return "Most likely this means that something is wrong with your .upmconfig.toml.";
+  if (error instanceof NoWslError)
+    return "Please make sure you are running in wsl, or remove the --wsl flag.";
+  if (error instanceof PackumentNotFoundError)
+    return "Did you make a typo when spelling the name?";
+  if (error instanceof CompatibilityCheckFailedError)
+    return `Fix the issue or run with --force to add anyway.`;
+  if (error instanceof PackageIncompatibleError)
+    return "Add a different version or run with --force to add anyway.";
+  if (error instanceof UnresolvedDependenciesError)
+    return "Resolve the dependency issues or run with --force to add anyway.";
+  if (error instanceof VersionNotFoundError)
+    return `Make sure you chose the right version. Here is a list of your options:${EOL}${error.availableVersions.join(
+      ", "
+    )}`;
+  if (error instanceof EditorNotInstalledError)
+    return `Make sure you have ${stringifyEditorVersion(
+      error.version
+    )} installed.`;
+  if (error instanceof RegistryAuthenticationError)
+    return `Use "openupm login" to authenticate with the registry.`;
+  if (
+    error instanceof ManifestMissingError ||
+    error instanceof ProjectVersionMissingError
+  )
+    return "Check if you are in the correct working directory.";
+  if (
+    error instanceof ManifestMalformedError ||
+    error instanceof ProjectVersionMalformedError
+  )
+    return "Please fix any format errors and try again.";
+  if (error instanceof NoHomePathError)
+    return "Make sure you run OpenUPM with either the HOME or USERPROFILE environment variable set to your home path.";
+  if (error instanceof NoSystemUserProfilePath)
+    return "Make sure you run OpenUPM with the ALLUSERSPROFILE environment variable set to your home path.";
+  return null;
+}
+
+export function logError(log: Logger, error: unknown) {
+  const message = makeErrorMessageFor(error);
+  log.error("", message);
+
+  const fixSuggestion = tryMakeFixSuggestionFor(error);
+  if (fixSuggestion !== null) log.notice("", fixSuggestion);
+
+  const isLoggingVerbose = log.level === "verbose" || log.level === "silly";
+  if (!isLoggingVerbose)
+    log.notice("", "Run with --verbose to get more information.");
+}
+
+export function withErrorLogger<
+  TArgs extends unknown[],
+  TOut extends ResultCodes
+>(
   log: Logger,
-  error: RemovePackagesError
-) {
-  if (error instanceof FileMissingError) notifyManifestMissing(log, error.path);
-  else if (error instanceof StringFormatError)
-    notifySyntacticallyMalformedProjectManifest(log);
-  else if (error instanceof FileParseError)
-    notifySemanticallyMalformedProjectManifest(log);
-  else if (error instanceof GenericIOError) {
-    if (error.operationType === "Read") notifyManifestLoadFailedBecauseIO(log);
-    else notifyManifestWriteFailed(log);
-  } else if (error instanceof PackumentNotFoundError)
-    notifyPackumentNotFoundInManifest(log, error.packageName);
+  cmd: (...args: TArgs) => Promise<TOut>
+): (...args: TArgs) => Promise<TOut> {
+  return (...args) =>
+    cmd(...args).catch((error) => {
+      logError(log, error);
+      process.exit(ResultCodes.Error);
+    });
 }

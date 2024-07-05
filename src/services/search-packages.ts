@@ -1,21 +1,8 @@
 import { Registry } from "../domain/registry";
-import { AsyncResult } from "ts-results-es";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import {
-  FetchAllPackuments,
-  FetchAllPackumentsError,
-} from "../io/all-packuments-io";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
-
-/**
- * Error which may occur when searching for packages.
- */
-export type SearchPackagesError =
-  | RegistryAuthenticationError
-  | GenericNetworkError;
+import { FetchAllPackuments } from "../io/all-packuments-io";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
 
 /**
  * A function for searching packages in a registry.
@@ -28,39 +15,40 @@ export type SearchPackages = (
   registry: Registry,
   keyword: string,
   onUseAllFallback?: () => void
-) => AsyncResult<ReadonlyArray<SearchedPackument>, SearchPackagesError>;
+) => Promise<ReadonlyArray<SearchedPackument>>;
 
 /**
  * Makes a {@licence SearchPackages} function.
  */
 export function makeSearchPackages(
   searchRegistry: SearchRegistry,
-  fetchAllPackuments: FetchAllPackuments
+  fetchAllPackuments: FetchAllPackuments,
+  debugLog: DebugLog
 ): SearchPackages {
-  function searchInAll(
+  async function searchInAll(
     registry: Registry,
     keyword: string
-  ): AsyncResult<SearchedPackument[], FetchAllPackumentsError> {
-    return fetchAllPackuments(registry).map((allPackuments) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _updated, ...packumentEntries } = allPackuments;
-      const packuments = Object.values(packumentEntries);
-
-      // filter keyword
-      const klc = keyword.toLowerCase();
-
-      return packuments.filter((packument) =>
-        packument.name.toLowerCase().includes(klc)
-      );
-    });
+  ): Promise<SearchedPackument[]> {
+    const allPackuments = await fetchAllPackuments(registry);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _updated, ...packumentEntries } = allPackuments;
+    const packuments = Object.values(packumentEntries);
+    const klc = keyword.toLowerCase();
+    return packuments.filter((packument) =>
+      packument.name.toLowerCase().includes(klc)
+    );
   }
 
-  return (registry, keyword, onUseOldSearch) => {
-    // search endpoint
-    return searchRegistry(registry, keyword).orElse(() => {
+  return async (registry, keyword, onUseOldSearch) => {
+    try {
+      // search endpoint
+      return await searchRegistry(registry, keyword);
+    } catch (error) {
+      assertIsError(error);
+      debugLog("Searching using search endpoint failed", error);
       // search old search
       onUseOldSearch && onUseOldSearch();
-      return searchInAll(registry, keyword);
-    });
+      return await searchInAll(registry, keyword);
+    }
   };
 }

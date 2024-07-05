@@ -1,54 +1,41 @@
 import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
-import { AsyncResult, Err, Ok } from "ts-results-es";
 import { SemanticVersion } from "../domain/semantic-version";
-import { PackumentNotFoundError } from "../common-errors";
-import {
-  NoVersionsError,
-  tryResolvePackumentVersion,
-} from "../domain/packument";
-import { FetchPackument, FetchPackumentError } from "../io/packument-io";
+import { tryResolvePackumentVersion } from "../domain/packument";
+import { FetchPackument } from "../io/packument-io";
 import { FromRegistry, queryAllRegistriesLazy } from "../utils/sources";
-
-/**
- * Error which may occur when resolving the latest version for a package.
- */
-export type ResolveLatestVersionError =
-  | PackumentNotFoundError
-  | FetchPackumentError
-  | NoVersionsError;
 
 /**
  * Service for resolving the latest published version of a package.
  * @param sources All sources to check for the package.
  * @param packageName The name of the package to search.
+ * @returns The resolved version or null if the package does not exist on the
+ * registry.
  */
 export type ResolveLatestVersion = (
   sources: ReadonlyArray<Registry>,
   packageName: DomainName
-) => AsyncResult<FromRegistry<SemanticVersion>, ResolveLatestVersionError>;
+) => Promise<FromRegistry<SemanticVersion> | null>;
 
 export function makeResolveLatestVersion(
   fetchPackument: FetchPackument
 ): ResolveLatestVersion {
-  function tryResolveFrom(
+  async function tryResolveFrom(
     source: Registry,
     packageName: DomainName
-  ): AsyncResult<SemanticVersion | null, ResolveLatestVersionError> {
-    return fetchPackument(source, packageName).andThen((maybePackument) => {
-      if (maybePackument === null) return Ok(null);
-      return tryResolvePackumentVersion(maybePackument, "latest").map(
-        (it) => it.version
-      );
-    });
+  ): Promise<SemanticVersion | null> {
+    const packument = await fetchPackument(source, packageName);
+    if (packument === null) return null;
+
+    const resolveResult = tryResolvePackumentVersion(packument, "latest");
+    if (resolveResult.isErr()) throw resolveResult.error;
+
+    return resolveResult.value.version;
   }
 
-  return (sources, packageName) =>
-    queryAllRegistriesLazy(sources, (source) =>
+  return (sources, packageName) => {
+    return queryAllRegistriesLazy(sources, (source) =>
       tryResolveFrom(source, packageName)
-    ).andThen((resolved) =>
-      resolved !== null
-        ? Ok(resolved)
-        : Err(new PackumentNotFoundError(packageName))
     );
+  };
 }

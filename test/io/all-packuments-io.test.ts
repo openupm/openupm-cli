@@ -4,10 +4,7 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { noopLogger } from "../../src/logging";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../../src/io/common-errors";
+import { RegistryAuthenticationError } from "../../src/io/common-errors";
 
 jest.mock("npm-registry-fetch");
 
@@ -31,11 +28,7 @@ describe("fetch all packuments", () => {
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
     const { getAllPackuments } = makeDependencies();
 
-    const result = await getAllPackuments(exampleRegistry).promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(GenericNetworkError)
-    );
+    await expect(getAllPackuments(exampleRegistry)).rejects.toEqual(expected);
   });
 
   it("should fail on auth error response", async () => {
@@ -47,10 +40,8 @@ describe("fetch all packuments", () => {
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
     const { getAllPackuments } = makeDependencies();
 
-    const result = await getAllPackuments(exampleRegistry).promise;
-
-    expect(result).toBeError((actual) =>
-      expect(actual).toBeInstanceOf(RegistryAuthenticationError)
+    await expect(getAllPackuments(exampleRegistry)).rejects.toBeInstanceOf(
+      RegistryAuthenticationError
     );
   });
 
@@ -61,8 +52,8 @@ describe("fetch all packuments", () => {
     jest.mocked(npmFetch.json).mockResolvedValue(expected);
     const { getAllPackuments } = makeDependencies();
 
-    const result = await getAllPackuments(exampleRegistry).promise;
+    const actual = await getAllPackuments(exampleRegistry);
 
-    expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    expect(actual).toEqual(expected);
   });
 });

@@ -4,6 +4,7 @@
  */
 export function makeNodeError(code: string): NodeJS.ErrnoException {
   const error = new Error() as NodeJS.ErrnoException;
+  error.errno = 123;
   error.code = code;
   return error;
 }

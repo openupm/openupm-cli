@@ -11,9 +11,9 @@ import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
-import { notifyEnvParsingFailed } from "./error-logging";
 import { FetchPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
+import { PackumentNotFoundError } from "../common-errors";
 
 export type ViewOptions = CmdOptions;
 
@@ -111,12 +111,7 @@ export function makeViewCmd(
 ): ViewCmd {
   return async (pkg, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     // parse name
     if (hasVersion(pkg)) {
@@ -130,19 +125,12 @@ export function makeViewCmd(
       env.registry,
       ...(env.upstream ? [env.upstreamRegistry] : []),
     ];
-    const resolveResult = await queryAllRegistriesLazy(sources, (source) =>
-      fetchPackument(source, pkg)
-    ).promise;
-    if (!resolveResult.isOk()) {
-      // TODO: Print error
-      return ResultCodes.Error;
-    }
-
-    const packument = resolveResult.value?.value ?? null;
-    if (packument === null) {
-      log.error("404", `package not found: ${pkg}`);
-      return ResultCodes.Error;
-    }
+    const packumentFromRegistry = await queryAllRegistriesLazy(
+      sources,
+      (source) => fetchPackument(source, pkg)
+    );
+    const packument = packumentFromRegistry?.value ?? null;
+    if (packument === null) throw new PackumentNotFoundError(pkg);
 
     printInfo(packument);
     return ResultCodes.Ok;

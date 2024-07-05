@@ -1,6 +1,6 @@
 import * as specialPaths from "../../src/io/special-paths";
 import { OSNotSupportedError } from "../../src/io/special-paths";
-import * as fileIo from "../../src/io/fs-result";
+import * as directoryIO from "../../src/io/directory-io";
 import { Err, Ok } from "ts-results-es";
 import {
   EditorNotInstalledError,
@@ -8,8 +8,7 @@ import {
 } from "../../src/io/builtin-packages";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { noopLogger } from "../../src/logging";
-import { enoentError } from "./node-error.mock";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
+import { eaccesError, enoentError } from "./node-error.mock";
 
 function makeDependencies() {
   const getBuiltInPackages = makeFindBuiltInPackages(noopLogger);
@@ -35,12 +34,24 @@ describe("builtin-packages", () => {
     const expected = new EditorNotInstalledError(version);
     const { getBuiltInPackages } = makeDependencies();
     jest
-      .spyOn(fileIo, "tryGetDirectoriesIn")
-      .mockReturnValue(AsyncErr(enoentError));
+      .spyOn(directoryIO, "tryGetDirectoriesIn")
+      .mockRejectedValue(enoentError);
 
     const result = await getBuiltInPackages(version).promise;
 
     expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
+
+  it("should fail if directory could not be read", async () => {
+    const version = makeEditorVersion(2022, 1, 2, "f", 1);
+    const { getBuiltInPackages } = makeDependencies();
+    const expected = eaccesError;
+    jest
+      .spyOn(specialPaths, "tryGetEditorInstallPath")
+      .mockReturnValue(Ok("/some/path"));
+    jest.spyOn(directoryIO, "tryGetDirectoriesIn").mockRejectedValue(expected);
+
+    await expect(getBuiltInPackages(version).promise).rejects.toEqual(expected);
   });
 
   it("should find package names", async () => {
@@ -50,9 +61,7 @@ describe("builtin-packages", () => {
     jest
       .spyOn(specialPaths, "tryGetEditorInstallPath")
       .mockReturnValue(Ok("/some/path"));
-    jest
-      .spyOn(fileIo, "tryGetDirectoriesIn")
-      .mockReturnValue(AsyncOk(expected));
+    jest.spyOn(directoryIO, "tryGetDirectoriesIn").mockResolvedValue(expected);
 
     const result = await getBuiltInPackages(version).promise;
 

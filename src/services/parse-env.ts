@@ -1,19 +1,23 @@
 import chalk from "chalk";
-import {
-  GetUpmConfigPath,
-  GetUpmConfigPathError,
-  LoadUpmConfig,
-  UpmConfigLoadError,
-} from "../io/upm-config-io";
+import { GetUpmConfigPath, LoadUpmConfig } from "../io/upm-config-io";
 import path from "path";
 import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
-import { Ok, Result } from "ts-results-es";
 import { tryGetEnv } from "../utils/env-util";
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
 import { GetCwd } from "../io/special-paths";
+import { CustomError } from "ts-custom-error";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
+
+/**
+ * Error for when auth information for a registry could not be loaded.
+ */
+export class RegistryAuthLoadError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+}
 
 export type Env = Readonly<{
   cwd: string;
@@ -24,15 +28,13 @@ export type Env = Readonly<{
   registry: Registry;
 }>;
 
-export type EnvParseError = GetUpmConfigPathError | UpmConfigLoadError;
-
 /**
  * Function for parsing environment information and global
  * command-options for further usage.
+ * @param options The options passed to the current command.
+ * @returns Environment information.
  */
-export type ParseEnv = (
-  options: CmdOptions
-) => Promise<Result<Env, EnvParseError>>;
+export type ParseEnv = (options: CmdOptions) => Promise<Env>;
 
 /**
  * Creates a {@link ParseEnv} function.
@@ -41,7 +43,8 @@ export function makeParseEnv(
   log: Logger,
   getUpmConfigPath: GetUpmConfigPath,
   loadUpmConfig: LoadUpmConfig,
-  getCwd: GetCwd
+  getCwd: GetCwd,
+  debugLog: DebugLog
 ): ParseEnv {
   function determineCwd(options: CmdOptions): string {
     return options._global.chdir !== undefined
@@ -76,7 +79,7 @@ export function makeParseEnv(
     return { url, auth };
   }
 
-  function determineUpstreamRegistry(options: CmdOptions): Registry {
+  function determineUpstreamRegistry(): Registry {
     const url = makeRegistryUrl("https://packages.unity.com");
 
     return { url, auth: null };
@@ -117,25 +120,30 @@ export function makeParseEnv(
     const wsl = determineWsl(options);
 
     // registries
-    const upmConfigResult = await getUpmConfigPath(wsl, systemUser).andThen(
-      loadUpmConfig
-    ).promise;
-    if (upmConfigResult.isErr()) return upmConfigResult;
-    const upmConfig = upmConfigResult.value;
+    const upmConfigPath = await getUpmConfigPath(wsl, systemUser);
 
-    const registry = determinePrimaryRegistry(options, upmConfig);
-    const upstreamRegistry = determineUpstreamRegistry(options);
+    let registry: Registry;
+    let upstreamRegistry: Registry;
+    try {
+      const upmConfig = await loadUpmConfig(upmConfigPath);
+      registry = determinePrimaryRegistry(options, upmConfig);
+      upstreamRegistry = determineUpstreamRegistry();
+    } catch (error) {
+      assertIsError(error);
+      debugLog("Upmconfig load or parsing failed.", error);
+      throw new RegistryAuthLoadError();
+    }
 
     // cwd
     const cwd = determineCwd(options);
 
-    return Ok({
+    return {
       cwd,
       registry,
       systemUser,
       upstream,
       upstreamRegistry,
       wsl,
-    });
+    };
   };
 }

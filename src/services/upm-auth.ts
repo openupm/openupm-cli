@@ -1,17 +1,6 @@
 import { RegistryUrl } from "../domain/registry-url";
 import { addAuth, UpmAuth } from "../domain/upm-config";
-import { AsyncResult } from "ts-results-es";
-import {
-  LoadUpmConfig,
-  SaveUpmConfig,
-  UpmConfigLoadError,
-} from "../io/upm-config-io";
-import { GenericIOError } from "../io/common-errors";
-
-/**
- * Errors which may occur when storing an {@link UpmAuth} to the file-system.
- */
-export type UpmAuthStoreError = UpmConfigLoadError | GenericIOError;
+import { LoadUpmConfig, SaveUpmConfig } from "../io/upm-config-io";
 
 /**
  * Function for storing authentication information in an upmconfig file.
@@ -23,8 +12,7 @@ export type SaveAuthToUpmConfig = (
   configPath: string,
   registry: RegistryUrl,
   auth: UpmAuth
-) => AsyncResult<void, UpmAuthStoreError>;
-
+) => Promise<void>;
 /**
  * Makes a {@link SaveAuthToUpmConfig} function.
  */
@@ -33,9 +21,9 @@ export function makeSaveAuthToUpmConfig(
   saveUpmConfig: SaveUpmConfig
 ): SaveAuthToUpmConfig {
   // TODO: Add tests for this service
-  return (configPath, registry, auth) =>
-    loadUpmConfig(configPath)
-      .map((maybeConfig) => maybeConfig || {})
-      .map((config) => addAuth(registry, auth, config))
-      .andThen((config) => saveUpmConfig(config, configPath));
+  return async (configPath, registry, auth) => {
+    const initialConfig = (await loadUpmConfig(configPath)) || {};
+    const updatedConfig = addAuth(registry, auth, initialConfig);
+    await saveUpmConfig(updatedConfig, configPath);
+  };
 }

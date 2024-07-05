@@ -6,7 +6,6 @@ import { Logger } from "npmlog";
 import { SearchPackages } from "../services/search-packages";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import { notifyEnvParsingFailed } from "./error-logging";
 
 /**
  * The possible result codes with which the search command can exit.
@@ -36,25 +35,14 @@ export function makeSearchCmd(
 ): SearchCmd {
   return async (keyword, options) => {
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
     let usedEndpoint = "npmsearch";
-    const searchResult = await searchPackages(env.registry, keyword, () => {
+    const results = await searchPackages(env.registry, keyword, () => {
       usedEndpoint = "endpoint.all";
       log.warn("", "fast search endpoint is not available, using old search.");
-    }).promise;
+    });
 
-    if (searchResult.isErr()) {
-      log.warn("", "/-/all endpoint is not available");
-      return ResultCodes.Error;
-    }
-
-    const results = searchResult.value;
     if (results.length === 0) {
       log.notice("", `No matches found for "${keyword}"`);
       return ResultCodes.Ok;

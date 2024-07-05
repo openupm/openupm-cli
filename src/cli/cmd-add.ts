@@ -4,10 +4,7 @@ import {
   WriteProjectManifest,
 } from "../io/project-manifest-io";
 import { ParseEnv } from "../services/parse-env";
-import {
-  compareEditorVersion,
-  stringifyEditorVersion,
-} from "../domain/editor-version";
+import { compareEditorVersion, EditorVersion } from "../domain/editor-version";
 import { DomainName } from "../domain/domain-name";
 import {
   makePackageReference,
@@ -26,56 +23,39 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
-import {
-  PackumentVersionResolveError,
-  pickMostFixable,
-} from "../packument-version-resolving";
+import { pickMostFixable } from "../packument-version-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
-import { Err, Ok, Result } from "ts-results-es";
 import { CustomError } from "ts-custom-error";
-import {
-  DependencyResolveError,
-  ResolveDependencies,
-} from "../services/dependency-resolving";
+import { ResolveDependencies } from "../services/dependency-resolving";
 import { ResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
 import { Logger } from "npmlog";
 import { logValidDependency } from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
-import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
-import { FetchPackumentError } from "../io/packument-io";
 import { ResultCodes } from "./result-codes";
-import {
-  notifyEnvParsingFailed,
-  notifyManifestLoadFailed,
-  notifyManifestWriteFailed,
-  notifyProjectVersionLoadFailed,
-  notifyRemotePackumentVersionResolvingFailed,
-} from "./error-logging";
+import { logError } from "./error-logging";
 
-export class InvalidPackumentDataError extends CustomError {
-  private readonly _class = "InvalidPackumentDataError";
-  constructor(readonly issue: string) {
-    super("A packument object was malformed.");
+export class PackageIncompatibleError extends CustomError {
+  constructor(
+    public readonly packageRef: PackageReference,
+    public readonly editorVersion: EditorVersion
+  ) {
+    super();
   }
 }
 
-export class EditorIncompatibleError extends CustomError {
-  private readonly _class = "EditorIncompatibleError";
-  constructor() {
-    super(
-      "A packuments target editor-version was not compatible with the installed editor-version."
-    );
+export class UnresolvedDependenciesError extends CustomError {
+  constructor(public readonly packageRef: PackageReference) {
+    super();
   }
 }
 
-export class UnresolvedDependencyError extends CustomError {
-  private readonly _class = "UnresolvedDependencyError";
-  constructor() {
-    super("A packuments dependency could not be resolved.");
+export class CompatibilityCheckFailedError extends CustomError {
+  constructor(public readonly packageRef: PackageReference) {
+    super();
   }
 }
 
@@ -83,14 +63,6 @@ export type AddOptions = CmdOptions<{
   test?: boolean;
   force?: boolean;
 }>;
-
-type AddError =
-  | PackumentVersionResolveError
-  | FetchPackumentError
-  | InvalidPackumentDataError
-  | EditorIncompatibleError
-  | UnresolvedDependencyError
-  | DependencyResolveError;
 
 /**
  * The different command result codes for the add command.
@@ -124,19 +96,9 @@ export function makeAddCmd(
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
 
     // parse env
-    const envResult = await parseEnv(options);
-    if (envResult.isErr()) {
-      notifyEnvParsingFailed(log, envResult.error);
-      return ResultCodes.Error;
-    }
-    const env = envResult.value;
+    const env = await parseEnv(options);
 
-    const editorVersionResult = await determineEditorVersion(env.cwd).promise;
-    if (editorVersionResult.isErr()) {
-      notifyProjectVersionLoadFailed(log, editorVersionResult.error);
-      return ResultCodes.Error;
-    }
-    const editorVersion = editorVersionResult.value;
+    const editorVersion = await determineEditorVersion(env.cwd);
 
     if (typeof editorVersion === "string")
       log.warn(
@@ -147,7 +109,7 @@ export function makeAddCmd(
     const tryAddToManifest = async function (
       manifest: UnityProjectManifest,
       pkg: PackageReference
-    ): Promise<Result<[UnityProjectManifest, boolean], AddError>> {
+    ): Promise<[UnityProjectManifest, boolean]> {
       // is upstream package flag
       let isUpstreamPackage = false;
       // parse name
@@ -176,77 +138,48 @@ export function makeAddCmd(
           }
         }
 
-        if (resolveResult.isErr()) {
-          notifyRemotePackumentVersionResolvingFailed(
-            log,
-            name,
-            resolveResult.error
-          );
-          return resolveResult;
-        }
+        if (resolveResult.isErr()) throw resolveResult.error;
 
         const packumentVersion = resolveResult.value.packumentVersion;
         versionToAdd = packumentVersion.version;
 
-        const targetEditorVersionResult =
-          tryGetTargetEditorVersionFor(packumentVersion);
-        if (targetEditorVersionResult.isErr()) {
-          log.warn(
-            "package.unity",
-            `${targetEditorVersionResult.error.versionString} is not valid`
-          );
-          if (!options.force) {
-            log.notice(
-              "suggest",
-              "contact the package author to fix the issue, or run with option -f to ignore the warning"
-            );
-            return Err(
-              new InvalidPackumentDataError("Editor-version not valid.")
-            );
+        // Only do compatibility check when we have a valid editor version
+        if (typeof editorVersion !== "string") {
+          let targetEditorVersion: EditorVersion | null;
+          try {
+            targetEditorVersion =
+              tryGetTargetEditorVersionFor(packumentVersion);
+          } catch (error) {
+            if (!options.force) {
+              const packageRef = makePackageReference(name, versionToAdd);
+              debugLog(
+                `"${packageRef}" is malformed. Target editor version could not be determined.`
+              );
+              throw new CompatibilityCheckFailedError(packageRef);
+            }
+            targetEditorVersion = null;
           }
-        } else {
-          const targetEditorVersion = targetEditorVersionResult.value;
 
           // verify editor version
-          if (
-            targetEditorVersion !== null &&
-            typeof editorVersion !== "string" &&
-            compareEditorVersion(editorVersion, targetEditorVersion) < 0
-          ) {
-            log.warn(
-              "editor.version",
-              `requires ${targetEditorVersion} but found ${stringifyEditorVersion(
-                editorVersion
-              )}`
+          const isCompatible =
+            targetEditorVersion === null ||
+            compareEditorVersion(editorVersion, targetEditorVersion) >= 0;
+          if (!isCompatible && !options.force)
+            throw new PackageIncompatibleError(
+              makePackageReference(name, versionToAdd),
+              targetEditorVersion!
             );
-            if (!options.force) {
-              log.notice(
-                "suggest",
-                `upgrade the editor to ${targetEditorVersion}, or run with option -f to ignore the warning`
-              );
-              return Err(new EditorIncompatibleError());
-            }
-          }
         }
 
         // pkgsInScope
         if (!isUpstreamPackage) {
           debugLog(`fetch: ${makePackageReference(name, requestedVersion)}`);
-          const resolveResult = await resolveDependencies(
+          const [depsValid, depsInvalid] = await resolveDependencies(
             [env.registry, env.upstreamRegistry],
             name,
             requestedVersion,
             true
           );
-          if (resolveResult.isErr()) {
-            notifyRemotePackumentVersionResolvingFailed(
-              log,
-              name,
-              resolveResult.error
-            );
-            return resolveResult;
-          }
-          const [depsValid, depsInvalid] = resolveResult.value;
 
           // add depsValid to pkgsInScope.
           depsValid.forEach((dependency) =>
@@ -263,35 +196,17 @@ export function makeAddCmd(
           // print suggestion for depsInvalid
           let isAnyDependencyUnresolved = false;
           depsInvalid.forEach((depObj) => {
-            notifyRemotePackumentVersionResolvingFailed(
-              log,
-              depObj.name,
-              depObj.reason
-            );
+            logError(log, depObj.reason);
 
             // If the manifest already has the dependency than it does not
             // really matter that it was not resolved.
-            if (!hasDependency(manifest, depObj.name)) {
+            if (!hasDependency(manifest, depObj.name))
               isAnyDependencyUnresolved = true;
-              if (depObj.reason instanceof VersionNotFoundError)
-                log.notice(
-                  "suggest",
-                  `to install ${makePackageReference(
-                    depObj.name,
-                    depObj.reason.requestedVersion
-                  )} or a replaceable version manually`
-                );
-            }
           });
-          if (isAnyDependencyUnresolved) {
-            if (!options.force) {
-              log.error(
-                "missing dependencies",
-                "please resolve the issue or run with option -f to ignore the warning"
-              );
-              return Err(new UnresolvedDependencyError());
-            }
-          }
+          if (isAnyDependencyUnresolved && !options.force)
+            throw new UnresolvedDependenciesError(
+              makePackageReference(name, versionToAdd)
+            );
         } else pkgsInScope.push(name);
       }
       // add to dependencies
@@ -338,24 +253,19 @@ export function makeAddCmd(
       }
       if (options.test) manifest = addTestable(manifest, name);
 
-      return Ok([manifest, dirty]);
+      return [manifest, dirty];
     };
 
     // load manifest
-    const loadResult = await loadProjectManifest(env.cwd).promise;
-    if (loadResult.isErr()) {
-      notifyManifestLoadFailed(log, loadResult.error);
-      return ResultCodes.Error;
-    }
-    let manifest = loadResult.value;
+    let manifest = await loadProjectManifest(env.cwd);
 
     // add
     let dirty = false;
     for (const pkg of pkgs) {
-      const result = await tryAddToManifest(manifest, pkg);
-      if (result.isErr()) return ResultCodes.Error;
-
-      const [newManifest, manifestChanged] = result.value;
+      const [newManifest, manifestChanged] = await tryAddToManifest(
+        manifest,
+        pkg
+      );
       if (manifestChanged) {
         manifest = newManifest;
         dirty = true;
@@ -364,12 +274,7 @@ export function makeAddCmd(
 
     // Save manifest
     if (dirty) {
-      const saveResult = await writeProjectManifest(env.cwd, manifest).promise;
-      if (saveResult.isErr()) {
-        notifyManifestWriteFailed(log);
-        return ResultCodes.Error;
-      }
-
+      await writeProjectManifest(env.cwd, manifest);
       // print manifest notice
       log.notice("", "please open Unity project to apply changes");
     }

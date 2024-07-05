@@ -7,22 +7,18 @@ import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import {
   LoadProjectManifest,
-  ManifestLoadError,
-  ManifestWriteError,
   WriteProjectManifest,
 } from "../io/project-manifest-io";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackageUrl } from "../domain/package-url";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 export type RemovedPackage = {
   name: DomainName;
   version: SemanticVersion | PackageUrl;
 };
 
-export type RemovePackagesError =
-  | ManifestLoadError
-  | PackumentNotFoundError
-  | ManifestWriteError;
+export type RemovePackagesError = PackumentNotFoundError;
 
 export type RemovePackages = (
   projectPath: string,
@@ -39,9 +35,8 @@ export function makeRemovePackages(
   ): Result<[UnityProjectManifest, RemovedPackage], PackumentNotFoundError> {
     // not found array
     const versionInManifest = manifest.dependencies[packageName];
-    if (versionInManifest === undefined) {
+    if (versionInManifest === undefined)
       return Err(new PackumentNotFoundError(packageName));
-    }
 
     manifest = removeDependency(manifest, packageName);
 
@@ -85,17 +80,19 @@ export function makeRemovePackages(
 
   return (projectPath, packageNames) => {
     // load manifest
-    const initialManifest = loadProjectManifest(projectPath);
+    const initialManifest = resultifyAsyncOp<
+      UnityProjectManifest,
+      RemovePackagesError
+    >(loadProjectManifest(projectPath));
 
     // remove
     const removeResult = initialManifest.andThen((it) =>
       tryRemoveAll(it, packageNames)
     );
 
-    return removeResult.andThen(([updatedManifest, removedPackages]) =>
-      writeProjectManifest(projectPath, updatedManifest).map(
-        () => removedPackages
-      )
-    );
+    return removeResult.map(async ([updatedManifest, removedPackages]) => {
+      await writeProjectManifest(projectPath, updatedManifest);
+      return removedPackages;
+    });
   };
 }

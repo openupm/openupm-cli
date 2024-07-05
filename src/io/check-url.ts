@@ -1,28 +1,18 @@
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
-import { GenericNetworkError } from "./common-errors";
 import fetch from "node-fetch";
 
 /**
  * Function for checking if an url exists.
  * @param url The url to check.
+ * @returns A boolean indicating whether the url exists.
  */
-export type CheckUrlExists = (
-  url: string
-) => AsyncResult<boolean, GenericNetworkError>;
+export type CheckUrlExists = (url: string) => Promise<boolean>;
 
 /**
  * Makes a {@link CheckUrlExists} function.
  */
 export function makeCheckUrlExists(): CheckUrlExists {
-  return (url) => {
-    return new AsyncResult(
-      Result.wrapAsync(() => fetch(url, { method: "HEAD" }))
-    )
-      .mapErr(() => new GenericNetworkError())
-      .andThen((reponse) => {
-        if (reponse.status === 200) return Ok(true);
-        else if (reponse.status === 404) return Ok(false);
-        else return Err(new GenericNetworkError());
-      });
+  return async (url) => {
+    const response = await fetch(url, { method: "HEAD" });
+    return response.status === 200;
   };
 }

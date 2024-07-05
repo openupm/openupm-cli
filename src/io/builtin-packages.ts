@@ -7,15 +7,15 @@ import {
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
-import { tryGetDirectoriesIn } from "./fs-result";
 import { DebugLog } from "../logging";
-import { GenericIOError } from "./common-errors";
+import { tryGetDirectoriesIn } from "./directory-io";
+import { assertIsNodeError } from "../utils/error-type-guards";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
  * Error for when an editor-version is not installed.
  */
 export class EditorNotInstalledError extends CustomError {
-  private readonly _class = "EditorNotInstalledError";
   constructor(
     /**
      * The version that is not installed.
@@ -31,8 +31,7 @@ export class EditorNotInstalledError extends CustomError {
  */
 export type FindBuiltInPackagesError =
   | GetEditorInstallPathError
-  | EditorNotInstalledError
-  | GenericIOError;
+  | EditorNotInstalledError;
 
 /**
  * Function for loading all built-in packages for an installed editor.
@@ -59,14 +58,22 @@ export function makeFindBuiltInPackages(
       );
 
       return (
-        tryGetDirectoriesIn(packagesDir, debugLog)
+        resultifyAsyncOp(tryGetDirectoriesIn(packagesDir))
           // We can assume correct format
           .map((names) => names as DomainName[])
-          .mapErr((error) =>
-            error.code === "ENOENT"
-              ? new EditorNotInstalledError(editorVersion)
-              : new GenericIOError("Read")
-          )
+          .mapErr((error) => {
+            assertIsNodeError(error);
+
+            if (error.code === "ENOENT") {
+              debugLog(
+                "Failed to get directories in built-in package directory",
+                error
+              );
+              return new EditorNotInstalledError(editorVersion);
+            }
+
+            throw error;
+          })
       );
     }
   };

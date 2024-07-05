@@ -1,18 +1,9 @@
-import { AsyncResult } from "ts-results-es";
 import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
-import { SaveAuthToUpmConfig, UpmAuthStoreError } from "./upm-auth";
-import { NpmLogin, NpmLoginError } from "./npm-login";
-import { AuthNpmrc, NpmrcAuthTokenUpdateError } from "./npmrc-auth";
+import { SaveAuthToUpmConfig } from "./upm-auth";
+import { NpmLogin } from "./npm-login";
+import { AuthNpmrc } from "./npmrc-auth";
 import { DebugLog } from "../logging";
-
-/**
- * Error which may occur when logging in a user.
- */
-export type LoginError =
-  | UpmAuthStoreError
-  | NpmLoginError
-  | NpmrcAuthTokenUpdateError;
 
 /**
  * Function for logging in a user to a npm registry. Supports both basic and
@@ -39,7 +30,7 @@ export type Login = (
   registry: RegistryUrl,
   configPath: string,
   authMode: "basic" | "token"
-) => AsyncResult<void, LoginError>;
+) => Promise<void>;
 
 /**
  * Makes a {@link Login} function.
@@ -50,7 +41,7 @@ export function makeLogin(
   authNpmrc: AuthNpmrc,
   debugLog: DebugLog
 ): Login {
-  return (
+  return async (
     username,
     password,
     email,
@@ -62,7 +53,7 @@ export function makeLogin(
     if (authMode === "basic") {
       // basic auth
       const _auth = encodeBasicAuth(username, password);
-      return saveAuthToUpmConfig(configPath, registry, {
+      return await saveAuthToUpmConfig(configPath, registry, {
         email,
         alwaysAuth,
         _auth,
@@ -70,18 +61,15 @@ export function makeLogin(
     }
 
     // npm login
-    return npmLogin(registry, username, password, email).andThen((token) => {
-      debugLog(`npm login successful`);
-      // write npm token
-      return authNpmrc(registry, token).andThen((npmrcPath) => {
-        debugLog(`saved to npm config: ${npmrcPath}`);
-        // Save config
-        return saveAuthToUpmConfig(configPath, registry, {
-          email,
-          alwaysAuth,
-          token,
-        } satisfies TokenAuth);
-      });
-    });
+    const token = await npmLogin(registry, username, password, email);
+    debugLog(`npm login successful`);
+
+    const npmrcPath = await authNpmrc(registry, token);
+    await saveAuthToUpmConfig(configPath, registry, {
+      email,
+      alwaysAuth,
+      token,
+    } satisfies TokenAuth);
+    debugLog(`saved to npm config: ${npmrcPath}`);
   };
 }

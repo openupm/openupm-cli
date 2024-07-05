@@ -1,17 +1,13 @@
-import { ReadTextFile, WriteTextFile } from "../../src/io/fs-result";
-import { AsyncResult, Err, Ok } from "ts-results-es";
+import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { EOL } from "node:os";
 import {
-  makeLoadNpmrc,
   makeFindNpmrcPath,
+  makeLoadNpmrc,
   makeSaveNpmrc,
 } from "../../src/io/npmrc-io";
 import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
-import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
 import { mockService } from "../services/service.mock";
-import { eaccesError, enoentError } from "./node-error.mock";
-import { GenericIOError } from "../../src/io/common-errors";
 
 describe("npmrc-io", () => {
   describe("get path", () => {
@@ -27,20 +23,11 @@ describe("npmrc-io", () => {
       const { findPath, getHomePath } = makeDependencies();
       const home = path.join(path.sep, "user", "dir");
       const expected = path.join(home, ".npmrc");
-      getHomePath.mockReturnValue(Ok(home));
+      getHomePath.mockReturnValue(home);
 
-      const result = findPath();
+      const actual = findPath();
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
-    });
-
-    it("should fail if home could not be determined", () => {
-      const { findPath, getHomePath } = makeDependencies();
-      getHomePath.mockReturnValue(Err(new RequiredEnvMissingError([])));
-
-      const result = findPath();
-
-      expect(result).toBeError();
+      expect(actual).toEqual(expected);
     });
   });
 
@@ -55,53 +42,42 @@ describe("npmrc-io", () => {
     it("should be ok for valid file", async () => {
       const fileContent = `key1 = value1${EOL}key2 = "value2"`;
       const { loadNpmrc, readText } = makeDependencies();
-      readText.mockReturnValue(new AsyncResult(Ok(fileContent)));
+      readText.mockResolvedValue(fileContent);
 
-      const result = await loadNpmrc("/valid/path/.npmrc").promise;
+      const actual = await loadNpmrc("/valid/path/.npmrc");
 
-      expect(result).toBeOk((actual) =>
-        expect(actual).toEqual(["key1 = value1", 'key2 = "value2"'])
-      );
+      expect(actual).toEqual(["key1 = value1", 'key2 = "value2"']);
     });
 
     it("should be null for missing file", async () => {
       const { loadNpmrc, readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
-      readText.mockReturnValue(new AsyncResult(Err(enoentError)));
+      readText.mockResolvedValue(null);
 
-      const result = await loadNpmrc(path).promise;
+      const actual = await loadNpmrc(path);
 
-      expect(result).toBeOk((actual) => expect(actual).toBeNull());
+      expect(actual).toBeNull();
     });
   });
 
   describe("save", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
-      writeFile.mockReturnValue(new AsyncResult(Ok(undefined)));
+      writeFile.mockResolvedValue(undefined);
 
       const saveNpmrc = makeSaveNpmrc(writeFile);
       return { saveNpmrc, writeFile } as const;
     }
 
-    it("should be ok when write succeeds", async () => {
-      const { saveNpmrc } = makeDependencies();
+    it("should write joined lines", async () => {
+      const { saveNpmrc, writeFile } = makeDependencies();
       const path = "/valid/path/.npmrc";
 
-      const result = await saveNpmrc(path, ["key=value"]).promise;
+      await saveNpmrc(path, ["key=value", "key2=value2"]);
 
-      expect(result).toBeOk();
-    });
-
-    it("should fail when write fails", async () => {
-      const { saveNpmrc, writeFile } = makeDependencies();
-      const path = "/invalid/path/.npmrc";
-      writeFile.mockReturnValue(new AsyncResult(Err(eaccesError)));
-
-      const result = await saveNpmrc(path, ["key=value"]).promise;
-
-      expect(result).toBeError((actual) =>
-        expect(actual).toBeInstanceOf(GenericIOError)
+      expect(writeFile).toHaveBeenCalledWith(
+        path,
+        `key=value${EOL}key2=value2`
       );
     });
   });

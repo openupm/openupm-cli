@@ -3,14 +3,19 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import path from "path";
-import { AsyncResult, Err, Ok } from "ts-results-es";
-import { ReadTextFile, WriteTextFile } from "./fs-result";
-import { StringFormatError, tryParseJson } from "../utils/string-parsing";
-import {
-  FileMissingError,
-  FileParseError,
-  GenericIOError,
-} from "./common-errors";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
+import { AnyJson } from "@iarna/toml";
+import { CustomError } from "ts-custom-error";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
+
+export class ManifestMissingError extends CustomError {
+  public constructor(public expectedPath: string) {
+    super();
+  }
+}
+
+export class ManifestMalformedError extends CustomError {}
 
 /**
  * Determines the path to the package manifest based on the project
@@ -22,80 +27,42 @@ export function manifestPathFor(projectPath: string): string {
 }
 
 /**
- * Error for when the project manifest is missing.
- */
-export type ProjectManifestMissingError = FileMissingError<"ProjectManifest">;
-
-/**
- * Makes a new {@link ProjectManifestMissingError}.
- * @param filePath The path that was searched.
- */
-export function makeProjectManifestMissingError(
-  filePath: string
-): ProjectManifestMissingError {
-  return new FileMissingError("ProjectManifest", filePath);
-}
-
-/**
- * Error for when the project manifest could not be parsed.
- */
-export type ProjectManifestParseError = FileParseError<"ProjectManifest">;
-
-/**
- * Makes a {@link ProjectManifestParseError} object.
- * @param filePath The path of the file.
- */
-export function makeProjectManifestParseError(
-  filePath: string
-): ProjectManifestParseError {
-  return new FileParseError(filePath, "ProjectManifest");
-}
-
-/**
- * Error which may occur when loading a project manifest.
- */
-export type ManifestLoadError =
-  | ProjectManifestMissingError
-  | GenericIOError
-  | StringFormatError<"Json">
-  | ProjectManifestParseError;
-
-/**
  * Function for loading the project manifest for a Unity project.
  * @param projectPath The path to the project's directory.
+ * @returns The loaded manifest.
  */
 export type LoadProjectManifest = (
   projectPath: string
-) => AsyncResult<UnityProjectManifest, ManifestLoadError>;
+) => Promise<UnityProjectManifest>;
 
 /**
  * Makes a {@link LoadProjectManifest} function.
  */
 export function makeLoadProjectManifest(
-  readFile: ReadTextFile
+  readFile: ReadTextFile,
+  debugLog: DebugLog
 ): LoadProjectManifest {
-  return (projectPath) => {
+  return async (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
-    return readFile(manifestPath)
-      .mapErr((error) =>
-        error.code === "ENOENT"
-          ? makeProjectManifestMissingError(manifestPath)
-          : new GenericIOError("Read")
-      )
-      .andThen(tryParseJson)
-      .andThen((json) =>
-        typeof json === "object"
-          ? // TODO: Actually validate the json structure
-            Ok(json as unknown as UnityProjectManifest)
-          : Err(makeProjectManifestParseError(manifestPath))
-      );
+
+    const content = await readFile(manifestPath, true);
+    if (content === null) throw new ManifestMissingError(manifestPath);
+
+    let json: AnyJson;
+    try {
+      json = await JSON.parse(content);
+    } catch (error) {
+      assertIsError(error);
+      debugLog("Manifest parse failed because of invalid json content.", error);
+      throw new ManifestMalformedError();
+    }
+
+    // TODO: Actually validate the json structure
+    if (typeof json !== "object") throw new ManifestMalformedError();
+
+    return json as unknown as UnityProjectManifest;
   };
 }
-
-/**
- * Error which may occur when saving a project manifest.
- */
-export type ManifestWriteError = GenericIOError;
 
 /**
  * Function for replacing the project manifest for a Unity project.
@@ -105,7 +72,7 @@ export type ManifestWriteError = GenericIOError;
 export type WriteProjectManifest = (
   projectPath: string,
   manifest: UnityProjectManifest
-) => AsyncResult<void, ManifestWriteError>;
+) => Promise<void>;
 
 /**
  * Makes a {@link WriteProjectManifest} function.
@@ -113,13 +80,11 @@ export type WriteProjectManifest = (
 export function makeWriteProjectManifest(
   writeFile: WriteTextFile
 ): WriteProjectManifest {
-  return (projectPath, manifest) => {
+  return async (projectPath, manifest) => {
     const manifestPath = manifestPathFor(projectPath);
     manifest = pruneManifest(manifest);
     const json = JSON.stringify(manifest, null, 2);
 
-    return writeFile(manifestPath, json).mapErr(
-      () => new GenericIOError("Write")
-    );
+    return await writeFile(manifestPath, json);
   };
 }
