@@ -7,7 +7,10 @@ import {
   ResolvePackumentVersionError,
 } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
-import { tryResolvePackumentVersion } from "../domain/packument";
+import {
+  tryResolvePackumentVersion,
+  UnityPackument,
+} from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
@@ -30,10 +33,9 @@ export function makeResolveRemotePackumentVersion(
   fetchPackument: FetchPackument
 ): ResolveRemotePackumentVersion {
   return (packageName, requestedVersion, source) =>
-    resultifyAsyncOp(fetchPackument(source, packageName)).andThen<
-      ResolvedPackumentVersion,
-      ResolvePackumentVersionError
-    >((packument) => {
+    resultifyAsyncOp<UnityPackument | null, ResolvePackumentVersionError>(
+      fetchPackument(source, packageName)
+    ).andThen((packument) => {
       if (packument === null)
         return Err(new PackumentNotFoundError(packageName));
       return tryResolvePackumentVersion(packument, requestedVersion).map(

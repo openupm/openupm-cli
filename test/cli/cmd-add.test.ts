@@ -1,4 +1,9 @@
-import { makeAddCmd, UnresolvedDependenciesError } from "../../src/cli/cmd-add";
+import {
+  CompatibilityCheckFailedError,
+  makeAddCmd,
+  PackageIncompatibleError,
+  UnresolvedDependenciesError,
+} from "../../src/cli/cmd-add";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -17,10 +22,16 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { VersionNotFoundError } from "../../src/domain/packument";
+import {
+  UnityPackumentVersion,
+  VersionNotFoundError,
+} from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
+import { PackumentNotFoundError } from "../../src/common-errors";
+import { ResolvedPackumentVersion } from "../../src/packument-version-resolving";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -161,6 +172,20 @@ describe("cmd-add", () => {
     expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
+  it("should fail when adding package with incompatible with editor and not running with force", async () => {
+    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
+    mockResolvedPackuments(resolveRemovePackumentVersion, [
+      exampleRegistryUrl,
+      incompatiblePackument,
+    ]);
+
+    await expect(
+      addCmd(somePackage, {
+        _global: {},
+      })
+    ).rejects.toBeInstanceOf(PackageIncompatibleError);
+  });
+
   it("should not fetch dependencies for upstream packages", async () => {
     const { addCmd, resolveRemovePackumentVersion, resolveDependencies } =
       makeDependencies();
@@ -174,6 +199,38 @@ describe("cmd-add", () => {
     });
 
     expect(resolveDependencies).not.toHaveBeenCalled();
+  });
+
+  it("should fail if package could not be resolved", async () => {
+    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
+    resolveRemovePackumentVersion.mockReturnValue(
+      AsyncErr(new PackumentNotFoundError(somePackage))
+    );
+
+    await expect(() =>
+      addCmd(somePackage, {
+        _global: {},
+      })
+    ).rejects.toBeInstanceOf(PackumentNotFoundError);
+  });
+
+  it("should fail if packument had malformed target editor and not running with force", async () => {
+    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
+    resolveRemovePackumentVersion.mockReturnValue(
+      AsyncOk({
+        packumentVersion: {
+          name: somePackage,
+          version: makeSemanticVersion("1.0.0"),
+          unity: "bad vesion",
+        } as unknown as UnityPackumentVersion,
+      } as unknown as ResolvedPackumentVersion)
+    );
+
+    await expect(() =>
+      addCmd(somePackage, {
+        _global: {},
+      })
+    ).rejects.toBeInstanceOf(CompatibilityCheckFailedError);
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {

@@ -10,7 +10,6 @@ import {
 } from "../domain/editor-version";
 import { EditorVersionNotSupportedError } from "../common-errors";
 import { tryGetEnv } from "../utils/env-util";
-import { DebugLog } from "../logging";
 
 /**
  * Error for when a specific OS does not support a specific editor-version.
@@ -55,7 +54,7 @@ export class NoHomePathError extends CustomError {}
 /**
  * Makes a {@link GetHomePath} function.
  */
-export function makeGetHomePath(debugLog: DebugLog): GetHomePath {
+export function makeGetHomePath(): GetHomePath {
   return () => {
     const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
     if (homePath === null) throw new NoHomePathError();

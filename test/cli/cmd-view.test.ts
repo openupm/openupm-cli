@@ -10,6 +10,7 @@ import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { FetchPackument } from "../../src/io/packument-io";
+import { PackumentNotFoundError } from "../../src/common-errors";
 
 const somePackage = makeDomainName("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -76,6 +77,15 @@ describe("cmd-view", () => {
     );
 
     expect(resultCode).toEqual(ResultCodes.Error);
+  });
+
+  it("should fail if package is not found", async () => {
+    const { viewCmd, fetchPackument } = makeDependencies();
+    fetchPackument.mockResolvedValue(null);
+
+    await expect(viewCmd(somePackage, { _global: {} })).rejects.toBeInstanceOf(
+      PackumentNotFoundError
+    );
   });
 
   it("should notify if package version was specified", async () => {

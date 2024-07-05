@@ -2,6 +2,7 @@ import path from "path";
 import { tryGetEnv } from "../../src/utils/env-util";
 import {
   makeGetHomePath,
+  NoHomePathError,
   OSNotSupportedError,
   tryGetEditorInstallPath,
   VersionNotSupportedOnOsError,
@@ -9,14 +10,13 @@ import {
 import os from "os";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { EditorVersionNotSupportedError } from "../../src/common-errors";
-import { noopLogger } from "../../src/logging";
 
 jest.mock("../../src/utils/env-util");
 
 describe("special-paths", () => {
   describe("home", () => {
     function makeDependencies() {
-      const getHomePath = makeGetHomePath(noopLogger);
+      const getHomePath = makeGetHomePath();
 
       return { getHomePath } as const;
     }
@@ -49,7 +49,7 @@ describe("special-paths", () => {
       const { getHomePath } = makeDependencies();
       jest.mocked(tryGetEnv).mockReturnValue(null);
 
-      expect(() => getHomePath()).toThrow();
+      expect(() => getHomePath()).toThrow(NoHomePathError);
     });
   });
 

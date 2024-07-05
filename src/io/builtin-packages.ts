@@ -58,19 +58,20 @@ export function makeFindBuiltInPackages(
       );
 
       return (
-        resultifyAsyncOp<readonly string[], NodeJS.ErrnoException>(
-          tryGetDirectoriesIn(packagesDir)
-        )
+        resultifyAsyncOp(tryGetDirectoriesIn(packagesDir))
           // We can assume correct format
           .map((names) => names as DomainName[])
           .mapErr((error) => {
             assertIsNodeError(error);
-            debugLog(
-              "Failed to get directories in built-in package directory",
-              error
-            );
-            if (error.code === "ENOENT")
+
+            if (error.code === "ENOENT") {
+              debugLog(
+                "Failed to get directories in built-in package directory",
+                error
+              );
               return new EditorNotInstalledError(editorVersion);
+            }
+
             throw error;
           })
       );

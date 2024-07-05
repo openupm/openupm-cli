@@ -70,7 +70,7 @@ const debugLog: DebugLog = (message, context) =>
 const regClient = new RegClient({ log });
 const getCwd = makeGetCwd();
 const runChildProcess = makeRunChildProcess(debugLog);
-const getHomePath = makeGetHomePath(debugLog);
+const getHomePath = makeGetHomePath();
 const readFile = makeReadText();
 const writeFile = makeWriteText();
 const loadProjectManifest = makeLoadProjectManifest(readFile, debugLog);

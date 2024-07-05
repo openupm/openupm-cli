@@ -1,6 +1,8 @@
 import {
   makeLoadProjectManifest,
   makeWriteProjectManifest,
+  ManifestMalformedError,
+  ManifestMissingError,
   manifestPathFor,
 } from "../../src/io/project-manifest-io";
 import { mapScopedRegistry } from "../../src/domain/project-manifest";
@@ -41,7 +43,25 @@ describe("project-manifest io", () => {
 
       await expect(
         loadProjectManifest(exampleProjectPath)
-      ).rejects.toBeDefined();
+      ).rejects.toBeInstanceOf(ManifestMissingError);
+    });
+
+    it("should fail if manifest contains invalid json", async () => {
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockResolvedValue("not {} valid : json");
+
+      await expect(
+        loadProjectManifest(exampleProjectPath)
+      ).rejects.toBeInstanceOf(ManifestMalformedError);
+    });
+
+    it("should fail if manifest contains invalid content", async () => {
+      const { loadProjectManifest, readFile } = makeDependencies();
+      readFile.mockResolvedValue(`123`);
+
+      await expect(
+        loadProjectManifest(exampleProjectPath)
+      ).rejects.toBeInstanceOf(ManifestMalformedError);
     });
 
     it("should load valid manifest", async () => {

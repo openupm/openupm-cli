@@ -8,7 +8,7 @@ import {
 } from "../../src/io/builtin-packages";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { noopLogger } from "../../src/logging";
-import { enoentError } from "./node-error.mock";
+import { eaccesError, enoentError } from "./node-error.mock";
 
 function makeDependencies() {
   const getBuiltInPackages = makeFindBuiltInPackages(noopLogger);
@@ -40,6 +40,18 @@ describe("builtin-packages", () => {
     const result = await getBuiltInPackages(version).promise;
 
     expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+  });
+
+  it("should fail if directory could not be read", async () => {
+    const version = makeEditorVersion(2022, 1, 2, "f", 1);
+    const { getBuiltInPackages } = makeDependencies();
+    const expected = eaccesError;
+    jest
+      .spyOn(specialPaths, "tryGetEditorInstallPath")
+      .mockReturnValue(Ok("/some/path"));
+    jest.spyOn(directoryIO, "tryGetDirectoriesIn").mockRejectedValue(expected);
+
+    await expect(getBuiltInPackages(version).promise).rejects.toEqual(expected);
   });
 
   it("should find package names", async () => {

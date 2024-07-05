@@ -80,7 +80,10 @@ export function makeRemovePackages(
 
   return (projectPath, packageNames) => {
     // load manifest
-    const initialManifest = resultifyAsyncOp(loadProjectManifest(projectPath));
+    const initialManifest = resultifyAsyncOp<
+      UnityProjectManifest,
+      RemovePackagesError
+    >(loadProjectManifest(projectPath));
 
     // remove
     const removeResult = initialManifest.andThen((it) =>

@@ -1,6 +1,10 @@
 import { ReadTextFile } from "../../src/io/text-file-io";
 import { mockService } from "../services/service.mock";
-import { makeLoadProjectVersion } from "../../src/io/project-version-io";
+import {
+  makeLoadProjectVersion,
+  ProjectVersionMalformedError,
+  ProjectVersionMissingError,
+} from "../../src/io/project-version-io";
 import { noopLogger } from "../../src/logging";
 
 describe("project-version-io", () => {
@@ -17,14 +21,27 @@ describe("project-version-io", () => {
       const { loadProjectVersion, readFile } = makeDependencies();
       readFile.mockResolvedValue(null);
 
-      await expect(loadProjectVersion("/some/bad/path")).rejects.toBeDefined();
+      await expect(loadProjectVersion("/some/bad/path")).rejects.toBeInstanceOf(
+        ProjectVersionMissingError
+      );
+    });
+
+    it("should fail if file does not contain valid yaml", async () => {
+      const { loadProjectVersion, readFile } = makeDependencies();
+      readFile.mockResolvedValue("this\\ is { not } : yaml");
+
+      await expect(loadProjectVersion("/some/path")).rejects.toBeInstanceOf(
+        ProjectVersionMalformedError
+      );
     });
 
     it("should fail if yaml does not contain editor-version", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
       readFile.mockResolvedValue("thisIsYaml: but not what we want");
 
-      await expect(loadProjectVersion("/some/path")).rejects.toBeDefined();
+      await expect(loadProjectVersion("/some/path")).rejects.toBeInstanceOf(
+        ProjectVersionMalformedError
+      );
     });
 
     it("should load valid version strings", async () => {

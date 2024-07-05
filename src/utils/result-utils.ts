@@ -29,7 +29,7 @@ export function AsyncErr<T>(error: T): AsyncResult<never, T> {
  * Wraps a promise or operation returning a promise into an {@link AsyncResult}.
  * @param op The operation to wrap.
  */
-export function resultifyAsyncOp<T, TError = never>(
+export function resultifyAsyncOp<T, TError>(
   op: (() => Promise<T>) | Promise<T>
 ): AsyncResult<T, TError> {
   return new AsyncResult(
