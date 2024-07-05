@@ -4,10 +4,7 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import { UnityPackument } from "../domain/packument";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "./common-errors";
+import { RegistryAuthenticationError } from "./common-errors";
 import { DebugLog } from "../logging";
 
 /**
@@ -57,7 +54,7 @@ export function makeSearchRegistry(debugLog: DebugLog): SearchRegistry {
         assertIsHttpError(error);
         debugLog("A http request failed.", error);
         throw error.statusCode === 401
-          ? new RegistryAuthenticationError()
-          : new GenericNetworkError();
+          ? new RegistryAuthenticationError(registry.url)
+          : error;
       });
 }

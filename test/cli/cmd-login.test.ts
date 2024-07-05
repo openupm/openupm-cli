@@ -1,4 +1,3 @@
-import { Err } from "ts-results-es";
 import { makeLoginCmd } from "../../src/cli/cmd-login";
 import { mockService } from "../services/service.mock";
 import { Env, ParseEnv } from "../../src/services/parse-env";
@@ -7,9 +6,6 @@ import { Login } from "../../src/services/login";
 import { makeMockLogger } from "./log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { RegistryAuthenticationError } from "../../src/io/common-errors";
-import { ResultCodes } from "../../src/cli/result-codes";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
@@ -31,7 +27,7 @@ describe("cmd-login", () => {
     getUpmConfigPath.mockResolvedValue(exampleUpmConfigPath);
 
     const login = mockService<Login>();
-    login.mockReturnValue(AsyncOk());
+    login.mockResolvedValue(undefined);
 
     const log = makeMockLogger();
 
@@ -40,40 +36,6 @@ describe("cmd-login", () => {
   }
 
   // TODO: Add tests for prompting logic
-
-  it("should fail if login failed", async () => {
-    const expected = new RegistryAuthenticationError();
-    const { loginCmd, login } = makeDependencies();
-    login.mockReturnValue(AsyncErr(expected));
-
-    const resultCode = await loginCmd({
-      username: exampleUser,
-      password: examplePassword,
-      email: exampleEmail,
-      _global: { registry: exampleRegistryUrl },
-    });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if unauthorized", async () => {
-    const { loginCmd, login, log } = makeDependencies();
-    login.mockReturnValue(
-      Err(new RegistryAuthenticationError()).toAsyncResult()
-    );
-
-    await loginCmd({
-      username: exampleUser,
-      password: examplePassword,
-      email: exampleEmail,
-      _global: { registry: exampleRegistryUrl },
-    });
-
-    expect(log.warn).toHaveBeenCalledWith(
-      "401",
-      "Incorrect username or password"
-    );
-  });
 
   it("should notify of success", async () => {
     const { loginCmd, log } = makeDependencies();

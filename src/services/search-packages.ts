@@ -1,6 +1,8 @@
 import { Registry } from "../domain/registry";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
 import { FetchAllPackuments } from "../io/all-packuments-io";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
 
 /**
  * A function for searching packages in a registry.
@@ -20,7 +22,8 @@ export type SearchPackages = (
  */
 export function makeSearchPackages(
   searchRegistry: SearchRegistry,
-  fetchAllPackuments: FetchAllPackuments
+  fetchAllPackuments: FetchAllPackuments,
+  debugLog: DebugLog
 ): SearchPackages {
   async function searchInAll(
     registry: Registry,
@@ -40,7 +43,9 @@ export function makeSearchPackages(
     try {
       // search endpoint
       return await searchRegistry(registry, keyword);
-    } catch {
+    } catch (error) {
+      assertIsError(error);
+      debugLog("Searching using search endpoint failed", error);
       // search old search
       onUseOldSearch && onUseOldSearch();
       return await searchInAll(registry, keyword);

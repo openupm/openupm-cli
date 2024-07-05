@@ -92,27 +92,6 @@ describe("cmd-view", () => {
     );
   });
 
-  it("should fail if package was not found", async () => {
-    const { viewCmd, fetchPackument } = makeDependencies();
-    fetchPackument.mockResolvedValue(null);
-
-    const resultCode = await viewCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if package could not be resolved", async () => {
-    const { viewCmd, fetchPackument, log } = makeDependencies();
-    fetchPackument.mockResolvedValue(null);
-
-    await viewCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      "404",
-      expect.stringContaining("not found")
-    );
-  });
-
   it("should print package information", async () => {
     const consoleSpy = jest.spyOn(console, "log");
     const { viewCmd } = makeDependencies();

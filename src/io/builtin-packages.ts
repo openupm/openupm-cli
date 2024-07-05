@@ -8,7 +8,6 @@ import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
 import { DebugLog } from "../logging";
-import { GenericIOError } from "./common-errors";
 import { tryGetDirectoriesIn } from "./directory-io";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import { resultifyAsyncOp } from "../utils/result-utils";
@@ -17,7 +16,6 @@ import { resultifyAsyncOp } from "../utils/result-utils";
  * Error for when an editor-version is not installed.
  */
 export class EditorNotInstalledError extends CustomError {
-  private readonly _class = "EditorNotInstalledError";
   constructor(
     /**
      * The version that is not installed.
@@ -61,15 +59,19 @@ export function makeFindBuiltInPackages(
 
       return (
         resultifyAsyncOp<readonly string[], NodeJS.ErrnoException>(
-          tryGetDirectoriesIn(packagesDir, debugLog)
+          tryGetDirectoriesIn(packagesDir)
         )
           // We can assume correct format
           .map((names) => names as DomainName[])
           .mapErr((error) => {
             assertIsNodeError(error);
+            debugLog(
+              "Failed to get directories in built-in package directory",
+              error
+            );
             if (error.code === "ENOENT")
               return new EditorNotInstalledError(editorVersion);
-            throw new GenericIOError("Read");
+            throw error;
           })
       );
     }

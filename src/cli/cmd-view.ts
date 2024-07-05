@@ -13,6 +13,7 @@ import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import { FetchPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
+import { PackumentNotFoundError } from "../common-errors";
 
 export type ViewOptions = CmdOptions;
 
@@ -129,10 +130,7 @@ export function makeViewCmd(
       (source) => fetchPackument(source, pkg)
     );
     const packument = packumentFromRegistry?.value ?? null;
-    if (packument === null) {
-      log.error("404", `package not found: ${pkg}`);
-      return ResultCodes.Error;
-    }
+    if (packument === null) throw new PackumentNotFoundError(pkg);
 
     printInfo(packument);
     return ResultCodes.Ok;

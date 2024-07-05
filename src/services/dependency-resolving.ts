@@ -14,7 +14,7 @@ import { ResolveRemotePackumentVersion } from "./resolve-remote-packument-versio
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
 import { ResolveLatestVersion } from "./resolve-latest-version";
-import { Err, Ok, Result } from "ts-results-es";
+import { Err, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import { CheckIsBuiltInPackage } from "./built-in-package-check";
 
@@ -55,11 +55,6 @@ export interface InvalidDependency extends DependencyBase {
 type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 
 /**
- * Error which may occur when resolving the dependencies for a package.
- */
-export type DependencyResolveError = PackumentNotFoundError;
-
-/**
  * Function for resolving all dependencies for a package.
  * @param sources Sources from which dependencies can be resolved.
  * @param name The name of the package.
@@ -71,9 +66,7 @@ export type ResolveDependencies = (
   name: DomainName,
   version: SemanticVersion | "latest" | undefined,
   deep: boolean
-) => Promise<
-  Result<[ValidDependency[], InvalidDependency[]], DependencyResolveError>
->;
+) => Promise<[ValidDependency[], InvalidDependency[]]>;
 
 /**
  * Makes a {@link ResolveDependencies} function.
@@ -93,7 +86,7 @@ export function makeResolveDependency(
           )
         : version;
 
-    if (latestVersion == null) return Err(new PackumentNotFoundError(name));
+    if (latestVersion == null) throw new PackumentNotFoundError(name);
 
     // a list of pending dependency {name, version}
     const pendingList = Array.of<NameVersionPair>([name, latestVersion]);
@@ -205,6 +198,6 @@ export function makeResolveDependency(
         depsValid.push(dependency);
       }
     }
-    return Ok([depsValid, depsInvalid]);
+    return [depsValid, depsInvalid];
   };
 }

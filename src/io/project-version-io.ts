@@ -1,40 +1,21 @@
 import path from "path";
 import { ReadTextFile } from "./text-file-io";
-import { tryParseYaml } from "../utils/string-parsing";
-import { FileMissingError, FileParseError } from "./common-errors";
+import * as YAML from "yaml";
+import { CustomError } from "ts-custom-error";
+import { AnyJson } from "@iarna/toml";
+import { assertIsError } from "../utils/error-type-guards";
+import { DebugLog } from "../logging";
+
+export class ProjectVersionMissingError extends CustomError {
+  public constructor(public readonly expectedPath: string) {
+    super();
+  }
+}
+
+export class ProjectVersionMalformedError extends CustomError {}
 
 export function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
-}
-
-/**
- * Error for when the ProjectVersion.txt is missing.
- */
-export type ProjectVersionMissingError = FileMissingError<"ProjectVersion.txt">;
-
-/**
- * Makes a {@link ProjectVersionMissingError} object.
- * @param filePath The path that was searched.
- */
-export function makeProjectVersionMissingError(
-  filePath: string
-): ProjectVersionMissingError {
-  return new FileMissingError("ProjectVersion.txt", filePath);
-}
-
-/**
- * Error for when the project version could not be parsed.
- */
-export type ProjectVersionParseError = FileParseError<"ProjectVersion.txt">;
-
-/**
- * Makes a {@link ProjectVersionParseError} object.
- * @param filePath The path of the file.
- */
-export function makeProjectVersionParseError(
-  filePath: string
-): ProjectVersionParseError {
-  return new FileParseError(filePath, "ProjectVersion.txt");
 }
 
 /**
@@ -48,15 +29,23 @@ export type LoadProjectVersion = (projectDirPath: string) => Promise<string>;
  * Makes a {@link LoadProjectVersion} function.
  */
 export function makeLoadProjectVersion(
-  readFile: ReadTextFile
+  readFile: ReadTextFile,
+  debugLog: DebugLog
 ): LoadProjectVersion {
   return async (projectDirPath) => {
     const filePath = projectVersionTxtPathFor(projectDirPath);
 
     const content = await readFile(filePath, true);
-    if (content === null) throw makeProjectVersionMissingError(filePath);
+    if (content === null) throw new ProjectVersionMissingError(filePath);
 
-    const yaml = tryParseYaml(content);
+    let yaml: AnyJson;
+    try {
+      yaml = YAML.parse(content);
+    } catch (error) {
+      assertIsError(error);
+      debugLog("ProjectVersion.txt has malformed yaml.", error);
+      throw new ProjectVersionMalformedError();
+    }
 
     if (
       !(
@@ -66,7 +55,7 @@ export function makeLoadProjectVersion(
         typeof yaml.m_EditorVersion === "string"
       )
     )
-      throw makeProjectVersionParseError(filePath);
+      throw new ProjectVersionMalformedError();
 
     return yaml.m_EditorVersion;
   };

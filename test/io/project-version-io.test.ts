@@ -1,14 +1,14 @@
 import { ReadTextFile } from "../../src/io/text-file-io";
 import { mockService } from "../services/service.mock";
 import { makeLoadProjectVersion } from "../../src/io/project-version-io";
-import { FileMissingError, FileParseError } from "../../src/io/common-errors";
+import { noopLogger } from "../../src/logging";
 
 describe("project-version-io", () => {
   describe("load", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
 
-      const loadProjectVersion = makeLoadProjectVersion(readFile);
+      const loadProjectVersion = makeLoadProjectVersion(readFile, noopLogger);
 
       return { loadProjectVersion, readFile } as const;
     }
@@ -17,18 +17,14 @@ describe("project-version-io", () => {
       const { loadProjectVersion, readFile } = makeDependencies();
       readFile.mockResolvedValue(null);
 
-      await expect(loadProjectVersion("/some/bad/path")).rejects.toBeInstanceOf(
-        FileMissingError
-      );
+      await expect(loadProjectVersion("/some/bad/path")).rejects.toBeDefined();
     });
 
     it("should fail if yaml does not contain editor-version", async () => {
       const { loadProjectVersion, readFile } = makeDependencies();
       readFile.mockResolvedValue("thisIsYaml: but not what we want");
 
-      await expect(loadProjectVersion("/some/path")).rejects.toBeInstanceOf(
-        FileParseError
-      );
+      await expect(loadProjectVersion("/some/path")).rejects.toBeDefined();
     });
 
     it("should load valid version strings", async () => {

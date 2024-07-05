@@ -1,26 +1,16 @@
 import path from "path";
 import TOML from "@iarna/toml";
 import { UPMConfig } from "../domain/upm-config";
-import { CustomError } from "ts-custom-error";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
-import { tryParseToml } from "../utils/string-parsing";
 import { tryGetWslPath } from "./wsl";
 import { RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
+import { CustomError } from "ts-custom-error";
 
 const configFileName = ".upmconfig.toml";
 
-export class RequiredEnvMissingError extends CustomError {
-  private readonly _class = "RequiredEnvMissingError";
-  constructor(public readonly keyNames: string[]) {
-    super(
-      `Env was required to contain a value for one of the following keys, but all were missing: ${keyNames
-        .map((keyName) => `"${keyName}"`)
-        .join(", ")}.`
-    );
-  }
-}
+export class NoSystemUserProfilePath extends CustomError {}
 
 /**
  * Function which gets the path to the upmconfig file.
@@ -53,8 +43,7 @@ export function makeGetUpmConfigPath(
 
     if (systemUser) {
       const profilePath = tryGetEnv("ALLUSERSPROFILE");
-      if (profilePath === null)
-        throw new RequiredEnvMissingError(["ALLUSERSPROFILE"]);
+      if (profilePath === null) throw new NoSystemUserProfilePath();
       return path.join(profilePath, systemUserSubPath);
     }
 
@@ -83,7 +72,7 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
   return async (configFilePath) => {
     const content = await readFile(configFilePath, true);
     if (content === null) return null;
-    const toml = tryParseToml(content);
+    const toml = TOML.parse(content);
     return toml as UPMConfig;
   };
 }

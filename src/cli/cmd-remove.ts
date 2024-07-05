@@ -3,9 +3,9 @@ import { makePackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
-import { notifyPackumentNotFoundInManifest } from "./error-logging";
 import { DomainName } from "../domain/domain-name";
 import { RemovePackages } from "../services/remove-packages";
+import { logError } from "./error-logging";
 
 /**
  * The possible result codes with which the remove command can exit.
@@ -38,7 +38,7 @@ export function makeRemoveCmd(
 
     const removeResult = await removePackages(env.cwd, pkgs).promise;
     if (removeResult.isErr()) {
-      notifyPackumentNotFoundInManifest(log, removeResult.error.packageName);
+      logError(log, removeResult.error);
       return ResultCodes.Error;
     }
     const removedPackages = removeResult.value;

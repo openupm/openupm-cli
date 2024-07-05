@@ -5,10 +5,7 @@ import { makeSearchRegistry } from "../../src/io/npm-search";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../../src/io/common-errors";
+import { RegistryAuthenticationError } from "../../src/io/common-errors";
 
 jest.mock("libnpmsearch");
 
@@ -32,8 +29,8 @@ describe("npm search", () => {
     jest.mocked(npmSearch).mockRejectedValue(expected);
     const { searchRegistry } = makeDependencies();
 
-    await expect(searchRegistry(exampleRegistry, "wow")).rejects.toBeInstanceOf(
-      GenericNetworkError
+    await expect(searchRegistry(exampleRegistry, "wow")).rejects.toEqual(
+      expected
     );
   });
 

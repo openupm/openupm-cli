@@ -1,21 +1,15 @@
 import { CustomError } from "ts-custom-error";
 import isWsl from "is-wsl";
-import { ChildProcessError, RunChildProcess } from "./child-process";
+import { RunChildProcess } from "./child-process";
 
 /**
  * Error for when attempting to interact with wsl on a non-wsl system.
  */
 export class NoWslError extends CustomError {
-  private readonly _class = "NoWslError";
   constructor() {
-    super("No WSL detected.");
+    super();
   }
 }
-
-/**
- * Error which may occur when resolving a wsl path.
- */
-export type WslPathError = NoWslError | ChildProcessError;
 
 /**
  * Attempt to resolve the wls path for a variable.

@@ -126,10 +126,8 @@ export function tryGetPackumentVersion(
  * had no versions.
  */
 export class NoVersionsError extends CustomError {
-  private readonly _class = "NoVersionsError";
-
-  constructor() {
-    super("A packument contained no versions");
+  constructor(public readonly packageName: DomainName) {
+    super();
   }
 }
 
@@ -138,19 +136,15 @@ export class NoVersionsError extends CustomError {
  * requested version did not exist.
  */
 export class VersionNotFoundError extends CustomError {
-  private readonly _class = "VersionNotFoundError";
-
   constructor(
-    /**
-     * The version that was requested.
-     */
-    readonly requestedVersion: SemanticVersion,
+    public readonly packageName: DomainName,
+    public readonly requestedVersion: SemanticVersion,
     /**
      * A list of available versions.
      */
-    readonly availableVersions: ReadonlyArray<SemanticVersion>
+    public readonly availableVersions: ReadonlyArray<SemanticVersion>
   ) {
-    super("The requested version was not in the packument.");
+    super();
   }
 }
 
@@ -176,7 +170,7 @@ export function tryResolvePackumentVersion(
   requestedVersion: ResolvableVersion
 ) {
   const availableVersions = recordKeys(packument.versions);
-  if (availableVersions.length === 0) throw new NoVersionsError();
+  if (availableVersions.length === 0) throw new NoVersionsError(packument.name);
 
   // Find the latest version
   if (requestedVersion === undefined || requestedVersion === "latest") {
@@ -187,7 +181,13 @@ export function tryResolvePackumentVersion(
 
   // Find a specific version
   if (!availableVersions.includes(requestedVersion))
-    return Err(new VersionNotFoundError(requestedVersion, availableVersions));
+    return Err(
+      new VersionNotFoundError(
+        packument.name,
+        requestedVersion,
+        availableVersions
+      )
+    );
 
   return Ok(tryGetPackumentVersion(packument, requestedVersion)!);
 }

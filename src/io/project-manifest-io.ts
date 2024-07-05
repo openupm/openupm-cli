@@ -4,8 +4,18 @@ import {
 } from "../domain/project-manifest";
 import path from "path";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
-import { tryParseJson } from "../utils/string-parsing";
-import { FileMissingError, FileParseError } from "./common-errors";
+import { AnyJson } from "@iarna/toml";
+import { CustomError } from "ts-custom-error";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
+
+export class ManifestMissingError extends CustomError {
+  public constructor(public expectedPath: string) {
+    super();
+  }
+}
+
+export class ManifestMalformedError extends CustomError {}
 
 /**
  * Determines the path to the package manifest based on the project
@@ -14,36 +24,6 @@ import { FileMissingError, FileParseError } from "./common-errors";
  */
 export function manifestPathFor(projectPath: string): string {
   return path.join(projectPath, "Packages/manifest.json");
-}
-
-/**
- * Error for when the project manifest is missing.
- */
-export type ProjectManifestMissingError = FileMissingError<"ProjectManifest">;
-
-/**
- * Makes a new {@link ProjectManifestMissingError}.
- * @param filePath The path that was searched.
- */
-export function makeProjectManifestMissingError(
-  filePath: string
-): ProjectManifestMissingError {
-  return new FileMissingError("ProjectManifest", filePath);
-}
-
-/**
- * Error for when the project manifest could not be parsed.
- */
-export type ProjectManifestParseError = FileParseError<"ProjectManifest">;
-
-/**
- * Makes a {@link ProjectManifestParseError} object.
- * @param filePath The path of the file.
- */
-export function makeProjectManifestParseError(
-  filePath: string
-): ProjectManifestParseError {
-  return new FileParseError(filePath, "ProjectManifest");
 }
 
 /**
@@ -59,23 +39,28 @@ export type LoadProjectManifest = (
  * Makes a {@link LoadProjectManifest} function.
  */
 export function makeLoadProjectManifest(
-  readFile: ReadTextFile
+  readFile: ReadTextFile,
+  debugLog: DebugLog
 ): LoadProjectManifest {
-  return (projectPath) => {
+  return async (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
-    return readFile(manifestPath, true)
-      .then((maybeContent) => {
-        if (maybeContent === null)
-          throw makeProjectManifestMissingError(manifestPath);
-        return maybeContent;
-      })
-      .then(tryParseJson)
-      .then((json) => {
-        if (typeof json === "object")
-          // TODO: Actually validate the json structure
-          return json as unknown as UnityProjectManifest;
-        throw makeProjectManifestParseError(manifestPath);
-      });
+
+    const content = await readFile(manifestPath, true);
+    if (content === null) throw new ManifestMissingError(manifestPath);
+
+    let json: AnyJson;
+    try {
+      json = await JSON.parse(content);
+    } catch (error) {
+      assertIsError(error);
+      debugLog("Manifest parse failed because of invalid json content.", error);
+      throw new ManifestMalformedError();
+    }
+
+    // TODO: Actually validate the json structure
+    if (typeof json !== "object") throw new ManifestMalformedError();
+
+    return json as unknown as UnityProjectManifest;
   };
 }
 

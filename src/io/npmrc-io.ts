@@ -3,7 +3,6 @@ import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import path from "path";
 import { GetHomePath } from "./special-paths";
-import { GenericIOError } from "./common-errors";
 
 /**
  * Function for determining the path of the users .npmrc file.
@@ -49,10 +48,6 @@ export type SaveNpmrc = (path: string, npmrc: Npmrc) => Promise<void>;
 export function makeSaveNpmrc(writeFile: WriteTextFile): SaveNpmrc {
   return async (path, npmrc) => {
     const content = npmrc.join(EOL);
-    try {
-      return await writeFile(path, content);
-    } catch {
-      throw new GenericIOError("Write");
-    }
+    return await writeFile(path, content);
   };
 }

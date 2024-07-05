@@ -1,4 +1,3 @@
-import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import {
   tryResolvePackumentVersion,
@@ -6,6 +5,7 @@ import {
 } from "../../src/domain/packument";
 import { RegistryUrl } from "../../src/domain/registry-url";
 import { ResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
+import { AsyncErr } from "../../src/utils/result-utils";
 
 type MockEntry = [RegistryUrl, UnityPackument];
 
@@ -26,7 +26,7 @@ export function mockResolvedPackuments(
         (entry) => entry[0] === registry.url && entry[1].name === name
       );
       if (matchingEntry === undefined)
-        return Err(new PackumentNotFoundError(name)).toAsyncResult();
+        return AsyncErr(new PackumentNotFoundError(name));
 
       const source = matchingEntry[0];
       const packument = matchingEntry[1];

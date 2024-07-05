@@ -7,14 +7,14 @@ import { DomainName } from "./domain/domain-name";
  */
 export class PackumentNotFoundError extends CustomError {
   // noinspection JSUnusedLocalSymbols
-  private readonly _class = "PackumentNotFoundError";
+
   constructor(
     /**
      * The name of the missing package.
      */
     public packageName: DomainName
   ) {
-    super("A packument was not found.");
+    super();
   }
 }
 
@@ -22,13 +22,18 @@ export class PackumentNotFoundError extends CustomError {
  * Error for when OpenUPM was used with an editor-version that is not supported.
  */
 export class EditorVersionNotSupportedError extends CustomError {
-  private readonly _class = "EditorVersionNotSupportedError";
   constructor(
     /**
      * The unsupported version.
      */
     public readonly version: EditorVersion
   ) {
+    super();
+  }
+}
+
+export class MalformedPackumentError extends CustomError {
+  constructor() {
     super();
   }
 }

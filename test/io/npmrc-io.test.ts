@@ -8,8 +8,6 @@ import {
 import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
 import { mockService } from "../services/service.mock";
-import { eaccesError } from "./node-error.mock";
-import { GenericIOError } from "../../src/io/common-errors";
 
 describe("npmrc-io", () => {
   describe("get path", () => {
@@ -71,20 +69,15 @@ describe("npmrc-io", () => {
       return { saveNpmrc, writeFile } as const;
     }
 
-    it("should be ok when write succeeds", async () => {
-      const { saveNpmrc } = makeDependencies();
+    it("should write joined lines", async () => {
+      const { saveNpmrc, writeFile } = makeDependencies();
       const path = "/valid/path/.npmrc";
 
-      await saveNpmrc(path, ["key=value"]);
-    });
+      await saveNpmrc(path, ["key=value", "key2=value2"]);
 
-    it("should fail when write fails", async () => {
-      const { saveNpmrc, writeFile } = makeDependencies();
-      const path = "/invalid/path/.npmrc";
-      writeFile.mockRejectedValue(eaccesError);
-
-      await expect(saveNpmrc(path, ["key=value"])).rejects.toBeInstanceOf(
-        GenericIOError
+      expect(writeFile).toHaveBeenCalledWith(
+        path,
+        `key=value${EOL}key2=value2`
       );
     });
   });

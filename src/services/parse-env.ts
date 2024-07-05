@@ -8,6 +8,16 @@ import { tryGetEnv } from "../utils/env-util";
 import { Registry } from "../domain/registry";
 import { Logger } from "npmlog";
 import { GetCwd } from "../io/special-paths";
+import { CustomError } from "ts-custom-error";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
+
+/**
+ * Error for when auth information for a registry could not be loaded.
+ */
+export class RegistryAuthLoadError extends CustomError {
+  // noinspection JSUnusedLocalSymbols
+}
 
 export type Env = Readonly<{
   cwd: string;
@@ -33,7 +43,8 @@ export function makeParseEnv(
   log: Logger,
   getUpmConfigPath: GetUpmConfigPath,
   loadUpmConfig: LoadUpmConfig,
-  getCwd: GetCwd
+  getCwd: GetCwd,
+  debugLog: DebugLog
 ): ParseEnv {
   function determineCwd(options: CmdOptions): string {
     return options._global.chdir !== undefined
@@ -68,7 +79,7 @@ export function makeParseEnv(
     return { url, auth };
   }
 
-  function determineUpstreamRegistry(options: CmdOptions): Registry {
+  function determineUpstreamRegistry(): Registry {
     const url = makeRegistryUrl("https://packages.unity.com");
 
     return { url, auth: null };
@@ -110,10 +121,18 @@ export function makeParseEnv(
 
     // registries
     const upmConfigPath = await getUpmConfigPath(wsl, systemUser);
-    const upmConfig = await loadUpmConfig(upmConfigPath);
 
-    const registry = determinePrimaryRegistry(options, upmConfig);
-    const upstreamRegistry = determineUpstreamRegistry(options);
+    let registry: Registry;
+    let upstreamRegistry: Registry;
+    try {
+      const upmConfig = await loadUpmConfig(upmConfigPath);
+      registry = determinePrimaryRegistry(options, upmConfig);
+      upstreamRegistry = determineUpstreamRegistry();
+    } catch (error) {
+      assertIsError(error);
+      debugLog("Upmconfig load or parsing failed.", error);
+      throw new RegistryAuthLoadError();
+    }
 
     // cwd
     const cwd = determineCwd(options);

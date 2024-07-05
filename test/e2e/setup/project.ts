@@ -5,12 +5,11 @@ import yaml from "yaml";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { makeWriteProjectManifest } from "../../../src/io/project-manifest-io";
 import { makeWriteText } from "../../../src/io/text-file-io";
-import { noopLogger } from "../../../src/logging";
 import { dropDirectory } from "./directories";
 
 export type ProjectOptions = {};
 
-const writeFile = makeWriteText(noopLogger);
+const writeFile = makeWriteText();
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 
 export async function prepareUnityProject(

@@ -6,6 +6,7 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientGetResult } from "../services/registry-client.mock";
 import { makeFetchPackument } from "../../src/io/packument-io";
+import { noopLogger } from "../../src/logging";
 
 describe("packument io", () => {
   describe("fetch", () => {
@@ -21,7 +22,7 @@ describe("packument io", () => {
         get: jest.fn(),
       };
 
-      const fetchPackument = makeFetchPackument(regClient);
+      const fetchPackument = makeFetchPackument(regClient, noopLogger);
       return { fetchPackument, regClient } as const;
     }
     it("should get existing packument", async () => {

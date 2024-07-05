@@ -33,7 +33,6 @@ import {
   makeGetUpmConfigPath,
   makeLoadUpmConfig,
   makeSaveUpmConfig,
-  RequiredEnvMissingError,
 } from "../io/upm-config-io";
 import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
@@ -50,34 +49,31 @@ import { makeLogin } from "../services/login";
 import { DebugLog } from "../logging";
 import { makeDetermineEditorVersion } from "../services/determine-editor-version";
 import { makeRemovePackages } from "../services/remove-packages";
-import { ChildProcessError, makeRunChildProcess } from "../io/child-process";
+import { makeRunChildProcess } from "../io/child-process";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { makeCheckUrlExists } from "../io/check-url";
-import {
-  GenericIOError,
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
-import { ResultCodes } from "./result-codes";
+import { withErrorLogger } from "./error-logging";
 
 // Composition root
 
 const log = npmlog;
 const debugLog: DebugLog = (message, context) =>
   log.verbose(
-    "openupm-cli",
+    "",
     `${message}${
-      context !== undefined ? ` context: ${JSON.stringify(context)}` : ""
+      context !== undefined
+        ? ` context: ${JSON.stringify(context, null, 2)}`
+        : ""
     }`
   );
 const regClient = new RegClient({ log });
 const getCwd = makeGetCwd();
 const runChildProcess = makeRunChildProcess(debugLog);
-const getHomePath = makeGetHomePath();
-const readFile = makeReadText(debugLog);
-const writeFile = makeWriteText(debugLog);
-const loadProjectManifest = makeLoadProjectManifest(readFile);
+const getHomePath = makeGetHomePath(debugLog);
+const readFile = makeReadText();
+const writeFile = makeWriteText();
+const loadProjectManifest = makeLoadProjectManifest(readFile, debugLog);
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 const getUpmConfigPath = makeGetUpmConfigPath(getHomePath, runChildProcess);
 const loadUpmConfig = makeLoadUpmConfig(readFile);
@@ -85,8 +81,8 @@ const saveUpmConfig = makeSaveUpmConfig(writeFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePath);
 const loadNpmrc = makeLoadNpmrc(readFile);
 const saveNpmrc = makeSaveNpmrc(writeFile);
-const loadProjectVersion = makeLoadProjectVersion(readFile);
-const fetchPackument = makeFetchPackument(regClient);
+const loadProjectVersion = makeLoadProjectVersion(readFile, debugLog);
+const fetchPackument = makeFetchPackument(regClient, debugLog);
 const fetchAllPackuments = makeFetchAllPackuments(debugLog);
 const searchRegistry = makeSearchRegistry(debugLog);
 const removePackages = makeRemovePackages(
@@ -95,7 +91,13 @@ const removePackages = makeRemovePackages(
 );
 const checkUrlExists = makeCheckUrlExists();
 
-const parseEnv = makeParseEnv(log, getUpmConfigPath, loadUpmConfig, getCwd);
+const parseEnv = makeParseEnv(
+  log,
+  getUpmConfigPath,
+  loadUpmConfig,
+  getCwd,
+  debugLog
+);
 const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
 const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLogin(regClient, debugLog);
@@ -116,7 +118,11 @@ const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(
   loadUpmConfig,
   saveUpmConfig
 );
-const searchPackages = makeSearchPackages(searchRegistry, fetchAllPackuments);
+const searchPackages = makeSearchPackages(
+  searchRegistry,
+  fetchAllPackuments,
+  debugLog
+);
 const login = makeLogin(saveAuthToUpmConfig, npmLogin, authNpmrc, debugLog);
 
 const addCmd = makeAddCmd(
@@ -162,34 +168,6 @@ function makeCmdOptions<T extends Record<string, unknown>>(
   return { ...specificOptions, _global: program.opts() };
 }
 
-function withGlobalErrorHandler<
-  TArgs extends unknown[],
-  TOut extends ResultCodes
->(
-  cmd: (...args: TArgs) => Promise<TOut>
-): (...args: TArgs) => Promise<TOut | ResultCodes.Error> {
-  return (...args) =>
-    cmd(...args).catch((error) => {
-      if (error instanceof GenericNetworkError)
-        log.error("", "A http request failed.");
-      else if (error instanceof RegistryAuthenticationError)
-        log.error("", "Failed to authenticate with a package registry.");
-      else if (error instanceof GenericIOError)
-        log.error("", "An interaction with the file-system failed.");
-      else if (error instanceof ChildProcessError)
-        log.error("", "A child process failed.");
-      else if (error instanceof RequiredEnvMissingError) {
-        const keyList = error.keyNames.map((name) => `"${name}"`).join(", ");
-        log.error(
-          "",
-          `One or more required environment variables were not set: ${keyList}`
-        );
-      } else log.error("", "An unknown error occurred.");
-      log.notice("", "Run with --verbose to get more information.");
-      return ResultCodes.Error;
-    });
-}
-
 program
   .command("add")
   .argument(
@@ -214,7 +192,7 @@ openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
   )
   .action(
-    withGlobalErrorHandler(async function (pkg, otherPkgs, options) {
+    withErrorLogger(log, async function (pkg, otherPkgs, options) {
       const pkgs = [pkg].concat(otherPkgs);
       const resultCode = await addCmd(pkgs, makeCmdOptions(options));
       process.exit(resultCode);
@@ -232,15 +210,17 @@ program
   .aliases(["rm", "uninstall"])
   .description("remove package from manifest json")
   .action(
-    withGlobalErrorHandler(async function (
-      packageName,
-      otherPackageNames,
-      options
-    ) {
-      const packageNames = [packageName].concat(otherPackageNames);
-      const resultCode = await removeCmd(packageNames, makeCmdOptions(options));
-      process.exit(resultCode);
-    })
+    withErrorLogger(
+      log,
+      async function (packageName, otherPackageNames, options) {
+        const packageNames = [packageName].concat(otherPackageNames);
+        const resultCode = await removeCmd(
+          packageNames,
+          makeCmdOptions(options)
+        );
+        process.exit(resultCode);
+      }
+    )
   );
 
 program
@@ -249,7 +229,7 @@ program
   .aliases(["s", "se", "find"])
   .description("Search package by keyword")
   .action(
-    withGlobalErrorHandler(async function (keyword, options) {
+    withErrorLogger(log, async function (keyword, options) {
       const resultCode = await searchCmd(keyword, makeCmdOptions(options));
       process.exit(resultCode);
     })
@@ -261,7 +241,7 @@ program
   .aliases(["v", "info", "show"])
   .description("view package information")
   .action(
-    withGlobalErrorHandler(async function (pkg, options) {
+    withErrorLogger(log, async function (pkg, options) {
       const resultCode = await viewCmd(pkg, makeCmdOptions(options));
       process.exit(resultCode);
     })
@@ -278,7 +258,7 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
   )
   .action(
-    withGlobalErrorHandler(async function (pkg, options) {
+    withErrorLogger(log, async function (pkg, options) {
       const resultCode = await depsCmd(pkg, makeCmdOptions(options));
       process.exit(resultCode);
     })
@@ -297,7 +277,7 @@ program
   )
   .description("authenticate with a scoped registry")
   .action(
-    withGlobalErrorHandler(async function (options) {
+    withErrorLogger(log, async function (options) {
       const resultCode = await loginCmd(makeCmdOptions(options));
       process.exit(resultCode);
     })

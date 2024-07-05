@@ -11,7 +11,6 @@ import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
 import { Login } from "../services/login";
 import { ResultCodes } from "./result-codes";
-import { RegistryAuthenticationError } from "../io/common-errors";
 
 /**
  * Options for logging in a user. These come from the CLI.
@@ -64,7 +63,7 @@ export function makeLoginCmd(
 
     const configPath = await getUpmConfigPath(env.wsl, env.systemUser);
 
-    const loginResult = await login(
+    await login(
       username,
       password,
       email,
@@ -72,16 +71,7 @@ export function makeLoginCmd(
       loginRegistry,
       configPath,
       options.basicAuth ? "basic" : "token"
-    ).promise;
-
-    if (loginResult.isErr()) {
-      const loginError = loginResult.error;
-      if (loginError instanceof RegistryAuthenticationError)
-        log.warn("401", "Incorrect username or password");
-
-      // TODO: Log all errors
-      return ResultCodes.Error;
-    }
+    );
 
     log.notice("auth", `you are authenticated as '${username}'`);
     log.notice("config", "saved unity config at " + configPath);

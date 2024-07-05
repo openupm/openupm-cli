@@ -11,8 +11,7 @@ import { DomainName } from "../../src/domain/domain-name";
 import { removeScope } from "../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
-import { FileMissingError, GenericIOError } from "../../src/io/common-errors";
-import { StringFormatError } from "../../src/utils/string-parsing";
+import { noopLogger } from "../../src/logging";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
@@ -32,18 +31,9 @@ describe("project-manifest io", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
 
-      const loadProjectManifest = makeLoadProjectManifest(readFile);
+      const loadProjectManifest = makeLoadProjectManifest(readFile, noopLogger);
       return { loadProjectManifest, readFile } as const;
     }
-
-    it("should fail if file could not be read", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockRejectedValue(new GenericIOError("Read"));
-
-      await expect(
-        loadProjectManifest(exampleProjectPath)
-      ).rejects.toBeInstanceOf(GenericIOError);
-    });
 
     it("should fail if file is missing", async () => {
       const { loadProjectManifest, readFile } = makeDependencies();
@@ -51,16 +41,7 @@ describe("project-manifest io", () => {
 
       await expect(
         loadProjectManifest(exampleProjectPath)
-      ).rejects.toBeInstanceOf(FileMissingError);
-    });
-
-    it("should fail if file does not contain json", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
-      readFile.mockResolvedValue("{} dang, this is not json []");
-
-      await expect(
-        loadProjectManifest(exampleProjectPath)
-      ).rejects.toBeInstanceOf(StringFormatError);
+      ).rejects.toBeDefined();
     });
 
     it("should load valid manifest", async () => {

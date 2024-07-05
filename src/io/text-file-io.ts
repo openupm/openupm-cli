@@ -2,8 +2,6 @@ import fs from "fs/promises";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
 import path from "path";
-import { DebugLog } from "../logging";
-import { GenericIOError } from "./common-errors";
 
 /**
  * Function for loading the content of a text file.
@@ -26,13 +24,12 @@ export type ReadTextFile = {
 /**
  * Makes a {@link ReadTextFile} function.
  */
-export function makeReadText(debugLog: DebugLog): ReadTextFile {
+export function makeReadText(): ReadTextFile {
   return ((path, optional) =>
     fs.readFile(path, { encoding: "utf8" }).catch((error) => {
       assertIsNodeError(error);
-      debugLog("Text file read failed.", error);
       if (optional && error.code === "ENOENT") return null;
-      throw new GenericIOError("Read");
+      throw error;
     })) as ReadTextFile;
 }
 
@@ -50,16 +47,10 @@ export type WriteTextFile = (
 /**
  * Makes a {@link WriteTextFile} function.
  */
-export function makeWriteText(debugLog: DebugLog): WriteTextFile {
+export function makeWriteText(): WriteTextFile {
   return async (filePath, content) => {
     const dirPath = path.dirname(filePath);
-    try {
-      await fse.ensureDir(dirPath);
-      await fs.writeFile(filePath, content);
-    } catch (error) {
-      assertIsNodeError(error);
-      debugLog("Text file write failed.", error);
-      throw new GenericIOError("Write");
-    }
+    await fse.ensureDir(dirPath);
+    await fs.writeFile(filePath, content);
   };
 }

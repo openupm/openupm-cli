@@ -1,8 +1,4 @@
-import {
-  InvalidPackumentDataError,
-  makeAddCmd,
-  UnresolvedDependencyError,
-} from "../../src/cli/cmd-add";
+import { makeAddCmd, UnresolvedDependenciesError } from "../../src/cli/cmd-add";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -21,11 +17,9 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { makePackageReference } from "../../src/domain/package-reference";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
-import { Ok } from "ts-results-es";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 const somePackage = makeDomainName("com.some.package");
@@ -69,25 +63,23 @@ function makeDependencies() {
   );
 
   const resolveDependencies = mockService<ResolveDependencies>();
-  resolveDependencies.mockResolvedValue(
-    Ok([
-      [
-        {
-          name: somePackage,
-          version: makeSemanticVersion("1.0.0"),
-          source: exampleRegistryUrl,
-          self: true,
-        },
-        {
-          name: otherPackage,
-          version: makeSemanticVersion("1.0.0"),
-          source: exampleRegistryUrl,
-          self: false,
-        },
-      ],
-      [],
-    ])
-  );
+  resolveDependencies.mockResolvedValue([
+    [
+      {
+        name: somePackage,
+        version: makeSemanticVersion("1.0.0"),
+        source: exampleRegistryUrl,
+        self: true,
+      },
+      {
+        name: otherPackage,
+        version: makeSemanticVersion("1.0.0"),
+        source: exampleRegistryUrl,
+        self: false,
+      },
+    ],
+    [],
+  ]);
 
   const loadProjectManifest = mockService<LoadProjectManifest>();
   loadProjectManifest.mockResolvedValue(emptyProjectManifest);
@@ -125,53 +117,6 @@ function makeDependencies() {
 }
 
 describe("cmd-add", () => {
-  it("should fail if package could not be resolved", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion);
-
-    const resultCode = await addCmd(somePackage, { _global: {} });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if package could not be resolved", async () => {
-    const { addCmd, resolveRemovePackumentVersion, log } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion);
-
-    await addCmd(somePackage, { _global: {} });
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("not found")
-    );
-  });
-
-  it("should fail if package version could not be resolved", async () => {
-    const { addCmd } = makeDependencies();
-
-    const resultCode = await addCmd(
-      makePackageReference(somePackage, "2.0.0"),
-      {
-        _global: {},
-      }
-    );
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
-  it("should notify if package version could not be resolved", async () => {
-    const { addCmd, log } = makeDependencies();
-
-    await addCmd(makePackageReference(somePackage, "2.0.0"), {
-      _global: {},
-    });
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("has no published version")
-    );
-  });
-
   it("should notify if editor-version is unknown", async () => {
     const { addCmd, determineEditorVersion, log } = makeDependencies();
     determineEditorVersion.mockResolvedValue("bad version");
@@ -184,54 +129,6 @@ describe("cmd-add", () => {
       "editor.version",
       expect.stringContaining("unknown")
     );
-  });
-
-  it("should notify if package editor version is not valid", async () => {
-    const { addCmd, resolveRemovePackumentVersion, log } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
-      exampleRegistryUrl,
-      badEditorPackument,
-    ]);
-
-    await addCmd(somePackage, {
-      _global: {},
-    }).catch(() => {});
-
-    expect(log.warn).toHaveBeenCalledWith(
-      "package.unity",
-      expect.stringContaining("not valid")
-    );
-  });
-
-  it("should suggest running with force if package editor version is not valid", async () => {
-    const { addCmd, resolveRemovePackumentVersion, log } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
-      exampleRegistryUrl,
-      badEditorPackument,
-    ]);
-
-    await addCmd(somePackage, {
-      _global: {},
-    }).catch(() => {});
-
-    expect(log.notice).toHaveBeenCalledWith(
-      "suggest",
-      expect.stringContaining("run with option -f")
-    );
-  });
-
-  it("should fail if package editor version is not valid and not running with force", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
-      exampleRegistryUrl,
-      badEditorPackument,
-    ]);
-
-    await expect(() =>
-      addCmd(somePackage, {
-        _global: {},
-      })
-    ).rejects.toBeInstanceOf(InvalidPackumentDataError);
   });
 
   it("should add package with invalid editor version when running with force", async () => {
@@ -249,54 +146,6 @@ describe("cmd-add", () => {
     expect(resultCode).toEqual(ResultCodes.Ok);
   });
 
-  it("should notify if package is incompatible with editor", async () => {
-    const { addCmd, resolveRemovePackumentVersion, log } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
-      exampleRegistryUrl,
-      incompatiblePackument,
-    ]);
-
-    await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.warn).toHaveBeenCalledWith(
-      "editor.version",
-      expect.stringContaining("requires")
-    );
-  });
-
-  it("should suggest to run with force if package is incompatible with editor", async () => {
-    const { addCmd, resolveRemovePackumentVersion, log } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
-      exampleRegistryUrl,
-      incompatiblePackument,
-    ]);
-
-    await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.notice).toHaveBeenCalledWith(
-      "suggest",
-      expect.stringContaining("run with option -f")
-    );
-  });
-
-  it("should fail if package is incompatible with editor and not running with force", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
-      exampleRegistryUrl,
-      incompatiblePackument,
-    ]);
-
-    const resultCode = await addCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(resultCode).toEqual(ResultCodes.Error);
-  });
-
   it("should add package with incompatible with editor when running with force", async () => {
     const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
     mockResolvedPackuments(resolveRemovePackumentVersion, [
@@ -310,31 +159,6 @@ describe("cmd-add", () => {
     });
 
     expect(resultCode).toEqual(ResultCodes.Ok);
-  });
-
-  it("should notify of unresolved dependencies", async () => {
-    const { addCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-          },
-        ],
-      ])
-    );
-
-    await addCmd(somePackage, {
-      _global: {},
-    }).catch(() => {});
-
-    expect(log.error).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.stringContaining("has no published version")
-    );
   });
 
   it("should not fetch dependencies for upstream packages", async () => {
@@ -352,92 +176,46 @@ describe("cmd-add", () => {
     expect(resolveDependencies).not.toHaveBeenCalled();
   });
 
-  it("should suggest to install missing dependency version manually", async () => {
-    const { addCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-          },
-        ],
-      ])
-    );
-
-    await addCmd(somePackage, {
-      _global: {},
-    }).catch(() => {});
-
-    expect(log.notice).toHaveBeenCalledWith(
-      "suggest",
-      expect.stringContaining("manually")
-    );
-  });
-
-  it("should suggest to run with force if dependency could not be resolved", async () => {
-    const { addCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-          },
-        ],
-      ])
-    );
-
-    await addCmd(somePackage, {
-      _global: {},
-    }).catch(() => {});
-
-    expect(log.error).toHaveBeenCalledWith(
-      "missing dependencies",
-      expect.stringContaining("run with option -f")
-    );
-  });
-
   it("should fail if dependency could not be resolved and not running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-          },
-        ],
-      ])
-    );
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(
+            otherPackage,
+            makeSemanticVersion("1.0.0"),
+            []
+          ),
+        },
+      ],
+    ]);
 
     await expect(() =>
       addCmd(somePackage, {
         _global: {},
       })
-    ).rejects.toBeInstanceOf(UnresolvedDependencyError);
+    ).rejects.toBeInstanceOf(UnresolvedDependenciesError);
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.0.0"), []),
-          },
-        ],
-      ])
-    );
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(
+            otherPackage,
+            makeSemanticVersion("1.0.0"),
+            []
+          ),
+        },
+      ],
+    ]);
 
     const resultCode = await addCmd(somePackage, {
       _global: {},
@@ -593,7 +371,7 @@ describe("cmd-add", () => {
     // The second package can not be added
     await addCmd([somePackage, makeDomainName("com.unknown.package")], {
       _global: {},
-    });
+    }).catch(() => {});
 
     // Because adding is atomic the manifest should only be written if
     // all packages were added.

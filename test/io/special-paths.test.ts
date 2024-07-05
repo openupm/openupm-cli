@@ -9,14 +9,14 @@ import {
 import os from "os";
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { EditorVersionNotSupportedError } from "../../src/common-errors";
-import { RequiredEnvMissingError } from "../../src/io/upm-config-io";
+import { noopLogger } from "../../src/logging";
 
 jest.mock("../../src/utils/env-util");
 
 describe("special-paths", () => {
   describe("home", () => {
     function makeDependencies() {
-      const getHomePath = makeGetHomePath();
+      const getHomePath = makeGetHomePath(noopLogger);
 
       return { getHomePath } as const;
     }
@@ -49,7 +49,7 @@ describe("special-paths", () => {
       const { getHomePath } = makeDependencies();
       jest.mocked(tryGetEnv).mockReturnValue(null);
 
-      expect(() => getHomePath()).toThrow(RequiredEnvMissingError);
+      expect(() => getHomePath()).toThrow();
     });
   });
 

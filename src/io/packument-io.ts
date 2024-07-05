@@ -3,10 +3,8 @@ import { assertIsHttpError } from "../utils/error-type-guards";
 import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "./common-errors";
+import { RegistryAuthenticationError } from "./common-errors";
+import { DebugLog } from "../logging";
 
 /**
  * Function for fetching a packument from a registry.
@@ -23,7 +21,8 @@ export type FetchPackument = (
  * Makes a {@link FetchPackument} function.
  */
 export function makeFetchPackument(
-  registryClient: RegClient.Instance
+  registryClient: RegClient.Instance,
+  debugLog: DebugLog
 ): FetchPackument {
   return (registry, name) => {
     const url = `${registry.url}/${name}`;
@@ -33,13 +32,14 @@ export function makeFetchPackument(
         { auth: registry.auth || undefined },
         (error, packument) => {
           if (error !== null) {
+            debugLog("Fetching a packument failed.", error);
             assertIsHttpError(error);
             if (error.statusCode === 404) resolve(null);
             else
               reject(
                 error.statusCode === 401
-                  ? new RegistryAuthenticationError()
-                  : new GenericNetworkError()
+                  ? new RegistryAuthenticationError(registry.url)
+                  : error
               );
           } else resolve(packument);
         }

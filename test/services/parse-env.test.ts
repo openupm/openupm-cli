@@ -7,6 +7,7 @@ import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import path from "path";
+import { noopLogger } from "../../src/logging";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -38,7 +39,13 @@ function makeDependencies() {
   const getCwd = mockService<GetCwd>();
   getCwd.mockReturnValue(testRootPath);
 
-  const parseEnv = makeParseEnv(log, getUpmConfigPath, loadUpmConfig, getCwd);
+  const parseEnv = makeParseEnv(
+    log,
+    getUpmConfigPath,
+    loadUpmConfig,
+    getCwd,
+    noopLogger
+  );
   return {
     parseEnv,
     log,

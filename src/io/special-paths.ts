@@ -1,5 +1,4 @@
 import { Err, Ok, Result } from "ts-results-es";
-import { RequiredEnvMissingError } from "./upm-config-io";
 import os from "os";
 import { CustomError } from "ts-custom-error";
 import {
@@ -11,12 +10,12 @@ import {
 } from "../domain/editor-version";
 import { EditorVersionNotSupportedError } from "../common-errors";
 import { tryGetEnv } from "../utils/env-util";
+import { DebugLog } from "../logging";
 
 /**
  * Error for when a specific OS does not support a specific editor-version.
  */
 export class VersionNotSupportedOnOsError extends CustomError {
-  private readonly _class = "VersionNotSupportedOnOsError";
   constructor(
     /**
      * The version that is not supported.
@@ -35,7 +34,6 @@ export class VersionNotSupportedOnOsError extends CustomError {
  * Error for when Unity does not support an OS.
  */
 export class OSNotSupportedError extends CustomError {
-  private readonly _class = "OSNotSupportedError";
   constructor(
     /**
      * Name of the unsupported OS.
@@ -52,14 +50,15 @@ export class OSNotSupportedError extends CustomError {
  */
 export type GetHomePath = () => string;
 
+export class NoHomePathError extends CustomError {}
+
 /**
  * Makes a {@link GetHomePath} function.
  */
-export function makeGetHomePath(): GetHomePath {
+export function makeGetHomePath(debugLog: DebugLog): GetHomePath {
   return () => {
     const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-    if (homePath === null)
-      throw new RequiredEnvMissingError(["USERPROFILE", "HOME"]);
+    if (homePath === null) throw new NoHomePathError();
     return homePath;
   };
 }

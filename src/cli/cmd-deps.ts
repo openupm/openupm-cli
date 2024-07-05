@@ -14,7 +14,6 @@ import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import { notifyPackumentVersionResolvingFailed } from "./error-logging";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -64,18 +63,12 @@ export function makeDepsCmd(
 
     const deep = options.deep || false;
     debugLog(`fetch: ${makePackageReference(name, version)}, deep=${deep}`);
-    const resolveResult = await resolveDependencies(
+    const [depsValid, depsInvalid] = await resolveDependencies(
       [env.registry, env.upstreamRegistry],
       name,
       version,
       deep
     );
-    if (resolveResult.isErr()) {
-      notifyPackumentVersionResolvingFailed(log, name, resolveResult.error);
-      return ResultCodes.Error;
-    }
-
-    const [depsValid, depsInvalid] = resolveResult.value;
 
     depsValid.forEach((dependency) => logValidDependency(debugLog, dependency));
     depsValid

@@ -1,13 +1,12 @@
 import fs from "fs/promises";
 import { makeReadText, makeWriteText } from "../../src/io/text-file-io";
 import fse from "fs-extra";
-import { noopLogger } from "../../src/logging";
 import { makeNodeError } from "./node-error.mock";
 
 describe("text file io", () => {
   describe("read text", () => {
     function makeDependencies() {
-      const readFile = makeReadText(noopLogger);
+      const readFile = makeReadText();
 
       return { readFile } as const;
     }
@@ -54,7 +53,7 @@ describe("text file io", () => {
 
   describe("write text", () => {
     function makeDependencies() {
-      const writeFile = makeWriteText(noopLogger);
+      const writeFile = makeWriteText();
 
       return { writeFile } as const;
     }

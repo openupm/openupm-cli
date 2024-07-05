@@ -31,14 +31,14 @@ describe("npm-login service", () => {
       null
     );
 
-    const result = await addUser(
+    const actual = await addUser(
       exampleRegistryUrl,
       "valid-user",
       "valid@user.com",
       "valid-password"
-    ).promise;
+    );
 
-    expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+    expect(actual).toEqual(expected);
   });
 
   it("should fail for not-ok response", async () => {
@@ -55,16 +55,9 @@ describe("npm-login service", () => {
       }
     );
 
-    const result = await addUser(
-      exampleRegistryUrl,
-      "bad-user",
-      "bad@user.com",
-      "bad-password"
-    ).promise;
-
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(RegistryAuthenticationError)
-    );
+    await expect(
+      addUser(exampleRegistryUrl, "bad-user", "bad@user.com", "bad-password")
+    ).rejects.toBeInstanceOf(RegistryAuthenticationError);
   });
 
   it("should fail for error response", async () => {
@@ -79,15 +72,8 @@ describe("npm-login service", () => {
       }
     );
 
-    const result = await addUser(
-      exampleRegistryUrl,
-      "bad-user",
-      "bad@user.com",
-      "bad-password"
-    ).promise;
-
-    expect(result).toBeError((error) =>
-      expect(error).toBeInstanceOf(RegistryAuthenticationError)
-    );
+    await expect(
+      addUser(exampleRegistryUrl, "bad-user", "bad@user.com", "bad-password")
+    ).rejects.toBeInstanceOf(RegistryAuthenticationError);
   });
 });

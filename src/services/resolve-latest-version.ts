@@ -26,7 +26,11 @@ export function makeResolveLatestVersion(
   ): Promise<SemanticVersion | null> {
     const packument = await fetchPackument(source, packageName);
     if (packument === null) return null;
-    return tryResolvePackumentVersion(packument, "latest").unwrap().version;
+
+    const resolveResult = tryResolvePackumentVersion(packument, "latest");
+    if (resolveResult.isErr()) throw resolveResult.error;
+
+    return resolveResult.value.version;
   }
 
   return (sources, packageName) => {

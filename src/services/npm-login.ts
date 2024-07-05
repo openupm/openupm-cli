@@ -1,16 +1,7 @@
 import RegClient from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
-import { AsyncResult, Err, Ok } from "ts-results-es";
-import {
-  GenericNetworkError,
-  RegistryAuthenticationError,
-} from "../io/common-errors";
+import { RegistryAuthenticationError } from "../io/common-errors";
 import { DebugLog } from "../logging";
-
-/**
- * Error which may occur when logging a user into a npm registry.
- */
-export type NpmLoginError = RegistryAuthenticationError;
 
 /**
  * A token authenticating a user.
@@ -30,7 +21,7 @@ export type NpmLogin = (
   username: string,
   email: string,
   password: string
-) => AsyncResult<AuthenticationToken, NpmLoginError>;
+) => Promise<AuthenticationToken>;
 
 /**
  * Makes a new {@link NpmLogin} function.
@@ -39,24 +30,21 @@ export function makeNpmLogin(
   registryClient: RegClient.Instance,
   debugLog: DebugLog
 ): NpmLogin {
-  return (registryUrl, username, email, password) => {
-    return new AsyncResult(
-      new Promise((resolve, reject) => {
-        registryClient.adduser(
-          registryUrl,
-          { auth: { username, email, password } },
-          (error, responseData, _, response) => {
-            if (response !== undefined && !responseData.ok) {
-              debugLog("A http request failed.", response);
-              if (response.statusCode === 401)
-                resolve(Err(new RegistryAuthenticationError()));
-              else reject(new GenericNetworkError());
-            } else if (responseData.ok) resolve(Ok(responseData.token));
-
-            // TODO: Handle error
-          }
-        );
-      })
-    );
-  };
+  return (registryUrl, username, email, password) =>
+    new Promise((resolve, reject) => {
+      registryClient.adduser(
+        registryUrl,
+        { auth: { username, email, password } },
+        (error, responseData, _, response) => {
+          if (response !== undefined && !responseData.ok) {
+            debugLog(
+              "Npm registry login failed because of not-ok response.",
+              response
+            );
+            reject(new RegistryAuthenticationError(registryUrl));
+          } else if (responseData.ok) resolve(responseData.token);
+          reject(error);
+        }
+      );
+    });
 }

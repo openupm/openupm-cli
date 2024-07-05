@@ -1,6 +1,5 @@
 import { makeDepsCmd } from "../../src/cli/cmd-deps";
 import { Env, ParseEnv } from "../../src/services/parse-env";
-import { Ok } from "ts-results-es";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { makeDomainName } from "../../src/domain/domain-name";
@@ -27,25 +26,23 @@ function makeDependencies() {
   parseEnv.mockResolvedValue(defaultEnv);
 
   const resolveDependencies = mockService<ResolveDependencies>();
-  resolveDependencies.mockResolvedValue(
-    Ok([
-      [
-        {
-          source: exampleRegistryUrl,
-          self: true,
-          name: somePackage,
-          version: makeSemanticVersion("1.2.3"),
-        },
-        {
-          source: exampleRegistryUrl,
-          self: false,
-          name: otherPackage,
-          version: makeSemanticVersion("1.2.3"),
-        },
-      ],
-      [],
-    ])
-  );
+  resolveDependencies.mockResolvedValue([
+    [
+      {
+        source: exampleRegistryUrl,
+        self: true,
+        name: somePackage,
+        version: makeSemanticVersion("1.2.3"),
+      },
+      {
+        source: exampleRegistryUrl,
+        self: false,
+        name: otherPackage,
+        version: makeSemanticVersion("1.2.3"),
+      },
+    ],
+    [],
+  ]);
 
   const log = makeMockLogger();
 
@@ -98,18 +95,16 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new PackumentNotFoundError(otherPackage),
-          },
-        ],
-      ])
-    );
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new PackumentNotFoundError(otherPackage),
+        },
+      ],
+    ]);
 
     await depsCmd(somePackage, {
       _global: {},
@@ -123,18 +118,20 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency version", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue(
-      Ok([
-        [],
-        [
-          {
-            name: otherPackage,
-            self: false,
-            reason: new VersionNotFoundError(makeSemanticVersion("1.2.3"), []),
-          },
-        ],
-      ])
-    );
+    resolveDependencies.mockResolvedValue([
+      [],
+      [
+        {
+          name: otherPackage,
+          self: false,
+          reason: new VersionNotFoundError(
+            otherPackage,
+            makeSemanticVersion("1.2.3"),
+            []
+          ),
+        },
+      ],
+    ]);
 
     await depsCmd(somePackage, {
       _global: {},

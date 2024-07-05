@@ -1,7 +1,6 @@
 import { makeNodeError } from "./node-error.mock";
 import fs from "fs/promises";
 import { tryGetDirectoriesIn } from "../../src/io/directory-io";
-import { noopLogger } from "../../src/logging";
 import { Dirent } from "node:fs";
 
 describe("directory io", () => {
@@ -10,9 +9,9 @@ describe("directory io", () => {
       const expected = makeNodeError("EACCES");
       jest.spyOn(fs, "readdir").mockRejectedValue(expected);
 
-      await expect(
-        tryGetDirectoriesIn("/good/path/", noopLogger)
-      ).rejects.toEqual(expected);
+      await expect(tryGetDirectoriesIn("/good/path/")).rejects.toEqual(
+        expected
+      );
     });
 
     it("should get names of directories", async () => {
@@ -23,7 +22,7 @@ describe("directory io", () => {
           { name: "b", isDirectory: () => true } as Dirent,
         ]);
 
-      const actual = await tryGetDirectoriesIn("/good/path/", noopLogger);
+      const actual = await tryGetDirectoriesIn("/good/path/");
 
       expect(actual).toEqual(["a", "b"]);
     });
@@ -36,7 +35,7 @@ describe("directory io", () => {
           { name: "b.txt", isDirectory: () => false } as Dirent,
         ]);
 
-      const actual = await tryGetDirectoriesIn("/good/path/", noopLogger);
+      const actual = await tryGetDirectoriesIn("/good/path/");
 
       expect(actual).toEqual(["a"]);
     });

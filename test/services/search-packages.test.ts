@@ -9,7 +9,7 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
-import { GenericNetworkError } from "../../src/io/common-errors";
+import { noopLogger } from "../../src/logging";
 
 describe("search packages", () => {
   const exampleRegistry: Registry = {
@@ -41,7 +41,8 @@ describe("search packages", () => {
 
     const searchPackages = makeSearchPackages(
       searchRegistry,
-      fetchAllPackument
+      fetchAllPackument,
+      noopLogger
     );
     return { searchPackages, searchRegistry, fetchAllPackument } as const;
   }
@@ -65,7 +66,7 @@ describe("search packages", () => {
 
   it("should search using old search if search api is not available", async () => {
     const { searchPackages, searchRegistry } = makeDependencies();
-    searchRegistry.mockRejectedValue(new GenericNetworkError());
+    searchRegistry.mockRejectedValue(new Error());
 
     const actual = await searchPackages(exampleRegistry, exampleKeyword);
 
@@ -74,7 +75,7 @@ describe("search packages", () => {
 
   it("should notify of using old search", async () => {
     const { searchPackages, searchRegistry } = makeDependencies();
-    searchRegistry.mockRejectedValue(new GenericNetworkError());
+    searchRegistry.mockRejectedValue(new Error());
 
     const fallback = jest.fn();
     await searchPackages(exampleRegistry, exampleKeyword, fallback);
@@ -84,7 +85,7 @@ describe("search packages", () => {
 
   it("should not find packages not matching the keyword using old search", async () => {
     const { searchPackages, searchRegistry } = makeDependencies();
-    searchRegistry.mockRejectedValue(new GenericNetworkError());
+    searchRegistry.mockRejectedValue(new Error());
 
     const actual = await searchPackages(exampleRegistry, "some other keyword");
 
