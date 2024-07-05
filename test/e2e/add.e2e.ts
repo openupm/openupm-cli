@@ -207,9 +207,7 @@ describe("add packages", () => {
     expect(output.stdOut).toEqual([]);
     expect(output.stdErr).toEqual(
       expect.arrayContaining([
-        expect.stringContaining(
-          `The package "does.not.exist" was not found in any of the provided registries.`
-        ),
+        expect.stringContaining(`Package "does.not.exist" could not be found.`),
       ])
     );
   });
@@ -230,7 +228,7 @@ describe("add packages", () => {
     expect(output.stdErr).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          `The package "dev.comradevanti.opt-unity" has no published version "100.1.1".`
+          `Can not add "dev.comradevanti.opt-unity" because version 100.1.1 could not be found in any registry.`
         ),
       ])
     );
