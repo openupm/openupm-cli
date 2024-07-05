@@ -136,10 +136,10 @@ export function withErrorLogger<
 >(
   log: Logger,
   cmd: (...args: TArgs) => Promise<TOut>
-): (...args: TArgs) => Promise<TOut | ResultCodes.Error> {
+): (...args: TArgs) => Promise<TOut> {
   return (...args) =>
     cmd(...args).catch((error) => {
       logError(log, error);
-      return ResultCodes.Error;
+      process.exit(ResultCodes.Error);
     });
 }
