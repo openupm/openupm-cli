@@ -13,7 +13,6 @@ import { Registry } from "../domain/registry";
 import { ResolveRemotePackumentVersion } from "./resolve-remote-packument-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { dependenciesOf } from "../domain/package-manifest";
-import { ResolveLatestVersion } from "./resolve-latest-version";
 import { Err, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import { CheckIsBuiltInPackage } from "./built-in-package-check";
@@ -64,7 +63,7 @@ type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 export type ResolveDependencies = (
   sources: ReadonlyArray<Registry>,
   name: DomainName,
-  version: SemanticVersion | "latest" | undefined,
+  version: SemanticVersion,
   deep: boolean
 ) => Promise<[ValidDependency[], InvalidDependency[]]>;
 
@@ -73,23 +72,13 @@ export type ResolveDependencies = (
  */
 export function makeResolveDependency(
   resolveRemovePackumentVersion: ResolveRemotePackumentVersion,
-  resolveLatestVersion: ResolveLatestVersion,
   checkIsBuiltInPackage: CheckIsBuiltInPackage
 ): ResolveDependencies {
   // TODO: Add tests for this service
 
   return async (sources, name, version, deep) => {
-    const latestVersion =
-      version === undefined || version === "latest"
-        ? await resolveLatestVersion(sources, name).then(
-            (it) => it?.value || null
-          )
-        : version;
-
-    if (latestVersion == null) throw new PackumentNotFoundError(name);
-
     // a list of pending dependency {name, version}
-    const pendingList = Array.of<NameVersionPair>([name, latestVersion]);
+    const pendingList = Array.of<NameVersionPair>([name, version]);
     // a list of processed dependency {name, version}
     const processedList = Array.of<NameVersionPair>();
     // a list of dependency entry exists on the registry

@@ -177,7 +177,7 @@ export function makeAddCmd(
           const [depsValid, depsInvalid] = await resolveDependencies(
             [env.registry, env.upstreamRegistry],
             name,
-            requestedVersion,
+            versionToAdd,
             true
           );
 

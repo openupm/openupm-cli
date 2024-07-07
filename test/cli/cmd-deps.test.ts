@@ -12,6 +12,7 @@ import { mockService } from "../services/service.mock";
 import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
+import { ResolveLatestVersion } from "../../src/services/resolve-latest-version";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -44,10 +45,28 @@ function makeDependencies() {
     [],
   ]);
 
+  const resolveLatestVersion = mockService<ResolveLatestVersion>();
+  resolveLatestVersion.mockResolvedValue({
+    source: exampleRegistryUrl,
+    value: makeSemanticVersion("1.2.3"),
+  });
+
   const log = makeMockLogger();
 
-  const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, noopLogger);
-  return { depsCmd, parseEnv, resolveDependencies, log } as const;
+  const depsCmd = makeDepsCmd(
+    parseEnv,
+    resolveDependencies,
+    resolveLatestVersion,
+    log,
+    noopLogger
+  );
+  return {
+    depsCmd,
+    parseEnv,
+    resolveDependencies,
+    resolveLatestVersion,
+    log,
+  } as const;
 }
 
 describe("cmd-deps", () => {
@@ -62,6 +81,17 @@ describe("cmd-deps", () => {
     );
 
     expect(resultCode).toEqual(ResultCodes.Error);
+  });
+
+  it("should fail if latest version could not be r esolved", async () => {
+    const { depsCmd, resolveLatestVersion } = makeDependencies();
+    resolveLatestVersion.mockResolvedValue(null);
+
+    await expect(
+      depsCmd(somePackage, {
+        _global: {},
+      })
+    ).rejects.toBeInstanceOf(PackumentNotFoundError);
   });
 
   it("should notify if package-reference has url-version", async () => {
