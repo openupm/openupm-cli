@@ -14,6 +14,8 @@ import { logValidDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
+import { ResolveLatestVersion } from "../services/resolve-latest-version";
+import { isSemanticVersion } from "../domain/semantic-version";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -47,26 +49,37 @@ function errorPrefixForError(error: ResolvePackumentVersionError): string {
 export function makeDepsCmd(
   parseEnv: ParseEnv,
   resolveDependencies: ResolveDependencies,
+  resolveLatestVersion: ResolveLatestVersion,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
     const env = await parseEnv(options);
+    const sources = [env.registry, env.upstreamRegistry];
 
-    const [name, version] = splitPackageReference(pkg);
+    const [packageName, requestedVersion] = splitPackageReference(pkg);
 
-    if (version !== undefined && isPackageUrl(version)) {
+    if (requestedVersion !== undefined && isPackageUrl(requestedVersion)) {
       log.error("", "cannot get dependencies for url-version");
       return ResultCodes.Error;
     }
 
+    const latestVersion =
+      requestedVersion !== undefined && isSemanticVersion(requestedVersion)
+        ? requestedVersion
+        : (await resolveLatestVersion(sources, packageName))?.value ?? null;
+
+    if (latestVersion === null) throw new PackumentNotFoundError(packageName);
+
     const deep = options.deep || false;
-    debugLog(`fetch: ${makePackageReference(name, version)}, deep=${deep}`);
+    debugLog(
+      `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
+    );
     const [depsValid, depsInvalid] = await resolveDependencies(
-      [env.registry, env.upstreamRegistry],
-      name,
-      version,
+      sources,
+      packageName,
+      latestVersion,
       deep
     );
 

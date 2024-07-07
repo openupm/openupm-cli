@@ -111,7 +111,6 @@ const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
 );
 const resolveDependencies = makeResolveDependency(
   resolveRemovePackumentVersion,
-  resolveLatestVersion,
   checkIsBuiltInPackage
 );
 const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(
@@ -137,7 +136,13 @@ const addCmd = makeAddCmd(
 );
 const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
 const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, debugLog);
-const depsCmd = makeDepsCmd(parseEnv, resolveDependencies, log, debugLog);
+const depsCmd = makeDepsCmd(
+  parseEnv,
+  resolveDependencies,
+  resolveLatestVersion,
+  log,
+  debugLog
+);
 const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
 const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
 
