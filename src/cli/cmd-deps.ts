@@ -16,6 +16,7 @@ import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
 import { isSemanticVersion } from "../domain/semantic-version";
+import { recordEntries } from "../utils/record-utils";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -76,25 +77,33 @@ export function makeDepsCmd(
     debugLog(
       `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
     );
-    const [depsValid, depsInvalid] = await resolveDependencies(
+    const dependencyGraph = await resolveDependencies(
       sources,
       packageName,
       latestVersion,
       deep
     );
 
-    depsValid.forEach((dependency) => logValidDependency(debugLog, dependency));
-    depsValid
-      .filter((x) => !x.self)
-      .forEach((x) =>
-        log.notice("dependency", `${makePackageReference(x.name, x.version)}`)
-      );
-    depsInvalid
-      .filter((x) => !x.self)
-      .forEach((x) => {
-        const prefix = errorPrefixForError(x.reason);
-        log.warn(prefix, x.name);
-      });
+    recordEntries(dependencyGraph).forEach(([dependencyName, versions]) =>
+      recordEntries(versions).forEach(([dependencyVersion, dependency]) => {
+        if (!dependency.resolved) {
+          if (dependencyName !== packageName) {
+            const prefix = errorPrefixForError(dependency.error);
+            log.warn(prefix, dependencyName);
+          }
+          return;
+        }
+        const dependencyRef = makePackageReference(
+          dependencyName,
+          dependencyVersion
+        );
+        logValidDependency(debugLog, dependencyRef, dependency.source);
+
+        if (dependencyName === packageName) return;
+
+        log.notice("dependency", `${dependencyRef}`);
+      })
+    );
 
     return ResultCodes.Ok;
   };

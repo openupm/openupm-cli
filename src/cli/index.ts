@@ -110,7 +110,7 @@ const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
   fetchPackument
 );
 const resolveDependencies = makeResolveDependency(
-  resolveRemovePackumentVersion,
+  fetchPackument,
   checkIsBuiltInPackage
 );
 const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(

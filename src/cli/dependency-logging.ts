@@ -1,6 +1,5 @@
-import { ValidDependency } from "../services/dependency-resolving";
-import { makePackageReference } from "../domain/package-reference";
-import { unityRegistryUrl } from "../domain/registry-url";
+import { PackageReference } from "../domain/package-reference";
+import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import { DebugLog } from "../logging";
 
 /**
@@ -8,13 +7,13 @@ import { DebugLog } from "../logging";
  */
 export function logValidDependency(
   debugLog: DebugLog,
-  dependency: ValidDependency
+  packageRef: PackageReference,
+  source: RegistryUrl | "built-in"
 ) {
-  const packageRef = makePackageReference(dependency.name, dependency.version);
   const tag =
-    dependency.source === "built-in"
+    source === "built-in"
       ? "[internal] "
-      : dependency.source === unityRegistryUrl
+      : source === unityRegistryUrl
       ? "[upstream]"
       : "";
   const message = `${packageRef} ${tag}`;

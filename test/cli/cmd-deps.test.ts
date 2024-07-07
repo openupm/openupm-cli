@@ -9,10 +9,10 @@ import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
-import { VersionNotFoundError } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { ResolveLatestVersion } from "../../src/services/resolve-latest-version";
+import { VersionNotFoundError } from "../../src/domain/packument";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -27,23 +27,22 @@ function makeDependencies() {
   parseEnv.mockResolvedValue(defaultEnv);
 
   const resolveDependencies = mockService<ResolveDependencies>();
-  resolveDependencies.mockResolvedValue([
-    [
-      {
+  resolveDependencies.mockResolvedValue({
+    [somePackage]: {
+      [makeSemanticVersion("1.2.3")]: {
+        resolved: true,
         source: exampleRegistryUrl,
-        self: true,
-        name: somePackage,
-        version: makeSemanticVersion("1.2.3"),
+        dependencies: { [otherPackage]: makeSemanticVersion("1.2.3") },
       },
-      {
+    },
+    [otherPackage]: {
+      [makeSemanticVersion("1.2.3")]: {
+        resolved: true,
         source: exampleRegistryUrl,
-        self: false,
-        name: otherPackage,
-        version: makeSemanticVersion("1.2.3"),
+        dependencies: {},
       },
-    ],
-    [],
-  ]);
+    },
+  });
 
   const resolveLatestVersion = mockService<ResolveLatestVersion>();
   resolveLatestVersion.mockResolvedValue({
@@ -125,16 +124,14 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new PackumentNotFoundError(otherPackage),
+    resolveDependencies.mockResolvedValue({
+      [otherPackage]: {
+        [makeSemanticVersion("1.2.3")]: {
+          resolved: false,
+          error: new PackumentNotFoundError(otherPackage),
         },
-      ],
-    ]);
+      },
+    });
 
     await depsCmd(somePackage, {
       _global: {},
@@ -148,20 +145,18 @@ describe("cmd-deps", () => {
 
   it("should log missing dependency version", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
-    resolveDependencies.mockResolvedValue([
-      [],
-      [
-        {
-          name: otherPackage,
-          self: false,
-          reason: new VersionNotFoundError(
+    resolveDependencies.mockResolvedValue({
+      [otherPackage]: {
+        [makeSemanticVersion("1.2.3")]: {
+          resolved: false,
+          error: new VersionNotFoundError(
             otherPackage,
             makeSemanticVersion("1.2.3"),
             []
           ),
         },
-      ],
-    ]);
+      },
+    });
 
     await depsCmd(somePackage, {
       _global: {},
