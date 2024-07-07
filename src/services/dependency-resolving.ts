@@ -1,54 +1,19 @@
 import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
-import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { Registry } from "../domain/registry";
 import { CheckIsBuiltInPackage } from "./built-in-package-check";
-import { RegistryUrl } from "../domain/registry-url";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
 import { PackumentNotFoundError } from "../common-errors";
 import { recordEntries } from "../utils/record-utils";
+import {
+  DependencyGraph,
+  emptyDependencyGraph,
+  graphHasNodeAt,
+  setGraphNode,
+} from "../domain/dependency-graph";
 
 type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
-
-type ResolvedNode = Readonly<{
-  resolved: true;
-  source: RegistryUrl | "built-in";
-  dependencies: Readonly<Record<DomainName, SemanticVersion>>;
-}>;
-
-type UnresolvedNode = Readonly<{
-  resolved: false;
-  error: ResolvePackumentVersionError;
-}>;
-
-type GraphNode = ResolvedNode | UnresolvedNode;
-
-type DependencyGraph = Readonly<
-  Record<DomainName, Readonly<Record<SemanticVersion, GraphNode>>>
->;
-
-const emptyGraph: DependencyGraph = {};
-
-function setGraphNode(
-  graph: DependencyGraph,
-  packageName: DomainName,
-  version: SemanticVersion,
-  node: GraphNode
-): DependencyGraph {
-  return {
-    ...graph,
-    [packageName]: { ...graph[packageName], [version]: node },
-  };
-}
-
-function graphHasNode(
-  graph: DependencyGraph,
-  packageName: DomainName,
-  version: SemanticVersion
-): boolean {
-  return graph[packageName]?.[version] !== undefined;
-}
 
 /**
  * Function for resolving all dependencies for a package.
@@ -80,7 +45,7 @@ export function makeResolveDependency(
     if (packagesToCheck.length === 0) return graph;
 
     const [packageName, version] = packagesToCheck[0]!;
-    if (graphHasNode(graph, packageName, version))
+    if (graphHasNodeAt(graph, packageName, version))
       return await resolveRecursively(
         graph,
         sources,
@@ -132,5 +97,5 @@ export function makeResolveDependency(
   }
 
   return (sources, packageName, version, deep) =>
-    resolveRecursively(emptyGraph, sources, [[packageName, version]], deep);
+    resolveRecursively(emptyDependencyGraph, sources, [[packageName, version]], deep);
 }
