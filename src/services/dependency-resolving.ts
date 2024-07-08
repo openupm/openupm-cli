@@ -83,7 +83,7 @@ export function makeResolveDependency(
       if (!deep) return updatedGraph;
 
       return await resolveRecursively(
-        graph,
+        updatedGraph,
         sources,
         [...packagesToCheck.slice(1), ...recordEntries(dependencies)],
         deep
