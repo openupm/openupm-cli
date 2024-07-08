@@ -101,7 +101,7 @@ export function makeDepsCmd(
 
         if (dependencyName === packageName) return;
 
-        log.notice("dependency", `${dependencyRef}`);
+        log.notice("dependency", dependencyRef);
       }
     );
 
