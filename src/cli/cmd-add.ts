@@ -37,7 +37,7 @@ import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
 import { logError } from "./error-logging";
-import { recordEntries } from "../utils/record-utils";
+import { flattenDependencyGraph } from "../domain/dependency-graph";
 
 export class PackageIncompatibleError extends CustomError {
   constructor(
@@ -183,33 +183,31 @@ export function makeAddCmd(
           );
 
           let isAnyDependencyUnresolved = false;
-          recordEntries(dependencyGraph).forEach(([dependencyName, versions]) =>
-            recordEntries(versions).forEach(
-              ([dependencyVersion, dependency]) => {
-                if (!dependency.resolved) {
-                  logError(log, dependency.error);
-                  // If the manifest already has the dependency than it does not
-                  // really matter that it was not resolved.
-                  if (!hasDependency(manifest, dependencyName))
-                    isAnyDependencyUnresolved = true;
-                  return;
-                }
-
-                const dependencyRef = makePackageReference(
-                  dependencyName,
-                  dependencyVersion
-                );
-                logValidDependency(debugLog, dependencyRef, dependency.source);
-
-                const isUnityPackage =
-                  dependency.source === "built-in" ||
-                  dependency.source === unityRegistryUrl;
-                if (isUnityPackage) return;
-
-                // add depsValid to pkgsInScope.
-                pkgsInScope.push(dependencyName);
+          flattenDependencyGraph(dependencyGraph).forEach(
+            ([dependencyName, dependencyVersion, dependency]) => {
+              if (!dependency.resolved) {
+                logError(log, dependency.error);
+                // If the manifest already has the dependency than it does not
+                // really matter that it was not resolved.
+                if (!hasDependency(manifest, dependencyName))
+                  isAnyDependencyUnresolved = true;
+                return;
               }
-            )
+
+              const dependencyRef = makePackageReference(
+                dependencyName,
+                dependencyVersion
+              );
+              logValidDependency(debugLog, dependencyRef, dependency.source);
+
+              const isUnityPackage =
+                dependency.source === "built-in" ||
+                dependency.source === unityRegistryUrl;
+              if (isUnityPackage) return;
+
+              // add depsValid to pkgsInScope.
+              pkgsInScope.push(dependencyName);
+            }
           );
 
           // print suggestion for depsInvalid

@@ -16,7 +16,7 @@ import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
 import { isSemanticVersion } from "../domain/semantic-version";
-import { recordEntries } from "../utils/record-utils";
+import { flattenDependencyGraph } from "../domain/dependency-graph";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -84,8 +84,8 @@ export function makeDepsCmd(
       deep
     );
 
-    recordEntries(dependencyGraph).forEach(([dependencyName, versions]) =>
-      recordEntries(versions).forEach(([dependencyVersion, dependency]) => {
+    flattenDependencyGraph(dependencyGraph).forEach(
+      ([dependencyName, dependencyVersion, dependency]) => {
         if (!dependency.resolved) {
           if (dependencyName !== packageName) {
             const prefix = errorPrefixForError(dependency.error);
@@ -102,7 +102,7 @@ export function makeDepsCmd(
         if (dependencyName === packageName) return;
 
         log.notice("dependency", `${dependencyRef}`);
-      })
+      }
     );
 
     return ResultCodes.Ok;

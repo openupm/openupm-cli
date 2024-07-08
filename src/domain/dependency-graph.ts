@@ -2,6 +2,7 @@ import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { RegistryUrl } from "./registry-url";
+import { recordEntries } from "../utils/record-utils";
 
 type ResolvedNode = Readonly<{
   resolved: true;
@@ -76,4 +77,20 @@ export function graphHasNodeAt(
   version: SemanticVersion
 ): boolean {
   return graph[packageName]?.[version] !== undefined;
+}
+
+/**
+ * Flattens a dependency tree down into a linear array of entries.
+ * @param graph The graph to flatten.
+ * @returns All nodes in the graph in a linear array.
+ */
+export function flattenDependencyGraph(
+  graph: DependencyGraph
+): ReadonlyArray<readonly [DomainName, SemanticVersion, GraphNode]> {
+  return recordEntries(graph).flatMap(([dependencyName, versions]) =>
+    recordEntries(versions).map(
+      ([dependencyVersion, dependency]) =>
+        [dependencyName, dependencyVersion, dependency] as const
+    )
+  );
 }
