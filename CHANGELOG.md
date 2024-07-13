@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/openupm/openupm-cli/compare/3.3.0...3.3.1) (2024-07-09)
+
+
+### Bug Fixes
+
+* 371 error cannot find module node fetch ([#372](https://github.com/openupm/openupm-cli/issues/372)) ([430a434](https://github.com/openupm/openupm-cli/commit/430a43401a0f45de9810d7db67427708a71ea573))
+
 # [3.3.0](https://github.com/openupm/openupm-cli/compare/3.2.0...3.3.0) (2024-07-05)
 
 
