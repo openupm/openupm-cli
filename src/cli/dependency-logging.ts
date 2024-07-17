@@ -3,9 +3,9 @@ import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import { DebugLog } from "../logging";
 
 /**
- * Logs information about a valid dependency to a logger.
+ * Logs information about a resolved dependency to a logger.
  */
-export function logValidDependency(
+export function logResolvedDependency(
   debugLog: DebugLog,
   packageRef: PackageReference,
   source: RegistryUrl | "built-in"

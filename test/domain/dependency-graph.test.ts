@@ -1,107 +1,181 @@
-import {
-  emptyDependencyGraph,
-  flattenDependencyGraph,
-  graphHasNodeAt,
-  setGraphNode,
-} from "../../src/domain/dependency-graph";
 import { makeDomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import {
+  graphNodeCount,
+  makeGraphFromSeed,
+  markBuiltInResolved,
+  markFailed,
+  markRemoteResolved,
+  NodeType,
+  traverseDependencyGraph,
+  tryGetGraphNode,
+  tryGetNextUnresolved,
+} from "../../src/domain/dependency-graph";
 import { exampleRegistryUrl } from "./data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 
 describe("dependency graph", () => {
-  // TODO: Maybe add some property-based tests
-
   const somePackage = makeDomainName("com.some.package");
   const otherPackage = makeDomainName("com.other.package");
+  const anotherPackage = makeDomainName("com.another.package");
   const someVersion = makeSemanticVersion("1.0.0");
 
-  describe("set node", () => {
-    it("should add new node", () => {
-      const initial = emptyDependencyGraph;
-      const node = {
-        resolved: true,
-        source: exampleRegistryUrl,
-        dependencies: {},
-      } as const;
-
-      const withNode = setGraphNode(initial, somePackage, someVersion, node);
-
-      expect(withNode).toEqual({ [somePackage]: { [someVersion]: node } });
-    });
-
-    it("should overwrite node", () => {
-      const initial = setGraphNode(
-        emptyDependencyGraph,
+  describe("traverse", () => {
+    it("should output all nodes", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+      graph = markRemoteResolved(
+        graph,
         somePackage,
         someVersion,
-        {
-          resolved: false,
-          error: new PackumentNotFoundError(somePackage),
-        }
+        exampleRegistryUrl,
+        { [otherPackage]: someVersion, [anotherPackage]: someVersion }
       );
-      const node = {
-        resolved: true,
-        source: exampleRegistryUrl,
-        dependencies: {},
-      } as const;
 
-      const withNode = setGraphNode(initial, somePackage, someVersion, node);
+      const entries = [...traverseDependencyGraph(graph)];
 
-      expect(withNode).toEqual({ [somePackage]: { [someVersion]: node } });
+      expect(entries).toEqual(
+        expect.arrayContaining([
+          [
+            somePackage,
+            someVersion,
+            expect.objectContaining({ type: NodeType.Resolved }),
+          ],
+          [otherPackage, someVersion, { type: NodeType.Unresolved }],
+          [anotherPackage, someVersion, { type: NodeType.Unresolved }],
+        ])
+      );
     });
   });
 
-  describe("has node", () => {
-    it("should be false if node was not added", () => {
-      const actual = graphHasNodeAt(
-        emptyDependencyGraph,
-        somePackage,
-        someVersion
-      );
+  describe("make from seed", () => {
+    it("should have unresolved initial node", () => {
+      const graph = makeGraphFromSeed(somePackage, someVersion);
 
-      expect(actual).toBeFalsy();
+      const node = tryGetGraphNode(graph, somePackage, someVersion);
+      expect(node).toEqual({ type: NodeType.Unresolved });
     });
 
-    it("should be true if node was added", () => {
-      const initial = setGraphNode(
-        emptyDependencyGraph,
-        somePackage,
-        someVersion,
-        {
-          resolved: false,
-          error: new PackumentNotFoundError(somePackage),
-        }
-      );
+    it("should have 1 node", () => {
+      const graph = makeGraphFromSeed(somePackage, someVersion);
 
-      const actual = graphHasNodeAt(initial, somePackage, someVersion);
-
-      expect(actual).toBeTruthy();
+      const nodeCount = graphNodeCount(graph);
+      expect(nodeCount).toEqual(1);
     });
   });
 
-  describe("flatten", () => {
-    it("should flatten down correctly", () => {
-      const someNode = {
-        resolved: true,
+  describe("get unresolved", () => {
+    it("should get unresolved node", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+      graph = markRemoteResolved(
+        graph,
+        somePackage,
+        someVersion,
+        exampleRegistryUrl,
+        { [otherPackage]: someVersion }
+      );
+
+      const unresolved = tryGetNextUnresolved(graph);
+      expect(unresolved).toEqual([otherPackage, someVersion]);
+    });
+
+    it("should get null if all are resolved", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+      graph = markBuiltInResolved(graph, somePackage, someVersion);
+
+      const unresolved = tryGetNextUnresolved(graph);
+      expect(unresolved).toEqual(null);
+    });
+  });
+
+  describe("mark built-in resolved", () => {
+    it("should mark the given package as resolved", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+
+      graph = markBuiltInResolved(graph, somePackage, someVersion);
+
+      const node = tryGetGraphNode(graph, somePackage, someVersion);
+      expect(node).toEqual({
+        type: NodeType.Resolved,
+        source: "built-in",
+        dependencies: {},
+      });
+    });
+  });
+
+  describe("mark remote resolved", () => {
+    it("should mark the given package as resolved", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+
+      graph = markRemoteResolved(
+        graph,
+        somePackage,
+        someVersion,
+        exampleRegistryUrl,
+        {}
+      );
+
+      const node = tryGetGraphNode(graph, somePackage, someVersion);
+      expect(node).toEqual({
+        type: NodeType.Resolved,
         source: exampleRegistryUrl,
-        dependencies: { [otherPackage]: someVersion },
-      } as const;
-      const otherNode = {
-        resolved: false,
-        error: new PackumentNotFoundError(otherPackage),
-      } as const;
+        dependencies: {},
+      });
+    });
 
-      let graph = emptyDependencyGraph;
-      graph = setGraphNode(graph, somePackage, someVersion, someNode);
-      graph = setGraphNode(graph, otherPackage, someVersion, otherNode);
+    it("should mark dependencies as unresolved", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
 
-      const actual = flattenDependencyGraph(graph);
+      graph = markRemoteResolved(
+        graph,
+        somePackage,
+        someVersion,
+        exampleRegistryUrl,
+        { [otherPackage]: someVersion }
+      );
 
-      expect(actual).toEqual([
-        [somePackage, someVersion, someNode],
-        [otherPackage, someVersion, otherNode],
-      ]);
+      const node = tryGetGraphNode(graph, otherPackage, someVersion);
+      expect(node).toEqual({
+        type: NodeType.Unresolved,
+      });
+    });
+
+    it("should not mark already resolved dependencies as unresolved", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+
+      graph = markRemoteResolved(
+        graph,
+        somePackage,
+        someVersion,
+        exampleRegistryUrl,
+        { [otherPackage]: someVersion, [anotherPackage]: someVersion }
+      );
+      graph = markBuiltInResolved(graph, anotherPackage, someVersion);
+      graph = markRemoteResolved(
+        graph,
+        otherPackage,
+        someVersion,
+        exampleRegistryUrl,
+        // anotherPackage is already resolved and should not be marked as unresolved
+        { [anotherPackage]: someVersion }
+      );
+
+      const node = tryGetGraphNode(graph, anotherPackage, someVersion);
+      expect(node?.type).toEqual(NodeType.Resolved);
+    });
+  });
+
+  describe("mark failed", () => {
+    it("should mark the given package as failed", () => {
+      let graph = makeGraphFromSeed(somePackage, someVersion);
+
+      const error = new PackumentNotFoundError(somePackage);
+      graph = markFailed(graph, somePackage, someVersion, error);
+
+      const node = tryGetGraphNode(graph, somePackage, someVersion);
+      expect(node).toEqual({
+        type: NodeType.Failed,
+        error,
+      });
     });
   });
 });

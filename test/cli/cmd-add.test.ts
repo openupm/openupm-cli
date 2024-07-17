@@ -22,16 +22,18 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
-import {
-  UnityPackumentVersion,
-  VersionNotFoundError,
-} from "../../src/domain/packument";
+import { UnityPackumentVersion } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { ResolvedPackumentVersion } from "../../src/packument-version-resolving";
+import {
+  makeGraphFromSeed,
+  markFailed,
+  markRemoteResolved,
+} from "../../src/domain/dependency-graph";
 
 const somePackage = makeDomainName("com.some.package");
 const otherPackage = makeDomainName("com.other.package");
@@ -61,6 +63,8 @@ const defaultEnv = {
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
 } as Env;
 
+const someVersion = makeSemanticVersion("1.0.0");
+
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(defaultEnv);
@@ -74,22 +78,22 @@ function makeDependencies() {
   );
 
   const resolveDependencies = mockService<ResolveDependencies>();
-  resolveDependencies.mockResolvedValue({
-    [somePackage]: {
-      [makeSemanticVersion("1.0.0")]: {
-        resolved: true,
-        source: exampleRegistryUrl,
-        dependencies: { [otherPackage]: makeSemanticVersion("1.0.0") },
-      },
-    },
-    [otherPackage]: {
-      [makeSemanticVersion("1.0.0")]: {
-        resolved: true,
-        source: exampleRegistryUrl,
-        dependencies: {},
-      },
-    },
-  });
+  let defaultGraph = makeGraphFromSeed(somePackage, someVersion);
+  defaultGraph = markRemoteResolved(
+    defaultGraph,
+    somePackage,
+    someVersion,
+    exampleRegistryUrl,
+    { [otherPackage]: someVersion }
+  );
+  defaultGraph = markRemoteResolved(
+    defaultGraph,
+    otherPackage,
+    someVersion,
+    exampleRegistryUrl,
+    {}
+  );
+  resolveDependencies.mockResolvedValue(defaultGraph);
 
   const loadProjectManifest = mockService<LoadProjectManifest>();
   loadProjectManifest.mockResolvedValue(emptyProjectManifest);
@@ -219,7 +223,7 @@ describe("cmd-add", () => {
       AsyncOk({
         packumentVersion: {
           name: somePackage,
-          version: makeSemanticVersion("1.0.0"),
+          version: someVersion,
           unity: "bad vesion",
         } as unknown as UnityPackumentVersion,
       } as unknown as ResolvedPackumentVersion)
@@ -234,18 +238,14 @@ describe("cmd-add", () => {
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
-    resolveDependencies.mockResolvedValue({
-      [otherPackage]: {
-        [makeSemanticVersion("1.0.0")]: {
-          resolved: false,
-          error: new VersionNotFoundError(
-            otherPackage,
-            makeSemanticVersion("1.0.0"),
-            []
-          ),
-        },
-      },
-    });
+    let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
+    failedGraph = markFailed(
+      failedGraph,
+      otherPackage,
+      someVersion,
+      new PackumentNotFoundError(otherPackage)
+    );
+    resolveDependencies.mockResolvedValue(failedGraph);
 
     await expect(() =>
       addCmd(somePackage, {
@@ -256,18 +256,14 @@ describe("cmd-add", () => {
 
   it("should add package with unresolved dependency when running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
-    resolveDependencies.mockResolvedValue({
-      [otherPackage]: {
-        [makeSemanticVersion("1.0.0")]: {
-          resolved: false,
-          error: new VersionNotFoundError(
-            otherPackage,
-            makeSemanticVersion("1.0.0"),
-            []
-          ),
-        },
-      },
-    });
+    let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
+    failedGraph = markFailed(
+      failedGraph,
+      otherPackage,
+      someVersion,
+      new PackumentNotFoundError(otherPackage)
+    );
+    resolveDependencies.mockResolvedValue(failedGraph);
 
     const resultCode = await addCmd(somePackage, {
       _global: {},

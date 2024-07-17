@@ -5,15 +5,14 @@ import { CheckIsBuiltInPackage } from "./built-in-package-check";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
 import { PackumentNotFoundError } from "../common-errors";
-import { recordEntries } from "../utils/record-utils";
 import {
   DependencyGraph,
-  emptyDependencyGraph,
-  graphHasNodeAt,
-  setGraphNode,
+  makeGraphFromSeed,
+  markBuiltInResolved,
+  markFailed,
+  markRemoteResolved,
+  tryGetNextUnresolved,
 } from "../domain/dependency-graph";
-
-type NameVersionPair = Readonly<[DomainName, SemanticVersion]>;
 
 /**
  * Function for resolving all dependencies for a package.
@@ -39,27 +38,18 @@ export function makeResolveDependency(
   async function resolveRecursively(
     graph: DependencyGraph,
     sources: ReadonlyArray<Registry>,
-    packagesToCheck: ReadonlyArray<NameVersionPair>,
     deep: boolean
   ): Promise<DependencyGraph> {
-    if (packagesToCheck.length === 0) return graph;
+    const nextUnresolved = tryGetNextUnresolved(graph);
+    if (nextUnresolved === null) return graph;
 
-    const [packageName, version] = packagesToCheck[0]!;
-    if (graphHasNodeAt(graph, packageName, version))
-      return await resolveRecursively(
-        graph,
-        sources,
-        packagesToCheck.slice(1),
-        deep
-      );
+    const [packageName, version] = nextUnresolved;
 
     const isBuiltIn = await checkIsBuiltInPackage(packageName, version);
-    if (isBuiltIn)
-      return setGraphNode(graph, packageName, version, {
-        resolved: true,
-        source: "built-in",
-        dependencies: {},
-      });
+    if (isBuiltIn) {
+      graph = markBuiltInResolved(graph, packageName, version);
+      return graph;
+    }
 
     for (const source of sources) {
       const packument = await fetchPackument(source, packageName);
@@ -69,33 +59,37 @@ export function makeResolveDependency(
         packument,
         version
       );
-      if (packumentVersionResult.isErr())
-        return setGraphNode(graph, packageName, version, {
-          resolved: false,
-          error: packumentVersionResult.error,
-        });
-      const dependencies = packumentVersionResult.value.dependencies ?? {};
-      const updatedGraph = setGraphNode(graph, packageName, version, {
-        resolved: true,
-        source: source.url,
-        dependencies,
-      });
-      if (!deep) return updatedGraph;
+      if (packumentVersionResult.isErr()) {
+        graph = markFailed(
+          graph,
+          packageName,
+          version,
+          packumentVersionResult.error
+        );
+        return graph;
+      }
 
-      return await resolveRecursively(
-        updatedGraph,
-        sources,
-        [...packagesToCheck.slice(1), ...recordEntries(dependencies)],
-        deep
+      const dependencies = packumentVersionResult.value.dependencies ?? {};
+      graph = markRemoteResolved(
+        graph,
+        packageName,
+        version,
+        source.url,
+        dependencies
       );
+      if (!deep) return graph;
+
+      return await resolveRecursively(graph, sources, deep);
     }
 
-    return setGraphNode(graph, packageName, version, {
-      resolved: false,
-      error: new PackumentNotFoundError(packageName),
-    });
+    return markFailed(
+      graph,
+      packageName,
+      version,
+      new PackumentNotFoundError(packageName)
+    );
   }
 
   return (sources, packageName, version, deep) =>
-    resolveRecursively(emptyDependencyGraph, sources, [[packageName, version]], deep);
+    resolveRecursively(makeGraphFromSeed(packageName, version), sources, deep);
 }
