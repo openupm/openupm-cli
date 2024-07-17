@@ -282,6 +282,8 @@ describe("add packages", () => {
       [
         {
           packageName: "jp.keijiro.metamesh",
+          addVersion: "1.2.0",
+          expectedVersion: "1.2.0",
         },
       ],
       ["jp.keijiro.metamesh"],
