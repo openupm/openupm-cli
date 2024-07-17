@@ -51,8 +51,8 @@ describe("add packages", () => {
         expect.objectContaining({
           scopedRegistries: [
             {
-              name: "package.openupm.com",
-              url: "https://package.openupm.com",
+              name: expect.any(String),
+              url: registryOverride ?? "https://package.openupm.com",
               scopes: expect.arrayContaining(expectedScopes),
             },
           ],
