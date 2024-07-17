@@ -10,12 +10,13 @@ import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
-import { logValidDependency } from "./dependency-logging";
+import { logResolvedDependency } from "./dependency-logging";
 import { VersionNotFoundError } from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
 import { isSemanticVersion } from "../domain/semantic-version";
+import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
@@ -76,25 +77,37 @@ export function makeDepsCmd(
     debugLog(
       `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
     );
-    const [depsValid, depsInvalid] = await resolveDependencies(
+    const dependencyGraph = await resolveDependencies(
       sources,
       packageName,
       latestVersion,
       deep
     );
 
-    depsValid.forEach((dependency) => logValidDependency(debugLog, dependency));
-    depsValid
-      .filter((x) => !x.self)
-      .forEach((x) =>
-        log.notice("dependency", `${makePackageReference(x.name, x.version)}`)
+    for (const [
+      dependencyName,
+      dependencyVersion,
+      dependency,
+    ] of traverseDependencyGraph(dependencyGraph)) {
+      if (dependency.type === NodeType.Failed) {
+        if (dependencyName !== packageName) {
+          const prefix = errorPrefixForError(dependency.error);
+          log.warn(prefix, dependencyName);
+        }
+        continue;
+      }
+      const dependencyRef = makePackageReference(
+        dependencyName,
+        dependencyVersion
       );
-    depsInvalid
-      .filter((x) => !x.self)
-      .forEach((x) => {
-        const prefix = errorPrefixForError(x.reason);
-        log.warn(prefix, x.name);
-      });
+
+      if (dependency.type === NodeType.Resolved)
+        logResolvedDependency(debugLog, dependencyRef, dependency.source);
+
+      if (dependencyName === packageName) continue;
+
+      log.notice("dependency", dependencyRef);
+    }
 
     return ResultCodes.Ok;
   };

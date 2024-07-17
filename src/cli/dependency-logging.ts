@@ -1,20 +1,19 @@
-import { ValidDependency } from "../services/dependency-resolving";
-import { makePackageReference } from "../domain/package-reference";
-import { unityRegistryUrl } from "../domain/registry-url";
+import { PackageReference } from "../domain/package-reference";
+import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import { DebugLog } from "../logging";
 
 /**
- * Logs information about a valid dependency to a logger.
+ * Logs information about a resolved dependency to a logger.
  */
-export function logValidDependency(
+export function logResolvedDependency(
   debugLog: DebugLog,
-  dependency: ValidDependency
+  packageRef: PackageReference,
+  source: RegistryUrl | "built-in"
 ) {
-  const packageRef = makePackageReference(dependency.name, dependency.version);
   const tag =
-    dependency.source === "built-in"
+    source === "built-in"
       ? "[internal] "
-      : dependency.source === unityRegistryUrl
+      : source === unityRegistryUrl
       ? "[upstream]"
       : "";
   const message = `${packageRef} ${tag}`;
