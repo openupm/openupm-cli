@@ -23,7 +23,6 @@ import {
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { CmdOptions } from "./options";
-import { pickMostFixable } from "../packument-version-resolving";
 import { SemanticVersion } from "../domain/semantic-version";
 import { areArraysEqual } from "../utils/array-utils";
 import { CustomError } from "ts-custom-error";
@@ -38,6 +37,9 @@ import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
 import { logError } from "./error-logging";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
+import { Err } from "ts-results-es";
+import { PackumentNotFoundError } from "../common-errors";
+import { ResolvePackumentVersionError } from "../packument-version-resolving";
 
 export class PackageIncompatibleError extends CustomError {
   constructor(
@@ -79,6 +81,24 @@ type AddCmd = (
   pkgs: PackageReference | PackageReference[],
   options: AddOptions
 ) => Promise<AddResultCode>;
+
+function pickMostFixable(
+  a: Err<ResolvePackumentVersionError>,
+  b: Err<ResolvePackumentVersionError>
+): Err<ResolvePackumentVersionError> {
+  // Anything is more fixable than packument-not-found
+  if (
+    a.error instanceof PackumentNotFoundError &&
+    !(b.error instanceof PackumentNotFoundError)
+  )
+    return b;
+  else if (
+    b.error instanceof PackumentNotFoundError &&
+    !(a.error instanceof PackumentNotFoundError)
+  )
+    return a;
+  return a;
+}
 
 /**
  * Makes a {@link AddCmd} function.
