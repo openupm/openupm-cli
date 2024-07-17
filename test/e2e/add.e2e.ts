@@ -4,17 +4,19 @@ import { prepareUnityProject } from "./setup/project";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { getProjectManifest } from "./check/project-manifest";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
+import { makeRegistryUrl, RegistryUrl } from "../../src/domain/registry-url";
 
 describe("add packages", () => {
   type SuccessfullAddCase = {
     packageName: string;
     addVersion?: string;
-    expectedVersion: string;
+    expectedVersion?: string;
   };
 
   async function testSuccessfulAdd(
     cases: SuccessfullAddCase[],
-    expectedScopes: string[]
+    expectedScopes: string[],
+    registryOverride?: RegistryUrl
   ) {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
@@ -24,14 +26,23 @@ describe("add packages", () => {
         ? `${it.packageName}@${it.addVersion}`
         : it.packageName
     );
-    const output = await runOpenupm(projectDir, ["add", ...pkgRefs]);
+    const output = await runOpenupm(projectDir, [
+      "add",
+      ...pkgRefs,
+      ...(registryOverride !== undefined
+        ? [`--registry=${registryOverride}`]
+        : []),
+    ]);
     const projectManifest = await getProjectManifest(projectDir);
 
     expect(output.code).toEqual(ResultCodes.Ok);
     expect(projectManifest).toEqual(
       expect.objectContaining({
         dependencies: Object.fromEntries(
-          cases.map((it) => [it.packageName, it.expectedVersion])
+          cases.map((it) => [
+            it.packageName,
+            it.expectedVersion ?? expect.any(String),
+          ])
         ),
       })
     );
@@ -262,6 +273,19 @@ describe("add packages", () => {
         },
       ],
       ["org.khronos.unitygltf"]
+    );
+  });
+
+  it("should add package from upstream if no matching version was found in primary registry", async () => {
+    // See https://github.com/openupm/openupm-cli/issues/41
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "jp.keijiro.metamesh",
+        },
+      ],
+      ["jp.keijiro.metamesh"],
+      makeRegistryUrl("https://registry.npmjs.com")
     );
   });
 });
