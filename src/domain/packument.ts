@@ -6,7 +6,8 @@ import { Dist, Maintainer } from "@npm/types";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
 import { recordKeys } from "../utils/record-utils";
-import { ResolvableVersion } from "../packument-version-resolving";
+
+import { ResolvableVersion } from "./package-reference";
 
 /**
  * Contains information about a specific version of a package. This is based on

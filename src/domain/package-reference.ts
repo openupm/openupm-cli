@@ -22,6 +22,14 @@ export type VersionReference = SemanticVersion | PackageUrl | PackageTag;
 export type ReferenceWithVersion = `${DomainName}@${VersionReference}`;
 
 /**
+ * A version-reference that is resolvable.
+ * Mostly this excludes {@link PackageUrl}s.
+ */
+export type ResolvableVersion =
+  | Exclude<VersionReference, PackageUrl>
+  | undefined;
+
+/**
  * References a package. Could be just the name or a reference to a specific
  * version. Not as specific as a {@link PackageId} as other version-formats
  * besides semantic versions, such as "latest" are also allowed.

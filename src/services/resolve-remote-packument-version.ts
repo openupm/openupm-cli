@@ -1,10 +1,7 @@
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 import { AsyncResult, Err } from "ts-results-es";
-import {
-  ResolvableVersion,
-  ResolvePackumentVersionError,
-} from "../packument-version-resolving";
+import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   tryResolvePackumentVersion,
@@ -14,6 +11,7 @@ import {
 import { FetchPackument } from "../io/packument-io";
 import { resultifyAsyncOp } from "../utils/result-utils";
 import { RegistryUrl } from "../domain/registry-url";
+import { ResolvableVersion } from "../domain/package-reference";
 
 /**
  * A successfully resolved packument-version.
