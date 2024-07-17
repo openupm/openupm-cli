@@ -1,15 +1,12 @@
 import { VersionReference } from "./domain/package-reference";
-import { DomainName } from "./domain/domain-name";
 import {
-  tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
   VersionNotFoundError,
 } from "./domain/packument";
 import { PackageUrl } from "./domain/package-url";
-import { PackumentCache, tryGetFromCache } from "./packument-cache";
 import { RegistryUrl } from "./domain/registry-url";
-import { Err, Result } from "ts-results-es";
+import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
 
 /**
@@ -44,32 +41,6 @@ export interface ResolvedPackumentVersion {
 export type ResolvePackumentVersionError =
   | PackumentNotFoundError
   | VersionNotFoundError;
-
-/**
- * Attempts to resolve a packument-version from the cache.
- * @param cache The cache to search.
- * @param source The source from which to resolve.
- * @param packumentName The name of the packument to resolve.
- * @param requestedVersion The requested version.
- */
-export function tryResolveFromCache(
-  cache: PackumentCache,
-  source: RegistryUrl,
-  packumentName: DomainName,
-  requestedVersion: ResolvableVersion
-): Result<ResolvedPackumentVersion, ResolvePackumentVersionError> {
-  const cachedPackument = tryGetFromCache(cache, source, packumentName);
-  if (cachedPackument === null)
-    return Err(new PackumentNotFoundError(packumentName));
-
-  return tryResolvePackumentVersion(cachedPackument, requestedVersion).map(
-    (packumentVersion) => ({
-      packument: cachedPackument,
-      packumentVersion,
-      source,
-    })
-  );
-}
 
 /**
  * Compares two resolve-failures to check which is more fixable.
