@@ -82,12 +82,13 @@ export function makeResolveDependency(
       return await resolveRecursively(graph, sources, deep);
     }
 
-    return markFailed(
+    graph = markFailed(
       graph,
       packageName,
       version,
       new PackumentNotFoundError(packageName)
     );
+    return graph;
   }
 
   return (sources, packageName, version, deep) =>
