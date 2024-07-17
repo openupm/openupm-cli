@@ -1,12 +1,7 @@
-import {VersionReference} from "./domain/package-reference";
-import {
-  UnityPackument,
-  UnityPackumentVersion,
-  VersionNotFoundError,
-} from "./domain/packument";
-import {PackageUrl} from "./domain/package-url";
-import {RegistryUrl} from "./domain/registry-url";
-import {PackumentNotFoundError} from "./common-errors";
+import { VersionReference } from "./domain/package-reference";
+import { VersionNotFoundError } from "./domain/packument";
+import { PackageUrl } from "./domain/package-url";
+import { PackumentNotFoundError } from "./common-errors";
 
 /**
  * A version-reference that is resolvable.
@@ -17,27 +12,8 @@ export type ResolvableVersion =
   | undefined;
 
 /**
- * A successfully resolved packument-version.
- */
-export interface ResolvedPackumentVersion {
-  /**
-   * The packument from which the version was resolved.
-   */
-  readonly packument: UnityPackument;
-  /**
-   * The resolved packument-version.
-   */
-  readonly packumentVersion: UnityPackumentVersion;
-  /**
-   * The source from which the packument was resolved.
-   */
-  readonly source: RegistryUrl;
-}
-
-/**
  * A failed attempt at resolving a packument-version.
  */
 export type ResolvePackumentVersionError =
   | PackumentNotFoundError
   | VersionNotFoundError;
-
