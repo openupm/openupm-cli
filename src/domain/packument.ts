@@ -8,6 +8,7 @@ import { Err, Ok, Result } from "ts-results-es";
 import { recordKeys } from "../utils/record-utils";
 
 import { ResolvableVersion } from "./package-reference";
+import { PackumentNotFoundError } from "../common-errors";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -148,6 +149,13 @@ export class VersionNotFoundError extends CustomError {
     super();
   }
 }
+
+/**
+ * A failed attempt at resolving a packument-version.
+ */
+export type ResolvePackumentVersionError =
+  | PackumentNotFoundError
+  | VersionNotFoundError;
 
 /**
  * Attempts to resolve a specific version from a packument. Resolve here means

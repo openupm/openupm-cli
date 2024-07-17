@@ -39,7 +39,8 @@ import { logError } from "./error-logging";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
-import { ResolvePackumentVersionError } from "../packument-version-resolving";
+
+import { ResolvePackumentVersionError } from "../domain/packument";
 
 export class PackageIncompatibleError extends CustomError {
   constructor(

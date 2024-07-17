@@ -1,9 +1,9 @@
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 import { AsyncResult, Err } from "ts-results-es";
-import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import {
+  ResolvePackumentVersionError,
   tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
