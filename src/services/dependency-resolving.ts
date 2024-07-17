@@ -2,7 +2,10 @@ import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { Registry } from "../domain/registry";
 import { CheckIsBuiltInPackage } from "./built-in-package-check";
-import { tryResolvePackumentVersion } from "../domain/packument";
+import {
+  ResolvePackumentVersionError,
+  tryResolvePackumentVersion,
+} from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
 import { PackumentNotFoundError } from "../common-errors";
 import {
@@ -51,6 +54,8 @@ export function makeResolveDependency(
       return graph;
     }
 
+    let mostFixableError: ResolvePackumentVersionError =
+      new PackumentNotFoundError(packageName);
     for (const source of sources) {
       const packument = await fetchPackument(source, packageName);
       if (packument === null) continue;
@@ -60,13 +65,8 @@ export function makeResolveDependency(
         version
       );
       if (packumentVersionResult.isErr()) {
-        graph = markFailed(
-          graph,
-          packageName,
-          version,
-          packumentVersionResult.error
-        );
-        return graph;
+        mostFixableError = packumentVersionResult.error;
+        continue;
       }
 
       const dependencies = packumentVersionResult.value.dependencies ?? {};
@@ -82,12 +82,7 @@ export function makeResolveDependency(
       return await resolveRecursively(graph, sources, deep);
     }
 
-    graph = markFailed(
-      graph,
-      packageName,
-      version,
-      new PackumentNotFoundError(packageName)
-    );
+    graph = markFailed(graph, packageName, version, mostFixableError);
     return graph;
   }
 
