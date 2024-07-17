@@ -6,12 +6,14 @@ import {
   splitPackageReference,
 } from "../domain/package-reference";
 import { CmdOptions } from "./options";
-import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { logResolvedDependency } from "./dependency-logging";
-import { VersionNotFoundError } from "../domain/packument";
+import {
+  ResolvePackumentVersionError,
+  VersionNotFoundError,
+} from "../domain/packument";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";

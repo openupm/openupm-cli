@@ -1,18 +1,35 @@
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 import { AsyncResult, Err } from "ts-results-es";
-import {
-  ResolvableVersion,
-  ResolvedPackumentVersion,
-  ResolvePackumentVersionError,
-} from "../packument-version-resolving";
 import { PackumentNotFoundError } from "../common-errors";
 import {
+  ResolvePackumentVersionError,
   tryResolvePackumentVersion,
   UnityPackument,
+  UnityPackumentVersion,
 } from "../domain/packument";
 import { FetchPackument } from "../io/packument-io";
 import { resultifyAsyncOp } from "../utils/result-utils";
+import { RegistryUrl } from "../domain/registry-url";
+import { ResolvableVersion } from "../domain/package-reference";
+
+/**
+ * A successfully resolved packument-version.
+ */
+export interface ResolvedPackumentVersion {
+  /**
+   * The packument from which the version was resolved.
+   */
+  readonly packument: UnityPackument;
+  /**
+   * The resolved packument-version.
+   */
+  readonly packumentVersion: UnityPackumentVersion;
+  /**
+   * The source from which the packument was resolved.
+   */
+  readonly source: RegistryUrl;
+}
 
 /**
  * Function for resolving remove packument versions.

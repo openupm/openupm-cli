@@ -1,8 +1,8 @@
-import { ResolvePackumentVersionError } from "../packument-version-resolving";
 import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { RegistryUrl } from "./registry-url";
 import { recordEntries } from "../utils/record-utils";
+import { ResolvePackumentVersionError } from "./packument";
 
 export enum NodeType {
   Unresolved,

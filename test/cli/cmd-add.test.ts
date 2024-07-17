@@ -17,7 +17,10 @@ import { buildProjectManifest } from "../domain/data-project-manifest";
 import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { mockService } from "../services/service.mock";
-import { ResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
+import {
+  ResolvedPackumentVersion,
+  ResolveRemotePackumentVersion,
+} from "../../src/services/resolve-remote-packument-version";
 import {
   LoadProjectManifest,
   WriteProjectManifest,
@@ -28,7 +31,6 @@ import { DetermineEditorVersion } from "../../src/services/determine-editor-vers
 import { ResultCodes } from "../../src/cli/result-codes";
 import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { PackumentNotFoundError } from "../../src/common-errors";
-import { ResolvedPackumentVersion } from "../../src/packument-version-resolving";
 import {
   makeGraphFromSeed,
   markFailed,
