@@ -30,6 +30,7 @@ import {
   ProjectVersionMissingError,
 } from "../io/project-version-io";
 import { NoSystemUserProfilePath } from "../io/upm-config-io";
+import { UpmAuthMalformedError } from "../domain/upm-config";
 
 function makeErrorMessageFor(error: unknown): string {
   if (error instanceof RegistryAuthLoadError)
@@ -75,6 +76,8 @@ function makeErrorMessageFor(error: unknown): string {
     return "Could not determine path of home directory.";
   if (error instanceof NoSystemUserProfilePath)
     return "Could not determine path of system user directory.";
+  if (error instanceof UpmAuthMalformedError)
+    return "Authentication information in upm config is malformed.";
   return "A fatal error occurred.";
 }
 
@@ -115,6 +118,8 @@ function tryMakeFixSuggestionFor(error: unknown): string | null {
     return "Make sure you run OpenUPM with either the HOME or USERPROFILE environment variable set to your home path.";
   if (error instanceof NoSystemUserProfilePath)
     return "Make sure you run OpenUPM with the ALLUSERSPROFILE environment variable set to your home path.";
+  if (error instanceof UpmAuthMalformedError)
+    return "Check the content of your .upmconfig.toml and fix any errors. Maybe clear the entry for the target registry and log in again.";
   return null;
 }
 

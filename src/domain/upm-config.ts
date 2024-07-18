@@ -2,6 +2,7 @@ import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { Base64, decodeBase64, encodeBase64 } from "./base64";
 import { RegistryUrl } from "./registry-url";
 import { NpmAuth } from "another-npm-registry-client";
+import { CustomError } from "ts-custom-error";
 
 /**
  * Authentication information that is shared between different authentication methods.
@@ -58,12 +59,19 @@ export type UPMConfig = Readonly<{
 }>;
 
 /**
+ * Error for when a {UpmAuth} object is malformed. This usually means that
+ * the base-64 encoded credentials are not valid.
+ */
+export class UpmAuthMalformedError extends CustomError {}
+
+/**
  * Checks if an auth-object uses basic authentication.
  * @param auth The auth-object.
  */
 export function isBasicAuth(auth: UpmAuth): auth is BasicAuth {
   return "_auth" in auth;
 }
+
 /**
  * Checks if an auth-object uses token authentication.
  * @param auth The auth-object.
@@ -105,17 +113,23 @@ export function shouldAlwaysAuth(auth: UpmAuth): boolean {
 /**
  * Attempts to convert a {@link UpmAuth} object to a {@link NpmAuth} object.
  * @param upmAuth The auth-object to convert.
- * @returns The converted object or null, if conversion failed.
+ * @returns The converted object.
+ * @throws UpmAuthMalformedError When auth object is malformed and can't be
+ * converted.
  */
-export function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
-  if (isTokenAuth(upmAuth)) {
+export function toNpmAuth(upmAuth: UpmAuth): NpmAuth {
+  if (isTokenAuth(upmAuth))
     return {
       token: upmAuth.token,
       alwaysAuth: shouldAlwaysAuth(upmAuth),
     };
-  } else if (isBasicAuth(upmAuth)) {
+
+  if (isBasicAuth(upmAuth)) {
     const decoded = tryDecodeBasicAuth(upmAuth._auth);
-    if (decoded === null) return null;
+    if (decoded === null)
+      throw new UpmAuthMalformedError(
+        "Credentials in _auth are not valid Base64."
+      );
     const [username, password] = decoded;
     return {
       username,
@@ -124,7 +138,8 @@ export function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
       alwaysAuth: shouldAlwaysAuth(upmAuth),
     };
   }
-  return null;
+
+  throw new UpmAuthMalformedError("Auth entry neither basic not token-based.");
 }
 
 /**
@@ -138,19 +153,13 @@ export function tryToNpmAuth(upmAuth: UpmAuth): NpmAuth | null {
 export function tryGetAuthForRegistry(
   upmConfig: UPMConfig,
   registry: RegistryUrl
-): /*
- * TODO: Change null return
- *  The null return here is not good because the function will return both
- *  for the expected case where the config has no auth information for the
- *  registry and for the unexpected case where the conversion failed.
- *  Convert to a result based function instead.*/
-NpmAuth | null {
+): NpmAuth | null {
   const upmAuth =
     upmConfig.npmAuth?.[registry] ||
     // As a backup search for the registry with trailing slash
     upmConfig.npmAuth?.[registry + "/"];
   if (upmAuth === undefined) return null;
-  return tryToNpmAuth(upmAuth);
+  return toNpmAuth(upmAuth);
 }
 
 /**

@@ -7,7 +7,7 @@ import {
   shouldAlwaysAuth,
   tryDecodeBasicAuth,
   tryGetAuthForRegistry,
-  tryToNpmAuth,
+  toNpmAuth,
   UpmAuth,
   UPMConfig,
 } from "../../src/domain/upm-config";
@@ -28,7 +28,7 @@ describe("upm-config", () => {
         };
         const config = addAuth(registry, auth, {});
         expect(tryGetAuthForRegistry(config, registry)).toEqual(
-          tryToNpmAuth(auth)
+          toNpmAuth(auth)
         );
       });
     });
