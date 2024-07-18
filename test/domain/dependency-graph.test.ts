@@ -168,13 +168,15 @@ describe("dependency graph", () => {
     it("should mark the given package as failed", () => {
       let graph = makeGraphFromSeed(somePackage, someVersion);
 
-      const error = new PackumentNotFoundError(somePackage);
-      graph = markFailed(graph, somePackage, someVersion, error);
+      const errors = {
+        [exampleRegistryUrl]: new PackumentNotFoundError(somePackage),
+      };
+      graph = markFailed(graph, somePackage, someVersion, errors);
 
       const node = tryGetGraphNode(graph, somePackage, someVersion);
       expect(node).toEqual({
         type: NodeType.Failed,
-        error,
+        errors,
       });
     });
   });

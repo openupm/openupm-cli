@@ -16,6 +16,7 @@ import {
   markRemoteResolved,
   tryGetNextUnresolved,
 } from "../domain/dependency-graph";
+import { RegistryUrl } from "../domain/registry-url";
 
 /**
  * Function for resolving all dependencies for a package.
@@ -54,18 +55,20 @@ export function makeResolveDependency(
       return graph;
     }
 
-    let mostFixableError: ResolvePackumentVersionError =
-      new PackumentNotFoundError(packageName);
+    const errors: Record<RegistryUrl, ResolvePackumentVersionError> = {};
     for (const source of sources) {
       const packument = await fetchPackument(source, packageName);
-      if (packument === null) continue;
+      if (packument === null) {
+        errors[source.url] = new PackumentNotFoundError(packageName);
+        continue;
+      }
 
       const packumentVersionResult = tryResolvePackumentVersion(
         packument,
         version
       );
       if (packumentVersionResult.isErr()) {
-        mostFixableError = packumentVersionResult.error;
+        errors[source.url] = packumentVersionResult.error;
         continue;
       }
 
@@ -82,7 +85,7 @@ export function makeResolveDependency(
       return await resolveRecursively(graph, sources, deep);
     }
 
-    graph = markFailed(graph, packageName, version, mostFixableError);
+    graph = markFailed(graph, packageName, version, errors);
     return graph;
   }
 

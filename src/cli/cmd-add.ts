@@ -29,13 +29,15 @@ import { CustomError } from "ts-custom-error";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { ResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
 import { Logger } from "npmlog";
-import { logResolvedDependency } from "./dependency-logging";
+import {
+  logFailedDependency,
+  logResolvedDependency,
+} from "./dependency-logging";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import { DebugLog } from "../logging";
 import { DetermineEditorVersion } from "../services/determine-editor-version";
 import { ResultCodes } from "./result-codes";
-import { logError } from "./error-logging";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
@@ -210,7 +212,12 @@ export function makeAddCmd(
             dependency,
           ] of traverseDependencyGraph(dependencyGraph)) {
             if (dependency.type === NodeType.Failed) {
-              logError(log, dependency.error);
+              logFailedDependency(
+                log,
+                dependencyName,
+                dependencyVersion,
+                dependency
+              );
               // If the manifest already has the dependency than it does not
               // really matter that it was not resolved.
               if (!hasDependency(manifest, dependencyName))

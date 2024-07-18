@@ -54,7 +54,10 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, somePackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Failed,
-      error: expect.any(PackumentNotFoundError),
+      errors: {
+        [sources[0]!.url]: expect.any(PackumentNotFoundError),
+        [sources[1]!.url]: expect.any(PackumentNotFoundError),
+      },
     });
   });
 
@@ -77,7 +80,10 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, somePackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Failed,
-      error: expect.any(VersionNotFoundError),
+      errors: {
+        [sources[0]!.url]: expect.any(VersionNotFoundError),
+        [sources[1]!.url]: expect.any(VersionNotFoundError),
+      },
     });
   });
 
