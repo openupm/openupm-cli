@@ -8,9 +8,9 @@ import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
 import { DebugLog } from "../logging";
-import { tryGetDirectoriesIn } from "./directory-io";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import { resultifyAsyncOp } from "../utils/result-utils";
+import { GetDirectoriesIn } from "./directory-io";
 
 /**
  * Error for when an editor-version is not installed.
@@ -45,6 +45,7 @@ export type FindBuiltInPackages = (
  * Makes a {@link FindBuiltInPackages} function.
  */
 export function makeFindBuiltInPackages(
+  getDirectoriesIn: GetDirectoriesIn,
   debugLog: DebugLog
 ): FindBuiltInPackages {
   return (editorVersion) => {
@@ -58,7 +59,7 @@ export function makeFindBuiltInPackages(
       );
 
       return (
-        resultifyAsyncOp(tryGetDirectoriesIn(packagesDir))
+        resultifyAsyncOp(getDirectoriesIn(packagesDir))
           // We can assume correct format
           .map((names) => names as DomainName[])
           .mapErr((error) => {
