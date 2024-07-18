@@ -1,3 +1,10 @@
+## [3.4.1](https://github.com/openupm/openupm-cli/compare/3.4.0...3.4.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* login error ([2380e31](https://github.com/openupm/openupm-cli/commit/2380e315db459c6390d53ba42379575128a2af42))
+
 # [3.4.0](https://github.com/openupm/openupm-cli/compare/3.3.1...3.4.0) (2024-07-18)
 
 
