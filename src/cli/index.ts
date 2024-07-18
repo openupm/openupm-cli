@@ -58,15 +58,17 @@ import { withErrorLogger } from "./error-logging";
 // Composition root
 
 const log = npmlog;
-const debugLog: DebugLog = (message, context) =>
-  log.verbose(
-    "",
-    `${message}${
-      context !== undefined
-        ? ` context: ${JSON.stringify(context, null, 2)}`
-        : ""
-    }`
-  );
+const debugLog: DebugLog = function (message, context) {
+  const contextMessage =
+    context !== undefined
+      ? `\n${
+          context instanceof Error
+            ? context.toString()
+            : JSON.stringify(context, null, 2)
+        }`
+      : "";
+  return log.verbose("", `${message}${contextMessage}`);
+};
 const regClient = new RegClient({ log });
 const getCwd = makeGetCwd();
 const runChildProcess = makeRunChildProcess(debugLog);
