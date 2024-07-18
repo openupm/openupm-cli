@@ -132,12 +132,9 @@ describe("cmd-deps", () => {
   it("should log missing dependency", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
     let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(
-      failedGraph,
-      otherPackage,
-      someVersion,
-      new PackumentNotFoundError(otherPackage)
-    );
+    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
+      [exampleRegistryUrl]: new PackumentNotFoundError(otherPackage),
+    });
     resolveDependencies.mockResolvedValue(failedGraph);
 
     await depsCmd(somePackage, {
@@ -145,20 +142,25 @@ describe("cmd-deps", () => {
     });
 
     expect(log.warn).toHaveBeenCalledWith(
-      "missing dependency",
+      "",
       expect.stringContaining(otherPackage)
+    );
+    expect(log.warn).toHaveBeenCalledWith(
+      "",
+      expect.stringContaining("package not found")
     );
   });
 
   it("should log missing dependency version", async () => {
     const { depsCmd, resolveDependencies, log } = makeDependencies();
     let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(
-      failedGraph,
-      otherPackage,
-      someVersion,
-      new VersionNotFoundError(otherPackage, someVersion, [])
-    );
+    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
+      [exampleRegistryUrl]: new VersionNotFoundError(
+        otherPackage,
+        someVersion,
+        []
+      ),
+    });
     resolveDependencies.mockResolvedValue(failedGraph);
 
     await depsCmd(somePackage, {
@@ -166,8 +168,12 @@ describe("cmd-deps", () => {
     });
 
     expect(log.warn).toHaveBeenCalledWith(
-      "missing dependency version",
+      "",
       expect.stringContaining(otherPackage)
+    );
+    expect(log.warn).toHaveBeenCalledWith(
+      "",
+      expect.stringContaining("version not found")
     );
   });
 });

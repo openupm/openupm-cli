@@ -54,7 +54,10 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, somePackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Failed,
-      error: expect.any(PackumentNotFoundError),
+      errors: {
+        [sources[0]!.url]: expect.any(PackumentNotFoundError),
+        [sources[1]!.url]: expect.any(PackumentNotFoundError),
+      },
     });
   });
 
@@ -77,7 +80,10 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, somePackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Failed,
-      error: expect.any(VersionNotFoundError),
+      errors: {
+        [sources[0]!.url]: expect.any(VersionNotFoundError),
+        [sources[1]!.url]: expect.any(VersionNotFoundError),
+      },
     });
   });
 
@@ -193,6 +199,44 @@ describe("dependency resolving", () => {
     expect(node).toEqual({
       type: NodeType.Resolved,
       source: sources[0]!.url,
+      dependencies: {},
+    });
+  });
+
+  it("should search backup registry if version missing in primary registry", async () => {
+    const { resolveDependencies, fetchPackument } = makeDependencies();
+    // First resolve somePackage
+    fetchPackument.mockResolvedValueOnce({
+      name: somePackage,
+      versions: {
+        [otherVersion]: {
+          name: somePackage,
+          version: otherVersion,
+        },
+      },
+    });
+    // then resolve otherPackage
+    fetchPackument.mockResolvedValueOnce({
+      name: somePackage,
+      versions: {
+        [someVersion]: {
+          name: somePackage,
+          version: someVersion,
+        },
+      },
+    });
+
+    const graph = await resolveDependencies(
+      sources,
+      somePackage,
+      someVersion,
+      false
+    );
+
+    const node = tryGetGraphNode(graph, somePackage, someVersion);
+    expect(node).toEqual({
+      type: NodeType.Resolved,
+      source: sources[1]!.url,
       dependencies: {},
     });
   });

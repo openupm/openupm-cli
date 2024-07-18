@@ -9,11 +9,10 @@ import { CmdOptions } from "./options";
 import { PackumentNotFoundError } from "../common-errors";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
-import { logResolvedDependency } from "./dependency-logging";
 import {
-  ResolvePackumentVersionError,
-  VersionNotFoundError,
-} from "../domain/packument";
+  logFailedDependency,
+  logResolvedDependency,
+} from "./dependency-logging";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
@@ -38,13 +37,6 @@ export type DepsCmd = (
   pkg: PackageReference,
   options: DepsOptions
 ) => Promise<DepsResultCode>;
-
-function errorPrefixForError(error: ResolvePackumentVersionError): string {
-  if (error instanceof PackumentNotFoundError) return "missing dependency";
-  else if (error instanceof VersionNotFoundError)
-    return "missing dependency version";
-  return "unknown";
-}
 
 /**
  * Makes a {@link DepsCmd} function.
@@ -92,10 +84,14 @@ export function makeDepsCmd(
       dependency,
     ] of traverseDependencyGraph(dependencyGraph)) {
       if (dependency.type === NodeType.Failed) {
-        if (dependencyName !== packageName) {
-          const prefix = errorPrefixForError(dependency.error);
-          log.warn(prefix, dependencyName);
-        }
+        if (dependencyName !== packageName)
+          logFailedDependency(
+            log,
+            dependencyName,
+            dependencyVersion,
+            dependency
+          );
+
         continue;
       }
       const dependencyRef = makePackageReference(

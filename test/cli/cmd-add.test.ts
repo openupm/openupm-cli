@@ -241,12 +241,9 @@ describe("cmd-add", () => {
   it("should fail if dependency could not be resolved and not running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
     let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(
-      failedGraph,
-      otherPackage,
-      someVersion,
-      new PackumentNotFoundError(otherPackage)
-    );
+    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
+      [exampleRegistryUrl]: new PackumentNotFoundError(otherPackage),
+    });
     resolveDependencies.mockResolvedValue(failedGraph);
 
     await expect(() =>
@@ -259,12 +256,9 @@ describe("cmd-add", () => {
   it("should add package with unresolved dependency when running with force", async () => {
     const { addCmd, resolveDependencies } = makeDependencies();
     let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(
-      failedGraph,
-      otherPackage,
-      someVersion,
-      new PackumentNotFoundError(otherPackage)
-    );
+    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
+      [exampleRegistryUrl]: new PackumentNotFoundError(otherPackage),
+    });
     resolveDependencies.mockResolvedValue(failedGraph);
 
     const resultCode = await addCmd(somePackage, {

@@ -20,9 +20,9 @@ type ResolvedNode = Readonly<{
   dependencies: Readonly<Record<DomainName, SemanticVersion>>;
 }>;
 
-type FailedNode = Readonly<{
+export type FailedNode = Readonly<{
   type: NodeType.Failed;
-  error: ResolvePackumentVersionError;
+  errors: Readonly<Record<RegistryUrl, ResolvePackumentVersionError>>;
 }>;
 
 type GraphNode = UnresolvedNode | ResolvedNode | FailedNode;
@@ -120,7 +120,7 @@ export function markRemoteResolved(
   packageName: DomainName,
   version: SemanticVersion,
   source: RegistryUrl,
-  dependencies: Readonly<Record<DomainName, SemanticVersion>>
+  dependencies: ResolvedNode["dependencies"]
 ): DependencyGraph {
   // Mark package resolved
   graph = putNode(graph, packageName, version, {
@@ -140,9 +140,12 @@ export function markFailed(
   graph: DependencyGraph,
   packageName: DomainName,
   version: SemanticVersion,
-  error: ResolvePackumentVersionError
+  errors: FailedNode["errors"]
 ): DependencyGraph {
-  return putNode(graph, packageName, version, { type: NodeType.Failed, error });
+  return putNode(graph, packageName, version, {
+    type: NodeType.Failed,
+    errors,
+  });
 }
 
 export function tryGetGraphNode(
