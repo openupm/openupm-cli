@@ -61,7 +61,7 @@ export function makeLogin(
     }
 
     // npm login
-    const token = await npmLogin(registry, username, password, email);
+    const token = await npmLogin(registry, username, email, password);
     debugLog(`npm login successful`);
 
     const npmrcPath = await authNpmrc(registry, token);
