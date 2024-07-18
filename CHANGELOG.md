@@ -1,3 +1,10 @@
+## [3.4.2](https://github.com/openupm/openupm-cli/compare/3.4.1...3.4.2) (2024-07-18)
+
+
+### Bug Fixes
+
+* bad version in primary registry issue ([#374](https://github.com/openupm/openupm-cli/issues/374)) ([ea10cb3](https://github.com/openupm/openupm-cli/commit/ea10cb37f0b76bba06ce78b8b726147ac5463d3c))
+
 ## [3.4.1](https://github.com/openupm/openupm-cli/compare/3.4.0...3.4.1) (2024-07-18)
 
 
