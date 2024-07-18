@@ -1,3 +1,10 @@
+# [3.4.0](https://github.com/openupm/openupm-cli/compare/3.3.1...3.4.0) (2024-07-18)
+
+
+### Features
+
+* improve context debug logger ([065358d](https://github.com/openupm/openupm-cli/commit/065358d277007bc51fdbf6b381ce9b606749eac8))
+
 ## [3.3.1](https://github.com/openupm/openupm-cli/compare/3.3.0...3.3.1) (2024-07-09)
 
 
