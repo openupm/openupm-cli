@@ -1,6 +1,5 @@
 import * as specialPaths from "../../src/io/special-paths";
 import { OSNotSupportedError } from "../../src/io/special-paths";
-import * as directoryIO from "../../src/io/directory-io";
 import { Err, Ok } from "ts-results-es";
 import {
   EditorNotInstalledError,
@@ -9,10 +8,17 @@ import {
 import { makeEditorVersion } from "../../src/domain/editor-version";
 import { noopLogger } from "../../src/logging";
 import { eaccesError, enoentError } from "./node-error.mock";
+import { mockService } from "../services/service.mock";
+import { GetDirectoriesIn } from "../../src/io/directory-io";
 
 function makeDependencies() {
-  const getBuiltInPackages = makeFindBuiltInPackages(noopLogger);
-  return { getBuiltInPackages } as const;
+  const getDirectoriesIn = mockService<GetDirectoriesIn>();
+
+  const getBuiltInPackages = makeFindBuiltInPackages(
+    getDirectoriesIn,
+    noopLogger
+  );
+  return { getBuiltInPackages, getDirectoriesIn } as const;
 }
 
 describe("builtin-packages", () => {
@@ -32,10 +38,8 @@ describe("builtin-packages", () => {
   it("should fail if editor is not installed", async () => {
     const version = makeEditorVersion(2022, 1, 2, "f", 1);
     const expected = new EditorNotInstalledError(version);
-    const { getBuiltInPackages } = makeDependencies();
-    jest
-      .spyOn(directoryIO, "tryGetDirectoriesIn")
-      .mockRejectedValue(enoentError);
+    const { getBuiltInPackages, getDirectoriesIn } = makeDependencies();
+    getDirectoriesIn.mockRejectedValue(enoentError);
 
     const result = await getBuiltInPackages(version).promise;
 
@@ -44,12 +48,12 @@ describe("builtin-packages", () => {
 
   it("should fail if directory could not be read", async () => {
     const version = makeEditorVersion(2022, 1, 2, "f", 1);
-    const { getBuiltInPackages } = makeDependencies();
+    const { getBuiltInPackages, getDirectoriesIn } = makeDependencies();
     const expected = eaccesError;
     jest
       .spyOn(specialPaths, "tryGetEditorInstallPath")
       .mockReturnValue(Ok("/some/path"));
-    jest.spyOn(directoryIO, "tryGetDirectoriesIn").mockRejectedValue(expected);
+    getDirectoriesIn.mockRejectedValue(expected);
 
     await expect(getBuiltInPackages(version).promise).rejects.toEqual(expected);
   });
@@ -57,11 +61,11 @@ describe("builtin-packages", () => {
   it("should find package names", async () => {
     const version = makeEditorVersion(2022, 1, 2, "f", 1);
     const expected = ["com.unity.ugui", "com.unity.modules.uielements"];
-    const { getBuiltInPackages } = makeDependencies();
+    const { getBuiltInPackages, getDirectoriesIn } = makeDependencies();
     jest
       .spyOn(specialPaths, "tryGetEditorInstallPath")
       .mockReturnValue(Ok("/some/path"));
-    jest.spyOn(directoryIO, "tryGetDirectoriesIn").mockResolvedValue(expected);
+    getDirectoriesIn.mockResolvedValue(expected);
 
     const result = await getBuiltInPackages(version).promise;
 
