@@ -11,11 +11,17 @@ import { SemanticVersion } from "../domain/semantic-version";
 import {
   DependencyGraph,
   FailedNode,
+  GraphNode,
   NodeType,
+  ResolvedNode,
   tryGetGraphNode,
 } from "../domain/dependency-graph";
-import { ResolvePackumentVersionError } from "../domain/packument";
+import {
+  ResolvePackumentVersionError,
+  VersionNotFoundError,
+} from "../domain/packument";
 import { PackumentNotFoundError } from "../common-errors";
+import { make } from "ts-brand";
 
 /**
  * Logs information about a resolved dependency to a logger.
@@ -76,10 +82,10 @@ export function stringifyDependencyGraph(
 ): readonly string[] {
   const printedRefs = new Set<PackageReference>();
 
-  function stringifyRecursively(
+  function getNode(
     packageName: DomainName,
     version: SemanticVersion
-  ): readonly string[] {
+  ): GraphNode {
     const node = tryGetGraphNode(graph, packageName, version);
     if (node === null)
       throw new RangeError(
@@ -88,43 +94,95 @@ export function stringifyDependencyGraph(
           rootVersion
         )}`
       );
+    return node;
+  }
 
-    const packageRef = makePackageReference(packageName, version);
-
-    if (printedRefs.has(packageRef)) return [`${packageRef} ..`];
-    else printedRefs.add(packageRef);
-
-    if (node.type === NodeType.Unresolved) return [packageRef];
-
-    if (node.type === NodeType.Failed) {
-      const errorLines = recordEntries(node.errors).flatMap(
-        ([sourceUrl, error]) => {
-          const message =
-            error instanceof PackumentNotFoundError
-              ? "package not found"
-              : "version not found";
-          return `  - "${sourceUrl}": ${message}`;
-        }
-      );
-      return [packageRef, ...errorLines];
+  function makeErrorMessageFor(error: ResolvePackumentVersionError): string {
+    switch (error.constructor) {
+      case PackumentNotFoundError:
+        return "package not found";
+      case VersionNotFoundError:
+        return "version not found";
+      default:
+        return "unknown";
     }
+  }
 
-    const dependencyBlocks = recordEntries(node.dependencies).map(
+  function makeDuplicateLine(packageRef: PackageReference): string {
+    return `${packageRef} ..`;
+  }
+
+  function makeErrorLines(errors: FailedNode["errors"]): readonly string[] {
+    // Each error gets a line
+    return recordEntries(errors).map(([sourceUrl, error]) => {
+      const message = makeErrorMessageFor(error);
+      // With the source url and a message describing the error
+      return `  - "${sourceUrl}": ${message}`;
+    });
+  }
+
+  function makeDependencyLines(
+    dependencies: ResolvedNode["dependencies"]
+  ): readonly string[] {
+    const dependencyBlocks = recordEntries(dependencies).map(
       ([dependencyName, dependencyVersion]) =>
         stringifyRecursively(dependencyName, dependencyVersion)
     );
-    const dependencyLines = dependencyBlocks.flatMap((block, blockIndex) =>
-      block.map((line, lineIndex) => {
+    return dependencyBlocks.flatMap((block, blockIndex) => {
+      const isLastBlock = blockIndex >= dependencyBlocks.length - 1;
+      return block.map((line, lineIndex) => {
+        const isFirstLine = lineIndex === 0;
         const prefix =
-          lineIndex === 0
+          // The first line of a dependency block has the "arrow" in order
+          // to branch of from the parent
+          isFirstLine
             ? "└─ "
-            : blockIndex < dependencyBlocks.length - 1
-            ? "│  "
-            : "   ";
+            : // The other lines have different symbols depending on whether
+            // there are more blocks following.
+            isLastBlock
+            ? // If there are no more blocks then no symbol.
+              "   "
+            : // Otherwise draw a line down from the parent so that the
+              // next block's arrow can connect to it.
+              "│  ";
         return prefix + line;
-      })
-    );
+      });
+    });
+  }
 
+  function stringifyRecursively(
+    packageName: DomainName,
+    version: SemanticVersion
+  ): readonly string[] {
+    const node = getNode(packageName, version);
+    const packageRef = makePackageReference(packageName, version);
+
+    // We only print package@version once. If two packages depend on the
+    // same package@version, we print a short version of it.
+    const isDuplicate = printedRefs.has(packageRef);
+    if (isDuplicate) return [makeDuplicateLine(packageRef)];
+    else printedRefs.add(packageRef);
+
+    if (node.type === NodeType.Unresolved)
+      // package@version
+      return [packageRef];
+
+    if (node.type === NodeType.Failed) {
+      /*
+        package@version
+         -  url1: version not found
+         -  url2: package not found
+       */
+      const errorLines = makeErrorLines(node.errors);
+      return [packageRef, ...errorLines];
+    }
+
+    // Resolved node
+    /*
+      package@version
+      └─ dependency@version
+     */
+    const dependencyLines = makeDependencyLines(node.dependencies);
     return [packageRef, ...dependencyLines];
   }
 

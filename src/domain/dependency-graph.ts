@@ -14,7 +14,7 @@ type UnresolvedNode = Readonly<{
   type: NodeType.Unresolved;
 }>;
 
-type ResolvedNode = Readonly<{
+export type ResolvedNode = Readonly<{
   type: NodeType.Resolved;
   source: RegistryUrl | "built-in";
   dependencies: Readonly<Record<DomainName, SemanticVersion>>;
