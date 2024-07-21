@@ -12,15 +12,15 @@ import { mockService } from "../services/service.mock";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { ResolveLatestVersion } from "../../src/services/resolve-latest-version";
-import { VersionNotFoundError } from "../../src/domain/packument";
 import {
   makeGraphFromSeed,
-  markFailed,
+  markBuiltInResolved,
   markRemoteResolved,
 } from "../../src/domain/dependency-graph";
 
 const somePackage = DomainName.parse("com.some.package");
 const otherPackage = DomainName.parse("com.other.package");
+const anotherPackage = DomainName.parse("com.another.package");
 
 const defaultEnv = {
   registry: { url: exampleRegistryUrl, auth: null },
@@ -116,64 +116,42 @@ describe("cmd-deps", () => {
     );
   });
 
-  it("should log valid dependencies", async () => {
-    const { depsCmd, log } = makeDependencies();
+  it("should print dependency graph", async () => {
+    const { depsCmd, resolveDependencies, log } = makeDependencies();
+    let graph = makeGraphFromSeed(somePackage, someVersion);
+    graph = markRemoteResolved(
+      graph,
+      somePackage,
+      someVersion,
+      exampleRegistryUrl,
+      {
+        [otherPackage]: someVersion,
+        [anotherPackage]: someVersion,
+      }
+    );
+    graph = markBuiltInResolved(graph, otherPackage, someVersion);
+    graph = markBuiltInResolved(graph, anotherPackage, someVersion);
+    resolveDependencies.mockResolvedValue(graph);
 
     await depsCmd(somePackage, {
       _global: {},
     });
 
+    // Here we just do some generic checks to see if something containing
+    // all relevant information was logged. For more detailed testing
+    // of the output format see the tests for the dependency graph
+    // logging logic.
     expect(log.notice).toHaveBeenCalledWith(
-      "dependency",
-      expect.stringContaining(otherPackage)
+      "",
+      expect.stringContaining(somePackage)
     );
-  });
-
-  it("should log missing dependency", async () => {
-    const { depsCmd, resolveDependencies, log } = makeDependencies();
-    let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
-      [exampleRegistryUrl]: new PackumentNotFoundError(otherPackage),
-    });
-    resolveDependencies.mockResolvedValue(failedGraph);
-
-    await depsCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.warn).toHaveBeenCalledWith(
+    expect(log.notice).toHaveBeenCalledWith(
       "",
       expect.stringContaining(otherPackage)
     );
-    expect(log.warn).toHaveBeenCalledWith(
+    expect(log.notice).toHaveBeenCalledWith(
       "",
-      expect.stringContaining("package not found")
-    );
-  });
-
-  it("should log missing dependency version", async () => {
-    const { depsCmd, resolveDependencies, log } = makeDependencies();
-    let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
-      [exampleRegistryUrl]: new VersionNotFoundError(
-        otherPackage,
-        someVersion,
-        []
-      ),
-    });
-    resolveDependencies.mockResolvedValue(failedGraph);
-
-    await depsCmd(somePackage, {
-      _global: {},
-    });
-
-    expect(log.warn).toHaveBeenCalledWith(
-      "",
-      expect.stringContaining(otherPackage)
-    );
-    expect(log.warn).toHaveBeenCalledWith(
-      "",
-      expect.stringContaining("version not found")
+      expect.stringContaining(anotherPackage)
     );
   });
 });

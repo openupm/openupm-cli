@@ -36,7 +36,7 @@ export type FailedNode = Readonly<{
   errors: Readonly<Record<RegistryUrl, ResolvePackumentVersionError>>;
 }>;
 
-type GraphNode = UnresolvedNode | ResolvedNode | FailedNode;
+export type GraphNode = UnresolvedNode | ResolvedNode | FailedNode;
 
 /**
  * A graph indicating which packages depend on which others.
