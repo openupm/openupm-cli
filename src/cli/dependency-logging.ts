@@ -21,7 +21,7 @@ import {
   VersionNotFoundError,
 } from "../domain/packument";
 import { PackumentNotFoundError } from "../common-errors";
-import { make } from "ts-brand";
+import { Chalk } from "chalk";
 
 /**
  * Logs information about a resolved dependency to a logger.
@@ -73,14 +73,20 @@ export function logFailedDependency(
  * @param graph The graph.
  * @param rootPackage The name of the graphs root package.
  * @param rootVersion The version of the graphs root package.
+ * @param chalk Used for coloring output. Omit if no color should be used.
  * @returns A string array representing the graph. Each string is a line.
  */
 export function stringifyDependencyGraph(
   graph: DependencyGraph,
   rootPackage: DomainName,
-  rootVersion: SemanticVersion
+  rootVersion: SemanticVersion,
+  chalk?: Chalk
 ): readonly string[] {
   const printedRefs = new Set<PackageReference>();
+
+  function tryColor(chalk: Chalk | undefined, s: string) {
+    return chalk !== undefined ? chalk(s) : s;
+  }
 
   function getNode(
     packageName: DomainName,
@@ -109,7 +115,7 @@ export function stringifyDependencyGraph(
   }
 
   function makeDuplicateLine(packageRef: PackageReference): string {
-    return `${packageRef} ..`;
+    return tryColor(chalk?.blueBright, `${packageRef} ..`);
   }
 
   function makeErrorLines(errors: FailedNode["errors"]): readonly string[] {
@@ -174,7 +180,7 @@ export function stringifyDependencyGraph(
          -  url2: package not found
        */
       const errorLines = makeErrorLines(node.errors);
-      return [packageRef, ...errorLines];
+      return [tryColor(chalk?.red, packageRef), ...errorLines];
     }
 
     // Resolved node

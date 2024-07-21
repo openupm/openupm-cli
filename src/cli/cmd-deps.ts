@@ -16,6 +16,7 @@ import { SemanticVersion } from "../domain/semantic-version";
 import { isZod } from "../utils/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import os from "os";
+import chalk from "chalk";
 
 /**
  * Options passed to the deps command.
@@ -85,7 +86,8 @@ export function makeDepsCmd(
     const output = stringifyDependencyGraph(
       dependencyGraph,
       packageName,
-      latestVersion
+      latestVersion,
+      chalk
     ).join(os.EOL);
     log.notice("", output);
 
