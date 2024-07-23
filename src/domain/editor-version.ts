@@ -13,6 +13,9 @@ type RegularVersion = {
   readonly minor: number;
 };
 
+/**
+ * An object representing a patch editor version.
+ */
 export type PatchVersion = RegularVersion & {
   /**
    * A patch.
@@ -20,6 +23,9 @@ export type PatchVersion = RegularVersion & {
   readonly patch: number;
 };
 
+/**
+ * An object representing a release editor version.
+ */
 export type ReleaseVersion = PatchVersion & {
   /**
    * A flag describing a specific release.

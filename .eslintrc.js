@@ -17,6 +17,7 @@ module.exports = {
       1,
       {
         publicOnly: true,
+        contexts: ["TSTypeAliasDeclaration"],
       },
     ],
     "jsdoc/require-param": 0,

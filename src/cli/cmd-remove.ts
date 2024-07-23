@@ -12,6 +12,9 @@ import { logError } from "./error-logging";
  */
 export type RemoveResultCode = ResultCodes.Ok | ResultCodes.Error;
 
+/**
+ * Options passed to the remove command.
+ */
 export type RemoveOptions = CmdOptions;
 
 /**

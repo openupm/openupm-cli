@@ -12,6 +12,9 @@ import { ResultCodes } from "./result-codes";
  */
 export type SearchResultCode = ResultCodes.Ok | ResultCodes.Error;
 
+/**
+ * Options passed to the search command.
+ */
 export type SearchOptions = CmdOptions;
 
 /**

@@ -1,5 +1,8 @@
 import { Brand } from "ts-brand";
 
+/**
+ * A Base64 encoded string.
+ */
 export type Base64 = Brand<string, "Base64">;
 
 /**

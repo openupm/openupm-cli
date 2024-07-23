@@ -19,6 +19,9 @@ export class RegistryAuthLoadError extends CustomError {
   // noinspection JSUnusedLocalSymbols
 }
 
+/**
+ * Contains information about the environment and context a command is run in.
+ */
 export type Env = Readonly<{
   cwd: string;
   systemUser: boolean;

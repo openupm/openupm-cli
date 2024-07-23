@@ -1,6 +1,9 @@
 import path from "path";
 import childProcess from "child_process";
 
+/**
+ * The output of a run of OpenUpm.
+ */
 export type AppOutput = {
   stdOut: string[];
   stdErr: string[];

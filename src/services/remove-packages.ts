@@ -13,13 +13,22 @@ import { SemanticVersion } from "../domain/semantic-version";
 import { PackageUrl } from "../domain/package-url";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
+/**
+ * Contains information about a package that was removed from a project.
+ */
 export type RemovedPackage = {
   name: DomainName;
   version: SemanticVersion | PackageUrl;
 };
 
+/**
+ * Errors which may occur when removing packages from a project.
+ */
 export type RemovePackagesError = PackumentNotFoundError;
 
+/**
+ * Service function for removing packages from a project.
+ */
 export type RemovePackages = (
   projectPath: string,
   packageNames: ReadonlyArray<DomainName>

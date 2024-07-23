@@ -20,6 +20,10 @@ type ResolvedNode = Readonly<{
   dependencies: Readonly<Record<DomainName, SemanticVersion>>;
 }>;
 
+/**
+ * A node in a {@link DependencyGraph} representing a package that could
+ * not be resolved.
+ */
 export type FailedNode = Readonly<{
   type: NodeType.Failed;
   errors: Readonly<Record<RegistryUrl, ResolvePackumentVersionError>>;

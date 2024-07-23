@@ -15,6 +15,9 @@ import { FetchPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { PackumentNotFoundError } from "../common-errors";
 
+/**
+ * Options passed to the view command.
+ */
 export type ViewOptions = CmdOptions;
 
 /**

@@ -65,6 +65,9 @@ export class CompatibilityCheckFailedError extends CustomError {
   }
 }
 
+/**
+ * Options passed to the add command.
+ */
 export type AddOptions = CmdOptions<{
   test?: boolean;
   force?: boolean;

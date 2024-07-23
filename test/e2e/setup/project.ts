@@ -7,6 +7,9 @@ import { makeWriteProjectManifest } from "../../../src/io/project-manifest-io";
 import { makeWriteText } from "../../../src/io/text-file-io";
 import { dropDirectory } from "./directories";
 
+/**
+ * Options for setting up a mock project.
+ */
 export type ProjectOptions = {};
 
 const writeFile = makeWriteText();

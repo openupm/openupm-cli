@@ -19,6 +19,9 @@ import { ResolveLatestVersion } from "../services/resolve-latest-version";
 import { isSemanticVersion } from "../domain/semantic-version";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 
+/**
+ * Options passed to the deps command.
+ */
 export type DepsOptions = CmdOptions<{
   deep?: boolean;
 }>;
