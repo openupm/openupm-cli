@@ -20,7 +20,6 @@ export function makeSaveAuthToUpmConfig(
   loadUpmConfig: LoadUpmConfig,
   saveUpmConfig: SaveUpmConfig
 ): SaveAuthToUpmConfig {
-  // TODO: Add tests for this service
   return async (configPath, registry, auth) => {
     const initialConfig = (await loadUpmConfig(configPath)) || {};
     const updatedConfig = addAuth(registry, auth, initialConfig);
