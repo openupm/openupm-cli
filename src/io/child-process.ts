@@ -14,7 +14,7 @@ export type RunChildProcess = (command: string) => Promise<string>;
 export function makeRunChildProcess(debugLog: DebugLog): RunChildProcess {
   return (command) =>
     new Promise(function (resolve, reject) {
-      childProcess.exec(command, function (error, stdout, stderr) {
+      childProcess.exec(command, function (error, stdout) {
         if (error) {
           debugLog("A child process failed.", error);
           reject(error);
