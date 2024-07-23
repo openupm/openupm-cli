@@ -19,6 +19,7 @@ export function tryGetWslPath(
   varName: string,
   runChildProcess: RunChildProcess
 ): Promise<string> {
+  // TODO: Convert to service function.
   if (!isWsl) throw new NoWslError();
 
   return runChildProcess(`wslpath "$(wslvar ${varName})"`).then((output) =>
