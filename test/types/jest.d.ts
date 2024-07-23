@@ -4,6 +4,7 @@ import { PackageUrl } from "../../src/domain/package-url";
 
 declare global {
   namespace jest {
+    // noinspection JSUnusedGlobalSymbols
     interface Matchers<R> {
       toHaveDependency(
         name: DomainName,
