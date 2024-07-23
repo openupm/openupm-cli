@@ -5,9 +5,9 @@ import {
   isBasicAuth,
   isTokenAuth,
   shouldAlwaysAuth,
+  toNpmAuth,
   tryDecodeBasicAuth,
   tryGetAuthForRegistry,
-  toNpmAuth,
   UpmAuth,
   UPMConfig,
 } from "../../src/domain/upm-config";

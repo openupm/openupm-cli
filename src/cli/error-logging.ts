@@ -142,7 +142,7 @@ export function logError(log: Logger, error: unknown) {
 
 /**
  * Wraps a function with an error logger. Any errors thrown by the function
- * will be caught and logged. Afterward the process will exit with 
+ * will be caught and logged. Afterward the process will exit with
  * {@link ResultCodes.Error}.
  * @param log The logger to print to.
  * @param cmd The function to wrap.

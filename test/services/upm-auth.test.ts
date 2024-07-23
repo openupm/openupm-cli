@@ -5,7 +5,6 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import {
   encodeBasicAuth,
   UpmAuth,
-  UpmAuthMalformedError,
   UPMConfig,
 } from "../../src/domain/upm-config";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
