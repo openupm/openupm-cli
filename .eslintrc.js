@@ -13,7 +13,12 @@ module.exports = {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "jsdoc/require-returns": 0,
-    "jsdoc/require-jsdoc": 0,
+    "jsdoc/require-jsdoc": [
+      1,
+      {
+        publicOnly: true,
+      },
+    ],
     "jsdoc/require-param": 0,
     "jsdoc/require-throws": 1,
     "jsdoc/require-description-complete-sentence": 1,
