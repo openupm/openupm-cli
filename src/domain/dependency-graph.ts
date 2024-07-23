@@ -25,7 +25,14 @@ type ResolvedNode = Readonly<{
  * not be resolved.
  */
 export type FailedNode = Readonly<{
+  /**
+   * Marks this node as failed.
+   */
   type: NodeType.Failed;
+  /**
+   * Map of errors which caused the package resolve to fail. They are keyed
+   * by the registry url for which the error occurred.
+   */
   errors: Readonly<Record<RegistryUrl, ResolvePackumentVersionError>>;
 }>;
 

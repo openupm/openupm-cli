@@ -18,10 +18,25 @@ import { ResultCodes } from "./result-codes";
  * from the user or get default values.
  */
 export type LoginOptions = CmdOptions<{
+  /**
+   * The username to log in with.
+   */
   username?: string;
+  /**
+   * The password to log in with.
+   */
   password?: string;
+  /**
+   * The email to log in with.
+   */
   email?: string;
+  /**
+   * Whether to use basic or token-based authentication.
+   */
   basicAuth?: boolean;
+  /**
+   * Whether to always authenticate.
+   */
   alwaysAuth?: boolean;
 }>;
 

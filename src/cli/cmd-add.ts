@@ -69,7 +69,14 @@ export class CompatibilityCheckFailedError extends CustomError {
  * Options passed to the add command.
  */
 export type AddOptions = CmdOptions<{
+  /**
+   * Whether to also add the packages to testables.
+   */
   test?: boolean;
+  /**
+   * Whether to run with force. This will add packages even if validation
+   * was not possible.
+   */
   force?: boolean;
 }>;
 

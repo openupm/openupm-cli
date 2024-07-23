@@ -17,7 +17,11 @@ module.exports = {
       1,
       {
         publicOnly: true,
-        contexts: ["TSTypeAliasDeclaration", "TSInterfaceDeclaration"],
+        contexts: [
+          "TSTypeAliasDeclaration",
+          "TSInterfaceDeclaration",
+          "TSPropertySignature",
+        ],
       },
     ],
     "jsdoc/require-param": 0,

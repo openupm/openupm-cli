@@ -23,11 +23,29 @@ export class RegistryAuthLoadError extends CustomError {
  * Contains information about the environment and context a command is run in.
  */
 export type Env = Readonly<{
+  /**
+   * The working directory.
+   */
   cwd: string;
+  /**
+   * Whether the user is a system-user.
+   */
   systemUser: boolean;
+  /**
+   * Whether the app is running in WSL.
+   */
   wsl: boolean;
+  /**
+   * Whether to fall back to the upstream registry.
+   */
   upstream: boolean;
+  /**
+   * The upstream registry.
+   */
   upstreamRegistry: Registry;
+  /**
+   * The primary registry.
+   */
   registry: Registry;
 }>;
 

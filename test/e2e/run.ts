@@ -5,8 +5,17 @@ import childProcess from "child_process";
  * The output of a run of OpenUpm.
  */
 export type AppOutput = {
+  /**
+   * A record of the run standard output.
+   */
   stdOut: string[];
+  /**
+   * A record of the run standard error.
+   */
   stdErr: string[];
+  /**
+   * The runs return code.
+   */
   code: number;
 };
 

@@ -10,6 +10,7 @@ import { DebugLog } from "../logging";
  * The result of querying the /-/all endpoint.
  */
 export type AllPackuments = Readonly<{
+  // eslint-disable-next-line jsdoc/require-jsdoc
   _updated: number;
   [name: DomainName]: SearchedPackument;
 }>;

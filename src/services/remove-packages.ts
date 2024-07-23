@@ -17,7 +17,13 @@ import { resultifyAsyncOp } from "../utils/result-utils";
  * Contains information about a package that was removed from a project.
  */
 export type RemovedPackage = {
+  /**
+   * The name of the removed package.
+   */
   name: DomainName;
+  /**
+   * The version of the removed package.
+   */
   version: SemanticVersion | PackageUrl;
 };
 

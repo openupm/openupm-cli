@@ -23,6 +23,9 @@ import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
  * Options passed to the deps command.
  */
 export type DepsOptions = CmdOptions<{
+  /**
+   * Whether to print only direct or deep dependencies.
+   */
   deep?: boolean;
 }>;
 

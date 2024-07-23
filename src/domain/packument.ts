@@ -45,8 +45,11 @@ export type UnityPackument = Readonly<{
    * Same as {@link name}.
    */
   _id?: DomainName;
+  // eslint-disable-next-line jsdoc/require-jsdoc
   _rev?: string;
+  // eslint-disable-next-line jsdoc/require-jsdoc
   _attachments?: Readonly<Record<string, unknown>>;
+  // eslint-disable-next-line jsdoc/require-jsdoc
   readme?: string;
   /**
    * The packages versions, organized by their version.
@@ -77,7 +80,9 @@ export type UnityPackument = Readonly<{
     created?: string;
     modified?: string;
   }>;
+  // eslint-disable-next-line jsdoc/require-jsdoc
   date?: Date;
+  // eslint-disable-next-line jsdoc/require-jsdoc
   users?: Readonly<Record<string, unknown>>;
 }>;
 
