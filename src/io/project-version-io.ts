@@ -14,6 +14,12 @@ export class ProjectVersionMissingError extends CustomError {
 
 export class ProjectVersionMalformedError extends CustomError {}
 
+/**
+ * Constructs the path to a ProjectVersion.txt file based on the path to
+ * the containing project directory.
+ * @param projectDirPath The path to the project directory.
+ * @returns The path to the version file.
+ */
 export function projectVersionTxtPathFor(projectDirPath: string) {
   return path.join(projectDirPath, "ProjectSettings", "ProjectVersion.txt");
 }

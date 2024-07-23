@@ -11,6 +11,10 @@ export async function prepareHomeDirectory(): Promise<string> {
   return homePath;
 }
 
+/**
+ * Deletes a directory.
+ * @param dir The path to the directory.
+ */
 export async function dropDirectory(dir: string): Promise<void> {
   await fse.remove(dir);
 }

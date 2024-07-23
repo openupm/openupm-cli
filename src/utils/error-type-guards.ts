@@ -1,9 +1,18 @@
 import { AssertionError } from "assert";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 
+/**
+ * Type guard for checking if a value is an {@link Error}.
+ *
+ * Note: This function is somewhat "duck-type-y". It only makes sure that the
+ * value is a non-null object. It does not truly establish that it is an
+ * instance of the {@link Error} class.
+ * @param x The value.
+ */
 export function isError(x: unknown): x is Error {
   return x !== null && typeof x === "object";
 }
+
 /**
  * @throws {AssertionError} The given parameter is not an error.
  */
@@ -16,6 +25,10 @@ export function assertIsError(x: unknown): asserts x is Error {
     });
 }
 
+/**
+ * Type guard for checking whether a value is a Node.js Error.
+ * @param x The value to check.
+ */
 export function isNodeError(x: unknown): x is NodeJS.ErrnoException {
   return isError(x) && "code" in x && "errno" in x;
 }
@@ -40,10 +53,19 @@ export function assertIsNodeError(
     });
 }
 
+/**
+ * Type guard for checking whether a value is a {@link HttpErrorBase}.
+ * @param x The value to check.
+ */
 export function isHttpError(x: unknown): x is HttpErrorBase {
   return isError(x) && "statusCode" in x;
 }
 
+/**
+ * Asserts that a value is a {@link HttpErrorBase}.
+ * @param x The value to assert.
+ * @throws AssertionError if the value is not a {@link HttpErrorBase}.
+ */
 export function assertIsHttpError(x: unknown): asserts x is HttpErrorBase {
   if (!isHttpError(x))
     throw new AssertionError({

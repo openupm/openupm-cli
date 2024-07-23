@@ -64,6 +64,10 @@ function isPatch(version: EditorVersion): version is PatchVersion {
   return "patch" in version;
 }
 
+/**
+ * Checks whether an editor version is a {@link ReleaseVersion}.
+ * @param version The version to check.
+ */
 export function isRelease(version: EditorVersion): version is ReleaseVersion {
   return isPatch(version) && "flag" in version;
 }
@@ -171,6 +175,9 @@ export function makeEditorVersion(
   flag: ReleaseFlag,
   build: number
 ): ReleaseVersion;
+/**
+ * Constructs an editor version.
+ */
 export function makeEditorVersion(
   major: number,
   minor: number,

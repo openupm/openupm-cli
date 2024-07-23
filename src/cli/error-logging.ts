@@ -123,6 +123,11 @@ function tryMakeFixSuggestionFor(error: unknown): string | null {
   return null;
 }
 
+/**
+ * Prints information about an error to a logger.
+ * @param log The logger to print to.
+ * @param error The error.
+ */
 export function logError(log: Logger, error: unknown) {
   const message = makeErrorMessageFor(error);
   log.error("", message);
@@ -135,6 +140,15 @@ export function logError(log: Logger, error: unknown) {
     log.notice("", "Run with --verbose to get more information.");
 }
 
+/**
+ * Wraps a function with an error logger. Any errors thrown by the function
+ * will be caught and logged. Afterward the process will exit with 
+ * {@link ResultCodes.Error}.
+ * @param log The logger to print to.
+ * @param cmd The function to wrap.
+ * @returns A new function that has the same behaviour as the original but with
+ * error logging.
+ */
 export function withErrorLogger<
   TArgs extends unknown[],
   TOut extends ResultCodes

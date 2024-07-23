@@ -158,22 +158,36 @@ export type ResolvePackumentVersionError =
   | VersionNotFoundError;
 
 /**
- * Attempts to resolve a specific version from a packument. Resolve here means
- * that this function also accepts non-semantic versions and will attempt to
- * find the correct version from the packument. This differentiates it from
- * {@link tryGetPackumentVersion}.
- * @param packument The packument to search.
- * @param requestedVersion The requested version.
+ * Resolved the latest version from a packument.
+ * @param packument The packument.
+ * @param requestedVersion The version to resolve. In this case indicates that
+ * the latest version is requested.
+ * @returns Result containing the resolved version. Will never be error.
+ * @throws NoVersionsError if the packument had no versions at all.
  */
-
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: undefined | "latest"
 ): Result<UnityPackumentVersion, never>;
+/**
+ * Attempts to resolve a specific version from a packument.
+ * @param packument The packument.
+ * @param requestedVersion The version to resolve.
+ * @returns Result containing the resolved version. Will be error if the
+ * version was not found.
+ */
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
-  requestedVersion: ResolvableVersion
+  requestedVersion: SemanticVersion
 ): Result<UnityPackumentVersion, VersionNotFoundError>;
+/**
+ * Attempts to resolve a version from a packument.
+ * @param packument The packument.
+ * @param requestedVersion The version to resolve.
+ * @returns A result containing the version or an error if it could not be
+ * resolved.
+ * @throws NoVersionsError if the packument had no versions at all.
+ */
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion

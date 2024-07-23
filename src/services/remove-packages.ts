@@ -25,6 +25,9 @@ export type RemovePackages = (
   packageNames: ReadonlyArray<DomainName>
 ) => AsyncResult<ReadonlyArray<RemovedPackage>, RemovePackagesError>;
 
+/**
+ * Makes a {@link RemovePackages} service function.
+ */
 export function makeRemovePackages(
   loadProjectManifest: LoadProjectManifest,
   writeProjectManifest: WriteProjectManifest

@@ -17,6 +17,9 @@ export type ResolveLatestVersion = (
   packageName: DomainName
 ) => Promise<FromRegistry<SemanticVersion> | null>;
 
+/**
+ * Makes a {@link ResolveLatestVersion} service function.
+ */
 export function makeResolveLatestVersion(
   fetchPackument: FetchPackument
 ): ResolveLatestVersion {

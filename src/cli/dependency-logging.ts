@@ -32,6 +32,13 @@ function errorMessageFor(error: ResolvePackumentVersionError): string {
   else return "version not found";
 }
 
+/**
+ * Prints information about a dependency that could not be resolved to a logger.
+ * @param log The logger to print to.
+ * @param dependencyName The name of the dependency.
+ * @param dependencyVersion The version of the dependency.
+ * @param dependency The failed node from the dependency graph.
+ */
 export function logFailedDependency(
   log: Logger,
   dependencyName: DomainName,

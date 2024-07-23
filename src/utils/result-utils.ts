@@ -12,6 +12,10 @@ export function AsyncOk<T>(value: T): AsyncResult<T, never>;
  * Shorthand for `Ok(undefined).toAsyncResult()`.
  */
 export function AsyncOk(): AsyncResult<void, never>;
+/**
+ * Creates an ok {@link AsyncResult}.
+ * @param value The value in the result.
+ */
 export function AsyncOk(value?: unknown) {
   return Ok(value).toAsyncResult();
 }

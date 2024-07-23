@@ -14,6 +14,9 @@ export type AuthNpmrc = (
   token: string
 ) => Promise<string>;
 
+/**
+ * Makes a {@link AuthNpmrc} service function.
+ */
 export function makeAuthNpmrc(
   findPath: FindNpmrcPath,
   loadNpmrc: LoadNpmrc,

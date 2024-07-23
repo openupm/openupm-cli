@@ -12,6 +12,13 @@ export type ProjectOptions = {};
 const writeFile = makeWriteText();
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 
+/**
+ * Prepares a mock Unity project for testing.
+ * @param homeDirectory The path to the users home directory. The project will
+ * be placed in relation to this path.
+ * @param options Creation options.
+ * @returns The path to the created project's directory.
+ */
 export async function prepareUnityProject(
   homeDirectory: string,
   options: ProjectOptions = {}

@@ -97,6 +97,13 @@ export function makeGraphFromSeed(
   return putNode({}, packageName, version, unresolvedNode);
 }
 
+/**
+ * Attempts to get the next unresolved package reference from a dependency
+ * graph.
+ * @param graph The graph to search.
+ * @returns A tuple with the name and version of the next unresolved package or
+ * null if there are no unresolved packages in the graph.
+ */
 export function tryGetNextUnresolved(
   graph: DependencyGraph
 ): readonly [DomainName, SemanticVersion] | null {
@@ -107,6 +114,13 @@ export function tryGetNextUnresolved(
   return null;
 }
 
+/**
+ * Marks a node in a graph as a built-in package. This will also resolve it.
+ * @param graph The graph.
+ * @param packageName The name of the package to resolve.
+ * @param version The version of the package to resolve.
+ * @returns The updated graph.
+ */
 export function markBuiltInResolved(
   graph: DependencyGraph,
   packageName: DomainName,
@@ -115,6 +129,16 @@ export function markBuiltInResolved(
   return putNode(graph, packageName, version, builtInNode);
 }
 
+/**
+ * Marks a node in a dependency graph as resolved from a remote registry.
+ * @param graph The graph.
+ * @param packageName The name of the package that was resolved.
+ * @param version The version of the package that was resolved.
+ * @param source The url of the registry from which the package was resolved.
+ * @param dependencies A record of the packages dependencies. These will be
+ * marked as unresolved in the graph, if they were not resolved previously.
+ * @returns The updated graph.
+ */
 export function markRemoteResolved(
   graph: DependencyGraph,
   packageName: DomainName,
@@ -136,6 +160,15 @@ export function markRemoteResolved(
   );
 }
 
+/**
+ * Marks a package that could not be resolved in a dependency graph.
+ * @param graph The graph.
+ * @param packageName The name of the package.
+ * @param version The version of the package.
+ * @param errors The errors that prevented the package from being resolved.
+ * They are stored in record form, keyed by the registry url with which
+ * the error is associated.
+ */
 export function markFailed(
   graph: DependencyGraph,
   packageName: DomainName,
@@ -148,6 +181,13 @@ export function markFailed(
   });
 }
 
+/**
+ * Attempts to get the node for a package from a dependency graph.
+ * @param graph The graph.
+ * @param packageName The name of the package.
+ * @param version The package version.
+ * @returns The package node or null if the graph has no node for this package.
+ */
 export function tryGetGraphNode(
   graph: DependencyGraph,
   packageName: DomainName,
@@ -156,6 +196,11 @@ export function tryGetGraphNode(
   return graph[packageName]?.[version] ?? null;
 }
 
+/**
+ * Counts the nodes in the graph.
+ * @param graph The graph.
+ * @returns A natural integer.
+ */
 export function graphNodeCount(graph: DependencyGraph): number {
   return Object.values(graph)
     .map(Object.keys)

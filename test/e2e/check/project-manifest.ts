@@ -6,6 +6,11 @@ import { noopLogger } from "../../../src/logging";
 const readText = makeReadText();
 const loadProjectManifest = makeLoadProjectManifest(readText, noopLogger);
 
+/**
+ * Loads the project manifest based on the project directory.
+ * @param projectDirectory The directory.
+ * @returns The manifest.
+ */
 export async function getProjectManifest(
   projectDirectory: string
 ): Promise<UnityProjectManifest> {
