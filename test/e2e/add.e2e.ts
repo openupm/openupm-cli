@@ -7,14 +7,14 @@ import { emptyProjectManifest } from "../../src/domain/project-manifest";
 import { makeRegistryUrl, RegistryUrl } from "../../src/domain/registry-url";
 
 describe("add packages", () => {
-  type SuccessfullAddCase = {
+  type SuccessfulAddCase = {
     packageName: string;
     addVersion?: string;
     expectedVersion?: string;
   };
 
   async function testSuccessfulAdd(
-    cases: SuccessfullAddCase[],
+    cases: SuccessfulAddCase[],
     expectedScopes: string[],
     registryOverride?: RegistryUrl
   ) {
