@@ -1,3 +1,10 @@
+## [3.4.3](https://github.com/openupm/openupm-cli/compare/3.4.2...3.4.3) (2024-07-23)
+
+
+### Bug Fixes
+
+* ts compile error ([46b8394](https://github.com/openupm/openupm-cli/commit/46b839428ad93c7e967d25c14f10723ddf2a7d63))
+
 ## [3.4.2](https://github.com/openupm/openupm-cli/compare/3.4.1...3.4.2) (2024-07-18)
 
 
