@@ -14,6 +14,7 @@ export class NoWslError extends CustomError {
 /**
  * Attempt to resolve the wls path for a variable.
  * @param varName The variable name.
+ * @throws NoWslError if not running in wsl.
  */
 export function tryGetWslPath(
   varName: string,
