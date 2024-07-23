@@ -7,7 +7,7 @@ describe("package-url", () => {
     it("should be ok for http", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          const input = `http://github.com/user/${{ packumentName }}`;
+          const input = `https://github.com/user/${{packumentName}}`;
           expect(isPackageUrl(input)).toBeTruthy();
         })
       );

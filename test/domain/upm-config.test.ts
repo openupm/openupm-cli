@@ -97,7 +97,7 @@ describe("upm-config", () => {
     });
     describe("get auth for registry", () => {
       it("should find auth for url without trailing slash", () => {
-        const url = makeRegistryUrl("http://registry.npmjs.com");
+        const url = makeRegistryUrl("https://registry.npmjs.com");
         const expected: NpmAuth = {
           alwaysAuth: false,
           token: "This is not a valid token",
@@ -116,7 +116,7 @@ describe("upm-config", () => {
         expect(actual).toEqual(expected);
       });
       it("should find auth for url with trailing slash", () => {
-        const url = "http://registry.npmjs.com/" as RegistryUrl;
+        const url = "https://registry.npmjs.com/" as RegistryUrl;
         const expected: NpmAuth = {
           alwaysAuth: false,
           token: "This is not a valid token",
@@ -137,7 +137,7 @@ describe("upm-config", () => {
       it("should not find auth for url that does not exist", () => {
         const config: UPMConfig = {
           npmAuth: {
-            ["http://registryA.com"]: {
+            ["https://registryA.com"]: {
               alwaysAuth: false,
               email: "real@email.com",
               token: "This is not a valid token",
@@ -147,7 +147,7 @@ describe("upm-config", () => {
 
         const actual = tryGetAuthForRegistry(
           config,
-          makeRegistryUrl("http://registryB.com")
+          makeRegistryUrl("https://registryB.com")
         );
         expect(actual).toBeNull();
       });
