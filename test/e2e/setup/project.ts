@@ -33,8 +33,7 @@ export async function prepareUnityProject(
     { encoding: "utf8" }
   );
 
-  const manifest = emptyProjectManifest;
-  await writeProjectManifest(projectDir, manifest);
+  await writeProjectManifest(projectDir, emptyProjectManifest);
 
   return projectDir;
 }
