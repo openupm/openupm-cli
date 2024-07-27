@@ -82,7 +82,8 @@
     "ts-custom-error": "^3.3.1",
     "ts-results-es": "^4.1.0",
     "update-notifier": "^5.1.0",
-    "yaml": "^2.2.2"
+    "yaml": "^2.2.2",
+    "zod": "^3.23.8"
   },
   "volta": {
     "node": "18.20.2"
