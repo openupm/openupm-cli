@@ -1,4 +1,5 @@
-import { isDomainName } from "../../src/domain/domain-name";
+import { isZod } from "../../src/utils/zod-utils";
+import { DomainName } from "../../src/domain/domain-name";
 
 describe("domain-name", () => {
   describe("validation", () => {
@@ -9,7 +10,7 @@ describe("domain-name", () => {
       "at.ac.my-school",
       "dev.comradevanti123",
     ])(`should be ok for "%s"`, (s) => {
-      expect(isDomainName(s)).toBeTruthy();
+      expect(isZod(s, DomainName)).toBeTruthy();
     });
 
     it.each([
@@ -24,7 +25,7 @@ describe("domain-name", () => {
       // No trailing hyphens
       "com.unity-",
     ])(`should not be ok for "%s"`, (s) => {
-      expect(isDomainName(s)).toBeFalsy();
+      expect(isZod(s, DomainName)).toBeFalsy();
     });
   });
 });

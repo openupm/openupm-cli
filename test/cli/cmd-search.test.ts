@@ -1,5 +1,5 @@
 import { makeSearchCmd, SearchOptions } from "../../src/cli/cmd-search";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { SearchedPackument } from "../../src/io/npm-search";
@@ -11,7 +11,7 @@ import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 const exampleSearchResult: SearchedPackument = {
-  name: makeDomainName("com.example.package-a"),
+  name: DomainName.parse("com.example.package-a"),
   versions: { [makeSemanticVersion("1.0.0")]: "latest" },
   description: "A demo package",
   date: new Date(2019, 9, 2, 3, 2, 38),

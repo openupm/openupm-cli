@@ -7,15 +7,15 @@ import {
   LoadProjectManifest,
   WriteProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import path from "path";
 import { PackumentNotFoundError } from "../../src/common-errors";
 
 describe("remove packages", () => {
   const someProjectPath = path.resolve("/home/projects/MyUnityProject");
-  const somePackage = makeDomainName("com.some.package");
-  const otherPackage = makeDomainName("com.other.package");
+  const somePackage = DomainName.parse("com.some.package");
+  const otherPackage = DomainName.parse("com.other.package");
 
   const defaultManifest = buildProjectManifest((manifest) =>
     manifest.addDependency(somePackage, "1.0.0", true, true)

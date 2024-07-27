@@ -1,6 +1,6 @@
 import { buildPackument } from "../domain/data-packument";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import RegClient from "another-npm-registry-client";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -10,7 +10,7 @@ import { noopLogger } from "../../src/logging";
 
 describe("packument io", () => {
   describe("fetch", () => {
-    const packageA = makeDomainName("package-a");
+    const packageA = DomainName.parse("package-a");
     const exampleRegistry: Registry = {
       url: exampleRegistryUrl,
       auth: null,

@@ -1,6 +1,6 @@
 import { mockService } from "./service.mock";
 import { makeResolveLatestVersion } from "../../src/services/resolve-latest-version";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { UnityPackument } from "../../src/domain/packument";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -9,7 +9,7 @@ import { FetchPackument } from "../../src/io/packument-io";
 import { SemanticVersion } from "../../src/domain/semantic-version";
 
 describe("resolve latest version service", () => {
-  const somePackage = makeDomainName("com.some.package");
+  const somePackage = DomainName.parse("com.some.package");
 
   const exampleRegistry: Registry = { url: exampleRegistryUrl, auth: null };
   const upstreamRegistry: Registry = { url: unityRegistryUrl, auth: null };

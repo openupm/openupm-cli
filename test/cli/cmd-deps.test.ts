@@ -2,7 +2,7 @@ import { makeDepsCmd } from "../../src/cli/cmd-deps";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeMockLogger } from "./log.mock";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
@@ -19,8 +19,8 @@ import {
   markRemoteResolved,
 } from "../../src/domain/dependency-graph";
 
-const somePackage = makeDomainName("com.some.package");
-const otherPackage = makeDomainName("com.other.package");
+const somePackage = DomainName.parse("com.some.package");
+const otherPackage = DomainName.parse("com.other.package");
 
 const defaultEnv = {
   registry: { url: exampleRegistryUrl, auth: null },

@@ -1,10 +1,10 @@
 import { makeCheckIsUnityPackage } from "../../src/services/unity-package-check";
 import { mockService } from "./service.mock";
 import { CheckUrlExists } from "../../src/io/check-url";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 
 describe("is unity package", () => {
-  const somePackage = makeDomainName("com.some.package");
+  const somePackage = DomainName.parse("com.some.package");
 
   function makeDependencies() {
     const checkUrlExists = mockService<CheckUrlExists>();

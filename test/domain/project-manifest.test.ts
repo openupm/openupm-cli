@@ -8,7 +8,7 @@ import {
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
 } from "../../src/domain/project-manifest";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import { makeRegistryUrl } from "../../src/domain/registry-url";
@@ -150,7 +150,7 @@ describe("project-manifest", () => {
     it("should not updated scoped-registry after returning it", () => {
       let manifest = emptyProjectManifest;
       const initial = makeScopedRegistry("test", exampleRegistryUrl);
-      const expected = addScope(initial, makeDomainName("wow"));
+      const expected = addScope(initial, DomainName.parse("wow"));
       manifest = setScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(
@@ -181,8 +181,8 @@ describe("project-manifest", () => {
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, makeDomainName("b"));
-      manifest = addTestable(manifest, makeDomainName("a"));
+      manifest = addTestable(manifest, DomainName.parse("b"));
+      manifest = addTestable(manifest, DomainName.parse("a"));
 
       expect(manifest.testables).toEqual(["a", "b"]);
     });
@@ -190,7 +190,7 @@ describe("project-manifest", () => {
 
   describe("has dependency", () => {
     it("should be true if manifest has dependency", () => {
-      const packageName = makeDomainName("com.some.package");
+      const packageName = DomainName.parse("com.some.package");
       const manifest = buildProjectManifest((manifest) =>
         manifest.addDependency(packageName, "1.0.0", true, true)
       );
@@ -199,7 +199,7 @@ describe("project-manifest", () => {
     });
 
     it("should be false if manifest does not have dependency", () => {
-      const packageName = makeDomainName("com.some.package");
+      const packageName = DomainName.parse("com.some.package");
 
       expect(hasDependency(emptyProjectManifest, packageName)).toBeFalsy();
     });

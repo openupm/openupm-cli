@@ -1,6 +1,6 @@
 import { mockService } from "./service.mock";
 import { makeResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -9,7 +9,7 @@ import { buildPackument } from "../domain/data-packument";
 import { FetchPackument } from "../../src/io/packument-io";
 
 describe("resolve remote packument version", () => {
-  const somePackage = makeDomainName("com.some.package");
+  const somePackage = DomainName.parse("com.some.package");
 
   const someVersion = makeSemanticVersion("1.0.0");
 

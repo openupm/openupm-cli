@@ -1,8 +1,9 @@
-import { DomainName, isDomainName } from "./domain-name";
+import { DomainName } from "./domain-name";
 import { isSemanticVersion, SemanticVersion } from "./semantic-version";
 import { isPackageUrl, PackageUrl } from "./package-url";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import assert from "assert";
+import { assertZod, isZod } from "../utils/zod-utils";
 
 /**
  * A string with the format of one of the supported version tags.
@@ -51,7 +52,7 @@ function isVersionReference(s: string): s is VersionReference {
 export function isPackageReference(s: string): s is PackageReference {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
   return (
-    isDomainName(name) && (version === null || isVersionReference(version))
+    isZod(name, DomainName) && (version === null || isVersionReference(version))
   );
 }
 
@@ -79,7 +80,7 @@ export function makePackageReference(
   name: string,
   version?: string
 ): PackageReference {
-  assert(isDomainName(name), `${name} is valid package-name`);
+  assertZod(name, DomainName);
   assert(
     version === undefined || isVersionReference(version),
     `"${version}" is valid version-reference`

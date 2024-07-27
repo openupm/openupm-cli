@@ -5,7 +5,7 @@ import {
   makeScopedRegistry,
   removeScope,
 } from "../../src/domain/scoped-registry";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { exampleRegistryUrl } from "./data-registry";
@@ -29,8 +29,8 @@ describe("scoped-registry", () => {
     it("should keep scope-list alphabetical", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl);
 
-      registry = addScope(registry, makeDomainName("b"));
-      registry = addScope(registry, makeDomainName("a"));
+      registry = addScope(registry, DomainName.parse("b"));
+      registry = addScope(registry, DomainName.parse("a"));
 
       expect(registry.scopes).toEqual(["a", "b"]);
     });
@@ -90,12 +90,12 @@ describe("scoped-registry", () => {
 
     it("should not do nothing if scope does not exist", () => {
       let registry = makeScopedRegistry("test", exampleRegistryUrl, [
-        makeDomainName("a"),
+        DomainName.parse("a"),
       ]);
 
-      registry = removeScope(registry, makeDomainName("b"));
+      registry = removeScope(registry, DomainName.parse("b"));
 
-      expect(hasScope(registry, makeDomainName("a"))).toBeTruthy();
+      expect(hasScope(registry, DomainName.parse("a"))).toBeTruthy();
     });
 
     it("should remove duplicate scopes", () => {

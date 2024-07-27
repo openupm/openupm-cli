@@ -7,7 +7,7 @@ import {
 } from "../../src/domain/packument";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { buildPackument } from "./data-packument";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 
 describe("packument", () => {
   describe("get latest version", () => {
@@ -63,8 +63,8 @@ describe("packument", () => {
   });
 
   describe("resolve version", () => {
-    const somePackage = makeDomainName("com.some.package");
-    const otherPackage = makeDomainName("com.other.package");
+    const somePackage = DomainName.parse("com.some.package");
+    const otherPackage = DomainName.parse("com.other.package");
     const someHighVersion = makeSemanticVersion("2.0.0");
     const someLowVersion = makeSemanticVersion("1.0.0");
     const somePackument = buildPackument(somePackage, (packument) =>

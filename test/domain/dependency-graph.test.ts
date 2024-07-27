@@ -1,4 +1,4 @@
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import {
   graphNodeCount,
@@ -15,9 +15,9 @@ import { exampleRegistryUrl } from "./data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 
 describe("dependency graph", () => {
-  const somePackage = makeDomainName("com.some.package");
-  const otherPackage = makeDomainName("com.other.package");
-  const anotherPackage = makeDomainName("com.another.package");
+  const somePackage = DomainName.parse("com.some.package");
+  const otherPackage = DomainName.parse("com.other.package");
+  const anotherPackage = DomainName.parse("com.another.package");
   const someVersion = makeSemanticVersion("1.0.0");
 
   describe("traverse", () => {

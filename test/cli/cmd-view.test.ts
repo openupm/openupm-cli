@@ -2,7 +2,7 @@ import { makeViewCmd } from "../../src/cli/cmd-view";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
@@ -12,7 +12,7 @@ import { ResultCodes } from "../../src/cli/result-codes";
 import { FetchPackument } from "../../src/io/packument-io";
 import { PackumentNotFoundError } from "../../src/common-errors";
 
-const somePackage = makeDomainName("com.some.package");
+const somePackage = DomainName.parse("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
   packument
     .set("time", {
