@@ -1,14 +1,12 @@
-import {
-  coerceRegistryUrl,
-  isRegistryUrl,
-} from "../../src/domain/registry-url";
+import { coerceRegistryUrl, RegistryUrl } from "../../src/domain/registry-url";
+import { isZod } from "../../src/utils/zod-utils";
 
 describe("registry-url", () => {
   describe("validation", () => {
     it.each(["http://registry.npmjs.org", "https://registry.npmjs.org"])(
       `"should be ok for "%s"`,
       (input) => {
-        expect(isRegistryUrl(input)).toBeTruthy();
+        expect(isZod(input, RegistryUrl)).toBeTruthy();
       }
     );
 
@@ -18,7 +16,7 @@ describe("registry-url", () => {
       // Trailing slash
       "http://registry.npmjs.org/",
     ])(`"should not be ok for "%s"`, (input) => {
-      expect(isRegistryUrl(input)).not.toBeTruthy();
+      expect(isZod(input, RegistryUrl)).not.toBeTruthy();
     });
   });
 

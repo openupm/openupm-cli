@@ -11,11 +11,11 @@ import {
 import { DomainName } from "../../src/domain/domain-name";
 import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
-import { makeRegistryUrl } from "../../src/domain/registry-url";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { exampleRegistryUrl } from "./data-registry";
 import { buildProjectManifest } from "./data-project-manifest";
+import { RegistryUrl } from "../../src/domain/registry-url";
 
 describe("project-manifest", () => {
   describe("set dependency", () => {
@@ -91,7 +91,7 @@ describe("project-manifest", () => {
   describe("get scoped-registry", () => {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
-      const url = makeRegistryUrl("https://test.com");
+      const url = RegistryUrl.parse("https://test.com");
       const expected = makeScopedRegistry("test", url);
 
       manifest = setScopedRegistry(manifest, expected);
@@ -101,10 +101,10 @@ describe("project-manifest", () => {
 
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
-      const url = makeRegistryUrl("https://test.com");
+      const url = RegistryUrl.parse("https://test.com");
       const expected = makeScopedRegistry(
         "test",
-        makeRegistryUrl("https://test2.com")
+        RegistryUrl.parse("https://test2.com")
       );
 
       manifest = setScopedRegistry(manifest, expected);

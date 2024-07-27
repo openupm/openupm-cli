@@ -4,7 +4,7 @@ import { prepareUnityProject } from "./setup/project";
 import { ResultCodes } from "../../src/cli/result-codes";
 import { getProjectManifest } from "./check/project-manifest";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
-import { makeRegistryUrl, RegistryUrl } from "../../src/domain/registry-url";
+import { RegistryUrl } from "../../src/domain/registry-url";
 
 describe("add packages", () => {
   type SuccessfulAddCase = {
@@ -287,7 +287,7 @@ describe("add packages", () => {
         },
       ],
       ["jp.keijiro.metamesh"],
-      makeRegistryUrl("https://registry.npmjs.com")
+      RegistryUrl.parse("https://registry.npmjs.com")
     );
   });
 });

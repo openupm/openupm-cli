@@ -1,5 +1,5 @@
 import promptly from "promptly";
-import { makeRegistryUrl, RegistryUrl } from "../domain/registry-url";
+import { RegistryUrl } from "../domain/registry-url";
 
 /**
  * Prompts the user for their username.
@@ -31,6 +31,6 @@ export function promptEmail(): Promise<string> {
  */
 export function promptRegistryUrl(): Promise<RegistryUrl> {
   return promptly.prompt("Registry: ", {
-    validator: [makeRegistryUrl],
+    validator: [RegistryUrl.parse],
   }) as Promise<RegistryUrl>;
 }
