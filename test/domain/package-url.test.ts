@@ -1,14 +1,15 @@
-import { isPackageUrl } from "../../src/domain/package-url";
+import { PackageUrl } from "../../src/domain/package-url";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
+import { isZod } from "../../src/utils/zod-utils";
 
 describe("package-url", () => {
   describe("validation", () => {
     it("should be ok for http", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          const input = `https://github.com/user/${{packumentName}}`;
-          expect(isPackageUrl(input)).toBeTruthy();
+          const input = `https://github.com/user/${{ packumentName }}`;
+          expect(isZod(input, PackageUrl)).toBeTruthy();
         })
       );
     });
@@ -17,7 +18,7 @@ describe("package-url", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `https://github.com/user/${{ packumentName }}`;
-          expect(isPackageUrl(input)).toBeTruthy();
+          expect(isZod(input, PackageUrl)).toBeTruthy();
         })
       );
     });
@@ -26,7 +27,7 @@ describe("package-url", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `git@github:user/${{ packumentName }}`;
-          expect(isPackageUrl(input)).toBeTruthy();
+          expect(isZod(input, PackageUrl)).toBeTruthy();
         })
       );
     });
@@ -35,7 +36,7 @@ describe("package-url", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `file:/path/to/${{ packumentName }}`;
-          expect(isPackageUrl(input)).toBeTruthy();
+          expect(isZod(input, PackageUrl)).toBeTruthy();
         })
       );
     });
@@ -46,7 +47,7 @@ describe("package-url", () => {
       // Bad protocol
       "ftp://my.server/my-package",
     ])(`should not be ok for "%s"`, (url) => {
-      expect(isPackageUrl(url)).not.toBeTruthy();
+      expect(isZod(url, PackageUrl)).not.toBeTruthy();
     });
   });
 });

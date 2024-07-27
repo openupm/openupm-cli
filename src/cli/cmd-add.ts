@@ -1,4 +1,4 @@
-import { isPackageUrl, PackageUrl } from "../domain/package-url";
+import { PackageUrl } from "../domain/package-url";
 import {
   LoadProjectManifest,
   WriteProjectManifest,
@@ -43,6 +43,7 @@ import { Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 
 import { ResolvePackumentVersionError } from "../domain/packument";
+import { isZod } from "../utils/zod-utils";
 
 export class PackageIncompatibleError extends CustomError {
   constructor(
@@ -152,7 +153,10 @@ export function makeAddCmd(
       // packages that added to scope registry
       const pkgsInScope = Array.of<DomainName>();
       let versionToAdd = requestedVersion;
-      if (requestedVersion === undefined || !isPackageUrl(requestedVersion)) {
+      if (
+        requestedVersion === undefined ||
+        !isZod(requestedVersion, PackageUrl)
+      ) {
         let resolveResult = await resolveRemotePackumentVersion(
           name,
           requestedVersion,

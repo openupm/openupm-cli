@@ -1,19 +1,20 @@
-import { Brand } from "ts-brand";
+import { z } from "zod";
+
+const GitUrl = z.string().startsWith("git");
+
+const HttpUrl = z.string().startsWith("http");
+
+const FileUrl = z.string().startsWith("file");
 
 /**
- * A string of an url pointing to a local or remote package.
+ * Schema for {@link PackageUrl}.
  */
-export type PackageUrl = Brand<string, "PackageUrl">;
-
-const isGit = (version: string): boolean => version.startsWith("git");
-
-const isHttp = (version: string): boolean => version.startsWith("http");
-
-const isLocal = (version: string): boolean => version.startsWith("file");
+export const PackageUrl = z
+  .union([GitUrl, HttpUrl, FileUrl])
+  .brand("PackageUrl");
 
 /**
  * Checks if a version is a package-url.
  * @param version The version.
  */
-export const isPackageUrl = (version: string): version is PackageUrl =>
-  isGit(version) || isHttp(version) || isLocal(version);
+export type PackageUrl = z.TypeOf<typeof PackageUrl>;
