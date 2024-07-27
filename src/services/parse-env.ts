@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { GetUpmConfigPath, LoadUpmConfig } from "../io/upm-config-io";
 import path from "path";
-import { coerceRegistryUrl, makeRegistryUrl } from "../domain/registry-url";
+import { coerceRegistryUrl, RegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
 import { tryGetEnv } from "../utils/env-util";
@@ -84,7 +84,7 @@ export function makeParseEnv(
     const url =
       options._global.registry !== undefined
         ? coerceRegistryUrl(options._global.registry)
-        : makeRegistryUrl("https://package.openupm.com");
+        : RegistryUrl.parse("https://package.openupm.com");
 
     if (upmConfig === null) return { url, auth: null };
 
@@ -101,7 +101,7 @@ export function makeParseEnv(
   }
 
   function determineUpstreamRegistry(): Registry {
-    const url = makeRegistryUrl("https://packages.unity.com");
+    const url = RegistryUrl.parse("https://packages.unity.com");
 
     return { url, auth: null };
   }

@@ -4,7 +4,7 @@ import {
   PackageIncompatibleError,
   UnresolvedDependenciesError,
 } from "../../src/cli/cmd-add";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
@@ -15,7 +15,7 @@ import { buildPackument } from "../domain/data-packument";
 import { mockResolvedPackuments } from "../services/packument-resolving.mock";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { ResolveDependencies } from "../../src/services/dependency-resolving";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { mockService } from "../services/service.mock";
 import {
   ResolvedPackumentVersion,
@@ -37,8 +37,8 @@ import {
   markRemoteResolved,
 } from "../../src/domain/dependency-graph";
 
-const somePackage = makeDomainName("com.some.package");
-const otherPackage = makeDomainName("com.other.package");
+const somePackage = DomainName.parse("com.some.package");
+const otherPackage = DomainName.parse("com.other.package");
 const somePackument = buildPackument(somePackage, (packument) =>
   packument.addVersion("1.0.0", (version) =>
     version.set("unity", "2022.2").addDependency(otherPackage, "1.0.0")
@@ -65,7 +65,7 @@ const defaultEnv = {
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
 } as Env;
 
-const someVersion = makeSemanticVersion("1.0.0");
+const someVersion = SemanticVersion.parse("1.0.0");
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
@@ -413,7 +413,7 @@ describe("cmd-add", () => {
     const { addCmd, writeProjectManifest } = makeDependencies();
 
     // The second package can not be added
-    await addCmd([somePackage, makeDomainName("com.unknown.package")], {
+    await addCmd([somePackage, DomainName.parse("com.unknown.package")], {
       _global: {},
     }).catch(() => {});
 

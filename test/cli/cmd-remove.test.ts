@@ -1,14 +1,14 @@
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Env, ParseEnv } from "../../src/services/parse-env";
 import { makeRemoveCmd } from "../../src/cli/cmd-remove";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 import { SemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { mockService } from "../services/service.mock";
 import { RemovePackages } from "../../src/services/remove-packages";
 import { AsyncOk } from "../../src/utils/result-utils";
 
-const somePackage = makeDomainName("com.some.package");
+const somePackage = DomainName.parse("com.some.package");
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
   registry: { url: exampleRegistryUrl, auth: null },

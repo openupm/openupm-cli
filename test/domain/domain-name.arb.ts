@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { makeDomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name";
 
 /**
  * Single char string [A-Z].
@@ -50,4 +50,4 @@ export const arbDomainName = fc
     maxLength: 4,
   })
   .map((segments) => segments.join("."))
-  .map(makeDomainName);
+  .map(DomainName.parse);

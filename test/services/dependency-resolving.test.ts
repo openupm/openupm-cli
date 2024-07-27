@@ -4,8 +4,8 @@ import { FetchPackument } from "../../src/io/packument-io";
 import { CheckIsBuiltInPackage } from "../../src/services/built-in-package-check";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { makeDomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { Registry } from "../../src/domain/registry";
 import { NodeType, tryGetGraphNode } from "../../src/domain/dependency-graph";
 import { PackumentNotFoundError } from "../../src/common-errors";
@@ -17,11 +17,11 @@ describe("dependency resolving", () => {
     { url: unityRegistryUrl, auth: null },
   ];
 
-  const somePackage = makeDomainName("com.some.package");
-  const otherPackage = makeDomainName("com.other.package");
+  const somePackage = DomainName.parse("com.some.package");
+  const otherPackage = DomainName.parse("com.other.package");
 
-  const someVersion = makeSemanticVersion("1.0.0");
-  const otherVersion = makeSemanticVersion("2.0.0");
+  const someVersion = SemanticVersion.parse("1.0.0");
+  const otherVersion = SemanticVersion.parse("2.0.0");
 
   function makeDependencies() {
     const fetchPackument = mockService<FetchPackument>();

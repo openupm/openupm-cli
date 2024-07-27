@@ -1,6 +1,6 @@
 import { makeSearchCmd, SearchOptions } from "../../src/cli/cmd-search";
-import { makeDomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { SearchedPackument } from "../../src/io/npm-search";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -11,11 +11,11 @@ import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
 
 const exampleSearchResult: SearchedPackument = {
-  name: makeDomainName("com.example.package-a"),
-  versions: { [makeSemanticVersion("1.0.0")]: "latest" },
+  name: DomainName.parse("com.example.package-a"),
+  versions: { [SemanticVersion.parse("1.0.0")]: "latest" },
   description: "A demo package",
   date: new Date(2019, 9, 2, 3, 2, 38),
-  "dist-tags": { latest: makeSemanticVersion("1.0.0") },
+  "dist-tags": { latest: SemanticVersion.parse("1.0.0") },
 };
 
 function makeDependencies() {

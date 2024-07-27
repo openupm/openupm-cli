@@ -1,6 +1,4 @@
-import assert from "assert";
-import { isDomainName } from "../../src/domain/domain-name";
-import { isSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import {
   addTestable,
@@ -10,6 +8,8 @@ import {
   UnityProjectManifest,
 } from "../../src/domain/project-manifest";
 import { exampleRegistryUrl } from "./data-registry";
+import { assertZod } from "../../src/utils/zod-utils";
+import { DomainName } from "../../src/domain/domain-name";
 
 /**
  * Builder class for {@link UnityProjectManifest}.
@@ -26,7 +26,7 @@ class UnityProjectManifestBuilder {
    * @param name The name of the scope.
    */
   addScope(name: string): UnityProjectManifestBuilder {
-    assert(isDomainName(name), `${name} is domain name`);
+    assertZod(name, DomainName);
 
     this.manifest = mapScopedRegistry(
       this.manifest,
@@ -46,7 +46,7 @@ class UnityProjectManifestBuilder {
    * @param name The packages name.
    */
   addTestable(name: string): UnityProjectManifestBuilder {
-    assert(isDomainName(name), `${name} is domain name`);
+    assertZod(name, DomainName);
     this.manifest = addTestable(this.manifest, name);
     return this;
   }
@@ -64,8 +64,8 @@ class UnityProjectManifestBuilder {
     withScope: boolean,
     testable: boolean
   ): UnityProjectManifestBuilder {
-    assert(isDomainName(name), `${name} is domain name`);
-    assert(isSemanticVersion(version), `${version} is semantic version`);
+    assertZod(name, DomainName);
+    assertZod(version, SemanticVersion);
     if (withScope) this.addScope(name);
     if (testable) this.addTestable(name);
     this.manifest = setDependency(this.manifest, name, version);

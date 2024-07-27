@@ -8,14 +8,14 @@ import {
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
 } from "../../src/domain/project-manifest";
-import { makeDomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
-import { makeRegistryUrl } from "../../src/domain/registry-url";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
 import { exampleRegistryUrl } from "./data-registry";
 import { buildProjectManifest } from "./data-project-manifest";
+import { RegistryUrl } from "../../src/domain/registry-url";
 
 describe("project-manifest", () => {
   describe("set dependency", () => {
@@ -27,7 +27,7 @@ describe("project-manifest", () => {
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("1.2.3")
+            SemanticVersion.parse("1.2.3")
           );
 
           expect(manifest.dependencies).toEqual({ [packumentName]: "1.2.3" });
@@ -43,12 +43,12 @@ describe("project-manifest", () => {
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("1.2.3")
+            SemanticVersion.parse("1.2.3")
           );
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("2.3.4")
+            SemanticVersion.parse("2.3.4")
           );
 
           expect(manifest.dependencies).toEqual({ [packumentName]: "2.3.4" });
@@ -66,7 +66,7 @@ describe("project-manifest", () => {
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("1.2.3")
+            SemanticVersion.parse("1.2.3")
           );
           manifest = removeDependency(manifest, packumentName);
 
@@ -91,7 +91,7 @@ describe("project-manifest", () => {
   describe("get scoped-registry", () => {
     it("should should find scoped-registry with url if present", () => {
       let manifest = emptyProjectManifest;
-      const url = makeRegistryUrl("https://test.com");
+      const url = RegistryUrl.parse("https://test.com");
       const expected = makeScopedRegistry("test", url);
 
       manifest = setScopedRegistry(manifest, expected);
@@ -101,10 +101,10 @@ describe("project-manifest", () => {
 
     it("should should not find scoped-registry with incorrect url", () => {
       let manifest = emptyProjectManifest;
-      const url = makeRegistryUrl("https://test.com");
+      const url = RegistryUrl.parse("https://test.com");
       const expected = makeScopedRegistry(
         "test",
-        makeRegistryUrl("https://test2.com")
+        RegistryUrl.parse("https://test2.com")
       );
 
       manifest = setScopedRegistry(manifest, expected);
@@ -150,7 +150,7 @@ describe("project-manifest", () => {
     it("should not updated scoped-registry after returning it", () => {
       let manifest = emptyProjectManifest;
       const initial = makeScopedRegistry("test", exampleRegistryUrl);
-      const expected = addScope(initial, makeDomainName("wow"));
+      const expected = addScope(initial, DomainName.parse("wow"));
       manifest = setScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(
@@ -181,8 +181,8 @@ describe("project-manifest", () => {
     it("should add testables in alphabetical order", () => {
       let manifest = emptyProjectManifest;
 
-      manifest = addTestable(manifest, makeDomainName("b"));
-      manifest = addTestable(manifest, makeDomainName("a"));
+      manifest = addTestable(manifest, DomainName.parse("b"));
+      manifest = addTestable(manifest, DomainName.parse("a"));
 
       expect(manifest.testables).toEqual(["a", "b"]);
     });
@@ -190,7 +190,7 @@ describe("project-manifest", () => {
 
   describe("has dependency", () => {
     it("should be true if manifest has dependency", () => {
-      const packageName = makeDomainName("com.some.package");
+      const packageName = DomainName.parse("com.some.package");
       const manifest = buildProjectManifest((manifest) =>
         manifest.addDependency(packageName, "1.0.0", true, true)
       );
@@ -199,7 +199,7 @@ describe("project-manifest", () => {
     });
 
     it("should be false if manifest does not have dependency", () => {
-      const packageName = makeDomainName("com.some.package");
+      const packageName = DomainName.parse("com.some.package");
 
       expect(hasDependency(emptyProjectManifest, packageName)).toBeFalsy();
     });

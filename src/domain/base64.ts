@@ -1,9 +1,11 @@
-import { Brand } from "ts-brand";
+import { z } from "zod";
+
+export const Base64 = z.string().base64().brand("Base64");
 
 /**
  * A Base64 encoded string.
  */
-export type Base64 = Brand<string, "Base64">;
+export type Base64 = z.TypeOf<typeof Base64>;
 
 /**
  * Encodes a string using base64.

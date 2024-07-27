@@ -7,8 +7,8 @@ import {
 import { makeSearchPackages } from "../../src/services/search-packages";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { makeDomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { noopLogger } from "../../src/logging";
 
 describe("search packages", () => {
@@ -20,11 +20,11 @@ describe("search packages", () => {
   const exampleKeyword = "package-a";
 
   const exampleSearchResult: SearchedPackument = {
-    name: makeDomainName("com.example.package-a"),
-    versions: { [makeSemanticVersion("1.0.0")]: "latest" },
+    name: DomainName.parse("com.example.package-a"),
+    versions: { [SemanticVersion.parse("1.0.0")]: "latest" },
     description: "A demo package",
     date: new Date(2019, 9, 2, 3, 2, 38),
-    "dist-tags": { latest: makeSemanticVersion("1.0.0") },
+    "dist-tags": { latest: SemanticVersion.parse("1.0.0") },
   };
 
   const exampleAllPackumentsResult = {

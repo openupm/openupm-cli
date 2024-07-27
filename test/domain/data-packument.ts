@@ -1,14 +1,12 @@
 import assert from "assert";
-import { DomainName, isDomainName } from "../../src/domain/domain-name";
-import {
-  isSemanticVersion,
-  SemanticVersion,
-} from "../../src/domain/semantic-version";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { makePackageId } from "../../src/domain/package-id";
 import {
   UnityPackument,
   UnityPackumentVersion,
 } from "../../src/domain/packument";
+import { isZod } from "../../src/utils/zod-utils";
 
 /**
  * Builder class for {@link UnityPackumentVersion}.
@@ -32,8 +30,8 @@ class UnityPackumentVersionBuilder {
    * @param version The version.
    */
   addDependency(name: string, version: string): UnityPackumentVersionBuilder {
-    assert(isDomainName(name), `${name} is domain name`);
-    assert(isSemanticVersion(version), `${version} is semantic version`);
+    assert(isZod(name, DomainName), `${name} is domain name`);
+    assert(isZod(version, SemanticVersion), `${version} is semantic version`);
     this.version = {
       ...this.version,
       dependencies: {
@@ -89,7 +87,7 @@ class UnityPackumentBuilder {
     version: string,
     build?: (builder: UnityPackumentVersionBuilder) => unknown
   ): UnityPackumentBuilder {
-    assert(isSemanticVersion(version), `${version} is semantic version`);
+    assert(isZod(version, SemanticVersion), `${version} is semantic version`);
     const builder = new UnityPackumentVersionBuilder(
       this.packument.name,
       version
@@ -129,7 +127,7 @@ export function buildPackument(
   name: string,
   build?: (builder: UnityPackumentBuilder) => unknown
 ): UnityPackument {
-  assert(isDomainName(name), `${name} is domain name`);
+  assert(isZod(name, DomainName));
   const builder = new UnityPackumentBuilder(name);
   if (build !== undefined) build(builder);
   return builder.packument;

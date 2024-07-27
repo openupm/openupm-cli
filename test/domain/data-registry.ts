@@ -1,3 +1,3 @@
-import { makeRegistryUrl } from "../../src/domain/registry-url";
+import { RegistryUrl } from "../../src/domain/registry-url";
 
-export const exampleRegistryUrl = makeRegistryUrl("https://example.com");
+export const exampleRegistryUrl = RegistryUrl.parse("https://example.com");

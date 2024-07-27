@@ -2,13 +2,13 @@ import { CheckIsUnityPackage } from "../../src/services/unity-package-check";
 import { makeCheckIsBuiltInPackage } from "../../src/services/built-in-package-check";
 import { mockService } from "./service.mock";
 import { FetchPackument } from "../../src/io/packument-io";
-import { makeDomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { UnityPackument } from "../../src/domain/packument";
 
 describe("is built-in package", () => {
-  const somePackage = makeDomainName("com.some.package");
-  const someVersion = makeSemanticVersion("1.0.0");
+  const somePackage = DomainName.parse("com.some.package");
+  const someVersion = SemanticVersion.parse("1.0.0");
 
   function makeDependencies() {
     const checkIsUnityPackage = mockService<CheckIsUnityPackage>();

@@ -1,5 +1,5 @@
 import { ParseEnv } from "../services/parse-env";
-import { isPackageUrl } from "../domain/package-url";
+import { PackageUrl } from "../domain/package-url";
 import {
   makePackageReference,
   PackageReference,
@@ -16,8 +16,9 @@ import {
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
-import { isSemanticVersion } from "../domain/semantic-version";
+import { SemanticVersion } from "../domain/semantic-version";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
+import { isZod } from "../utils/zod-utils";
 
 /**
  * Options passed to the deps command.
@@ -61,13 +62,13 @@ export function makeDepsCmd(
 
     const [packageName, requestedVersion] = splitPackageReference(pkg);
 
-    if (requestedVersion !== undefined && isPackageUrl(requestedVersion)) {
+    if (requestedVersion !== undefined && isZod(requestedVersion, PackageUrl)) {
       log.error("", "cannot get dependencies for url-version");
       return ResultCodes.Error;
     }
 
     const latestVersion =
-      requestedVersion !== undefined && isSemanticVersion(requestedVersion)
+      requestedVersion !== undefined && isZod(requestedVersion, SemanticVersion)
         ? requestedVersion
         : (await resolveLatestVersion(sources, packageName))?.value ?? null;
 

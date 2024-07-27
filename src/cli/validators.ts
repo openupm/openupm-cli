@@ -1,7 +1,8 @@
 import { mustBeParsable, mustSatisfy } from "./cli-parsing";
 import { isPackageReference } from "../domain/package-reference";
-import { isDomainName } from "../domain/domain-name";
 import { coerceRegistryUrl } from "../domain/registry-url";
+import { isZod } from "../utils/zod-utils";
+import { DomainName } from "../domain/domain-name";
 
 export const mustBePackageReference = mustSatisfy(
   isPackageReference,
@@ -9,7 +10,7 @@ export const mustBePackageReference = mustSatisfy(
 );
 
 export const mustBeDomainName = mustSatisfy(
-  isDomainName,
+  (s): s is DomainName => isZod(s, DomainName),
   (input) => `"${input}" is not a valid package name`
 );
 

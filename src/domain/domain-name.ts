@@ -1,12 +1,4 @@
-import { Brand } from "ts-brand";
-import assert from "assert";
-
-/**
- * A string matching the format of a domain name.
- * @example com.unity
- * @example com.my-company
- */
-export type DomainName = Brand<string, "DomainName">;
+import { z } from "zod";
 
 const segmentRegex = /^(?!.*--|^-.*|.*-$)[a-zA-Z0-9-]+$/;
 
@@ -15,22 +7,20 @@ function domainSegmentsIn(hostName: string): string[] {
 }
 
 /**
- * Checks if a string is a domain name. Only does basic syntax validation.
- * Does not check for correct segment-count etc.
- * @param s The string.
+ * Schema for {@link DomainName}.
  */
-export function isDomainName(s: string): s is DomainName {
-  const segments = domainSegmentsIn(s);
-  if (segments.length === 0) return false;
-  return segments.every((segment) => segmentRegex.test(segment));
-}
+export const DomainName = z
+  .string()
+  .refine((s) => {
+    const segments = domainSegmentsIn(s);
+    if (segments.length === 0) return false;
+    return segments.every((segment) => segmentRegex.test(segment));
+  })
+  .brand("DomainName");
 
 /**
- * Constructs a domain-name from a string.
- * @param s The string.
- * @throws {assert.AssertionError} If string is not in valid format.
+ * A string matching the format of a domain name.
+ * @example com.unity
+ * @example com.my-company
  */
-export function makeDomainName(s: string): DomainName {
-  assert(isDomainName(s), `"${s}" is a domain name`);
-  return s;
-}
+export type DomainName = z.TypeOf<typeof DomainName>;
