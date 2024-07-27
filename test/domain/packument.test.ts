@@ -5,7 +5,7 @@ import {
   tryResolvePackumentVersion,
   VersionNotFoundError,
 } from "../../src/domain/packument";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { buildPackument } from "./data-packument";
 import { DomainName } from "../../src/domain/domain-name";
 
@@ -13,7 +13,7 @@ describe("packument", () => {
   describe("get latest version", () => {
     it("should first get version from dist-tags", async () => {
       const packument = {
-        "dist-tags": { latest: makeSemanticVersion("1.0.0") },
+        "dist-tags": { latest: SemanticVersion.parse("1.0.0") },
       };
 
       const version = tryGetLatestVersion(packument);
@@ -23,7 +23,7 @@ describe("packument", () => {
 
     it("should then get version from version property", async () => {
       const packument = {
-        version: makeSemanticVersion("1.0.0"),
+        version: SemanticVersion.parse("1.0.0"),
       };
 
       const version = tryGetLatestVersion(packument);
@@ -42,7 +42,7 @@ describe("packument", () => {
 
   describe("get version", () => {
     it("should find existing packument version", () => {
-      const version = makeSemanticVersion("1.0.0");
+      const version = SemanticVersion.parse("1.0.0");
       const packument = buildPackument("com.some.package", (packument) =>
         packument.addVersion(version)
       );
@@ -53,7 +53,7 @@ describe("packument", () => {
     });
 
     it("should not find missing packument version", () => {
-      const version = makeSemanticVersion("1.0.0");
+      const version = SemanticVersion.parse("1.0.0");
       const packument = buildPackument("com.some.package");
 
       const packumentVersion = tryGetPackumentVersion(packument, version);
@@ -65,8 +65,8 @@ describe("packument", () => {
   describe("resolve version", () => {
     const somePackage = DomainName.parse("com.some.package");
     const otherPackage = DomainName.parse("com.other.package");
-    const someHighVersion = makeSemanticVersion("2.0.0");
-    const someLowVersion = makeSemanticVersion("1.0.0");
+    const someHighVersion = SemanticVersion.parse("2.0.0");
+    const someLowVersion = SemanticVersion.parse("1.0.0");
     const somePackument = buildPackument(somePackage, (packument) =>
       packument
         .addVersion(someLowVersion, (version) =>
@@ -110,7 +110,7 @@ describe("packument", () => {
     });
 
     it("should fail if version is not found", () => {
-      const someNonExistentVersion = makeSemanticVersion("3.0.0");
+      const someNonExistentVersion = SemanticVersion.parse("3.0.0");
 
       const result = tryResolvePackumentVersion(
         somePackument,

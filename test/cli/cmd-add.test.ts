@@ -15,7 +15,7 @@ import { buildPackument } from "../domain/data-packument";
 import { mockResolvedPackuments } from "../services/packument-resolving.mock";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { ResolveDependencies } from "../../src/services/dependency-resolving";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { mockService } from "../services/service.mock";
 import {
   ResolvedPackumentVersion,
@@ -65,7 +65,7 @@ const defaultEnv = {
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
 } as Env;
 
-const someVersion = makeSemanticVersion("1.0.0");
+const someVersion = SemanticVersion.parse("1.0.0");
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();

@@ -9,7 +9,7 @@ import {
   tryGetScopedRegistryByUrl,
 } from "../../src/domain/project-manifest";
 import { DomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
@@ -27,7 +27,7 @@ describe("project-manifest", () => {
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("1.2.3")
+            SemanticVersion.parse("1.2.3")
           );
 
           expect(manifest.dependencies).toEqual({ [packumentName]: "1.2.3" });
@@ -43,12 +43,12 @@ describe("project-manifest", () => {
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("1.2.3")
+            SemanticVersion.parse("1.2.3")
           );
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("2.3.4")
+            SemanticVersion.parse("2.3.4")
           );
 
           expect(manifest.dependencies).toEqual({ [packumentName]: "2.3.4" });
@@ -66,7 +66,7 @@ describe("project-manifest", () => {
           manifest = setDependency(
             manifest,
             packumentName,
-            makeSemanticVersion("1.2.3")
+            SemanticVersion.parse("1.2.3")
           );
           manifest = removeDependency(manifest, packumentName);
 

@@ -1,5 +1,5 @@
 import { DomainName } from "./domain-name";
-import { isSemanticVersion, SemanticVersion } from "./semantic-version";
+import { SemanticVersion } from "./semantic-version";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { isZod } from "../utils/zod-utils";
 
@@ -17,7 +17,9 @@ export type PackageId = `${DomainName}@${SemanticVersion}`;
 export function isPackageId(s: string): s is PackageId {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
   return (
-    isZod(name, DomainName) && version !== null && isSemanticVersion(version)
+    isZod(name, DomainName) &&
+    version !== null &&
+    isZod(version, SemanticVersion)
   );
 }
 

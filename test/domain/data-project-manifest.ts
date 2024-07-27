@@ -1,5 +1,5 @@
 import assert from "assert";
-import { isSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import {
   addTestable,
@@ -66,7 +66,7 @@ class UnityProjectManifestBuilder {
     testable: boolean
   ): UnityProjectManifestBuilder {
     assertZod(name, DomainName);
-    assert(isSemanticVersion(version), `${version} is semantic version`);
+    assertZod(version, SemanticVersion);
     if (withScope) this.addScope(name);
     if (testable) this.addTestable(name);
     this.manifest = setDependency(this.manifest, name, version);

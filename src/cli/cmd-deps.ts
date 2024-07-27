@@ -16,7 +16,7 @@ import {
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
-import { isSemanticVersion } from "../domain/semantic-version";
+import { SemanticVersion } from "../domain/semantic-version";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { isZod } from "../utils/zod-utils";
 
@@ -68,7 +68,7 @@ export function makeDepsCmd(
     }
 
     const latestVersion =
-      requestedVersion !== undefined && isSemanticVersion(requestedVersion)
+      requestedVersion !== undefined && isZod(requestedVersion, SemanticVersion)
         ? requestedVersion
         : (await resolveLatestVersion(sources, packageName))?.value ?? null;
 

@@ -5,7 +5,7 @@ import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { DomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { makeMockLogger } from "./log.mock";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
@@ -27,7 +27,7 @@ const defaultEnv = {
   upstreamRegistry: { url: unityRegistryUrl, auth: null },
 } as Env;
 
-const someVersion = makeSemanticVersion("1.2.3");
+const someVersion = SemanticVersion.parse("1.2.3");
 
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();

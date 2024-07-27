@@ -1,9 +1,6 @@
 import assert from "assert";
 import { DomainName } from "../../src/domain/domain-name";
-import {
-  isSemanticVersion,
-  SemanticVersion,
-} from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { makePackageId } from "../../src/domain/package-id";
 import {
   UnityPackument,
@@ -34,7 +31,7 @@ class UnityPackumentVersionBuilder {
    */
   addDependency(name: string, version: string): UnityPackumentVersionBuilder {
     assert(isZod(name, DomainName), `${name} is domain name`);
-    assert(isSemanticVersion(version), `${version} is semantic version`);
+    assert(isZod(version, SemanticVersion), `${version} is semantic version`);
     this.version = {
       ...this.version,
       dependencies: {
@@ -90,7 +87,7 @@ class UnityPackumentBuilder {
     version: string,
     build?: (builder: UnityPackumentVersionBuilder) => unknown
   ): UnityPackumentBuilder {
-    assert(isSemanticVersion(version), `${version} is semantic version`);
+    assert(isZod(version, SemanticVersion), `${version} is semantic version`);
     const builder = new UnityPackumentVersionBuilder(
       this.packument.name,
       version

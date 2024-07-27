@@ -1,5 +1,5 @@
 import { DomainName } from "./domain-name";
-import { isSemanticVersion, SemanticVersion } from "./semantic-version";
+import { SemanticVersion } from "./semantic-version";
 import { PackageUrl } from "./package-url";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import assert from "assert";
@@ -42,7 +42,7 @@ export type PackageReference = DomainName | ReferenceWithVersion;
  * @param s The string.
  */
 function isVersionReference(s: string): s is VersionReference {
-  return s === "latest" || isSemanticVersion(s) || isZod(s, PackageUrl);
+  return s === "latest" || isZod(s, SemanticVersion) || isZod(s, PackageUrl);
 }
 
 /**

@@ -4,7 +4,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { DomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
@@ -18,7 +18,7 @@ const somePackument = buildPackument(somePackage, (packument) =>
     .set("time", {
       modified: "2019-11-28T18:51:58.123Z",
       created: "2019-11-28T18:51:58.123Z",
-      [makeSemanticVersion("1.0.0")]: "2019-11-28T18:51:58.123Z",
+      [SemanticVersion.parse("1.0.0")]: "2019-11-28T18:51:58.123Z",
     })
     .set("_rev", "3-418f950115c32bd0")
     .set("readme", "A demo package")
@@ -72,7 +72,7 @@ describe("cmd-view", () => {
     const { viewCmd } = makeDependencies();
 
     const resultCode = await viewCmd(
-      makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
+      makePackageReference(somePackage, SemanticVersion.parse("1.0.0")),
       { _global: {} }
     );
 
@@ -92,7 +92,7 @@ describe("cmd-view", () => {
     const { viewCmd, log } = makeDependencies();
 
     await viewCmd(
-      makePackageReference(somePackage, makeSemanticVersion("1.0.0")),
+      makePackageReference(somePackage, SemanticVersion.parse("1.0.0")),
       { _global: {} }
     );
 
