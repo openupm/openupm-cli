@@ -24,9 +24,7 @@ describe("package manifest", () => {
     });
 
     it("should empty list for missing dependencies property", () => {
-      const packageManifest = {
-        dependencies: undefined,
-      };
+      const packageManifest = {};
 
       const dependencies = dependenciesOf(packageManifest);
 

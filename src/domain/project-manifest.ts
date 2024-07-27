@@ -113,9 +113,10 @@ export function mapScopedRegistry(
 ): UnityProjectManifest {
   const updated = mapF(tryGetScopedRegistryByUrl(manifest, registryUrl));
 
-  let newScopedRegistries = manifest.scopedRegistries?.filter(
-    (it) => it.url !== (updated?.url ?? registryUrl)
-  );
+  let newScopedRegistries =
+    manifest.scopedRegistries?.filter(
+      (it) => it.url !== (updated?.url ?? registryUrl)
+    ) ?? [];
 
   if (updated !== null)
     newScopedRegistries = [...(newScopedRegistries ?? []), updated];
@@ -164,9 +165,10 @@ export function addTestable(
 export function pruneManifest(
   manifest: UnityProjectManifest
 ): UnityProjectManifest {
+  if (manifest.scopedRegistries === undefined) return manifest;
   return {
     ...manifest,
-    scopedRegistries: manifest.scopedRegistries?.filter(
+    scopedRegistries: manifest.scopedRegistries.filter(
       (it) => it.scopes.length > 0
     ),
   };
