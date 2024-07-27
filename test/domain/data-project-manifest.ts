@@ -1,4 +1,3 @@
-import assert from "assert";
 import { SemanticVersion } from "../../src/domain/semantic-version";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import {
