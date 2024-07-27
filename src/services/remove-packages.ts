@@ -58,17 +58,18 @@ export function makeRemovePackages(
 
     manifest = removeDependency(manifest, packageName);
 
-    manifest = {
-      ...manifest,
-      scopedRegistries: manifest.scopedRegistries
-        // Remove package scope from all scoped registries
-        ?.map((scopedRegistry) => ({
-          ...scopedRegistry,
-          scopes: scopedRegistry.scopes.filter(
-            (scope) => scope !== packageName
-          ),
-        })),
-    };
+    if (manifest.scopedRegistries !== undefined)
+      manifest = {
+        ...manifest,
+        scopedRegistries: manifest.scopedRegistries
+          // Remove package scope from all scoped registries
+          .map((scopedRegistry) => ({
+            ...scopedRegistry,
+            scopes: scopedRegistry.scopes.filter(
+              (scope) => scope !== packageName
+            ),
+          })),
+      };
 
     return Ok([manifest, { name: packageName, version: versionInManifest }]);
   };

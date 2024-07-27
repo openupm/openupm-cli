@@ -105,7 +105,7 @@ describe("upm-config", () => {
         const config: UPMConfig = {
           npmAuth: {
             [url]: {
-              alwaysAuth: expected.alwaysAuth,
+              alwaysAuth: expected.alwaysAuth!,
               email: "real@email.com",
               token: expected.token,
             },
@@ -124,7 +124,7 @@ describe("upm-config", () => {
         const config: UPMConfig = {
           npmAuth: {
             [url]: {
-              alwaysAuth: expected.alwaysAuth,
+              alwaysAuth: expected.alwaysAuth!,
               email: "real@email.com",
               token: expected.token,
             },

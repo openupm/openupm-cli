@@ -16,7 +16,7 @@ declare module "another-npm-registry-client" {
     timeout?: number;
     follow?: boolean;
     staleOk?: boolean;
-    auth?: NpmAuth;
+    auth?: NpmAuth | undefined;
     fullMetadata?: boolean;
   };
 
