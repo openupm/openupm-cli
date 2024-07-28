@@ -1,4 +1,4 @@
-import { ZodType } from "zod";
+import { z, ZodType } from "zod";
 import { AssertionError } from "assert";
 
 /**
@@ -32,4 +32,37 @@ export function assertZod<TZod extends ZodType>(
       expected: "Instance of: " + schema,
       message: result.error.message,
     });
+}
+
+type RemoveExplicitUndefined<T> = T extends undefined
+  ? never
+  : T extends z.BRAND<string>
+  ? T
+  : T extends object
+  ? { [K in keyof T]: RemoveExplicitUndefined<T[K]> }
+  : T;
+
+export function removeExplicitUndefined(value: undefined): never;
+export function removeExplicitUndefined<T>(
+  value: T
+): RemoveExplicitUndefined<T>;
+/**
+ * Recursively removes all instances of explicit undefined from a value.
+ * This mostly gets rid of explicit undefined properties in objects.
+ *
+ * You can use this function to circumvent [issue #365](https://github.com/colinhacks/zod/issues/635).
+ * @param value The value.
+ * @throws Error if the passed value is undefined.
+ */
+export function removeExplicitUndefined(value: unknown) {
+  if (value === undefined)
+    throw new Error("Cannot remove undefined from undefined!");
+
+  if (value === null || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, v]) => v !== undefined)
+      .map(([key, v]) => [key, removeExplicitUndefined(v)])
+  );
 }
