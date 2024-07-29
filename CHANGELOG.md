@@ -1,3 +1,10 @@
+# [3.5.0](https://github.com/openupm/openupm-cli/compare/3.4.3...3.5.0) (2024-07-29)
+
+
+### Features
+
+* add new deps output ([#376](https://github.com/openupm/openupm-cli/issues/376)) ([bdc6d74](https://github.com/openupm/openupm-cli/commit/bdc6d74a00f6aeea04839cbc21e4c6a11ca4ce22)), closes [#366](https://github.com/openupm/openupm-cli/issues/366)
+
 ## [3.4.3](https://github.com/openupm/openupm-cli/compare/3.4.2...3.4.3) (2024-07-23)
 
 
