@@ -1,5 +1,3 @@
-import { makeDomainName } from "../../src/domain/domain-name";
-import { makeSemanticVersion } from "../../src/domain/semantic-version";
 import {
   makeGraphFromSeed,
   markBuiltInResolved,
@@ -12,16 +10,18 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
 import { VersionNotFoundError } from "../../src/domain/packument";
+import { DomainName } from "../../src/domain/domain-name";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 
 describe("dependency-logging", () => {
   describe("graph", () => {
-    const somePackage = makeDomainName("com.some.package");
-    const otherPackage = makeDomainName("com.other.package");
-    const anotherPackage = makeDomainName("com.another.package");
-    const thatPackage = makeDomainName("com.that.package");
+    const somePackage = DomainName.parse("com.some.package");
+    const otherPackage = DomainName.parse("com.other.package");
+    const anotherPackage = DomainName.parse("com.another.package");
+    const thatPackage = DomainName.parse("com.that.package");
 
-    const someVersion = makeSemanticVersion("1.2.3");
-    const otherVersion = makeSemanticVersion("2.3.4");
+    const someVersion = SemanticVersion.parse("1.2.3");
+    const otherVersion = SemanticVersion.parse("2.3.4");
 
     it("should fail if graph does not contain package", () => {
       const graph = makeGraphFromSeed(somePackage, someVersion);
