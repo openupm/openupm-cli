@@ -9,16 +9,14 @@ import { CmdOptions } from "./options";
 import { PackumentNotFoundError } from "../common-errors";
 import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
-import {
-  logFailedDependency,
-  logResolvedDependency,
-} from "./dependency-logging";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 import { ResolveLatestVersion } from "../services/resolve-latest-version";
 import { SemanticVersion } from "../domain/semantic-version";
-import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { isZod } from "../utils/zod-utils";
+import { stringifyDependencyGraph } from "./dependency-logging";
+import os from "os";
+import chalk from "chalk";
 
 /**
  * Options passed to the deps command.
@@ -85,34 +83,13 @@ export function makeDepsCmd(
       deep
     );
 
-    for (const [
-      dependencyName,
-      dependencyVersion,
-      dependency,
-    ] of traverseDependencyGraph(dependencyGraph)) {
-      if (dependency.type === NodeType.Failed) {
-        if (dependencyName !== packageName)
-          logFailedDependency(
-            log,
-            dependencyName,
-            dependencyVersion,
-            dependency
-          );
-
-        continue;
-      }
-      const dependencyRef = makePackageReference(
-        dependencyName,
-        dependencyVersion
-      );
-
-      if (dependency.type === NodeType.Resolved)
-        logResolvedDependency(debugLog, dependencyRef, dependency.source);
-
-      if (dependencyName === packageName) continue;
-
-      log.notice("dependency", dependencyRef);
-    }
+    const output = stringifyDependencyGraph(
+      dependencyGraph,
+      packageName,
+      latestVersion,
+      chalk
+    ).join(os.EOL);
+    log.notice("", output);
 
     return ResultCodes.Ok;
   };

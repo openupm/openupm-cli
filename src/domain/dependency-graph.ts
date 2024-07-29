@@ -14,7 +14,7 @@ type UnresolvedNode = Readonly<{
   type: NodeType.Unresolved;
 }>;
 
-type ResolvedNode = Readonly<{
+export type ResolvedNode = Readonly<{
   type: NodeType.Resolved;
   source: RegistryUrl | "built-in";
   dependencies: Readonly<Record<DomainName, SemanticVersion>>;
@@ -36,7 +36,7 @@ export type FailedNode = Readonly<{
   errors: Readonly<Record<RegistryUrl, ResolvePackumentVersionError>>;
 }>;
 
-type GraphNode = UnresolvedNode | ResolvedNode | FailedNode;
+export type GraphNode = UnresolvedNode | ResolvedNode | FailedNode;
 
 /**
  * A graph indicating which packages depend on which others.
