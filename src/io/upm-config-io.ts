@@ -12,7 +12,7 @@ import {
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
 import { UPMConfig } from "../domain/upm-config";
-import {Base64} from "../domain/base64";
+import { Base64 } from "../domain/base64";
 
 const configFileName = ".upmconfig.toml";
 
@@ -110,7 +110,10 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
     const stringContent = await readFile(configFilePath, true);
     if (stringContent === null) return null;
     const tomlContent = TOML.parse(stringContent);
-    return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
+    const content = removeExplicitUndefined(
+      upmConfigContentSchema.parse(tomlContent)
+    );
+    return content;
   };
 }
 

@@ -1,4 +1,4 @@
-import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
+import { UPMConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { makeParseEnv } from "../../src/services/parse-env";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
@@ -11,18 +11,13 @@ import { noopLogger } from "../../src/logging";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
-const testUpmAuth: TokenAuth = {
-  email: "test@mail.com",
-  token: "ThisIsNotAValidToken",
-};
-
 const testNpmAuth: NpmAuth = {
   token: "ThisIsNotAValidToken",
   alwaysAuth: false,
 };
 
 const testUpmConfig: UPMConfig = {
-  npmAuth: { [exampleRegistryUrl]: testUpmAuth },
+  [exampleRegistryUrl]: testNpmAuth,
 };
 
 function makeDependencies() {
@@ -276,9 +271,7 @@ describe("env", () => {
 
     it("should have no auth if upm-config had no entry for the url", async () => {
       const { parseEnv, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue({
-        npmAuth: {},
-      });
+      loadUpmConfig.mockResolvedValue({});
 
       const env = await parseEnv({
         _global: {
@@ -291,9 +284,7 @@ describe("env", () => {
 
     it("should notify if upm-config did not have auth", async () => {
       const { parseEnv, log, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue({
-        npmAuth: {},
-      });
+      loadUpmConfig.mockResolvedValue({});
 
       await parseEnv({
         _global: {

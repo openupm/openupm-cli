@@ -51,9 +51,10 @@ describe("login", () => {
         exampleConfigPath,
         exampleRegistryUrl,
         {
+          username: exampleUser,
+          password: examplePassword,
           email: exampleEmail,
           alwaysAuth: true,
-          _auth: "dXNlcjpwYXNz",
         }
       );
     });

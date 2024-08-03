@@ -2,18 +2,15 @@ import { LoadUpmConfig, SaveUpmConfig } from "../../src/io/upm-config-io";
 import { makeSaveAuthToUpmConfig } from "../../src/services/upm-auth";
 import { mockService } from "./service.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import {
-  encodeBasicAuth,
-  UpmAuth,
-  UPMConfig,
-} from "../../src/domain/upm-config";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
+import { NpmAuth } from "another-npm-registry-client";
 
 describe("upm auth", () => {
   const someConfigPath = "/some/path/.upmconfig.toml";
 
-  const someAuth: UpmAuth = {
-    _auth: encodeBasicAuth("a", "b"),
+  const someAuth: NpmAuth = {
+    username: "a",
+    password: "b",
     email: "some@email.com",
   };
 
@@ -37,9 +34,7 @@ describe("upm auth", () => {
     await saveAuthToUpmConfig(someConfigPath, exampleRegistryUrl, someAuth);
 
     expect(saveUpmConfig).toHaveBeenCalledWith(
-      {
-        npmAuth: { [exampleRegistryUrl]: someAuth },
-      } satisfies UPMConfig,
+      { [exampleRegistryUrl]: someAuth },
       someConfigPath
     );
   });
@@ -47,21 +42,15 @@ describe("upm auth", () => {
   it("should update existing config if found", async () => {
     const { saveAuthToUpmConfig, loadUpmConfig, saveUpmConfig } =
       makeDependencies();
-    loadUpmConfig.mockResolvedValue({
-      npmAuth: {
-        [unityRegistryUrl]: someAuth,
-      },
-    } satisfies UPMConfig);
+    loadUpmConfig.mockResolvedValue({ [unityRegistryUrl]: someAuth });
 
     await saveAuthToUpmConfig(someConfigPath, exampleRegistryUrl, someAuth);
 
     expect(saveUpmConfig).toHaveBeenCalledWith(
       {
-        npmAuth: {
-          [unityRegistryUrl]: someAuth,
-          [exampleRegistryUrl]: someAuth,
-        },
-      } satisfies UPMConfig,
+        [unityRegistryUrl]: someAuth,
+        [exampleRegistryUrl]: someAuth,
+      },
       someConfigPath
     );
   });

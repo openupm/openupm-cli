@@ -1,6 +1,7 @@
-import { RegistryUrl } from "../domain/registry-url";
-import { addAuth, UpmAuth } from "../domain/upm-config";
-import { LoadUpmConfig, SaveUpmConfig } from "../io/upm-config-io";
+import {RegistryUrl} from "../domain/registry-url";
+import {addAuth} from "../domain/upm-config";
+import {LoadUpmConfig, SaveUpmConfig} from "../io/upm-config-io";
+import {NpmAuth} from "another-npm-registry-client";
 
 /**
  * Function for storing authentication information in an upmconfig file.
@@ -11,7 +12,7 @@ import { LoadUpmConfig, SaveUpmConfig } from "../io/upm-config-io";
 export type SaveAuthToUpmConfig = (
   configPath: string,
   registry: RegistryUrl,
-  auth: UpmAuth
+  auth: NpmAuth
 ) => Promise<void>;
 /**
  * Makes a {@link SaveAuthToUpmConfig} function.
@@ -22,7 +23,7 @@ export function makeSaveAuthToUpmConfig(
 ): SaveAuthToUpmConfig {
   return async (configPath, registry, auth) => {
     const initialConfig = (await loadUpmConfig(configPath)) || {};
-    const updatedConfig = addAuth(registry, auth, initialConfig);
+    const updatedConfig = addAuth(initialConfig, registry, auth);
     await saveUpmConfig(updatedConfig, configPath);
   };
 }
