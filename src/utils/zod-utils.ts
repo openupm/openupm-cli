@@ -34,7 +34,10 @@ export function assertZod<TZod extends ZodType>(
     });
 }
 
-type RemoveExplicitUndefined<T> = T extends undefined
+/**
+ * Recursively removes all instances of `undefined` from a type.
+ */
+export type RemoveExplicitUndefined<T> = T extends undefined
   ? never
   : T extends z.BRAND<string>
   ? T

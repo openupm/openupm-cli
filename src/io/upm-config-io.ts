@@ -1,12 +1,18 @@
 import path from "path";
 import TOML from "@iarna/toml";
-import { UPMConfig } from "../domain/upm-config";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetEnv } from "../utils/env-util";
 import { tryGetWslPath } from "./wsl";
 import { RunChildProcess } from "./child-process";
 import { GetHomePath } from "./special-paths";
 import { CustomError } from "ts-custom-error";
+import { z } from "zod";
+import {
+  removeExplicitUndefined,
+  RemoveExplicitUndefined,
+} from "../utils/zod-utils";
+import { UPMConfig } from "../domain/upm-config";
+import {Base64} from "../domain/base64";
 
 const configFileName = ".upmconfig.toml";
 
@@ -56,6 +62,37 @@ export function makeGetUpmConfigPath(
   };
 }
 
+const authBaseSchema = z.object({
+  alwaysAuth: z.optional(z.boolean()),
+});
+
+const basicAuthSchema = authBaseSchema.and(
+  z.object({
+    email: z.string().email(),
+    _auth: Base64,
+  })
+);
+
+const tokenAuthSchema = authBaseSchema.and(
+  z.object({
+    email: z.optional(z.string().email()),
+    token: z.string(),
+  })
+);
+
+const upmConfigContentSchema = z.object({
+  npmAuth: z.optional(
+    z.record(z.string(), basicAuthSchema.or(tokenAuthSchema))
+  ),
+});
+
+/**
+ * The content of a .upmconfig.toml file.
+ */
+type UpmConfigContent = RemoveExplicitUndefined<
+  z.TypeOf<typeof upmConfigContentSchema>
+>;
+
 /**
  * IO function for loading an upm-config file.
  * @param configFilePath Path of the upm-config file.
@@ -70,10 +107,10 @@ export type LoadUpmConfig = (
  */
 export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
   return async (configFilePath) => {
-    const content = await readFile(configFilePath, true);
-    if (content === null) return null;
-    const toml = TOML.parse(content);
-    return toml as UPMConfig;
+    const stringContent = await readFile(configFilePath, true);
+    if (stringContent === null) return null;
+    const tomlContent = TOML.parse(stringContent);
+    return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
   };
 }
 
