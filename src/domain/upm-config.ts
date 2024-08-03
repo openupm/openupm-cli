@@ -6,6 +6,8 @@ import { NpmAuth } from "another-npm-registry-client";
  */
 export type UPMConfig = Readonly<Record<RegistryUrl, NpmAuth>>;
 
+export const emptyUpmConfig: UPMConfig = {}
+
 /**
  * Attempts to get the {@link NpmAuth} information for a specific registry
  * from a {@link UPMConfig} object.

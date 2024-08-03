@@ -7,6 +7,8 @@ import { mockService } from "../services/service.mock";
 import { GetHomePath } from "../../src/io/special-paths";
 import path from "path";
 import { RunChildProcess } from "../../src/io/child-process";
+import { EOL } from "node:os";
+import { exampleRegistryUrl } from "../domain/data-registry";
 
 describe("upm-config-io", () => {
   describe("get path", () => {
@@ -37,6 +39,10 @@ describe("upm-config-io", () => {
   });
 
   describe("load", () => {
+    const someConfigPath = "/home/user/.upmconfig.toml";
+    const someEmail = "user@mail.com";
+    const someToken = "isehusehgusheguszg8gshg";
+
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
       readFile.mockResolvedValue("");
@@ -45,23 +51,123 @@ describe("upm-config-io", () => {
       return { loadUpmConfig, readFile } as const;
     }
 
+    function makeUpmConfigEntryToml(entry: {
+      url: string;
+      _auth?: string;
+      email?: string;
+      alwaysAuth?: boolean;
+      token?: string;
+    }): string {
+      const lines = [`[npmAuth."${entry.url}"]`];
+      if (entry._auth !== undefined) lines.push(`_auth = "${entry._auth}"`);
+      if (entry.email !== undefined) lines.push(`email = "${entry.email}"`);
+      if (entry.token !== undefined) lines.push(`token = "${entry.token}"`);
+      if (entry.alwaysAuth !== undefined)
+        lines.push(`alwaysAuth = ${entry.alwaysAuth}`);
+      return lines.join(EOL);
+    }
+
     it("should be null if file is not found", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
-      const path = "/home/user/.upmconfig.toml";
       readFile.mockResolvedValue(null);
 
-      const actual = await loadUpmConfig(path);
+      const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toBeNull();
     });
 
-    it("should be parsed file", async () => {
-      const { loadUpmConfig } = makeDependencies();
-      const path = "/home/user/.upmconfig.toml";
+    it("should load empty", async () => {
+      const { loadUpmConfig, readFile } = makeDependencies();
+      readFile.mockResolvedValue("");
 
-      const actual = await loadUpmConfig(path);
+      const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toEqual({});
+    });
+
+    it("should remove trailing slash on registry urls", async () => {
+      const { loadUpmConfig, readFile } = makeDependencies();
+      readFile.mockResolvedValue(
+        makeUpmConfigEntryToml({
+          url: exampleRegistryUrl + "/",
+          _auth: "dXNlcjpwYXNz", // user:pass
+          email: someEmail,
+          alwaysAuth: true,
+        })
+      );
+
+      const actual = await loadUpmConfig(someConfigPath);
+
+      expect(actual).toEqual({
+        [exampleRegistryUrl]: {
+          username: "user",
+          password: "pass",
+          email: someEmail,
+          alwaysAuth: true,
+        },
+      });
+    });
+
+    it("should load valid basic auth", async () => {
+      const { loadUpmConfig, readFile } = makeDependencies();
+      readFile.mockResolvedValue(
+        makeUpmConfigEntryToml({
+          url: exampleRegistryUrl,
+          _auth: "dXNlcjpwYXNz", // user:pass
+          email: someEmail,
+          alwaysAuth: true,
+        })
+      );
+
+      const actual = await loadUpmConfig(someConfigPath);
+
+      expect(actual).toEqual({
+        [exampleRegistryUrl]: {
+          username: "user",
+          password: "pass",
+          email: someEmail,
+          alwaysAuth: true,
+        },
+      });
+    });
+
+    it("should load valid token auth", async () => {
+      const { loadUpmConfig, readFile } = makeDependencies();
+      readFile.mockResolvedValue(
+        makeUpmConfigEntryToml({
+          url: exampleRegistryUrl,
+          token: someToken,
+          alwaysAuth: true,
+        })
+      );
+
+      const actual = await loadUpmConfig(someConfigPath);
+
+      expect(actual).toEqual({
+        [exampleRegistryUrl]: {
+          token: someToken,
+          alwaysAuth: true,
+        },
+      });
+    });
+
+    it("should ignore email when loading token auth", async () => {
+      const { loadUpmConfig, readFile } = makeDependencies();
+      readFile.mockResolvedValue(
+        makeUpmConfigEntryToml({
+          url: exampleRegistryUrl,
+          token: someToken,
+          email: someEmail,
+        })
+      );
+
+      const actual = await loadUpmConfig(someConfigPath);
+
+      expect(actual).toEqual({
+        [exampleRegistryUrl]: {
+          token: someToken,
+        },
+      });
     });
   });
 });
