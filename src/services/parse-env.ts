@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { GetUpmConfigPath } from "../io/upm-config-io";
 import path from "path";
 import { coerceRegistryUrl, RegistryUrl } from "../domain/registry-url";
-import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
+import { tryGetAuthForRegistry, UpmConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
 import { tryGetEnv } from "../utils/env-util";
 import { Registry } from "../domain/registry";
@@ -80,7 +80,7 @@ export function makeParseEnv(
 
   function determinePrimaryRegistry(
     options: CmdOptions,
-    upmConfig: UPMConfig
+    upmConfig: UpmConfig
   ): Registry {
     const url =
       options._global.registry !== undefined

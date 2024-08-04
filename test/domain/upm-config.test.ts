@@ -1,4 +1,4 @@
-import { tryGetAuthForRegistry, UPMConfig } from "../../src/domain/upm-config";
+import { tryGetAuthForRegistry, UpmConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 
 import { exampleRegistryUrl } from "./data-registry";
@@ -12,7 +12,7 @@ describe("upm-config", () => {
 
   describe("get auth for registry", () => {
     it("should find auth that was added", () => {
-      const config: UPMConfig = {
+      const config: UpmConfig = {
         [exampleRegistryUrl]: someAuth,
       };
 
@@ -22,7 +22,7 @@ describe("upm-config", () => {
     });
 
     it("should not find auth for url that does not exist", () => {
-      const config: UPMConfig = {};
+      const config: UpmConfig = {};
 
       const actual = tryGetAuthForRegistry(config, exampleRegistryUrl);
 

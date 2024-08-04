@@ -1,4 +1,4 @@
-import { addAuth, emptyUpmConfig, UPMConfig } from "../domain/upm-config";
+import { addAuth, emptyUpmConfig, UpmConfig } from "../domain/upm-config";
 import { LoadUpmConfig, UpmAuth, UpmConfigContent } from "../io/upm-config-io";
 import { NpmAuth } from "another-npm-registry-client";
 import { decodeBase64 } from "../domain/base64";
@@ -12,12 +12,14 @@ import { coerceRegistryUrl } from "../domain/registry-url";
  * will load it from the upmconfig.toml.
  * @param upmConfigPath The path to the upmconfig.toml file.
  */
-export type LoadRegistryAuth = (upmConfigPath: string) => Promise<UPMConfig>;
+export type LoadRegistryAuth = (upmConfigPath: string) => Promise<UpmConfig>;
 
 /**
  * Makes a {@link LoadRegistryAuth} function.
  */
-export function makeLoadRegistryAuth(loadUpmConfig: LoadUpmConfig): LoadRegistryAuth {
+export function makeLoadRegistryAuth(
+  loadUpmConfig: LoadUpmConfig
+): LoadRegistryAuth {
   return async (upmConfigPath) => {
     function importNpmAuth(input: UpmAuth): NpmAuth {
       // Basic auth
@@ -43,7 +45,7 @@ export function makeLoadRegistryAuth(loadUpmConfig: LoadUpmConfig): LoadRegistry
       });
     }
 
-    function importUpmConfig(input: UpmConfigContent): UPMConfig {
+    function importUpmConfig(input: UpmConfigContent): UpmConfig {
       if (input.npmAuth === undefined) return {};
       return recordEntries(input.npmAuth)
         .map(

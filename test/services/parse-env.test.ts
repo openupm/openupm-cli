@@ -1,4 +1,4 @@
-import { emptyUpmConfig, UPMConfig } from "../../src/domain/upm-config";
+import { emptyUpmConfig, UpmConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { makeParseEnv } from "../../src/services/parse-env";
 import { GetUpmConfigPath } from "../../src/io/upm-config-io";
@@ -17,7 +17,7 @@ const testNpmAuth: NpmAuth = {
   alwaysAuth: false,
 };
 
-const testUpmConfig: UPMConfig = {
+const testUpmConfig: UpmConfig = {
   [exampleRegistryUrl]: testNpmAuth,
 };
 

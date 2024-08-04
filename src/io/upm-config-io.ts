@@ -11,7 +11,7 @@ import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { UPMConfig } from "../domain/upm-config";
+import { UpmConfig } from "../domain/upm-config";
 import { Base64 } from "../domain/base64";
 
 const configFileName = ".upmconfig.toml";

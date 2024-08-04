@@ -4,20 +4,20 @@ import { NpmAuth } from "another-npm-registry-client";
 /**
  * Abstraction of an upmconfig.toml file.
  */
-export type UPMConfig = Readonly<Record<RegistryUrl, NpmAuth>>;
+export type UpmConfig = Readonly<Record<RegistryUrl, NpmAuth>>;
 
-export const emptyUpmConfig: UPMConfig = {};
+export const emptyUpmConfig: UpmConfig = {};
 
 /**
  * Attempts to get the {@link NpmAuth} information for a specific registry
- * from a {@link UPMConfig} object.
+ * from a {@link UpmConfig} object.
  * @param upmConfig The config.
  * @param registry The registry.
  * @returns The auth information or null if the registry does not exist
  * in the config.
  */
 export function tryGetAuthForRegistry(
-  upmConfig: UPMConfig,
+  upmConfig: UpmConfig,
   registry: RegistryUrl
 ): NpmAuth | null {
   return upmConfig[registry] ?? null;
@@ -31,9 +31,9 @@ export function tryGetAuthForRegistry(
  * @returns A new config with the entry added.
  */
 export function addAuth(
-  upmConfig: UPMConfig,
+  upmConfig: UpmConfig,
   registry: RegistryUrl,
   auth: NpmAuth
-): UPMConfig {
+): UpmConfig {
   return { ...upmConfig, [registry]: auth };
 }
