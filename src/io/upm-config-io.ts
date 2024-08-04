@@ -86,6 +86,9 @@ const upmConfigContentSchema = z.object({
   npmAuth: z.optional(z.record(z.string(), upmAuthSchema)),
 });
 
+/**
+ * Schema for an entry in a .upmconfig.toml file.
+ */
 export type UpmAuth = RemoveExplicitUndefined<z.TypeOf<typeof upmAuthSchema>>;
 
 /**
@@ -122,7 +125,7 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
  * @param configFilePath The path of the file that should be saved to.
  */
 export type SaveUpmConfig = (
-  config: UPMConfig,
+  config: UpmConfigContent,
   configFilePath: string
 ) => Promise<void>;
 

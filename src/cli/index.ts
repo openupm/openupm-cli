@@ -42,7 +42,7 @@ import {
 } from "../io/npmrc-io";
 import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
 import { makeLoadProjectVersion } from "../io/project-version-io";
-import { makeSaveAuthToUpmConfig } from "../services/upm-auth";
+import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { makeFetchPackument } from "../io/packument-io";
 import { makeSearchPackages } from "../services/search-packages";
 import { makeLogin } from "../services/login";
@@ -117,16 +117,13 @@ const resolveDependencies = makeResolveDependency(
   fetchPackument,
   checkIsBuiltInPackage
 );
-const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(
-  loadUpmConfig,
-  saveUpmConfig
-);
+const putRegistryAuth = makePutRegistryAuth(loadUpmConfig, saveUpmConfig);
 const searchPackages = makeSearchPackages(
   searchRegistry,
   fetchAllPackuments,
   debugLog
 );
-const login = makeLogin(saveAuthToUpmConfig, npmLogin, authNpmrc, debugLog);
+const login = makeLogin(putRegistryAuth, npmLogin, authNpmrc, debugLog);
 
 const addCmd = makeAddCmd(
   parseEnv,
