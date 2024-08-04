@@ -6,7 +6,7 @@ import { NpmAuth } from "another-npm-registry-client";
  */
 export type UPMConfig = Readonly<Record<RegistryUrl, NpmAuth>>;
 
-export const emptyUpmConfig: UPMConfig = {}
+export const emptyUpmConfig: UPMConfig = {};
 
 /**
  * Attempts to get the {@link NpmAuth} information for a specific registry
@@ -23,6 +23,13 @@ export function tryGetAuthForRegistry(
   return upmConfig[registry] ?? null;
 }
 
+/**
+ * Adds an entry to an upm-config.
+ * @param upmConfig The config.
+ * @param registry The registry for which to authenticate.
+ * @param auth The autentication information.
+ * @returns A new config with the entry added.
+ */
 export function addAuth(
   upmConfig: UPMConfig,
   registry: RegistryUrl,
