@@ -17,18 +17,7 @@ import { PackumentNotFoundError } from "../common-errors";
  */
 export type UnityPackumentVersion = Readonly<
   UnityPackageManifest & {
-    /**
-     * Same as {@link name}.
-     */
-    _id?: PackageId;
-    _nodeVersion?: string;
-    _npmVersion?: string;
-    _rev?: string;
     homepage?: string;
-    category?: string;
-    gitHead?: string;
-    readmeFilename?: string;
-    contributors?: ReadonlyArray<Maintainer>;
     dist?: Readonly<Dist>;
   }
 >;
@@ -41,16 +30,6 @@ export type UnityPackument = Readonly<{
    * The packages name.
    */
   name: DomainName;
-  /**
-   * Same as {@link name}.
-   */
-  _id?: DomainName;
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  _rev?: string;
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  _attachments?: Readonly<Record<string, unknown>>;
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  readme?: string;
   /**
    * The packages versions, organized by their version.
    */
@@ -82,8 +61,6 @@ export type UnityPackument = Readonly<{
   }>;
   // eslint-disable-next-line jsdoc/require-jsdoc
   date?: Date;
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  users?: Readonly<Record<string, unknown>>;
 }>;
 
 /**

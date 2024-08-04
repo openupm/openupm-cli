@@ -18,15 +18,6 @@ export type UnityProjectManifest = Readonly<{
    */
   dependencies: Readonly<Record<DomainName, SemanticVersion | PackageUrl>>;
   /**
-   * Enables a lock file to ensure that dependencies are resolved in a
-   * deterministic manner.
-   */
-  enableLockFile?: boolean;
-  /**
-   * Upgrades indirect dependencies based on Semantic Versioning rules.
-   */
-  resolutionStrategy?: string;
-  /**
    * Specify custom registries in addition to the default registry.
    * This allows you to host your own packages.
    */

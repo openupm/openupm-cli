@@ -20,8 +20,6 @@ const somePackument = buildPackument(somePackage, (packument) =>
       created: "2019-11-28T18:51:58.123Z",
       [SemanticVersion.parse("1.0.0")]: "2019-11-28T18:51:58.123Z",
     })
-    .set("_rev", "3-418f950115c32bd0")
-    .set("readme", "A demo package")
     .addVersion("1.0.0", (version) =>
       version
         .set("displayName", "Package A")
@@ -29,11 +27,6 @@ const somePackument = buildPackument(somePackage, (packument) =>
         .set("unity", "2018.4")
         .set("description", "A demo package")
         .set("keywords", [""])
-        .set("category", "Unity")
-        .set("gitHead", "5c141ecfac59c389090a07540f44c8ac5d07a729")
-        .set("readmeFilename", "README.md")
-        .set("_nodeVersion", "12.13.1")
-        .set("_npmVersion", "6.12.1")
         .set("dist", {
           integrity:
             "sha512-MAh44bur7HGyfbCXH9WKfaUNS67aRMfO0VAbLkr+jwseb1hJue/I1pKsC7PKksuBYh4oqoo9Jov1cBcvjVgjmA==",
