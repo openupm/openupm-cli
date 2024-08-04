@@ -1,7 +1,6 @@
 import assert from "assert";
 import { DomainName } from "../../src/domain/domain-name";
 import { SemanticVersion } from "../../src/domain/semantic-version";
-import { makePackageId } from "../../src/domain/package-id";
 import {
   UnityPackument,
   UnityPackumentVersion,
@@ -17,10 +16,8 @@ class UnityPackumentVersionBuilder {
   constructor(name: DomainName, version: SemanticVersion) {
     this.version = {
       name,
-      _id: makePackageId(name, version),
       version,
       dependencies: {},
-      contributors: [],
     };
   }
 
@@ -70,11 +67,8 @@ class UnityPackumentBuilder {
   constructor(name: DomainName) {
     this.packument = {
       name,
-      _id: name,
       versions: {},
       time: {},
-      users: {},
-      _attachments: {},
     };
   }
 

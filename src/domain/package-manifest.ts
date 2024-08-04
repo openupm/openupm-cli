@@ -9,27 +9,6 @@ import { MalformedPackumentError } from "../common-errors";
 type MajorMinor = `${number}.${number}`;
 
 /**
- * A package sample.
- * @see https://docs.unity3d.com/Manual/cus-samples.html
- */
-type Sample = {
-  /**
-   * The name of the sample as it appears in the package details on the
-   * Package Manager window.
-   */
-  displayName: string;
-  /**
-   * A brief description of what the sample demonstrates or contains.
-   * This is just for the package manifest.
-   */
-  description: string;
-  /**
-   * The path from the Samples~ folder to the sample’s root folder.
-   */
-  path: string;
-};
-
-/**
  * The content of a `package.json` file for a Unity package.
  * @see https://docs.unity3d.com/Manual/upm-manifestPkg.html
  */
@@ -75,13 +54,6 @@ export type UnityPackageManifest = Readonly<{
    */
   documentationUrl?: string;
   /**
-   * By default, a package’s assets are hidden in the Project window and
-   * omitted from the results when you use the Object Picker in the Inspector
-   * window. Set this property to “false” to make sure that this package’s
-   * assets are always visible.
-   */
-  hideInEditor?: boolean;
-  /**
    * An array of keywords used by the Package Manager search APIs.
    */
   keywords?: ReadonlyArray<string>;
@@ -94,14 +66,6 @@ export type UnityPackageManifest = Readonly<{
    * Custom location for this package’s license information specified as a URL.
    */
   licenseUrl?: string;
-  /**
-   * List of samples included in the package.
-   */
-  samples?: ReadonlyArray<Sample>;
-  /**
-   * A constant that provides additional information to the Package Manager.
-   */
-  type?: string;
   /**
    * Part of a Unity version indicating the specific release of Unity that the
    * package is compatible with.
