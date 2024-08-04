@@ -1,28 +1,24 @@
-import { TokenAuth, UPMConfig } from "../../src/domain/upm-config";
+import { emptyUpmConfig, UpmConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
 import { makeParseEnv } from "../../src/services/parse-env";
-import { GetUpmConfigPath, LoadUpmConfig } from "../../src/io/upm-config-io";
+import { GetUpmConfigPath } from "../../src/io/upm-config-io";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { makeMockLogger } from "../cli/log.mock";
 import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import path from "path";
 import { noopLogger } from "../../src/logging";
+import { LoadRegistryAuth } from "../../src/services/load-registry-auth";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
-
-const testUpmAuth: TokenAuth = {
-  email: "test@mail.com",
-  token: "ThisIsNotAValidToken",
-};
 
 const testNpmAuth: NpmAuth = {
   token: "ThisIsNotAValidToken",
   alwaysAuth: false,
 };
 
-const testUpmConfig: UPMConfig = {
-  npmAuth: { [exampleRegistryUrl]: testUpmAuth },
+const testUpmConfig: UpmConfig = {
+  [exampleRegistryUrl]: testNpmAuth,
 };
 
 function makeDependencies() {
@@ -32,8 +28,8 @@ function makeDependencies() {
   // The root directory does not contain an upm-config
   getUpmConfigPath.mockResolvedValue(testRootPath);
 
-  const loadUpmConfig = mockService<LoadUpmConfig>();
-  loadUpmConfig.mockResolvedValue(null);
+  const loadRegistryAuth = mockService<LoadRegistryAuth>();
+  loadRegistryAuth.mockResolvedValue(emptyUpmConfig);
 
   // process.cwd is in the root directory.
   const getCwd = mockService<GetCwd>();
@@ -42,7 +38,7 @@ function makeDependencies() {
   const parseEnv = makeParseEnv(
     log,
     getUpmConfigPath,
-    loadUpmConfig,
+    loadRegistryAuth,
     getCwd,
     noopLogger
   );
@@ -50,7 +46,7 @@ function makeDependencies() {
     parseEnv,
     log,
     getUpmConfigPath,
-    loadUpmConfig,
+    loadRegistryAuth,
   } as const;
 }
 
@@ -275,10 +271,8 @@ describe("env", () => {
     });
 
     it("should have no auth if upm-config had no entry for the url", async () => {
-      const { parseEnv, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue({
-        npmAuth: {},
-      });
+      const { parseEnv, loadRegistryAuth } = makeDependencies();
+      loadRegistryAuth.mockResolvedValue({});
 
       const env = await parseEnv({
         _global: {
@@ -290,10 +284,8 @@ describe("env", () => {
     });
 
     it("should notify if upm-config did not have auth", async () => {
-      const { parseEnv, log, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue({
-        npmAuth: {},
-      });
+      const { parseEnv, log, loadRegistryAuth } = makeDependencies();
+      loadRegistryAuth.mockResolvedValue({});
 
       await parseEnv({
         _global: {
@@ -308,8 +300,8 @@ describe("env", () => {
     });
 
     it("should have auth if upm-config had entry for the url", async () => {
-      const { parseEnv, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue(testUpmConfig);
+      const { parseEnv, loadRegistryAuth } = makeDependencies();
+      loadRegistryAuth.mockResolvedValue(testUpmConfig);
 
       const env = await parseEnv({
         _global: {

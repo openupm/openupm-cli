@@ -1,8 +1,8 @@
 import chalk from "chalk";
-import { GetUpmConfigPath, LoadUpmConfig } from "../io/upm-config-io";
+import { GetUpmConfigPath } from "../io/upm-config-io";
 import path from "path";
 import { coerceRegistryUrl, RegistryUrl } from "../domain/registry-url";
-import { tryGetAuthForRegistry, UPMConfig } from "../domain/upm-config";
+import { tryGetAuthForRegistry, UpmConfig } from "../domain/upm-config";
 import { CmdOptions } from "../cli/options";
 import { tryGetEnv } from "../utils/env-util";
 import { Registry } from "../domain/registry";
@@ -11,6 +11,7 @@ import { GetCwd } from "../io/special-paths";
 import { CustomError } from "ts-custom-error";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
+import { LoadRegistryAuth } from "./load-registry-auth";
 
 /**
  * Error for when auth information for a registry could not be loaded.
@@ -63,7 +64,7 @@ export type ParseEnv = (options: CmdOptions) => Promise<Env>;
 export function makeParseEnv(
   log: Logger,
   getUpmConfigPath: GetUpmConfigPath,
-  loadUpmConfig: LoadUpmConfig,
+  loadRegistryAuth: LoadRegistryAuth,
   getCwd: GetCwd,
   debugLog: DebugLog
 ): ParseEnv {
@@ -79,14 +80,12 @@ export function makeParseEnv(
 
   function determinePrimaryRegistry(
     options: CmdOptions,
-    upmConfig: UPMConfig | null
+    upmConfig: UpmConfig
   ): Registry {
     const url =
       options._global.registry !== undefined
         ? coerceRegistryUrl(options._global.registry)
         : RegistryUrl.parse("https://package.openupm.com");
-
-    if (upmConfig === null) return { url, auth: null };
 
     const auth = tryGetAuthForRegistry(upmConfig, url);
 
@@ -146,7 +145,7 @@ export function makeParseEnv(
     let registry: Registry;
     let upstreamRegistry: Registry;
     try {
-      const upmConfig = await loadUpmConfig(upmConfigPath);
+      const upmConfig = await loadRegistryAuth(upmConfigPath);
       registry = determinePrimaryRegistry(options, upmConfig);
       upstreamRegistry = determineUpstreamRegistry();
     } catch (error) {

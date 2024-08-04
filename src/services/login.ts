@@ -1,9 +1,9 @@
-import { BasicAuth, encodeBasicAuth, TokenAuth } from "../domain/upm-config";
 import { RegistryUrl } from "../domain/registry-url";
-import { SaveAuthToUpmConfig } from "./upm-auth";
+import { PutRegistryAuth } from "./put-registry-auth";
 import { NpmLogin } from "./npm-login";
 import { AuthNpmrc } from "./npmrc-auth";
 import { DebugLog } from "../logging";
+import { NpmAuth } from "another-npm-registry-client";
 
 /**
  * Function for logging in a user to a npm registry. Supports both basic and
@@ -36,7 +36,7 @@ export type Login = (
  * Makes a {@link Login} function.
  */
 export function makeLogin(
-  saveAuthToUpmConfig: SaveAuthToUpmConfig,
+  putRegistryAuth: PutRegistryAuth,
   npmLogin: NpmLogin,
   authNpmrc: AuthNpmrc,
   debugLog: DebugLog
@@ -51,25 +51,18 @@ export function makeLogin(
     authMode
   ) => {
     if (authMode === "basic") {
-      // basic auth
-      const _auth = encodeBasicAuth(username, password);
-      return await saveAuthToUpmConfig(configPath, registry, {
-        email,
-        alwaysAuth,
-        _auth,
-      } satisfies BasicAuth);
+      const auth: NpmAuth = { username, password, email, alwaysAuth };
+      return await putRegistryAuth(configPath, registry, auth);
     }
 
     // npm login
     const token = await npmLogin(registry, username, email, password);
     debugLog(`npm login successful`);
 
+    const auth: NpmAuth = { token, email, alwaysAuth };
+    await putRegistryAuth(configPath, registry, auth);
+
     const npmrcPath = await authNpmrc(registry, token);
-    await saveAuthToUpmConfig(configPath, registry, {
-      email,
-      alwaysAuth,
-      token,
-    } satisfies TokenAuth);
     debugLog(`saved to npm config: ${npmrcPath}`);
   };
 }
