@@ -54,6 +54,7 @@ import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { makeCheckUrlExists } from "../io/check-url";
 import { withErrorLogger } from "./error-logging";
+import { makeLoadRegistryAuth } from "../services/load-registry-auth";
 
 // Composition root
 
@@ -93,10 +94,11 @@ const removePackages = makeRemovePackages(
 );
 const checkUrlExists = makeCheckUrlExists();
 
+const loadRegistryAuth = makeLoadRegistryAuth(loadUpmConfig);
 const parseEnv = makeParseEnv(
   log,
   getUpmConfigPath,
-  loadUpmConfig,
+  loadRegistryAuth,
   getCwd,
   debugLog
 );

@@ -11,12 +11,8 @@ import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { addAuth, emptyUpmConfig, UPMConfig } from "../domain/upm-config";
-import { Base64, decodeBase64 } from "../domain/base64";
-import { NpmAuth } from "another-npm-registry-client";
-import { coerceRegistryUrl } from "../domain/registry-url";
-import { recordEntries } from "../utils/record-utils";
-import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
+import { UPMConfig } from "../domain/upm-config";
+import { Base64 } from "../domain/base64";
 
 const configFileName = ".upmconfig.toml";
 
@@ -90,12 +86,12 @@ const upmConfigContentSchema = z.object({
   npmAuth: z.optional(z.record(z.string(), upmAuthSchema)),
 });
 
-type UpmAuth = RemoveExplicitUndefined<z.TypeOf<typeof upmAuthSchema>>;
+export type UpmAuth = RemoveExplicitUndefined<z.TypeOf<typeof upmAuthSchema>>;
 
 /**
  * The content of a .upmconfig.toml file.
  */
-type UpmConfigContent = RemoveExplicitUndefined<
+export type UpmConfigContent = RemoveExplicitUndefined<
   z.TypeOf<typeof upmConfigContentSchema>
 >;
 
@@ -106,54 +102,17 @@ type UpmConfigContent = RemoveExplicitUndefined<
  */
 export type LoadUpmConfig = (
   configFilePath: string
-) => Promise<UPMConfig | null>;
+) => Promise<UpmConfigContent | null>;
 
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
 export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
-  function importNpmAuth(input: UpmAuth): NpmAuth {
-    // Basic auth
-    if ("_auth" in input) {
-      const decoded = decodeBase64(input._auth);
-      const [username, password] = trySplitAtFirstOccurrenceOf(decoded, ":");
-      if (password === null)
-        throw new Error("Auth Base64 string was not in the user:pass format.");
-      return removeExplicitUndefined({
-        username,
-        password,
-        email: input.email,
-        alwaysAuth: input.alwaysAuth,
-      });
-    }
-
-    // Bearer auth
-    return removeExplicitUndefined({
-      token: input.token,
-      alwaysAuth: input.alwaysAuth,
-    });
-  }
-
-  function importUpmConfig(input: UpmConfigContent): UPMConfig {
-    if (input.npmAuth === undefined) return {};
-    return recordEntries(input.npmAuth)
-      .map(
-        ([url, auth]) => [coerceRegistryUrl(url), importNpmAuth(auth)] as const
-      )
-      .reduce(
-        (upmConfig, [url, auth]) => addAuth(upmConfig, url, auth),
-        emptyUpmConfig
-      );
-  }
-
   return async (configFilePath) => {
     const stringContent = await readFile(configFilePath, true);
     if (stringContent === null) return null;
     const tomlContent = TOML.parse(stringContent);
-    const content = removeExplicitUndefined(
-      upmConfigContentSchema.parse(tomlContent)
-    );
-    return importUpmConfig(content);
+    return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
   };
 }
 

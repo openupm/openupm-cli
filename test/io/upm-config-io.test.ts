@@ -85,29 +85,6 @@ describe("upm-config-io", () => {
       expect(actual).toEqual({});
     });
 
-    it("should remove trailing slash on registry urls", async () => {
-      const { loadUpmConfig, readFile } = makeDependencies();
-      readFile.mockResolvedValue(
-        makeUpmConfigEntryToml({
-          url: exampleRegistryUrl + "/",
-          _auth: "dXNlcjpwYXNz", // user:pass
-          email: someEmail,
-          alwaysAuth: true,
-        })
-      );
-
-      const actual = await loadUpmConfig(someConfigPath);
-
-      expect(actual).toEqual({
-        [exampleRegistryUrl]: {
-          username: "user",
-          password: "pass",
-          email: someEmail,
-          alwaysAuth: true,
-        },
-      });
-    });
-
     it("should load valid basic auth", async () => {
       const { loadUpmConfig, readFile } = makeDependencies();
       readFile.mockResolvedValue(
@@ -122,11 +99,12 @@ describe("upm-config-io", () => {
       const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toEqual({
-        [exampleRegistryUrl]: {
-          username: "user",
-          password: "pass",
-          email: someEmail,
-          alwaysAuth: true,
+        npmAuth: {
+          [exampleRegistryUrl]: {
+            _auth: "dXNlcjpwYXNz", // user:pass
+            email: someEmail,
+            alwaysAuth: true,
+          },
         },
       });
     });
@@ -144,28 +122,11 @@ describe("upm-config-io", () => {
       const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toEqual({
-        [exampleRegistryUrl]: {
-          token: someToken,
-          alwaysAuth: true,
-        },
-      });
-    });
-
-    it("should ignore email when loading token auth", async () => {
-      const { loadUpmConfig, readFile } = makeDependencies();
-      readFile.mockResolvedValue(
-        makeUpmConfigEntryToml({
-          url: exampleRegistryUrl,
-          token: someToken,
-          email: someEmail,
-        })
-      );
-
-      const actual = await loadUpmConfig(someConfigPath);
-
-      expect(actual).toEqual({
-        [exampleRegistryUrl]: {
-          token: someToken,
+        npmAuth: {
+          [exampleRegistryUrl]: {
+            token: someToken,
+            alwaysAuth: true,
+          },
         },
       });
     });
