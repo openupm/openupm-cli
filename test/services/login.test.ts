@@ -1,10 +1,10 @@
 import { makeLogin } from "../../src/services/login";
 import { mockService } from "./service.mock";
-import { SaveAuthToUpmConfig } from "../../src/services/upm-auth";
 import { NpmLogin } from "../../src/services/npm-login";
 import { AuthNpmrc } from "../../src/services/npmrc-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
+import { PutUpmAuth } from "../../src/io/upm-config-io";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -15,8 +15,8 @@ const exampleToken = "some token";
 
 describe("login", () => {
   function makeDependencies() {
-    const saveAuthToUpmConfig = mockService<SaveAuthToUpmConfig>();
-    saveAuthToUpmConfig.mockResolvedValue(undefined);
+    const putUpmAuth = mockService<PutUpmAuth>();
+    putUpmAuth.mockResolvedValue(undefined);
 
     const npmLogin = mockService<NpmLogin>();
     npmLogin.mockResolvedValue(exampleToken);
@@ -24,18 +24,13 @@ describe("login", () => {
     const authNpmrc = mockService<AuthNpmrc>();
     authNpmrc.mockResolvedValue(exampleNpmrcPath);
 
-    const login = makeLogin(
-      saveAuthToUpmConfig,
-      npmLogin,
-      authNpmrc,
-      noopLogger
-    );
-    return { login, saveAuthToUpmConfig, npmLogin, authNpmrc } as const;
+    const login = makeLogin(putUpmAuth, npmLogin, authNpmrc, noopLogger);
+    return { login, putUpmAuth, npmLogin, authNpmrc } as const;
   }
 
   describe("basic auth", () => {
     it("should save encoded auth data", async () => {
-      const { login, saveAuthToUpmConfig } = makeDependencies();
+      const { login, putUpmAuth } = makeDependencies();
 
       await login(
         exampleUser,
@@ -47,7 +42,7 @@ describe("login", () => {
         "basic"
       );
 
-      expect(saveAuthToUpmConfig).toHaveBeenCalledWith(
+      expect(putUpmAuth).toHaveBeenCalledWith(
         exampleConfigPath,
         exampleRegistryUrl,
         {
@@ -62,7 +57,7 @@ describe("login", () => {
 
   describe("token auth", () => {
     it("should save token", async () => {
-      const { login, saveAuthToUpmConfig } = makeDependencies();
+      const { login, putUpmAuth } = makeDependencies();
 
       await login(
         exampleUser,
@@ -74,7 +69,7 @@ describe("login", () => {
         "token"
       );
 
-      expect(saveAuthToUpmConfig).toHaveBeenCalledWith(
+      expect(putUpmAuth).toHaveBeenCalledWith(
         exampleConfigPath,
         exampleRegistryUrl,
         {

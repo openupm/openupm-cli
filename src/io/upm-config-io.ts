@@ -12,9 +12,9 @@ import {
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
 import { addAuth, emptyUpmConfig, UPMConfig } from "../domain/upm-config";
-import { Base64, decodeBase64 } from "../domain/base64";
+import { Base64, decodeBase64, encodeBase64 } from "../domain/base64";
 import { NpmAuth } from "another-npm-registry-client";
-import { coerceRegistryUrl } from "../domain/registry-url";
+import { coerceRegistryUrl, RegistryUrl } from "../domain/registry-url";
 import { recordEntries } from "../utils/record-utils";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 
@@ -108,6 +108,16 @@ export type LoadUpmConfig = (
   configFilePath: string
 ) => Promise<UPMConfig | null>;
 
+async function tryReadUpmConfigContent(
+  configFilePath: string,
+  readFile: ReadTextFile
+): Promise<UpmConfigContent | null> {
+  const stringContent = await readFile(configFilePath, true);
+  if (stringContent === null) return null;
+  const tomlContent = TOML.parse(stringContent);
+  return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
+}
+
 /**
  * Makes a {@link LoadUpmConfig} function.
  */
@@ -147,32 +157,58 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
   }
 
   return async (configFilePath) => {
-    const stringContent = await readFile(configFilePath, true);
-    if (stringContent === null) return null;
-    const tomlContent = TOML.parse(stringContent);
-    const content = removeExplicitUndefined(
-      upmConfigContentSchema.parse(tomlContent)
-    );
+    const content = await tryReadUpmConfigContent(configFilePath, readFile);
+    if (content === null) return null;
     return importUpmConfig(content);
   };
 }
 
-/**
- * Save the upm config.
- * @param config The config to save.
- * @param configFilePath The path of the file that should be saved to.
- */
-export type SaveUpmConfig = (
-  config: UPMConfig,
-  configFilePath: string
+export type PutUpmAuth = (
+  configFilePath: string,
+  registry: RegistryUrl,
+  auth: NpmAuth
 ) => Promise<void>;
 
-/**
- * Creates a {@link SaveUpmConfig} function.
- */
-export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
-  return (config, configFilePath) => {
-    const content = TOML.stringify(config);
-    return writeFile(configFilePath, content);
+export function makePutUpmAuth(
+  readFile: ReadTextFile,
+  writeFile: WriteTextFile
+): PutUpmAuth {
+  function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
+    const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;
+
+    if ("token" in newEntry) {
+      return removeExplicitUndefined({
+        token: newEntry.token,
+        email: oldEntry?.email,
+        alwaysAuth,
+      });
+    }
+
+    return removeExplicitUndefined({
+      _auth: encodeBase64(`${newEntry.username}:${newEntry.password}`),
+      email: newEntry.email,
+      alwaysAuth,
+    });
+  }
+
+  return async (configFilePath, registry, auth) => {
+    const currentContent = await tryReadUpmConfigContent(
+      configFilePath,
+      readFile
+    );
+
+    const oldEntries = currentContent?.npmAuth ?? {};
+    // Search the entry both with and without trailing slash
+    const oldEntry = oldEntries[registry] ?? oldEntries[registry + "/"] ?? null;
+    const newContent: UpmConfigContent = removeExplicitUndefined({
+      npmAuth: {
+        ...oldEntries,
+        // Remove entry with trailing slash
+        [registry + "/"]: undefined,
+        [registry]: mergeEntries(oldEntry, auth),
+      },
+    });
+    const textContent = TOML.stringify(newContent);
+    await writeFile(configFilePath, textContent);
   };
 }
