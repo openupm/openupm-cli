@@ -32,7 +32,7 @@ import { makeResolveLatestVersion } from "../services/resolve-latest-version";
 import {
   makeGetUpmConfigPath,
   makeLoadUpmConfig,
-  makePutUpmAuth,
+  makeSaveUpmConfig,
 } from "../io/upm-config-io";
 import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
@@ -42,6 +42,7 @@ import {
 } from "../io/npmrc-io";
 import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
 import { makeLoadProjectVersion } from "../io/project-version-io";
+import { makeSaveAuthToUpmConfig } from "../services/upm-auth";
 import { makeFetchPackument } from "../io/packument-io";
 import { makeSearchPackages } from "../services/search-packages";
 import { makeLogin } from "../services/login";
@@ -78,7 +79,7 @@ const loadProjectManifest = makeLoadProjectManifest(readFile, debugLog);
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 const getUpmConfigPath = makeGetUpmConfigPath(getHomePath, runChildProcess);
 const loadUpmConfig = makeLoadUpmConfig(readFile);
-const putUpmAuth = makePutUpmAuth(readFile, writeFile);
+const saveUpmConfig = makeSaveUpmConfig(writeFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePath);
 const loadNpmrc = makeLoadNpmrc(readFile);
 const saveNpmrc = makeSaveNpmrc(writeFile);
@@ -114,12 +115,16 @@ const resolveDependencies = makeResolveDependency(
   fetchPackument,
   checkIsBuiltInPackage
 );
+const saveAuthToUpmConfig = makeSaveAuthToUpmConfig(
+  loadUpmConfig,
+  saveUpmConfig
+);
 const searchPackages = makeSearchPackages(
   searchRegistry,
   fetchAllPackuments,
   debugLog
 );
-const login = makeLogin(putUpmAuth, npmLogin, authNpmrc, debugLog);
+const login = makeLogin(saveAuthToUpmConfig, npmLogin, authNpmrc, debugLog);
 
 const addCmd = makeAddCmd(
   parseEnv,
