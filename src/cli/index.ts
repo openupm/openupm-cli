@@ -14,7 +14,7 @@ import {
 } from "../io/npmrc-io";
 import { makeFetchPackument } from "../io/packument-io";
 import {
-  makeLoadProjectManifest,
+  loadProjectManifest,
   makeWriteProjectManifest,
 } from "../io/project-manifest-io";
 import { makeLoadProjectVersion } from "../io/project-version-io";
@@ -60,7 +60,6 @@ import {
 
 const log = npmlog;
 
-const loadProjectManifest = makeLoadProjectManifest(readTextFile, npmDebugLog);
 const writeProjectManifest = makeWriteProjectManifest(writeTextFile);
 const getUpmConfigPath = makeGetUpmConfigPath(
   getHomePathFromEnv,

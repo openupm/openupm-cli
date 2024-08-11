@@ -1,13 +1,13 @@
+import { AnyJson } from "@iarna/toml";
+import path from "path";
+import { CustomError } from "ts-custom-error";
 import {
   pruneManifest,
   UnityProjectManifest,
 } from "../domain/project-manifest";
-import path from "path";
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
-import { AnyJson } from "@iarna/toml";
-import { CustomError } from "ts-custom-error";
-import { DebugLog } from "../logging";
+import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
+import { readTextFile, ReadTextFile, WriteTextFile } from "./text-file-io";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {
@@ -36,9 +36,10 @@ export type LoadProjectManifest = (
 ) => Promise<UnityProjectManifest>;
 
 /**
- * Makes a {@link LoadProjectManifest} function.
+ * Makes a {@link LoadProjectManifest} function which reads the content
+ * of a `manifest.json` file.
  */
-export function makeLoadProjectManifest(
+export function ReadProjectManifestFile(
   readFile: ReadTextFile,
   debugLog: DebugLog
 ): LoadProjectManifest {
@@ -63,6 +64,14 @@ export function makeLoadProjectManifest(
     return json as unknown as UnityProjectManifest;
   };
 }
+
+/**
+ * Default {@link LoadProjectManifest} function. Uses {@link ReadProjectManifestFile}.
+ */
+export const loadProjectManifest: LoadProjectManifest = ReadProjectManifestFile(
+  readTextFile,
+  npmDebugLog
+);
 
 /**
  * Function for replacing the project manifest for a Unity project.
