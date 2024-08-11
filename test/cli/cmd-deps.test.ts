@@ -52,10 +52,7 @@ function makeDependencies() {
   resolveDependencies.mockResolvedValue(defaultGraph);
 
   const resolveLatestVersion = mockService<ResolveLatestVersion>();
-  resolveLatestVersion.mockResolvedValue({
-    source: exampleRegistryUrl,
-    value: someVersion,
-  });
+  resolveLatestVersion.mockResolvedValue(someVersion);
 
   const log = makeMockLogger();
 

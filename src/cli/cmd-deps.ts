@@ -17,6 +17,7 @@ import { isZod } from "../utils/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import os from "os";
 import chalk from "chalk";
+import { queryAllRegistriesLazy } from "../utils/sources";
 
 /**
  * Options passed to the deps command.
@@ -68,7 +69,11 @@ export function makeDepsCmd(
     const latestVersion =
       requestedVersion !== undefined && isZod(requestedVersion, SemanticVersion)
         ? requestedVersion
-        : (await resolveLatestVersion(sources, packageName))?.value ?? null;
+        : (
+            await queryAllRegistriesLazy(sources, (source) =>
+              resolveLatestVersion(source, packageName)
+            )
+          )?.value ?? null;
 
     if (latestVersion === null) throw new PackumentNotFoundError(packageName);
 
