@@ -1,7 +1,7 @@
 import { RegistryUrl } from "../domain/registry-url";
 import { PutRegistryAuth } from "./put-registry-auth";
 import { NpmLogin } from "./npm-login";
-import { AuthNpmrc } from "./npmrc-auth";
+import { StoreNpmAuthToken } from "./put-npm-auth-token";
 import { DebugLog } from "../logging";
 import { NpmAuth } from "another-npm-registry-client";
 
@@ -33,7 +33,7 @@ export type Login = (
 export function makeLogin(
   putRegistryAuth: PutRegistryAuth,
   npmLogin: NpmLogin,
-  authNpmrc: AuthNpmrc,
+  putNpmAuthToken: StoreNpmAuthToken,
   debugLog: DebugLog
 ): Login {
   return async (
@@ -57,7 +57,7 @@ export function makeLogin(
     const auth: NpmAuth = { token, email, alwaysAuth };
     await putRegistryAuth(configPath, registry, auth);
 
-    const npmrcPath = await authNpmrc(registry, token);
+    const npmrcPath = await putNpmAuthToken(registry, token);
     debugLog(`saved to npm config: ${npmrcPath}`);
   };
 }

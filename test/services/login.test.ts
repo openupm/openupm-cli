@@ -2,7 +2,7 @@ import { makeLogin } from "../../src/services/login";
 import { mockService } from "./service.mock";
 import { PutRegistryAuth } from "../../src/services/put-registry-auth";
 import { NpmLogin } from "../../src/services/npm-login";
-import { AuthNpmrc } from "../../src/services/npmrc-auth";
+import { StoreNpmAuthToken } from "../../src/services/put-npm-auth-token";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
 
@@ -21,16 +21,16 @@ describe("login", () => {
     const npmLogin = mockService<NpmLogin>();
     npmLogin.mockResolvedValue(exampleToken);
 
-    const authNpmrc = mockService<AuthNpmrc>();
-    authNpmrc.mockResolvedValue(exampleNpmrcPath);
+    const putNpmAuthToken = mockService<StoreNpmAuthToken>();
+    putNpmAuthToken.mockResolvedValue(exampleNpmrcPath);
 
     const login = makeLogin(
       putRegistryAuth,
       npmLogin,
-      authNpmrc,
+      putNpmAuthToken,
       noopLogger
     );
-    return { login, putRegistryAuth, npmLogin, authNpmrc } as const;
+    return { login, putRegistryAuth, npmLogin, putNpmAuthToken } as const;
   }
 
   describe("basic auth", () => {

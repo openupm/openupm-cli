@@ -22,13 +22,10 @@ import {
 import { npmDebugLog } from "../logging";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeResolveDependency } from "../services/dependency-resolving";
-import {
-  determineEditorVersion
-} from "../services/determine-editor-version";
+import { determineEditorVersion } from "../services/determine-editor-version";
 import { getRegistryAuth } from "../services/get-registry-auth";
 import { makeLogin } from "../services/login";
 import { makeNpmLogin } from "../services/npm-login";
-import { makeAuthNpmrc } from "../services/npmrc-auth";
 import { makeParseEnv } from "../services/parse-env";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
@@ -50,6 +47,7 @@ import {
   mustBePackageReference,
   mustBeRegistryUrl,
 } from "./validators";
+import { putNpmAuthToken } from "../services/put-npm-auth-token";
 
 // Composition root
 
@@ -62,7 +60,6 @@ const parseEnv = makeParseEnv(
   getProcessCwd,
   npmDebugLog
 );
-const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLogin(npmRegistryClient, npmDebugLog);
 const resolveRemovePackumentVersion =
   makeResolveRemotePackumentVersion(getRegistryPackument);
@@ -82,7 +79,12 @@ const searchPackages = makeSearchPackages(
   getAllRegistryPackuments,
   npmDebugLog
 );
-const login = makeLogin(putRegistryAuth, npmLogin, authNpmrc, npmDebugLog);
+const login = makeLogin(
+  putRegistryAuth,
+  npmLogin,
+  putNpmAuthToken,
+  npmDebugLog
+);
 
 const addCmd = makeAddCmd(
   parseEnv,
