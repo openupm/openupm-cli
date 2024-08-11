@@ -20,7 +20,7 @@ import {
 import { makeLoadProjectVersion } from "../io/project-version-io";
 import { npmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv, getProcessCwd } from "../io/special-paths";
-import { makeReadText, makeWriteText } from "../io/text-file-io";
+import { makeWriteText, readTextFile } from "../io/text-file-io";
 import {
   makeGetUpmConfigPath,
   makeLoadUpmConfig,
@@ -60,20 +60,19 @@ import {
 
 const log = npmlog;
 
-const readFile = makeReadText();
 const writeFile = makeWriteText();
-const loadProjectManifest = makeLoadProjectManifest(readFile, npmDebugLog);
+const loadProjectManifest = makeLoadProjectManifest(readTextFile, npmDebugLog);
 const writeProjectManifest = makeWriteProjectManifest(writeFile);
 const getUpmConfigPath = makeGetUpmConfigPath(
   getHomePathFromEnv,
   runChildProcess
 );
-const loadUpmConfig = makeLoadUpmConfig(readFile);
+const loadUpmConfig = makeLoadUpmConfig(readTextFile);
 const saveUpmConfig = makeSaveUpmConfig(writeFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePathFromEnv);
-const loadNpmrc = makeLoadNpmrc(readFile);
+const loadNpmrc = makeLoadNpmrc(readTextFile);
 const saveNpmrc = makeSaveNpmrc(writeFile);
-const loadProjectVersion = makeLoadProjectVersion(readFile, npmDebugLog);
+const loadProjectVersion = makeLoadProjectVersion(readTextFile, npmDebugLog);
 const fetchPackument = makeFetchPackument(npmRegistryClient, npmDebugLog);
 const fetchAllPackuments = makeFetchAllPackuments(npmDebugLog);
 const searchRegistry = makeSearchRegistry(npmDebugLog);

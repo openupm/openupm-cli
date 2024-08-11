@@ -22,16 +22,15 @@ export type ReadTextFile = {
 };
 
 /**
- * Makes a {@link ReadTextFile} function.
+ * Makes a {@link ReadTextFile} function which reads from the file-system
+ * using the {@link fs} module.
  */
-export function makeReadText(): ReadTextFile {
-  return ((path, optional) =>
-    fs.readFile(path, { encoding: "utf8" }).catch((error) => {
-      assertIsNodeError(error);
-      if (optional && error.code === "ENOENT") return null;
-      throw error;
-    })) as ReadTextFile;
-}
+export const readTextFile: ReadTextFile = ((path, optional) =>
+  fs.readFile(path, { encoding: "utf8" }).catch((error) => {
+    assertIsNodeError(error);
+    if (optional && error.code === "ENOENT") return null;
+    throw error;
+  })) as ReadTextFile;
 
 /**
  * Function for overwriting the content of a text file. Creates the file
