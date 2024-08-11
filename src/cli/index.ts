@@ -3,8 +3,6 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { getAllRegistryPackuments } from "../io/all-packuments-io";
-import { searchRegistry } from "../io/npm-search";
 import { getRegistryPackument } from "../io/packument-io";
 import {
   loadProjectManifest,
@@ -24,7 +22,7 @@ import { makeParseEnv } from "../services/parse-env";
 import { putNpmAuthToken } from "../services/put-npm-auth-token";
 import { putRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
-import { makeSearchPackages } from "../services/search-packages";
+import { searchPackages } from "../services/search-packages";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
@@ -52,11 +50,6 @@ const parseEnv = makeParseEnv(
   npmDebugLog
 );
 
-const searchPackages = makeSearchPackages(
-  searchRegistry,
-  getAllRegistryPackuments,
-  npmDebugLog
-);
 const login = makeLogin(
   putRegistryAuth,
   getAuthToken,

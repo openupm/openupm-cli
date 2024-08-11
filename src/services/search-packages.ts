@@ -1,7 +1,14 @@
 import { Registry } from "../domain/registry";
-import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import { GetAllRegistryPackuments } from "../io/all-packuments-io";
-import { DebugLog } from "../logging";
+import {
+  getAllRegistryPackuments,
+  GetAllRegistryPackuments,
+} from "../io/all-packuments-io";
+import {
+  SearchedPackument,
+  searchRegistry,
+  SearchRegistry,
+} from "../io/npm-search";
+import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 
 /**
@@ -18,9 +25,11 @@ export type SearchPackages = (
 ) => Promise<ReadonlyArray<SearchedPackument>>;
 
 /**
- * Makes a {@licence SearchPackages} function.
+ * Makes a {@licence SearchPackages} function which searches a registry both
+ * using the search endpoint and, as a fallback, by querying all packages
+ * and searching on the client side.
  */
-export function makeSearchPackages(
+export function ApiAndFallbackPackageSearch(
   searchRegistry: SearchRegistry,
   getAllRegistryPackuments: GetAllRegistryPackuments,
   debugLog: DebugLog
@@ -52,3 +61,12 @@ export function makeSearchPackages(
     }
   };
 }
+
+/**
+ * Default {@link SearchPackages} function. Uses {@link ApiAndFallbackPackageSearch}.
+ */
+export const searchPackages = ApiAndFallbackPackageSearch(
+  searchRegistry,
+  getAllRegistryPackuments,
+  npmDebugLog
+);
