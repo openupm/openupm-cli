@@ -1,6 +1,6 @@
 import { Registry } from "../domain/registry";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import { FetchAllPackuments } from "../io/all-packuments-io";
+import { GetAllRegistryPackuments } from "../io/all-packuments-io";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 
@@ -22,14 +22,14 @@ export type SearchPackages = (
  */
 export function makeSearchPackages(
   searchRegistry: SearchRegistry,
-  fetchAllPackuments: FetchAllPackuments,
+  getAllRegistryPackuments: GetAllRegistryPackuments,
   debugLog: DebugLog
 ): SearchPackages {
   async function searchInAll(
     registry: Registry,
     keyword: string
   ): Promise<SearchedPackument[]> {
-    const allPackuments = await fetchAllPackuments(registry);
+    const allPackuments = await getAllRegistryPackuments(registry);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _updated, ...packumentEntries } = allPackuments;
     const packuments = Object.values(packumentEntries);

@@ -2,7 +2,7 @@ import { mockService } from "./service.mock";
 import { SearchedPackument, SearchRegistry } from "../../src/io/npm-search";
 import {
   AllPackuments,
-  FetchAllPackuments,
+  GetAllRegistryPackuments,
 } from "../../src/io/all-packuments-io";
 import { makeSearchPackages } from "../../src/services/search-packages";
 import { Registry } from "../../src/domain/registry";
@@ -36,7 +36,7 @@ describe("search packages", () => {
     const searchRegistry = mockService<SearchRegistry>();
     searchRegistry.mockResolvedValue([exampleSearchResult]);
 
-    const fetchAllPackument = mockService<FetchAllPackuments>();
+    const fetchAllPackument = mockService<GetAllRegistryPackuments>();
     fetchAllPackument.mockResolvedValue(exampleAllPackumentsResult);
 
     const searchPackages = makeSearchPackages(

@@ -1,10 +1,10 @@
 import npmFetch from "npm-registry-fetch";
-import { makeFetchAllPackuments } from "../../src/io/all-packuments-io";
-import { Registry } from "../../src/domain/registry";
-import { exampleRegistryUrl } from "../domain/data-registry";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { noopLogger } from "../../src/logging";
+import { Registry } from "../../src/domain/registry";
+import { FetchAllRegistryPackuments } from "../../src/io/all-packuments-io";
 import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import { noopLogger } from "../../src/logging";
+import { exampleRegistryUrl } from "../domain/data-registry";
 
 jest.mock("npm-registry-fetch");
 
@@ -14,8 +14,8 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const getAllPackuments = makeFetchAllPackuments(noopLogger);
-  return { getAllPackuments } as const;
+  const fetchAllRegistryPackuments = FetchAllRegistryPackuments(noopLogger);
+  return { fetchAllRegistryPackuments } as const;
 }
 
 describe("fetch all packuments", () => {
@@ -26,9 +26,11 @@ describe("fetch all packuments", () => {
       statusCode: 500,
     } as HttpErrorBase;
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
-    const { getAllPackuments } = makeDependencies();
+    const { fetchAllRegistryPackuments } = makeDependencies();
 
-    await expect(getAllPackuments(exampleRegistry)).rejects.toEqual(expected);
+    await expect(fetchAllRegistryPackuments(exampleRegistry)).rejects.toEqual(
+      expected
+    );
   });
 
   it("should fail on auth error response", async () => {
@@ -38,11 +40,11 @@ describe("fetch all packuments", () => {
       statusCode: 401,
     } as HttpErrorBase;
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
-    const { getAllPackuments } = makeDependencies();
+    const { fetchAllRegistryPackuments } = makeDependencies();
 
-    await expect(getAllPackuments(exampleRegistry)).rejects.toBeInstanceOf(
-      RegistryAuthenticationError
-    );
+    await expect(
+      fetchAllRegistryPackuments(exampleRegistry)
+    ).rejects.toBeInstanceOf(RegistryAuthenticationError);
   });
 
   it("should succeed on ok response", async () => {
@@ -50,9 +52,9 @@ describe("fetch all packuments", () => {
       _update: 123,
     };
     jest.mocked(npmFetch.json).mockResolvedValue(expected);
-    const { getAllPackuments } = makeDependencies();
+    const { fetchAllRegistryPackuments } = makeDependencies();
 
-    const actual = await getAllPackuments(exampleRegistry);
+    const actual = await fetchAllRegistryPackuments(exampleRegistry);
 
     expect(actual).toEqual(expected);
   });
