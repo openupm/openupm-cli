@@ -11,7 +11,7 @@ import { GetCwd } from "../io/special-paths";
 import { CustomError } from "ts-custom-error";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-import { LoadRegistryAuth } from "./load-registry-auth";
+import { GetRegistryAuth } from "./get-registry-auth";
 
 /**
  * Error for when auth information for a registry could not be loaded.
@@ -64,7 +64,7 @@ export type ParseEnv = (options: CmdOptions) => Promise<Env>;
 export function makeParseEnv(
   log: Logger,
   getUpmConfigPath: GetUpmConfigPath,
-  loadRegistryAuth: LoadRegistryAuth,
+  getRegistryAuth: GetRegistryAuth,
   getCwd: GetCwd,
   debugLog: DebugLog
 ): ParseEnv {
@@ -145,7 +145,7 @@ export function makeParseEnv(
     let registry: Registry;
     let upstreamRegistry: Registry;
     try {
-      const upmConfig = await loadRegistryAuth(upmConfigPath);
+      const upmConfig = await getRegistryAuth(upmConfigPath);
       registry = determinePrimaryRegistry(options, upmConfig);
       upstreamRegistry = determineUpstreamRegistry();
     } catch (error) {

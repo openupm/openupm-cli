@@ -1,17 +1,17 @@
-import { DomainName } from "../domain/domain-name";
-import { Registry } from "../domain/registry";
 import { AsyncResult, Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
+import { DomainName } from "../domain/domain-name";
+import { ResolvableVersion } from "../domain/package-reference";
 import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
 } from "../domain/packument";
-import { FetchPackument } from "../io/packument-io";
-import { resultifyAsyncOp } from "../utils/result-utils";
+import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
-import { ResolvableVersion } from "../domain/package-reference";
+import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
+import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
  * A successfully resolved packument-version.
@@ -32,26 +32,27 @@ export interface ResolvedPackumentVersion {
 }
 
 /**
- * Function for resolving remove packument versions.
+ * Function for resolving a specific packument version.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
  */
-export type ResolveRemotePackumentVersion = (
+export type GetRegistryPackumentVersion = (
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
 ) => AsyncResult<ResolvedPackumentVersion, ResolvePackumentVersionError>;
 
 /**
- * Makes a {@link ResolveRemotePackumentVersion} function.
+ * Makes a {@link GetRegistryPackumentVersion} function which fetches the
+ * packument version from a remote npm registry.
  */
-export function makeResolveRemotePackumentVersion(
-  fetchPackument: FetchPackument
-): ResolveRemotePackumentVersion {
+export function FetchRegistryPackumentVersion(
+  getRegistryPackument: GetRegistryPackument
+): GetRegistryPackumentVersion {
   return (packageName, requestedVersion, source) =>
     resultifyAsyncOp<UnityPackument | null, ResolvePackumentVersionError>(
-      fetchPackument(source, packageName)
+      getRegistryPackument(source, packageName)
     ).andThen((packument) => {
       if (packument === null)
         return Err(new PackumentNotFoundError(packageName));
@@ -64,3 +65,9 @@ export function makeResolveRemotePackumentVersion(
       );
     });
 }
+
+/**
+ * Default {@link GetRegistryPackumentVersion} function. Uses {@link FetchRegistryPackumentVersion}.
+ */
+export const getRegistryPackumentVersion =
+  FetchRegistryPackumentVersion(getRegistryPackument);

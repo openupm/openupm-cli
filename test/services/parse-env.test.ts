@@ -8,7 +8,7 @@ import { mockService } from "./service.mock";
 import { GetCwd } from "../../src/io/special-paths";
 import path from "path";
 import { noopLogger } from "../../src/logging";
-import { LoadRegistryAuth } from "../../src/services/load-registry-auth";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -28,7 +28,7 @@ function makeDependencies() {
   // The root directory does not contain an upm-config
   getUpmConfigPath.mockResolvedValue(testRootPath);
 
-  const loadRegistryAuth = mockService<LoadRegistryAuth>();
+  const loadRegistryAuth = mockService<GetRegistryAuth>();
   loadRegistryAuth.mockResolvedValue(emptyUpmConfig);
 
   // process.cwd is in the root directory.

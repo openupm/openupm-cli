@@ -1,10 +1,10 @@
-import { makeLogin } from "../../src/services/login";
-import { mockService } from "./service.mock";
-import { PutRegistryAuth } from "../../src/services/put-registry-auth";
-import { NpmLogin } from "../../src/services/npm-login";
-import { AuthNpmrc } from "../../src/services/npmrc-auth";
-import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
+import { GetAuthToken } from "../../src/services/get-auth-token";
+import { UpmConfigLogin } from "../../src/services/login";
+import { StoreNpmAuthToken } from "../../src/services/put-npm-auth-token";
+import { PutRegistryAuth } from "../../src/services/put-registry-auth";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "./service.mock";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -18,19 +18,19 @@ describe("login", () => {
     const putRegistryAuth = mockService<PutRegistryAuth>();
     putRegistryAuth.mockResolvedValue(undefined);
 
-    const npmLogin = mockService<NpmLogin>();
+    const npmLogin = mockService<GetAuthToken>();
     npmLogin.mockResolvedValue(exampleToken);
 
-    const authNpmrc = mockService<AuthNpmrc>();
-    authNpmrc.mockResolvedValue(exampleNpmrcPath);
+    const putNpmAuthToken = mockService<StoreNpmAuthToken>();
+    putNpmAuthToken.mockResolvedValue(exampleNpmrcPath);
 
-    const login = makeLogin(
+    const login = UpmConfigLogin(
       putRegistryAuth,
       npmLogin,
-      authNpmrc,
+      putNpmAuthToken,
       noopLogger
     );
-    return { login, putRegistryAuth, npmLogin, authNpmrc } as const;
+    return { login, putRegistryAuth, npmLogin, putNpmAuthToken } as const;
   }
 
   describe("basic auth", () => {

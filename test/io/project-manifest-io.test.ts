@@ -1,6 +1,6 @@
 import {
-  makeLoadProjectManifest,
-  makeWriteProjectManifest,
+  ReadProjectManifestFile,
+  WriteProjectManifestFile,
   ManifestMalformedError,
   ManifestMissingError,
   manifestPathFor,
@@ -29,48 +29,51 @@ describe("project-manifest io", () => {
     });
   });
 
-  describe("load", () => {
+  describe("read file", () => {
     function makeDependencies() {
       const readFile = mockService<ReadTextFile>();
 
-      const loadProjectManifest = makeLoadProjectManifest(readFile, noopLogger);
-      return { loadProjectManifest, readFile } as const;
+      const readProjectManifestFile = ReadProjectManifestFile(
+        readFile,
+        noopLogger
+      );
+      return { readProjectManifestFile, readFile } as const;
     }
 
     it("should fail if file is missing", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
+      const { readProjectManifestFile, readFile } = makeDependencies();
       readFile.mockResolvedValue(null);
 
       await expect(
-        loadProjectManifest(exampleProjectPath)
+        readProjectManifestFile(exampleProjectPath)
       ).rejects.toBeInstanceOf(ManifestMissingError);
     });
 
     it("should fail if manifest contains invalid json", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
+      const { readProjectManifestFile, readFile } = makeDependencies();
       readFile.mockResolvedValue("not {} valid : json");
 
       await expect(
-        loadProjectManifest(exampleProjectPath)
+        readProjectManifestFile(exampleProjectPath)
       ).rejects.toBeInstanceOf(ManifestMalformedError);
     });
 
     it("should fail if manifest contains invalid content", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
+      const { readProjectManifestFile, readFile } = makeDependencies();
       readFile.mockResolvedValue(`123`);
 
       await expect(
-        loadProjectManifest(exampleProjectPath)
+        readProjectManifestFile(exampleProjectPath)
       ).rejects.toBeInstanceOf(ManifestMalformedError);
     });
 
     it("should load valid manifest", async () => {
-      const { loadProjectManifest, readFile } = makeDependencies();
+      const { readProjectManifestFile, readFile } = makeDependencies();
       readFile.mockResolvedValue(
         `{ "dependencies": { "com.package.a": "1.0.0"} }`
       );
 
-      const actual = await loadProjectManifest(exampleProjectPath);
+      const actual = await readProjectManifestFile(exampleProjectPath);
 
       expect(actual).toEqual({
         dependencies: {
@@ -80,12 +83,12 @@ describe("project-manifest io", () => {
     });
   });
 
-  describe("write", () => {
+  describe("write file", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
       writeFile.mockResolvedValue(undefined);
 
-      const writeProjectManifest = makeWriteProjectManifest(writeFile);
+      const writeProjectManifest = WriteProjectManifestFile(writeFile);
       return { writeProjectManifest, writeFile } as const;
     }
 

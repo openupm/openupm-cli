@@ -1,20 +1,17 @@
-import { PackageUrl } from "../domain/package-url";
-import {
-  LoadProjectManifest,
-  WriteProjectManifest,
-} from "../io/project-manifest-io";
-import { ParseEnv } from "../services/parse-env";
-import { compareEditorVersion, EditorVersion } from "../domain/editor-version";
+import { Logger } from "npmlog";
+import { CustomError } from "ts-custom-error";
+import { Err } from "ts-results-es";
+import { PackumentNotFoundError } from "../common-errors";
+import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";
+import { compareEditorVersion, EditorVersion } from "../domain/editor-version";
+import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import {
   makePackageReference,
   PackageReference,
   splitPackageReference,
 } from "../domain/package-reference";
-import {
-  addScope,
-  makeEmptyScopedRegistryFor,
-} from "../domain/scoped-registry";
+import { PackageUrl } from "../domain/package-url";
 import {
   addTestable,
   hasDependency,
@@ -22,27 +19,30 @@ import {
   setDependency,
   UnityProjectManifest,
 } from "../domain/project-manifest";
-import { CmdOptions } from "./options";
+import { unityRegistryUrl } from "../domain/registry-url";
+import {
+  addScope,
+  makeEmptyScopedRegistryFor,
+} from "../domain/scoped-registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { areArraysEqual } from "../utils/array-utils";
-import { CustomError } from "ts-custom-error";
+import {
+  LoadProjectManifest,
+  SaveProjectManifest,
+} from "../io/project-manifest-io";
+import { DebugLog } from "../logging";
 import { ResolveDependencies } from "../services/dependency-resolving";
-import { ResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
-import { Logger } from "npmlog";
+import { DetermineEditorVersion } from "../services/determine-editor-version";
+import { ParseEnv } from "../services/parse-env";
+import { areArraysEqual } from "../utils/array-utils";
 import {
   logFailedDependency,
   logResolvedDependency,
 } from "./dependency-logging";
-import { unityRegistryUrl } from "../domain/registry-url";
-import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
-import { DebugLog } from "../logging";
-import { DetermineEditorVersion } from "../services/determine-editor-version";
+import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
-import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
-import { Err } from "ts-results-es";
-import { PackumentNotFoundError } from "../common-errors";
 
 import { ResolvePackumentVersionError } from "../domain/packument";
+import { GetRegistryPackumentVersion } from "../services/get-registry-packument-version";
 import { isZod } from "../utils/zod-utils";
 
 export class PackageIncompatibleError extends CustomError {
@@ -119,10 +119,10 @@ function pickMostFixable(
  */
 export function makeAddCmd(
   parseEnv: ParseEnv,
-  resolveRemotePackumentVersion: ResolveRemotePackumentVersion,
+  getRegistryPackumentVersion: GetRegistryPackumentVersion,
   resolveDependencies: ResolveDependencies,
   loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest,
+  saveProjectManifest: SaveProjectManifest,
   determineEditorVersion: DetermineEditorVersion,
   log: Logger,
   debugLog: DebugLog
@@ -157,13 +157,13 @@ export function makeAddCmd(
         requestedVersion === undefined ||
         !isZod(requestedVersion, PackageUrl)
       ) {
-        let resolveResult = await resolveRemotePackumentVersion(
+        let resolveResult = await getRegistryPackumentVersion(
           name,
           requestedVersion,
           env.registry
         ).promise;
         if (resolveResult.isErr() && env.upstream) {
-          const upstreamResult = await resolveRemotePackumentVersion(
+          const upstreamResult = await getRegistryPackumentVersion(
             name,
             requestedVersion,
             env.upstreamRegistry
@@ -328,7 +328,7 @@ export function makeAddCmd(
 
     // Save manifest
     if (dirty) {
-      await writeProjectManifest(env.cwd, manifest);
+      await saveProjectManifest(env.cwd, manifest);
       // print manifest notice
       log.notice("", "please open Unity project to apply changes");
     }

@@ -1,5 +1,5 @@
 import childProcess from "child_process";
-import { DebugLog } from "../logging";
+import { DebugLog, npmDebugLog } from "../logging";
 
 /**
  * Function that run a child process.
@@ -9,9 +9,10 @@ import { DebugLog } from "../logging";
 export type RunChildProcess = (command: string) => Promise<string>;
 
 /**
- * Makes a {@link RunChildProcess} function.
+ * Makes a {@link RunChildProcess} function which uses a promisified version of
+ * the built-in {@link childProcess.exec} function.
  */
-export function makeRunChildProcess(debugLog: DebugLog): RunChildProcess {
+function ExecChildProcess(debugLog: DebugLog): RunChildProcess {
   return (command) =>
     new Promise(function (resolve, reject) {
       childProcess.exec(command, function (error, stdout) {
@@ -25,3 +26,8 @@ export function makeRunChildProcess(debugLog: DebugLog): RunChildProcess {
       });
     });
 }
+
+/**
+ * Default {@link RunChildProcess} function. Uses {@link ExecChildProcess}.
+ */
+export const runChildProcess = ExecChildProcess(npmDebugLog);

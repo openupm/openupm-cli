@@ -1,18 +1,22 @@
-import path from "path";
 import TOML from "@iarna/toml";
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
-import { tryGetEnv } from "../utils/env-util";
-import { tryGetWslPath } from "./wsl";
-import { RunChildProcess } from "./child-process";
-import { GetHomePath } from "./special-paths";
+import path from "path";
 import { CustomError } from "ts-custom-error";
 import { z } from "zod";
+import { Base64 } from "../domain/base64";
+import { tryGetEnv } from "../utils/env-util";
 import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { UpmConfig } from "../domain/upm-config";
-import { Base64 } from "../domain/base64";
+import { runChildProcess, RunChildProcess } from "./child-process";
+import { GetHomePath, getHomePathFromEnv } from "./special-paths";
+import {
+  readTextFile,
+  ReadTextFile,
+  writeTextFile,
+  WriteTextFile,
+} from "./text-file-io";
+import { tryGetWslPath } from "./wsl";
 
 const configFileName = ".upmconfig.toml";
 
@@ -30,9 +34,11 @@ export type GetUpmConfigPath = (
 ) => Promise<string>;
 
 /**
- * Makes a {@link GetUpmConfigPath} function.
+ * Makes a {@link GetUpmConfigPath} function which resolves to the default
+ * location of the `.upmconfig.toml` file.
+ * @see https://docs.unity3d.com/Manual/upm-config.html#upmconfig
  */
-export function makeGetUpmConfigPath(
+export function ResolveDefaultUpmConfigPath(
   getHomePath: GetHomePath,
   runChildProcess: RunChildProcess
 ): GetUpmConfigPath {
@@ -61,6 +67,14 @@ export function makeGetUpmConfigPath(
     return path.join(directory, configFileName);
   };
 }
+
+/**
+ * Default {@link GetUpmConfigPath} function. Uses {@link ResolveDefaultUpmConfigPath}.
+ */
+export const getUpmConfigPath: GetUpmConfigPath = ResolveDefaultUpmConfigPath(
+  getHomePathFromEnv,
+  runChildProcess
+);
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),
@@ -108,9 +122,10 @@ export type LoadUpmConfig = (
 ) => Promise<UpmConfigContent | null>;
 
 /**
- * Makes a {@link LoadUpmConfig} function.
+ * Makes a {@link LoadUpmConfig} function which reads the content of a
+ * `.upmconfig.toml` file.
  */
-export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
+export function ReadUpmConfigFile(readFile: ReadTextFile): LoadUpmConfig {
   return async (configFilePath) => {
     const stringContent = await readFile(configFilePath, true);
     if (stringContent === null) return null;
@@ -118,6 +133,11 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
     return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
   };
 }
+
+/**
+ * Default {@link LoadUpmConfig} function. Uses {@link ReadUpmConfigFile}.
+ */
+export const loadUpmConfig: LoadUpmConfig = ReadUpmConfigFile(readTextFile);
 
 /**
  * Save the upm config.
@@ -130,11 +150,17 @@ export type SaveUpmConfig = (
 ) => Promise<void>;
 
 /**
- * Creates a {@link SaveUpmConfig} function.
+ * Creates a {@link SaveUpmConfig} function which overwrites the content
+ * of a `.upmconfig.toml` file.
  */
-export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
+export function WriteUpmConfigFile(writeFile: WriteTextFile): SaveUpmConfig {
   return (config, configFilePath) => {
     const content = TOML.stringify(config);
     return writeFile(configFilePath, content);
   };
 }
+
+/**
+ * Default {@link SaveUpmConfig} function. Uses {@link WriteUpmConfigFile}.
+ */
+export const saveUpmConfig: SaveUpmConfig = WriteUpmConfigFile(writeTextFile);

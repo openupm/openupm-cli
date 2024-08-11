@@ -11,7 +11,7 @@ import { CmdOptions } from "./options";
 import { recordKeys } from "../utils/record-utils";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
-import { FetchPackument } from "../io/packument-io";
+import { GetRegistryPackument } from "../io/packument-io";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { PackumentNotFoundError } from "../common-errors";
 
@@ -109,7 +109,7 @@ const printInfo = function (packument: UnityPackument) {
  */
 export function makeViewCmd(
   parseEnv: ParseEnv,
-  fetchPackument: FetchPackument,
+  getRegistryPackument: GetRegistryPackument,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
@@ -130,7 +130,7 @@ export function makeViewCmd(
     ];
     const packumentFromRegistry = await queryAllRegistriesLazy(
       sources,
-      (source) => fetchPackument(source, pkg)
+      (source) => getRegistryPackument(source, pkg)
     );
     const packument = packumentFromRegistry?.value ?? null;
     if (packument === null) throw new PackumentNotFoundError(pkg);

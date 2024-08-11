@@ -9,7 +9,7 @@ import { makeMockLogger } from "./log.mock";
 import { buildPackument } from "../domain/data-packument";
 import { mockService } from "../services/service.mock";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { FetchPackument } from "../../src/io/packument-io";
+import { GetRegistryPackument } from "../../src/io/packument-io";
 import { PackumentNotFoundError } from "../../src/common-errors";
 
 const somePackage = DomainName.parse("com.some.package");
@@ -46,16 +46,16 @@ function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(defaultEnv);
 
-  const fetchPackument = mockService<FetchPackument>();
-  fetchPackument.mockResolvedValue(somePackument);
+  const getRegistryPackument = mockService<GetRegistryPackument>();
+  getRegistryPackument.mockResolvedValue(somePackument);
 
   const log = makeMockLogger();
 
-  const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
+  const viewCmd = makeViewCmd(parseEnv, getRegistryPackument, log);
   return {
     viewCmd,
     parseEnv,
-    fetchPackument: fetchPackument,
+    getRegistryPackument: getRegistryPackument,
     log,
   } as const;
 }
@@ -73,8 +73,8 @@ describe("cmd-view", () => {
   });
 
   it("should fail if package is not found", async () => {
-    const { viewCmd, fetchPackument } = makeDependencies();
-    fetchPackument.mockResolvedValue(null);
+    const { viewCmd, getRegistryPackument } = makeDependencies();
+    getRegistryPackument.mockResolvedValue(null);
 
     await expect(viewCmd(somePackage, {})).rejects.toBeInstanceOf(
       PackumentNotFoundError

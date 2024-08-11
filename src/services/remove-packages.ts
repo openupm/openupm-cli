@@ -1,16 +1,18 @@
 import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { PackumentNotFoundError } from "../common-errors";
+import { DomainName } from "../domain/domain-name";
+import { PackageUrl } from "../domain/package-url";
 import {
   removeDependency,
   UnityProjectManifest,
 } from "../domain/project-manifest";
-import { PackumentNotFoundError } from "../common-errors";
-import { DomainName } from "../domain/domain-name";
-import {
-  LoadProjectManifest,
-  WriteProjectManifest,
-} from "../io/project-manifest-io";
 import { SemanticVersion } from "../domain/semantic-version";
-import { PackageUrl } from "../domain/package-url";
+import {
+  loadProjectManifest,
+  LoadProjectManifest,
+  saveProjectManifest,
+  SaveProjectManifest,
+} from "../io/project-manifest-io";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -41,11 +43,12 @@ export type RemovePackages = (
 ) => AsyncResult<ReadonlyArray<RemovedPackage>, RemovePackagesError>;
 
 /**
- * Makes a {@link RemovePackages} service function.
+ * Makes a {@link RemovePackages} which atomically removes a batch of
+ * packages from a project manifest.
  */
-export function makeRemovePackages(
+export function RemovePackagesFromManifest(
   loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest
+  saveProjectManifest: SaveProjectManifest
 ): RemovePackages {
   const tryRemoveSingle = function (
     manifest: UnityProjectManifest,
@@ -110,8 +113,16 @@ export function makeRemovePackages(
     );
 
     return removeResult.map(async ([updatedManifest, removedPackages]) => {
-      await writeProjectManifest(projectPath, updatedManifest);
+      await saveProjectManifest(projectPath, updatedManifest);
       return removedPackages;
     });
   };
 }
+
+/**
+ * Default {@link RemovePackages} function. Uses {@link RemovePackagesFromManifest}.
+ */
+export const removePackages = RemovePackagesFromManifest(
+  loadProjectManifest,
+  saveProjectManifest
+);

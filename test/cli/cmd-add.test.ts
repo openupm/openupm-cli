@@ -4,38 +4,38 @@ import {
   PackageIncompatibleError,
   UnresolvedDependenciesError,
 } from "../../src/cli/cmd-add";
-import { DomainName } from "../../src/domain/domain-name";
-import { Env, ParseEnv } from "../../src/services/parse-env";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { makeEditorVersion } from "../../src/domain/editor-version";
-import { emptyProjectManifest } from "../../src/domain/project-manifest";
-import { makeMockLogger } from "./log.mock";
-import { buildPackument } from "../domain/data-packument";
-import { mockResolvedPackuments } from "../services/packument-resolving.mock";
-import { buildProjectManifest } from "../domain/data-project-manifest";
-import { ResolveDependencies } from "../../src/services/dependency-resolving";
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import { mockService } from "../services/service.mock";
-import {
-  ResolvedPackumentVersion,
-  ResolveRemotePackumentVersion,
-} from "../../src/services/resolve-remote-packument-version";
-import {
-  LoadProjectManifest,
-  WriteProjectManifest,
-} from "../../src/io/project-manifest-io";
-import { UnityPackumentVersion } from "../../src/domain/packument";
-import { noopLogger } from "../../src/logging";
-import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import {
   makeGraphFromSeed,
   markFailed,
   markRemoteResolved,
 } from "../../src/domain/dependency-graph";
+import { DomainName } from "../../src/domain/domain-name";
+import { makeEditorVersion } from "../../src/domain/editor-version";
+import { UnityPackumentVersion } from "../../src/domain/packument";
+import { emptyProjectManifest } from "../../src/domain/project-manifest";
+import { unityRegistryUrl } from "../../src/domain/registry-url";
+import { SemanticVersion } from "../../src/domain/semantic-version";
+import {
+  LoadProjectManifest,
+  SaveProjectManifest,
+} from "../../src/io/project-manifest-io";
+import { noopLogger } from "../../src/logging";
+import { ResolveDependencies } from "../../src/services/dependency-resolving";
+import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
+import {
+  GetRegistryPackumentVersion,
+  ResolvedPackumentVersion,
+} from "../../src/services/get-registry-packument-version";
+import { Env, ParseEnv } from "../../src/services/parse-env";
+import { AsyncErr, AsyncOk } from "../../src/utils/result-utils";
+import { buildPackument } from "../domain/data-packument";
+import { buildProjectManifest } from "../domain/data-project-manifest";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockResolvedPackuments } from "../services/remote-packuments.mock";
+import { mockService } from "../services/service.mock";
+import { makeMockLogger } from "./log.mock";
 
 const somePackage = DomainName.parse("com.some.package");
 const otherPackage = DomainName.parse("com.other.package");
@@ -71,10 +71,10 @@ function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue(defaultEnv);
 
-  const resolveRemovePackumentVersion =
-    mockService<ResolveRemotePackumentVersion>();
+  const getRegistryPackumentVersion =
+    mockService<GetRegistryPackumentVersion>();
   mockResolvedPackuments(
-    resolveRemovePackumentVersion,
+    getRegistryPackumentVersion,
     [exampleRegistryUrl, somePackument],
     [exampleRegistryUrl, otherPackument]
   );
@@ -100,7 +100,7 @@ function makeDependencies() {
   const loadProjectManifest = mockService<LoadProjectManifest>();
   loadProjectManifest.mockResolvedValue(emptyProjectManifest);
 
-  const writeProjectManifest = mockService<WriteProjectManifest>();
+  const writeProjectManifest = mockService<SaveProjectManifest>();
   writeProjectManifest.mockResolvedValue(undefined);
 
   const determineEditorVersion = mockService<DetermineEditorVersion>();
@@ -112,7 +112,7 @@ function makeDependencies() {
 
   const addCmd = makeAddCmd(
     parseEnv,
-    resolveRemovePackumentVersion,
+    getRegistryPackumentVersion,
     resolveDependencies,
     loadProjectManifest,
     writeProjectManifest,
@@ -123,7 +123,7 @@ function makeDependencies() {
   return {
     addCmd,
     parseEnv,
-    resolveRemovePackumentVersion,
+    getRegistryPackumentVersion,
     resolveDependencies,
     loadProjectManifest,
     writeProjectManifest,
@@ -146,8 +146,8 @@ describe("cmd-add", () => {
   });
 
   it("should add package with invalid editor version when running with force", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
+    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
+    mockResolvedPackuments(getRegistryPackumentVersion, [
       exampleRegistryUrl,
       badEditorPackument,
     ]);
@@ -160,8 +160,8 @@ describe("cmd-add", () => {
   });
 
   it("should add package with incompatible with editor when running with force", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
+    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
+    mockResolvedPackuments(getRegistryPackumentVersion, [
       exampleRegistryUrl,
       incompatiblePackument,
     ]);
@@ -174,8 +174,8 @@ describe("cmd-add", () => {
   });
 
   it("should fail when adding package with incompatible with editor and not running with force", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
+    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
+    mockResolvedPackuments(getRegistryPackumentVersion, [
       exampleRegistryUrl,
       incompatiblePackument,
     ]);
@@ -186,9 +186,9 @@ describe("cmd-add", () => {
   });
 
   it("should not fetch dependencies for upstream packages", async () => {
-    const { addCmd, resolveRemovePackumentVersion, resolveDependencies } =
+    const { addCmd, getRegistryPackumentVersion, resolveDependencies } =
       makeDependencies();
-    mockResolvedPackuments(resolveRemovePackumentVersion, [
+    mockResolvedPackuments(getRegistryPackumentVersion, [
       unityRegistryUrl,
       somePackument,
     ]);
@@ -199,8 +199,8 @@ describe("cmd-add", () => {
   });
 
   it("should fail if package could not be resolved", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    resolveRemovePackumentVersion.mockReturnValue(
+    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
+    getRegistryPackumentVersion.mockReturnValue(
       AsyncErr(new PackumentNotFoundError(somePackage))
     );
 
@@ -210,8 +210,8 @@ describe("cmd-add", () => {
   });
 
   it("should fail if packument had malformed target editor and not running with force", async () => {
-    const { addCmd, resolveRemovePackumentVersion } = makeDependencies();
-    resolveRemovePackumentVersion.mockReturnValue(
+    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
+    getRegistryPackumentVersion.mockReturnValue(
       AsyncOk({
         packumentVersion: {
           name: somePackage,

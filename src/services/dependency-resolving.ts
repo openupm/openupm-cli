@@ -1,12 +1,3 @@
-import { DomainName } from "../domain/domain-name";
-import { SemanticVersion } from "../domain/semantic-version";
-import { Registry } from "../domain/registry";
-import { CheckIsBuiltInPackage } from "./built-in-package-check";
-import {
-  ResolvePackumentVersionError,
-  tryResolvePackumentVersion,
-} from "../domain/packument";
-import { FetchPackument } from "../io/packument-io";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   DependencyGraph,
@@ -16,7 +7,19 @@ import {
   markRemoteResolved,
   tryGetNextUnresolved,
 } from "../domain/dependency-graph";
+import { DomainName } from "../domain/domain-name";
+import {
+  ResolvePackumentVersionError,
+  tryResolvePackumentVersion,
+} from "../domain/packument";
+import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
+import { SemanticVersion } from "../domain/semantic-version";
+import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
+import {
+  checkIsBuiltInPackage,
+  CheckIsBuiltInPackage,
+} from "./built-in-package-check";
 
 /**
  * Function for resolving all dependencies for a package.
@@ -33,10 +36,11 @@ export type ResolveDependencies = (
 ) => Promise<DependencyGraph>;
 
 /**
- * Makes a {@link ResolveDependencies} function.
+ * Makes a {@link ResolveDependencies} function which resolves a dependency
+ * graph by querying multiple source registries.
  */
-export function makeResolveDependency(
-  fetchPackument: FetchPackument,
+export function ResolveDependenciesFromRegistries(
+  getRegistryPackument: GetRegistryPackument,
   checkIsBuiltInPackage: CheckIsBuiltInPackage
 ): ResolveDependencies {
   async function resolveRecursively(
@@ -57,7 +61,7 @@ export function makeResolveDependency(
 
     const errors: Record<RegistryUrl, ResolvePackumentVersionError> = {};
     for (const source of sources) {
-      const packument = await fetchPackument(source, packageName);
+      const packument = await getRegistryPackument(source, packageName);
       if (packument === null) {
         errors[source.url] = new PackumentNotFoundError(packageName);
         continue;
@@ -92,3 +96,11 @@ export function makeResolveDependency(
   return (sources, packageName, version, deep) =>
     resolveRecursively(makeGraphFromSeed(packageName, version), sources, deep);
 }
+
+/**
+ * Default {@link ResolveDependencies} function. Uses {@link ResolveDependenciesFromRegistries}.
+ */
+export const resolveDependencies = ResolveDependenciesFromRegistries(
+  getRegistryPackument,
+  checkIsBuiltInPackage
+);

@@ -5,7 +5,7 @@ import RegClient from "another-npm-registry-client";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientGetResult } from "../services/registry-client.mock";
-import { makeFetchPackument } from "../../src/io/packument-io";
+import { FetchRegistryPackument } from "../../src/io/packument-io";
 import { noopLogger } from "../../src/logging";
 
 describe("packument io", () => {
@@ -22,22 +22,25 @@ describe("packument io", () => {
         get: jest.fn(),
       };
 
-      const fetchPackument = makeFetchPackument(regClient, noopLogger);
-      return { fetchPackument, regClient } as const;
+      const fetchRegistryPackument = FetchRegistryPackument(
+        regClient,
+        noopLogger
+      );
+      return { fetchRegistryPackument, regClient } as const;
     }
     it("should get existing packument", async () => {
       // TODO: Use prop test
       const packument = buildPackument(packageA);
-      const { fetchPackument, regClient } = makeDependencies();
+      const { fetchRegistryPackument, regClient } = makeDependencies();
       mockRegClientGetResult(regClient, null, packument);
 
-      const actual = await fetchPackument(exampleRegistry, packageA);
+      const actual = await fetchRegistryPackument(exampleRegistry, packageA);
 
       expect(actual).toEqual(packument);
     });
 
     it("should not find unknown packument", async () => {
-      const { fetchPackument, regClient } = makeDependencies();
+      const { fetchRegistryPackument, regClient } = makeDependencies();
       mockRegClientGetResult(
         regClient,
         {
@@ -48,13 +51,13 @@ describe("packument io", () => {
         null
       );
 
-      const actual = await fetchPackument(exampleRegistry, packageA);
+      const actual = await fetchRegistryPackument(exampleRegistry, packageA);
 
       expect(actual).toBeNull();
     });
 
     it("should fail for errors", async () => {
-      const { fetchPackument, regClient } = makeDependencies();
+      const { fetchRegistryPackument, regClient } = makeDependencies();
       mockRegClientGetResult(
         regClient,
         {
@@ -66,7 +69,7 @@ describe("packument io", () => {
       );
 
       await expect(
-        fetchPackument(exampleRegistry, packageA)
+        fetchRegistryPackument(exampleRegistry, packageA)
       ).rejects.toBeInstanceOf(Error);
     });
   });

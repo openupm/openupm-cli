@@ -1,10 +1,10 @@
-import { Registry } from "../domain/registry";
 import npmFetch from "npm-registry-fetch";
-import { assertIsError, isHttpError } from "../utils/error-type-guards";
-import { getNpmFetchOptions, SearchedPackument } from "./npm-search";
 import { DomainName } from "../domain/domain-name";
+import { Registry } from "../domain/registry";
+import { DebugLog, npmDebugLog } from "../logging";
+import { assertIsError, isHttpError } from "../utils/error-type-guards";
 import { RegistryAuthenticationError } from "./common-errors";
-import { DebugLog } from "../logging";
+import { getNpmFetchOptions, SearchedPackument } from "./npm-search";
 
 /**
  * The result of querying the /-/all endpoint.
@@ -16,15 +16,15 @@ export type AllPackuments = Readonly<{
 }>;
 
 /**
- * Function for getting fetching packuments from a npm registry.
+ * Function for getting all packuments from a npm registry.
  * @param registry The registry to get packuments for.
  */
-export type FetchAllPackuments = (registry: Registry) => Promise<AllPackuments>;
+export type GetAllRegistryPackuments = (registry: Registry) => Promise<AllPackuments>;
 
 /**
- * Makes a {@link FetchAllPackuments} function.
+ * Makes a {@link GetAllRegistryPackuments} function.
  */
-export function makeFetchAllPackuments(debugLog: DebugLog): FetchAllPackuments {
+export function FetchAllRegistryPackuments(debugLog: DebugLog): GetAllRegistryPackuments {
   return async (registry) => {
     debugLog(`Getting all packages from ${registry.url}.`);
     try {
@@ -45,3 +45,8 @@ export function makeFetchAllPackuments(debugLog: DebugLog): FetchAllPackuments {
     }
   };
 }
+
+/**
+ * Default {@link GetAllRegistryPackuments} function. Uses {@link FetchAllRegistryPackuments}.
+ */
+export const getAllRegistryPackuments = FetchAllRegistryPackuments(npmDebugLog)

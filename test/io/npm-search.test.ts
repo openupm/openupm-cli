@@ -1,11 +1,11 @@
 import npmSearch from "libnpmsearch";
 import search from "libnpmsearch";
 import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { makeSearchRegistry } from "../../src/io/npm-search";
 import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
 import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import { NpmApiSearch } from "../../src/io/npm-search";
 
 jest.mock("libnpmsearch");
 
@@ -14,12 +14,12 @@ const exampleRegistry: Registry = {
   auth: null,
 };
 
-function makeDependencies() {
-  const searchRegistry = makeSearchRegistry(noopLogger);
-  return { searchRegistry } as const;
-}
+describe("npm api search", () => {
+  function makeDependencies() {
+    const npmApiSearch = NpmApiSearch(noopLogger);
+    return { npmApiSearch } as const;
+  }
 
-describe("npm search", () => {
   it("should fail for non-auth error response", async () => {
     const expected = {
       message: "Idk, it failed",
@@ -27,9 +27,9 @@ describe("npm search", () => {
       statusCode: 500,
     } as HttpErrorBase;
     jest.mocked(npmSearch).mockRejectedValue(expected);
-    const { searchRegistry } = makeDependencies();
+    const { npmApiSearch } = makeDependencies();
 
-    await expect(searchRegistry(exampleRegistry, "wow")).rejects.toEqual(
+    await expect(npmApiSearch(exampleRegistry, "wow")).rejects.toEqual(
       expected
     );
   });
@@ -41,9 +41,9 @@ describe("npm search", () => {
       statusCode: 401,
     } as HttpErrorBase;
     jest.mocked(npmSearch).mockRejectedValue(expected);
-    const { searchRegistry } = makeDependencies();
+    const { npmApiSearch } = makeDependencies();
 
-    await expect(searchRegistry(exampleRegistry, "wow")).rejects.toBeInstanceOf(
+    await expect(npmApiSearch(exampleRegistry, "wow")).rejects.toBeInstanceOf(
       RegistryAuthenticationError
     );
   });
@@ -51,9 +51,9 @@ describe("npm search", () => {
   it("should succeed for ok response", async () => {
     const expected = [{ name: "wow" } as search.Result];
     jest.mocked(npmSearch).mockResolvedValue(expected);
-    const { searchRegistry } = makeDependencies();
+    const { npmApiSearch } = makeDependencies();
 
-    const actual = await searchRegistry(exampleRegistry, "wow");
+    const actual = await npmApiSearch(exampleRegistry, "wow");
 
     expect(actual).toEqual(expected);
   });

@@ -1,14 +1,14 @@
-import { mockService } from "./service.mock";
-import { makeResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
-import { DomainName } from "../../src/domain/domain-name";
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import { Registry } from "../../src/domain/registry";
-import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
+import { DomainName } from "../../src/domain/domain-name";
+import { Registry } from "../../src/domain/registry";
+import { SemanticVersion } from "../../src/domain/semantic-version";
+import { GetRegistryPackument } from "../../src/io/packument-io";
+import { FetchRegistryPackumentVersion } from "../../src/services/get-registry-packument-version";
 import { buildPackument } from "../domain/data-packument";
-import { FetchPackument } from "../../src/io/packument-io";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "./service.mock";
 
-describe("resolve remote packument version", () => {
+describe("fetch registrypackument version", () => {
   const somePackage = DomainName.parse("com.some.package");
 
   const someVersion = SemanticVersion.parse("1.0.0");
@@ -16,19 +16,19 @@ describe("resolve remote packument version", () => {
   const someRegistry: Registry = { url: exampleRegistryUrl, auth: null };
 
   function makeDependencies() {
-    const fetchPackument = mockService<FetchPackument>();
+    const getRegistryPackument = mockService<GetRegistryPackument>();
 
-    const resolveRemovePackumentVersion =
-      makeResolveRemotePackumentVersion(fetchPackument);
-    return { resolveRemovePackumentVersion, fetchPackument } as const;
+    const fetchRegistryPackumentVersion =
+      FetchRegistryPackumentVersion(getRegistryPackument);
+    return { fetchRegistryPackumentVersion, getRegistryPackument } as const;
   }
 
   it("should fail if packument was not found", async () => {
-    const { resolveRemovePackumentVersion, fetchPackument } =
+    const { fetchRegistryPackumentVersion, getRegistryPackument } =
       makeDependencies();
-    fetchPackument.mockResolvedValue(null);
+    getRegistryPackument.mockResolvedValue(null);
 
-    const result = await resolveRemovePackumentVersion(
+    const result = await fetchRegistryPackumentVersion(
       somePackage,
       someVersion,
       someRegistry
@@ -40,16 +40,16 @@ describe("resolve remote packument version", () => {
   });
 
   it("should give resolved packument-version", async () => {
-    const { resolveRemovePackumentVersion, fetchPackument } =
+    const { fetchRegistryPackumentVersion, getRegistryPackument } =
       makeDependencies();
     const packument = buildPackument(somePackage, (packument) =>
       packument.addVersion(someVersion, (version) =>
         version.addDependency("com.other.package", "1.0.0")
       )
     );
-    fetchPackument.mockResolvedValue(packument);
+    getRegistryPackument.mockResolvedValue(packument);
 
-    const result = await resolveRemovePackumentVersion(
+    const result = await fetchRegistryPackumentVersion(
       somePackage,
       someVersion,
       someRegistry

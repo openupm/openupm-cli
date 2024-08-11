@@ -1,151 +1,73 @@
 import { createCommand } from "@commander-js/extra-typings";
+import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
-import { makeRemoveCmd } from "./cmd-remove";
+import pkg from "../../package.json";
+import { getRegistryPackument } from "../io/packument-io";
+import {
+  loadProjectManifest,
+  saveProjectManifest,
+} from "../io/project-manifest-io";
+import { getProcessCwd } from "../io/special-paths";
+import { getUpmConfigPath } from "../io/upm-config-io";
+import { npmDebugLog } from "../logging";
+import { resolveDependencies } from "../services/dependency-resolving";
+import { determineEditorVersion } from "../services/determine-editor-version";
+import { getLatestVersion } from "../services/get-latest-version";
+import { getRegistryAuth } from "../services/get-registry-auth";
+import { getRegistryPackumentVersion } from "../services/get-registry-packument-version";
+import { login } from "../services/login";
+import { makeParseEnv } from "../services/parse-env";
+import { removePackages } from "../services/remove-packages";
+import { searchPackages } from "../services/search-packages";
+import { eachValue } from "./cli-parsing";
+import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
-import { eachValue } from "./cli-parsing";
-import { CmdOptions } from "./options";
-import { makeAddCmd } from "./cmd-add";
-import { makeAuthNpmrc } from "../services/npmrc-auth";
-import { makeNpmLogin } from "../services/npm-login";
-import { makeSearchRegistry } from "../io/npm-search";
-import pkg from "../../package.json";
+import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
-import { makeResolveDependency } from "../services/dependency-resolving";
-import { makeFetchAllPackuments } from "../io/all-packuments-io";
+import { withErrorLogger } from "./error-logging";
+import { CmdOptions } from "./options";
 import {
   mustBeDomainName,
   mustBePackageReference,
   mustBeRegistryUrl,
 } from "./validators";
-import RegClient from "another-npm-registry-client";
-import { makeParseEnv } from "../services/parse-env";
-import { makeResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
-import {
-  makeLoadProjectManifest,
-  makeWriteProjectManifest,
-} from "../io/project-manifest-io";
-import npmlog from "npmlog";
-import { makeResolveLatestVersion } from "../services/resolve-latest-version";
-import {
-  makeGetUpmConfigPath,
-  makeLoadUpmConfig,
-  makeSaveUpmConfig,
-} from "../io/upm-config-io";
-import { makeReadText, makeWriteText } from "../io/text-file-io";
-import {
-  makeFindNpmrcPath,
-  makeLoadNpmrc,
-  makeSaveNpmrc,
-} from "../io/npmrc-io";
-import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
-import { makeLoadProjectVersion } from "../io/project-version-io";
-import { makePutRegistryAuth } from "../services/put-registry-auth";
-import { makeFetchPackument } from "../io/packument-io";
-import { makeSearchPackages } from "../services/search-packages";
-import { makeLogin } from "../services/login";
-import { DebugLog } from "../logging";
-import { makeDetermineEditorVersion } from "../services/determine-editor-version";
-import { makeRemovePackages } from "../services/remove-packages";
-import { makeRunChildProcess } from "../io/child-process";
-import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
-import { makeCheckIsUnityPackage } from "../services/unity-package-check";
-import { makeCheckUrlExists } from "../io/check-url";
-import { withErrorLogger } from "./error-logging";
-import { makeLoadRegistryAuth } from "../services/load-registry-auth";
 
 // Composition root
 
 const log = npmlog;
-const debugLog: DebugLog = function (message, context) {
-  const contextMessage =
-    context !== undefined
-      ? `\n${
-          context instanceof Error
-            ? context.toString()
-            : JSON.stringify(context, null, 2)
-        }`
-      : "";
-  return log.verbose("", `${message}${contextMessage}`);
-};
-const regClient = new RegClient({ log });
-const getCwd = makeGetCwd();
-const runChildProcess = makeRunChildProcess(debugLog);
-const getHomePath = makeGetHomePath();
-const readFile = makeReadText();
-const writeFile = makeWriteText();
-const loadProjectManifest = makeLoadProjectManifest(readFile, debugLog);
-const writeProjectManifest = makeWriteProjectManifest(writeFile);
-const getUpmConfigPath = makeGetUpmConfigPath(getHomePath, runChildProcess);
-const loadUpmConfig = makeLoadUpmConfig(readFile);
-const saveUpmConfig = makeSaveUpmConfig(writeFile);
-const findNpmrcPath = makeFindNpmrcPath(getHomePath);
-const loadNpmrc = makeLoadNpmrc(readFile);
-const saveNpmrc = makeSaveNpmrc(writeFile);
-const loadProjectVersion = makeLoadProjectVersion(readFile, debugLog);
-const fetchPackument = makeFetchPackument(regClient, debugLog);
-const fetchAllPackuments = makeFetchAllPackuments(debugLog);
-const searchRegistry = makeSearchRegistry(debugLog);
-const removePackages = makeRemovePackages(
-  loadProjectManifest,
-  writeProjectManifest
-);
-const checkUrlExists = makeCheckUrlExists();
 
-const loadRegistryAuth = makeLoadRegistryAuth(loadUpmConfig);
 const parseEnv = makeParseEnv(
   log,
   getUpmConfigPath,
-  loadRegistryAuth,
-  getCwd,
-  debugLog
+  getRegistryAuth,
+  getProcessCwd,
+  npmDebugLog
 );
-const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
-const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
-const npmLogin = makeNpmLogin(regClient, debugLog);
-const resolveRemovePackumentVersion =
-  makeResolveRemotePackumentVersion(fetchPackument);
-const resolveLatestVersion = makeResolveLatestVersion(fetchPackument);
-const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
-const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
-  checkIsUnityPackage,
-  fetchPackument
-);
-const resolveDependencies = makeResolveDependency(
-  fetchPackument,
-  checkIsBuiltInPackage
-);
-const putRegistryAuth = makePutRegistryAuth(loadUpmConfig, saveUpmConfig);
-const searchPackages = makeSearchPackages(
-  searchRegistry,
-  fetchAllPackuments,
-  debugLog
-);
-const login = makeLogin(putRegistryAuth, npmLogin, authNpmrc, debugLog);
 
 const addCmd = makeAddCmd(
   parseEnv,
-  resolveRemovePackumentVersion,
+  getRegistryPackumentVersion,
   resolveDependencies,
   loadProjectManifest,
-  writeProjectManifest,
+  saveProjectManifest,
   determineEditorVersion,
   log,
-  debugLog
+  npmDebugLog
 );
 const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
-const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, debugLog);
+const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, npmDebugLog);
 const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependencies,
-  resolveLatestVersion,
+  getLatestVersion,
   log,
-  debugLog
+  npmDebugLog
 );
 const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
-const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
+const viewCmd = makeViewCmd(parseEnv, getRegistryPackument, log);
 
 // update-notifier
 

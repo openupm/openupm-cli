@@ -1,10 +1,10 @@
-import path from "path";
-import { ReadTextFile } from "./text-file-io";
-import * as YAML from "yaml";
-import { CustomError } from "ts-custom-error";
 import { AnyJson } from "@iarna/toml";
+import path from "path";
+import { CustomError } from "ts-custom-error";
+import * as YAML from "yaml";
+import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-import { DebugLog } from "../logging";
+import { readTextFile, ReadTextFile } from "./text-file-io";
 
 export class ProjectVersionMissingError extends CustomError {
   public constructor(public readonly expectedPath: string) {
@@ -25,19 +25,20 @@ export function projectVersionTxtPathFor(projectDirPath: string) {
 }
 
 /**
- * Function for loading a projects editor version string.
+ * Function for getting a projects editor version string.
  * @param projectDirPath The path to the projects root directory.
  * @returns A string describing the projects editor version ie 2020.2.1f1.
  */
-export type LoadProjectVersion = (projectDirPath: string) => Promise<string>;
+export type GetProjectVersion = (projectDirPath: string) => Promise<string>;
 
 /**
- * Makes a {@link LoadProjectVersion} function.
+ * Makes a {@link GetProjectVersion} function which gets the project-version
+ * from the `ProjectSettings/ProjectVersion.txt` file.
  */
-export function makeLoadProjectVersion(
+export function ReadProjectVersionFile(
   readFile: ReadTextFile,
   debugLog: DebugLog
-): LoadProjectVersion {
+): GetProjectVersion {
   return async (projectDirPath) => {
     const filePath = projectVersionTxtPathFor(projectDirPath);
 
@@ -66,3 +67,11 @@ export function makeLoadProjectVersion(
     return yaml.m_EditorVersion;
   };
 }
+
+/**
+ * Default {@link GetProjectVersion} function. Uses {@link ReadProjectVersionFile}.
+ */
+export const getProjectVersion = ReadProjectVersionFile(
+  readTextFile,
+  npmDebugLog
+);

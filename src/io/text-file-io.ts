@@ -1,7 +1,7 @@
-import fs from "fs/promises";
-import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
+import fs from "fs/promises";
 import path from "path";
+import { assertIsNodeError } from "../utils/error-type-guards";
 
 /**
  * Function for loading the content of a text file.
@@ -22,16 +22,15 @@ export type ReadTextFile = {
 };
 
 /**
- * Makes a {@link ReadTextFile} function.
+ * Makes a {@link ReadTextFile} function which reads from the file-system
+ * using the {@link fs} module.
  */
-export function makeReadText(): ReadTextFile {
-  return ((path, optional) =>
-    fs.readFile(path, { encoding: "utf8" }).catch((error) => {
-      assertIsNodeError(error);
-      if (optional && error.code === "ENOENT") return null;
-      throw error;
-    })) as ReadTextFile;
-}
+export const readTextFile: ReadTextFile = ((path, optional) =>
+  fs.readFile(path, { encoding: "utf8" }).catch((error) => {
+    assertIsNodeError(error);
+    if (optional && error.code === "ENOENT") return null;
+    throw error;
+  })) as ReadTextFile;
 
 /**
  * Function for overwriting the content of a text file. Creates the file
@@ -45,12 +44,11 @@ export type WriteTextFile = (
 ) => Promise<void>;
 
 /**
- * Makes a {@link WriteTextFile} function.
+ * Makes a {@link WriteTextFile} function which writes to the file-system
+ * using the {@link fs} module.
  */
-export function makeWriteText(): WriteTextFile {
-  return async (filePath, content) => {
-    const dirPath = path.dirname(filePath);
-    await fse.ensureDir(dirPath);
-    await fs.writeFile(filePath, content);
-  };
-}
+export const writeTextFile: WriteTextFile = async (filePath, content) => {
+  const dirPath = path.dirname(filePath);
+  await fse.ensureDir(dirPath);
+  await fs.writeFile(filePath, content);
+};

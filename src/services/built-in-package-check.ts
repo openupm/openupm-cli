@@ -1,9 +1,12 @@
 import { DomainName } from "../domain/domain-name";
-import { SemanticVersion } from "../domain/semantic-version";
-import { CheckIsUnityPackage } from "./unity-package-check";
-import { FetchPackument } from "../io/packument-io";
 import { unityRegistryUrl } from "../domain/registry-url";
+import { SemanticVersion } from "../domain/semantic-version";
+import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
 import { recordKeys } from "../utils/record-utils";
+import {
+  checkIsUnityPackage,
+  CheckIsUnityPackage,
+} from "./unity-package-check";
 
 /**
  * Function for checking whether a specific package version is built-in.
@@ -17,17 +20,19 @@ export type CheckIsBuiltInPackage = (
 ) => Promise<boolean>;
 
 /**
- * Makes a {@link CheckIsBuiltInPackage} function.
+ * Makes a {@link CheckIsBuiltInPackage} function which checks if package is
+ * built-in by establishing if the package is an official Unity package which
+ * does not exist on the Unity package registry.
  */
-export function makeCheckIsBuiltInPackage(
+export function CheckIsNonRegistryUnityPackage(
   checkIsUnityPackage: CheckIsUnityPackage,
-  fetchPackument: FetchPackument
+  getRegistryPackument: GetRegistryPackument
 ): CheckIsBuiltInPackage {
   async function checkExistsOnUnityRegistry(
     packageName: DomainName,
     version: SemanticVersion
   ): Promise<boolean> {
-    const packument = await fetchPackument(
+    const packument = await getRegistryPackument(
       { url: unityRegistryUrl, auth: null },
       packageName
     );
@@ -42,3 +47,11 @@ export function makeCheckIsBuiltInPackage(
     return !(await checkExistsOnUnityRegistry(packageName, version));
   };
 }
+
+/**
+ * Default {@link CheckIsBuiltInPackage}. Uses {@link CheckIsNonRegistryUnityPackage}.
+ */
+export const checkIsBuiltInPackage = CheckIsNonRegistryUnityPackage(
+  checkIsUnityPackage,
+  getRegistryPackument
+);

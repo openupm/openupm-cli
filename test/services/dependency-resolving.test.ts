@@ -1,6 +1,5 @@
-import { makeResolveDependency } from "../../src/services/dependency-resolving";
 import { mockService } from "./service.mock";
-import { FetchPackument } from "../../src/io/packument-io";
+import { GetRegistryPackument } from "../../src/io/packument-io";
 import { CheckIsBuiltInPackage } from "../../src/services/built-in-package-check";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { unityRegistryUrl } from "../../src/domain/registry-url";
@@ -10,6 +9,7 @@ import { Registry } from "../../src/domain/registry";
 import { NodeType, tryGetGraphNode } from "../../src/domain/dependency-graph";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { VersionNotFoundError } from "../../src/domain/packument";
+import { ResolveDependenciesFromRegistries } from "../../src/services/dependency-resolving";
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
@@ -24,25 +24,25 @@ describe("dependency resolving", () => {
   const otherVersion = SemanticVersion.parse("2.0.0");
 
   function makeDependencies() {
-    const fetchPackument = mockService<FetchPackument>();
+    const getRegistryPackument = mockService<GetRegistryPackument>();
 
     const checkIsBuiltInPackage = mockService<CheckIsBuiltInPackage>();
     checkIsBuiltInPackage.mockResolvedValue(false);
 
-    const resolveDependencies = makeResolveDependency(
-      fetchPackument,
+    const resolveDependencies = ResolveDependenciesFromRegistries(
+      getRegistryPackument,
       checkIsBuiltInPackage
     );
     return {
       resolveDependencies,
-      fetchPackument,
+      getRegistryPackument,
       checkIsBuiltInPackage,
     } as const;
   }
 
   it("should mark missing packages", async () => {
-    const { resolveDependencies, fetchPackument } = makeDependencies();
-    fetchPackument.mockResolvedValue(null);
+    const { resolveDependencies, getRegistryPackument } = makeDependencies();
+    getRegistryPackument.mockResolvedValue(null);
 
     const graph = await resolveDependencies(
       sources,
@@ -62,8 +62,8 @@ describe("dependency resolving", () => {
   });
 
   it("should mark missing versions", async () => {
-    const { resolveDependencies, fetchPackument } = makeDependencies();
-    fetchPackument.mockResolvedValue({
+    const { resolveDependencies, getRegistryPackument } = makeDependencies();
+    getRegistryPackument.mockResolvedValue({
       name: somePackage,
       versions: {
         [otherVersion]: { name: somePackage, version: otherVersion },
@@ -88,11 +88,11 @@ describe("dependency resolving", () => {
   });
 
   it("should mark resolved remote packages", async () => {
-    const { resolveDependencies, fetchPackument } = makeDependencies();
+    const { resolveDependencies, getRegistryPackument } = makeDependencies();
     // The first source does not have the package
-    fetchPackument.mockResolvedValueOnce(null);
+    getRegistryPackument.mockResolvedValueOnce(null);
     // But the second does
-    fetchPackument.mockResolvedValueOnce({
+    getRegistryPackument.mockResolvedValueOnce({
       name: somePackage,
       versions: {
         [someVersion]: {
@@ -139,8 +139,8 @@ describe("dependency resolving", () => {
   });
 
   it("should mark dependencies when resolving shallow", async () => {
-    const { resolveDependencies, fetchPackument } = makeDependencies();
-    fetchPackument.mockResolvedValue({
+    const { resolveDependencies, getRegistryPackument } = makeDependencies();
+    getRegistryPackument.mockResolvedValue({
       name: somePackage,
       versions: {
         [someVersion]: {
@@ -165,9 +165,9 @@ describe("dependency resolving", () => {
   });
 
   it("should resolve dependencies when resolving deep", async () => {
-    const { resolveDependencies, fetchPackument } = makeDependencies();
+    const { resolveDependencies, getRegistryPackument } = makeDependencies();
     // First resolve somePackage
-    fetchPackument.mockResolvedValueOnce({
+    getRegistryPackument.mockResolvedValueOnce({
       name: somePackage,
       versions: {
         [someVersion]: {
@@ -178,7 +178,7 @@ describe("dependency resolving", () => {
       },
     });
     // then resolve otherPackage
-    fetchPackument.mockResolvedValueOnce({
+    getRegistryPackument.mockResolvedValueOnce({
       name: otherPackage,
       versions: {
         [someVersion]: {
@@ -204,9 +204,9 @@ describe("dependency resolving", () => {
   });
 
   it("should search backup registry if version missing in primary registry", async () => {
-    const { resolveDependencies, fetchPackument } = makeDependencies();
+    const { resolveDependencies, getRegistryPackument } = makeDependencies();
     // First resolve somePackage
-    fetchPackument.mockResolvedValueOnce({
+    getRegistryPackument.mockResolvedValueOnce({
       name: somePackage,
       versions: {
         [otherVersion]: {
@@ -216,7 +216,7 @@ describe("dependency resolving", () => {
       },
     });
     // then resolve otherPackage
-    fetchPackument.mockResolvedValueOnce({
+    getRegistryPackument.mockResolvedValueOnce({
       name: somePackage,
       versions: {
         [someVersion]: {

@@ -3,7 +3,7 @@ import {
   ReleaseVersion,
   tryParseEditorVersion,
 } from "../domain/editor-version";
-import { LoadProjectVersion } from "../io/project-version-io";
+import { getProjectVersion, GetProjectVersion } from "../io/project-version-io";
 
 /**
  * Function for determining the editor-version for a Unity project.
@@ -16,16 +16,23 @@ export type DetermineEditorVersion = (
 ) => Promise<ReleaseVersion | string>;
 
 /**
- * Makes a {@link DetermineEditorVersion} function.
+ * Makes a {@link DetermineEditorVersion} function which determines the editor
+ * version based on the content of the project version file.
  */
-export function makeDetermineEditorVersion(
-  loadProjectVersion: LoadProjectVersion
+export function DetermineEditorVersionFromFile(
+  getProjectVersion: GetProjectVersion
 ): DetermineEditorVersion {
   return async (projectPath) => {
-    const unparsedEditorVersion = await loadProjectVersion(projectPath);
+    const unparsedEditorVersion = await getProjectVersion(projectPath);
     const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
     return parsedEditorVersion !== null && isRelease(parsedEditorVersion)
       ? parsedEditorVersion
       : unparsedEditorVersion;
   };
 }
+
+/**
+ * Default {@link DetermineEditorVersion} function. Uses {@link DetermineEditorVersionFromFile}.
+ */
+export const determineEditorVersion =
+  DetermineEditorVersionFromFile(getProjectVersion);

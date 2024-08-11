@@ -1,15 +1,15 @@
-import { mockService } from "./service.mock";
-import { SearchedPackument, SearchRegistry } from "../../src/io/npm-search";
+import { DomainName } from "../../src/domain/domain-name";
+import { Registry } from "../../src/domain/registry";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import {
   AllPackuments,
-  FetchAllPackuments,
+  GetAllRegistryPackuments,
 } from "../../src/io/all-packuments-io";
-import { makeSearchPackages } from "../../src/services/search-packages";
-import { Registry } from "../../src/domain/registry";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { DomainName } from "../../src/domain/domain-name";
-import { SemanticVersion } from "../../src/domain/semantic-version";
+import { SearchedPackument, SearchRegistry } from "../../src/io/npm-search";
 import { noopLogger } from "../../src/logging";
+import { ApiAndFallbackPackageSearch } from "../../src/services/search-packages";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "./service.mock";
 
 describe("search packages", () => {
   const exampleRegistry: Registry = {
@@ -36,10 +36,10 @@ describe("search packages", () => {
     const searchRegistry = mockService<SearchRegistry>();
     searchRegistry.mockResolvedValue([exampleSearchResult]);
 
-    const fetchAllPackument = mockService<FetchAllPackuments>();
+    const fetchAllPackument = mockService<GetAllRegistryPackuments>();
     fetchAllPackument.mockResolvedValue(exampleAllPackumentsResult);
 
-    const searchPackages = makeSearchPackages(
+    const searchPackages = ApiAndFallbackPackageSearch(
       searchRegistry,
       fetchAllPackument,
       noopLogger

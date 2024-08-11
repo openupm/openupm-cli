@@ -1,8 +1,13 @@
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { EOL } from "node:os";
-import { Npmrc } from "../domain/npmrc";
 import path from "path";
-import { GetHomePath } from "./special-paths";
+import { Npmrc } from "../domain/npmrc";
+import { GetHomePath, getHomePathFromEnv } from "./special-paths";
+import {
+  readTextFile,
+  ReadTextFile,
+  writeTextFile,
+  WriteTextFile,
+} from "./text-file-io";
 
 /**
  * Function for determining the path of the users .npmrc file.
@@ -11,14 +16,20 @@ import { GetHomePath } from "./special-paths";
 export type FindNpmrcPath = () => string;
 
 /**
- * Makes a {@link FindNpmrcPath} function.
+ * Makes a {@link FindNpmrcPath} function which resolves the path to the
+ * `.npmrc` file that is stored in the users home directory.
  */
-export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
+export function FindNpmrcInHome(getHomePath: GetHomePath): FindNpmrcPath {
   return () => {
     const homePath = getHomePath();
     return path.join(homePath, ".npmrc");
   };
 }
+
+/**
+ * Default {@link FindNpmrcPath} function. Uses {@link FindNpmrcInHome}.
+ */
+export const findNpmrcPath: FindNpmrcPath = FindNpmrcInHome(getHomePathFromEnv);
 
 /**
  * Function for loading npmrc.
@@ -28,12 +39,18 @@ export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
 export type LoadNpmrc = (path: string) => Promise<Npmrc | null>;
 
 /**
- * Makes a {@link LoadNpmrc} function.
+ * Makes a {@link LoadNpmrc} function which reads the content of a `.npmrc`
+ * file.
  */
-export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
+export function ReadNpmrcFile(readFile: ReadTextFile): LoadNpmrc {
   return (path) =>
     readFile(path, true).then((content) => content?.split(EOL) ?? null);
 }
+
+/**
+ * Default {@link LoadNpmrc} function. Uses {@link ReadNpmrcFile}.
+ */
+export const loadNpmrc = ReadNpmrcFile(readTextFile);
 
 /**
  * Function for saving npmrc files. Overwrites the content of the file.
@@ -43,11 +60,17 @@ export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
 export type SaveNpmrc = (path: string, npmrc: Npmrc) => Promise<void>;
 
 /**
- * Makes a {@link SaveNpmrc} function.
+ * Makes a {@link SaveNpmrc} function which overwrites the content of a
+ * `.npmrc` file.
  */
-export function makeSaveNpmrc(writeFile: WriteTextFile): SaveNpmrc {
+export function WriteNpmrcPath(writeFile: WriteTextFile): SaveNpmrc {
   return async (path, npmrc) => {
     const content = npmrc.join(EOL);
     return await writeFile(path, content);
   };
 }
+
+/**
+ * Default {@link SaveNpmrc} function. Uses {@link WriteNpmrcPath}.
+ */
+export const saveNpmrc = WriteNpmrcPath(writeTextFile);

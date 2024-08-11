@@ -1,21 +1,21 @@
-import { makeCheckUrlExists } from "../../src/io/check-url";
 import fetch, { Response } from "node-fetch";
+import { CheckUrlIsOk } from "../../src/io/check-url";
 
 jest.mock("node-fetch");
 
-describe("check url exists", () => {
+describe("check url is ok", () => {
   function makeDependencies() {
-    const checkUrlExists = makeCheckUrlExists();
-    return { checkUrlExists } as const;
+    const checkUrlIsOk = CheckUrlIsOk();
+    return { checkUrlIsOk } as const;
   }
 
   it("should be true if url responds with 200", async () => {
     jest.mocked(fetch).mockResolvedValue({
       status: 200,
     } as Response);
-    const { checkUrlExists } = makeDependencies();
+    const { checkUrlIsOk } = makeDependencies();
 
-    const actual = await checkUrlExists("https://some.url.com");
+    const actual = await checkUrlIsOk("https://some.url.com");
 
     expect(actual).toBeTruthy();
   });
@@ -26,9 +26,9 @@ describe("check url exists", () => {
       jest.mocked(fetch).mockResolvedValue({
         status: statusCode,
       } as Response);
-      const { checkUrlExists } = makeDependencies();
+      const { checkUrlIsOk } = makeDependencies();
 
-      const actual = await checkUrlExists("https://some.url.com");
+      const actual = await checkUrlIsOk("https://some.url.com");
 
       expect(actual).toBeFalsy();
     }

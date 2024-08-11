@@ -8,11 +8,17 @@ import fetch from "node-fetch";
 export type CheckUrlExists = (url: string) => Promise<boolean>;
 
 /**
- * Makes a {@link CheckUrlExists} function.
+ * Makes a {@link CheckUrlExists} function that determines whether a url
+ * exists by checking whether it responds to a HEAD request with 200.
  */
-export function makeCheckUrlExists(): CheckUrlExists {
+export function CheckUrlIsOk(): CheckUrlExists {
   return async (url) => {
     const response = await fetch(url, { method: "HEAD" });
     return response.status === 200;
   };
 }
+
+/**
+ * Default {@link CheckUrlExists} function. Uses {@link CheckUrlIsOk}.
+ */
+export const checkUrlExists: CheckUrlExists = CheckUrlIsOk();
