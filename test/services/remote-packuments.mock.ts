@@ -4,23 +4,23 @@ import {
   UnityPackument,
 } from "../../src/domain/packument";
 import { RegistryUrl } from "../../src/domain/registry-url";
-import { ResolveRemotePackumentVersion } from "../../src/services/resolve-remote-packument-version";
+import { GetRegistryPackumentVersion } from "../../src/services/get-registry-packument-version";
 import { AsyncErr } from "../../src/utils/result-utils";
 
 type MockEntry = [RegistryUrl, UnityPackument];
 
 /**
- * Mocks the results of a {@link ResolveRemotePackumentVersion}.
- * @param resolveRemovePackumentVersion The service to mock.
+ * Mocks the results of a {@link GetRegistryPackumentVersion}.
+ * @param getRegistryPackumentVersion The service to mock.
  * @param entries The entries of the mocked registry. Each entry contains
  * the url under which the packument is registered and the packument. All
  * packuments not given in this list are assumed to not exist.
  */
 export function mockResolvedPackuments(
-  resolveRemovePackumentVersion: jest.MockedFunction<ResolveRemotePackumentVersion>,
+  getRegistryPackumentVersion: jest.MockedFunction<GetRegistryPackumentVersion>,
   ...entries: MockEntry[]
 ) {
-  return resolveRemovePackumentVersion.mockImplementation(
+  return getRegistryPackumentVersion.mockImplementation(
     (name, requestedVersion, registry) => {
       const matchingEntry = entries.find(
         (entry) => entry[0] === registry.url && entry[1].name === name

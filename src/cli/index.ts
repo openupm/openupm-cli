@@ -23,13 +23,13 @@ import { makeResolveDependency } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
 import { getAuthToken } from "../services/get-auth-token";
 import { getRegistryAuth } from "../services/get-registry-auth";
+import { getRegistryPackumentVersion } from "../services/get-registry-packument-version";
 import { makeLogin } from "../services/login";
 import { makeParseEnv } from "../services/parse-env";
 import { putNpmAuthToken } from "../services/put-npm-auth-token";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
 import { makeResolveLatestVersion } from "../services/resolve-latest-version";
-import { makeResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
 import { makeSearchPackages } from "../services/search-packages";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { eachValue } from "./cli-parsing";
@@ -58,8 +58,7 @@ const parseEnv = makeParseEnv(
   getProcessCwd,
   npmDebugLog
 );
-const resolveRemovePackumentVersion =
-  makeResolveRemotePackumentVersion(getRegistryPackument);
+
 const resolveLatestVersion = makeResolveLatestVersion(getRegistryPackument);
 const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
 const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
@@ -85,7 +84,7 @@ const login = makeLogin(
 
 const addCmd = makeAddCmd(
   parseEnv,
-  resolveRemovePackumentVersion,
+  getRegistryPackumentVersion,
   resolveDependencies,
   loadProjectManifest,
   saveProjectManifest,
