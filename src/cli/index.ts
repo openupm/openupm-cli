@@ -17,7 +17,7 @@ import {
   saveUpmConfig,
 } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
-import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
+import { checkIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeResolveDependency } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
 import { getAuthToken } from "../services/get-auth-token";
@@ -30,7 +30,6 @@ import { putNpmAuthToken } from "../services/put-npm-auth-token";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
 import { makeSearchPackages } from "../services/search-packages";
-import { checkIsUnityPackage } from "../services/unity-package-check";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
@@ -58,10 +57,6 @@ const parseEnv = makeParseEnv(
   npmDebugLog
 );
 
-const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
-  checkIsUnityPackage,
-  getRegistryPackument
-);
 const resolveDependencies = makeResolveDependency(
   getRegistryPackument,
   checkIsBuiltInPackage
