@@ -4,7 +4,7 @@ import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { getAllRegistryPackuments } from "../io/all-packuments-io";
-import { makeCheckUrlExists } from "../io/check-url";
+import { checkUrlExists } from "../io/check-url";
 import { searchRegistry } from "../io/npm-search";
 import { findNpmrcPath, loadNpmrc, saveNpmrc } from "../io/npmrc-io";
 import { getRegistryPackument } from "../io/packument-io";
@@ -53,8 +53,6 @@ import {
 // Composition root
 
 const log = npmlog;
-
-const checkUrlExists = makeCheckUrlExists();
 
 const loadRegistryAuth = makeLoadRegistryAuth(loadUpmConfig);
 const parseEnv = makeParseEnv(
