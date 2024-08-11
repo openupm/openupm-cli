@@ -1,13 +1,15 @@
+import { NpmAuth } from "another-npm-registry-client";
+import { encodeBase64 } from "../domain/base64";
 import { RegistryUrl } from "../domain/registry-url";
 import {
+  loadUpmConfig,
   LoadUpmConfig,
+  saveUpmConfig,
   SaveUpmConfig,
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
-import { NpmAuth } from "another-npm-registry-client";
 import { removeExplicitUndefined } from "../utils/zod-utils";
-import { encodeBase64 } from "../domain/base64";
 
 /**
  * Service function for storing registry authentication. Internally this
@@ -21,10 +23,12 @@ export type PutRegistryAuth = (
   registry: RegistryUrl,
   auth: NpmAuth
 ) => Promise<void>;
+
 /**
- * Makes a {@link PutRegistryAuth} function.
+ * Makes a {@link PutRegistryAuth} function which puts registry authentication
+ * info into the users upm config.
  */
-export function makePutRegistryAuth(
+export function PutRegistryAuthIntoUpmConfig(
   loadUpmConfig: LoadUpmConfig,
   saveUpmConfig: SaveUpmConfig
 ): PutRegistryAuth {
@@ -63,3 +67,11 @@ export function makePutRegistryAuth(
     await saveUpmConfig(newContent, configPath);
   };
 }
+
+/**
+ * Default {@link PutRegistryAuth} function. Uses {@link PutRegistryAuthIntoUpmConfig}.
+ */
+export const putRegistryAuth = PutRegistryAuthIntoUpmConfig(
+  loadUpmConfig,
+  saveUpmConfig
+);

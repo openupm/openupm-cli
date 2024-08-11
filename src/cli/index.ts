@@ -11,11 +11,7 @@ import {
   saveProjectManifest,
 } from "../io/project-manifest-io";
 import { getProcessCwd } from "../io/special-paths";
-import {
-  getUpmConfigPath,
-  loadUpmConfig,
-  saveUpmConfig,
-} from "../io/upm-config-io";
+import { getUpmConfigPath } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
 import { resolveDependencies } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
@@ -26,7 +22,7 @@ import { getRegistryPackumentVersion } from "../services/get-registry-packument-
 import { makeLogin } from "../services/login";
 import { makeParseEnv } from "../services/parse-env";
 import { putNpmAuthToken } from "../services/put-npm-auth-token";
-import { makePutRegistryAuth } from "../services/put-registry-auth";
+import { putRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
 import { makeSearchPackages } from "../services/search-packages";
 import { eachValue } from "./cli-parsing";
@@ -56,7 +52,6 @@ const parseEnv = makeParseEnv(
   npmDebugLog
 );
 
-const putRegistryAuth = makePutRegistryAuth(loadUpmConfig, saveUpmConfig);
 const searchPackages = makeSearchPackages(
   searchRegistry,
   getAllRegistryPackuments,

@@ -1,10 +1,10 @@
 import { mockService } from "./service.mock";
-import { makePutRegistryAuth } from "../../src/services/put-registry-auth";
 import { LoadUpmConfig, SaveUpmConfig } from "../../src/io/upm-config-io";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Base64 } from "../../src/domain/base64";
+import { PutRegistryAuthIntoUpmConfig } from "../../src/services/put-registry-auth";
 
-describe("put registry auth", () => {
+describe("put registry auth into upm config", () => {
   const someConfigPath = "/home/user/.upmconfig.toml";
   const someEmail = "user@mail.com";
   const someToken = "isehusehgusheguszg8gshg";
@@ -17,7 +17,10 @@ describe("put registry auth", () => {
     const saveUpmConfig = mockService<SaveUpmConfig>();
     saveUpmConfig.mockResolvedValue();
 
-    const putRegistryAuth = makePutRegistryAuth(loadUpmConfig, saveUpmConfig);
+    const putRegistryAuth = PutRegistryAuthIntoUpmConfig(
+      loadUpmConfig,
+      saveUpmConfig
+    );
     return { putRegistryAuth, loadUpmConfig, saveUpmConfig } as const;
   }
 
