@@ -1,10 +1,10 @@
-import { makeLogin } from "../../src/services/login";
-import { mockService } from "./service.mock";
-import { PutRegistryAuth } from "../../src/services/put-registry-auth";
-import { GetAuthToken } from "../../src/services/get-auth-token";
-import { StoreNpmAuthToken } from "../../src/services/put-npm-auth-token";
-import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
+import { GetAuthToken } from "../../src/services/get-auth-token";
+import { UpmConfigLogin } from "../../src/services/login";
+import { StoreNpmAuthToken } from "../../src/services/put-npm-auth-token";
+import { PutRegistryAuth } from "../../src/services/put-registry-auth";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "./service.mock";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -24,7 +24,7 @@ describe("login", () => {
     const putNpmAuthToken = mockService<StoreNpmAuthToken>();
     putNpmAuthToken.mockResolvedValue(exampleNpmrcPath);
 
-    const login = makeLogin(
+    const login = UpmConfigLogin(
       putRegistryAuth,
       npmLogin,
       putNpmAuthToken,

@@ -13,14 +13,11 @@ import { getUpmConfigPath } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
 import { resolveDependencies } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
-import { getAuthToken } from "../services/get-auth-token";
 import { getLatestVersion } from "../services/get-latest-version";
 import { getRegistryAuth } from "../services/get-registry-auth";
 import { getRegistryPackumentVersion } from "../services/get-registry-packument-version";
-import { makeLogin } from "../services/login";
+import { login } from "../services/login";
 import { makeParseEnv } from "../services/parse-env";
-import { putNpmAuthToken } from "../services/put-npm-auth-token";
-import { putRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
 import { searchPackages } from "../services/search-packages";
 import { eachValue } from "./cli-parsing";
@@ -47,13 +44,6 @@ const parseEnv = makeParseEnv(
   getUpmConfigPath,
   getRegistryAuth,
   getProcessCwd,
-  npmDebugLog
-);
-
-const login = makeLogin(
-  putRegistryAuth,
-  getAuthToken,
-  putNpmAuthToken,
   npmDebugLog
 );
 
