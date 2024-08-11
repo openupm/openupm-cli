@@ -6,7 +6,7 @@ import { Registry } from "../../src/domain/registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { buildPackument } from "../domain/data-packument";
-import { FetchPackument } from "../../src/io/packument-io";
+import { GetRegistryPackument } from "../../src/io/packument-io";
 
 describe("resolve remote packument version", () => {
   const somePackage = DomainName.parse("com.some.package");
@@ -16,17 +16,17 @@ describe("resolve remote packument version", () => {
   const someRegistry: Registry = { url: exampleRegistryUrl, auth: null };
 
   function makeDependencies() {
-    const fetchPackument = mockService<FetchPackument>();
+    const getRegistryPackument = mockService<GetRegistryPackument>();
 
     const resolveRemovePackumentVersion =
-      makeResolveRemotePackumentVersion(fetchPackument);
-    return { resolveRemovePackumentVersion, fetchPackument } as const;
+      makeResolveRemotePackumentVersion(getRegistryPackument);
+    return { resolveRemovePackumentVersion, getRegistryPackument } as const;
   }
 
   it("should fail if packument was not found", async () => {
-    const { resolveRemovePackumentVersion, fetchPackument } =
+    const { resolveRemovePackumentVersion, getRegistryPackument } =
       makeDependencies();
-    fetchPackument.mockResolvedValue(null);
+    getRegistryPackument.mockResolvedValue(null);
 
     const result = await resolveRemovePackumentVersion(
       somePackage,
@@ -40,14 +40,14 @@ describe("resolve remote packument version", () => {
   });
 
   it("should give resolved packument-version", async () => {
-    const { resolveRemovePackumentVersion, fetchPackument } =
+    const { resolveRemovePackumentVersion, getRegistryPackument } =
       makeDependencies();
     const packument = buildPackument(somePackage, (packument) =>
       packument.addVersion(someVersion, (version) =>
         version.addDependency("com.other.package", "1.0.0")
       )
     );
-    fetchPackument.mockResolvedValue(packument);
+    getRegistryPackument.mockResolvedValue(packument);
 
     const result = await resolveRemovePackumentVersion(
       somePackage,

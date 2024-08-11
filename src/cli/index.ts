@@ -7,7 +7,7 @@ import { makeFetchAllPackuments } from "../io/all-packuments-io";
 import { makeCheckUrlExists } from "../io/check-url";
 import { makeSearchRegistry } from "../io/npm-search";
 import { findNpmrcPath, loadNpmrc, saveNpmrc } from "../io/npmrc-io";
-import { makeFetchPackument } from "../io/packument-io";
+import { getRegistryPackument } from "../io/packument-io";
 import {
   loadProjectManifest,
   saveProjectManifest,
@@ -54,7 +54,6 @@ import {
 
 const log = npmlog;
 
-const fetchPackument = makeFetchPackument(npmRegistryClient, npmDebugLog);
 const fetchAllPackuments = makeFetchAllPackuments(npmDebugLog);
 const searchRegistry = makeSearchRegistry(npmDebugLog);
 const removePackages = makeRemovePackages(
@@ -75,15 +74,15 @@ const determineEditorVersion = makeDetermineEditorVersion(getProjectVersion);
 const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLogin(npmRegistryClient, npmDebugLog);
 const resolveRemovePackumentVersion =
-  makeResolveRemotePackumentVersion(fetchPackument);
-const resolveLatestVersion = makeResolveLatestVersion(fetchPackument);
+  makeResolveRemotePackumentVersion(getRegistryPackument);
+const resolveLatestVersion = makeResolveLatestVersion(getRegistryPackument);
 const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
 const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
   checkIsUnityPackage,
-  fetchPackument
+  getRegistryPackument
 );
 const resolveDependencies = makeResolveDependency(
-  fetchPackument,
+  getRegistryPackument,
   checkIsBuiltInPackage
 );
 const putRegistryAuth = makePutRegistryAuth(loadUpmConfig, saveUpmConfig);
@@ -114,7 +113,7 @@ const depsCmd = makeDepsCmd(
   npmDebugLog
 );
 const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
-const viewCmd = makeViewCmd(parseEnv, fetchPackument, log);
+const viewCmd = makeViewCmd(parseEnv, getRegistryPackument, log);
 
 // update-notifier
 

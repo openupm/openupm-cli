@@ -1,7 +1,7 @@
 import { CheckIsUnityPackage } from "../../src/services/unity-package-check";
 import { makeCheckIsBuiltInPackage } from "../../src/services/built-in-package-check";
 import { mockService } from "./service.mock";
-import { FetchPackument } from "../../src/io/packument-io";
+import { GetRegistryPackument } from "../../src/io/packument-io";
 import { DomainName } from "../../src/domain/domain-name";
 import { SemanticVersion } from "../../src/domain/semantic-version";
 import { UnityPackument } from "../../src/domain/packument";
@@ -13,13 +13,13 @@ describe("is built-in package", () => {
   function makeDependencies() {
     const checkIsUnityPackage = mockService<CheckIsUnityPackage>();
 
-    const fetchPackument = mockService<FetchPackument>();
+    const getRegistryPackument = mockService<GetRegistryPackument>();
 
     const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
       checkIsUnityPackage,
-      fetchPackument
+      getRegistryPackument
     );
-    return { checkIsBuiltInPackage, checkIsUnityPackage, fetchPackument };
+    return { checkIsBuiltInPackage, checkIsUnityPackage, getRegistryPackument };
   }
 
   it("should be false if package is not a Unity package", async () => {
@@ -32,10 +32,10 @@ describe("is built-in package", () => {
   });
 
   it("should be false if package is Unity package and exists on Unity registry", async () => {
-    const { checkIsBuiltInPackage, checkIsUnityPackage, fetchPackument } =
+    const { checkIsBuiltInPackage, checkIsUnityPackage, getRegistryPackument } =
       makeDependencies();
     checkIsUnityPackage.mockResolvedValue(true);
-    fetchPackument.mockResolvedValue({
+    getRegistryPackument.mockResolvedValue({
       versions: { [someVersion]: {} },
     } as UnityPackument);
 
@@ -45,10 +45,10 @@ describe("is built-in package", () => {
   });
 
   it("should be true if package is Unity package, but does not exist on Unity registry", async () => {
-    const { checkIsBuiltInPackage, checkIsUnityPackage, fetchPackument } =
+    const { checkIsBuiltInPackage, checkIsUnityPackage, getRegistryPackument } =
       makeDependencies();
     checkIsUnityPackage.mockResolvedValue(true);
-    fetchPackument.mockResolvedValue(null);
+    getRegistryPackument.mockResolvedValue(null);
 
     const actual = await checkIsBuiltInPackage(somePackage, someVersion);
 

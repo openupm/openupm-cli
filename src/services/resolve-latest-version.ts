@@ -2,7 +2,7 @@ import { DomainName } from "../domain/domain-name";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { FetchPackument } from "../io/packument-io";
+import { GetRegistryPackument } from "../io/packument-io";
 
 /**
  * Service for resolving the latest published version of a package.
@@ -20,10 +20,10 @@ export type ResolveLatestVersion = (
  * Makes a {@link ResolveLatestVersion} service function.
  */
 export function makeResolveLatestVersion(
-  fetchPackument: FetchPackument
+  getRegistryPackument: GetRegistryPackument
 ): ResolveLatestVersion {
   return async (source, packageName) => {
-    const packument = await fetchPackument(source, packageName);
+    const packument = await getRegistryPackument(source, packageName);
     if (packument === null) return null;
 
     const resolveResult = tryResolvePackumentVersion(packument, "latest");

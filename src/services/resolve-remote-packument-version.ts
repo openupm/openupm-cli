@@ -8,7 +8,7 @@ import {
   UnityPackument,
   UnityPackumentVersion,
 } from "../domain/packument";
-import { FetchPackument } from "../io/packument-io";
+import { GetRegistryPackument } from "../io/packument-io";
 import { resultifyAsyncOp } from "../utils/result-utils";
 import { RegistryUrl } from "../domain/registry-url";
 import { ResolvableVersion } from "../domain/package-reference";
@@ -47,11 +47,11 @@ export type ResolveRemotePackumentVersion = (
  * Makes a {@link ResolveRemotePackumentVersion} function.
  */
 export function makeResolveRemotePackumentVersion(
-  fetchPackument: FetchPackument
+  getRegistryPackument: GetRegistryPackument
 ): ResolveRemotePackumentVersion {
   return (packageName, requestedVersion, source) =>
     resultifyAsyncOp<UnityPackument | null, ResolvePackumentVersionError>(
-      fetchPackument(source, packageName)
+      getRegistryPackument(source, packageName)
     ).andThen((packument) => {
       if (packument === null)
         return Err(new PackumentNotFoundError(packageName));

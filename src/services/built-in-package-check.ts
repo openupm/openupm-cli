@@ -1,7 +1,7 @@
 import { DomainName } from "../domain/domain-name";
 import { SemanticVersion } from "../domain/semantic-version";
 import { CheckIsUnityPackage } from "./unity-package-check";
-import { FetchPackument } from "../io/packument-io";
+import { GetRegistryPackument } from "../io/packument-io";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { recordKeys } from "../utils/record-utils";
 
@@ -21,13 +21,13 @@ export type CheckIsBuiltInPackage = (
  */
 export function makeCheckIsBuiltInPackage(
   checkIsUnityPackage: CheckIsUnityPackage,
-  fetchPackument: FetchPackument
+  getRegistryPackument: GetRegistryPackument
 ): CheckIsBuiltInPackage {
   async function checkExistsOnUnityRegistry(
     packageName: DomainName,
     version: SemanticVersion
   ): Promise<boolean> {
-    const packument = await fetchPackument(
+    const packument = await getRegistryPackument(
       { url: unityRegistryUrl, auth: null },
       packageName
     );

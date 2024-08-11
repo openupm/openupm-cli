@@ -4,26 +4,28 @@ import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
 import { RegistryAuthenticationError } from "./common-errors";
-import { DebugLog } from "../logging";
+import { DebugLog, npmDebugLog } from "../logging";
+import { npmRegistryClient } from "./reg-client";
 
 /**
- * Function for fetching a packument from a registry.
- * @param registry The registry to fetch from.
- * @param name The name of the packument to fetch.
+ * Function for getting a packument from a registry.
+ * @param registry The registry to get the packument from.
+ * @param name The name of the packument.
  * @returns The packument or null of not found.
  */
-export type FetchPackument = (
+export type GetRegistryPackument = (
   registry: Registry,
   name: DomainName
 ) => Promise<UnityPackument | null>;
 
 /**
- * Makes a {@link FetchPackument} function.
+ * Makes a {@link GetRegistryPackument} function which fetches the packument
+ * from a remote npm registry.
  */
-export function makeFetchPackument(
+export function FetchRegistryPackument(
   registryClient: RegClient.Instance,
   debugLog: DebugLog
-): FetchPackument {
+): GetRegistryPackument {
   return (registry, name) => {
     const url = `${registry.url}/${name}`;
     return new Promise((resolve, reject) => {
@@ -47,3 +49,11 @@ export function makeFetchPackument(
     });
   };
 }
+
+/**
+ * Default {@link GetRegistryPackument} function. Uses {@link FetchRegistryPackument}.
+ */
+export const getRegistryPackument = FetchRegistryPackument(
+  npmRegistryClient,
+  npmDebugLog
+);

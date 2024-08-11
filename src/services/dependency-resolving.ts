@@ -6,7 +6,7 @@ import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
 } from "../domain/packument";
-import { FetchPackument } from "../io/packument-io";
+import { GetRegistryPackument } from "../io/packument-io";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   DependencyGraph,
@@ -36,7 +36,7 @@ export type ResolveDependencies = (
  * Makes a {@link ResolveDependencies} function.
  */
 export function makeResolveDependency(
-  fetchPackument: FetchPackument,
+  getRegistryPackument: GetRegistryPackument,
   checkIsBuiltInPackage: CheckIsBuiltInPackage
 ): ResolveDependencies {
   async function resolveRecursively(
@@ -57,7 +57,7 @@ export function makeResolveDependency(
 
     const errors: Record<RegistryUrl, ResolvePackumentVersionError> = {};
     for (const source of sources) {
-      const packument = await fetchPackument(source, packageName);
+      const packument = await getRegistryPackument(source, packageName);
       if (packument === null) {
         errors[source.url] = new PackumentNotFoundError(packageName);
         continue;
