@@ -17,8 +17,7 @@ import {
   saveUpmConfig,
 } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
-import { checkIsBuiltInPackage } from "../services/built-in-package-check";
-import { makeResolveDependency } from "../services/dependency-resolving";
+import { resolveDependencies } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
 import { getAuthToken } from "../services/get-auth-token";
 import { getLatestVersion } from "../services/get-latest-version";
@@ -57,10 +56,6 @@ const parseEnv = makeParseEnv(
   npmDebugLog
 );
 
-const resolveDependencies = makeResolveDependency(
-  getRegistryPackument,
-  checkIsBuiltInPackage
-);
 const putRegistryAuth = makePutRegistryAuth(loadUpmConfig, saveUpmConfig);
 const searchPackages = makeSearchPackages(
   searchRegistry,

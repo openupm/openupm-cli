@@ -1,4 +1,3 @@
-import { makeResolveDependency } from "../../src/services/dependency-resolving";
 import { mockService } from "./service.mock";
 import { GetRegistryPackument } from "../../src/io/packument-io";
 import { CheckIsBuiltInPackage } from "../../src/services/built-in-package-check";
@@ -10,6 +9,7 @@ import { Registry } from "../../src/domain/registry";
 import { NodeType, tryGetGraphNode } from "../../src/domain/dependency-graph";
 import { PackumentNotFoundError } from "../../src/common-errors";
 import { VersionNotFoundError } from "../../src/domain/packument";
+import { ResolveDependenciesFromRegistries } from "../../src/services/dependency-resolving";
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
@@ -29,7 +29,7 @@ describe("dependency resolving", () => {
     const checkIsBuiltInPackage = mockService<CheckIsBuiltInPackage>();
     checkIsBuiltInPackage.mockResolvedValue(false);
 
-    const resolveDependencies = makeResolveDependency(
+    const resolveDependencies = ResolveDependenciesFromRegistries(
       getRegistryPackument,
       checkIsBuiltInPackage
     );
