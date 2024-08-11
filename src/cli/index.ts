@@ -5,7 +5,7 @@ import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { getAllRegistryPackuments } from "../io/all-packuments-io";
 import { makeCheckUrlExists } from "../io/check-url";
-import { makeSearchRegistry } from "../io/npm-search";
+import { searchRegistry } from "../io/npm-search";
 import { findNpmrcPath, loadNpmrc, saveNpmrc } from "../io/npmrc-io";
 import { getRegistryPackument } from "../io/packument-io";
 import {
@@ -54,7 +54,6 @@ import {
 
 const log = npmlog;
 
-const searchRegistry = makeSearchRegistry(npmDebugLog);
 const removePackages = makeRemovePackages(
   loadProjectManifest,
   saveProjectManifest
