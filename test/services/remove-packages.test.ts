@@ -1,18 +1,18 @@
-import {
-  makeRemovePackages,
-  RemovedPackage,
-} from "../../src/services/remove-packages";
-import { mockService } from "./service.mock";
+import path from "path";
+import { PackumentNotFoundError } from "../../src/common-errors";
+import { DomainName } from "../../src/domain/domain-name";
 import {
   LoadProjectManifest,
   SaveProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { DomainName } from "../../src/domain/domain-name";
+import {
+  RemovedPackage,
+  RemovePackagesFromManifest,
+} from "../../src/services/remove-packages";
 import { buildProjectManifest } from "../domain/data-project-manifest";
-import path from "path";
-import { PackumentNotFoundError } from "../../src/common-errors";
+import { mockService } from "./service.mock";
 
-describe("remove packages", () => {
+describe("remove packages from manifest", () => {
   const someProjectPath = path.resolve("/home/projects/MyUnityProject");
   const somePackage = DomainName.parse("com.some.package");
   const otherPackage = DomainName.parse("com.other.package");
@@ -28,22 +28,23 @@ describe("remove packages", () => {
     const writeProjectManifest = mockService<SaveProjectManifest>();
     writeProjectManifest.mockResolvedValue(undefined);
 
-    const removePackages = makeRemovePackages(
+    const removePackagesFromManifestu = RemovePackagesFromManifest(
       loadProjectManifest,
       writeProjectManifest
     );
     return {
-      removePackages,
+      removePackagesFromManifestu,
       loadProjectManifest,
       writeProjectManifest,
     } as const;
   }
 
   it("should fail if package is not in manifest", async () => {
-    const { removePackages } = makeDependencies();
+    const { removePackagesFromManifestu } = makeDependencies();
 
-    const result = await removePackages(someProjectPath, [otherPackage])
-      .promise;
+    const result = await removePackagesFromManifestu(someProjectPath, [
+      otherPackage,
+    ]).promise;
 
     expect(result).toBeError((actual) =>
       expect(actual).toBeInstanceOf(PackumentNotFoundError)
@@ -51,9 +52,11 @@ describe("remove packages", () => {
   });
 
   it("should return removed version", async () => {
-    const { removePackages } = makeDependencies();
+    const { removePackagesFromManifestu } = makeDependencies();
 
-    const result = await removePackages(someProjectPath, [somePackage]).promise;
+    const result = await removePackagesFromManifestu(someProjectPath, [
+      somePackage,
+    ]).promise;
 
     expect(result).toBeOk((removedPackage: RemovedPackage) =>
       expect(removedPackage).toEqual([{ name: somePackage, version: "1.0.0" }])
@@ -61,18 +64,23 @@ describe("remove packages", () => {
   });
 
   it("should be atomic for multiple packages", async () => {
-    const { removePackages, writeProjectManifest } = makeDependencies();
+    const { removePackagesFromManifestu, writeProjectManifest } =
+      makeDependencies();
 
     // One of these packages can not be removed, so none should be removed.
-    await removePackages(someProjectPath, [somePackage, otherPackage]).promise;
+    await removePackagesFromManifestu(someProjectPath, [
+      somePackage,
+      otherPackage,
+    ]).promise;
 
     expect(writeProjectManifest).not.toHaveBeenCalled();
   });
 
   it("should remove package from manifest", async () => {
-    const { removePackages, writeProjectManifest } = makeDependencies();
+    const { removePackagesFromManifestu, writeProjectManifest } =
+      makeDependencies();
 
-    await removePackages(someProjectPath, [somePackage]).promise;
+    await removePackagesFromManifestu(someProjectPath, [somePackage]).promise;
 
     expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
@@ -85,9 +93,10 @@ describe("remove packages", () => {
   });
 
   it("should remove scope from manifest", async () => {
-    const { removePackages, writeProjectManifest } = makeDependencies();
+    const { removePackagesFromManifestu, writeProjectManifest } =
+      makeDependencies();
 
-    await removePackages(someProjectPath, [somePackage]).promise;
+    await removePackagesFromManifestu(someProjectPath, [somePackage]).promise;
 
     expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),

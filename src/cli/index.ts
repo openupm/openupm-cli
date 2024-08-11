@@ -30,7 +30,7 @@ import { makeNpmLogin } from "../services/npm-login";
 import { makeAuthNpmrc } from "../services/npmrc-auth";
 import { makeParseEnv } from "../services/parse-env";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
-import { makeRemovePackages } from "../services/remove-packages";
+import { removePackages } from "../services/remove-packages";
 import { makeResolveLatestVersion } from "../services/resolve-latest-version";
 import { makeResolveRemotePackumentVersion } from "../services/resolve-remote-packument-version";
 import { makeSearchPackages } from "../services/search-packages";
@@ -54,10 +54,6 @@ import {
 
 const log = npmlog;
 
-const removePackages = makeRemovePackages(
-  loadProjectManifest,
-  saveProjectManifest
-);
 const checkUrlExists = makeCheckUrlExists();
 
 const loadRegistryAuth = makeLoadRegistryAuth(loadUpmConfig);
