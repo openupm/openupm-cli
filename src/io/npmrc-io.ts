@@ -2,7 +2,7 @@ import { EOL } from "node:os";
 import path from "path";
 import { Npmrc } from "../domain/npmrc";
 import { GetHomePath, getHomePathFromEnv } from "./special-paths";
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
+import { readTextFile, ReadTextFile, WriteTextFile } from "./text-file-io";
 
 /**
  * Function for determining the path of the users .npmrc file.
@@ -34,12 +34,18 @@ export const findNpmrcPath: FindNpmrcPath = FindNpmrcInHome(getHomePathFromEnv);
 export type LoadNpmrc = (path: string) => Promise<Npmrc | null>;
 
 /**
- * Makes a {@link LoadNpmrc} function.
+ * Makes a {@link LoadNpmrc} function which reads the content of a `.npmrc`
+ * file.
  */
-export function makeLoadNpmrc(readFile: ReadTextFile): LoadNpmrc {
+export function ReadNpmrcFile(readFile: ReadTextFile): LoadNpmrc {
   return (path) =>
     readFile(path, true).then((content) => content?.split(EOL) ?? null);
 }
+
+/**
+ * Default {@link LoadNpmrc} function. Uses {@link ReadNpmrcFile}.
+ */
+export const loadNpmrc = ReadNpmrcFile(readTextFile);
 
 /**
  * Function for saving npmrc files. Overwrites the content of the file.

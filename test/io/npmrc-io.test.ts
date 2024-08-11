@@ -2,8 +2,8 @@ import { EOL } from "node:os";
 import path from "path";
 import {
   FindNpmrcInHome,
-  makeLoadNpmrc,
   makeSaveNpmrc,
+  ReadNpmrcFile,
 } from "../../src/io/npmrc-io";
 import { GetHomePath } from "../../src/io/special-paths";
 import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
@@ -31,30 +31,30 @@ describe("npmrc-io", () => {
     });
   });
 
-  describe("load", () => {
+  describe("read file", () => {
     function makeDependencies() {
       const readText = mockService<ReadTextFile>();
 
-      const loadNpmrc = makeLoadNpmrc(readText);
-      return { loadNpmrc, readText } as const;
+      const readNpmrcFile = ReadNpmrcFile(readText);
+      return { readNpmrcFile, readText } as const;
     }
 
     it("should be ok for valid file", async () => {
       const fileContent = `key1 = value1${EOL}key2 = "value2"`;
-      const { loadNpmrc, readText } = makeDependencies();
+      const { readNpmrcFile, readText } = makeDependencies();
       readText.mockResolvedValue(fileContent);
 
-      const actual = await loadNpmrc("/valid/path/.npmrc");
+      const actual = await readNpmrcFile("/valid/path/.npmrc");
 
       expect(actual).toEqual(["key1 = value1", 'key2 = "value2"']);
     });
 
     it("should be null for missing file", async () => {
-      const { loadNpmrc, readText } = makeDependencies();
+      const { readNpmrcFile, readText } = makeDependencies();
       const path = "/invalid/path/.npmrc";
       readText.mockResolvedValue(null);
 
-      const actual = await loadNpmrc(path);
+      const actual = await readNpmrcFile(path);
 
       expect(actual).toBeNull();
     });

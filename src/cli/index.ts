@@ -6,7 +6,7 @@ import pkg from "../../package.json";
 import { makeFetchAllPackuments } from "../io/all-packuments-io";
 import { makeCheckUrlExists } from "../io/check-url";
 import { makeSearchRegistry } from "../io/npm-search";
-import { findNpmrcPath, makeLoadNpmrc, makeSaveNpmrc } from "../io/npmrc-io";
+import { findNpmrcPath, loadNpmrc, makeSaveNpmrc } from "../io/npmrc-io";
 import { makeFetchPackument } from "../io/packument-io";
 import {
   loadProjectManifest,
@@ -55,7 +55,6 @@ import {
 
 const log = npmlog;
 
-const loadNpmrc = makeLoadNpmrc(readTextFile);
 const saveNpmrc = makeSaveNpmrc(writeTextFile);
 const loadProjectVersion = makeLoadProjectVersion(readTextFile, npmDebugLog);
 const fetchPackument = makeFetchPackument(npmRegistryClient, npmDebugLog);
