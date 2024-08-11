@@ -19,7 +19,7 @@ import {
 } from "../io/project-manifest-io";
 import { makeLoadProjectVersion } from "../io/project-version-io";
 import { npmRegistryClient } from "../io/reg-client";
-import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
+import { getProcessCwd, makeGetHomePath } from "../io/special-paths";
 import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
   makeGetUpmConfigPath,
@@ -60,7 +60,6 @@ import {
 
 const log = npmlog;
 
-const getCwd = makeGetCwd();
 const runChildProcess = makeRunChildProcess(npmDebugLog);
 const getHomePath = makeGetHomePath();
 const readFile = makeReadText();
@@ -88,7 +87,7 @@ const parseEnv = makeParseEnv(
   log,
   getUpmConfigPath,
   loadRegistryAuth,
-  getCwd,
+  getProcessCwd,
   npmDebugLog
 );
 const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);

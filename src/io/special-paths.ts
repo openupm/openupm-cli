@@ -116,8 +116,6 @@ export function tryGetEditorInstallPath(
 export type GetCwd = () => string;
 
 /**
- * Makes a {@link GetCwd} function.
+ * {@link GetCwd} function which uses {@link process.cwd}.
  */
-export function makeGetCwd(): GetCwd {
-  return process.cwd;
-}
+export const getProcessCwd: GetCwd = process.cwd;
