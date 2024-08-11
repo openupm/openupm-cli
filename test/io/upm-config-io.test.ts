@@ -1,37 +1,37 @@
-import {
-  makeGetUpmConfigPath,
-  makeLoadUpmConfig,
-} from "../../src/io/upm-config-io";
-import { ReadTextFile } from "../../src/io/text-file-io";
-import { mockService } from "../services/service.mock";
-import { GetHomePath } from "../../src/io/special-paths";
+import { EOL } from "node:os";
 import path from "path";
 import { RunChildProcess } from "../../src/io/child-process";
-import { EOL } from "node:os";
+import { GetHomePath } from "../../src/io/special-paths";
+import { ReadTextFile } from "../../src/io/text-file-io";
+import {
+  makeLoadUpmConfig,
+  ResolveDefaultUpmConfigPath,
+} from "../../src/io/upm-config-io";
 import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "../services/service.mock";
 
 describe("upm-config-io", () => {
-  describe("get path", () => {
+  describe("resolve default path", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
       const runChildProcess = mockService<RunChildProcess>();
 
-      const getUpmConfigPath = makeGetUpmConfigPath(
+      const resolveDefaultUpmConfigPath = ResolveDefaultUpmConfigPath(
         getHomePath,
         runChildProcess
       );
 
-      return { getUpmConfigPath, getHomePath } as const;
+      return { resolveDefaultUpmConfigPath, getHomePath } as const;
     }
 
     describe("no wsl and no system-user", () => {
       it("should be in home path", async () => {
-        const { getUpmConfigPath, getHomePath } = makeDependencies();
+        const { resolveDefaultUpmConfigPath, getHomePath } = makeDependencies();
         const expected = path.resolve("/some/home/dir/.upmconfig.toml");
         getHomePath.mockReturnValue(path.dirname(expected));
 
-        const actual = await getUpmConfigPath(false, false);
+        const actual = await resolveDefaultUpmConfigPath(false, false);
 
         expect(actual).toEqual(expected);
       });

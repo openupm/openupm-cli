@@ -5,7 +5,6 @@ import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { makeFetchAllPackuments } from "../io/all-packuments-io";
 import { makeCheckUrlExists } from "../io/check-url";
-import { runChildProcess } from "../io/child-process";
 import { makeSearchRegistry } from "../io/npm-search";
 import {
   makeFindNpmrcPath,
@@ -22,7 +21,7 @@ import { npmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv, getProcessCwd } from "../io/special-paths";
 import { readTextFile, writeTextFile } from "../io/text-file-io";
 import {
-  makeGetUpmConfigPath,
+  getUpmConfigPath,
   makeLoadUpmConfig,
   makeSaveUpmConfig,
 } from "../io/upm-config-io";
@@ -60,10 +59,6 @@ import {
 
 const log = npmlog;
 
-const getUpmConfigPath = makeGetUpmConfigPath(
-  getHomePathFromEnv,
-  runChildProcess
-);
 const loadUpmConfig = makeLoadUpmConfig(readTextFile);
 const saveUpmConfig = makeSaveUpmConfig(writeTextFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePathFromEnv);

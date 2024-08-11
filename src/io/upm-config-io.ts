@@ -1,18 +1,17 @@
-import path from "path";
 import TOML from "@iarna/toml";
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
-import { tryGetEnv } from "../utils/env-util";
-import { tryGetWslPath } from "./wsl";
-import { RunChildProcess } from "./child-process";
-import { GetHomePath } from "./special-paths";
+import path from "path";
 import { CustomError } from "ts-custom-error";
 import { z } from "zod";
+import { Base64 } from "../domain/base64";
+import { tryGetEnv } from "../utils/env-util";
 import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { UpmConfig } from "../domain/upm-config";
-import { Base64 } from "../domain/base64";
+import { runChildProcess, RunChildProcess } from "./child-process";
+import { GetHomePath, getHomePathFromEnv } from "./special-paths";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
+import { tryGetWslPath } from "./wsl";
 
 const configFileName = ".upmconfig.toml";
 
@@ -30,9 +29,11 @@ export type GetUpmConfigPath = (
 ) => Promise<string>;
 
 /**
- * Makes a {@link GetUpmConfigPath} function.
+ * Makes a {@link GetUpmConfigPath} function which resolves to the default
+ * location of the `.upmconfig.toml` file.
+ * @see https://docs.unity3d.com/Manual/upm-config.html#upmconfig
  */
-export function makeGetUpmConfigPath(
+export function ResolveDefaultUpmConfigPath(
   getHomePath: GetHomePath,
   runChildProcess: RunChildProcess
 ): GetUpmConfigPath {
@@ -61,6 +62,14 @@ export function makeGetUpmConfigPath(
     return path.join(directory, configFileName);
   };
 }
+
+/**
+ * Default {@link GetUpmConfigPath} function. Uses {@link ResolveDefaultUpmConfigPath}.
+ */
+export const getUpmConfigPath: GetUpmConfigPath = ResolveDefaultUpmConfigPath(
+  getHomePathFromEnv,
+  runChildProcess
+);
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),
