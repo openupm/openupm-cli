@@ -23,7 +23,7 @@ import { readTextFile, writeTextFile } from "../io/text-file-io";
 import {
   getUpmConfigPath,
   loadUpmConfig,
-  makeSaveUpmConfig,
+  saveUpmConfig,
 } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
@@ -59,7 +59,6 @@ import {
 
 const log = npmlog;
 
-const saveUpmConfig = makeSaveUpmConfig(writeTextFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePathFromEnv);
 const loadNpmrc = makeLoadNpmrc(readTextFile);
 const saveNpmrc = makeSaveNpmrc(writeTextFile);

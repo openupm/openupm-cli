@@ -10,7 +10,12 @@ import {
 } from "../utils/zod-utils";
 import { runChildProcess, RunChildProcess } from "./child-process";
 import { GetHomePath, getHomePathFromEnv } from "./special-paths";
-import { readTextFile, ReadTextFile, WriteTextFile } from "./text-file-io";
+import {
+  readTextFile,
+  ReadTextFile,
+  writeTextFile,
+  WriteTextFile,
+} from "./text-file-io";
 import { tryGetWslPath } from "./wsl";
 
 const configFileName = ".upmconfig.toml";
@@ -145,11 +150,17 @@ export type SaveUpmConfig = (
 ) => Promise<void>;
 
 /**
- * Creates a {@link SaveUpmConfig} function.
+ * Creates a {@link SaveUpmConfig} function which overwrites the content
+ * of a `.upmconfig.toml` file.
  */
-export function makeSaveUpmConfig(writeFile: WriteTextFile): SaveUpmConfig {
+export function WriteUpmConfigFile(writeFile: WriteTextFile): SaveUpmConfig {
   return (config, configFilePath) => {
     const content = TOML.stringify(config);
     return writeFile(configFilePath, content);
   };
 }
+
+/**
+ * Default {@link SaveUpmConfig} function. Uses {@link WriteUpmConfigFile}.
+ */
+export const saveUpmConfig: SaveUpmConfig = WriteUpmConfigFile(writeTextFile);
