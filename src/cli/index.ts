@@ -12,7 +12,6 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../io/project-manifest-io";
-import { getProjectVersion } from "../io/project-version-io";
 import { npmRegistryClient } from "../io/reg-client";
 import { getProcessCwd } from "../io/special-paths";
 import {
@@ -23,7 +22,9 @@ import {
 import { npmDebugLog } from "../logging";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeResolveDependency } from "../services/dependency-resolving";
-import { makeDetermineEditorVersion } from "../services/determine-editor-version";
+import {
+  determineEditorVersion
+} from "../services/determine-editor-version";
 import { getRegistryAuth } from "../services/get-registry-auth";
 import { makeLogin } from "../services/login";
 import { makeNpmLogin } from "../services/npm-login";
@@ -61,7 +62,6 @@ const parseEnv = makeParseEnv(
   getProcessCwd,
   npmDebugLog
 );
-const determineEditorVersion = makeDetermineEditorVersion(getProjectVersion);
 const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLogin(npmRegistryClient, npmDebugLog);
 const resolveRemovePackumentVersion =
