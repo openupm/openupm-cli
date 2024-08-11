@@ -11,7 +11,7 @@ import { ResolveDependencies } from "../services/dependency-resolving";
 import { Logger } from "npmlog";
 import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
-import { ResolveLatestVersion } from "../services/resolve-latest-version";
+import { GetLatestVersion } from "../services/get-latest-version";
 import { SemanticVersion } from "../domain/semantic-version";
 import { isZod } from "../utils/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
@@ -50,7 +50,7 @@ export type DepsCmd = (
 export function makeDepsCmd(
   parseEnv: ParseEnv,
   resolveDependencies: ResolveDependencies,
-  resolveLatestVersion: ResolveLatestVersion,
+  resolveLatestVersion: GetLatestVersion,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {

@@ -29,7 +29,6 @@ import { makeParseEnv } from "../services/parse-env";
 import { putNpmAuthToken } from "../services/put-npm-auth-token";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
-import { makeResolveLatestVersion } from "../services/resolve-latest-version";
 import { makeSearchPackages } from "../services/search-packages";
 import { makeCheckIsUnityPackage } from "../services/unity-package-check";
 import { eachValue } from "./cli-parsing";
@@ -46,6 +45,7 @@ import {
   mustBePackageReference,
   mustBeRegistryUrl,
 } from "./validators";
+import { getLatestVersion } from "../services/get-latest-version";
 
 // Composition root
 
@@ -59,7 +59,6 @@ const parseEnv = makeParseEnv(
   npmDebugLog
 );
 
-const resolveLatestVersion = makeResolveLatestVersion(getRegistryPackument);
 const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
 const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
   checkIsUnityPackage,
@@ -97,7 +96,7 @@ const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, npmDebugLog);
 const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependencies,
-  resolveLatestVersion,
+  getLatestVersion,
   log,
   npmDebugLog
 );

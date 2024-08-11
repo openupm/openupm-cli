@@ -11,7 +11,7 @@ import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { mockService } from "../services/service.mock";
 import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { ResolveLatestVersion } from "../../src/services/resolve-latest-version";
+import { GetLatestVersion } from "../../src/services/get-latest-version";
 import {
   makeGraphFromSeed,
   markBuiltInResolved,
@@ -51,7 +51,7 @@ function makeDependencies() {
   );
   resolveDependencies.mockResolvedValue(defaultGraph);
 
-  const resolveLatestVersion = mockService<ResolveLatestVersion>();
+  const resolveLatestVersion = mockService<GetLatestVersion>();
   resolveLatestVersion.mockResolvedValue(someVersion);
 
   const log = makeMockLogger();
