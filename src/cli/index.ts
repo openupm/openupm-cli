@@ -5,7 +5,7 @@ import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { makeFetchAllPackuments } from "../io/all-packuments-io";
 import { makeCheckUrlExists } from "../io/check-url";
-import { makeRunChildProcess } from "../io/child-process";
+import { runChildProcess } from "../io/child-process";
 import { makeSearchRegistry } from "../io/npm-search";
 import {
   makeFindNpmrcPath,
@@ -60,7 +60,6 @@ import {
 
 const log = npmlog;
 
-const runChildProcess = makeRunChildProcess(npmDebugLog);
 const getHomePath = makeGetHomePath();
 const readFile = makeReadText();
 const writeFile = makeWriteText();
