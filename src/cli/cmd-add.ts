@@ -1,7 +1,7 @@
 import { PackageUrl } from "../domain/package-url";
 import {
   LoadProjectManifest,
-  WriteProjectManifest,
+  SaveProjectManifest,
 } from "../io/project-manifest-io";
 import { ParseEnv } from "../services/parse-env";
 import { compareEditorVersion, EditorVersion } from "../domain/editor-version";
@@ -122,7 +122,7 @@ export function makeAddCmd(
   resolveRemotePackumentVersion: ResolveRemotePackumentVersion,
   resolveDependencies: ResolveDependencies,
   loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest,
+  saveProjectManifest: SaveProjectManifest,
   determineEditorVersion: DetermineEditorVersion,
   log: Logger,
   debugLog: DebugLog
@@ -328,7 +328,7 @@ export function makeAddCmd(
 
     // Save manifest
     if (dirty) {
-      await writeProjectManifest(env.cwd, manifest);
+      await saveProjectManifest(env.cwd, manifest);
       // print manifest notice
       log.notice("", "please open Unity project to apply changes");
     }

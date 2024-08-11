@@ -23,7 +23,7 @@ import {
 } from "../../src/services/resolve-remote-packument-version";
 import {
   LoadProjectManifest,
-  WriteProjectManifest,
+  SaveProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { UnityPackumentVersion } from "../../src/domain/packument";
 import { noopLogger } from "../../src/logging";
@@ -100,7 +100,7 @@ function makeDependencies() {
   const loadProjectManifest = mockService<LoadProjectManifest>();
   loadProjectManifest.mockResolvedValue(emptyProjectManifest);
 
-  const writeProjectManifest = mockService<WriteProjectManifest>();
+  const writeProjectManifest = mockService<SaveProjectManifest>();
   writeProjectManifest.mockResolvedValue(undefined);
 
   const determineEditorVersion = mockService<DetermineEditorVersion>();

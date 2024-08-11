@@ -5,7 +5,7 @@ import {
 import { mockService } from "./service.mock";
 import {
   LoadProjectManifest,
-  WriteProjectManifest,
+  SaveProjectManifest,
 } from "../../src/io/project-manifest-io";
 import { DomainName } from "../../src/domain/domain-name";
 import { buildProjectManifest } from "../domain/data-project-manifest";
@@ -25,7 +25,7 @@ describe("remove packages", () => {
     const loadProjectManifest = mockService<LoadProjectManifest>();
     loadProjectManifest.mockResolvedValue(defaultManifest);
 
-    const writeProjectManifest = mockService<WriteProjectManifest>();
+    const writeProjectManifest = mockService<SaveProjectManifest>();
     writeProjectManifest.mockResolvedValue(undefined);
 
     const removePackages = makeRemovePackages(

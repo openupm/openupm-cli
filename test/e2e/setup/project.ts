@@ -2,12 +2,12 @@ import fse from "fs-extra";
 import path from "path";
 import yaml from "yaml";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
-import { makeWriteProjectManifest } from "../../../src/io/project-manifest-io";
+import { WriteProjectManifestFile } from "../../../src/io/project-manifest-io";
 import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
 import { writeTextFile } from "../../../src/io/text-file-io";
 import { dropDirectory } from "./directories";
 
-const writeProjectManifest = makeWriteProjectManifest(writeTextFile);
+const writeProjectManifest = WriteProjectManifestFile(writeTextFile);
 
 /**
  * Prepares a mock Unity project for testing.

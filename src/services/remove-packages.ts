@@ -7,7 +7,7 @@ import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
 import {
   LoadProjectManifest,
-  WriteProjectManifest,
+  SaveProjectManifest,
 } from "../io/project-manifest-io";
 import { SemanticVersion } from "../domain/semantic-version";
 import { PackageUrl } from "../domain/package-url";
@@ -45,7 +45,7 @@ export type RemovePackages = (
  */
 export function makeRemovePackages(
   loadProjectManifest: LoadProjectManifest,
-  writeProjectManifest: WriteProjectManifest
+  saveProjectManifest: SaveProjectManifest
 ): RemovePackages {
   const tryRemoveSingle = function (
     manifest: UnityProjectManifest,
@@ -110,7 +110,7 @@ export function makeRemovePackages(
     );
 
     return removeResult.map(async ([updatedManifest, removedPackages]) => {
-      await writeProjectManifest(projectPath, updatedManifest);
+      await saveProjectManifest(projectPath, updatedManifest);
       return removedPackages;
     });
   };

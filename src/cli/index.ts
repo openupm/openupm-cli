@@ -15,7 +15,7 @@ import {
 import { makeFetchPackument } from "../io/packument-io";
 import {
   loadProjectManifest,
-  makeWriteProjectManifest,
+  saveProjectManifest,
 } from "../io/project-manifest-io";
 import { makeLoadProjectVersion } from "../io/project-version-io";
 import { npmRegistryClient } from "../io/reg-client";
@@ -60,7 +60,6 @@ import {
 
 const log = npmlog;
 
-const writeProjectManifest = makeWriteProjectManifest(writeTextFile);
 const getUpmConfigPath = makeGetUpmConfigPath(
   getHomePathFromEnv,
   runChildProcess
@@ -76,7 +75,7 @@ const fetchAllPackuments = makeFetchAllPackuments(npmDebugLog);
 const searchRegistry = makeSearchRegistry(npmDebugLog);
 const removePackages = makeRemovePackages(
   loadProjectManifest,
-  writeProjectManifest
+  saveProjectManifest
 );
 const checkUrlExists = makeCheckUrlExists();
 
@@ -116,7 +115,7 @@ const addCmd = makeAddCmd(
   resolveRemovePackumentVersion,
   resolveDependencies,
   loadProjectManifest,
-  writeProjectManifest,
+  saveProjectManifest,
   determineEditorVersion,
   log,
   npmDebugLog

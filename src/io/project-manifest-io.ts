@@ -7,7 +7,12 @@ import {
 } from "../domain/project-manifest";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-import { readTextFile, ReadTextFile, WriteTextFile } from "./text-file-io";
+import {
+  readTextFile,
+  ReadTextFile,
+  writeTextFile,
+  WriteTextFile,
+} from "./text-file-io";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {
@@ -78,17 +83,18 @@ export const loadProjectManifest: LoadProjectManifest = ReadProjectManifestFile(
  * @param projectPath The path to the project's directory.
  * @param manifest The manifest to write to the project.
  */
-export type WriteProjectManifest = (
+export type SaveProjectManifest = (
   projectPath: string,
   manifest: UnityProjectManifest
 ) => Promise<void>;
 
 /**
- * Makes a {@link WriteProjectManifest} function.
+ * Makes a {@link SaveProjectManifest} function which overwrites the contents
+ * of a `manifest.json` file.
  */
-export function makeWriteProjectManifest(
+export function WriteProjectManifestFile(
   writeFile: WriteTextFile
-): WriteProjectManifest {
+): SaveProjectManifest {
   return async (projectPath, manifest) => {
     const manifestPath = manifestPathFor(projectPath);
     manifest = pruneManifest(manifest);
@@ -97,3 +103,9 @@ export function makeWriteProjectManifest(
     return await writeFile(manifestPath, json);
   };
 }
+
+/**
+ * Default {@link SaveProjectManifest} function. Uses {@link WriteProjectManifestFile}.
+ */
+export const saveProjectManifest: SaveProjectManifest =
+  WriteProjectManifestFile(writeTextFile);

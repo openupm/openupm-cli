@@ -1,6 +1,6 @@
 import {
   ReadProjectManifestFile,
-  makeWriteProjectManifest,
+  WriteProjectManifestFile,
   ManifestMalformedError,
   ManifestMissingError,
   manifestPathFor,
@@ -83,12 +83,12 @@ describe("project-manifest io", () => {
     });
   });
 
-  describe("write", () => {
+  describe("write file", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
       writeFile.mockResolvedValue(undefined);
 
-      const writeProjectManifest = makeWriteProjectManifest(writeFile);
+      const writeProjectManifest = WriteProjectManifestFile(writeFile);
       return { writeProjectManifest, writeFile } as const;
     }
 
