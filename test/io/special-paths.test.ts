@@ -1,55 +1,46 @@
+import os from "os";
 import path from "path";
-import { tryGetEnv } from "../../src/utils/env-util";
+import { EditorVersionNotSupportedError } from "../../src/common-errors";
+import { makeEditorVersion } from "../../src/domain/editor-version";
 import {
-  makeGetHomePath,
+  getHomePathFromEnv,
   NoHomePathError,
   OSNotSupportedError,
   tryGetEditorInstallPath,
   VersionNotSupportedOnOsError,
 } from "../../src/io/special-paths";
-import os from "os";
-import { makeEditorVersion } from "../../src/domain/editor-version";
-import { EditorVersionNotSupportedError } from "../../src/common-errors";
+import { tryGetEnv } from "../../src/utils/env-util";
 
 jest.mock("../../src/utils/env-util");
 
 describe("special-paths", () => {
-  describe("home", () => {
-    function makeDependencies() {
-      const getHomePath = makeGetHomePath();
-
-      return { getHomePath } as const;
-    }
-
+  describe("home from env", () => {
     it("should be USERPROFILE if defined", () => {
-      const { getHomePath } = makeDependencies();
       const expected = path.join(path.sep, "user", "dir");
       jest
         .mocked(tryGetEnv)
         .mockImplementation((key) => (key === "USERPROFILE" ? expected : null));
 
-      const actual = getHomePath();
+      const actual = getHomePathFromEnv();
 
       expect(actual).toEqual(expected);
     });
 
     it("should be HOME if USERPROFILE is not defined", () => {
-      const { getHomePath } = makeDependencies();
       const expected = path.join(path.sep, "user", "dir");
       jest
         .mocked(tryGetEnv)
         .mockImplementation((key) => (key === "HOME" ? expected : null));
 
-      const actual = getHomePath();
+      const actual = getHomePathFromEnv();
 
       expect(actual).toEqual(expected);
     });
 
     it("should fail if HOME and USERPROFILE are not defined", () => {
-      const { getHomePath } = makeDependencies();
       jest.mocked(tryGetEnv).mockReturnValue(null);
 
-      expect(() => getHomePath()).toThrow(NoHomePathError);
+      expect(() => getHomePathFromEnv()).toThrow(NoHomePathError);
     });
   });
 

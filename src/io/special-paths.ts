@@ -52,15 +52,15 @@ export type GetHomePath = () => string;
 export class NoHomePathError extends CustomError {}
 
 /**
- * Makes a {@link GetHomePath} function.
+ * {@link GetHomePath} function which resolved the home path using the
+ * `USERPROFILE` and `HOME` environment variables.
+ * @throws NoHomePathError if none of the required env variables are set.
  */
-export function makeGetHomePath(): GetHomePath {
-  return () => {
-    const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-    if (homePath === null) throw new NoHomePathError();
-    return homePath;
-  };
-}
+export const getHomePathFromEnv: GetHomePath = () => {
+  const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
+  if (homePath === null) throw new NoHomePathError();
+  return homePath;
+};
 
 /**
  * Errors which may occur when trying to resolve an editor-version.
