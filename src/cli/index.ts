@@ -22,7 +22,7 @@ import { getHomePathFromEnv, getProcessCwd } from "../io/special-paths";
 import { readTextFile, writeTextFile } from "../io/text-file-io";
 import {
   getUpmConfigPath,
-  makeLoadUpmConfig,
+  loadUpmConfig,
   makeSaveUpmConfig,
 } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
@@ -59,7 +59,6 @@ import {
 
 const log = npmlog;
 
-const loadUpmConfig = makeLoadUpmConfig(readTextFile);
 const saveUpmConfig = makeSaveUpmConfig(writeTextFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePathFromEnv);
 const loadNpmrc = makeLoadNpmrc(readTextFile);

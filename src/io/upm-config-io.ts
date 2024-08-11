@@ -10,7 +10,7 @@ import {
 } from "../utils/zod-utils";
 import { runChildProcess, RunChildProcess } from "./child-process";
 import { GetHomePath, getHomePathFromEnv } from "./special-paths";
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
+import { readTextFile, ReadTextFile, WriteTextFile } from "./text-file-io";
 import { tryGetWslPath } from "./wsl";
 
 const configFileName = ".upmconfig.toml";
@@ -117,9 +117,10 @@ export type LoadUpmConfig = (
 ) => Promise<UpmConfigContent | null>;
 
 /**
- * Makes a {@link LoadUpmConfig} function.
+ * Makes a {@link LoadUpmConfig} function which reads the content of a
+ * `.upmconfig.toml` file.
  */
-export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
+export function ReadUpmConfigFile(readFile: ReadTextFile): LoadUpmConfig {
   return async (configFilePath) => {
     const stringContent = await readFile(configFilePath, true);
     if (stringContent === null) return null;
@@ -127,6 +128,11 @@ export function makeLoadUpmConfig(readFile: ReadTextFile): LoadUpmConfig {
     return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
   };
 }
+
+/**
+ * Default {@link LoadUpmConfig} function. Uses {@link ReadUpmConfigFile}.
+ */
+export const loadUpmConfig: LoadUpmConfig = ReadUpmConfigFile(readTextFile);
 
 /**
  * Save the upm config.
