@@ -12,10 +12,9 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../io/project-manifest-io";
-import { makeLoadProjectVersion } from "../io/project-version-io";
+import { getProjectVersion } from "../io/project-version-io";
 import { npmRegistryClient } from "../io/reg-client";
 import { getProcessCwd } from "../io/special-paths";
-import { readTextFile } from "../io/text-file-io";
 import {
   getUpmConfigPath,
   loadUpmConfig,
@@ -55,7 +54,6 @@ import {
 
 const log = npmlog;
 
-const loadProjectVersion = makeLoadProjectVersion(readTextFile, npmDebugLog);
 const fetchPackument = makeFetchPackument(npmRegistryClient, npmDebugLog);
 const fetchAllPackuments = makeFetchAllPackuments(npmDebugLog);
 const searchRegistry = makeSearchRegistry(npmDebugLog);
@@ -73,7 +71,7 @@ const parseEnv = makeParseEnv(
   getProcessCwd,
   npmDebugLog
 );
-const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
+const determineEditorVersion = makeDetermineEditorVersion(getProjectVersion);
 const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
 const npmLogin = makeNpmLogin(npmRegistryClient, npmDebugLog);
 const resolveRemovePackumentVersion =
