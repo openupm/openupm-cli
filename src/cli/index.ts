@@ -24,7 +24,7 @@ import { npmDebugLog } from "../logging";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeResolveDependency } from "../services/dependency-resolving";
 import { makeDetermineEditorVersion } from "../services/determine-editor-version";
-import { makeLoadRegistryAuth } from "../services/load-registry-auth";
+import { getRegistryAuth } from "../services/get-registry-auth";
 import { makeLogin } from "../services/login";
 import { makeNpmLogin } from "../services/npm-login";
 import { makeAuthNpmrc } from "../services/npmrc-auth";
@@ -54,11 +54,10 @@ import {
 
 const log = npmlog;
 
-const loadRegistryAuth = makeLoadRegistryAuth(loadUpmConfig);
 const parseEnv = makeParseEnv(
   log,
   getUpmConfigPath,
-  loadRegistryAuth,
+  getRegistryAuth,
   getProcessCwd,
   npmDebugLog
 );

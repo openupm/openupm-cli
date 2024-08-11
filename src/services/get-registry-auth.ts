@@ -1,25 +1,30 @@
-import { addAuth, emptyUpmConfig, UpmConfig } from "../domain/upm-config";
-import { LoadUpmConfig, UpmAuth, UpmConfigContent } from "../io/upm-config-io";
 import { NpmAuth } from "another-npm-registry-client";
 import { decodeBase64 } from "../domain/base64";
+import { coerceRegistryUrl } from "../domain/registry-url";
+import { addAuth, emptyUpmConfig, UpmConfig } from "../domain/upm-config";
+import {
+  loadUpmConfig,
+  LoadUpmConfig,
+  UpmAuth,
+  UpmConfigContent,
+} from "../io/upm-config-io";
+import { recordEntries } from "../utils/record-utils";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { removeExplicitUndefined } from "../utils/zod-utils";
-import { recordEntries } from "../utils/record-utils";
-import { coerceRegistryUrl } from "../domain/registry-url";
 
 /**
- * Service function for loading registry authentication. Internally this
- * will load it from the upmconfig.toml.
+ * Service function for getting registry authentication.
  * @param upmConfigPath The path to the upmconfig.toml file.
  */
-export type LoadRegistryAuth = (upmConfigPath: string) => Promise<UpmConfig>;
+export type GetRegistryAuth = (upmConfigPath: string) => Promise<UpmConfig>;
 
 /**
- * Makes a {@link LoadRegistryAuth} function.
+ * Makes a {@link GetRegistryAuth} function which gets it's information from
+ * the users upm config.
  */
-export function makeLoadRegistryAuth(
+export function LoadRegistryAuthFromUpmConfig(
   loadUpmConfig: LoadUpmConfig
-): LoadRegistryAuth {
+): GetRegistryAuth {
   return async (upmConfigPath) => {
     function importNpmAuth(input: UpmAuth): NpmAuth {
       // Basic auth
@@ -62,3 +67,8 @@ export function makeLoadRegistryAuth(
     return content !== null ? importUpmConfig(content) : emptyUpmConfig;
   };
 }
+
+/**
+ * Default {@link GetRegistryAuth} function. Uses {@link LoadRegistryAuthFromUpmConfig}.
+ */
+export const getRegistryAuth = LoadRegistryAuthFromUpmConfig(loadUpmConfig);
