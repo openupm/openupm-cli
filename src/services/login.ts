@@ -16,11 +16,6 @@ import { NpmAuth } from "another-npm-registry-client";
  * @param configPath Path of the upm-config file in which to store
  * authentication information.
  * @param authMode Whether to use basic or token-based authentication.
- * @param onNpmAuthSuccess Callback that notifies when authentication
- * with the npm registry was successful. Only called with token-based
- * authentication.
- * @param onNpmrcUpdated Callback that notifies when the .npmrc file was
- * updated. Only called with token-based authentication.
  */
 export type Login = (
   username: string,
