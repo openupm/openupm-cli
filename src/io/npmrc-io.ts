@@ -1,8 +1,8 @@
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
 import { EOL } from "node:os";
-import { Npmrc } from "../domain/npmrc";
 import path from "path";
-import { GetHomePath } from "./special-paths";
+import { Npmrc } from "../domain/npmrc";
+import { GetHomePath, getHomePathFromEnv } from "./special-paths";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 /**
  * Function for determining the path of the users .npmrc file.
@@ -11,14 +11,20 @@ import { GetHomePath } from "./special-paths";
 export type FindNpmrcPath = () => string;
 
 /**
- * Makes a {@link FindNpmrcPath} function.
+ * Makes a {@link FindNpmrcPath} function which resolves the path to the
+ * `.npmrc` file that is stored in the users home directory.
  */
-export function makeFindNpmrcPath(getHomePath: GetHomePath): FindNpmrcPath {
+export function FindNpmrcInHome(getHomePath: GetHomePath): FindNpmrcPath {
   return () => {
     const homePath = getHomePath();
     return path.join(homePath, ".npmrc");
   };
 }
+
+/**
+ * Default {@link FindNpmrcPath} function. Uses {@link FindNpmrcInHome}.
+ */
+export const findNpmrcPath: FindNpmrcPath = FindNpmrcInHome(getHomePathFromEnv);
 
 /**
  * Function for loading npmrc.

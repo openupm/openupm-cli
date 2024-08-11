@@ -1,31 +1,31 @@
-import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { EOL } from "node:os";
+import path from "path";
 import {
-  makeFindNpmrcPath,
+  FindNpmrcInHome,
   makeLoadNpmrc,
   makeSaveNpmrc,
 } from "../../src/io/npmrc-io";
-import path from "path";
 import { GetHomePath } from "../../src/io/special-paths";
+import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { mockService } from "../services/service.mock";
 
 describe("npmrc-io", () => {
-  describe("get path", () => {
+  describe("find path in home", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
-      const findPath = makeFindNpmrcPath(getHomePath);
+      const findNpmrcInHome = FindNpmrcInHome(getHomePath);
 
-      return { findPath, getHomePath } as const;
+      return { findNpmrcInHome, getHomePath } as const;
     }
 
     it("should be [Home]/.npmrc", () => {
-      const { findPath, getHomePath } = makeDependencies();
+      const { findNpmrcInHome, getHomePath } = makeDependencies();
       const home = path.join(path.sep, "user", "dir");
       const expected = path.join(home, ".npmrc");
       getHomePath.mockReturnValue(home);
 
-      const actual = findPath();
+      const actual = findNpmrcInHome();
 
       expect(actual).toEqual(expected);
     });
