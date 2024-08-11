@@ -1,32 +1,32 @@
-import { makeCheckIsUnityPackage } from "../../src/services/unity-package-check";
-import { mockService } from "./service.mock";
-import { CheckUrlExists } from "../../src/io/check-url";
 import { DomainName } from "../../src/domain/domain-name";
+import { CheckUrlExists } from "../../src/io/check-url";
+import { PackageHasDocPage } from "../../src/services/unity-package-check";
+import { mockService } from "./service.mock";
 
-describe("is unity package", () => {
+describe("unity package has doc page", () => {
   const somePackage = DomainName.parse("com.some.package");
 
   function makeDependencies() {
     const checkUrlExists = mockService<CheckUrlExists>();
 
-    const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
-    return { checkIsUnityPackage, checkUrlExists } as const;
+    const packageHasDocPage = PackageHasDocPage(checkUrlExists);
+    return { packageHasDocPage, checkUrlExists } as const;
   }
 
   it("should be true if manual page exists", async () => {
-    const { checkIsUnityPackage, checkUrlExists } = makeDependencies();
+    const { packageHasDocPage, checkUrlExists } = makeDependencies();
     checkUrlExists.mockResolvedValue(true);
 
-    const actual = await checkIsUnityPackage(somePackage);
+    const actual = await packageHasDocPage(somePackage);
 
     expect(actual).toBeTruthy();
   });
 
   it("should be false if manual page does not exist", async () => {
-    const { checkIsUnityPackage, checkUrlExists } = makeDependencies();
+    const { packageHasDocPage, checkUrlExists } = makeDependencies();
     checkUrlExists.mockResolvedValue(false);
 
-    const actual = await checkIsUnityPackage(somePackage);
+    const actual = await packageHasDocPage(somePackage);
 
     expect(actual).toBeFalsy();
   });

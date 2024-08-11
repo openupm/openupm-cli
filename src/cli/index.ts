@@ -4,7 +4,6 @@ import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { getAllRegistryPackuments } from "../io/all-packuments-io";
-import { checkUrlExists } from "../io/check-url";
 import { searchRegistry } from "../io/npm-search";
 import { getRegistryPackument } from "../io/packument-io";
 import {
@@ -22,6 +21,7 @@ import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeResolveDependency } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
 import { getAuthToken } from "../services/get-auth-token";
+import { getLatestVersion } from "../services/get-latest-version";
 import { getRegistryAuth } from "../services/get-registry-auth";
 import { getRegistryPackumentVersion } from "../services/get-registry-packument-version";
 import { makeLogin } from "../services/login";
@@ -30,7 +30,7 @@ import { putNpmAuthToken } from "../services/put-npm-auth-token";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
 import { makeSearchPackages } from "../services/search-packages";
-import { makeCheckIsUnityPackage } from "../services/unity-package-check";
+import { checkIsUnityPackage } from "../services/unity-package-check";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
@@ -45,7 +45,6 @@ import {
   mustBePackageReference,
   mustBeRegistryUrl,
 } from "./validators";
-import { getLatestVersion } from "../services/get-latest-version";
 
 // Composition root
 
@@ -59,7 +58,6 @@ const parseEnv = makeParseEnv(
   npmDebugLog
 );
 
-const checkIsUnityPackage = makeCheckIsUnityPackage(checkUrlExists);
 const checkIsBuiltInPackage = makeCheckIsBuiltInPackage(
   checkIsUnityPackage,
   getRegistryPackument
