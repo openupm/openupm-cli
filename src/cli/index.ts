@@ -1,5 +1,4 @@
 import { createCommand } from "@commander-js/extra-typings";
-import RegClient from "another-npm-registry-client";
 import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
@@ -19,6 +18,7 @@ import {
   makeWriteProjectManifest,
 } from "../io/project-manifest-io";
 import { makeLoadProjectVersion } from "../io/project-version-io";
+import { npmRegistryClient } from "../io/reg-client";
 import { makeGetCwd, makeGetHomePath } from "../io/special-paths";
 import { makeReadText, makeWriteText } from "../io/text-file-io";
 import {
@@ -60,7 +60,6 @@ import {
 
 const log = npmlog;
 
-const regClient = new RegClient({ log });
 const getCwd = makeGetCwd();
 const runChildProcess = makeRunChildProcess(npmDebugLog);
 const getHomePath = makeGetHomePath();
@@ -75,7 +74,7 @@ const findNpmrcPath = makeFindNpmrcPath(getHomePath);
 const loadNpmrc = makeLoadNpmrc(readFile);
 const saveNpmrc = makeSaveNpmrc(writeFile);
 const loadProjectVersion = makeLoadProjectVersion(readFile, npmDebugLog);
-const fetchPackument = makeFetchPackument(regClient, npmDebugLog);
+const fetchPackument = makeFetchPackument(npmRegistryClient, npmDebugLog);
 const fetchAllPackuments = makeFetchAllPackuments(npmDebugLog);
 const searchRegistry = makeSearchRegistry(npmDebugLog);
 const removePackages = makeRemovePackages(
@@ -94,7 +93,7 @@ const parseEnv = makeParseEnv(
 );
 const determineEditorVersion = makeDetermineEditorVersion(loadProjectVersion);
 const authNpmrc = makeAuthNpmrc(findNpmrcPath, loadNpmrc, saveNpmrc);
-const npmLogin = makeNpmLogin(regClient, npmDebugLog);
+const npmLogin = makeNpmLogin(npmRegistryClient, npmDebugLog);
 const resolveRemovePackumentVersion =
   makeResolveRemotePackumentVersion(fetchPackument);
 const resolveLatestVersion = makeResolveLatestVersion(fetchPackument);
