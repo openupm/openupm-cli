@@ -2,7 +2,12 @@ import { EOL } from "node:os";
 import path from "path";
 import { Npmrc } from "../domain/npmrc";
 import { GetHomePath, getHomePathFromEnv } from "./special-paths";
-import { readTextFile, ReadTextFile, WriteTextFile } from "./text-file-io";
+import {
+  readTextFile,
+  ReadTextFile,
+  writeTextFile,
+  WriteTextFile,
+} from "./text-file-io";
 
 /**
  * Function for determining the path of the users .npmrc file.
@@ -55,11 +60,17 @@ export const loadNpmrc = ReadNpmrcFile(readTextFile);
 export type SaveNpmrc = (path: string, npmrc: Npmrc) => Promise<void>;
 
 /**
- * Makes a {@link SaveNpmrc} function.
+ * Makes a {@link SaveNpmrc} function which overwrites the content of a
+ * `.npmrc` file.
  */
-export function makeSaveNpmrc(writeFile: WriteTextFile): SaveNpmrc {
+export function WriteNpmrcPath(writeFile: WriteTextFile): SaveNpmrc {
   return async (path, npmrc) => {
     const content = npmrc.join(EOL);
     return await writeFile(path, content);
   };
 }
+
+/**
+ * Default {@link SaveNpmrc} function. Uses {@link WriteNpmrcPath}.
+ */
+export const saveNpmrc = WriteNpmrcPath(writeTextFile);

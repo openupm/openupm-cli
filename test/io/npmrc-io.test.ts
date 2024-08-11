@@ -2,8 +2,8 @@ import { EOL } from "node:os";
 import path from "path";
 import {
   FindNpmrcInHome,
-  makeSaveNpmrc,
   ReadNpmrcFile,
+  WriteNpmrcPath as WriteNpmrcFile,
 } from "../../src/io/npmrc-io";
 import { GetHomePath } from "../../src/io/special-paths";
 import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
@@ -60,20 +60,20 @@ describe("npmrc-io", () => {
     });
   });
 
-  describe("save", () => {
+  describe("write file", () => {
     function makeDependencies() {
       const writeFile = mockService<WriteTextFile>();
       writeFile.mockResolvedValue(undefined);
 
-      const saveNpmrc = makeSaveNpmrc(writeFile);
-      return { saveNpmrc, writeFile } as const;
+      const writeNpmrcFile = WriteNpmrcFile(writeFile);
+      return { writeNpmrcFile, writeFile } as const;
     }
 
     it("should write joined lines", async () => {
-      const { saveNpmrc, writeFile } = makeDependencies();
+      const { writeNpmrcFile, writeFile } = makeDependencies();
       const path = "/valid/path/.npmrc";
 
-      await saveNpmrc(path, ["key=value", "key2=value2"]);
+      await writeNpmrcFile(path, ["key=value", "key2=value2"]);
 
       expect(writeFile).toHaveBeenCalledWith(
         path,
