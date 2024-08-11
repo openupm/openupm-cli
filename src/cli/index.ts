@@ -6,13 +6,11 @@ import pkg from "../../package.json";
 import { getAllRegistryPackuments } from "../io/all-packuments-io";
 import { checkUrlExists } from "../io/check-url";
 import { searchRegistry } from "../io/npm-search";
-import { findNpmrcPath, loadNpmrc, saveNpmrc } from "../io/npmrc-io";
 import { getRegistryPackument } from "../io/packument-io";
 import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../io/project-manifest-io";
-import { npmRegistryClient } from "../io/reg-client";
 import { getProcessCwd } from "../io/special-paths";
 import {
   getUpmConfigPath,
@@ -23,10 +21,11 @@ import { npmDebugLog } from "../logging";
 import { makeCheckIsBuiltInPackage } from "../services/built-in-package-check";
 import { makeResolveDependency } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
+import { getAuthToken } from "../services/get-auth-token";
 import { getRegistryAuth } from "../services/get-registry-auth";
 import { makeLogin } from "../services/login";
-import { makeNpmLogin } from "../services/npm-login";
 import { makeParseEnv } from "../services/parse-env";
+import { putNpmAuthToken } from "../services/put-npm-auth-token";
 import { makePutRegistryAuth } from "../services/put-registry-auth";
 import { removePackages } from "../services/remove-packages";
 import { makeResolveLatestVersion } from "../services/resolve-latest-version";
@@ -47,7 +46,6 @@ import {
   mustBePackageReference,
   mustBeRegistryUrl,
 } from "./validators";
-import { putNpmAuthToken } from "../services/put-npm-auth-token";
 
 // Composition root
 
@@ -60,7 +58,6 @@ const parseEnv = makeParseEnv(
   getProcessCwd,
   npmDebugLog
 );
-const npmLogin = makeNpmLogin(npmRegistryClient, npmDebugLog);
 const resolveRemovePackumentVersion =
   makeResolveRemotePackumentVersion(getRegistryPackument);
 const resolveLatestVersion = makeResolveLatestVersion(getRegistryPackument);
@@ -81,7 +78,7 @@ const searchPackages = makeSearchPackages(
 );
 const login = makeLogin(
   putRegistryAuth,
-  npmLogin,
+  getAuthToken,
   putNpmAuthToken,
   npmDebugLog
 );

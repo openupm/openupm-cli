@@ -1,9 +1,9 @@
-import { RegistryUrl } from "../domain/registry-url";
-import { PutRegistryAuth } from "./put-registry-auth";
-import { NpmLogin } from "./npm-login";
-import { StoreNpmAuthToken } from "./put-npm-auth-token";
-import { DebugLog } from "../logging";
 import { NpmAuth } from "another-npm-registry-client";
+import { RegistryUrl } from "../domain/registry-url";
+import { DebugLog } from "../logging";
+import { GetAuthToken } from "./get-auth-token";
+import { StoreNpmAuthToken } from "./put-npm-auth-token";
+import { PutRegistryAuth } from "./put-registry-auth";
 
 /**
  * Function for logging in a user to a npm registry. Supports both basic and
@@ -32,7 +32,7 @@ export type Login = (
  */
 export function makeLogin(
   putRegistryAuth: PutRegistryAuth,
-  npmLogin: NpmLogin,
+  getAuthToken: GetAuthToken,
   putNpmAuthToken: StoreNpmAuthToken,
   debugLog: DebugLog
 ): Login {
@@ -51,7 +51,7 @@ export function makeLogin(
     }
 
     // npm login
-    const token = await npmLogin(registry, username, email, password);
+    const token = await getAuthToken(registry, username, email, password);
     debugLog(`npm login successful`);
 
     const auth: NpmAuth = { token, email, alwaysAuth };

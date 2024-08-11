@@ -1,35 +1,37 @@
 import RegClient from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
 import { RegistryAuthenticationError } from "../io/common-errors";
-import { DebugLog } from "../logging";
+import { npmRegistryClient } from "../io/reg-client";
+import { DebugLog, npmDebugLog } from "../logging";
 
 /**
  * A token authenticating a user.
  */
-type AuthenticationToken = string;
+type AuthToken = string;
 
 /**
- * Function for authenticating users with a npm registry.
- * @param registryUrl The url of the registry into which to login.
- * @param username The username with which to login.
- * @param email The email with which to login.
- * @param password The password with which to login.
- * @returns An authentication token or null if registration failed.
+ * Function for getting the authentication token for a npm reigstry.
+ * @param registryUrl The url of the registry for which to get the token.
+ * @param username The username for which to get the token.
+ * @param email The email with which to get the token.
+ * @param password The password for witch to get the token.
+ * @returns The authentication token.
  */
-export type NpmLogin = (
+export type GetAuthToken = (
   registryUrl: RegistryUrl,
   username: string,
   email: string,
   password: string
-) => Promise<AuthenticationToken>;
+) => Promise<AuthToken>;
 
 /**
- * Makes a new {@link NpmLogin} function.
+ * Makes a {@link GetAuthToken} function which gets the token
+ * by authenticating the user with a remote npm registry.
  */
-export function makeNpmLogin(
+export function AuthenticateWithNpmRegistry(
   registryClient: RegClient.Instance,
   debugLog: DebugLog
-): NpmLogin {
+): GetAuthToken {
   return (registryUrl, username, email, password) =>
     new Promise((resolve, reject) => {
       registryClient.adduser(
@@ -48,3 +50,11 @@ export function makeNpmLogin(
       );
     });
 }
+
+/**
+ * Default {@link GetAuthToken}. Uses {@link AuthenticateWithNpmRegistry}.
+ */
+export const getAuthToken = AuthenticateWithNpmRegistry(
+  npmRegistryClient,
+  npmDebugLog
+);

@@ -1,7 +1,7 @@
 import { makeLogin } from "../../src/services/login";
 import { mockService } from "./service.mock";
 import { PutRegistryAuth } from "../../src/services/put-registry-auth";
-import { NpmLogin } from "../../src/services/npm-login";
+import { GetAuthToken } from "../../src/services/get-auth-token";
 import { StoreNpmAuthToken } from "../../src/services/put-npm-auth-token";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { noopLogger } from "../../src/logging";
@@ -18,7 +18,7 @@ describe("login", () => {
     const putRegistryAuth = mockService<PutRegistryAuth>();
     putRegistryAuth.mockResolvedValue(undefined);
 
-    const npmLogin = mockService<NpmLogin>();
+    const npmLogin = mockService<GetAuthToken>();
     npmLogin.mockResolvedValue(exampleToken);
 
     const putNpmAuthToken = mockService<StoreNpmAuthToken>();
