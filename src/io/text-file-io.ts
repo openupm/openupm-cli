@@ -1,7 +1,7 @@
-import fs from "fs/promises";
-import { assertIsNodeError } from "../utils/error-type-guards";
 import fse from "fs-extra";
+import fs from "fs/promises";
 import path from "path";
+import { assertIsNodeError } from "../utils/error-type-guards";
 
 /**
  * Function for loading the content of a text file.
@@ -44,12 +44,11 @@ export type WriteTextFile = (
 ) => Promise<void>;
 
 /**
- * Makes a {@link WriteTextFile} function.
+ * Makes a {@link WriteTextFile} function which writes to the file-system
+ * using the {@link fs} module.
  */
-export function makeWriteText(): WriteTextFile {
-  return async (filePath, content) => {
-    const dirPath = path.dirname(filePath);
-    await fse.ensureDir(dirPath);
-    await fs.writeFile(filePath, content);
-  };
-}
+export const writeTextFile: WriteTextFile = async (filePath, content) => {
+  const dirPath = path.dirname(filePath);
+  await fse.ensureDir(dirPath);
+  await fs.writeFile(filePath, content);
+};

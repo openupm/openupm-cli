@@ -20,7 +20,7 @@ import {
 import { makeLoadProjectVersion } from "../io/project-version-io";
 import { npmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv, getProcessCwd } from "../io/special-paths";
-import { makeWriteText, readTextFile } from "../io/text-file-io";
+import { readTextFile, writeTextFile } from "../io/text-file-io";
 import {
   makeGetUpmConfigPath,
   makeLoadUpmConfig,
@@ -60,18 +60,17 @@ import {
 
 const log = npmlog;
 
-const writeFile = makeWriteText();
 const loadProjectManifest = makeLoadProjectManifest(readTextFile, npmDebugLog);
-const writeProjectManifest = makeWriteProjectManifest(writeFile);
+const writeProjectManifest = makeWriteProjectManifest(writeTextFile);
 const getUpmConfigPath = makeGetUpmConfigPath(
   getHomePathFromEnv,
   runChildProcess
 );
 const loadUpmConfig = makeLoadUpmConfig(readTextFile);
-const saveUpmConfig = makeSaveUpmConfig(writeFile);
+const saveUpmConfig = makeSaveUpmConfig(writeTextFile);
 const findNpmrcPath = makeFindNpmrcPath(getHomePathFromEnv);
 const loadNpmrc = makeLoadNpmrc(readTextFile);
-const saveNpmrc = makeSaveNpmrc(writeFile);
+const saveNpmrc = makeSaveNpmrc(writeTextFile);
 const loadProjectVersion = makeLoadProjectVersion(readTextFile, npmDebugLog);
 const fetchPackument = makeFetchPackument(npmRegistryClient, npmDebugLog);
 const fetchAllPackuments = makeFetchAllPackuments(npmDebugLog);
