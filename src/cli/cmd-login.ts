@@ -70,8 +70,8 @@ export function makeLoginCmd(
     const email = options.email ?? (await promptEmail());
 
     const loginRegistry =
-      options._global.registry !== undefined
-        ? coerceRegistryUrl(options._global.registry)
+      options.registry !== undefined
+        ? coerceRegistryUrl(options.registry)
         : await promptRegistryUrl();
 
     const alwaysAuth = options.alwaysAuth || false;

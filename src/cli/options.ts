@@ -37,13 +37,8 @@ type GlobalOptions = Readonly<{
 }>;
 
 /**
- * Command-options. Extends the given record with a _global property
- * containing {@link GlobalOptions}.
+ * Command-options. Extends the given record with {@link GlobalOptions}.
  */
 export type CmdOptions<
   TOptions extends Record<string, unknown> = Record<string, unknown>
-> = Readonly<
-  TOptions & {
-    _global: GlobalOptions;
-  }
->;
+> = Readonly<TOptions & GlobalOptions>;

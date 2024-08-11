@@ -171,7 +171,7 @@ const program = createCommand()
 function makeCmdOptions<T extends Record<string, unknown>>(
   specificOptions: T
 ): CmdOptions<T> {
-  return { ...specificOptions, _global: program.opts() };
+  return { ...specificOptions, ...program.opts() };
 }
 
 program

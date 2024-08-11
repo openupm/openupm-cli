@@ -38,7 +38,7 @@ describe("cmd-remove", () => {
   it("should print removed packages", async () => {
     const { removeCmd, log } = makeDependencies();
 
-    await removeCmd([somePackage], { _global: {} });
+    await removeCmd([somePackage], {});
 
     expect(log.notice).toHaveBeenCalledWith(
       expect.any(String),
@@ -49,7 +49,7 @@ describe("cmd-remove", () => {
   it("should suggest to open Unity after save", async () => {
     const { removeCmd, log } = makeDependencies();
 
-    await removeCmd([somePackage], { _global: {} });
+    await removeCmd([somePackage], {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "",

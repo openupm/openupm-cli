@@ -56,9 +56,7 @@ describe("env", () => {
       const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
-        _global: {
-          verbose: true,
-        },
+        verbose: true,
       });
 
       expect(log.level).toEqual("verbose");
@@ -68,9 +66,7 @@ describe("env", () => {
       const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
-        _global: {
-          verbose: false,
-        },
+        verbose: false,
       });
 
       expect(log.level).toEqual("notice");
@@ -80,9 +76,7 @@ describe("env", () => {
       const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
-        _global: {
-          verbose: false,
-        },
+        verbose: false,
       });
 
       expect(log.level).toEqual("notice");
@@ -98,9 +92,7 @@ describe("env", () => {
       const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
-        _global: {
-          color: true,
-        },
+        color: true,
       });
 
       expect(log.disableColor).not.toHaveBeenCalled();
@@ -109,9 +101,7 @@ describe("env", () => {
     it("should use color if color option is missing", async () => {
       const { parseEnv, log } = makeDependencies();
 
-      await parseEnv({
-        _global: {},
-      });
+      await parseEnv({});
 
       expect(log.disableColor).not.toHaveBeenCalled();
     });
@@ -120,9 +110,7 @@ describe("env", () => {
       const { parseEnv, log } = makeDependencies();
 
       await parseEnv({
-        _global: {
-          color: false,
-        },
+        color: false,
       });
 
       expect(log.disableColor).toHaveBeenCalled();
@@ -134,9 +122,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          upstream: true,
-        },
+        upstream: true,
       });
 
       expect(env.upstream).toBeTruthy();
@@ -145,9 +131,7 @@ describe("env", () => {
     it("should use upstream if upstream option is missing", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({
-        _global: {},
-      });
+      const env = await parseEnv({});
 
       expect(env.upstream).toBeTruthy();
     });
@@ -156,9 +140,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          upstream: false,
-        },
+        upstream: false,
       });
 
       expect(env.upstream).toBeFalsy();
@@ -170,9 +152,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          systemUser: true,
-        },
+        systemUser: true,
       });
 
       expect(env.systemUser).toBeTruthy();
@@ -181,9 +161,7 @@ describe("env", () => {
     it("should not be system-user if option is missing", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({
-        _global: {},
-      });
+      const env = await parseEnv({});
 
       expect(env.systemUser).toBeFalsy();
     });
@@ -192,9 +170,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          systemUser: false,
-        },
+        systemUser: false,
       });
 
       expect(env.systemUser).toBeFalsy();
@@ -206,9 +182,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          wsl: true,
-        },
+        wsl: true,
       });
 
       expect(env.wsl).toBeTruthy();
@@ -217,9 +191,7 @@ describe("env", () => {
     it("should not use wsl if option is missing", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({
-        _global: {},
-      });
+      const env = await parseEnv({});
 
       expect(env.wsl).toBeFalsy();
     });
@@ -228,9 +200,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          wsl: false,
-        },
+        wsl: false,
       });
 
       expect(env.wsl).toBeFalsy();
@@ -241,7 +211,7 @@ describe("env", () => {
     it("should be global openupm by default", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({ _global: {} });
+      const env = await parseEnv({});
 
       expect(env.registry.url).toEqual("https://package.openupm.com");
     });
@@ -250,9 +220,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          registry: exampleRegistryUrl,
-        },
+        registry: exampleRegistryUrl,
       });
 
       expect(env.registry.url).toEqual(exampleRegistryUrl);
@@ -262,9 +230,7 @@ describe("env", () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
-        _global: {
-          registry: exampleRegistryUrl,
-        },
+        registry: exampleRegistryUrl,
       });
 
       expect(env.registry.auth).toEqual(null);
@@ -275,9 +241,7 @@ describe("env", () => {
       loadRegistryAuth.mockResolvedValue({});
 
       const env = await parseEnv({
-        _global: {
-          registry: exampleRegistryUrl,
-        },
+        registry: exampleRegistryUrl,
       });
 
       expect(env.registry.auth).toEqual(null);
@@ -288,9 +252,7 @@ describe("env", () => {
       loadRegistryAuth.mockResolvedValue({});
 
       await parseEnv({
-        _global: {
-          registry: exampleRegistryUrl,
-        },
+        registry: exampleRegistryUrl,
       });
 
       expect(log.warn).toHaveBeenCalledWith(
@@ -304,9 +266,7 @@ describe("env", () => {
       loadRegistryAuth.mockResolvedValue(testUpmConfig);
 
       const env = await parseEnv({
-        _global: {
-          registry: exampleRegistryUrl,
-        },
+        registry: exampleRegistryUrl,
       });
 
       expect(env.registry.auth).toEqual(testNpmAuth);
@@ -317,7 +277,7 @@ describe("env", () => {
     it("should be global unity by default", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({ _global: {} });
+      const env = await parseEnv({});
 
       expect(env.upstreamRegistry.url).toEqual("https://packages.unity.com");
     });
@@ -325,9 +285,7 @@ describe("env", () => {
     it("should have no auth", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({
-        _global: {},
-      });
+      const env = await parseEnv({});
 
       expect(env.upstreamRegistry.auth).toEqual(null);
     });
@@ -337,9 +295,7 @@ describe("env", () => {
     it("should be process directory by default", async () => {
       const { parseEnv } = makeDependencies();
 
-      const env = await parseEnv({
-        _global: {},
-      });
+      const env = await parseEnv({});
 
       expect(env.cwd).toEqual(testRootPath);
     });
@@ -350,9 +306,7 @@ describe("env", () => {
       const expected = path.resolve("/some/other/path");
 
       const env = await parseEnv({
-        _global: {
-          chdir: expected,
-        },
+        chdir: expected,
       });
 
       expect(env.cwd).toEqual(expected);

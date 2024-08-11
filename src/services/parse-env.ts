@@ -69,13 +69,13 @@ export function makeParseEnv(
   debugLog: DebugLog
 ): ParseEnv {
   function determineCwd(options: CmdOptions): string {
-    return options._global.chdir !== undefined
-      ? path.resolve(options._global.chdir)
+    return options.chdir !== undefined
+      ? path.resolve(options.chdir)
       : getCwd();
   }
 
   function determineWsl(options: CmdOptions): boolean {
-    return options._global.wsl === true;
+    return options.wsl === true;
   }
 
   function determinePrimaryRegistry(
@@ -83,8 +83,8 @@ export function makeParseEnv(
     upmConfig: UpmConfig
   ): Registry {
     const url =
-      options._global.registry !== undefined
-        ? coerceRegistryUrl(options._global.registry)
+      options.registry !== undefined
+        ? coerceRegistryUrl(options.registry)
         : RegistryUrl.parse("https://package.openupm.com");
 
     const auth = tryGetAuthForRegistry(upmConfig, url);
@@ -106,19 +106,19 @@ export function makeParseEnv(
   }
 
   function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
-    return options._global.verbose ? "verbose" : "notice";
+    return options.verbose ? "verbose" : "notice";
   }
 
   function determineUseColor(options: CmdOptions): boolean {
-    return options._global.color !== false && tryGetEnv("NODE_ENV") !== "test";
+    return options.color !== false && tryGetEnv("NODE_ENV") !== "test";
   }
 
   function determineUseUpstream(options: CmdOptions): boolean {
-    return options._global.upstream !== false;
+    return options.upstream !== false;
   }
 
   function determineIsSystemUser(options: CmdOptions): boolean {
-    return options._global.systemUser === true;
+    return options.systemUser === true;
   }
 
   return async (options) => {

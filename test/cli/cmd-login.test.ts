@@ -44,7 +44,7 @@ describe("cmd-login", () => {
       username: exampleUser,
       password: examplePassword,
       email: exampleEmail,
-      _global: { registry: exampleRegistryUrl },
+      registry: exampleRegistryUrl,
     });
 
     expect(log.notice).toHaveBeenCalledWith(

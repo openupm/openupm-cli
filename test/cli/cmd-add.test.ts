@@ -137,9 +137,7 @@ describe("cmd-add", () => {
     const { addCmd, determineEditorVersion, log } = makeDependencies();
     determineEditorVersion.mockResolvedValue("bad version");
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
@@ -155,7 +153,6 @@ describe("cmd-add", () => {
     ]);
 
     const resultCode = await addCmd(somePackage, {
-      _global: {},
       force: true,
     });
 
@@ -170,7 +167,6 @@ describe("cmd-add", () => {
     ]);
 
     const resultCode = await addCmd(somePackage, {
-      _global: {},
       force: true,
     });
 
@@ -184,11 +180,9 @@ describe("cmd-add", () => {
       incompatiblePackument,
     ]);
 
-    await expect(
-      addCmd(somePackage, {
-        _global: {},
-      })
-    ).rejects.toBeInstanceOf(PackageIncompatibleError);
+    await expect(addCmd(somePackage, {})).rejects.toBeInstanceOf(
+      PackageIncompatibleError
+    );
   });
 
   it("should not fetch dependencies for upstream packages", async () => {
@@ -199,9 +193,7 @@ describe("cmd-add", () => {
       somePackument,
     ]);
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(resolveDependencies).not.toHaveBeenCalled();
   });
@@ -212,11 +204,9 @@ describe("cmd-add", () => {
       AsyncErr(new PackumentNotFoundError(somePackage))
     );
 
-    await expect(() =>
-      addCmd(somePackage, {
-        _global: {},
-      })
-    ).rejects.toBeInstanceOf(PackumentNotFoundError);
+    await expect(() => addCmd(somePackage, {})).rejects.toBeInstanceOf(
+      PackumentNotFoundError
+    );
   });
 
   it("should fail if packument had malformed target editor and not running with force", async () => {
@@ -231,11 +221,9 @@ describe("cmd-add", () => {
       } as unknown as ResolvedPackumentVersion)
     );
 
-    await expect(() =>
-      addCmd(somePackage, {
-        _global: {},
-      })
-    ).rejects.toBeInstanceOf(CompatibilityCheckFailedError);
+    await expect(() => addCmd(somePackage, {})).rejects.toBeInstanceOf(
+      CompatibilityCheckFailedError
+    );
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
@@ -246,11 +234,9 @@ describe("cmd-add", () => {
     });
     resolveDependencies.mockResolvedValue(failedGraph);
 
-    await expect(() =>
-      addCmd(somePackage, {
-        _global: {},
-      })
-    ).rejects.toBeInstanceOf(UnresolvedDependenciesError);
+    await expect(() => addCmd(somePackage, {})).rejects.toBeInstanceOf(
+      UnresolvedDependenciesError
+    );
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
@@ -262,7 +248,6 @@ describe("cmd-add", () => {
     resolveDependencies.mockResolvedValue(failedGraph);
 
     const resultCode = await addCmd(somePackage, {
-      _global: {},
       force: true,
     });
 
@@ -272,9 +257,7 @@ describe("cmd-add", () => {
   it("should add package", async () => {
     const { addCmd, writeProjectManifest } = makeDependencies();
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
@@ -287,9 +270,7 @@ describe("cmd-add", () => {
   it("should notify if package was added", async () => {
     const { addCmd, log } = makeDependencies();
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -306,9 +287,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
@@ -326,9 +305,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -344,9 +321,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -357,9 +332,7 @@ describe("cmd-add", () => {
   it("should add scope for package", async () => {
     const { addCmd, writeProjectManifest } = makeDependencies();
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(writeProjectManifest).toHaveBeenCalledWith(
       expect.any(String),
@@ -379,7 +352,6 @@ describe("cmd-add", () => {
     const { addCmd, writeProjectManifest } = makeDependencies();
 
     await addCmd(somePackage, {
-      _global: {},
       test: true,
     });
 
@@ -402,9 +374,7 @@ describe("cmd-add", () => {
       )
     );
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(writeProjectManifest).not.toHaveBeenCalled();
   });
@@ -413,9 +383,10 @@ describe("cmd-add", () => {
     const { addCmd, writeProjectManifest } = makeDependencies();
 
     // The second package can not be added
-    await addCmd([somePackage, DomainName.parse("com.unknown.package")], {
-      _global: {},
-    }).catch(() => {});
+    await addCmd(
+      [somePackage, DomainName.parse("com.unknown.package")],
+      {}
+    ).catch(() => {});
 
     // Because adding is atomic the manifest should only be written if
     // all packages were added.
@@ -425,9 +396,7 @@ describe("cmd-add", () => {
   it("should suggest to open Unity after save", async () => {
     const { addCmd, log } = makeDependencies();
 
-    await addCmd(somePackage, {
-      _global: {},
-    });
+    await addCmd(somePackage, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "",

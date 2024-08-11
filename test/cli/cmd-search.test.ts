@@ -40,10 +40,8 @@ function makeDependencies() {
 
 describe("cmd-search", () => {
   const options: SearchOptions = {
-    _global: {
-      registry: exampleRegistryUrl,
-      upstream: false,
-    },
+    registry: exampleRegistryUrl,
+    upstream: false,
   };
 
   it("should print packument information", async () => {

@@ -66,7 +66,7 @@ describe("cmd-view", () => {
 
     const resultCode = await viewCmd(
       makePackageReference(somePackage, SemanticVersion.parse("1.0.0")),
-      { _global: {} }
+      {}
     );
 
     expect(resultCode).toEqual(ResultCodes.Error);
@@ -76,7 +76,7 @@ describe("cmd-view", () => {
     const { viewCmd, fetchPackument } = makeDependencies();
     fetchPackument.mockResolvedValue(null);
 
-    await expect(viewCmd(somePackage, { _global: {} })).rejects.toBeInstanceOf(
+    await expect(viewCmd(somePackage, {})).rejects.toBeInstanceOf(
       PackumentNotFoundError
     );
   });
@@ -86,7 +86,7 @@ describe("cmd-view", () => {
 
     await viewCmd(
       makePackageReference(somePackage, SemanticVersion.parse("1.0.0")),
-      { _global: {} }
+      {}
     );
 
     expect(log.warn).toHaveBeenCalledWith(
@@ -99,7 +99,7 @@ describe("cmd-view", () => {
     const consoleSpy = jest.spyOn(console, "log");
     const { viewCmd } = makeDependencies();
 
-    await viewCmd(somePackage, { _global: {} });
+    await viewCmd(somePackage, {});
 
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining(somePackage)

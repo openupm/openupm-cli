@@ -81,9 +81,7 @@ describe("cmd-deps", () => {
 
     const resultCode = await depsCmd(
       makePackageReference(somePackage, "https://some.registry.com"),
-      {
-        _global: {},
-      }
+      {}
     );
 
     expect(resultCode).toEqual(ResultCodes.Error);
@@ -93,11 +91,9 @@ describe("cmd-deps", () => {
     const { depsCmd, resolveLatestVersion } = makeDependencies();
     resolveLatestVersion.mockResolvedValue(null);
 
-    await expect(
-      depsCmd(somePackage, {
-        _global: {},
-      })
-    ).rejects.toBeInstanceOf(PackumentNotFoundError);
+    await expect(depsCmd(somePackage, {})).rejects.toBeInstanceOf(
+      PackumentNotFoundError
+    );
   });
 
   it("should notify if package-reference has url-version", async () => {
@@ -105,9 +101,7 @@ describe("cmd-deps", () => {
 
     await depsCmd(
       makePackageReference(somePackage, "https://some.registry.com"),
-      {
-        _global: {},
-      }
+      {}
     );
 
     expect(log.error).toHaveBeenCalledWith(
@@ -133,9 +127,7 @@ describe("cmd-deps", () => {
     graph = markBuiltInResolved(graph, anotherPackage, someVersion);
     resolveDependencies.mockResolvedValue(graph);
 
-    await depsCmd(somePackage, {
-      _global: {},
-    });
+    await depsCmd(somePackage, {});
 
     // Here we just do some generic checks to see if something containing
     // all relevant information was logged. For more detailed testing
