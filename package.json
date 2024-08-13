@@ -69,7 +69,6 @@
     "cli-table": "^0.3.11",
     "commander": "^9.5.0",
     "fs-extra": "^10.1.0",
-    "is-wsl": "^2.2.0",
     "libnpmsearch": "^5.0.3",
     "mkdirp": "^3.0.1",
     "node-fetch": "^2.7.0",

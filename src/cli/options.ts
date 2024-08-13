@@ -27,10 +27,6 @@ type GlobalOptions = Readonly<{
    */
   systemUser?: boolean;
   /**
-   * Whether WSL should be treated as Windows.
-   */
-  wsl?: boolean;
-  /**
    * Override working directory.
    */
   chdir?: string;

@@ -1,14 +1,14 @@
-import { emptyUpmConfig, UpmConfig } from "../../src/domain/upm-config";
 import { NpmAuth } from "another-npm-registry-client";
-import { makeParseEnv } from "../../src/services/parse-env";
-import { GetUpmConfigPath } from "../../src/io/upm-config-io";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { makeMockLogger } from "../cli/log.mock";
-import { mockService } from "./service.mock";
-import { GetCwd } from "../../src/io/special-paths";
 import path from "path";
+import { emptyUpmConfig, UpmConfig } from "../../src/domain/upm-config";
+import { GetCwd } from "../../src/io/special-paths";
+import { GetUpmConfigPath } from "../../src/io/upm-config-io";
 import { noopLogger } from "../../src/logging";
 import { GetRegistryAuth } from "../../src/services/get-registry-auth";
+import { makeParseEnv } from "../../src/services/parse-env";
+import { makeMockLogger } from "../cli/log.mock";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "./service.mock";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -174,36 +174,6 @@ describe("env", () => {
       });
 
       expect(env.systemUser).toBeFalsy();
-    });
-  });
-
-  describe("wsl", () => {
-    it("should use wsl if option is true", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const env = await parseEnv({
-        wsl: true,
-      });
-
-      expect(env.wsl).toBeTruthy();
-    });
-
-    it("should not use wsl if option is missing", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const env = await parseEnv({});
-
-      expect(env.wsl).toBeFalsy();
-    });
-
-    it("should not use wsl if option is false", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const env = await parseEnv({
-        wsl: false,
-      });
-
-      expect(env.wsl).toBeFalsy();
     });
   });
 

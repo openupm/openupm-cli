@@ -21,7 +21,6 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
       - [Using token](#using-token)
       - [Using basic authentication](#using-basic-authentication)
       - [Always auth](#always-auth)
-      - [Windows Subsystem for Linux (WSL)](#windows-subsystem-for-linux-wsl)
       - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
       - [Troubleshooting](#troubleshooting)
     - [Command options](#command-options)
@@ -184,13 +183,6 @@ openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
 i.e.
 openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
 ```
-
-#### Windows Subsystem for Linux (WSL)
-
-By default, the command treats the Windows Subsystem for Linux (WSL) as a Linux system. But if you want to authenticate for the Windows (probably where your Unity installed on), add `--wsl` option.
-
-
-> Known issue: run with `--wsl` option may clear the terminal screen during the process.
 
 #### Authenticate for the Windows system user
 
