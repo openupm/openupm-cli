@@ -39,13 +39,7 @@ import {
 
 const log = npmlog;
 
-const parseEnv = makeParseEnv(
-  log,
-  getUpmConfigPath,
-  getRegistryAuth,
-  getProcessCwd,
-  npmDebugLog
-);
+const parseEnv = makeParseEnv(log, getProcessCwd);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -54,20 +48,33 @@ const addCmd = makeAddCmd(
   loadProjectManifest,
   saveProjectManifest,
   determineEditorVersion,
+  getRegistryAuth,
   log,
   npmDebugLog
 );
 const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
-const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, npmDebugLog);
+const searchCmd = makeSearchCmd(
+  parseEnv,
+  searchPackages,
+  getRegistryAuth,
+  log,
+  npmDebugLog
+);
 const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependencies,
   getLatestVersion,
+  getRegistryAuth,
   log,
   npmDebugLog
 );
 const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
-const viewCmd = makeViewCmd(parseEnv, getRegistryPackument, log);
+const viewCmd = makeViewCmd(
+  parseEnv,
+  getRegistryPackument,
+  getRegistryAuth,
+  log
+);
 
 // update-notifier
 

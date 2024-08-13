@@ -1,18 +1,18 @@
 import { makeLoginCmd } from "../../src/cli/cmd-login";
-import { mockService } from "../services/service.mock";
-import { Env, ParseEnv } from "../../src/services/parse-env";
 import { GetUpmConfigPath } from "../../src/io/upm-config-io";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
 import { Login } from "../../src/services/login";
-import { makeMockLogger } from "./log.mock";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { unityRegistryUrl } from "../../src/domain/registry-url";
+import { mockService } from "../services/service.mock";
+import { makeMockLogger } from "./log.mock";
 
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
   upstream: true,
-  registry: { url: exampleRegistryUrl, auth: null },
-  upstreamRegistry: { url: unityRegistryUrl, auth: null },
+  primaryRegistryUrl: exampleRegistryUrl,
 } as Env;
+
 const exampleUser = "user";
 const examplePassword = "pass";
 const exampleEmail = "user@email.com";
@@ -29,10 +29,20 @@ describe("cmd-login", () => {
     const login = mockService<Login>();
     login.mockResolvedValue(undefined);
 
+    const getRegistryAuth = mockService<GetRegistryAuth>();
+    getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
+
     const log = makeMockLogger();
 
     const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
-    return { loginCmd, parseEnv, getUpmConfigPath, login, log } as const;
+    return {
+      loginCmd,
+      parseEnv,
+      getUpmConfigPath,
+      login,
+      getRegistryAuth,
+      log,
+    } as const;
   }
 
   // TODO: Add tests for prompting logic

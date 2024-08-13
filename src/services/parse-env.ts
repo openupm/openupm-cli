@@ -3,15 +3,13 @@ import { Logger } from "npmlog";
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import { CmdOptions } from "../cli/options";
-import { Registry } from "../domain/registry";
-import { coerceRegistryUrl, RegistryUrl } from "../domain/registry-url";
-import { tryGetAuthForRegistry, UpmConfig } from "../domain/upm-config";
+import {
+  coerceRegistryUrl,
+  openupmRegistryUrl,
+  RegistryUrl,
+} from "../domain/registry-url";
 import { GetCwd } from "../io/special-paths";
-import { GetUpmConfigPath } from "../io/upm-config-io";
-import { DebugLog } from "../logging";
 import { tryGetEnv } from "../utils/env-util";
-import { assertIsError } from "../utils/error-type-guards";
-import { GetRegistryAuth } from "./get-registry-auth";
 
 /**
  * Error for when auth information for a registry could not be loaded.
@@ -33,17 +31,13 @@ export type Env = Readonly<{
    */
   systemUser: boolean;
   /**
-   * Whether to fall back to the upstream registry.
+   * Whether to fall back to the Unity registry.
    */
   upstream: boolean;
   /**
-   * The upstream registry.
+   * The primary registry url.
    */
-  upstreamRegistry: Registry;
-  /**
-   * The primary registry.
-   */
-  registry: Registry;
+  primaryRegistryUrl: RegistryUrl;
 }>;
 
 /**
@@ -57,46 +51,9 @@ export type ParseEnv = (options: CmdOptions) => Promise<Env>;
 /**
  * Creates a {@link ParseEnv} function.
  */
-export function makeParseEnv(
-  log: Logger,
-  getUpmConfigPath: GetUpmConfigPath,
-  getRegistryAuth: GetRegistryAuth,
-  getCwd: GetCwd,
-  debugLog: DebugLog
-): ParseEnv {
+export function makeParseEnv(log: Logger, getCwd: GetCwd): ParseEnv {
   function determineCwd(options: CmdOptions): string {
     return options.chdir !== undefined ? path.resolve(options.chdir) : getCwd();
-  }
-
-  function determinePrimaryRegistry(
-    options: CmdOptions,
-    upmConfig: UpmConfig
-  ): Registry {
-    if (options.registry === undefined) {
-      return {
-        url: RegistryUrl.parse("https://package.openupm.com"),
-        auth: null,
-      };
-    }
-
-    const url = coerceRegistryUrl(options.registry);
-
-    const auth = tryGetAuthForRegistry(upmConfig, url);
-
-    if (auth === null) {
-      log.verbose(
-        "",
-        `upm config did not contain an entry for "${url}". Will use this registry without authentication.`
-      );
-    }
-
-    return { url, auth };
-  }
-
-  function determineUpstreamRegistry(): Registry {
-    const url = RegistryUrl.parse("https://packages.unity.com");
-
-    return { url, auth: null };
   }
 
   function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
@@ -113,6 +70,11 @@ export function makeParseEnv(
 
   function determineIsSystemUser(options: CmdOptions): boolean {
     return options.systemUser === true;
+  }
+
+  function determinePrimaryRegistryUrl(options: CmdOptions): RegistryUrl {
+    if (options.registry === undefined) return openupmRegistryUrl;
+    return coerceRegistryUrl(options.registry);
   }
 
   return async (options) => {
@@ -133,29 +95,16 @@ export function makeParseEnv(
     const systemUser = determineIsSystemUser(options);
 
     // registries
-    const upmConfigPath = await getUpmConfigPath(systemUser);
-
-    let registry: Registry;
-    let upstreamRegistry: Registry;
-    try {
-      const upmConfig = await getRegistryAuth(upmConfigPath);
-      registry = determinePrimaryRegistry(options, upmConfig);
-      upstreamRegistry = determineUpstreamRegistry();
-    } catch (error) {
-      assertIsError(error);
-      debugLog("Upmconfig load or parsing failed.", error);
-      throw new RegistryAuthLoadError();
-    }
+    const primaryRegistryUrl = determinePrimaryRegistryUrl(options);
 
     // cwd
     const cwd = determineCwd(options);
 
     return {
       cwd,
-      registry,
+      primaryRegistryUrl,
       systemUser,
       upstream,
-      upstreamRegistry,
     };
   };
 }

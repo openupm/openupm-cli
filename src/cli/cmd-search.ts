@@ -1,10 +1,11 @@
+import { Logger } from "npmlog";
 import * as os from "os";
+import { DebugLog } from "../logging";
+import { GetRegistryAuth } from "../services/get-registry-auth";
 import { ParseEnv } from "../services/parse-env";
+import { SearchPackages } from "../services/search-packages";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
-import { Logger } from "npmlog";
-import { SearchPackages } from "../services/search-packages";
-import { DebugLog } from "../logging";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -33,15 +34,20 @@ export type SearchCmd = (
 export function makeSearchCmd(
   parseEnv: ParseEnv,
   searchPackages: SearchPackages,
+  getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
 ): SearchCmd {
   return async (keyword, options) => {
     // parse env
     const env = await parseEnv(options);
+    const primaryRegistry = await getRegistryAuth(
+      env.systemUser,
+      env.primaryRegistryUrl
+    );
 
     let usedEndpoint = "npmsearch";
-    const results = await searchPackages(env.registry, keyword, () => {
+    const results = await searchPackages(primaryRegistry, keyword, () => {
       usedEndpoint = "endpoint.all";
       log.warn("", "fast search endpoint is not available, using old search.");
     });

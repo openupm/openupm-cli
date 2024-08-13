@@ -1,4 +1,4 @@
-import { RegistryUrl } from "./registry-url";
+import { RegistryUrl, unityRegistryUrl } from "./registry-url";
 import { NpmAuth } from "another-npm-registry-client";
 
 /**
@@ -15,3 +15,8 @@ export type Registry = Readonly<{
    */
   auth: NpmAuth | null;
 }>;
+
+export const unityRegistry: Registry = {
+  url: unityRegistryUrl,
+  auth: null,
+};

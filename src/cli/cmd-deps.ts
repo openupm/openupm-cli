@@ -1,23 +1,25 @@
-import { ParseEnv } from "../services/parse-env";
-import { PackageUrl } from "../domain/package-url";
+import chalk from "chalk";
+import { Logger } from "npmlog";
+import os from "os";
+import { PackumentNotFoundError } from "../common-errors";
 import {
   makePackageReference,
   PackageReference,
   splitPackageReference,
 } from "../domain/package-reference";
-import { CmdOptions } from "./options";
-import { PackumentNotFoundError } from "../common-errors";
-import { ResolveDependencies } from "../services/dependency-resolving";
-import { Logger } from "npmlog";
-import { DebugLog } from "../logging";
-import { ResultCodes } from "./result-codes";
-import { GetLatestVersion } from "../services/get-latest-version";
+import { PackageUrl } from "../domain/package-url";
+import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
+import { DebugLog } from "../logging";
+import { ResolveDependencies } from "../services/dependency-resolving";
+import { GetLatestVersion } from "../services/get-latest-version";
+import { GetRegistryAuth } from "../services/get-registry-auth";
+import { ParseEnv } from "../services/parse-env";
+import { queryAllRegistriesLazy } from "../utils/sources";
 import { isZod } from "../utils/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
-import os from "os";
-import chalk from "chalk";
-import { queryAllRegistriesLazy } from "../utils/sources";
+import { CmdOptions } from "./options";
+import { ResultCodes } from "./result-codes";
 
 /**
  * Options passed to the deps command.
@@ -51,13 +53,18 @@ export function makeDepsCmd(
   parseEnv: ParseEnv,
   resolveDependencies: ResolveDependencies,
   resolveLatestVersion: GetLatestVersion,
+  getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
     const env = await parseEnv(options);
-    const sources = [env.registry, env.upstreamRegistry];
+    const primaryRegistry = await getRegistryAuth(
+      env.systemUser,
+      env.primaryRegistryUrl
+    );
+    const sources = [primaryRegistry, unityRegistry];
 
     const [packageName, requestedVersion] = splitPackageReference(pkg);
 

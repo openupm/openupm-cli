@@ -1,30 +1,29 @@
 import { makeDepsCmd } from "../../src/cli/cmd-deps";
-import { Env, ParseEnv } from "../../src/services/parse-env";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { DomainName } from "../../src/domain/domain-name";
-import { makePackageReference } from "../../src/domain/package-reference";
-import { makeMockLogger } from "./log.mock";
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import { PackumentNotFoundError } from "../../src/common-errors";
-import { ResolveDependencies } from "../../src/services/dependency-resolving";
-import { mockService } from "../services/service.mock";
-import { noopLogger } from "../../src/logging";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { GetLatestVersion } from "../../src/services/get-latest-version";
+import { PackumentNotFoundError } from "../../src/common-errors";
 import {
   makeGraphFromSeed,
   markBuiltInResolved,
   markRemoteResolved,
 } from "../../src/domain/dependency-graph";
+import { DomainName } from "../../src/domain/domain-name";
+import { makePackageReference } from "../../src/domain/package-reference";
+import { SemanticVersion } from "../../src/domain/semantic-version";
+import { noopLogger } from "../../src/logging";
+import { ResolveDependencies } from "../../src/services/dependency-resolving";
+import { GetLatestVersion } from "../../src/services/get-latest-version";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
+import { Env, ParseEnv } from "../../src/services/parse-env";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "../services/service.mock";
+import { makeMockLogger } from "./log.mock";
 
 const somePackage = DomainName.parse("com.some.package");
 const otherPackage = DomainName.parse("com.other.package");
 const anotherPackage = DomainName.parse("com.another.package");
 
 const defaultEnv = {
-  registry: { url: exampleRegistryUrl, auth: null },
-  upstreamRegistry: { url: unityRegistryUrl, auth: null },
+  primaryRegistryUrl: exampleRegistryUrl,
 } as Env;
 
 const someVersion = SemanticVersion.parse("1.2.3");
@@ -54,12 +53,16 @@ function makeDependencies() {
   const resolveLatestVersion = mockService<GetLatestVersion>();
   resolveLatestVersion.mockResolvedValue(someVersion);
 
+  const getRegistryAuth = mockService<GetRegistryAuth>();
+  getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
+
   const log = makeMockLogger();
 
   const depsCmd = makeDepsCmd(
     parseEnv,
     resolveDependencies,
     resolveLatestVersion,
+    getRegistryAuth,
     log,
     noopLogger
   );

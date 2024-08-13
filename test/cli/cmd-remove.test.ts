@@ -1,17 +1,18 @@
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { Env, ParseEnv } from "../../src/services/parse-env";
 import { makeRemoveCmd } from "../../src/cli/cmd-remove";
 import { DomainName } from "../../src/domain/domain-name";
 import { SemanticVersion } from "../../src/domain/semantic-version";
-import { makeMockLogger } from "./log.mock";
-import { mockService } from "../services/service.mock";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
+import { Env, ParseEnv } from "../../src/services/parse-env";
 import { RemovePackages } from "../../src/services/remove-packages";
 import { AsyncOk } from "../../src/utils/result-utils";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "../services/service.mock";
+import { makeMockLogger } from "./log.mock";
 
 const somePackage = DomainName.parse("com.some.package");
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
-  registry: { url: exampleRegistryUrl, auth: null },
+  primaryRegistryUrl: exampleRegistryUrl,
 } as Env;
 
 function makeDependencies() {
@@ -23,6 +24,12 @@ function makeDependencies() {
     AsyncOk([{ name: somePackage, version: "1.0.0" as SemanticVersion }])
   );
 
+  const getRegistryAuth = mockService<GetRegistryAuth>();
+  getRegistryAuth.mockResolvedValue({
+    url: defaultEnv.primaryRegistryUrl,
+    auth: null,
+  });
+
   const log = makeMockLogger();
 
   const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
@@ -30,6 +37,7 @@ function makeDependencies() {
     removeCmd,
     parseEnv,
     removePackages,
+    getRegistryAuth,
     log,
   } as const;
 }

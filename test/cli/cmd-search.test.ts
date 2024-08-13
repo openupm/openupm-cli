@@ -1,14 +1,15 @@
 import { makeSearchCmd, SearchOptions } from "../../src/cli/cmd-search";
+import { ResultCodes } from "../../src/cli/result-codes";
 import { DomainName } from "../../src/domain/domain-name";
 import { SemanticVersion } from "../../src/domain/semantic-version";
-import { makeMockLogger } from "./log.mock";
 import { SearchedPackument } from "../../src/io/npm-search";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { Env, ParseEnv } from "../../src/services/parse-env";
-import { mockService } from "../services/service.mock";
-import { SearchPackages } from "../../src/services/search-packages";
 import { noopLogger } from "../../src/logging";
-import { ResultCodes } from "../../src/cli/result-codes";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
+import { Env, ParseEnv } from "../../src/services/parse-env";
+import { SearchPackages } from "../../src/services/search-packages";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "../services/service.mock";
+import { makeMockLogger } from "./log.mock";
 
 const exampleSearchResult: SearchedPackument = {
   name: DomainName.parse("com.example.package-a"),
@@ -21,15 +22,24 @@ const exampleSearchResult: SearchedPackument = {
 function makeDependencies() {
   const parseEnv = mockService<ParseEnv>();
   parseEnv.mockResolvedValue({
-    registry: { url: exampleRegistryUrl, auth: null },
+    primaryRegistryUrl: exampleRegistryUrl,
   } as Env);
 
   const searchPackages = mockService<SearchPackages>();
   searchPackages.mockResolvedValue([exampleSearchResult]);
 
+  const getRegistryAuth = mockService<GetRegistryAuth>();
+  getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
+
   const log = makeMockLogger();
 
-  const searchCmd = makeSearchCmd(parseEnv, searchPackages, log, noopLogger);
+  const searchCmd = makeSearchCmd(
+    parseEnv,
+    searchPackages,
+    getRegistryAuth,
+    log,
+    noopLogger
+  );
   return {
     searchCmd,
     parseEnv,

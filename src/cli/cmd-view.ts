@@ -1,19 +1,21 @@
-import chalk from "chalk";
 import assert from "assert";
-import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
-import { ParseEnv } from "../services/parse-env";
+import chalk from "chalk";
+import { Logger } from "npmlog";
+import { PackumentNotFoundError } from "../common-errors";
 import {
   hasVersion,
   PackageReference,
   splitPackageReference,
 } from "../domain/package-reference";
-import { CmdOptions } from "./options";
-import { recordKeys } from "../utils/record-utils";
-import { Logger } from "npmlog";
-import { ResultCodes } from "./result-codes";
+import { tryGetLatestVersion, UnityPackument } from "../domain/packument";
+import { unityRegistry } from "../domain/registry";
 import { GetRegistryPackument } from "../io/packument-io";
+import { GetRegistryAuth } from "../services/get-registry-auth";
+import { ParseEnv } from "../services/parse-env";
+import { recordKeys } from "../utils/record-utils";
 import { queryAllRegistriesLazy } from "../utils/sources";
-import { PackumentNotFoundError } from "../common-errors";
+import { CmdOptions } from "./options";
+import { ResultCodes } from "./result-codes";
 
 /**
  * Options passed to the view command.
@@ -110,11 +112,16 @@ const printInfo = function (packument: UnityPackument) {
 export function makeViewCmd(
   parseEnv: ParseEnv,
   getRegistryPackument: GetRegistryPackument,
+  getRegistryAuth: GetRegistryAuth,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
     // parse env
     const env = await parseEnv(options);
+    const primaryRegistry = await getRegistryAuth(
+      env.systemUser,
+      env.primaryRegistryUrl
+    );
 
     // parse name
     if (hasVersion(pkg)) {
@@ -124,10 +131,7 @@ export function makeViewCmd(
     }
 
     // verify name
-    const sources = [
-      env.registry,
-      ...(env.upstream ? [env.upstreamRegistry] : []),
-    ];
+    const sources = [primaryRegistry, ...(env.upstream ? [unityRegistry] : [])];
     const packumentFromRegistry = await queryAllRegistriesLazy(
       sources,
       (source) => getRegistryPackument(source, pkg)
