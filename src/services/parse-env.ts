@@ -72,17 +72,21 @@ export function makeParseEnv(
     options: CmdOptions,
     upmConfig: UpmConfig
   ): Registry {
-    const url =
-      options.registry !== undefined
-        ? coerceRegistryUrl(options.registry)
-        : RegistryUrl.parse("https://package.openupm.com");
+    if (options.registry === undefined) {
+      return {
+        url: RegistryUrl.parse("https://package.openupm.com"),
+        auth: null,
+      };
+    }
+
+    const url = coerceRegistryUrl(options.registry);
 
     const auth = tryGetAuthForRegistry(upmConfig, url);
 
     if (auth === null) {
-      log.warn(
-        "env.auth",
-        `failed to parse auth info for ${url} in .upmconfig.toml: missing token or _auth fields`
+      log.verbose(
+        "",
+        `upm config did not contain an entry for "${url}". Will use this registry without authentication.`
       );
     }
 
