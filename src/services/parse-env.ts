@@ -1,15 +1,15 @@
 import chalk from "chalk";
-import { GetUpmConfigPath } from "../io/upm-config-io";
+import { Logger } from "npmlog";
 import path from "path";
+import { CustomError } from "ts-custom-error";
+import { CmdOptions } from "../cli/options";
+import { Registry } from "../domain/registry";
 import { coerceRegistryUrl, RegistryUrl } from "../domain/registry-url";
 import { tryGetAuthForRegistry, UpmConfig } from "../domain/upm-config";
-import { CmdOptions } from "../cli/options";
-import { tryGetEnv } from "../utils/env-util";
-import { Registry } from "../domain/registry";
-import { Logger } from "npmlog";
 import { GetCwd } from "../io/special-paths";
-import { CustomError } from "ts-custom-error";
+import { GetUpmConfigPath } from "../io/upm-config-io";
 import { DebugLog } from "../logging";
+import { tryGetEnv } from "../utils/env-util";
 import { assertIsError } from "../utils/error-type-guards";
 import { GetRegistryAuth } from "./get-registry-auth";
 
@@ -32,10 +32,6 @@ export type Env = Readonly<{
    * Whether the user is a system-user.
    */
   systemUser: boolean;
-  /**
-   * Whether the app is running in WSL.
-   */
-  wsl: boolean;
   /**
    * Whether to fall back to the upstream registry.
    */
@@ -69,13 +65,7 @@ export function makeParseEnv(
   debugLog: DebugLog
 ): ParseEnv {
   function determineCwd(options: CmdOptions): string {
-    return options.chdir !== undefined
-      ? path.resolve(options.chdir)
-      : getCwd();
-  }
-
-  function determineWsl(options: CmdOptions): boolean {
-    return options.wsl === true;
+    return options.chdir !== undefined ? path.resolve(options.chdir) : getCwd();
   }
 
   function determinePrimaryRegistry(
@@ -137,10 +127,9 @@ export function makeParseEnv(
 
     // auth
     const systemUser = determineIsSystemUser(options);
-    const wsl = determineWsl(options);
 
     // registries
-    const upmConfigPath = await getUpmConfigPath(wsl, systemUser);
+    const upmConfigPath = await getUpmConfigPath(systemUser);
 
     let registry: Registry;
     let upstreamRegistry: Registry;
@@ -163,7 +152,6 @@ export function makeParseEnv(
       systemUser,
       upstream,
       upstreamRegistry,
-      wsl,
     };
   };
 }

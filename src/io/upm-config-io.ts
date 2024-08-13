@@ -8,7 +8,6 @@ import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { runChildProcess, RunChildProcess } from "./child-process";
 import { GetHomePath, getHomePathFromEnv } from "./special-paths";
 import {
   readTextFile,
@@ -16,7 +15,6 @@ import {
   writeTextFile,
   WriteTextFile,
 } from "./text-file-io";
-import { tryGetWslPath } from "./wsl";
 
 const configFileName = ".upmconfig.toml";
 
@@ -24,14 +22,10 @@ export class NoSystemUserProfilePath extends CustomError {}
 
 /**
  * Function which gets the path to the upmconfig file.
- * @param wsl Whether WSL should be treated as Windows.
  * @param systemUser Whether to authenticate as a Windows system-user.
  * @returns The file path.
  */
-export type GetUpmConfigPath = (
-  wsl: boolean,
-  systemUser: boolean
-) => Promise<string>;
+export type GetUpmConfigPath = (systemUser: boolean) => Promise<string>;
 
 /**
  * Makes a {@link GetUpmConfigPath} function which resolves to the default
@@ -39,20 +33,10 @@ export type GetUpmConfigPath = (
  * @see https://docs.unity3d.com/Manual/upm-config.html#upmconfig
  */
 export function ResolveDefaultUpmConfigPath(
-  getHomePath: GetHomePath,
-  runChildProcess: RunChildProcess
+  getHomePath: GetHomePath
 ): GetUpmConfigPath {
-  async function getConfigDirectory(wsl: boolean, systemUser: boolean) {
+  async function getConfigDirectory(systemUser: boolean) {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
-    if (wsl) {
-      if (systemUser)
-        return await tryGetWslPath("ALLUSERSPROFILE", runChildProcess).then(
-          (it) => path.join(it, systemUserSubPath)
-        );
-
-      return await tryGetWslPath("USERPROFILE", runChildProcess);
-    }
-
     if (systemUser) {
       const profilePath = tryGetEnv("ALLUSERSPROFILE");
       if (profilePath === null) throw new NoSystemUserProfilePath();
@@ -62,8 +46,8 @@ export function ResolveDefaultUpmConfigPath(
     return getHomePath();
   }
 
-  return async (wsl, systemUser) => {
-    const directory = await getConfigDirectory(wsl, systemUser);
+  return async (systemUser) => {
+    const directory = await getConfigDirectory(systemUser);
     return path.join(directory, configFileName);
   };
 }
@@ -71,10 +55,8 @@ export function ResolveDefaultUpmConfigPath(
 /**
  * Default {@link GetUpmConfigPath} function. Uses {@link ResolveDefaultUpmConfigPath}.
  */
-export const getUpmConfigPath: GetUpmConfigPath = ResolveDefaultUpmConfigPath(
-  getHomePathFromEnv,
-  runChildProcess
-);
+export const getUpmConfigPath: GetUpmConfigPath =
+  ResolveDefaultUpmConfigPath(getHomePathFromEnv);
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),

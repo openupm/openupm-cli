@@ -1,15 +1,15 @@
-import { GetUpmConfigPath } from "../io/upm-config-io";
-import { ParseEnv } from "../services/parse-env";
+import { Logger } from "npmlog";
 import { coerceRegistryUrl } from "../domain/registry-url";
+import { GetUpmConfigPath } from "../io/upm-config-io";
+import { Login } from "../services/login";
+import { ParseEnv } from "../services/parse-env";
+import { CmdOptions } from "./options";
 import {
   promptEmail,
   promptPassword,
   promptRegistryUrl,
   promptUsername,
 } from "./prompts";
-import { CmdOptions } from "./options";
-import { Logger } from "npmlog";
-import { Login } from "../services/login";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -76,7 +76,7 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configPath = await getUpmConfigPath(env.wsl, env.systemUser);
+    const configPath = await getUpmConfigPath(env.systemUser);
 
     await login(
       username,

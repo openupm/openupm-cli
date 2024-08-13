@@ -1,7 +1,6 @@
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import { RegistryAuthLoadError } from "../services/parse-env";
-import { NoWslError } from "../io/wsl";
 import {
   EditorVersionNotSupportedError,
   PackumentNotFoundError,
@@ -34,7 +33,6 @@ import { NoSystemUserProfilePath } from "../io/upm-config-io";
 function makeErrorMessageFor(error: unknown): string {
   if (error instanceof RegistryAuthLoadError)
     return "Could not load registry authentication information.";
-  if (error instanceof NoWslError) return "Not running in wsl.";
   if (error instanceof PackumentNotFoundError)
     return `Package "${error.packageName}" could not be found.`;
   if (error instanceof EditorVersionNotSupportedError)
@@ -81,8 +79,6 @@ function makeErrorMessageFor(error: unknown): string {
 function tryMakeFixSuggestionFor(error: unknown): string | null {
   if (error instanceof RegistryAuthLoadError)
     return "Most likely this means that something is wrong with your .upmconfig.toml.";
-  if (error instanceof NoWslError)
-    return "Please make sure you are running in wsl, or remove the --wsl flag.";
   if (error instanceof PackumentNotFoundError)
     return "Did you make a typo when spelling the name?";
   if (error instanceof CompatibilityCheckFailedError)

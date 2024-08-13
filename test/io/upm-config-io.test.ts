@@ -1,6 +1,5 @@
 import { EOL } from "node:os";
 import path from "path";
-import { RunChildProcess } from "../../src/io/child-process";
 import { GetHomePath } from "../../src/io/special-paths";
 import { ReadTextFile } from "../../src/io/text-file-io";
 import {
@@ -15,23 +14,19 @@ describe("upm-config-io", () => {
     function makeDependencies() {
       const getHomePath = mockService<GetHomePath>();
 
-      const runChildProcess = mockService<RunChildProcess>();
-
-      const resolveDefaultUpmConfigPath = ResolveDefaultUpmConfigPath(
-        getHomePath,
-        runChildProcess
-      );
+      const resolveDefaultUpmConfigPath =
+        ResolveDefaultUpmConfigPath(getHomePath);
 
       return { resolveDefaultUpmConfigPath, getHomePath } as const;
     }
 
-    describe("no wsl and no system-user", () => {
+    describe("no system-user", () => {
       it("should be in home path", async () => {
         const { resolveDefaultUpmConfigPath, getHomePath } = makeDependencies();
         const expected = path.resolve("/some/home/dir/.upmconfig.toml");
         getHomePath.mockReturnValue(path.dirname(expected));
 
-        const actual = await resolveDefaultUpmConfigPath(false, false);
+        const actual = await resolveDefaultUpmConfigPath(false);
 
         expect(actual).toEqual(expected);
       });

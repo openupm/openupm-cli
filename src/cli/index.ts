@@ -81,7 +81,6 @@ const program = createCommand()
   .option("-r, --registry <url>", "specify registry url", mustBeRegistryUrl)
   .option("-v, --verbose", "output extra debugging")
   .option("--system-user", "auth for Windows system user")
-  .option("--wsl", "auth for Windows when using WSL")
   .option("--no-upstream", "don't use upstream unity registry")
   .option("--no-color", "disable color");
 
