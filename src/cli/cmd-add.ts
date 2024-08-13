@@ -42,6 +42,8 @@ import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
 
 import { ResolvePackumentVersionError } from "../domain/packument";
+import { unityRegistry } from "../domain/registry";
+import { GetRegistryAuth } from "../services/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../services/get-registry-packument-version";
 import { isZod } from "../utils/zod-utils";
 
@@ -124,6 +126,7 @@ export function makeAddCmd(
   loadProjectManifest: LoadProjectManifest,
   saveProjectManifest: SaveProjectManifest,
   determineEditorVersion: DetermineEditorVersion,
+  getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
 ): AddCmd {
@@ -140,6 +143,11 @@ export function makeAddCmd(
         "editor.version",
         `${editorVersion} is unknown, the editor version check is disabled`
       );
+
+    const primaryRegistry = await getRegistryAuth(
+      env.systemUser,
+      env.primaryRegistryUrl
+    );
 
     const tryAddToManifest = async function (
       manifest: UnityProjectManifest,
@@ -160,13 +168,13 @@ export function makeAddCmd(
         let resolveResult = await getRegistryPackumentVersion(
           name,
           requestedVersion,
-          env.registry
+          primaryRegistry
         ).promise;
         if (resolveResult.isErr() && env.upstream) {
           const upstreamResult = await getRegistryPackumentVersion(
             name,
             requestedVersion,
-            env.upstreamRegistry
+            unityRegistry
           ).promise;
           if (upstreamResult.isOk()) {
             resolveResult = upstreamResult;
@@ -213,7 +221,7 @@ export function makeAddCmd(
         if (!isUpstreamPackage) {
           debugLog(`fetch: ${makePackageReference(name, requestedVersion)}`);
           const dependencyGraph = await resolveDependencies(
-            [env.registry, env.upstreamRegistry],
+            [primaryRegistry, unityRegistry],
             name,
             versionToAdd,
             true
@@ -295,15 +303,20 @@ export function makeAddCmd(
       }
 
       if (!isUpstreamPackage && pkgsInScope.length > 0) {
-        manifest = mapScopedRegistry(manifest, env.registry.url, (initial) => {
-          let updated = initial ?? makeEmptyScopedRegistryFor(env.registry.url);
+        manifest = mapScopedRegistry(
+          manifest,
+          primaryRegistry.url,
+          (initial) => {
+            let updated =
+              initial ?? makeEmptyScopedRegistryFor(primaryRegistry.url);
 
-          updated = pkgsInScope.reduce(addScope, updated!);
-          dirty =
-            !areArraysEqual(updated!.scopes, initial?.scopes ?? []) || dirty;
+            updated = pkgsInScope.reduce(addScope, updated!);
+            dirty =
+              !areArraysEqual(updated!.scopes, initial?.scopes ?? []) || dirty;
 
-          return updated;
-        });
+            return updated;
+          }
+        );
       }
       if (options.test) manifest = addTestable(manifest, name);
 

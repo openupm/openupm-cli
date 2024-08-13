@@ -29,3 +29,5 @@ export function coerceRegistryUrl(s: string): RegistryUrl {
 }
 
 export const unityRegistryUrl = RegistryUrl.parse("https://packages.unity.com");
+
+export const openupmRegistryUrl = RegistryUrl.parse("https://package.openupm.com");

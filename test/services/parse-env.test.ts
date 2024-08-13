@@ -1,10 +1,6 @@
-import { NpmAuth } from "another-npm-registry-client";
 import path from "path";
-import { emptyUpmConfig, UpmConfig } from "../../src/domain/upm-config";
+import { openupmRegistryUrl } from "../../src/domain/registry-url";
 import { GetCwd } from "../../src/io/special-paths";
-import { GetUpmConfigPath } from "../../src/io/upm-config-io";
-import { noopLogger } from "../../src/logging";
-import { GetRegistryAuth } from "../../src/services/get-registry-auth";
 import { makeParseEnv } from "../../src/services/parse-env";
 import { makeMockLogger } from "../cli/log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -12,42 +8,15 @@ import { mockService } from "./service.mock";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
-const testNpmAuth: NpmAuth = {
-  token: "ThisIsNotAValidToken",
-  alwaysAuth: false,
-};
-
-const testUpmConfig: UpmConfig = {
-  [exampleRegistryUrl]: testNpmAuth,
-};
-
 function makeDependencies() {
   const log = makeMockLogger();
-
-  const getUpmConfigPath = mockService<GetUpmConfigPath>();
-  // The root directory does not contain an upm-config
-  getUpmConfigPath.mockResolvedValue(testRootPath);
-
-  const loadRegistryAuth = mockService<GetRegistryAuth>();
-  loadRegistryAuth.mockResolvedValue(emptyUpmConfig);
 
   // process.cwd is in the root directory.
   const getCwd = mockService<GetCwd>();
   getCwd.mockReturnValue(testRootPath);
 
-  const parseEnv = makeParseEnv(
-    log,
-    getUpmConfigPath,
-    loadRegistryAuth,
-    getCwd,
-    noopLogger
-  );
-  return {
-    parseEnv,
-    log,
-    getUpmConfigPath,
-    loadRegistryAuth,
-  } as const;
+  const parseEnv = makeParseEnv(log, getCwd);
+  return { parseEnv, log } as const;
 }
 
 describe("env", () => {
@@ -178,86 +147,22 @@ describe("env", () => {
   });
 
   describe("registry", () => {
-    it("should be global openupm by default", async () => {
+    it("should be openupm by default", async () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({});
 
-      expect(env.registry.url).toEqual("https://package.openupm.com");
+      expect(env.primaryRegistryUrl).toEqual(openupmRegistryUrl);
     });
 
-    it("should be custom registry if overridden", async () => {
+    it("should be custom registry url if overridden", async () => {
       const { parseEnv } = makeDependencies();
 
       const env = await parseEnv({
         registry: exampleRegistryUrl,
       });
 
-      expect(env.registry.url).toEqual(exampleRegistryUrl);
-    });
-
-    it("should have no auth if no upm-config was found", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const env = await parseEnv({
-        registry: exampleRegistryUrl,
-      });
-
-      expect(env.registry.auth).toEqual(null);
-    });
-
-    it("should have no auth if upm-config had no entry for the url", async () => {
-      const { parseEnv, loadRegistryAuth } = makeDependencies();
-      loadRegistryAuth.mockResolvedValue({});
-
-      const env = await parseEnv({
-        registry: exampleRegistryUrl,
-      });
-
-      expect(env.registry.auth).toEqual(null);
-    });
-
-    it("should notify if upm-config did not have auth", async () => {
-      const { parseEnv, log, loadRegistryAuth } = makeDependencies();
-      loadRegistryAuth.mockResolvedValue({});
-
-      await parseEnv({
-        registry: exampleRegistryUrl,
-      });
-
-      expect(log.verbose).toHaveBeenCalledWith(
-        "",
-        expect.stringContaining("did not contain an entry")
-      );
-    });
-
-    it("should have auth if upm-config had entry for the url", async () => {
-      const { parseEnv, loadRegistryAuth } = makeDependencies();
-      loadRegistryAuth.mockResolvedValue(testUpmConfig);
-
-      const env = await parseEnv({
-        registry: exampleRegistryUrl,
-      });
-
-      expect(env.registry.auth).toEqual(testNpmAuth);
-    });
-  });
-
-  describe("upstream registry", () => {
-    it("should be global unity by default", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const env = await parseEnv({});
-
-      expect(env.upstreamRegistry.url).toEqual("https://packages.unity.com");
-    });
-
-    it("should have no auth", async () => {
-      const { parseEnv } = makeDependencies();
-
-      const env = await parseEnv({});
-
-      expect(env.upstreamRegistry.auth).toEqual(null);
+      expect(env.primaryRegistryUrl).toEqual(exampleRegistryUrl);
     });
   });
 

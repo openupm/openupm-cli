@@ -1,16 +1,16 @@
 import { makeViewCmd } from "../../src/cli/cmd-view";
-import { Env, ParseEnv } from "../../src/services/parse-env";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { unityRegistryUrl } from "../../src/domain/registry-url";
+import { ResultCodes } from "../../src/cli/result-codes";
+import { PackumentNotFoundError } from "../../src/common-errors";
 import { DomainName } from "../../src/domain/domain-name";
 import { makePackageReference } from "../../src/domain/package-reference";
 import { SemanticVersion } from "../../src/domain/semantic-version";
-import { makeMockLogger } from "./log.mock";
-import { buildPackument } from "../domain/data-packument";
-import { mockService } from "../services/service.mock";
-import { ResultCodes } from "../../src/cli/result-codes";
 import { GetRegistryPackument } from "../../src/io/packument-io";
-import { PackumentNotFoundError } from "../../src/common-errors";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
+import { Env, ParseEnv } from "../../src/services/parse-env";
+import { buildPackument } from "../domain/data-packument";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockService } from "../services/service.mock";
+import { makeMockLogger } from "./log.mock";
 
 const somePackage = DomainName.parse("com.some.package");
 const somePackument = buildPackument(somePackage, (packument) =>
@@ -38,8 +38,7 @@ const somePackument = buildPackument(somePackage, (packument) =>
 );
 const defaultEnv = {
   upstream: false,
-  registry: { url: exampleRegistryUrl, auth: null },
-  upstreamRegistry: { url: unityRegistryUrl, auth: null },
+  primaryRegistryUrl: exampleRegistryUrl,
 } as Env;
 
 function makeDependencies() {
@@ -49,9 +48,20 @@ function makeDependencies() {
   const getRegistryPackument = mockService<GetRegistryPackument>();
   getRegistryPackument.mockResolvedValue(somePackument);
 
+  const getRegistryAuth = mockService<GetRegistryAuth>();
+  getRegistryAuth.mockResolvedValue({
+    url: defaultEnv.primaryRegistryUrl,
+    auth: null,
+  });
+
   const log = makeMockLogger();
 
-  const viewCmd = makeViewCmd(parseEnv, getRegistryPackument, log);
+  const viewCmd = makeViewCmd(
+    parseEnv,
+    getRegistryPackument,
+    getRegistryAuth,
+    log
+  );
   return {
     viewCmd,
     parseEnv,

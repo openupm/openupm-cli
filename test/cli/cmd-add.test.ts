@@ -24,6 +24,7 @@ import {
 import { noopLogger } from "../../src/logging";
 import { ResolveDependencies } from "../../src/services/dependency-resolving";
 import { DetermineEditorVersion } from "../../src/services/determine-editor-version";
+import { GetRegistryAuth } from "../../src/services/get-registry-auth";
 import {
   GetRegistryPackumentVersion,
   ResolvedPackumentVersion,
@@ -61,8 +62,7 @@ const incompatiblePackument = buildPackument(somePackage, (packument) =>
 const defaultEnv = {
   cwd: "/users/some-user/projects/SomeProject",
   upstream: true,
-  registry: { url: exampleRegistryUrl, auth: null },
-  upstreamRegistry: { url: unityRegistryUrl, auth: null },
+  primaryRegistryUrl: exampleRegistryUrl,
 } as Env;
 
 const someVersion = SemanticVersion.parse("1.0.0");
@@ -108,6 +108,9 @@ function makeDependencies() {
     makeEditorVersion(2022, 2, 1, "f", 2)
   );
 
+  const getRegistryAuth = mockService<GetRegistryAuth>();
+  getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
+
   const log = makeMockLogger();
 
   const addCmd = makeAddCmd(
@@ -117,6 +120,7 @@ function makeDependencies() {
     loadProjectManifest,
     writeProjectManifest,
     determineEditorVersion,
+    getRegistryAuth,
     log,
     noopLogger
   );
