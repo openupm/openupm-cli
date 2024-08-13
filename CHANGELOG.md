@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/openupm/openupm-cli/compare/4.0.0...4.1.0) (2024-08-13)
+
+
+### Features
+
+* custom upm config path ([bad3c0c](https://github.com/openupm/openupm-cli/commit/bad3c0c2d7e1822a01b7fbb855b0d3416d3bba93))
+
 # [4.0.0](https://github.com/openupm/openupm-cli/compare/3.5.0...4.0.0) (2024-08-13)
 
 
