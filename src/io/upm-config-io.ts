@@ -47,6 +47,9 @@ export function ResolveDefaultUpmConfigPath(
   }
 
   return async (systemUser) => {
+    const customDir = tryGetEnv("UPM_USER_CONFIG_FILE");
+    if (customDir !== null) return path.resolve(customDir);
+
     const directory = await getConfigDirectory(systemUser);
     return path.join(directory, configFileName);
   };
