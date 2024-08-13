@@ -1,3 +1,17 @@
+# [4.0.0](https://github.com/openupm/openupm-cli/compare/3.5.0...4.0.0) (2024-08-13)
+
+
+### misc
+
+* drop wsl ([#383](https://github.com/openupm/openupm-cli/issues/383)) ([f8cbe5b](https://github.com/openupm/openupm-cli/commit/f8cbe5b9016f5fdf256758d2aac02802f7ed3aec))
+
+
+### BREAKING CHANGES
+
+* The wsl flag allowed users to use their Windows .upmconfig.toml from inside their wsl session. This feature was rarely used and can also be emulated by external means.
+
+If you relied on this feature, please find another way to link to your windows .upmconfig.toml from inside wsl. For example using a symlink.
+
 # [3.5.0](https://github.com/openupm/openupm-cli/compare/3.4.3...3.5.0) (2024-07-29)
 
 
