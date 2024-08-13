@@ -225,9 +225,9 @@ describe("env", () => {
         registry: exampleRegistryUrl,
       });
 
-      expect(log.warn).toHaveBeenCalledWith(
-        "env.auth",
-        expect.stringContaining("failed to parse auth info")
+      expect(log.verbose).toHaveBeenCalledWith(
+        "",
+        expect.stringContaining("did not contain an entry")
       );
     });
 
