@@ -67,7 +67,7 @@ export function LoadRegistryAuthFromUpmConfig(
 
     // Only load config if we have dont have it in the cache
     if (cachedConfig === null) {
-      const configPath = await getUpmConfigPath(systemUser);
+      const configPath = getUpmConfigPath(systemUser);
       cachedConfig = await loadUpmConfig(configPath);
       if (cachedConfig === null) {
         debugLog(

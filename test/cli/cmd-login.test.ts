@@ -24,7 +24,7 @@ describe("cmd-login", () => {
     parseEnv.mockResolvedValue(defaultEnv);
 
     const getUpmConfigPath = mockService<GetUpmConfigPath>();
-    getUpmConfigPath.mockResolvedValue(exampleUpmConfigPath);
+    getUpmConfigPath.mockReturnValue(exampleUpmConfigPath);
 
     const login = mockService<Login>();
     login.mockResolvedValue(undefined);

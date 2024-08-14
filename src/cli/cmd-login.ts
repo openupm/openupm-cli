@@ -76,7 +76,7 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configPath = await getUpmConfigPath(env.systemUser);
+    const configPath = getUpmConfigPath(env.systemUser);
 
     await login(
       username,

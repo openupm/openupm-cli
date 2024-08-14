@@ -25,7 +25,7 @@ export class NoSystemUserProfilePath extends CustomError {}
  * @param systemUser Whether to authenticate as a Windows system-user.
  * @returns The file path.
  */
-export type GetUpmConfigPath = (systemUser: boolean) => Promise<string>;
+export type GetUpmConfigPath = (systemUser: boolean) => string;
 
 /**
  * Makes a {@link GetUpmConfigPath} function which resolves to the default
@@ -35,7 +35,7 @@ export type GetUpmConfigPath = (systemUser: boolean) => Promise<string>;
 export function ResolveDefaultUpmConfigPath(
   getHomePath: GetHomePath
 ): GetUpmConfigPath {
-  async function getConfigDirectory(systemUser: boolean) {
+  function getConfigDirectory(systemUser: boolean) {
     const systemUserSubPath = "Unity/config/ServiceAccounts";
     if (systemUser) {
       const profilePath = tryGetEnv("ALLUSERSPROFILE");
@@ -46,11 +46,11 @@ export function ResolveDefaultUpmConfigPath(
     return getHomePath();
   }
 
-  return async (systemUser) => {
+  return (systemUser) => {
     const customDir = tryGetEnv("UPM_USER_CONFIG_FILE");
     if (customDir !== null) return path.resolve(customDir);
 
-    const directory = await getConfigDirectory(systemUser);
+    const directory = getConfigDirectory(systemUser);
     return path.join(directory, configFileName);
   };
 }

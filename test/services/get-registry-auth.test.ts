@@ -15,7 +15,7 @@ describe("get registry auth from upm config", () => {
 
   function makeDependencies() {
     const getUpmConfigPath = mockService<GetUpmConfigPath>();
-    getUpmConfigPath.mockResolvedValue("/home/user/.upmconfig.toml");
+    getUpmConfigPath.mockReturnValue("/home/user/.upmconfig.toml");
 
     const loadUpmConfig = mockService<LoadUpmConfig>();
     loadUpmConfig.mockResolvedValue({});
