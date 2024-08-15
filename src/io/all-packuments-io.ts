@@ -2,8 +2,8 @@ import npmFetch from "npm-registry-fetch";
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
 import { DebugLog, npmDebugLog } from "../logging";
-import { assertIsError, isHttpError } from "../utils/error-type-guards";
-import { RegistryAuthenticationError } from "./common-errors";
+import { assertIsError } from "../utils/error-type-guards";
+import { makeRegistryInteractionError } from "./common-errors";
 import { getNpmFetchOptions, SearchedPackument } from "./npm-search";
 
 /**
@@ -19,12 +19,16 @@ export type AllPackuments = Readonly<{
  * Function for getting all packuments from a npm registry.
  * @param registry The registry to get packuments for.
  */
-export type GetAllRegistryPackuments = (registry: Registry) => Promise<AllPackuments>;
+export type GetAllRegistryPackuments = (
+  registry: Registry
+) => Promise<AllPackuments>;
 
 /**
  * Makes a {@link GetAllRegistryPackuments} function.
  */
-export function FetchAllRegistryPackuments(debugLog: DebugLog): GetAllRegistryPackuments {
+export function FetchAllRegistryPackuments(
+  debugLog: DebugLog
+): GetAllRegistryPackuments {
   return async (registry) => {
     debugLog(`Getting all packages from ${registry.url}.`);
     try {
@@ -37,11 +41,7 @@ export function FetchAllRegistryPackuments(debugLog: DebugLog): GetAllRegistryPa
       assertIsError(error);
       debugLog(`Failed to get all packages from ${registry.url}.`, error);
 
-      if (isHttpError(error))
-        throw error.statusCode === 401
-          ? new RegistryAuthenticationError(registry.url)
-          : error;
-      throw error;
+      throw makeRegistryInteractionError(error, registry.url);
     }
   };
 }
@@ -49,4 +49,4 @@ export function FetchAllRegistryPackuments(debugLog: DebugLog): GetAllRegistryPa
 /**
  * Default {@link GetAllRegistryPackuments} function. Uses {@link FetchAllRegistryPackuments}.
  */
-export const getAllRegistryPackuments = FetchAllRegistryPackuments(npmDebugLog)
+export const getAllRegistryPackuments = FetchAllRegistryPackuments(npmDebugLog);

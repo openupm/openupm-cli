@@ -1,10 +1,10 @@
 import RegClient from "another-npm-registry-client";
-import { assertIsHttpError } from "../utils/error-type-guards";
-import { Registry } from "../domain/registry";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
-import { RegistryAuthenticationError } from "./common-errors";
+import { Registry } from "../domain/registry";
 import { DebugLog, npmDebugLog } from "../logging";
+import { assertIsHttpError } from "../utils/error-type-guards";
+import { makeRegistryInteractionError } from "./common-errors";
 import { npmRegistryClient } from "./reg-client";
 
 /**
@@ -37,12 +37,7 @@ export function FetchRegistryPackument(
             debugLog("Fetching a packument failed.", error);
             assertIsHttpError(error);
             if (error.statusCode === 404) resolve(null);
-            else
-              reject(
-                error.statusCode === 401
-                  ? new RegistryAuthenticationError(registry.url)
-                  : error
-              );
+            else reject(makeRegistryInteractionError(error, registry.url));
           } else resolve(packument);
         }
       );

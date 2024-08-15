@@ -4,8 +4,8 @@ import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { DebugLog, npmDebugLog } from "../logging";
-import { assertIsHttpError } from "../utils/error-type-guards";
-import { RegistryAuthenticationError } from "./common-errors";
+import { assertIsError } from "../utils/error-type-guards";
+import { makeRegistryInteractionError } from "./common-errors";
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -52,11 +52,9 @@ export function NpmApiSearch(debugLog: DebugLog): SearchRegistry {
       // NOTE: The results of the search will be packument objects, so we can change the type
       .then((results) => results as SearchedPackument[])
       .catch((error) => {
-        assertIsHttpError(error);
+        assertIsError(error);
         debugLog("A http request failed.", error);
-        throw error.statusCode === 401
-          ? new RegistryAuthenticationError(registry.url)
-          : error;
+        throw makeRegistryInteractionError(error, registry.url);
       });
 }
 
