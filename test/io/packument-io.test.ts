@@ -1,12 +1,11 @@
-import { buildPackument } from "../domain/data-packument";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
-import { DomainName } from "../../src/domain/domain-name";
 import RegClient from "another-npm-registry-client";
+import { DomainName } from "../../src/domain/domain-name";
 import { Registry } from "../../src/domain/registry";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockRegClientGetResult } from "../services/registry-client.mock";
 import { FetchRegistryPackument } from "../../src/io/packument-io";
 import { noopLogger } from "../../src/logging";
+import { buildPackument } from "../domain/data-packument";
+import { exampleRegistryUrl } from "../domain/data-registry";
+import { mockRegClientGetResult } from "../services/registry-client.mock";
 
 describe("packument io", () => {
   describe("fetch", () => {
@@ -47,7 +46,7 @@ describe("packument io", () => {
           message: "not found",
           name: "FakeError",
           statusCode: 404,
-        } as HttpErrorBase,
+        },
         null
       );
 
@@ -64,7 +63,7 @@ describe("packument io", () => {
           message: "Unauthorized",
           name: "FakeError",
           statusCode: 401,
-        } as HttpErrorBase,
+        },
         null
       );
 

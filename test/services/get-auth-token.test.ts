@@ -1,6 +1,5 @@
 import "assert";
 import RegClient from "another-npm-registry-client";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
 import { RegistryAuthenticationError } from "../../src/io/common-errors";
@@ -74,7 +73,7 @@ describe("authenticate user with npm registry", () => {
       makeDependencies();
     mockRegClientAddUserResult(
       registryClient,
-      {} as HttpErrorBase,
+      new Error(),
       { ok: false },
       {
         statusMessage: "bad user",

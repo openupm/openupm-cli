@@ -1,5 +1,5 @@
 import { AssertionError } from "assert";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import { HttpErrorLike } from "../io/common-errors";
 
 /**
  * Type guard for checking if a value is an {@link Error}.
@@ -54,19 +54,19 @@ export function assertIsNodeError(
 }
 
 /**
- * Type guard for checking whether a value is a {@link HttpErrorBase}.
+ * Type guard for checking whether a value is a {@link HttpErrorLike}.
  * @param x The value to check.
  */
-export function isHttpError(x: unknown): x is HttpErrorBase {
+export function isHttpError(x: unknown): x is HttpErrorLike {
   return isError(x) && "statusCode" in x;
 }
 
 /**
- * Asserts that a value is a {@link HttpErrorBase}.
+ * Asserts that a value is a {@link HttpErrorLike}.
  * @param x The value to assert.
- * @throws {AssertionError} If the value is not a {@link HttpErrorBase}.
+ * @throws {AssertionError} If the value is not a {@link HttpErrorLike}.
  */
-export function assertIsHttpError(x: unknown): asserts x is HttpErrorBase {
+export function assertIsHttpError(x: unknown): asserts x is HttpErrorLike {
   if (!isHttpError(x))
     throw new AssertionError({
       message: "Value is not an http error.",

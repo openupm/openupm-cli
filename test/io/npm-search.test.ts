@@ -1,11 +1,12 @@
-import npmSearch from "libnpmsearch";
-import search from "libnpmsearch";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
+import { default as npmSearch, default as search } from "libnpmsearch";
 import { Registry } from "../../src/domain/registry";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { noopLogger } from "../../src/logging";
-import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import {
+  HttpErrorLike,
+  RegistryAuthenticationError,
+} from "../../src/io/common-errors";
 import { NpmApiSearch } from "../../src/io/npm-search";
+import { noopLogger } from "../../src/logging";
+import { exampleRegistryUrl } from "../domain/data-registry";
 
 jest.mock("libnpmsearch");
 
@@ -21,11 +22,11 @@ describe("npm api search", () => {
   }
 
   it("should fail for non-auth error response", async () => {
-    const expected = {
+    const expected: HttpErrorLike = {
       message: "Idk, it failed",
       name: "FakeError",
       statusCode: 500,
-    } as HttpErrorBase;
+    };
     jest.mocked(npmSearch).mockRejectedValue(expected);
     const { npmApiSearch } = makeDependencies();
 
@@ -35,11 +36,11 @@ describe("npm api search", () => {
   });
 
   it("should fail for auth error response", async () => {
-    const expected = {
+    const expected: HttpErrorLike = {
       message: "Idk, it failed",
       name: "FakeError",
       statusCode: 401,
-    } as HttpErrorBase;
+    };
     jest.mocked(npmSearch).mockRejectedValue(expected);
     const { npmApiSearch } = makeDependencies();
 

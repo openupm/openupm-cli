@@ -9,3 +9,13 @@ export class RegistryAuthenticationError extends CustomError {
     super();
   }
 }
+
+/**
+ * Type for {@link Error}s with a HTTP status code property.
+ */
+export interface HttpErrorLike extends Error {
+  /**
+   * The HTTP status code.
+   */
+  statusCode: number;
+}

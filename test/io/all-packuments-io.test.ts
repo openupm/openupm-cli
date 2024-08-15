@@ -1,8 +1,10 @@
 import npmFetch from "npm-registry-fetch";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Registry } from "../../src/domain/registry";
 import { FetchAllRegistryPackuments } from "../../src/io/all-packuments-io";
-import { RegistryAuthenticationError } from "../../src/io/common-errors";
+import {
+  HttpErrorLike,
+  RegistryAuthenticationError,
+} from "../../src/io/common-errors";
 import { noopLogger } from "../../src/logging";
 import { exampleRegistryUrl } from "../domain/data-registry";
 
@@ -20,11 +22,11 @@ function makeDependencies() {
 
 describe("fetch all packuments", () => {
   it("should fail on non-auth error response", async () => {
-    const expected = {
+    const expected: HttpErrorLike = {
       message: "Idk, it failed",
       name: "FakeError",
       statusCode: 500,
-    } as HttpErrorBase;
+    };
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
     const { fetchAllRegistryPackuments } = makeDependencies();
 
@@ -34,11 +36,11 @@ describe("fetch all packuments", () => {
   });
 
   it("should fail on auth error response", async () => {
-    const expected = {
+    const expected: HttpErrorLike = {
       message: "Idk, it failed",
       name: "FakeError",
       statusCode: 401,
-    } as HttpErrorBase;
+    };
     jest.mocked(npmFetch.json).mockRejectedValue(expected);
     const { fetchAllRegistryPackuments } = makeDependencies();
 

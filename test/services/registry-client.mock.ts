@@ -1,7 +1,7 @@
 import RegClient, { AddUserResponse } from "another-npm-registry-client";
-import { UnityPackument } from "../../src/domain/packument";
-import { HttpErrorBase } from "npm-registry-fetch/lib/errors";
 import { Response } from "request";
+import { UnityPackument } from "../../src/domain/packument";
+import { HttpErrorLike } from "../../src/io/common-errors";
 
 /**
  * Mocks the result of getting a package using a {@link RegClient.Instance}.
@@ -11,7 +11,7 @@ import { Response } from "request";
  */
 export function mockRegClientGetResult(
   regClient: jest.Mocked<RegClient.Instance>,
-  error: HttpErrorBase | null,
+  error: Error | HttpErrorLike | null,
   packument: UnityPackument | null
 ) {
   regClient.get.mockImplementation((_1, _2, cb) => {
@@ -28,7 +28,7 @@ export function mockRegClientGetResult(
  */
 export function mockRegClientAddUserResult(
   registryClient: jest.Mocked<RegClient.Instance>,
-  error: HttpErrorBase | null,
+  error: Error | null,
   responseData: AddUserResponse | null,
   response: Pick<Response, "statusMessage" | "statusCode"> | null
 ) {
