@@ -91,7 +91,7 @@ export function dependenciesOf(
  * @param packageManifest The manifest for which to get the editor.
  * @returns The editor-version or null if the package is compatible
  * with all Unity version.
- * @throws MalformedPackumentError if the packument contains invalid data that
+ * @throws {MalformedPackumentError} If the packument contains invalid data that
  * can not be parsed.
  */
 export function tryGetTargetEditorVersionFor(

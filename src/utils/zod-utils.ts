@@ -19,7 +19,7 @@ export function isZod<TZod extends ZodType>(
  * zod schemas type.
  * @param value The value to check.
  * @param schema The zod schema to check against.
- * @throws AssertionError if value does not match schema.
+ * @throws {AssertionError} If value does not match schema.
  */
 export function assertZod<TZod extends ZodType>(
   value: TZod["_input"],
@@ -55,7 +55,7 @@ export function removeExplicitUndefined<T>(
  *
  * You can use this function to circumvent [issue #365](https://github.com/colinhacks/zod/issues/635).
  * @param value The value.
- * @throws Error if the passed value is undefined.
+ * @throws {Error} If the passed value is undefined.
  */
 export function removeExplicitUndefined(value: unknown) {
   if (value === undefined)

@@ -64,7 +64,7 @@ export function isHttpError(x: unknown): x is HttpErrorBase {
 /**
  * Asserts that a value is a {@link HttpErrorBase}.
  * @param x The value to assert.
- * @throws AssertionError if the value is not a {@link HttpErrorBase}.
+ * @throws {AssertionError} If the value is not a {@link HttpErrorBase}.
  */
 export function assertIsHttpError(x: unknown): asserts x is HttpErrorBase {
   if (!isHttpError(x))

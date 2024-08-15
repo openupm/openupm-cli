@@ -145,7 +145,7 @@ export type ResolvePackumentVersionError =
  * @param requestedVersion The version to resolve. In this case indicates that
  * the latest version is requested.
  * @returns Result containing the resolved version. Will never be error.
- * @throws NoVersionsError if the packument had no versions at all.
+ * @throws {NoVersionsError} If the packument had no versions at all.
  */
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
@@ -168,7 +168,7 @@ export function tryResolvePackumentVersion(
  * @param requestedVersion The version to resolve.
  * @returns A result containing the version or an error if it could not be
  * resolved.
- * @throws NoVersionsError if the packument had no versions at all.
+ * @throws {NoVersionsError} If the packument had no versions at all.
  */
 export function tryResolvePackumentVersion(
   packument: UnityPackument,

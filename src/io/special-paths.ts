@@ -54,7 +54,7 @@ export class NoHomePathError extends CustomError {}
 /**
  * {@link GetHomePath} function which resolved the home path using the
  * `USERPROFILE` and `HOME` environment variables.
- * @throws NoHomePathError if none of the required env variables are set.
+ * @throws {NoHomePathError} If none of the required env variables are set.
  */
 export const getHomePathFromEnv: GetHomePath = () => {
   const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
