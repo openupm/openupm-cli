@@ -8,7 +8,6 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../io/project-manifest-io";
-import { getProcessCwd } from "../io/special-paths";
 import { getUpmConfigPath } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
 import { resolveDependencies } from "../services/dependency-resolving";
@@ -39,7 +38,7 @@ import {
 
 const log = npmlog;
 
-const parseEnv = makeParseEnv(log, getProcessCwd);
+const parseEnv = makeParseEnv(log, process.cwd());
 
 const addCmd = makeAddCmd(
   parseEnv,

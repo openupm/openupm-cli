@@ -1,21 +1,15 @@
 import path from "path";
 import { openupmRegistryUrl } from "../../src/domain/registry-url";
-import { GetCwd } from "../../src/io/special-paths";
 import { makeParseEnv } from "../../src/services/parse-env";
 import { makeMockLogger } from "../cli/log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
 function makeDependencies() {
   const log = makeMockLogger();
 
-  // process.cwd is in the root directory.
-  const getCwd = mockService<GetCwd>();
-  getCwd.mockReturnValue(testRootPath);
-
-  const parseEnv = makeParseEnv(log, getCwd);
+  const parseEnv = makeParseEnv(log, testRootPath);
   return { parseEnv, log } as const;
 }
 

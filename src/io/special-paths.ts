@@ -1,6 +1,7 @@
-import { Err, Ok, Result } from "ts-results-es";
 import os from "os";
 import { CustomError } from "ts-custom-error";
+import { Err, Ok, Result } from "ts-results-es";
+import { EditorVersionNotSupportedError } from "../common-errors";
 import {
   compareEditorVersion,
   EditorVersion,
@@ -8,7 +9,6 @@ import {
   ReleaseVersion,
   stringifyEditorVersion,
 } from "../domain/editor-version";
-import { EditorVersionNotSupportedError } from "../common-errors";
 import { tryGetEnv } from "../utils/env-util";
 
 /**
@@ -108,14 +108,3 @@ export function tryGetEditorInstallPath(
 
   return Err(new OSNotSupportedError(platform));
 }
-
-/**
- * Function that gets the current working directories path.
- * @returns The path.
- */
-export type GetCwd = () => string;
-
-/**
- * {@link GetCwd} function which uses {@link process.cwd}.
- */
-export const getProcessCwd: GetCwd = process.cwd;

@@ -8,7 +8,6 @@ import {
   openupmRegistryUrl,
   RegistryUrl,
 } from "../domain/registry-url";
-import { GetCwd } from "../io/special-paths";
 import { tryGetEnv } from "../utils/env-util";
 
 /**
@@ -51,9 +50,11 @@ export type ParseEnv = (options: CmdOptions) => Promise<Env>;
 /**
  * Creates a {@link ParseEnv} function.
  */
-export function makeParseEnv(log: Logger, getCwd: GetCwd): ParseEnv {
+export function makeParseEnv(log: Logger, processCwd: string): ParseEnv {
   function determineCwd(options: CmdOptions): string {
-    return options.chdir !== undefined ? path.resolve(options.chdir) : getCwd();
+    return options.chdir !== undefined
+      ? path.resolve(options.chdir)
+      : processCwd;
   }
 
   function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
