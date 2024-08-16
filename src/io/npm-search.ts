@@ -1,11 +1,11 @@
 import npmSearch from "libnpmsearch";
-import npmFetch from "npm-registry-fetch";
 import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
+import { makeNpmFetchOptions } from "./npm-registry";
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -29,26 +29,12 @@ export type SearchRegistry = (
 ) => Promise<ReadonlyArray<SearchedPackument>>;
 
 /**
- * Get npm fetch options.
- */
-export const getNpmFetchOptions = function (
-  registry: Registry
-): npmFetch.Options {
-  const opts: npmSearch.Options = {
-    registry: registry.url,
-  };
-  const auth = registry.auth;
-  if (auth !== null) Object.assign(opts, auth);
-  return opts;
-};
-
-/**
  * Makes a {@link SearchRegistry} function which uses the npm search api to
  * find packages in a remote registry.
  */
 export function NpmApiSearch(debugLog: DebugLog): SearchRegistry {
   return (registry, keyword) =>
-    npmSearch(keyword, getNpmFetchOptions(registry))
+    npmSearch(keyword, makeNpmFetchOptions(registry))
       // NOTE: The results of the search will be packument objects, so we can change the type
       .then((results) => results as SearchedPackument[])
       .catch((error) => {

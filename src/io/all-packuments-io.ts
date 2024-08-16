@@ -4,7 +4,8 @@ import { Registry } from "../domain/registry";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
-import { getNpmFetchOptions, SearchedPackument } from "./npm-search";
+import { makeNpmFetchOptions } from "./npm-registry";
+import { SearchedPackument } from "./npm-search";
 
 /**
  * The result of querying the /-/all endpoint.
@@ -34,7 +35,7 @@ export function FetchAllRegistryPackuments(
     try {
       const result = await npmFetch.json(
         "/-/all",
-        getNpmFetchOptions(registry)
+        makeNpmFetchOptions(registry)
       );
       return result as AllPackuments;
     } catch (error) {
