@@ -1,9 +1,7 @@
 import TOML from "@iarna/toml";
-import path from "path";
-import { CustomError } from "ts-custom-error";
 import { z } from "zod";
 import { Base64 } from "../domain/base64";
-import { tryGetEnv } from "../utils/env-util";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
@@ -15,10 +13,6 @@ import {
   writeTextFile,
   WriteTextFile,
 } from "./text-file-io";
-
-const configFileName = ".upmconfig.toml";
-
-export class NoSystemUserProfilePath extends CustomError {}
 
 /**
  * Function which gets the path to the upmconfig file.
@@ -35,24 +29,8 @@ export type GetUpmConfigPath = (systemUser: boolean) => string;
 export function ResolveDefaultUpmConfigPath(
   getHomePath: GetHomePath
 ): GetUpmConfigPath {
-  function getConfigDirectory(systemUser: boolean) {
-    const systemUserSubPath = "Unity/config/ServiceAccounts";
-    if (systemUser) {
-      const profilePath = tryGetEnv("ALLUSERSPROFILE");
-      if (profilePath === null) throw new NoSystemUserProfilePath();
-      return path.join(profilePath, systemUserSubPath);
-    }
-
-    return getHomePath();
-  }
-
-  return (systemUser) => {
-    const customDir = tryGetEnv("UPM_USER_CONFIG_FILE");
-    if (customDir !== null) return path.resolve(customDir);
-
-    const directory = getConfigDirectory(systemUser);
-    return path.join(directory, configFileName);
-  };
+  return (systemUser) =>
+    getUserUpmConfigPathFor(process.env, getHomePath(), systemUser);
 }
 
 /**

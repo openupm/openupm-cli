@@ -1,58 +1,12 @@
 import { EOL } from "node:os";
-import path from "path";
-import { GetHomePath } from "../../src/io/special-paths";
 import { ReadTextFile } from "../../src/io/text-file-io";
-import {
-  ReadUpmConfigFile,
-  ResolveDefaultUpmConfigPath,
-} from "../../src/io/upm-config-io";
+import { ReadUpmConfigFile } from "../../src/io/upm-config-io";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
-import { tryGetEnv } from "../../src/utils/env-util";
 
 jest.mock("../../src/utils/env-util");
 
 describe("upm-config-io", () => {
-  describe("resolve default path", () => {
-    const homeConfigPath = path.resolve("/some/home/dir/.upmconfig.toml");
-    const customConfigPath = path.resolve("/some/other/dir/.upmconfig.toml");
-
-    function makeDependencies() {
-      const getHomePath = mockService<GetHomePath>();
-      getHomePath.mockReturnValue(path.dirname(homeConfigPath));
-
-      jest.mocked(tryGetEnv).mockReturnValue(null);
-
-      const resolveDefaultUpmConfigPath =
-        ResolveDefaultUpmConfigPath(getHomePath);
-
-      return { resolveDefaultUpmConfigPath, getHomePath } as const;
-    }
-
-    it("should be UPM_USER_CONFIG_FILE if set", async () => {
-      const { resolveDefaultUpmConfigPath } = makeDependencies();
-      jest
-        .mocked(tryGetEnv)
-        .mockImplementation((key) =>
-          key === "UPM_USER_CONFIG_FILE" ? customConfigPath : null
-        );
-
-      const actual = await resolveDefaultUpmConfigPath(false);
-
-      expect(actual).toEqual(customConfigPath);
-    });
-
-    describe("no system-user", () => {
-      it("should be in home path", async () => {
-        const { resolveDefaultUpmConfigPath } = makeDependencies();
-
-        const actual = await resolveDefaultUpmConfigPath(false);
-
-        expect(actual).toEqual(homeConfigPath);
-      });
-    });
-  });
-
   describe("read file", () => {
     const someConfigPath = "/home/user/.upmconfig.toml";
     const someEmail = "user@mail.com";

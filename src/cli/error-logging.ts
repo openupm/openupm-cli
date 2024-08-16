@@ -1,25 +1,14 @@
+import { EOL } from "node:os";
 import { Logger } from "npmlog";
-import { ResultCodes } from "./result-codes";
-import { RegistryAuthLoadError } from "../services/parse-env";
 import {
   EditorVersionNotSupportedError,
   PackumentNotFoundError,
 } from "../common-errors";
 import { stringifyEditorVersion } from "../domain/editor-version";
-import {
-  CompatibilityCheckFailedError,
-  PackageIncompatibleError,
-  UnresolvedDependenciesError,
-} from "./cmd-add";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
-import { EOL } from "node:os";
+import { NoSystemUserProfilePath } from "../domain/upm-config";
 import { EditorNotInstalledError } from "../io/builtin-packages";
 import { RegistryAuthenticationError } from "../io/common-errors";
-import {
-  NoHomePathError,
-  OSNotSupportedError,
-  VersionNotSupportedOnOsError,
-} from "../io/special-paths";
 import {
   ManifestMalformedError,
   ManifestMissingError,
@@ -28,7 +17,18 @@ import {
   ProjectVersionMalformedError,
   ProjectVersionMissingError,
 } from "../io/project-version-io";
-import { NoSystemUserProfilePath } from "../io/upm-config-io";
+import {
+  NoHomePathError,
+  OSNotSupportedError,
+  VersionNotSupportedOnOsError,
+} from "../io/special-paths";
+import { RegistryAuthLoadError } from "../services/parse-env";
+import {
+  CompatibilityCheckFailedError,
+  PackageIncompatibleError,
+  UnresolvedDependenciesError,
+} from "./cmd-add";
+import { ResultCodes } from "./result-codes";
 
 function makeErrorMessageFor(error: unknown): string {
   if (error instanceof RegistryAuthLoadError)
