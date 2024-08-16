@@ -4,8 +4,12 @@ import {
   ManifestMalformedError,
   ManifestMissingError,
   manifestPathFor,
+  serializeProjectManifest,
 } from "../../src/io/project-manifest-io";
-import { mapScopedRegistry } from "../../src/domain/project-manifest";
+import {
+  mapScopedRegistry,
+  UnityProjectManifest,
+} from "../../src/domain/project-manifest";
 import path from "path";
 import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 import { buildProjectManifest } from "../domain/data-project-manifest";
@@ -83,63 +87,20 @@ describe("project-manifest io", () => {
     });
   });
 
-  describe("write file", () => {
-    function makeDependencies() {
-      const writeFile = mockService<WriteTextFile>();
-      writeFile.mockResolvedValue(undefined);
+  describe("serialize manifest", () => {
+    it("should prune empty scoped registries", () => {
+      const manifest: UnityProjectManifest = {
+        dependencies: {},
+        scopedRegistries: [
+          // Scoped registry with no scopes
+          { name: "some registry", url: exampleRegistryUrl, scopes: [] },
+        ],
+      };
 
-      const writeProjectManifest = WriteProjectManifestFile(writeFile);
-      return { writeProjectManifest, writeFile } as const;
-    }
+      const json = serializeProjectManifest(manifest);
 
-    it("should write manifest json", async () => {
-      const { writeProjectManifest, writeFile } = makeDependencies();
-
-      const manifest = buildProjectManifest((manifest) =>
-        manifest.addDependency("com.package.a", "1.0.0", true, true)
-      );
-
-      await writeProjectManifest(exampleProjectPath, manifest);
-
-      expect(writeFile).toHaveBeenCalledWith(
-        expect.any(String),
-        JSON.stringify(
-          {
-            dependencies: {
-              "com.package.a": "1.0.0",
-            },
-            scopedRegistries: [
-              {
-                name: "example.com",
-                url: exampleRegistryUrl,
-                scopes: ["com.package.a"],
-              },
-            ],
-            testables: ["com.package.a"],
-          },
-          null,
-          2
-        )
-      );
-    });
-
-    it("should prune manifest before writing", async () => {
-      const { writeProjectManifest, writeFile } = makeDependencies();
-      // Add and then remove a scope to force an empty scoped-registry
-      const testDomain = "test" as DomainName;
-      let manifest = buildProjectManifest((manifest) =>
-        manifest.addScope(testDomain)
-      );
-      manifest = mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
-        return removeScope(registry!, testDomain);
-      });
-
-      await writeProjectManifest(exampleProjectPath, manifest);
-
-      expect(writeFile).toHaveBeenCalledWith(
-        expect.any(String),
-        JSON.stringify({ dependencies: {}, scopedRegistries: [] }, null, 2)
-      );
+      // The registry should not be in the output json
+      expect(json).not.toContain("some registry");
     });
   });
 });

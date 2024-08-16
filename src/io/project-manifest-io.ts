@@ -1,20 +1,17 @@
 import { AnyJson } from "@iarna/toml";
 import path from "path";
 import { CustomError } from "ts-custom-error";
-import {
-  pruneManifest,
-  UnityProjectManifest,
-} from "../domain/project-manifest";
+import { z } from "zod";
+import { UnityProjectManifest } from "../domain/project-manifest";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
+import { isZod } from "../utils/zod-utils";
 import {
   readTextFile,
   ReadTextFile,
   writeTextFile,
   WriteTextFile,
 } from "./text-file-io";
-import { z } from "zod";
-import { isZod } from "../utils/zod-utils";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {
@@ -93,6 +90,26 @@ export type SaveProjectManifest = (
 ) => Promise<void>;
 
 /**
+ * Serializes a {@link UnityProjectManifest} object into json format.
+ * @param manifest The manifest to serialize.
+ * @returns The serialized manifest.
+ */
+export function serializeProjectManifest(
+  manifest: UnityProjectManifest
+): string {
+  // Remove empty scoped registries
+  if (manifest.scopedRegistries !== undefined)
+    manifest = {
+      ...manifest,
+      scopedRegistries: manifest.scopedRegistries.filter(
+        (it) => it.scopes.length > 0
+      ),
+    };
+
+  return JSON.stringify(manifest, null, 2);
+}
+
+/**
  * Makes a {@link SaveProjectManifest} function which overwrites the contents
  * of a `manifest.json` file.
  */
@@ -101,10 +118,8 @@ export function WriteProjectManifestFile(
 ): SaveProjectManifest {
   return async (projectPath, manifest) => {
     const manifestPath = manifestPathFor(projectPath);
-    manifest = pruneManifest(manifest);
-    const json = JSON.stringify(manifest, null, 2);
-
-    return await writeFile(manifestPath, json);
+    const content = serializeProjectManifest(manifest);
+    return await writeFile(manifestPath, content);
   };
 }
 

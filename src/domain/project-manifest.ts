@@ -149,23 +149,6 @@ export function addTestable(
 }
 
 /**
- * Prunes the manifest by performing the following operations:
- *  - Remove scoped-registries without scopes.
- * @param manifest The manifest to prune.
- */
-export function pruneManifest(
-  manifest: UnityProjectManifest
-): UnityProjectManifest {
-  if (manifest.scopedRegistries === undefined) return manifest;
-  return {
-    ...manifest,
-    scopedRegistries: manifest.scopedRegistries.filter(
-      (it) => it.scopes.length > 0
-    ),
-  };
-}
-
-/**
  * Checks if a manifest has a dependency on a specific package.
  */
 export function hasDependency(
