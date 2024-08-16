@@ -13,6 +13,8 @@ import {
   writeTextFile,
   WriteTextFile,
 } from "./text-file-io";
+import { z } from "zod";
+import { isZod } from "../utils/zod-utils";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {
@@ -40,6 +42,9 @@ export type LoadProjectManifest = (
   projectPath: string
 ) => Promise<UnityProjectManifest>;
 
+// TODO: Add a better schema
+const projectManifestSchema = z.object({});
+
 /**
  * Makes a {@link LoadProjectManifest} function which reads the content
  * of a `manifest.json` file.
@@ -63,8 +68,7 @@ export function ReadProjectManifestFile(
       throw new ManifestMalformedError();
     }
 
-    // TODO: Actually validate the json structure
-    if (typeof json !== "object") throw new ManifestMalformedError();
+    if (!isZod(json, projectManifestSchema)) throw new ManifestMalformedError();
 
     return json as unknown as UnityProjectManifest;
   };
