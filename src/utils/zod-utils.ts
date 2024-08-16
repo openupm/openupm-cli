@@ -8,7 +8,7 @@ import { AssertionError } from "assert";
  * @param schema The zod schema to check against.
  */
 export function isZod<TZod extends ZodType>(
-  value: TZod["_input"],
+  value: unknown,
   schema: TZod
 ): value is TZod["_output"] {
   return schema.safeParse(value).success;
@@ -22,7 +22,7 @@ export function isZod<TZod extends ZodType>(
  * @throws {AssertionError} If value does not match schema.
  */
 export function assertZod<TZod extends ZodType>(
-  value: TZod["_input"],
+  value: unknown,
   schema: TZod
 ): asserts value is TZod["_output"] {
   const result = schema.safeParse(value);

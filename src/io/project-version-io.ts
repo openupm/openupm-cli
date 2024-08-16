@@ -5,6 +5,8 @@ import * as YAML from "yaml";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { readTextFile, ReadTextFile } from "./text-file-io";
+import { z } from "zod";
+import { isZod } from "../utils/zod-utils";
 
 export class ProjectVersionMissingError extends CustomError {
   public constructor(public readonly expectedPath: string) {
@@ -31,6 +33,8 @@ export function projectVersionTxtPathFor(projectDirPath: string) {
  */
 export type GetProjectVersion = (projectDirPath: string) => Promise<string>;
 
+const projectVersionTxtSchema = z.object({ m_EditorVersion: z.string() });
+
 /**
  * Makes a {@link GetProjectVersion} function which gets the project-version
  * from the `ProjectSettings/ProjectVersion.txt` file.
@@ -54,14 +58,7 @@ export function ReadProjectVersionFile(
       throw new ProjectVersionMalformedError();
     }
 
-    if (
-      !(
-        typeof yaml === "object" &&
-        yaml !== null &&
-        "m_EditorVersion" in yaml &&
-        typeof yaml.m_EditorVersion === "string"
-      )
-    )
+    if (!isZod(yaml, projectVersionTxtSchema))
       throw new ProjectVersionMalformedError();
 
     return yaml.m_EditorVersion;
