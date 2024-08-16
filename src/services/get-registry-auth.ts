@@ -94,8 +94,9 @@ export function LoadRegistryAuthFromUpmConfig(
 /**
  * Default {@link GetRegistryAuth} function. Uses {@link LoadRegistryAuthFromUpmConfig}.
  */
-export const getRegistryAuth = LoadRegistryAuthFromUpmConfig(
-  getUpmConfigPath,
-  loadUpmConfig,
-  npmDebugLog
-);
+export const getRegistryAuth = (homePath: string) =>
+  LoadRegistryAuthFromUpmConfig(
+    getUpmConfigPath(homePath),
+    loadUpmConfig,
+    npmDebugLog
+  );

@@ -8,6 +8,7 @@ import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../io/project-manifest-io";
+import { getHomePathFromEnv } from "../io/special-paths";
 import { getUpmConfigPath } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
 import { resolveDependencies } from "../services/dependency-resolving";
@@ -39,6 +40,7 @@ import {
 const log = npmlog;
 
 const parseEnv = makeParseEnv(log, process.cwd());
+const homePath = getHomePathFromEnv(process.env);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -47,15 +49,20 @@ const addCmd = makeAddCmd(
   loadProjectManifest,
   saveProjectManifest,
   determineEditorVersion,
-  getRegistryAuth,
+  getRegistryAuth(homePath),
   log,
   npmDebugLog
 );
-const loginCmd = makeLoginCmd(parseEnv, getUpmConfigPath, login, log);
+const loginCmd = makeLoginCmd(
+  parseEnv,
+  getUpmConfigPath(homePath),
+  login(homePath),
+  log
+);
 const searchCmd = makeSearchCmd(
   parseEnv,
   searchPackages,
-  getRegistryAuth,
+  getRegistryAuth(homePath),
   log,
   npmDebugLog
 );
@@ -63,7 +70,7 @@ const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependencies,
   getLatestVersion,
-  getRegistryAuth,
+  getRegistryAuth(homePath),
   log,
   npmDebugLog
 );
@@ -71,7 +78,7 @@ const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
 const viewCmd = makeViewCmd(
   parseEnv,
   getRegistryPackument,
-  getRegistryAuth,
+  getRegistryAuth(homePath),
   log
 );
 

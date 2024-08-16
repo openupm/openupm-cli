@@ -41,8 +41,5 @@ export function StoreNpmAuthTokenInNpmrc(
 /**
  * Default {@link StoreNpmAuthToken} function. Uses {@link StoreNpmAuthTokenInNpmrc}.
  */
-export const putNpmAuthToken = StoreNpmAuthTokenInNpmrc(
-  findNpmrcPath,
-  loadNpmrc,
-  saveNpmrc
-);
+export const putNpmAuthToken = (homePath: string) =>
+  StoreNpmAuthTokenInNpmrc(findNpmrcPath(homePath), loadNpmrc, saveNpmrc);

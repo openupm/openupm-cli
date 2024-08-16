@@ -66,9 +66,10 @@ export function UpmConfigLogin(
 /**
  * Default {@link Login} function. Uses {@link UpmConfigLogin}.
  */
-export const login = UpmConfigLogin(
-  putRegistryAuth,
-  getAuthToken,
-  putNpmAuthToken,
-  npmDebugLog
-);
+export const login = (homePath: string) =>
+  UpmConfigLogin(
+    putRegistryAuth,
+    getAuthToken,
+    putNpmAuthToken(homePath),
+    npmDebugLog
+  );

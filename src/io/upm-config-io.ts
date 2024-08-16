@@ -6,7 +6,6 @@ import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { GetHomePath, getHomePathFromEnv } from "./special-paths";
 import {
   readTextFile,
   ReadTextFile,
@@ -27,17 +26,17 @@ export type GetUpmConfigPath = (systemUser: boolean) => string;
  * @see https://docs.unity3d.com/Manual/upm-config.html#upmconfig
  */
 export function ResolveDefaultUpmConfigPath(
-  getHomePath: GetHomePath
+  homePath: string
 ): GetUpmConfigPath {
   return (systemUser) =>
-    getUserUpmConfigPathFor(process.env, getHomePath(), systemUser);
+    getUserUpmConfigPathFor(process.env, homePath, systemUser);
 }
 
 /**
  * Default {@link GetUpmConfigPath} function. Uses {@link ResolveDefaultUpmConfigPath}.
  */
-export const getUpmConfigPath: GetUpmConfigPath =
-  ResolveDefaultUpmConfigPath(getHomePathFromEnv);
+export const getUpmConfigPath = (homePath: string): GetUpmConfigPath =>
+  ResolveDefaultUpmConfigPath(homePath);
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),

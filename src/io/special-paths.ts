@@ -9,7 +9,6 @@ import {
   ReleaseVersion,
   stringifyEditorVersion,
 } from "../domain/editor-version";
-import { tryGetEnv } from "../utils/env-util";
 
 /**
  * Error for when a specific OS does not support a specific editor-version.
@@ -43,24 +42,22 @@ export class OSNotSupportedError extends CustomError {
   }
 }
 
-/**
- * Function for getting the path of the users home directory.
- * @returns The path to the directory.
- */
-export type GetHomePath = () => string;
-
 export class NoHomePathError extends CustomError {}
 
 /**
- * {@link GetHomePath} function which resolved the home path using the
- * `USERPROFILE` and `HOME` environment variables.
- * @throws {NoHomePathError} If none of the required env variables are set.
+ * Attempts to resolve the users home path from environment variables,
+ * specifically the `USERPROFILE` and `HOME` vars.
+ * @param envVars The current environment variables.
+ * @returns The resolved path.
+ * @throws {NoHomePathError} If none of the required env vars were set.
  */
-export const getHomePathFromEnv: GetHomePath = () => {
-  const homePath = tryGetEnv("USERPROFILE") ?? tryGetEnv("HOME");
-  if (homePath === null) throw new NoHomePathError();
+export function getHomePathFromEnv(
+  envVars: Record<string, string | undefined>
+) {
+  const homePath = envVars["USERPROFILE"] ?? envVars["HOME"];
+  if (homePath === undefined) throw new NoHomePathError();
   return homePath;
-};
+}
 
 /**
  * Errors which may occur when trying to resolve an editor-version.
