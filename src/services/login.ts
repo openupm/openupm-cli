@@ -1,4 +1,4 @@
-import { NpmAuth } from "another-npm-registry-client";
+import RegClient, { NpmAuth } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
 import { DebugLog, npmDebugLog } from "../logging";
 import { getAuthToken, GetAuthToken } from "./get-auth-token";
@@ -66,10 +66,10 @@ export function UpmConfigLogin(
 /**
  * Default {@link Login} function. Uses {@link UpmConfigLogin}.
  */
-export const login = (homePath: string) =>
+export const login = (homePath: string, registryClient: RegClient.Instance) =>
   UpmConfigLogin(
     putRegistryAuth,
-    getAuthToken,
+    getAuthToken(registryClient),
     putNpmAuthToken(homePath),
     npmDebugLog
   );

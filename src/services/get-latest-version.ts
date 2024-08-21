@@ -1,3 +1,4 @@
+import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { Registry } from "../domain/registry";
@@ -34,5 +35,5 @@ export function GetLatestVersionFromRegistryPackument(
 /**
  * Default {@link GetLatestVersion}. Uses {@link GetLatestVersionFromRegistryPackument}.
  */
-export const getLatestVersion =
-  GetLatestVersionFromRegistryPackument(getRegistryPackument);
+export const getLatestVersion = (registryClient: RegClient.Instance) =>
+  GetLatestVersionFromRegistryPackument(getRegistryPackument(registryClient));

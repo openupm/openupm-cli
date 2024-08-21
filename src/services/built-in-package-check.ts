@@ -1,3 +1,4 @@
+import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
@@ -51,7 +52,8 @@ export function CheckIsNonRegistryUnityPackage(
 /**
  * Default {@link CheckIsBuiltInPackage}. Uses {@link CheckIsNonRegistryUnityPackage}.
  */
-export const checkIsBuiltInPackage = CheckIsNonRegistryUnityPackage(
-  checkIsUnityPackage,
-  getRegistryPackument
-);
+export const checkIsBuiltInPackage = (registryClient: RegClient.Instance) =>
+  CheckIsNonRegistryUnityPackage(
+    checkIsUnityPackage,
+    getRegistryPackument(registryClient)
+  );

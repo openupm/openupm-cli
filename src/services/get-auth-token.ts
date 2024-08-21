@@ -1,7 +1,6 @@
 import RegClient from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
 import { RegistryAuthenticationError } from "../io/common-errors";
-import { npmRegistryClient } from "../io/reg-client";
 import { DebugLog, npmDebugLog } from "../logging";
 
 /**
@@ -54,7 +53,5 @@ export function AuthenticateWithNpmRegistry(
 /**
  * Default {@link GetAuthToken}. Uses {@link AuthenticateWithNpmRegistry}.
  */
-export const getAuthToken = AuthenticateWithNpmRegistry(
-  npmRegistryClient,
-  npmDebugLog
-);
+export const getAuthToken = (registryClient: RegClient.Instance) =>
+  AuthenticateWithNpmRegistry(registryClient, npmDebugLog);

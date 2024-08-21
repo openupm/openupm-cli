@@ -3,20 +3,21 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { getRegistryPackument } from "../io/packument-io";
+import { getRegistryPackument as getRegistryPackumentUsing } from "../io/packument-io";
 import {
   loadProjectManifest,
   saveProjectManifest,
 } from "../io/project-manifest-io";
+import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
-import { getUpmConfigPath } from "../io/upm-config-io";
+import { getUpmConfigPath as getUpmConfigPathUsing } from "../io/upm-config-io";
 import { npmDebugLog } from "../logging";
-import { resolveDependencies } from "../services/dependency-resolving";
+import { resolveDependencies as resolveDependenciesUsing } from "../services/dependency-resolving";
 import { determineEditorVersion } from "../services/determine-editor-version";
-import { getLatestVersion } from "../services/get-latest-version";
-import { getRegistryAuth } from "../services/get-registry-auth";
-import { getRegistryPackumentVersion } from "../services/get-registry-packument-version";
-import { login } from "../services/login";
+import { getLatestVersion as getLatestVersionUsing } from "../services/get-latest-version";
+import { getRegistryAuth as getRegistryAuthUsing } from "../services/get-registry-auth";
+import { getRegistryPackumentVersion as getRegistryPackumentVersionUsing } from "../services/get-registry-packument-version";
+import { login as loginUsing } from "../services/login";
 import { makeParseEnv } from "../services/parse-env";
 import { removePackages } from "../services/remove-packages";
 import { searchPackages } from "../services/search-packages";
@@ -42,43 +43,45 @@ const log = npmlog;
 const parseEnv = makeParseEnv(log, process.cwd());
 const homePath = getHomePathFromEnv(process.env);
 
+const registryClient = makeNpmRegistryClient(log);
+
 const addCmd = makeAddCmd(
   parseEnv,
-  getRegistryPackumentVersion,
-  resolveDependencies,
+  getRegistryPackumentVersionUsing(registryClient),
+  resolveDependenciesUsing(registryClient),
   loadProjectManifest,
   saveProjectManifest,
   determineEditorVersion,
-  getRegistryAuth(homePath),
+  getRegistryAuthUsing(homePath),
   log,
   npmDebugLog
 );
 const loginCmd = makeLoginCmd(
   parseEnv,
-  getUpmConfigPath(homePath),
-  login(homePath),
+  getUpmConfigPathUsing(homePath),
+  loginUsing(homePath, registryClient),
   log
 );
 const searchCmd = makeSearchCmd(
   parseEnv,
   searchPackages,
-  getRegistryAuth(homePath),
+  getRegistryAuthUsing(homePath),
   log,
   npmDebugLog
 );
 const depsCmd = makeDepsCmd(
   parseEnv,
-  resolveDependencies,
-  getLatestVersion,
-  getRegistryAuth(homePath),
+  resolveDependenciesUsing(registryClient),
+  getLatestVersionUsing(registryClient),
+  getRegistryAuthUsing(homePath),
   log,
   npmDebugLog
 );
 const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
 const viewCmd = makeViewCmd(
   parseEnv,
-  getRegistryPackument,
-  getRegistryAuth(homePath),
+  getRegistryPackumentUsing(registryClient),
+  getRegistryAuthUsing(homePath),
   log
 );
 

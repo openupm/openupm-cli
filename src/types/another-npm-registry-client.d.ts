@@ -1,3 +1,5 @@
+import { Logger } from "npmlog";
+
 declare module "another-npm-registry-client" {
   import { type Response } from "request";
 
@@ -44,6 +46,6 @@ declare module "another-npm-registry-client" {
 }
 
 declare module "another-npm-registry-client" {
-  const RegClient: new (this: Instance, config?: { log: unknown }) => Instance;
+  const RegClient: new (this: Instance, config?: { log?: Logger }) => Instance;
   export = RegClient;
 }

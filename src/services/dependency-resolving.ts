@@ -1,3 +1,4 @@
+import RegClient from "another-npm-registry-client";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   DependencyGraph,
@@ -100,7 +101,8 @@ export function ResolveDependenciesFromRegistries(
 /**
  * Default {@link ResolveDependencies} function. Uses {@link ResolveDependenciesFromRegistries}.
  */
-export const resolveDependencies = ResolveDependenciesFromRegistries(
-  getRegistryPackument,
-  checkIsBuiltInPackage
-);
+export const resolveDependencies = (registryClient: RegClient.Instance) =>
+  ResolveDependenciesFromRegistries(
+    getRegistryPackument(registryClient),
+    checkIsBuiltInPackage(registryClient)
+  );

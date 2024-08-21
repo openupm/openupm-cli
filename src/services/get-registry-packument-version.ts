@@ -1,3 +1,4 @@
+import RegClient from "another-npm-registry-client";
 import { AsyncResult, Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
@@ -69,5 +70,5 @@ export function FetchRegistryPackumentVersion(
 /**
  * Default {@link GetRegistryPackumentVersion} function. Uses {@link FetchRegistryPackumentVersion}.
  */
-export const getRegistryPackumentVersion =
-  FetchRegistryPackumentVersion(getRegistryPackument);
+export const getRegistryPackumentVersion = (regClient: RegClient.Instance) =>
+  FetchRegistryPackumentVersion(getRegistryPackument(regClient));

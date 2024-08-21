@@ -5,7 +5,6 @@ import { Registry } from "../domain/registry";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
-import { npmRegistryClient } from "./reg-client";
 
 /**
  * Function for getting a packument from a registry.
@@ -48,7 +47,5 @@ export function FetchRegistryPackument(
 /**
  * Default {@link GetRegistryPackument} function. Uses {@link FetchRegistryPackument}.
  */
-export const getRegistryPackument = FetchRegistryPackument(
-  npmRegistryClient,
-  npmDebugLog
-);
+export const getRegistryPackument = (registryClient: RegClient.Instance) =>
+  FetchRegistryPackument(registryClient, npmDebugLog);
