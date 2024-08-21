@@ -21,14 +21,12 @@ jobs:
         run: npm run test:unit
         
   e2e-test:
-    runs-on: ubuntu-latest
-    container: ghcr.io/openupm/openupm-cli-e2e-${{ matrix.os }}:latest
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         os: 
           - ubuntu
-          # Seems like windows is not supported at the moment (06.2024)
-          # - windows
+          - windows
     name: E2E Tests
     steps:
       - uses: actions/checkout@v3
