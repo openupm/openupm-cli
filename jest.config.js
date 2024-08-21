@@ -4,7 +4,7 @@ module.exports = {
   verbose: true,
   clearMocks: true,
   setupFilesAfterEnv: [
-    "./test/domain/project-manifest-assertions.ts",
+    "./test/project-manifest-assertions.ts",
     "./test/result-assertions.ts",
   ],
 };
