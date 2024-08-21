@@ -41,7 +41,7 @@ jobs:
       - name: build
         run: npm run build
       - name: run tests
-        run: npx jest --testMatch "**/*.e2e.ts" --runInBand --silent=false
+        run: npm run test:e2e
         
   release:
     runs-on: ubuntu-latest
