@@ -7,8 +7,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "test:e2e": "jest --testMatch \"**/e2e/*.test.ts\"",
-    "test:unit": "cross-env NODE_ENV=test jest --testMatch \"**/unit/*.test.ts\"",
+    "test:e2e": "jest --testMatch \"**/e2e/**/*.test.ts\"",
+    "test:unit": "cross-env NODE_ENV=test jest --testMatch \"**/unit/**/*.test.ts\"",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc -w -p tsconfig.build.json",
