@@ -2,7 +2,7 @@ import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
-import { DebugLog, npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { assertIsHttpError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
 
@@ -21,7 +21,7 @@ export type GetRegistryPackument = (
  * Makes a {@link GetRegistryPackument} function which fetches the packument
  * from a remote npm registry.
  */
-export function FetchRegistryPackument(
+export function getRegistryPackumentUsing(
   registryClient: RegClient.Instance,
   debugLog: DebugLog
 ): GetRegistryPackument {
@@ -43,9 +43,3 @@ export function FetchRegistryPackument(
     });
   };
 }
-
-/**
- * Default {@link GetRegistryPackument} function. Uses {@link FetchRegistryPackument}.
- */
-export const getRegistryPackument = (registryClient: RegClient.Instance) =>
-  FetchRegistryPackument(registryClient, npmDebugLog);

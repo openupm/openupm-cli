@@ -4,7 +4,7 @@ import {
   HttpErrorLike,
   RegistryAuthenticationError,
 } from "../../src/io/common-errors";
-import { NpmApiSearch } from "../../src/io/npm-search";
+import { searchRegistryUsing } from "../../src/io/npm-search";
 import { noopLogger } from "../../src/logging";
 import { exampleRegistryUrl } from "../domain/data-registry";
 
@@ -17,7 +17,7 @@ const exampleRegistry: Registry = {
 
 describe("npm api search", () => {
   function makeDependencies() {
-    const npmApiSearch = NpmApiSearch(noopLogger);
+    const npmApiSearch = searchRegistryUsing(noopLogger);
     return { npmApiSearch } as const;
   }
 

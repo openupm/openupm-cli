@@ -8,11 +8,12 @@ import {
 } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
-  loadProjectManifest,
   LoadProjectManifest,
+  loadProjectManifestUsing,
   saveProjectManifest,
   SaveProjectManifest,
 } from "../io/project-manifest-io";
+import { DebugLog } from "../logging";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -122,7 +123,8 @@ export function RemovePackagesFromManifest(
 /**
  * Default {@link RemovePackages} function. Uses {@link RemovePackagesFromManifest}.
  */
-export const removePackages = RemovePackagesFromManifest(
-  loadProjectManifest,
-  saveProjectManifest
-);
+export const removePackages = (debugLog: DebugLog) =>
+  RemovePackagesFromManifest(
+    loadProjectManifestUsing(debugLog),
+    saveProjectManifest
+  );

@@ -1,6 +1,6 @@
 import npmFetch from "npm-registry-fetch";
 import { Registry } from "../../src/domain/registry";
-import { FetchAllRegistryPackuments } from "../../src/io/all-packuments-io";
+import { getAllRegistryPackumentsUsing } from "../../src/io/all-packuments-io";
 import {
   HttpErrorLike,
   RegistryAuthenticationError,
@@ -16,7 +16,7 @@ const exampleRegistry: Registry = {
 };
 
 function makeDependencies() {
-  const fetchAllRegistryPackuments = FetchAllRegistryPackuments(noopLogger);
+  const fetchAllRegistryPackuments = getAllRegistryPackumentsUsing(noopLogger);
   return { fetchAllRegistryPackuments } as const;
 }
 

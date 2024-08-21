@@ -16,7 +16,11 @@ import {
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
-import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
+import {
+  GetRegistryPackument,
+  getRegistryPackumentUsing,
+} from "../io/packument-io";
+import { DebugLog } from "../logging";
 import {
   checkIsBuiltInPackage,
   CheckIsBuiltInPackage,
@@ -101,8 +105,11 @@ export function ResolveDependenciesFromRegistries(
 /**
  * Default {@link ResolveDependencies} function. Uses {@link ResolveDependenciesFromRegistries}.
  */
-export const resolveDependencies = (registryClient: RegClient.Instance) =>
+export const resolveDependencies = (
+  registryClient: RegClient.Instance,
+  debugLog: DebugLog
+) =>
   ResolveDependenciesFromRegistries(
-    getRegistryPackument(registryClient),
-    checkIsBuiltInPackage(registryClient)
+    getRegistryPackumentUsing(registryClient, debugLog),
+    checkIsBuiltInPackage(registryClient, debugLog)
   );

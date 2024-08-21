@@ -11,7 +11,11 @@ import {
 } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
-import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
+import {
+  GetRegistryPackument,
+  getRegistryPackumentUsing,
+} from "../io/packument-io";
+import { DebugLog } from "../logging";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -70,5 +74,8 @@ export function FetchRegistryPackumentVersion(
 /**
  * Default {@link GetRegistryPackumentVersion} function. Uses {@link FetchRegistryPackumentVersion}.
  */
-export const getRegistryPackumentVersion = (regClient: RegClient.Instance) =>
-  FetchRegistryPackumentVersion(getRegistryPackument(regClient));
+export const getRegistryPackumentVersionUsing = (
+  regClient: RegClient.Instance,
+  debugLog: DebugLog
+) =>
+  FetchRegistryPackumentVersion(getRegistryPackumentUsing(regClient, debugLog));

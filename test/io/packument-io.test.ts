@@ -1,7 +1,7 @@
 import RegClient from "another-npm-registry-client";
 import { DomainName } from "../../src/domain/domain-name";
 import { Registry } from "../../src/domain/registry";
-import { FetchRegistryPackument } from "../../src/io/packument-io";
+import { getRegistryPackumentUsing } from "../../src/io/packument-io";
 import { noopLogger } from "../../src/logging";
 import { buildPackument } from "../domain/data-packument";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -21,7 +21,7 @@ describe("packument io", () => {
         get: jest.fn(),
       };
 
-      const fetchRegistryPackument = FetchRegistryPackument(
+      const fetchRegistryPackument = getRegistryPackumentUsing(
         regClient,
         noopLogger
       );

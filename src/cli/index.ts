@@ -3,24 +3,24 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { getRegistryPackument as getRegistryPackumentUsing } from "../io/packument-io";
+import { getRegistryPackumentUsing } from "../io/packument-io";
 import {
-  loadProjectManifest,
+  loadProjectManifestUsing,
   saveProjectManifest,
 } from "../io/project-manifest-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
 import { getUpmConfigPath as getUpmConfigPathUsing } from "../io/upm-config-io";
-import { npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { resolveDependencies as resolveDependenciesUsing } from "../services/dependency-resolving";
-import { determineEditorVersion } from "../services/determine-editor-version";
+import { determineEditorVersionUsing } from "../services/determine-editor-version";
 import { getLatestVersion as getLatestVersionUsing } from "../services/get-latest-version";
-import { getRegistryAuth as getRegistryAuthUsing } from "../services/get-registry-auth";
-import { getRegistryPackumentVersion as getRegistryPackumentVersionUsing } from "../services/get-registry-packument-version";
+import { getRegistryAuthUsing } from "../services/get-registry-auth";
+import { getRegistryPackumentVersionUsing } from "../services/get-registry-packument-version";
 import { login as loginUsing } from "../services/login";
 import { makeParseEnv } from "../services/parse-env";
-import { removePackages } from "../services/remove-packages";
-import { searchPackages } from "../services/search-packages";
+import { removePackages as removePackagesUsing } from "../services/remove-packages";
+import { searchPackagesUsing } from "../services/search-packages";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
@@ -40,6 +40,22 @@ import {
 
 const log = npmlog;
 
+/**
+ * {@link DebugLog} function which uses {@link npmlog} to print logs to
+ * the console.
+ */
+const debugLogToConsole: DebugLog = function (message, context) {
+  const contextMessage =
+    context !== undefined
+      ? `\n${
+          context instanceof Error
+            ? context.toString()
+            : JSON.stringify(context, null, 2)
+        }`
+      : "";
+  return log.verbose("", `${message}${contextMessage}`);
+};
+
 const parseEnv = makeParseEnv(log, process.cwd());
 const homePath = getHomePathFromEnv(process.env);
 
@@ -47,41 +63,45 @@ const registryClient = makeNpmRegistryClient(log);
 
 const addCmd = makeAddCmd(
   parseEnv,
-  getRegistryPackumentVersionUsing(registryClient),
-  resolveDependenciesUsing(registryClient),
-  loadProjectManifest,
+  getRegistryPackumentVersionUsing(registryClient, debugLogToConsole),
+  resolveDependenciesUsing(registryClient, debugLogToConsole),
+  loadProjectManifestUsing(debugLogToConsole),
   saveProjectManifest,
-  determineEditorVersion,
-  getRegistryAuthUsing(homePath),
+  determineEditorVersionUsing(debugLogToConsole),
+  getRegistryAuthUsing(homePath, debugLogToConsole),
   log,
-  npmDebugLog
+  debugLogToConsole
 );
 const loginCmd = makeLoginCmd(
   parseEnv,
   getUpmConfigPathUsing(homePath),
-  loginUsing(homePath, registryClient),
+  loginUsing(homePath, registryClient, debugLogToConsole),
   log
 );
 const searchCmd = makeSearchCmd(
   parseEnv,
-  searchPackages,
-  getRegistryAuthUsing(homePath),
+  searchPackagesUsing(debugLogToConsole),
+  getRegistryAuthUsing(homePath, debugLogToConsole),
   log,
-  npmDebugLog
+  debugLogToConsole
 );
 const depsCmd = makeDepsCmd(
   parseEnv,
-  resolveDependenciesUsing(registryClient),
-  getLatestVersionUsing(registryClient),
-  getRegistryAuthUsing(homePath),
+  resolveDependenciesUsing(registryClient, debugLogToConsole),
+  getLatestVersionUsing(registryClient, debugLogToConsole),
+  getRegistryAuthUsing(homePath, debugLogToConsole),
   log,
-  npmDebugLog
+  debugLogToConsole
 );
-const removeCmd = makeRemoveCmd(parseEnv, removePackages, log);
+const removeCmd = makeRemoveCmd(
+  parseEnv,
+  removePackagesUsing(debugLogToConsole),
+  log
+);
 const viewCmd = makeViewCmd(
   parseEnv,
-  getRegistryPackumentUsing(registryClient),
-  getRegistryAuthUsing(homePath),
+  getRegistryPackumentUsing(registryClient, debugLogToConsole),
+  getRegistryAuthUsing(homePath, debugLogToConsole),
   log
 );
 

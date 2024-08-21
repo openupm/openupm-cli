@@ -1,7 +1,7 @@
 import npmFetch from "npm-registry-fetch";
 import { DomainName } from "../domain/domain-name";
 import { Registry } from "../domain/registry";
-import { DebugLog, npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
 import { makeNpmFetchOptions } from "./npm-registry";
@@ -27,7 +27,7 @@ export type GetAllRegistryPackuments = (
 /**
  * Makes a {@link GetAllRegistryPackuments} function.
  */
-export function FetchAllRegistryPackuments(
+export function getAllRegistryPackumentsUsing(
   debugLog: DebugLog
 ): GetAllRegistryPackuments {
   return async (registry) => {
@@ -46,8 +46,3 @@ export function FetchAllRegistryPackuments(
     }
   };
 }
-
-/**
- * Default {@link GetAllRegistryPackuments} function. Uses {@link FetchAllRegistryPackuments}.
- */
-export const getAllRegistryPackuments = FetchAllRegistryPackuments(npmDebugLog);

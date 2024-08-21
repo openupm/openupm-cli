@@ -14,7 +14,7 @@ import {
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
-import { DebugLog, npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { removeExplicitUndefined } from "../utils/zod-utils";
 
@@ -94,9 +94,9 @@ export function LoadRegistryAuthFromUpmConfig(
 /**
  * Default {@link GetRegistryAuth} function. Uses {@link LoadRegistryAuthFromUpmConfig}.
  */
-export const getRegistryAuth = (homePath: string) =>
+export const getRegistryAuthUsing = (homePath: string, debugLog: DebugLog) =>
   LoadRegistryAuthFromUpmConfig(
     getUpmConfigPath(homePath),
     loadUpmConfig,
-    npmDebugLog
+    debugLog
   );
