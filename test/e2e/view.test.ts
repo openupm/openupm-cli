@@ -39,10 +39,12 @@ describe("view packages", () => {
     const output = await runOpenupm(homeDir, [
       "view",
       "dev.comradevanti.opt-unity",
+      // We need to disable color, otherwise chalk will mess with the output
+      "--no-color"
     ]);
 
     expect(output.code).toEqual(ResultCodes.Ok);
-    expect(output.stdOut).toEqual(
+    expect(output.stdErr).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
           "dev.comradevanti.opt-unity@3.5.0 | Unlicense | versions: 10"
