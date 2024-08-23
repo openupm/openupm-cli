@@ -5,16 +5,13 @@ on: push
 jobs:
   unit-test: 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
     name: Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: set node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "22.x"
       - name: npm ci
         run: npm ci
       - name: Unit tests
