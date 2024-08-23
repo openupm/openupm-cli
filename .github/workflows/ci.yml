@@ -27,13 +27,17 @@ jobs:
         os: 
           - ubuntu
           - windows
+        node:
+          - "18.x" # Oldest supported lts
+          - "20.x" # Newest lts
+          - "22.x" # Latest
     name: E2E Tests
     steps:
       - uses: actions/checkout@v3
       - name: setup node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 
+          node-version: ${{ matrix.node }}
       - name: install deps
         run: npm ci
       - name: build
