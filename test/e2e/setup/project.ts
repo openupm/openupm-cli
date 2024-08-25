@@ -1,7 +1,10 @@
 import fse from "fs-extra";
 import path from "path";
 import yaml from "yaml";
-import { emptyProjectManifest } from "../../../src/domain/project-manifest";
+import {
+  emptyProjectManifest,
+  UnityProjectManifest,
+} from "../../../src/domain/project-manifest";
 import { WriteProjectManifestFile } from "../../../src/io/project-manifest-io";
 import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
 import { writeTextFile } from "../../../src/io/text-file-io";
@@ -16,7 +19,8 @@ const writeProjectManifest = WriteProjectManifestFile(writeTextFile);
  * @returns The path to the created project's directory.
  */
 export async function prepareUnityProject(
-  homeDirectory: string
+  homeDirectory: string,
+  options?: { manifest?: UnityProjectManifest }
 ): Promise<string> {
   const projectName = "MyProject";
   const projectDir = path.join(homeDirectory, projectName);
@@ -32,7 +36,10 @@ export async function prepareUnityProject(
     { encoding: "utf8" }
   );
 
-  await writeProjectManifest(projectDir, emptyProjectManifest);
+  await writeProjectManifest(
+    projectDir,
+    options?.manifest ?? emptyProjectManifest
+  );
 
   return projectDir;
 }

@@ -1,47 +1,46 @@
 name: CI
 
-on: [push, pull_request]
+on: push
 
 jobs:
-  unit-test:
+  unit-test: 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
     name: Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: set node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "22.x"
       - name: npm ci
         run: npm ci
       - name: Unit tests
         run: npm run test:unit
         
   e2e-test:
-    runs-on: ubuntu-latest
-    container: ghcr.io/openupm/openupm-cli-e2e-${{ matrix.os }}:latest
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         os: 
           - ubuntu
-          # Seems like windows is not supported at the moment (06.2024)
-          # - windows
+          - windows
+        node:
+          - "18.x" # Oldest supported lts
+          - "20.x" # Newest lts
+          - "22.x" # Latest
     name: E2E Tests
     steps:
       - uses: actions/checkout@v3
       - name: setup node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 
+          node-version: ${{ matrix.node }}
       - name: install deps
         run: npm ci
       - name: build
         run: npm run build
       - name: run tests
-        run: npx jest --testMatch "**/*.e2e.ts" --runInBand --silent=false
+        run: npm run test:e2e
         
   release:
     runs-on: ubuntu-latest
