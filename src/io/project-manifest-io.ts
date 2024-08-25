@@ -1,11 +1,9 @@
-import { AnyJson } from "@iarna/toml";
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import { z } from "zod";
 import { UnityProjectManifest } from "../domain/project-manifest";
 import { DebugLog, npmDebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-import { isZod } from "../utils/zod-utils";
 import {
   readTextFile,
   ReadTextFile,
@@ -40,7 +38,18 @@ export type LoadProjectManifest = (
 ) => Promise<UnityProjectManifest>;
 
 // TODO: Add a better schema
-const projectManifestSchema = z.object({});
+const projectManifestSchema = z.object({}).passthrough();
+
+/**
+ * Parses the content of a `manifest.json` file to a {@link UnityProjectManifest}.
+ * @param content The files content.
+ * @returns The parsed file.
+ * @throws {Error} If parsing failed.
+ */
+export function parseProjectManifest(content: string): UnityProjectManifest {
+  const json = JSON.parse(content);
+  return projectManifestSchema.parse(json) as UnityProjectManifest;
+}
 
 /**
  * Makes a {@link LoadProjectManifest} function which reads the content
@@ -56,18 +65,13 @@ export function ReadProjectManifestFile(
     const content = await readFile(manifestPath, true);
     if (content === null) throw new ManifestMissingError(manifestPath);
 
-    let json: AnyJson;
     try {
-      json = await JSON.parse(content);
+      return parseProjectManifest(content);
     } catch (error) {
       assertIsError(error);
       debugLog("Manifest parse failed because of invalid json content.", error);
       throw new ManifestMalformedError();
     }
-
-    if (!isZod(json, projectManifestSchema)) throw new ManifestMalformedError();
-
-    return json as unknown as UnityProjectManifest;
   };
 }
 

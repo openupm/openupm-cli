@@ -1,26 +1,47 @@
+import path from "path";
+import { UnityProjectManifest } from "../../src/domain/project-manifest";
 import {
-  ReadProjectManifestFile,
-  WriteProjectManifestFile,
   ManifestMalformedError,
   ManifestMissingError,
   manifestPathFor,
+  parseProjectManifest,
+  ReadProjectManifestFile,
   serializeProjectManifest,
 } from "../../src/io/project-manifest-io";
-import {
-  mapScopedRegistry,
-  UnityProjectManifest,
-} from "../../src/domain/project-manifest";
-import path from "path";
-import { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
-import { buildProjectManifest } from "../domain/data-project-manifest";
-import { DomainName } from "../../src/domain/domain-name";
-import { removeScope } from "../../src/domain/scoped-registry";
+import { ReadTextFile } from "../../src/io/text-file-io";
+import { noopLogger } from "../../src/logging";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockService } from "../services/service.mock";
-import { noopLogger } from "../../src/logging";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
+  describe("parse", () => {
+    it("should parse valid manifest", () => {
+      const content = `{ "dependencies": { "com.package.a": "1.0.0"} }`;
+
+      const parsed = parseProjectManifest(content);
+
+      expect(parsed).toEqual({
+        dependencies: {
+          "com.package.a": "1.0.0",
+        },
+      });
+    });
+
+    it("should fail for bad json", () => {
+      const content = "not : valid // json";
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+
+    it("should fail incorrect json shape", () => {
+      // Valid json but not what we want
+      const content = `123`;
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+  });
+
   describe("path", () => {
     it("should determine correct manifest path", () => {
       const manifestPath = manifestPathFor("test-openupm-cli");
@@ -53,18 +74,9 @@ describe("project-manifest io", () => {
       ).rejects.toBeInstanceOf(ManifestMissingError);
     });
 
-    it("should fail if manifest contains invalid json", async () => {
+    it("should fail if manifest could not be parsed", async () => {
       const { readProjectManifestFile, readFile } = makeDependencies();
       readFile.mockResolvedValue("not {} valid : json");
-
-      await expect(
-        readProjectManifestFile(exampleProjectPath)
-      ).rejects.toBeInstanceOf(ManifestMalformedError);
-    });
-
-    it("should fail if manifest contains invalid content", async () => {
-      const { readProjectManifestFile, readFile } = makeDependencies();
-      readFile.mockResolvedValue(`123`);
 
       await expect(
         readProjectManifestFile(exampleProjectPath)
