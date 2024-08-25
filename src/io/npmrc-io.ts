@@ -1,6 +1,7 @@
 import { EOL } from "node:os";
 import path from "path";
 import { Npmrc } from "../domain/npmrc";
+import { splitLines } from "../utils/string-utils";
 import {
   readTextFile,
   ReadTextFile,
@@ -44,7 +45,12 @@ export type LoadNpmrc = (path: string) => Promise<Npmrc | null>;
  */
 export function ReadNpmrcFile(readFile: ReadTextFile): LoadNpmrc {
   return (path) =>
-    readFile(path, true).then((content) => content?.split(EOL) ?? null);
+    readFile(path, true).then((content) =>
+      content !== null
+        ? // TODO: Check if lines are valid.
+          splitLines(content)
+        : null
+    );
 }
 
 /**

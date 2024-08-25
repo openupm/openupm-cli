@@ -25,3 +25,12 @@ export function removeTrailingSlash<T extends string>(s: T): T {
   if (s.endsWith("/")) return s.slice(0, -1) as T;
   return s;
 }
+
+/**
+ * Splits a multiline string into it's separate lines.
+ * @param s The string to split.
+ * @returns All non-empty lines in the string.
+ */
+export function splitLines(s: string): ReadonlyArray<string> {
+  return s.split(/[\r\n]+/).filter((it) => it.length > 0);
+}
