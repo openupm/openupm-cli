@@ -16,7 +16,7 @@ import { buildProjectManifest } from "../domain/data-project-manifest";
 import { DomainName } from "../../../src/domain/domain-name";
 import { removeScope } from "../../../src/domain/scoped-registry";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "../services/service.mock";
+import { mockFunctionOfType } from "../services/func.mock";
 import { noopLogger } from "../../../src/logging";
 
 const exampleProjectPath = "/some/path";
@@ -35,7 +35,7 @@ describe("project-manifest io", () => {
 
   describe("read file", () => {
     function makeDependencies() {
-      const readFile = mockService<ReadTextFile>();
+      const readFile = mockFunctionOfType<ReadTextFile>();
 
       const readProjectManifestFile = ReadProjectManifestFile(
         readFile,

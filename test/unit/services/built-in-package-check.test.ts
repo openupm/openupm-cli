@@ -4,16 +4,16 @@ import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
 import { CheckIsNonRegistryUnityPackage } from "../../../src/services/built-in-package-check";
 import { CheckIsUnityPackage } from "../../../src/services/unity-package-check";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("is non-registry unity package", () => {
   const somePackage = DomainName.parse("com.some.package");
   const someVersion = SemanticVersion.parse("1.0.0");
 
   function makeDependencies() {
-    const checkIsUnityPackage = mockService<CheckIsUnityPackage>();
+    const checkIsUnityPackage = mockFunctionOfType<CheckIsUnityPackage>();
 
-    const getRegistryPackument = mockService<GetRegistryPackument>();
+    const getRegistryPackument = mockFunctionOfType<GetRegistryPackument>();
 
     const checkIsNonRegistryUnityPackage = CheckIsNonRegistryUnityPackage(
       checkIsUnityPackage,

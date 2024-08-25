@@ -10,7 +10,7 @@ import {
   RemovePackagesFromManifest,
 } from "../../../src/services/remove-packages";
 import { buildProjectManifest } from "../domain/data-project-manifest";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("remove packages from manifest", () => {
   const someProjectPath = path.resolve("/home/projects/MyUnityProject");
@@ -22,10 +22,10 @@ describe("remove packages from manifest", () => {
   );
 
   function makeDependencies() {
-    const loadProjectManifest = mockService<LoadProjectManifest>();
+    const loadProjectManifest = mockFunctionOfType<LoadProjectManifest>();
     loadProjectManifest.mockResolvedValue(defaultManifest);
 
-    const writeProjectManifest = mockService<SaveProjectManifest>();
+    const writeProjectManifest = mockFunctionOfType<SaveProjectManifest>();
     writeProjectManifest.mockResolvedValue(undefined);
 
     const removePackagesFromManifestu = RemovePackagesFromManifest(

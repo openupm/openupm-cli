@@ -1,13 +1,13 @@
 import { DomainName } from "../../../src/domain/domain-name";
 import { CheckUrlExists } from "../../../src/io/check-url";
 import { PackageHasDocPage } from "../../../src/services/unity-package-check";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("unity package has doc page", () => {
   const somePackage = DomainName.parse("com.some.package");
 
   function makeDependencies() {
-    const checkUrlExists = mockService<CheckUrlExists>();
+    const checkUrlExists = mockFunctionOfType<CheckUrlExists>();
 
     const packageHasDocPage = PackageHasDocPage(checkUrlExists);
     return { packageHasDocPage, checkUrlExists } as const;

@@ -8,11 +8,11 @@ import { GetDirectoriesIn } from "../../../src/io/directory-io";
 import * as specialPaths from "../../../src/io/special-paths";
 import { OSNotSupportedError } from "../../../src/io/special-paths";
 import { noopLogger } from "../../../src/logging";
-import { mockService } from "../services/service.mock";
+import { mockFunctionOfType } from "../services/func.mock";
 import { eaccesError, enoentError } from "./node-error.mock";
 
 function makeDependencies() {
-  const getDirectoriesIn = mockService<GetDirectoriesIn>();
+  const getDirectoriesIn = mockFunctionOfType<GetDirectoriesIn>();
 
   const getBuiltInPackages = makeFindBuiltInPackages(
     getDirectoriesIn,

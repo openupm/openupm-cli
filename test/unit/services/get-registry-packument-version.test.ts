@@ -6,7 +6,7 @@ import { GetRegistryPackument } from "../../../src/io/packument-io";
 import { FetchRegistryPackumentVersion } from "../../../src/services/get-registry-packument-version";
 import { buildPackument } from "../domain/data-packument";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("fetch registrypackument version", () => {
   const somePackage = DomainName.parse("com.some.package");
@@ -16,7 +16,7 @@ describe("fetch registrypackument version", () => {
   const someRegistry: Registry = { url: exampleRegistryUrl, auth: null };
 
   function makeDependencies() {
-    const getRegistryPackument = mockService<GetRegistryPackument>();
+    const getRegistryPackument = mockFunctionOfType<GetRegistryPackument>();
 
     const fetchRegistryPackumentVersion =
       FetchRegistryPackumentVersion(getRegistryPackument);

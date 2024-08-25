@@ -9,7 +9,7 @@ import { SearchedPackument, SearchRegistry } from "../../../src/io/npm-search";
 import { noopLogger } from "../../../src/logging";
 import { ApiAndFallbackPackageSearch } from "../../../src/services/search-packages";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("search packages", () => {
   const exampleRegistry: Registry = {
@@ -33,10 +33,10 @@ describe("search packages", () => {
   } as AllPackuments;
 
   function makeDependencies() {
-    const searchRegistry = mockService<SearchRegistry>();
+    const searchRegistry = mockFunctionOfType<SearchRegistry>();
     searchRegistry.mockResolvedValue([exampleSearchResult]);
 
-    const fetchAllPackument = mockService<GetAllRegistryPackuments>();
+    const fetchAllPackument = mockFunctionOfType<GetAllRegistryPackuments>();
     fetchAllPackument.mockResolvedValue(exampleAllPackumentsResult);
 
     const searchPackages = ApiAndFallbackPackageSearch(

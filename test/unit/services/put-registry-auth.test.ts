@@ -1,4 +1,4 @@
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 import { LoadUpmConfig, SaveUpmConfig } from "../../../src/io/upm-config-io";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { Base64 } from "../../../src/domain/base64";
@@ -11,10 +11,10 @@ describe("put registry auth into upm config", () => {
   const otherToken = "8zseg974wge4g94whfheghf";
 
   function makeDependencies() {
-    const loadUpmConfig = mockService<LoadUpmConfig>();
+    const loadUpmConfig = mockFunctionOfType<LoadUpmConfig>();
     loadUpmConfig.mockResolvedValue({});
 
-    const saveUpmConfig = mockService<SaveUpmConfig>();
+    const saveUpmConfig = mockFunctionOfType<SaveUpmConfig>();
     saveUpmConfig.mockResolvedValue();
 
     const putRegistryAuth = PutRegistryAuthIntoUpmConfig(

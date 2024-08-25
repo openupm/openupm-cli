@@ -4,7 +4,7 @@ import { UpmConfigLogin } from "../../../src/services/login";
 import { StoreNpmAuthToken } from "../../../src/services/put-npm-auth-token";
 import { PutRegistryAuth } from "../../../src/services/put-registry-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 const exampleUser = "user";
 const examplePassword = "pass";
@@ -15,13 +15,13 @@ const exampleToken = "some token";
 
 describe("login", () => {
   function makeDependencies() {
-    const putRegistryAuth = mockService<PutRegistryAuth>();
+    const putRegistryAuth = mockFunctionOfType<PutRegistryAuth>();
     putRegistryAuth.mockResolvedValue(undefined);
 
-    const npmLogin = mockService<GetAuthToken>();
+    const npmLogin = mockFunctionOfType<GetAuthToken>();
     npmLogin.mockResolvedValue(exampleToken);
 
-    const putNpmAuthToken = mockService<StoreNpmAuthToken>();
+    const putNpmAuthToken = mockFunctionOfType<StoreNpmAuthToken>();
     putNpmAuthToken.mockResolvedValue(exampleNpmrcPath);
 
     const login = UpmConfigLogin(

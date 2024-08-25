@@ -7,17 +7,17 @@ import { GetUpmConfigPath, LoadUpmConfig } from "../../../src/io/upm-config-io";
 import { noopLogger } from "../../../src/logging";
 import { LoadRegistryAuthFromUpmConfig } from "../../../src/services/get-registry-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("get registry auth from upm config", () => {
   const someEmail = "user@mail.com";
   const someToken = "isehusehgusheguszg8gshg";
 
   function makeDependencies() {
-    const getUpmConfigPath = mockService<GetUpmConfigPath>();
+    const getUpmConfigPath = mockFunctionOfType<GetUpmConfigPath>();
     getUpmConfigPath.mockReturnValue("/home/user/.upmconfig.toml");
 
-    const loadUpmConfig = mockService<LoadUpmConfig>();
+    const loadUpmConfig = mockFunctionOfType<LoadUpmConfig>();
     loadUpmConfig.mockResolvedValue({});
 
     const getRegistryAuth = LoadRegistryAuthFromUpmConfig(

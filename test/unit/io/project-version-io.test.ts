@@ -5,12 +5,12 @@ import {
 } from "../../../src/io/project-version-io";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
-import { mockService } from "../services/service.mock";
+import { mockFunctionOfType } from "../services/func.mock";
 
 describe("project-version-io", () => {
   describe("read file", () => {
     function makeDependencies() {
-      const readFile = mockService<ReadTextFile>();
+      const readFile = mockFunctionOfType<ReadTextFile>();
 
       const readProjectVersionFile = ReadProjectVersionFile(
         readFile,

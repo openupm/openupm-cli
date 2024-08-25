@@ -35,7 +35,7 @@ import { buildPackument } from "../domain/data-packument";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockResolvedPackuments } from "../services/remote-packuments.mock";
-import { mockService } from "../services/service.mock";
+import { mockFunctionOfType } from "../services/func.mock";
 import { makeMockLogger } from "./log.mock";
 
 const somePackage = DomainName.parse("com.some.package");
@@ -68,18 +68,18 @@ const defaultEnv = {
 const someVersion = SemanticVersion.parse("1.0.0");
 
 function makeDependencies() {
-  const parseEnv = mockService<ParseEnv>();
+  const parseEnv = mockFunctionOfType<ParseEnv>();
   parseEnv.mockResolvedValue(defaultEnv);
 
   const getRegistryPackumentVersion =
-    mockService<GetRegistryPackumentVersion>();
+    mockFunctionOfType<GetRegistryPackumentVersion>();
   mockResolvedPackuments(
     getRegistryPackumentVersion,
     [exampleRegistryUrl, somePackument],
     [exampleRegistryUrl, otherPackument]
   );
 
-  const resolveDependencies = mockService<ResolveDependencies>();
+  const resolveDependencies = mockFunctionOfType<ResolveDependencies>();
   let defaultGraph = makeGraphFromSeed(somePackage, someVersion);
   defaultGraph = markRemoteResolved(
     defaultGraph,
@@ -97,18 +97,18 @@ function makeDependencies() {
   );
   resolveDependencies.mockResolvedValue(defaultGraph);
 
-  const loadProjectManifest = mockService<LoadProjectManifest>();
+  const loadProjectManifest = mockFunctionOfType<LoadProjectManifest>();
   loadProjectManifest.mockResolvedValue(emptyProjectManifest);
 
-  const writeProjectManifest = mockService<SaveProjectManifest>();
+  const writeProjectManifest = mockFunctionOfType<SaveProjectManifest>();
   writeProjectManifest.mockResolvedValue(undefined);
 
-  const determineEditorVersion = mockService<DetermineEditorVersion>();
+  const determineEditorVersion = mockFunctionOfType<DetermineEditorVersion>();
   determineEditorVersion.mockResolvedValue(
     makeEditorVersion(2022, 2, 1, "f", 2)
   );
 
-  const getRegistryAuth = mockService<GetRegistryAuth>();
+  const getRegistryAuth = mockFunctionOfType<GetRegistryAuth>();
   getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
 
   const log = makeMockLogger();

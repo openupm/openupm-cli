@@ -2,19 +2,19 @@ import { emptyNpmrc, setToken } from "../../../src/domain/npmrc";
 import { FindNpmrcPath, LoadNpmrc, SaveNpmrc } from "../../../src/io/npmrc-io";
 import { StoreNpmAuthTokenInNpmrc as PutNpmAuthTokenInNpmrc } from "../../../src/services/put-npm-auth-token";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 const exampleNpmrcPath = "/users/someuser/.npmrc";
 
 describe("put npm auth token in npmrc", () => {
   function makeDependencies() {
-    const findPath = mockService<FindNpmrcPath>();
+    const findPath = mockFunctionOfType<FindNpmrcPath>();
     findPath.mockReturnValue(exampleNpmrcPath);
 
-    const loadNpmrc = mockService<LoadNpmrc>();
+    const loadNpmrc = mockFunctionOfType<LoadNpmrc>();
     loadNpmrc.mockResolvedValue(null);
 
-    const saveNpmrc = mockService<SaveNpmrc>();
+    const saveNpmrc = mockFunctionOfType<SaveNpmrc>();
     saveNpmrc.mockResolvedValue(undefined);
 
     const putNpmAuthTokenInNpmrc = PutNpmAuthTokenInNpmrc(

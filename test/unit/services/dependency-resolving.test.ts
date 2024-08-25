@@ -1,4 +1,4 @@
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
 import { CheckIsBuiltInPackage } from "../../../src/services/built-in-package-check";
 import { exampleRegistryUrl } from "../domain/data-registry";
@@ -24,9 +24,9 @@ describe("dependency resolving", () => {
   const otherVersion = SemanticVersion.parse("2.0.0");
 
   function makeDependencies() {
-    const getRegistryPackument = mockService<GetRegistryPackument>();
+    const getRegistryPackument = mockFunctionOfType<GetRegistryPackument>();
 
-    const checkIsBuiltInPackage = mockService<CheckIsBuiltInPackage>();
+    const checkIsBuiltInPackage = mockFunctionOfType<CheckIsBuiltInPackage>();
     checkIsBuiltInPackage.mockResolvedValue(false);
 
     const resolveDependencies = ResolveDependenciesFromRegistries(

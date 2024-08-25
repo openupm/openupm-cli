@@ -1,4 +1,4 @@
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 import { GetProjectVersion } from "../../../src/io/project-version-io";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { mockProjectVersion } from "../io/project-version-io.mock";
@@ -8,7 +8,7 @@ describe("determine editor version from file", () => {
   const exampleProjectPath = "/home/my-project/";
 
   function makeDependencies() {
-    const getProjectVersion = mockService<GetProjectVersion>();
+    const getProjectVersion = mockFunctionOfType<GetProjectVersion>();
 
     const determineEditorVersionFromFile =
       DetermineEditorVersionFromFile(getProjectVersion);

@@ -6,7 +6,7 @@ import {
   WriteNpmrcPath as WriteNpmrcFile,
 } from "../../../src/io/npmrc-io";
 import { ReadTextFile, WriteTextFile } from "../../../src/io/text-file-io";
-import { mockService } from "../services/service.mock";
+import { mockFunctionOfType } from "../services/func.mock";
 
 describe("npmrc-io", () => {
   describe("find path in home", () => {
@@ -30,7 +30,7 @@ describe("npmrc-io", () => {
 
   describe("read file", () => {
     function makeDependencies() {
-      const readText = mockService<ReadTextFile>();
+      const readText = mockFunctionOfType<ReadTextFile>();
 
       const readNpmrcFile = ReadNpmrcFile(readText);
       return { readNpmrcFile, readText } as const;
@@ -59,7 +59,7 @@ describe("npmrc-io", () => {
 
   describe("write file", () => {
     function makeDependencies() {
-      const writeFile = mockService<WriteTextFile>();
+      const writeFile = mockFunctionOfType<WriteTextFile>();
       writeFile.mockResolvedValue(undefined);
 
       const writeNpmrcFile = WriteNpmrcFile(writeFile);

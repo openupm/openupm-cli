@@ -2,7 +2,7 @@ import { EOL } from "node:os";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { ReadUpmConfigFile } from "../../../src/io/upm-config-io";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "../services/service.mock";
+import { mockFunctionOfType } from "../services/func.mock";
 
 jest.mock("../../../src/utils/env-util");
 
@@ -13,7 +13,7 @@ describe("upm-config-io", () => {
     const someToken = "isehusehgusheguszg8gshg";
 
     function makeDependencies() {
-      const readFile = mockService<ReadTextFile>();
+      const readFile = mockFunctionOfType<ReadTextFile>();
       readFile.mockResolvedValue("");
 
       const readUpmConfigFile = ReadUpmConfigFile(readFile);

@@ -5,7 +5,7 @@ import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
 import { GetLatestVersionFromRegistryPackument } from "../../../src/services/get-latest-version";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockService } from "./service.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 describe("get latest version from registry packument", () => {
   const somePackage = DomainName.parse("com.some.package");
@@ -13,7 +13,7 @@ describe("get latest version from registry packument", () => {
   const exampleRegistry: Registry = { url: exampleRegistryUrl, auth: null };
 
   function makeDependencies() {
-    const getRegistryPackument = mockService<GetRegistryPackument>();
+    const getRegistryPackument = mockFunctionOfType<GetRegistryPackument>();
 
     const getLatestVersionFromRegistryPackument =
       GetLatestVersionFromRegistryPackument(getRegistryPackument);
