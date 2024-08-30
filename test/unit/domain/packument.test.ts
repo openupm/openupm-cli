@@ -1,5 +1,7 @@
+import { DomainName } from "../../../src/domain/domain-name";
 import {
   NoVersionsError,
+  packumentHasVersion,
   tryGetLatestVersion,
   tryGetPackumentVersion,
   tryResolvePackumentVersion,
@@ -7,7 +9,6 @@ import {
 } from "../../../src/domain/packument";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { buildPackument } from "./data-packument";
-import { DomainName } from "../../../src/domain/domain-name";
 
 describe("packument", () => {
   describe("get latest version", () => {
@@ -120,6 +121,34 @@ describe("packument", () => {
       expect(result).toBeError((error) =>
         expect(error).toBeInstanceOf(VersionNotFoundError)
       );
+    });
+  });
+
+  describe("has version", () => {
+    it("should have version if there is entry for it", () => {
+      const packument = buildPackument("com.some.package", (packument) =>
+        packument.addVersion("1.0.0")
+      );
+
+      const hasVersion = packumentHasVersion(
+        packument,
+        SemanticVersion.parse("1.0.0")
+      );
+
+      expect(hasVersion).toBeTruthy();
+    });
+
+    it("should not have version if there is no entry for it", () => {
+      const packument = buildPackument("com.some.package", (packument) =>
+        packument.addVersion("1.0.0")
+      );
+
+      const hasVersion = packumentHasVersion(
+        packument,
+        SemanticVersion.parse("2.0.0")
+      );
+
+      expect(hasVersion).toBeFalsy();
     });
   });
 });

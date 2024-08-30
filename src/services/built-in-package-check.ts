@@ -1,5 +1,6 @@
 import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
+import { packumentHasVersion } from "../domain/packument";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
@@ -7,7 +8,6 @@ import {
   getRegistryPackumentUsing,
 } from "../io/packument-io";
 import { DebugLog } from "../logging";
-import { recordKeys } from "../utils/record-utils";
 import {
   checkIsUnityPackage,
   CheckIsUnityPackage,
@@ -42,8 +42,7 @@ export function CheckIsNonRegistryUnityPackage(
       packageName
     );
     if (packument === null) return false;
-    const versions = recordKeys(packument.versions);
-    return versions.includes(version);
+    return packumentHasVersion(packument, version);
   }
 
   return async (packageName, version) => {
