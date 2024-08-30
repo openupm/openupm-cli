@@ -11,3 +11,18 @@ export function mockFunctionOfType<
   // @ts-ignore
   return jest.fn();
 }
+
+/**
+ * Creates a mock for a function with a specific return type.
+ */
+export function mockFunctionWithReturnType<T>() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return mockFunctionOfType<(...args: any[]) => T>();
+}
+
+/**
+ * Creates a mock for a function with a specific resolved type.
+ */
+export function mockFunctionWithResolvedType<T>() {
+  return mockFunctionWithReturnType<Promise<T>>();
+}
