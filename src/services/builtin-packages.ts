@@ -3,14 +3,14 @@ import { AsyncResult } from "ts-results-es";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
-} from "./special-paths";
+} from "../io/special-paths";
 import { DomainName } from "../domain/domain-name";
 import { CustomError } from "ts-custom-error";
 import path from "path";
 import { DebugLog } from "../logging";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import { resultifyAsyncOp } from "../utils/result-utils";
-import { GetDirectoriesIn } from "./directory-io";
+import { GetDirectoriesIn } from "../io/directory-io";
 
 /**
  * Error for when an editor-version is not installed.

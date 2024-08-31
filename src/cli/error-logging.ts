@@ -7,7 +7,7 @@ import {
 import { stringifyEditorVersion } from "../domain/editor-version";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
 import { NoSystemUserProfilePath } from "../domain/upm-config";
-import { EditorNotInstalledError } from "../io/builtin-packages";
+import { EditorNotInstalledError } from "../services/builtin-packages";
 import { RegistryAuthenticationError } from "../io/common-errors";
 import {
   ManifestMalformedError,
