@@ -2,7 +2,7 @@ import path from "path";
 import { CustomError } from "ts-custom-error";
 import { z } from "zod";
 import { UnityProjectManifest } from "../domain/project-manifest";
-import { DebugLog, npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import {
   readTextFile,
@@ -78,10 +78,8 @@ export function ReadProjectManifestFile(
 /**
  * Default {@link LoadProjectManifest} function. Uses {@link ReadProjectManifestFile}.
  */
-export const loadProjectManifest: LoadProjectManifest = ReadProjectManifestFile(
-  readTextFile,
-  npmDebugLog
-);
+export const loadProjectManifestUsing = (debugLog: DebugLog) =>
+  ReadProjectManifestFile(readTextFile, debugLog);
 
 /**
  * Function for replacing the project manifest for a Unity project.

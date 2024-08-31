@@ -1,3 +1,4 @@
+import RegClient from "another-npm-registry-client";
 import { AsyncResult, Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
@@ -10,7 +11,11 @@ import {
 } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
-import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
+import {
+  GetRegistryPackument,
+  getRegistryPackumentUsing,
+} from "../io/packument-io";
+import { DebugLog } from "../logging";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -69,5 +74,8 @@ export function FetchRegistryPackumentVersion(
 /**
  * Default {@link GetRegistryPackumentVersion} function. Uses {@link FetchRegistryPackumentVersion}.
  */
-export const getRegistryPackumentVersion =
-  FetchRegistryPackumentVersion(getRegistryPackument);
+export const getRegistryPackumentVersionUsing = (
+  regClient: RegClient.Instance,
+  debugLog: DebugLog
+) =>
+  FetchRegistryPackumentVersion(getRegistryPackumentUsing(regClient, debugLog));

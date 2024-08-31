@@ -58,7 +58,7 @@ export function makeSearchCmd(
     }
 
     debugLog(`${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`);
-    console.log(formatAsTable(results));
+    log.notice("", formatAsTable(results));
     return ResultCodes.Ok;
   };
 }

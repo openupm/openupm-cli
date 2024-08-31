@@ -2,7 +2,7 @@ import npmSearch from "libnpmsearch";
 import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { DebugLog, npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
 import { makeNpmFetchOptions } from "./npm-registry";
@@ -32,7 +32,7 @@ export type SearchRegistry = (
  * Makes a {@link SearchRegistry} function which uses the npm search api to
  * find packages in a remote registry.
  */
-export function NpmApiSearch(debugLog: DebugLog): SearchRegistry {
+export function searchRegistryUsing(debugLog: DebugLog): SearchRegistry {
   return (registry, keyword) =>
     npmSearch(keyword, makeNpmFetchOptions(registry))
       // NOTE: The results of the search will be packument objects, so we can change the type
@@ -43,8 +43,3 @@ export function NpmApiSearch(debugLog: DebugLog): SearchRegistry {
         throw makeRegistryInteractionError(error, registry.url);
       });
 }
-
-/**
- * Default {@link SearchRegistry} function. Uses {@link NpmApiSearch}.
- */
-export const searchRegistry = NpmApiSearch(npmDebugLog);

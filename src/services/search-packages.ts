@@ -1,14 +1,14 @@
 import { Registry } from "../domain/registry";
 import {
-  getAllRegistryPackuments,
   GetAllRegistryPackuments,
+  getAllRegistryPackumentsUsing,
 } from "../io/all-packuments-io";
 import {
   SearchedPackument,
-  searchRegistry,
   SearchRegistry,
+  searchRegistryUsing,
 } from "../io/npm-search";
-import { DebugLog, npmDebugLog } from "../logging";
+import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 
 /**
@@ -65,8 +65,9 @@ export function ApiAndFallbackPackageSearch(
 /**
  * Default {@link SearchPackages} function. Uses {@link ApiAndFallbackPackageSearch}.
  */
-export const searchPackages = ApiAndFallbackPackageSearch(
-  searchRegistry,
-  getAllRegistryPackuments,
-  npmDebugLog
-);
+export const searchPackagesUsing = (debugLog: DebugLog) =>
+  ApiAndFallbackPackageSearch(
+    searchRegistryUsing(debugLog),
+    getAllRegistryPackumentsUsing(debugLog),
+    debugLog
+  );

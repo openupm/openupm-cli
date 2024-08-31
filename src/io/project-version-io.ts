@@ -2,11 +2,11 @@ import { AnyJson } from "@iarna/toml";
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import * as YAML from "yaml";
-import { DebugLog, npmDebugLog } from "../logging";
-import { assertIsError } from "../utils/error-type-guards";
-import { readTextFile, ReadTextFile } from "./text-file-io";
 import { z } from "zod";
+import { DebugLog } from "../logging";
+import { assertIsError } from "../utils/error-type-guards";
 import { isZod } from "../utils/zod-utils";
+import { readTextFile, ReadTextFile } from "./text-file-io";
 
 export class ProjectVersionMissingError extends CustomError {
   public constructor(public readonly expectedPath: string) {
@@ -68,7 +68,5 @@ export function ReadProjectVersionFile(
 /**
  * Default {@link GetProjectVersion} function. Uses {@link ReadProjectVersionFile}.
  */
-export const getProjectVersion = ReadProjectVersionFile(
-  readTextFile,
-  npmDebugLog
-);
+export const getProjectVersionUsing = (debugLog: DebugLog) =>
+  ReadProjectVersionFile(readTextFile, debugLog);

@@ -1,8 +1,13 @@
+import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { tryResolvePackumentVersion } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
+import {
+  GetRegistryPackument,
+  getRegistryPackumentUsing,
+} from "../io/packument-io";
+import { DebugLog } from "../logging";
 
 /**
  * Gets the latest published version of a package from a npm registry.
@@ -34,5 +39,10 @@ export function GetLatestVersionFromRegistryPackument(
 /**
  * Default {@link GetLatestVersion}. Uses {@link GetLatestVersionFromRegistryPackument}.
  */
-export const getLatestVersion =
-  GetLatestVersionFromRegistryPackument(getRegistryPackument);
+export const getLatestVersion = (
+  registryClient: RegClient.Instance,
+  debugLog: DebugLog
+) =>
+  GetLatestVersionFromRegistryPackument(
+    getRegistryPackumentUsing(registryClient, debugLog)
+  );

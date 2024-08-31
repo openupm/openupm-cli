@@ -8,11 +8,12 @@ import {
 } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
-  loadProjectManifest,
   LoadProjectManifest,
+  loadProjectManifestUsing,
   saveProjectManifest,
   SaveProjectManifest,
 } from "../io/project-manifest-io";
+import { DebugLog } from "../logging";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -61,7 +62,7 @@ export function RemovePackagesFromManifest(
 
     manifest = removeDependency(manifest, packageName);
 
-    if (manifest.scopedRegistries !== undefined)
+    if (manifest.scopedRegistries !== undefined) {
       manifest = {
         ...manifest,
         scopedRegistries: manifest.scopedRegistries
@@ -73,6 +74,36 @@ export function RemovePackagesFromManifest(
             ),
           })),
       };
+
+      // Remove scoped registries without scopes
+      manifest = {
+        ...manifest,
+        scopedRegistries: manifest.scopedRegistries!.filter(
+          (it) => it.scopes.length > 0
+        ),
+      };
+
+      // Remove scoped registries property if empty
+      if (manifest.scopedRegistries!.length === 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { scopedRegistries, ...withoutScopedRegistries } = manifest;
+        manifest = withoutScopedRegistries;
+      }
+    }
+
+    if (manifest.testables !== undefined) {
+      manifest = {
+        ...manifest,
+        testables: manifest.testables.filter((it) => it !== packageName),
+      };
+
+      // Remove testables property if empty
+      if (manifest.testables!.length === 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { testables, ...withoutTestables } = manifest;
+        manifest = withoutTestables;
+      }
+    }
 
     return Ok([manifest, { name: packageName, version: versionInManifest }]);
   };
@@ -122,7 +153,8 @@ export function RemovePackagesFromManifest(
 /**
  * Default {@link RemovePackages} function. Uses {@link RemovePackagesFromManifest}.
  */
-export const removePackages = RemovePackagesFromManifest(
-  loadProjectManifest,
-  saveProjectManifest
-);
+export const removePackages = (debugLog: DebugLog) =>
+  RemovePackagesFromManifest(
+    loadProjectManifestUsing(debugLog),
+    saveProjectManifest
+  );

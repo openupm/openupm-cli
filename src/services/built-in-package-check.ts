@@ -1,12 +1,14 @@
+import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
+import { packumentHasVersion } from "../domain/packument";
 import { unityRegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
-import { getRegistryPackument, GetRegistryPackument } from "../io/packument-io";
-import { recordKeys } from "../utils/record-utils";
+import { CheckUrlExists, fetchCheckUrlExists } from "../io/check-url";
 import {
-  checkIsUnityPackage,
-  CheckIsUnityPackage,
-} from "./unity-package-check";
+  GetRegistryPackument,
+  getRegistryPackumentUsing,
+} from "../io/packument-io";
+import { DebugLog } from "../logging";
 
 /**
  * Function for checking whether a specific package version is built-in.
@@ -19,15 +21,25 @@ export type CheckIsBuiltInPackage = (
   version: SemanticVersion
 ) => Promise<boolean>;
 
+function docUrlForPackage(packageName: DomainName) {
+  return `https://docs.unity3d.com/Manual/${packageName}.html`;
+}
+
 /**
  * Makes a {@link CheckIsBuiltInPackage} function which checks if package is
  * built-in by establishing if the package is an official Unity package which
  * does not exist on the Unity package registry.
  */
 export function CheckIsNonRegistryUnityPackage(
-  checkIsUnityPackage: CheckIsUnityPackage,
+  checkUrlExists: CheckUrlExists,
   getRegistryPackument: GetRegistryPackument
 ): CheckIsBuiltInPackage {
+  function checkIsUnityPackage(packageName: DomainName) {
+    // A package is an official Unity package if it has a documentation page
+    const url = docUrlForPackage(packageName);
+    return checkUrlExists(url);
+  }
+
   async function checkExistsOnUnityRegistry(
     packageName: DomainName,
     version: SemanticVersion
@@ -37,8 +49,7 @@ export function CheckIsNonRegistryUnityPackage(
       packageName
     );
     if (packument === null) return false;
-    const versions = recordKeys(packument.versions);
-    return versions.includes(version);
+    return packumentHasVersion(packument, version);
   }
 
   return async (packageName, version) => {
@@ -51,7 +62,11 @@ export function CheckIsNonRegistryUnityPackage(
 /**
  * Default {@link CheckIsBuiltInPackage}. Uses {@link CheckIsNonRegistryUnityPackage}.
  */
-export const checkIsBuiltInPackage = CheckIsNonRegistryUnityPackage(
-  checkIsUnityPackage,
-  getRegistryPackument
-);
+export const checkIsBuiltInPackage = (
+  registryClient: RegClient.Instance,
+  debugLog: DebugLog
+) =>
+  CheckIsNonRegistryUnityPackage(
+    fetchCheckUrlExists,
+    getRegistryPackumentUsing(registryClient, debugLog)
+  );

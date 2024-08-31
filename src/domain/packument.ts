@@ -1,14 +1,13 @@
-import { SemanticVersion } from "./semantic-version";
-import { DomainName } from "./domain-name";
-import { UnityPackageManifest } from "./package-manifest";
-import { PackageId } from "./package-id";
-import { Dist, Maintainer } from "@npm/types";
+import { Dist } from "@npm/types";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
 import { recordKeys } from "../utils/record-utils";
+import { DomainName } from "./domain-name";
+import { UnityPackageManifest } from "./package-manifest";
+import { SemanticVersion } from "./semantic-version";
 
-import { ResolvableVersion } from "./package-reference";
 import { PackumentNotFoundError } from "../common-errors";
+import { ResolvableVersion } from "./package-reference";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -200,4 +199,17 @@ export function tryResolvePackumentVersion(
     );
 
   return Ok(tryGetPackumentVersion(packument, requestedVersion)!);
+}
+
+/**
+ * Checks whether a packument has an entry for a version.
+ * @param packument The packument to check.
+ * @param version The version to check for.
+ */
+export function packumentHasVersion(
+  packument: UnityPackument,
+  version: SemanticVersion
+): boolean {
+  const versions = recordKeys(packument.versions);
+  return versions.includes(version);
 }
