@@ -1,5 +1,5 @@
 import { noopLogger } from "../../../src/logging";
-import { GetAuthToken } from "../../../src/services/get-auth-token";
+import { GetAuthToken } from "../../../src/io/get-auth-token";
 import { UpmConfigLogin } from "../../../src/services/login";
 import { StoreNpmAuthToken } from "../../../src/services/put-npm-auth-token";
 import { PutRegistryAuth } from "../../../src/services/put-registry-auth";

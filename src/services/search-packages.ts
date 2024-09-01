@@ -2,6 +2,7 @@ import { Registry } from "../domain/registry";
 import {
   GetAllRegistryPackuments,
   getAllRegistryPackumentsUsing,
+  type AllPackuments,
 } from "../io/all-packuments-io";
 import {
   SearchedPackument,
@@ -24,6 +25,19 @@ export type SearchPackages = (
   onUseAllFallback?: () => void
 ) => Promise<ReadonlyArray<SearchedPackument>>;
 
+function tryFindPackagesByKeyword(
+  allPackuments: AllPackuments,
+  keyword: string
+): ReadonlyArray<SearchedPackument> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { _updated, ...packumentEntries } = allPackuments;
+  const packuments = Object.values(packumentEntries);
+  const klc = keyword.toLowerCase();
+  return packuments.filter((packument) =>
+    packument.name.toLowerCase().includes(klc)
+  );
+}
+
 /**
  * Makes a {@licence SearchPackages} function which searches a registry both
  * using the search endpoint and, as a fallback, by querying all packages
@@ -34,20 +48,6 @@ export function ApiAndFallbackPackageSearch(
   getAllRegistryPackuments: GetAllRegistryPackuments,
   debugLog: DebugLog
 ): SearchPackages {
-  async function searchInAll(
-    registry: Registry,
-    keyword: string
-  ): Promise<SearchedPackument[]> {
-    const allPackuments = await getAllRegistryPackuments(registry);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _updated, ...packumentEntries } = allPackuments;
-    const packuments = Object.values(packumentEntries);
-    const klc = keyword.toLowerCase();
-    return packuments.filter((packument) =>
-      packument.name.toLowerCase().includes(klc)
-    );
-  }
-
   return async (registry, keyword, onUseOldSearch) => {
     try {
       // search endpoint
@@ -57,7 +57,8 @@ export function ApiAndFallbackPackageSearch(
       debugLog("Searching using search endpoint failed", error);
       // search old search
       onUseOldSearch && onUseOldSearch();
-      return await searchInAll(registry, keyword);
+      const allPackuments = await getAllRegistryPackuments(registry);
+      return tryFindPackagesByKeyword(allPackuments, keyword);
     }
   };
 }

@@ -1,21 +1,28 @@
+import fc from "fast-check";
+import { DomainName } from "../../../src/domain/domain-name";
 import {
   addTestable,
   emptyProjectManifest,
   hasDependency,
   mapScopedRegistry,
   removeDependency,
+  removeEmptyScopedRegistries,
+  removeScopeFromAllScopedRegistries,
+  removeTestable,
   setDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
+  type UnityProjectManifest,
 } from "../../../src/domain/project-manifest";
-import { DomainName } from "../../../src/domain/domain-name";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { addScope, makeScopedRegistry } from "../../../src/domain/scoped-registry";
-import fc from "fast-check";
-import { arbDomainName } from "./domain-name.arb";
-import { exampleRegistryUrl } from "./data-registry";
-import { buildProjectManifest } from "./data-project-manifest";
 import { RegistryUrl } from "../../../src/domain/registry-url";
+import {
+  addScope,
+  makeScopedRegistry,
+} from "../../../src/domain/scoped-registry";
+import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { buildProjectManifest } from "./data-project-manifest";
+import { exampleRegistryUrl } from "./data-registry";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
   describe("set dependency", () => {
@@ -202,6 +209,143 @@ describe("project-manifest", () => {
       const packageName = DomainName.parse("com.some.package");
 
       expect(hasDependency(emptyProjectManifest, packageName)).toBeFalsy();
+    });
+  });
+
+  describe("remove scope from all scoped registries", () => {
+    it('should have no effect for undefined "scopedRegistries"', () => {
+      fc.assert(
+        fc.property(arbDomainName, (scope) => {
+          const original: UnityProjectManifest = { dependencies: {} };
+
+          const actual = removeScopeFromAllScopedRegistries(original, scope);
+
+          expect(actual).toEqual(original);
+        })
+      );
+    });
+
+    it("should remove scope from all scoped registries", () => {
+      fc.assert(
+        fc.property(arbDomainName, arbDomainName, (scope1, scope2) => {
+          const original: UnityProjectManifest = {
+            dependencies: {},
+            scopedRegistries: [
+              {
+                name: "Scope A",
+                url: RegistryUrl.parse("https://a.com"),
+                scopes: [scope1],
+              },
+              {
+                name: "Scope B",
+                url: RegistryUrl.parse("https://b.com"),
+                scopes: [scope1, scope2],
+              },
+            ],
+          };
+
+          const actual = removeScopeFromAllScopedRegistries(original, scope1);
+
+          expect(actual).toEqual<UnityProjectManifest>({
+            dependencies: {},
+            scopedRegistries: [
+              {
+                name: "Scope A",
+                url: RegistryUrl.parse("https://a.com"),
+                scopes: [],
+              },
+              {
+                name: "Scope B",
+                url: RegistryUrl.parse("https://b.com"),
+                scopes: [scope2],
+              },
+            ],
+          });
+        })
+      );
+    });
+  });
+
+  describe("remove empty scoped registries", () => {
+    it('should have no effect for undefined "scopedRegistries"', () => {
+      const original: UnityProjectManifest = { dependencies: {} };
+
+      const actual = removeEmptyScopedRegistries(original);
+
+      expect(actual).toEqual(original);
+    });
+
+    it("should leave non-empty scoped registries", () => {
+      fc.assert(
+        fc.property(arbDomainName, (scope) => {
+          const original: UnityProjectManifest = {
+            dependencies: {},
+            scopedRegistries: [
+              {
+                name: "Scope A",
+                url: RegistryUrl.parse("https://a.com"),
+                scopes: [scope],
+              },
+            ],
+          };
+
+          const actual = removeEmptyScopedRegistries(original);
+
+          expect(actual).toEqual<UnityProjectManifest>(original);
+        })
+      );
+    });
+
+    it("should remove empty scoped registries", () => {
+      const original: UnityProjectManifest = {
+        dependencies: {},
+        scopedRegistries: [
+          {
+            name: "Scope A",
+            url: RegistryUrl.parse("https://a.com"),
+            scopes: [],
+          },
+        ],
+      };
+
+      const actual = removeEmptyScopedRegistries(original);
+
+      expect(actual).toEqual<UnityProjectManifest>({
+        dependencies: {},
+        scopedRegistries: [],
+      });
+    });
+  });
+
+  describe("remove testable", () => {
+    it('should have no effect for undefined "testables"', () => {
+      fc.assert(
+        fc.property(arbDomainName, (packageName) => {
+          const original: UnityProjectManifest = { dependencies: {} };
+
+          const actual = removeTestable(original, packageName);
+
+          expect(actual).toEqual(original);
+        })
+      );
+    });
+
+    it("should remove testable", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packageName) => {
+          const original: UnityProjectManifest = {
+            dependencies: {},
+            testables: [packageName],
+          };
+
+          const actual = removeTestable(original, packageName);
+
+          expect(actual).toEqual<UnityProjectManifest>({
+            dependencies: {},
+            testables: [],
+          });
+        })
+      );
     });
   });
 });

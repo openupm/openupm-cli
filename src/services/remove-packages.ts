@@ -1,11 +1,9 @@
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
+import { tryRemoveProjectDependencies } from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
 import { PackageUrl } from "../domain/package-url";
-import {
-  removeDependency,
-  UnityProjectManifest,
-} from "../domain/project-manifest";
+import { UnityProjectManifest } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
   LoadProjectManifest,
@@ -51,86 +49,6 @@ export function RemovePackagesFromManifest(
   loadProjectManifest: LoadProjectManifest,
   saveProjectManifest: SaveProjectManifest
 ): RemovePackages {
-  const tryRemoveSingle = function (
-    manifest: UnityProjectManifest,
-    packageName: DomainName
-  ): Result<[UnityProjectManifest, RemovedPackage], PackumentNotFoundError> {
-    // not found array
-    const versionInManifest = manifest.dependencies[packageName];
-    if (versionInManifest === undefined)
-      return Err(new PackumentNotFoundError(packageName));
-
-    manifest = removeDependency(manifest, packageName);
-
-    if (manifest.scopedRegistries !== undefined) {
-      manifest = {
-        ...manifest,
-        scopedRegistries: manifest.scopedRegistries
-          // Remove package scope from all scoped registries
-          .map((scopedRegistry) => ({
-            ...scopedRegistry,
-            scopes: scopedRegistry.scopes.filter(
-              (scope) => scope !== packageName
-            ),
-          })),
-      };
-
-      // Remove scoped registries without scopes
-      manifest = {
-        ...manifest,
-        scopedRegistries: manifest.scopedRegistries!.filter(
-          (it) => it.scopes.length > 0
-        ),
-      };
-
-      // Remove scoped registries property if empty
-      if (manifest.scopedRegistries!.length === 0) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { scopedRegistries, ...withoutScopedRegistries } = manifest;
-        manifest = withoutScopedRegistries;
-      }
-    }
-
-    if (manifest.testables !== undefined) {
-      manifest = {
-        ...manifest,
-        testables: manifest.testables.filter((it) => it !== packageName),
-      };
-
-      // Remove testables property if empty
-      if (manifest.testables!.length === 0) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { testables, ...withoutTestables } = manifest;
-        manifest = withoutTestables;
-      }
-    }
-
-    return Ok([manifest, { name: packageName, version: versionInManifest }]);
-  };
-
-  function tryRemoveAll(
-    manifest: UnityProjectManifest,
-    packageNames: ReadonlyArray<DomainName>
-  ): Result<
-    [UnityProjectManifest, ReadonlyArray<RemovedPackage>],
-    PackumentNotFoundError
-  > {
-    if (packageNames.length == 0) return Ok([manifest, []]);
-
-    const currentPackageName = packageNames[0]!;
-    const remainingPackageNames = packageNames.slice(1);
-
-    return tryRemoveSingle(manifest, currentPackageName).andThen(
-      ([updatedManifest, removedPackage]) =>
-        tryRemoveAll(updatedManifest, remainingPackageNames).map(
-          ([finalManifest, removedPackages]) => [
-            finalManifest,
-            [removedPackage, ...removedPackages],
-          ]
-        )
-    );
-  }
-
   return (projectPath, packageNames) => {
     // load manifest
     const initialManifest = resultifyAsyncOp<
@@ -140,7 +58,7 @@ export function RemovePackagesFromManifest(
 
     // remove
     const removeResult = initialManifest.andThen((it) =>
-      tryRemoveAll(it, packageNames)
+      tryRemoveProjectDependencies(it, packageNames)
     );
 
     return removeResult.map(async ([updatedManifest, removedPackages]) => {

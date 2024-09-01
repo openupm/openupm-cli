@@ -1,10 +1,10 @@
-import { DomainName } from "./domain-name";
-import { SemanticVersion } from "./semantic-version";
-import { PackageUrl } from "./package-url";
-import { ScopedRegistry } from "./scoped-registry";
-import { RegistryUrl } from "./registry-url";
-import { removeTrailingSlash } from "../utils/string-utils";
 import { removeRecordKey } from "../utils/record-utils";
+import { removeTrailingSlash } from "../utils/string-utils";
+import { DomainName } from "./domain-name";
+import { PackageUrl } from "./package-url";
+import { RegistryUrl } from "./registry-url";
+import { ScopedRegistry } from "./scoped-registry";
+import { SemanticVersion } from "./semantic-version";
 
 /**
  * The content of the project-manifest (manifest.json) of a Unity project.
@@ -156,4 +156,60 @@ export function hasDependency(
   packageName: DomainName
 ): boolean {
   return packageName in manifest.dependencies;
+}
+
+/**
+ * Removes a package name from all scope lists of all scoped registries
+ * in a manifest.
+ * @param manifest The manifest.
+ * @param packageName The package name.
+ * @returns The manifest with the scope removed.
+ */
+export function removeScopeFromAllScopedRegistries(
+  manifest: UnityProjectManifest,
+  packageName: DomainName
+): UnityProjectManifest {
+  if (manifest.scopedRegistries === undefined) return manifest;
+  return {
+    ...manifest,
+    scopedRegistries: manifest.scopedRegistries.map((scopedRegistry) => ({
+      ...scopedRegistry,
+      scopes: scopedRegistry.scopes.filter((scope) => scope !== packageName),
+    })),
+  };
+}
+
+/**
+ * Removes all empty scoped registries from a manifest. A scoped registry
+ * is empty, if it has no scopes.
+ * @param manifest The manifest.
+ * @returns The manifest without empty scoped registried.
+ */
+export function removeEmptyScopedRegistries(
+  manifest: UnityProjectManifest
+): UnityProjectManifest {
+  if (manifest.scopedRegistries === undefined) return manifest;
+  return {
+    ...manifest,
+    scopedRegistries: manifest.scopedRegistries.filter(
+      (it) => it.scopes.length > 0
+    ),
+  };
+}
+
+/**
+ * Removes a testable from this manifest.
+ * @param manifest The manifest.
+ * @param packageName The name of the testable to remove.
+ * @returns The manifest without the testable.
+ */
+export function removeTestable(
+  manifest: UnityProjectManifest,
+  packageName: DomainName
+): UnityProjectManifest {
+  if (manifest.testables === undefined) return manifest;
+  return {
+    ...manifest,
+    testables: manifest.testables.filter((it) => it !== packageName),
+  };
 }

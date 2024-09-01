@@ -1,7 +1,7 @@
 import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { packumentHasVersion } from "../domain/packument";
-import { unityRegistryUrl } from "../domain/registry-url";
+import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { CheckUrlExists, fetchCheckUrlExists } from "../io/check-url";
 import {
@@ -34,28 +34,25 @@ export function CheckIsNonRegistryUnityPackage(
   checkUrlExists: CheckUrlExists,
   getRegistryPackument: GetRegistryPackument
 ): CheckIsBuiltInPackage {
-  function checkIsUnityPackage(packageName: DomainName) {
+  function hasDocPage(packageName: DomainName) {
     // A package is an official Unity package if it has a documentation page
     const url = docUrlForPackage(packageName);
     return checkUrlExists(url);
   }
 
-  async function checkExistsOnUnityRegistry(
+  async function versionIsOnRegistry(
     packageName: DomainName,
     version: SemanticVersion
   ): Promise<boolean> {
-    const packument = await getRegistryPackument(
-      { url: unityRegistryUrl, auth: null },
-      packageName
-    );
-    if (packument === null) return false;
-    return packumentHasVersion(packument, version);
+    const packument = await getRegistryPackument(unityRegistry, packageName);
+    return packument !== null && packumentHasVersion(packument, version);
   }
 
   return async (packageName, version) => {
-    const isUnityPackage = await checkIsUnityPackage(packageName);
+    const isUnityPackage = await hasDocPage(packageName);
     if (!isUnityPackage) return false;
-    return !(await checkExistsOnUnityRegistry(packageName, version));
+    const isOnUnityRegistry = await versionIsOnRegistry(packageName, version);
+    return !isOnUnityRegistry;
   };
 }
 
