@@ -31,12 +31,12 @@ import {
 } from "../../../src/io/project-manifest-io";
 import { noopLogger } from "../../../src/logging";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
-import { mockFunctionOfType } from "../../integration/app/func.mock";
-import { mockResolvedPackuments } from "../../integration/app/remote-packuments.mock";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
+import { mockFunctionOfType } from "../app/func.mock";
+import { mockResolvedPackuments } from "../app/remote-packuments.mock";
 
 const somePackage = DomainName.parse("com.some.package");
 const otherPackage = DomainName.parse("com.other.package");
