@@ -1,7 +1,7 @@
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
 import { splitLines } from "../utils/string-utils";
-import { ReadTextFile, WriteTextFile } from "./text-file-io";
+import { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 
 /**
  * Attempts to load the `.npmrc` file at a given path.
