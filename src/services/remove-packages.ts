@@ -1,6 +1,6 @@
-import { AsyncResult, Ok, Result } from "ts-results-es";
+import { AsyncResult } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
-import { tryRemoveProjectDependency } from "../domain/dependency-management";
+import { tryRemoveProjectDependencies } from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
 import { PackageUrl } from "../domain/package-url";
 import { UnityProjectManifest } from "../domain/project-manifest";
@@ -49,29 +49,6 @@ export function RemovePackagesFromManifest(
   loadProjectManifest: LoadProjectManifest,
   saveProjectManifest: SaveProjectManifest
 ): RemovePackages {
-  function tryRemoveAll(
-    manifest: UnityProjectManifest,
-    packageNames: ReadonlyArray<DomainName>
-  ): Result<
-    [UnityProjectManifest, ReadonlyArray<RemovedPackage>],
-    PackumentNotFoundError
-  > {
-    if (packageNames.length == 0) return Ok([manifest, []]);
-
-    const currentPackageName = packageNames[0]!;
-    const remainingPackageNames = packageNames.slice(1);
-
-    return tryRemoveProjectDependency(manifest, currentPackageName).andThen(
-      ([updatedManifest, removedPackage]) =>
-        tryRemoveAll(updatedManifest, remainingPackageNames).map(
-          ([finalManifest, removedPackages]) => [
-            finalManifest,
-            [removedPackage, ...removedPackages],
-          ]
-        )
-    );
-  }
-
   return (projectPath, packageNames) => {
     // load manifest
     const initialManifest = resultifyAsyncOp<
@@ -81,7 +58,7 @@ export function RemovePackagesFromManifest(
 
     // remove
     const removeResult = initialManifest.andThen((it) =>
-      tryRemoveAll(it, packageNames)
+      tryRemoveProjectDependencies(it, packageNames)
     );
 
     return removeResult.map(async ([updatedManifest, removedPackages]) => {

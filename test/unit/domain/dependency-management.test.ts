@@ -1,6 +1,9 @@
 import fc from "fast-check";
 import { PackumentNotFoundError } from "../../../src/common-errors";
-import { tryRemoveProjectDependency } from "../../../src/domain/dependency-management";
+import {
+  tryRemoveProjectDependencies,
+  tryRemoveProjectDependency,
+} from "../../../src/domain/dependency-management";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
   hasDependency,
@@ -162,6 +165,70 @@ describe("dependency management", () => {
 
           expect(updated.testables).not.toBeDefined();
         })
+      );
+    });
+  });
+
+  describe("remove multiple", () => {
+    it("should have no effect for empty package list", () => {
+      fc.assert(
+        fc.property(arbManifest, (manifest) => {
+          const [updated] = tryRemoveProjectDependencies(manifest, []).unwrap();
+
+          expect(updated).toEqual(manifest);
+        })
+      );
+    });
+
+    it("should remove packages", () => {
+      fc.assert(
+        fc.property(arbManifestWithDependencyCount(10), (manifest) => {
+          const packagesToRemove = recordKeys(manifest.dependencies).slice(
+            0,
+            5
+          );
+
+          const [updated, removed] = tryRemoveProjectDependencies(
+            manifest,
+            packagesToRemove
+          ).unwrap();
+
+          // Here we only do some surface level tests to check that the
+          // packages were removed correctly. More detailed tests are in
+          // the section for the "remove single" function because the
+          // "remove multiple" version uses that internally.
+
+          packagesToRemove.forEach((it) => {
+            const hasDependency = recordKeys(updated.dependencies).includes(it);
+            expect(hasDependency).toEqual(false);
+          });
+          expect(removed.map((it) => it.name)).toEqual(packagesToRemove);
+        })
+      );
+    });
+
+    it("should should be atomic", () => {
+      fc.assert(
+        fc.property(
+          arbManifestWithDependencyCount(10),
+          arbDomainName,
+          (manifest, missingPackage) => {
+            // A mix of packages that are in the package and one
+            // which is not.
+            const packagesToRemove = [
+              ...recordKeys(manifest.dependencies).slice(0, 2),
+              missingPackage,
+              ...recordKeys(manifest.dependencies).slice(3, 5),
+            ];
+
+            const error = tryRemoveProjectDependencies(
+              manifest,
+              packagesToRemove
+            ).unwrapErr();
+
+            expect(error).toEqual(new PackumentNotFoundError(missingPackage));
+          }
+        )
       );
     });
   });
