@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test:e2e": "jest --testMatch \"**/e2e/**/*.test.ts\" --runInBand",
+    "test:integration": "cross-env NODE_ENV=test jest --testMatch \"**/integration/**/*.test.ts\"",
     "test:unit": "cross-env NODE_ENV=test jest --testMatch \"**/unit/**/*.test.ts\"",
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json",

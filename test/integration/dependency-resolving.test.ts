@@ -1,50 +1,20 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import { PackumentNotFoundError } from "../../../src/common-errors";
-import {
-  NodeType,
-  tryGetGraphNode,
-} from "../../../src/domain/dependency-graph";
-import { DomainName } from "../../../src/domain/domain-name";
-import {
-  VersionNotFoundError,
-  type UnityPackument,
-} from "../../../src/domain/packument";
-import { Registry } from "../../../src/domain/registry";
-import {
-  unityRegistryUrl,
-  type RegistryUrl,
-} from "../../../src/domain/registry-url";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { fetchCheckUrlExists } from "../../../src/io/check-url";
-import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
-import { noopLogger } from "../../../src/logging";
-import { ResolveDependenciesFromRegistries } from "../../../src/services/dependency-resolving";
-import { buildPackument } from "../domain/data-packument";
-import { exampleRegistryUrl } from "../domain/data-registry";
-
-function mockUnityDocPages(packages: ReadonlyArray<DomainName>) {
-  const scope = nock("https://docs.unity3d.com/Manual").persist();
-
-  packages.forEach((it) => scope.head(`/${it}.html`).reply(200));
-
-  scope.head(/.*/).reply(404);
-}
-
-function mockRegistryPackuments(
-  registryUrl: RegistryUrl,
-  packuments: ReadonlyArray<UnityPackument>
-) {
-  const scope = nock(registryUrl).persist();
-
-  packuments.forEach((packument) =>
-    scope.get(`/${packument.name}`).reply(200, JSON.stringify(packument), {
-      "Content-Type": "application/json",
-    })
-  );
-
-  scope.get(/.*/).reply(404);
-}
+import { PackumentNotFoundError } from "../../src/common-errors";
+import { NodeType, tryGetGraphNode } from "../../src/domain/dependency-graph";
+import { DomainName } from "../../src/domain/domain-name";
+import { VersionNotFoundError } from "../../src/domain/packument";
+import { Registry } from "../../src/domain/registry";
+import { unityRegistryUrl } from "../../src/domain/registry-url";
+import { SemanticVersion } from "../../src/domain/semantic-version";
+import { fetchCheckUrlExists } from "../../src/io/check-url";
+import { getRegistryPackumentUsing } from "../../src/io/packument-io";
+import { noopLogger } from "../../src/logging";
+import { ResolveDependenciesFromRegistries } from "../../src/services/dependency-resolving";
+import { buildPackument } from "../unit/domain/data-packument";
+import { exampleRegistryUrl } from "../unit/domain/data-registry";
+import { mockUnityDocPages } from "./docs.mock";
+import { mockRegistryPackuments } from "./registry.mock";
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
