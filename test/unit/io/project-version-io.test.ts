@@ -5,7 +5,7 @@ import {
 } from "../../../src/io/project-version-io";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
-import { mockFunctionOfType } from "../services/func.mock";
+import { mockFunctionOfType } from "../app/func.mock";
 
 describe("project-version-io", () => {
   describe("read file", () => {

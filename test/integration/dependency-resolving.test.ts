@@ -10,7 +10,7 @@ import { SemanticVersion } from "../../src/domain/semantic-version";
 import { fetchCheckUrlExists } from "../../src/io/check-url";
 import { getRegistryPackumentUsing } from "../../src/io/packument-io";
 import { noopLogger } from "../../src/logging";
-import { ResolveDependenciesFromRegistries } from "../../src/services/dependency-resolving";
+import { ResolveDependenciesFromRegistries } from "../../src/app/dependency-resolving";
 import { buildPackument } from "../unit/domain/data-packument";
 import { exampleRegistryUrl } from "../unit/domain/data-registry";
 import { mockUnityDocPages } from "./docs.mock";

@@ -1,6 +1,6 @@
 import { Base64 } from "../../../src/domain/base64";
 import { type UpmConfigContent } from "../../../src/io/upm-config-io";
-import { putRegistryAuthIntoUpmConfig } from "../../../src/services/put-registry-auth";
+import { putRegistryAuthIntoUpmConfig } from "../../../src/app/put-registry-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 
 describe("put registry auth into upm config", () => {

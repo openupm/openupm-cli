@@ -9,7 +9,7 @@ import {
   importNpmAuth,
   isNonAuthUrl,
   LoadRegistryAuthFromUpmConfig,
-} from "../../../src/services/get-registry-auth";
+} from "../../../src/app/get-registry-auth";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 

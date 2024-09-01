@@ -1,10 +1,10 @@
-import { ParseEnv } from "../services/parse-env";
+import { ParseEnv } from "../app/parse-env";
 import { makePackageReference } from "../domain/package-reference";
 import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
 import { ResultCodes } from "./result-codes";
 import { DomainName } from "../domain/domain-name";
-import { RemovePackages } from "../services/remove-packages";
+import { RemovePackages } from "../app/remove-packages";
 import { logError } from "./error-logging";
 
 /**

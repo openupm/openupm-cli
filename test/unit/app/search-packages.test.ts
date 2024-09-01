@@ -7,7 +7,7 @@ import {
 } from "../../../src/io/all-packuments-io";
 import { SearchedPackument, SearchRegistry } from "../../../src/io/npm-search";
 import { noopLogger } from "../../../src/logging";
-import { ApiAndFallbackPackageSearch } from "../../../src/services/search-packages";
+import { ApiAndFallbackPackageSearch } from "../../../src/app/search-packages";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 

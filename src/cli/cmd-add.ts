@@ -30,9 +30,9 @@ import {
   SaveProjectManifest,
 } from "../io/project-manifest-io";
 import { DebugLog } from "../logging";
-import { ResolveDependencies } from "../services/dependency-resolving";
-import { DetermineEditorVersion } from "../services/determine-editor-version";
-import { ParseEnv } from "../services/parse-env";
+import { ResolveDependencies } from "../app/dependency-resolving";
+import { DetermineEditorVersion } from "../app/determine-editor-version";
+import { ParseEnv } from "../app/parse-env";
 import { areArraysEqual } from "../utils/array-utils";
 import {
   logFailedDependency,
@@ -43,8 +43,8 @@ import { ResultCodes } from "./result-codes";
 
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
-import { GetRegistryAuth } from "../services/get-registry-auth";
-import { GetRegistryPackumentVersion } from "../services/get-registry-packument-version";
+import { GetRegistryAuth } from "../app/get-registry-auth";
+import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { isZod } from "../utils/zod-utils";
 
 export class PackageIncompatibleError extends CustomError {

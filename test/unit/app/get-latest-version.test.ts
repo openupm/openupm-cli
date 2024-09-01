@@ -3,7 +3,7 @@ import { UnityPackument } from "../../../src/domain/packument";
 import { Registry } from "../../../src/domain/registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
-import { GetLatestVersionFromRegistryPackument } from "../../../src/services/get-latest-version";
+import { GetLatestVersionFromRegistryPackument } from "../../../src/app/get-latest-version";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 

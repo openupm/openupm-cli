@@ -1,3 +1,11 @@
+import { ResolveDependencies } from "../../../src/app/dependency-resolving";
+import { DetermineEditorVersion } from "../../../src/app/determine-editor-version";
+import { GetRegistryAuth } from "../../../src/app/get-registry-auth";
+import {
+  GetRegistryPackumentVersion,
+  ResolvedPackumentVersion,
+} from "../../../src/app/get-registry-packument-version";
+import { Env, ParseEnv } from "../../../src/app/parse-env";
 import {
   CompatibilityCheckFailedError,
   makeAddCmd,
@@ -22,20 +30,12 @@ import {
   SaveProjectManifest,
 } from "../../../src/io/project-manifest-io";
 import { noopLogger } from "../../../src/logging";
-import { ResolveDependencies } from "../../../src/services/dependency-resolving";
-import { DetermineEditorVersion } from "../../../src/services/determine-editor-version";
-import { GetRegistryAuth } from "../../../src/services/get-registry-auth";
-import {
-  GetRegistryPackumentVersion,
-  ResolvedPackumentVersion,
-} from "../../../src/services/get-registry-packument-version";
-import { Env, ParseEnv } from "../../../src/services/parse-env";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
+import { mockFunctionOfType } from "../app/func.mock";
+import { mockResolvedPackuments } from "../app/remote-packuments.mock";
 import { buildPackument } from "../domain/data-packument";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { exampleRegistryUrl } from "../domain/data-registry";
-import { mockResolvedPackuments } from "../services/remote-packuments.mock";
-import { mockFunctionOfType } from "../services/func.mock";
 import { makeMockLogger } from "./log.mock";
 
 const somePackage = DomainName.parse("com.some.package");

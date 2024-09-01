@@ -3,7 +3,7 @@ import { UnityPackument } from "../../../src/domain/packument";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { CheckUrlExists } from "../../../src/io/check-url";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
-import { checkIsBuiltInPackageUsing } from "../../../src/services/built-in-package-check";
+import { checkIsBuiltInPackageUsing } from "../../../src/app/built-in-package-check";
 import { partialApply } from "../../../src/utils/fp-utils";
 import { mockFunctionOfType } from "./func.mock";
 

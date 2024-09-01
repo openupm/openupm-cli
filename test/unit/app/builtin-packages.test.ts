@@ -1,16 +1,16 @@
 import { Err, Ok } from "ts-results-es";
+import {
+  EditorNotInstalledError,
+  findBuiltInPackagesUsing,
+} from "../../../src/app/builtin-packages";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { GetDirectoriesIn } from "../../../src/io/directory-io";
 import * as specialPaths from "../../../src/io/special-paths";
 import { OSNotSupportedError } from "../../../src/io/special-paths";
 import { noopLogger } from "../../../src/logging";
-import {
-  EditorNotInstalledError,
-  findBuiltInPackagesUsing,
-} from "../../../src/services/builtin-packages";
 import { partialApply } from "../../../src/utils/fp-utils";
 import { eaccesError, enoentError } from "../io/node-error.mock";
-import { mockFunctionOfType } from "../services/func.mock";
+import { mockFunctionOfType } from "./func.mock";
 
 function makeDependencies() {
   const getDirectoriesIn = mockFunctionOfType<GetDirectoriesIn>();

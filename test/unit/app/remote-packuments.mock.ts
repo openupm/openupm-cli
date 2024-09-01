@@ -4,7 +4,7 @@ import {
   UnityPackument,
 } from "../../../src/domain/packument";
 import { RegistryUrl } from "../../../src/domain/registry-url";
-import { GetRegistryPackumentVersion } from "../../../src/services/get-registry-packument-version";
+import { GetRegistryPackumentVersion } from "../../../src/app/get-registry-packument-version";
 import { AsyncErr } from "../../../src/utils/result-utils";
 
 type MockEntry = [RegistryUrl, UnityPackument];

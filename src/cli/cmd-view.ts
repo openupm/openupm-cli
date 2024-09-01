@@ -8,8 +8,8 @@ import {
 } from "../domain/package-reference";
 import { unityRegistry } from "../domain/registry";
 import { GetRegistryPackument } from "../io/packument-io";
-import { GetRegistryAuth } from "../services/get-registry-auth";
-import { ParseEnv } from "../services/parse-env";
+import { GetRegistryAuth } from "../app/get-registry-auth";
+import { ParseEnv } from "../app/parse-env";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { CmdOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";

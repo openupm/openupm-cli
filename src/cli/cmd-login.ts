@@ -1,8 +1,8 @@
 import { Logger } from "npmlog";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { GetUpmConfigPath } from "../io/upm-config-io";
-import { Login } from "../services/login";
-import { ParseEnv } from "../services/parse-env";
+import { Login } from "../app/login";
+import { ParseEnv } from "../app/parse-env";
 import { CmdOptions } from "./options";
 import {
   promptEmail,

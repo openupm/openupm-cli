@@ -1,6 +1,6 @@
 import path from "path";
 import { openupmRegistryUrl } from "../../../src/domain/registry-url";
-import { makeParseEnv } from "../../../src/services/parse-env";
+import { makeParseEnv } from "../../../src/app/parse-env";
 import { makeMockLogger } from "../cli/log.mock";
 import { exampleRegistryUrl } from "../domain/data-registry";
 
