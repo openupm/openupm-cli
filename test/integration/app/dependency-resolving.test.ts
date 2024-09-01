@@ -1,20 +1,23 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import { PackumentNotFoundError } from "../../src/common-errors";
-import { NodeType, tryGetGraphNode } from "../../src/domain/dependency-graph";
-import { DomainName } from "../../src/domain/domain-name";
-import { VersionNotFoundError } from "../../src/domain/packument";
-import { Registry } from "../../src/domain/registry";
-import { unityRegistryUrl } from "../../src/domain/registry-url";
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import { fetchCheckUrlExists } from "../../src/io/check-url";
-import { getRegistryPackumentUsing } from "../../src/io/packument-io";
-import { noopLogger } from "../../src/logging";
-import { ResolveDependenciesFromRegistries } from "../../src/app/dependency-resolving";
-import { buildPackument } from "../unit/domain/data-packument";
-import { exampleRegistryUrl } from "../unit/domain/data-registry";
-import { mockUnityDocPages } from "./docs.mock";
-import { mockRegistryPackuments } from "./registry.mock";
+import { ResolveDependenciesFromRegistries } from "../../../src/app/dependency-resolving";
+import { PackumentNotFoundError } from "../../../src/common-errors";
+import {
+  NodeType,
+  tryGetGraphNode,
+} from "../../../src/domain/dependency-graph";
+import { DomainName } from "../../../src/domain/domain-name";
+import { VersionNotFoundError } from "../../../src/domain/packument";
+import { Registry } from "../../../src/domain/registry";
+import { unityRegistryUrl } from "../../../src/domain/registry-url";
+import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { fetchCheckUrlExists } from "../../../src/io/check-url";
+import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
+import { noopLogger } from "../../../src/logging";
+import { buildPackument } from "../../unit/domain/data-packument";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { mockUnityDocPages } from "../docs.mock";
+import { mockRegistryPackuments } from "../registry.mock";
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
