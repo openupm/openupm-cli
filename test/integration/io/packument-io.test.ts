@@ -3,8 +3,8 @@ import { DomainName } from "../../../src/domain/domain-name";
 import { Registry } from "../../../src/domain/registry";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
 import { noopLogger } from "../../../src/logging";
-import { buildPackument } from "../domain/data-packument";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { buildPackument } from "../../unit/domain/data-packument";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 import { mockRegClientGetResult } from "./registry-client.mock";
 
 describe("packument io", () => {

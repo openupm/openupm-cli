@@ -1,6 +1,6 @@
 import "assert";
 import RegClient from "another-npm-registry-client";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
 import { RegistryAuthenticationError } from "../../../src/io/common-errors";
 import { noopLogger } from "../../../src/logging";

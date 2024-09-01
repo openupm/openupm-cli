@@ -9,7 +9,7 @@ import * as specialPaths from "../../../src/io/special-paths";
 import { OSNotSupportedError } from "../../../src/io/special-paths";
 import { noopLogger } from "../../../src/logging";
 import { partialApply } from "../../../src/utils/fp-utils";
-import { eaccesError, enoentError } from "../io/node-error.mock";
+import { eaccesError, enoentError } from "../../integration/io/node-error.mock";
 import { mockFunctionOfType } from "./func.mock";
 
 function makeDependencies() {

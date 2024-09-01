@@ -1,7 +1,7 @@
 import { mockFunctionOfType } from "./func.mock";
 import { GetProjectVersion } from "../../../src/io/project-version-io";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
-import { mockProjectVersion } from "../io/project-version-io.mock";
+import { mockProjectVersion } from "../../integration/io/project-version-io.mock";
 import { DetermineEditorVersionFromFile } from "../../../src/app/determine-editor-version";
 
 describe("determine editor version from file", () => {

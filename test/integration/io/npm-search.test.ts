@@ -6,7 +6,7 @@ import {
 } from "../../../src/io/common-errors";
 import { searchRegistryUsing } from "../../../src/io/npm-search";
 import { noopLogger } from "../../../src/logging";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 
 jest.mock("libnpmsearch");
 
