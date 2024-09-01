@@ -2,12 +2,7 @@ import { EOL } from "node:os";
 import path from "path";
 import { Npmrc } from "../domain/npmrc";
 import { splitLines } from "../utils/string-utils";
-import {
-  readTextFile,
-  ReadTextFile,
-  writeTextFile,
-  WriteTextFile,
-} from "./text-file-io";
+import { ReadTextFile, writeTextFile, WriteTextFile } from "./text-file-io";
 
 /**
  * Gets the `.npmrc` path for a user.
@@ -18,30 +13,22 @@ export const getHomeNpmrcPath = (homePath: string): string =>
   path.join(homePath, ".npmrc");
 
 /**
- * Function for loading npmrc.
- * @param path The path to load from.
- * @returns The npmrc's lines or null if not found.
+ * Attempts to load the `.npmrc` file at a given path.
+ * @param readFile IO function with which to read the file.
+ * @param path The path of the file.
+ * @returns The file content or null if not found.
  */
-export type LoadNpmrc = (path: string) => Promise<Npmrc | null>;
-
-/**
- * Makes a {@link LoadNpmrc} function which reads the content of a `.npmrc`
- * file.
- */
-export function ReadNpmrcFile(readFile: ReadTextFile): LoadNpmrc {
-  return (path) =>
-    readFile(path, true).then((content) =>
-      content !== null
-        ? // TODO: Check if lines are valid.
-          splitLines(content)
-        : null
-    );
+export async function tryLoadNpmrcUsing(
+  readFile: ReadTextFile,
+  path: string
+): Promise<Npmrc | null> {
+  return readFile(path, true).then((content) =>
+    content !== null
+      ? // TODO: Check if lines are valid.
+        splitLines(content)
+      : null
+  );
 }
-
-/**
- * Default {@link LoadNpmrc} function. Uses {@link ReadNpmrcFile}.
- */
-export const loadNpmrc = ReadNpmrcFile(readTextFile);
 
 /**
  * Function for saving npmrc files. Overwrites the content of the file.
