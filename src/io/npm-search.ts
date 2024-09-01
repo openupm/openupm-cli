@@ -1,11 +1,10 @@
 import npmSearch from "libnpmsearch";
 import { UnityPackument } from "../domain/packument";
-import { Registry } from "../domain/registry";
+import { makeNpmFetchOptions, Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
-import { makeNpmFetchOptions } from "./npm-registry";
 
 /**
  * A type representing a searched packument. Instead of having all versions

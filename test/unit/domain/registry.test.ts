@@ -1,11 +1,8 @@
-import { userInfo } from "os";
-import { Registry } from "../../../src/domain/registry";
-import { makeNpmFetchOptions } from "../../../src/io/npm-registry";
-import { exampleRegistryUrl } from "../../common/data-registry";
-import { Options as FetchOptions } from "npm-registry-fetch";
 import { NpmAuth } from "another-npm-registry-client";
+import { makeNpmFetchOptions, Registry } from "../../../src/domain/registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 
-describe("npm registry interactions", () => {
+describe("npm registry", () => {
   describe("make fetch options from registry object", () => {
     it("should use input registry url", () => {
       const registry: Registry = {
