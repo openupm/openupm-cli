@@ -1,15 +1,15 @@
-import { makeNodeError } from "./node-error.mock";
 import fs from "fs/promises";
 import { Dirent } from "node:fs";
-import { makeGetDirectoriesIn } from "../../../src/io/directory-io";
+import { getDirectoriesInFs } from "../../../src/io/directory-io";
+import { makeNodeError } from "./node-error.mock";
 
 describe("directory io", () => {
-  function makeDependencies() {
-    const getDirectoriesIn = makeGetDirectoriesIn();
-    return { getDirectoriesIn } as const;
-  }
-
   describe("get directories", () => {
+    function makeDependencies() {
+      const getDirectoriesIn = getDirectoriesInFs;
+      return { getDirectoriesIn } as const;
+    }
+
     it("should fail if directory could not be read", async () => {
       const expected = makeNodeError("EACCES");
       const { getDirectoriesIn } = makeDependencies();
