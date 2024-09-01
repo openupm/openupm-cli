@@ -1,3 +1,4 @@
+import path from "node:path";
 import { removeRecordKey } from "../utils/record-utils";
 import { removeTrailingSlash } from "../utils/string-utils";
 import { DomainName } from "./domain-name";
@@ -212,4 +213,13 @@ export function removeTestable(
     ...manifest,
     testables: manifest.testables.filter((it) => it !== packageName),
   };
+}
+
+/**
+ * Determines the path to the package manifest based on the project
+ * directory.
+ * @param projectPath The root path of the Unity project.
+ */
+export function manifestPathFor(projectPath: string): string {
+  return path.join(projectPath, "Packages/manifest.json");
 }

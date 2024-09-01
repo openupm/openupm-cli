@@ -1,9 +1,11 @@
 import fc from "fast-check";
+import path from "path";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
   addTestable,
   emptyProjectManifest,
   hasDependency,
+  manifestPathFor,
   mapScopedRegistry,
   removeDependency,
   removeEmptyScopedRegistries,
@@ -346,6 +348,18 @@ describe("project-manifest", () => {
           });
         })
       );
+    });
+  });
+
+  describe("path", () => {
+    it("should determine correct manifest path", () => {
+      const manifestPath = manifestPathFor("test-openupm-cli");
+      const expected = path.join(
+        "test-openupm-cli",
+        "Packages",
+        "manifest.json"
+      );
+      expect(manifestPath).toEqual(expected);
     });
   });
 });

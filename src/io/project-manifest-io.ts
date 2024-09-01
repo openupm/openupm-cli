@@ -1,7 +1,9 @@
-import path from "path";
 import { CustomError } from "ts-custom-error";
 import { z } from "zod";
-import { UnityProjectManifest } from "../domain/project-manifest";
+import {
+  manifestPathFor,
+  UnityProjectManifest,
+} from "../domain/project-manifest";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import {
@@ -18,15 +20,6 @@ export class ManifestMissingError extends CustomError {
 }
 
 export class ManifestMalformedError extends CustomError {}
-
-/**
- * Determines the path to the package manifest based on the project
- * directory.
- * @param projectPath The root path of the Unity project.
- */
-export function manifestPathFor(projectPath: string): string {
-  return path.join(projectPath, "Packages/manifest.json");
-}
 
 /**
  * Function for loading the project manifest for a Unity project.

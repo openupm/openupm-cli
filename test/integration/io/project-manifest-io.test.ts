@@ -1,9 +1,7 @@
-import path from "path";
 import { UnityProjectManifest } from "../../../src/domain/project-manifest";
 import {
   ManifestMalformedError,
   ManifestMissingError,
-  manifestPathFor,
   parseProjectManifest,
   ReadProjectManifestFile,
   serializeProjectManifest,
@@ -39,18 +37,6 @@ describe("project-manifest io", () => {
       const content = `123`;
 
       expect(() => parseProjectManifest(content)).toThrow(Error);
-    });
-  });
-
-  describe("path", () => {
-    it("should determine correct manifest path", () => {
-      const manifestPath = manifestPathFor("test-openupm-cli");
-      const expected = path.join(
-        "test-openupm-cli",
-        "Packages",
-        "manifest.json"
-      );
-      expect(manifestPath).toEqual(expected);
     });
   });
 
