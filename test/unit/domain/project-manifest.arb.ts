@@ -33,7 +33,7 @@ export function arbManifestWithDependencyCount(
   dependencyCount: number
 ): Arbitrary<UnityProjectManifest> {
   return withArbDependencies(
-    new UnityProjectManifestBuilder(),
+    UnityProjectManifestBuilder.empty,
     dependencyCount
   );
 }

@@ -1,5 +1,8 @@
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { addScope, makeScopedRegistry } from "../../../src/domain/scoped-registry";
+import {
+  addScope,
+  makeScopedRegistry,
+} from "../../../src/domain/scoped-registry";
 import {
   addTestable,
   emptyProjectManifest,
@@ -14,12 +17,10 @@ import { DomainName } from "../../../src/domain/domain-name";
 /**
  * Builder class for {@link UnityProjectManifest}.
  */
-class UnityProjectManifestBuilder {
-  manifest: UnityProjectManifest;
+export class UnityProjectManifestBuilder {
+  private constructor(public readonly manifest: UnityProjectManifest) {}
 
-  constructor() {
-    this.manifest = emptyProjectManifest;
-  }
+  public static empty = new UnityProjectManifestBuilder(emptyProjectManifest);
 
   /**
    * Add a scope to the manifests scoped registry.
@@ -28,17 +29,13 @@ class UnityProjectManifestBuilder {
   addScope(name: string): UnityProjectManifestBuilder {
     assertZod(name, DomainName);
 
-    this.manifest = mapScopedRegistry(
-      this.manifest,
-      exampleRegistryUrl,
-      (registry) => {
+    return new UnityProjectManifestBuilder(
+      mapScopedRegistry(this.manifest, exampleRegistryUrl, (registry) => {
         if (registry === null)
           registry = makeScopedRegistry("example.com", exampleRegistryUrl);
         return addScope(registry, name);
-      }
+      })
     );
-
-    return this;
   }
 
   /**
@@ -47,8 +44,7 @@ class UnityProjectManifestBuilder {
    */
   addTestable(name: string): UnityProjectManifestBuilder {
     assertZod(name, DomainName);
-    this.manifest = addTestable(this.manifest, name);
-    return this;
+    return new UnityProjectManifestBuilder(addTestable(this.manifest, name));
   }
 
   /**
@@ -66,10 +62,12 @@ class UnityProjectManifestBuilder {
   ): UnityProjectManifestBuilder {
     assertZod(name, DomainName);
     assertZod(version, SemanticVersion);
-    if (withScope) this.addScope(name);
-    if (testable) this.addTestable(name);
-    this.manifest = setDependency(this.manifest, name, version);
-    return this;
+    let updated: UnityProjectManifestBuilder = new UnityProjectManifestBuilder(
+      setDependency(this.manifest, name, version)
+    );
+    if (withScope) updated = updated.addScope(name);
+    if (testable) updated = updated.addTestable(name);
+    return updated;
   }
 }
 
@@ -79,9 +77,9 @@ class UnityProjectManifestBuilder {
  * @param build A builder function.
  */
 export function buildProjectManifest(
-  build?: (builder: UnityProjectManifestBuilder) => unknown
+  build?: (builder: UnityProjectManifestBuilder) => UnityProjectManifestBuilder
 ) {
-  const builder = new UnityProjectManifestBuilder();
-  if (build !== undefined) build(builder);
+  let builder = UnityProjectManifestBuilder.empty;
+  if (build !== undefined) builder = build(builder);
   return builder.manifest;
 }
