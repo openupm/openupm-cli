@@ -14,6 +14,7 @@ import {
   SaveProjectManifest,
 } from "../io/project-manifest-io";
 import { DebugLog } from "../logging";
+import { omitKey } from "../utils/object-utils";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -84,11 +85,8 @@ export function RemovePackagesFromManifest(
       };
 
       // Remove scoped registries property if empty
-      if (manifest.scopedRegistries!.length === 0) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { scopedRegistries, ...withoutScopedRegistries } = manifest;
-        manifest = withoutScopedRegistries;
-      }
+      if (manifest.scopedRegistries!.length === 0)
+        manifest = omitKey(manifest, "scopedRegistries");
     }
 
     if (manifest.testables !== undefined) {
@@ -98,11 +96,8 @@ export function RemovePackagesFromManifest(
       };
 
       // Remove testables property if empty
-      if (manifest.testables!.length === 0) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { testables, ...withoutTestables } = manifest;
-        manifest = withoutTestables;
-      }
+      if (manifest.testables!.length === 0)
+        manifest = omitKey(manifest, "testables");
     }
 
     return Ok([manifest, { name: packageName, version: versionInManifest }]);
