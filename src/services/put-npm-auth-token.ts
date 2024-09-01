@@ -1,10 +1,6 @@
-import { emptyNpmrc, setToken } from "../domain/npmrc";
+import { emptyNpmrc, getHomeNpmrcPath, setToken } from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
-import {
-  getHomeNpmrcPath,
-  saveNpmrcUsing,
-  tryLoadNpmrcUsing,
-} from "../io/npmrc-io";
+import { saveNpmrcUsing, tryLoadNpmrcUsing } from "../io/npmrc-io";
 import {
   readTextFile,
   writeTextFile,

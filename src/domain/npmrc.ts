@@ -1,3 +1,4 @@
+import path from "path";
 import { RegistryUrl } from "./registry-url";
 
 /**
@@ -9,6 +10,14 @@ export type Npmrc = ReadonlyArray<string>;
  * An empty npmrc (No lines).
  */
 export const emptyNpmrc: Npmrc = [];
+
+/**
+ * Gets the `.npmrc` path for a user.
+ * @param homePath The users home directory.
+ * @returns The path to the `.npmrc` file.
+ */
+export const getHomeNpmrcPath = (homePath: string): string =>
+  path.join(homePath, ".npmrc");
 
 /**
  * Adds or updates the auth-token for a registry.

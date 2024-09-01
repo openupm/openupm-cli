@@ -1,16 +1,7 @@
 import { EOL } from "node:os";
-import path from "path";
 import { Npmrc } from "../domain/npmrc";
 import { splitLines } from "../utils/string-utils";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
-
-/**
- * Gets the `.npmrc` path for a user.
- * @param homePath The users home directory.
- * @returns The path to the `.npmrc` file.
- */
-export const getHomeNpmrcPath = (homePath: string): string =>
-  path.join(homePath, ".npmrc");
 
 /**
  * Attempts to load the `.npmrc` file at a given path.

@@ -1,4 +1,9 @@
-import { emptyNpmrc, setToken } from "../../../src/domain/npmrc";
+import path from "node:path";
+import {
+  emptyNpmrc,
+  getHomeNpmrcPath,
+  setToken,
+} from "../../../src/domain/npmrc";
 
 import { exampleRegistryUrl } from "./data-registry";
 
@@ -6,6 +11,18 @@ const exampleToken = "123-456-789";
 const normalizedRegistryUrl = "//example.com/";
 
 describe("npmrc", () => {
+  describe("find path in home", () => {
+    const someHomePath = path.join(path.sep, "user", "dir");
+
+    it("should be [Home]/.npmrc", () => {
+      const expected = path.join(someHomePath, ".npmrc");
+
+      const actual = getHomeNpmrcPath(someHomePath);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe("set token", () => {
     it("should add token if registry does not exist", async () => {
       const initial = ["key1=value1"];
