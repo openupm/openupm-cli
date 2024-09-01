@@ -1,21 +1,26 @@
+import fc from "fast-check";
+import { DomainName } from "../../../src/domain/domain-name";
 import {
   addTestable,
   emptyProjectManifest,
   hasDependency,
   mapScopedRegistry,
   removeDependency,
+  removeScopeFromAllScopedRegistries,
   setDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
+  type UnityProjectManifest,
 } from "../../../src/domain/project-manifest";
-import { DomainName } from "../../../src/domain/domain-name";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { addScope, makeScopedRegistry } from "../../../src/domain/scoped-registry";
-import fc from "fast-check";
-import { arbDomainName } from "./domain-name.arb";
-import { exampleRegistryUrl } from "./data-registry";
-import { buildProjectManifest } from "./data-project-manifest";
 import { RegistryUrl } from "../../../src/domain/registry-url";
+import {
+  addScope,
+  makeScopedRegistry,
+} from "../../../src/domain/scoped-registry";
+import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { buildProjectManifest } from "./data-project-manifest";
+import { exampleRegistryUrl } from "./data-registry";
+import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
   describe("set dependency", () => {
@@ -202,6 +207,60 @@ describe("project-manifest", () => {
       const packageName = DomainName.parse("com.some.package");
 
       expect(hasDependency(emptyProjectManifest, packageName)).toBeFalsy();
+    });
+  });
+
+  describe("remove scope from all scoped registries", () => {
+    it('should have no effect for undefined "scopedRegistries"', () => {
+      fc.assert(
+        fc.property(arbDomainName, (scope) => {
+          const original: UnityProjectManifest = { dependencies: {} };
+
+          const actual = removeScopeFromAllScopedRegistries(original, scope);
+
+          expect(actual).toEqual(original);
+        })
+      );
+    });
+
+    it("should remove scope from all scoped registries", () => {
+      fc.assert(
+        fc.property(arbDomainName, arbDomainName, (scope1, scope2) => {
+          const original: UnityProjectManifest = {
+            dependencies: {},
+            scopedRegistries: [
+              {
+                name: "Scope A",
+                url: RegistryUrl.parse("https://a.com"),
+                scopes: [scope1],
+              },
+              {
+                name: "Scope B",
+                url: RegistryUrl.parse("https://b.com"),
+                scopes: [scope1, scope2],
+              },
+            ],
+          };
+
+          const actual = removeScopeFromAllScopedRegistries(original, scope1);
+
+          expect(actual).toEqual<UnityProjectManifest>({
+            dependencies: {},
+            scopedRegistries: [
+              {
+                name: "Scope A",
+                url: RegistryUrl.parse("https://a.com"),
+                scopes: [],
+              },
+              {
+                name: "Scope B",
+                url: RegistryUrl.parse("https://b.com"),
+                scopes: [scope2],
+              },
+            ],
+          });
+        })
+      );
     });
   });
 });
