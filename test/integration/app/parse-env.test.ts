@@ -1,8 +1,8 @@
 import path from "path";
-import { openupmRegistryUrl } from "../../../src/domain/registry-url";
 import { makeParseEnv } from "../../../src/app/parse-env";
-import { makeMockLogger } from "../cli/log.mock";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { openupmRegistryUrl } from "../../../src/domain/registry-url";
+import { makeMockLogger } from "../../unit/cli/log.mock";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 

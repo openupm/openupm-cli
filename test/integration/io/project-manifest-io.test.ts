@@ -10,8 +10,8 @@ import {
 } from "../../../src/io/project-manifest-io";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
-import { mockFunctionOfType } from "../../unit/app/func.mock";
 import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { mockFunctionOfType } from "../app/func.mock";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {

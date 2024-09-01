@@ -1,3 +1,4 @@
+import { ApiAndFallbackPackageSearch } from "../../../src/app/search-packages";
 import { DomainName } from "../../../src/domain/domain-name";
 import { Registry } from "../../../src/domain/registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
@@ -7,8 +8,7 @@ import {
 } from "../../../src/io/all-packuments-io";
 import { SearchedPackument, SearchRegistry } from "../../../src/io/npm-search";
 import { noopLogger } from "../../../src/logging";
-import { ApiAndFallbackPackageSearch } from "../../../src/app/search-packages";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("search packages", () => {

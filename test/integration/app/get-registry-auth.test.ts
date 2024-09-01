@@ -1,3 +1,8 @@
+import {
+  importNpmAuth,
+  isNonAuthUrl,
+  LoadRegistryAuthFromUpmConfig,
+} from "../../../src/app/get-registry-auth";
 import { Base64 } from "../../../src/domain/base64";
 import {
   openupmRegistryUrl,
@@ -5,12 +10,7 @@ import {
 } from "../../../src/domain/registry-url";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../../src/io/upm-config-io";
 import { noopLogger } from "../../../src/logging";
-import {
-  importNpmAuth,
-  isNonAuthUrl,
-  LoadRegistryAuthFromUpmConfig,
-} from "../../../src/app/get-registry-auth";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("get registry auth from upm config", () => {

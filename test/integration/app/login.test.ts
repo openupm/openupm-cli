@@ -1,9 +1,9 @@
-import { GetAuthToken } from "../../../src/io/get-auth-token";
-import { noopLogger } from "../../../src/logging";
 import { UpmConfigLogin } from "../../../src/app/login";
 import { StoreNpmAuthToken } from "../../../src/app/put-npm-auth-token";
 import { PutRegistryAuth } from "../../../src/app/put-registry-auth";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { GetAuthToken } from "../../../src/io/get-auth-token";
+import { noopLogger } from "../../../src/logging";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 const exampleUser = "user";

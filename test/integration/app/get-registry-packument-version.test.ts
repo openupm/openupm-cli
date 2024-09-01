@@ -1,11 +1,11 @@
+import { FetchRegistryPackumentVersion } from "../../../src/app/get-registry-packument-version";
 import { PackumentNotFoundError } from "../../../src/common-errors";
 import { DomainName } from "../../../src/domain/domain-name";
 import { Registry } from "../../../src/domain/registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
-import { FetchRegistryPackumentVersion } from "../../../src/app/get-registry-packument-version";
-import { buildPackument } from "../domain/data-packument";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { buildPackument } from "../../unit/domain/data-packument";
+import { exampleRegistryUrl } from "../../unit/domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("fetch registrypackument version", () => {

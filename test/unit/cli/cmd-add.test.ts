@@ -31,8 +31,8 @@ import {
 } from "../../../src/io/project-manifest-io";
 import { noopLogger } from "../../../src/logging";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
-import { mockFunctionOfType } from "../app/func.mock";
-import { mockResolvedPackuments } from "../app/remote-packuments.mock";
+import { mockFunctionOfType } from "../../integration/app/func.mock";
+import { mockResolvedPackuments } from "../../integration/app/remote-packuments.mock";
 import { buildPackument } from "../domain/data-packument";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { exampleRegistryUrl } from "../domain/data-registry";
