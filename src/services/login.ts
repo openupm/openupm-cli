@@ -1,7 +1,7 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
 import { DebugLog } from "../logging";
-import { getAuthToken, GetAuthToken } from "./get-auth-token";
+import { getAuthToken, GetAuthToken } from "../io/get-auth-token";
 import { putNpmAuthToken, StoreNpmAuthToken } from "./put-npm-auth-token";
 import { putRegistryAuthIntoUserUpmConfig, PutRegistryAuth } from "./put-registry-auth";
 

@@ -1,6 +1,6 @@
 import RegClient from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
-import { RegistryAuthenticationError } from "../io/common-errors";
+import { RegistryAuthenticationError } from "./common-errors";
 import { DebugLog } from "../logging";
 
 /**
