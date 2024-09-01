@@ -6,6 +6,7 @@ import {
   hasDependency,
   mapScopedRegistry,
   removeDependency,
+  removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
   setDependency,
   setScopedRegistry,
@@ -261,6 +262,57 @@ describe("project-manifest", () => {
           });
         })
       );
+    });
+  });
+
+  describe("remove empty scoped registries", () => {
+    it('should have no effect for undefined "scopedRegistries"', () => {
+      const original: UnityProjectManifest = { dependencies: {} };
+
+      const actual = removeEmptyScopedRegistries(original);
+
+      expect(actual).toEqual(original);
+    });
+
+    it("should leave non-empty scoped registries", () => {
+      fc.assert(
+        fc.property(arbDomainName, (scope) => {
+          const original: UnityProjectManifest = {
+            dependencies: {},
+            scopedRegistries: [
+              {
+                name: "Scope A",
+                url: RegistryUrl.parse("https://a.com"),
+                scopes: [scope],
+              },
+            ],
+          };
+
+          const actual = removeEmptyScopedRegistries(original);
+
+          expect(actual).toEqual<UnityProjectManifest>(original);
+        })
+      );
+    });
+
+    it("should remove empty scoped registries", () => {
+      const original: UnityProjectManifest = {
+        dependencies: {},
+        scopedRegistries: [
+          {
+            name: "Scope A",
+            url: RegistryUrl.parse("https://a.com"),
+            scopes: [],
+          },
+        ],
+      };
+
+      const actual = removeEmptyScopedRegistries(original);
+
+      expect(actual).toEqual<UnityProjectManifest>({
+        dependencies: {},
+        scopedRegistries: [],
+      });
     });
   });
 });

@@ -4,6 +4,7 @@ import { DomainName } from "../domain/domain-name";
 import { PackageUrl } from "../domain/package-url";
 import {
   removeDependency,
+  removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
   UnityProjectManifest,
 } from "../domain/project-manifest";
@@ -65,15 +66,8 @@ export function RemovePackagesFromManifest(
     manifest = removeDependency(manifest, packageName);
 
     if (manifest.scopedRegistries !== undefined) {
-
-      // Remove scoped registries without scopes
-      manifest = {
-        ...manifest,
-        scopedRegistries: manifest.scopedRegistries!.filter(
-          (it) => it.scopes.length > 0
-        ),
-      };
       manifest = removeScopeFromAllScopedRegistries(manifest, packageName);
+      manifest = removeEmptyScopedRegistries(manifest);
 
       // Remove scoped registries property if empty
       if (manifest.scopedRegistries!.length === 0)

@@ -178,3 +178,21 @@ export function removeScopeFromAllScopedRegistries(
     })),
   };
 }
+
+/**
+ * Removes all empty scoped registries from a manifest. A scoped registry
+ * is empty, if it has no scopes.
+ * @param manifest The manifest.
+ * @returns The manifest without empty scoped registried.
+ */
+export function removeEmptyScopedRegistries(
+  manifest: UnityProjectManifest
+): UnityProjectManifest {
+  if (manifest.scopedRegistries === undefined) return manifest;
+  return {
+    ...manifest,
+    scopedRegistries: manifest.scopedRegistries.filter(
+      (it) => it.scopes.length > 0
+    ),
+  };
+}
