@@ -3,7 +3,7 @@ import {
   HttpErrorLike,
   RegistryAuthenticationError,
 } from "../../../src/io/common-errors";
-import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 
 describe("common error utilities", () => {
   describe("make registry interaction errors", () => {

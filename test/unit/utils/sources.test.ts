@@ -1,6 +1,6 @@
 import { queryAllRegistriesLazy } from "../../../src/utils/sources";
 import { Registry } from "../../../src/domain/registry";
-import { exampleRegistryUrl } from "../domain/data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 
 describe("sources", () => {

@@ -8,7 +8,7 @@ import {
 } from "../../../src/io/all-packuments-io";
 import { SearchedPackument, SearchRegistry } from "../../../src/io/npm-search";
 import { noopLogger } from "../../../src/logging";
-import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("search packages", () => {

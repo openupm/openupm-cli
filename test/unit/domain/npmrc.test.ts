@@ -5,7 +5,7 @@ import {
   setToken,
 } from "../../../src/domain/npmrc";
 
-import { exampleRegistryUrl } from "./data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 
 const exampleToken = "123-456-789";
 const normalizedRegistryUrl = "//example.com/";

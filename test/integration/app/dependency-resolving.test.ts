@@ -14,8 +14,8 @@ import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { fetchCheckUrlExists } from "../../../src/io/check-url";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
 import { noopLogger } from "../../../src/logging";
-import { buildPackument } from "../../unit/domain/data-packument";
-import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { buildPackument } from "../../common/data-packument";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockUnityDocPages } from "../docs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
 

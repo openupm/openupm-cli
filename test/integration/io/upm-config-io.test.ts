@@ -1,7 +1,7 @@
 import { EOL } from "node:os";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { ReadUpmConfigFile } from "../../../src/io/upm-config-io";
-import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "../app/func.mock";
 
 jest.mock("../../../src/utils/env-util");

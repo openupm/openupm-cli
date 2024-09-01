@@ -4,7 +4,7 @@ import { UnityPackument } from "../../../src/domain/packument";
 import { Registry } from "../../../src/domain/registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
-import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("get latest version from registry packument", () => {

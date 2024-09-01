@@ -10,7 +10,7 @@ import {
 } from "../../../src/domain/registry-url";
 import { GetUpmConfigPath, LoadUpmConfig } from "../../../src/io/upm-config-io";
 import { noopLogger } from "../../../src/logging";
-import { exampleRegistryUrl } from "../../unit/domain/data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("get registry auth from upm config", () => {

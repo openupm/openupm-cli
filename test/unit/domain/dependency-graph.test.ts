@@ -11,7 +11,7 @@ import {
   tryGetGraphNode,
   tryGetNextUnresolved,
 } from "../../../src/domain/dependency-graph";
-import { exampleRegistryUrl } from "./data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { PackumentNotFoundError } from "../../../src/common-errors";
 
 describe("dependency graph", () => {

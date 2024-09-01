@@ -33,10 +33,10 @@ import { noopLogger } from "../../../src/logging";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
 import { mockFunctionOfType } from "../../integration/app/func.mock";
 import { mockResolvedPackuments } from "../../integration/app/remote-packuments.mock";
-import { buildPackument } from "../domain/data-packument";
-import { buildProjectManifest } from "../domain/data-project-manifest";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { makeMockLogger } from "./log.mock";
+import { buildPackument } from "../../common/data-packument";
+import { buildProjectManifest } from "../../common/data-project-manifest";
+import { exampleRegistryUrl } from "../../common/data-registry";
+import { makeMockLogger } from "../../common/log.mock";
 
 const somePackage = DomainName.parse("com.some.package");
 const otherPackage = DomainName.parse("com.other.package");

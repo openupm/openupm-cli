@@ -20,8 +20,8 @@ import {
   makeScopedRegistry,
 } from "../../../src/domain/scoped-registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildProjectManifest } from "./data-project-manifest";
-import { exampleRegistryUrl } from "./data-registry";
+import { buildProjectManifest } from "../../common/data-project-manifest";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {

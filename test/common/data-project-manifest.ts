@@ -1,18 +1,18 @@
-import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import {
   addScope,
   makeScopedRegistry,
-} from "../../../src/domain/scoped-registry";
+} from "../../src/domain/scoped-registry";
 import {
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
   setDependency,
   UnityProjectManifest,
-} from "../../../src/domain/project-manifest";
+} from "../../src/domain/project-manifest";
 import { exampleRegistryUrl } from "./data-registry";
-import { assertZod } from "../../../src/utils/zod-utils";
-import { DomainName } from "../../../src/domain/domain-name";
+import { assertZod } from "../../src/utils/zod-utils";
+import { DomainName } from "../../src/domain/domain-name";
 
 /**
  * Builder class for {@link UnityProjectManifest}.
