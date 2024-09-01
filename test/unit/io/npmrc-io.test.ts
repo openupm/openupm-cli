@@ -1,7 +1,7 @@
 import { EOL } from "node:os";
 import path from "path";
 import {
-  FindNpmrcInHome,
+  getHomeNpmrcPath,
   ReadNpmrcFile,
   WriteNpmrcPath as WriteNpmrcFile,
 } from "../../../src/io/npmrc-io";
@@ -12,17 +12,10 @@ describe("npmrc-io", () => {
   describe("find path in home", () => {
     const someHomePath = path.join(path.sep, "user", "dir");
 
-    function makeDependencies() {
-      const findNpmrcInHome = FindNpmrcInHome(someHomePath);
-
-      return { findNpmrcInHome } as const;
-    }
-
     it("should be [Home]/.npmrc", () => {
-      const { findNpmrcInHome } = makeDependencies();
       const expected = path.join(someHomePath, ".npmrc");
 
-      const actual = findNpmrcInHome();
+      const actual = getHomeNpmrcPath(someHomePath);
 
       expect(actual).toEqual(expected);
     });

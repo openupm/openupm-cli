@@ -10,27 +10,12 @@ import {
 } from "./text-file-io";
 
 /**
- * Function for determining the path of the users .npmrc file.
- * @returns The path to the file.
+ * Gets the `.npmrc` path for a user.
+ * @param homePath The users home directory.
+ * @returns The path to the `.npmrc` file.
  */
-export type FindNpmrcPath = () => string;
-
-/**
- * Makes a {@link FindNpmrcPath} function which resolves the path to the
- * `.npmrc` file that is stored in the users home directory.
- */
-export function FindNpmrcInHome(homePath: string): FindNpmrcPath {
-  // TODO: Unsevice! This function is pure and does not benefit from being a service style function.
-  return () => {
-    return path.join(homePath, ".npmrc");
-  };
-}
-
-/**
- * Default {@link FindNpmrcPath} function. Uses {@link FindNpmrcInHome}.
- */
-export const findNpmrcPath = (homePath: string): FindNpmrcPath =>
-  FindNpmrcInHome(homePath);
+export const getHomeNpmrcPath = (homePath: string): string =>
+  path.join(homePath, ".npmrc");
 
 /**
  * Function for loading npmrc.

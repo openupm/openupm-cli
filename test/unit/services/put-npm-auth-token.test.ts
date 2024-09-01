@@ -1,16 +1,15 @@
+import path from "path";
 import { emptyNpmrc, setToken } from "../../../src/domain/npmrc";
-import { FindNpmrcPath, LoadNpmrc, SaveNpmrc } from "../../../src/io/npmrc-io";
+import { LoadNpmrc, SaveNpmrc } from "../../../src/io/npmrc-io";
 import { StoreNpmAuthTokenInNpmrc as PutNpmAuthTokenInNpmrc } from "../../../src/services/put-npm-auth-token";
 import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
-const exampleNpmrcPath = "/users/someuser/.npmrc";
+const exampleHomePath = path.resolve("/users/someuser");
+const exampleNpmrcPath = path.resolve("/users/someuser/.npmrc");
 
 describe("put npm auth token in npmrc", () => {
   function makeDependencies() {
-    const findPath = mockFunctionOfType<FindNpmrcPath>();
-    findPath.mockReturnValue(exampleNpmrcPath);
-
     const loadNpmrc = mockFunctionOfType<LoadNpmrc>();
     loadNpmrc.mockResolvedValue(null);
 
@@ -18,13 +17,12 @@ describe("put npm auth token in npmrc", () => {
     saveNpmrc.mockResolvedValue(undefined);
 
     const putNpmAuthTokenInNpmrc = PutNpmAuthTokenInNpmrc(
-      findPath,
       loadNpmrc,
-      saveNpmrc
+      saveNpmrc,
+      exampleHomePath
     );
     return {
       putNpmAuthTokenInNpmrc,
-      findPath,
       loadNpmrc,
       saveNpmrc,
     } as const;
@@ -51,8 +49,7 @@ describe("put npm auth token in npmrc", () => {
   });
 
   it("should update npmrc if already exists", async () => {
-    const { putNpmAuthTokenInNpmrc, loadNpmrc, saveNpmrc } =
-      makeDependencies();
+    const { putNpmAuthTokenInNpmrc, loadNpmrc, saveNpmrc } = makeDependencies();
     const initial = setToken(emptyNpmrc, exampleRegistryUrl, "some old token");
     const expected = setToken(initial, exampleRegistryUrl, "some token");
     loadNpmrc.mockResolvedValue(initial);

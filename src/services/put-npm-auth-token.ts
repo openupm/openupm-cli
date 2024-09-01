@@ -1,8 +1,7 @@
 import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
 import {
-  findNpmrcPath,
-  FindNpmrcPath,
+  getHomeNpmrcPath,
   loadNpmrc,
   LoadNpmrc,
   saveNpmrc,
@@ -25,12 +24,12 @@ export type StoreNpmAuthToken = (
  * inside the users `.npmrc` file.
  */
 export function StoreNpmAuthTokenInNpmrc(
-  findPath: FindNpmrcPath,
   loadNpmrc: LoadNpmrc,
-  saveNpmrc: SaveNpmrc
+  saveNpmrc: SaveNpmrc,
+  homePath: string
 ): StoreNpmAuthToken {
   return async (registry, token) => {
-    const configPath = findPath();
+    const configPath = getHomeNpmrcPath(homePath);
     const initial = (await loadNpmrc(configPath)) || emptyNpmrc;
     const updated = setToken(initial, registry, token);
     await saveNpmrc(configPath, updated);
@@ -42,4 +41,4 @@ export function StoreNpmAuthTokenInNpmrc(
  * Default {@link StoreNpmAuthToken} function. Uses {@link StoreNpmAuthTokenInNpmrc}.
  */
 export const putNpmAuthToken = (homePath: string) =>
-  StoreNpmAuthTokenInNpmrc(findNpmrcPath(homePath), loadNpmrc, saveNpmrc);
+  StoreNpmAuthTokenInNpmrc(loadNpmrc, saveNpmrc, homePath);
