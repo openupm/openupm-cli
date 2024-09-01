@@ -1,14 +1,9 @@
-import { AsyncResult, Err, Ok, Result } from "ts-results-es";
+import { AsyncResult, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
+import { tryRemoveProjectDependency } from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
 import { PackageUrl } from "../domain/package-url";
-import {
-  removeDependency,
-  removeEmptyScopedRegistries,
-  removeScopeFromAllScopedRegistries,
-  removeTestable,
-  UnityProjectManifest,
-} from "../domain/project-manifest";
+import { UnityProjectManifest } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
   LoadProjectManifest,
@@ -17,7 +12,6 @@ import {
   SaveProjectManifest,
 } from "../io/project-manifest-io";
 import { DebugLog } from "../logging";
-import { omitKey } from "../utils/object-utils";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -55,30 +49,6 @@ export function RemovePackagesFromManifest(
   loadProjectManifest: LoadProjectManifest,
   saveProjectManifest: SaveProjectManifest
 ): RemovePackages {
-  const tryRemoveSingle = function (
-    manifest: UnityProjectManifest,
-    packageName: DomainName
-  ): Result<[UnityProjectManifest, RemovedPackage], PackumentNotFoundError> {
-    // not found array
-    const versionInManifest = manifest.dependencies[packageName];
-    if (versionInManifest === undefined)
-      return Err(new PackumentNotFoundError(packageName));
-
-    manifest = removeDependency(manifest, packageName);
-    manifest = removeScopeFromAllScopedRegistries(manifest, packageName);
-    manifest = removeEmptyScopedRegistries(manifest);
-    manifest = removeTestable(manifest, packageName);
-
-    // Remove scoped registries property if empty
-    if (manifest.scopedRegistries?.length === 0)
-      manifest = omitKey(manifest, "scopedRegistries");
-    // Remove testables property if empty
-    if (manifest.testables?.length === 0)
-      manifest = omitKey(manifest, "testables");
-
-    return Ok([manifest, { name: packageName, version: versionInManifest }]);
-  };
-
   function tryRemoveAll(
     manifest: UnityProjectManifest,
     packageNames: ReadonlyArray<DomainName>
@@ -91,7 +61,7 @@ export function RemovePackagesFromManifest(
     const currentPackageName = packageNames[0]!;
     const remainingPackageNames = packageNames.slice(1);
 
-    return tryRemoveSingle(manifest, currentPackageName).andThen(
+    return tryRemoveProjectDependency(manifest, currentPackageName).andThen(
       ([updatedManifest, removedPackage]) =>
         tryRemoveAll(updatedManifest, remainingPackageNames).map(
           ([finalManifest, removedPackages]) => [

@@ -1,14 +1,12 @@
 import path from "path";
 import { PackumentNotFoundError } from "../../../src/common-errors";
+import type { RemovedPackage } from "../../../src/domain/dependency-management";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
   LoadProjectManifest,
   SaveProjectManifest,
 } from "../../../src/io/project-manifest-io";
-import {
-  RemovedPackage,
-  RemovePackagesFromManifest,
-} from "../../../src/services/remove-packages";
+import { RemovePackagesFromManifest } from "../../../src/services/remove-packages";
 import { buildProjectManifest } from "../domain/data-project-manifest";
 import { mockFunctionOfType } from "./func.mock";
 
