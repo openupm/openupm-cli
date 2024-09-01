@@ -196,3 +196,20 @@ export function removeEmptyScopedRegistries(
     ),
   };
 }
+
+/**
+ * Removes a testable from this manifest.
+ * @param manifest The manifest.
+ * @param packageName The name of the testable to remove.
+ * @returns The manifest without the testable.
+ */
+export function removeTestable(
+  manifest: UnityProjectManifest,
+  packageName: DomainName
+): UnityProjectManifest {
+  if (manifest.testables === undefined) return manifest;
+  return {
+    ...manifest,
+    testables: manifest.testables.filter((it) => it !== packageName),
+  };
+}

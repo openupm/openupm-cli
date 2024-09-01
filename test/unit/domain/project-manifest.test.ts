@@ -8,6 +8,7 @@ import {
   removeDependency,
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
+  removeTestable,
   setDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
@@ -313,6 +314,38 @@ describe("project-manifest", () => {
         dependencies: {},
         scopedRegistries: [],
       });
+    });
+  });
+
+  describe("remove testable", () => {
+    it('should have no effect for undefined "testables"', () => {
+      fc.assert(
+        fc.property(arbDomainName, (packageName) => {
+          const original: UnityProjectManifest = { dependencies: {} };
+
+          const actual = removeTestable(original, packageName);
+
+          expect(actual).toEqual(original);
+        })
+      );
+    });
+
+    it("should remove testable", () => {
+      fc.assert(
+        fc.property(arbDomainName, (packageName) => {
+          const original: UnityProjectManifest = {
+            dependencies: {},
+            testables: [packageName],
+          };
+
+          const actual = removeTestable(original, packageName);
+
+          expect(actual).toEqual<UnityProjectManifest>({
+            dependencies: {},
+            testables: [],
+          });
+        })
+      );
     });
   });
 });

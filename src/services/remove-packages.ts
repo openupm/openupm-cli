@@ -6,6 +6,7 @@ import {
   removeDependency,
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
+  removeTestable,
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
@@ -64,26 +65,16 @@ export function RemovePackagesFromManifest(
       return Err(new PackumentNotFoundError(packageName));
 
     manifest = removeDependency(manifest, packageName);
+    manifest = removeScopeFromAllScopedRegistries(manifest, packageName);
+    manifest = removeEmptyScopedRegistries(manifest);
+    manifest = removeTestable(manifest, packageName);
 
-    if (manifest.scopedRegistries !== undefined) {
-      manifest = removeScopeFromAllScopedRegistries(manifest, packageName);
-      manifest = removeEmptyScopedRegistries(manifest);
-
-      // Remove scoped registries property if empty
-      if (manifest.scopedRegistries!.length === 0)
-        manifest = omitKey(manifest, "scopedRegistries");
-    }
-
-    if (manifest.testables !== undefined) {
-      manifest = {
-        ...manifest,
-        testables: manifest.testables.filter((it) => it !== packageName),
-      };
-
-      // Remove testables property if empty
-      if (manifest.testables!.length === 0)
-        manifest = omitKey(manifest, "testables");
-    }
+    // Remove scoped registries property if empty
+    if (manifest.scopedRegistries?.length === 0)
+      manifest = omitKey(manifest, "scopedRegistries");
+    // Remove testables property if empty
+    if (manifest.testables?.length === 0)
+      manifest = omitKey(manifest, "testables");
 
     return Ok([manifest, { name: packageName, version: versionInManifest }]);
   };
