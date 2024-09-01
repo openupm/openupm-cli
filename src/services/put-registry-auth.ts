@@ -24,6 +24,52 @@ export type PutRegistryAuth = (
   auth: NpmAuth
 ) => Promise<void>;
 
+function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
+  const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;
+
+  if ("token" in newEntry) {
+    return removeExplicitUndefined({
+      token: newEntry.token,
+      email: oldEntry?.email,
+      alwaysAuth,
+    });
+  }
+
+  return removeExplicitUndefined({
+    _auth: encodeBase64(`${newEntry.username}:${newEntry.password}`),
+    email: newEntry.email,
+    alwaysAuth,
+  });
+}
+
+/**
+ * Updates a {@link UpmConfigContent} object to contain auth data for a
+ * specific registry.
+ * @param currentContent The current upm config content. May be null if there
+ * is no config currently.
+ * @param registry The registry for which to put the auth data.
+ * @param auth The auth data.
+ * @returns An updated upm config content with the auth data.
+ */
+export function putRegistryAuthIntoUpmConfig(
+  currentContent: UpmConfigContent | null,
+  registry: RegistryUrl,
+  auth: NpmAuth
+): UpmConfigContent {
+  const oldEntries = currentContent?.npmAuth ?? {};
+  // Search the entry both with and without trailing slash
+  const oldEntry = oldEntries[registry] ?? oldEntries[registry + "/"] ?? null;
+  const newContent: UpmConfigContent = removeExplicitUndefined({
+    npmAuth: {
+      ...oldEntries,
+      // Remove entry with trailing slash
+      [registry + "/"]: undefined,
+      [registry]: mergeEntries(oldEntry, auth),
+    },
+  });
+  return newContent;
+}
+
 /**
  * Makes a {@link PutRegistryAuth} function which puts registry authentication
  * info into the users upm config.
@@ -32,38 +78,15 @@ export function PutRegistryAuthIntoUpmConfig(
   loadUpmConfig: LoadUpmConfig,
   saveUpmConfig: SaveUpmConfig
 ): PutRegistryAuth {
-  function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
-    const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;
-
-    if ("token" in newEntry) {
-      return removeExplicitUndefined({
-        token: newEntry.token,
-        email: oldEntry?.email,
-        alwaysAuth,
-      });
-    }
-
-    return removeExplicitUndefined({
-      _auth: encodeBase64(`${newEntry.username}:${newEntry.password}`),
-      email: newEntry.email,
-      alwaysAuth,
-    });
-  }
-
   return async (configPath, registry, auth) => {
     const currentContent = await loadUpmConfig(configPath);
 
-    const oldEntries = currentContent?.npmAuth ?? {};
-    // Search the entry both with and without trailing slash
-    const oldEntry = oldEntries[registry] ?? oldEntries[registry + "/"] ?? null;
-    const newContent: UpmConfigContent = removeExplicitUndefined({
-      npmAuth: {
-        ...oldEntries,
-        // Remove entry with trailing slash
-        [registry + "/"]: undefined,
-        [registry]: mergeEntries(oldEntry, auth),
-      },
-    });
+    const newContent: UpmConfigContent = putRegistryAuthIntoUpmConfig(
+      currentContent,
+      registry,
+      auth
+    );
+
     await saveUpmConfig(newContent, configPath);
   };
 }
@@ -71,7 +94,7 @@ export function PutRegistryAuthIntoUpmConfig(
 /**
  * Default {@link PutRegistryAuth} function. Uses {@link PutRegistryAuthIntoUpmConfig}.
  */
-export const putRegistryAuth = PutRegistryAuthIntoUpmConfig(
+export const putRegistryAuthIntoUserUpmConfig = PutRegistryAuthIntoUpmConfig(
   loadUpmConfig,
   saveUpmConfig
 );
