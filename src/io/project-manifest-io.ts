@@ -1,7 +1,7 @@
 import { CustomError } from "ts-custom-error";
-import { z } from "zod";
 import {
   manifestPathFor,
+  parseProjectManifest,
   UnityProjectManifest,
 } from "../domain/project-manifest";
 import { DebugLog } from "../logging";
@@ -29,20 +29,6 @@ export class ManifestMalformedError extends CustomError {}
 export type LoadProjectManifest = (
   projectPath: string
 ) => Promise<UnityProjectManifest>;
-
-// TODO: Add a better schema
-const projectManifestSchema = z.object({}).passthrough();
-
-/**
- * Parses the content of a `manifest.json` file to a {@link UnityProjectManifest}.
- * @param content The files content.
- * @returns The parsed file.
- * @throws {Error} If parsing failed.
- */
-export function parseProjectManifest(content: string): UnityProjectManifest {
-  const json = JSON.parse(content);
-  return projectManifestSchema.parse(json) as UnityProjectManifest;
-}
 
 /**
  * Makes a {@link LoadProjectManifest} function which reads the content

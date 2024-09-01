@@ -2,7 +2,6 @@ import { UnityProjectManifest } from "../../../src/domain/project-manifest";
 import {
   ManifestMalformedError,
   ManifestMissingError,
-  parseProjectManifest,
   ReadProjectManifestFile,
   serializeProjectManifest,
 } from "../../../src/io/project-manifest-io";
@@ -13,33 +12,6 @@ import { mockFunctionOfType } from "../app/func.mock";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
-  describe("parse", () => {
-    it("should parse valid manifest", () => {
-      const content = `{ "dependencies": { "com.package.a": "1.0.0"} }`;
-
-      const parsed = parseProjectManifest(content);
-
-      expect(parsed).toEqual({
-        dependencies: {
-          "com.package.a": "1.0.0",
-        },
-      });
-    });
-
-    it("should fail for bad json", () => {
-      const content = "not : valid // json";
-
-      expect(() => parseProjectManifest(content)).toThrow(Error);
-    });
-
-    it("should fail incorrect json shape", () => {
-      // Valid json but not what we want
-      const content = `123`;
-
-      expect(() => parseProjectManifest(content)).toThrow(Error);
-    });
-  });
-
   describe("read file", () => {
     function makeDependencies() {
       const readFile = mockFunctionOfType<ReadTextFile>();

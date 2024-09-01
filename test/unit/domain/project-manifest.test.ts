@@ -7,6 +7,7 @@ import {
   hasDependency,
   manifestPathFor,
   mapScopedRegistry,
+  parseProjectManifest,
   removeDependency,
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
@@ -360,6 +361,33 @@ describe("project-manifest", () => {
         "manifest.json"
       );
       expect(manifestPath).toEqual(expected);
+    });
+  });
+
+  describe("parse", () => {
+    it("should parse valid manifest", () => {
+      const content = `{ "dependencies": { "com.package.a": "1.0.0"} }`;
+
+      const parsed = parseProjectManifest(content);
+
+      expect(parsed).toEqual({
+        dependencies: {
+          "com.package.a": "1.0.0",
+        },
+      });
+    });
+
+    it("should fail for bad json", () => {
+      const content = "not : valid // json";
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+
+    it("should fail incorrect json shape", () => {
+      // Valid json but not what we want
+      const content = `123`;
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
     });
   });
 });
