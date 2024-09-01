@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/openupm/openupm-cli/compare/4.1.0...4.1.1) (2024-08-31)
+
+
+### Bug Fixes
+
+* incorrect import path ([44fe7ea](https://github.com/openupm/openupm-cli/commit/44fe7ea0e5400a5d7403a56bf632b173b8245beb))
+
 # [4.1.0](https://github.com/openupm/openupm-cli/compare/4.0.0...4.1.0) (2024-08-13)
 
 
