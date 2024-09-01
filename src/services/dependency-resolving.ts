@@ -16,15 +16,14 @@ import {
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
+import { fetchCheckUrlExists, type CheckUrlExists } from "../io/check-url";
 import {
   GetRegistryPackument,
   getRegistryPackumentUsing,
 } from "../io/packument-io";
 import { DebugLog } from "../logging";
-import {
-  checkIsBuiltInPackage,
-  CheckIsBuiltInPackage,
-} from "./built-in-package-check";
+import { partialApply } from "../utils/fp-utils";
+import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
 
 /**
  * Function for resolving all dependencies for a package.
@@ -45,9 +44,15 @@ export type ResolveDependencies = (
  * graph by querying multiple source registries.
  */
 export function ResolveDependenciesFromRegistries(
-  getRegistryPackument: GetRegistryPackument,
-  checkIsBuiltInPackage: CheckIsBuiltInPackage
+  checkUrlExists: CheckUrlExists,
+  getRegistryPackument: GetRegistryPackument
 ): ResolveDependencies {
+  const checkIsBuiltInPackage = partialApply(
+    checkIsBuiltInPackageUsing,
+    checkUrlExists,
+    getRegistryPackument
+  );
+
   async function resolveRecursively(
     graph: DependencyGraph,
     sources: ReadonlyArray<Registry>,
@@ -110,6 +115,6 @@ export const resolveDependencies = (
   debugLog: DebugLog
 ) =>
   ResolveDependenciesFromRegistries(
-    getRegistryPackumentUsing(registryClient, debugLog),
-    checkIsBuiltInPackage(registryClient, debugLog)
+    fetchCheckUrlExists,
+    getRegistryPackumentUsing(registryClient, debugLog)
   );

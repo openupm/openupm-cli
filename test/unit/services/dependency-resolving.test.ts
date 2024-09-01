@@ -1,15 +1,50 @@
-import { mockFunctionOfType } from "./func.mock";
-import { GetRegistryPackument } from "../../../src/io/packument-io";
-import { CheckIsBuiltInPackage } from "../../../src/services/built-in-package-check";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { unityRegistryUrl } from "../../../src/domain/registry-url";
-import { DomainName } from "../../../src/domain/domain-name";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { Registry } from "../../../src/domain/registry";
-import { NodeType, tryGetGraphNode } from "../../../src/domain/dependency-graph";
+import RegClient from "another-npm-registry-client";
+import nock from "nock";
 import { PackumentNotFoundError } from "../../../src/common-errors";
-import { VersionNotFoundError } from "../../../src/domain/packument";
+import {
+  NodeType,
+  tryGetGraphNode,
+} from "../../../src/domain/dependency-graph";
+import { DomainName } from "../../../src/domain/domain-name";
+import {
+  VersionNotFoundError,
+  type UnityPackument,
+} from "../../../src/domain/packument";
+import { Registry } from "../../../src/domain/registry";
+import {
+  unityRegistryUrl,
+  type RegistryUrl,
+} from "../../../src/domain/registry-url";
+import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { fetchCheckUrlExists } from "../../../src/io/check-url";
+import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
+import { noopLogger } from "../../../src/logging";
 import { ResolveDependenciesFromRegistries } from "../../../src/services/dependency-resolving";
+import { buildPackument } from "../domain/data-packument";
+import { exampleRegistryUrl } from "../domain/data-registry";
+
+function mockUnityDocPages(packages: ReadonlyArray<DomainName>) {
+  const scope = nock("https://docs.unity3d.com/Manual").persist();
+
+  packages.forEach((it) => scope.head(`/${it}.html`).reply(200));
+
+  scope.head(/.*/).reply(404);
+}
+
+function mockRegistryPackuments(
+  registryUrl: RegistryUrl,
+  packuments: ReadonlyArray<UnityPackument>
+) {
+  const scope = nock(registryUrl).persist();
+
+  packuments.forEach((packument) =>
+    scope.get(`/${packument.name}`).reply(200, JSON.stringify(packument), {
+      "Content-Type": "application/json",
+    })
+  );
+
+  scope.get(/.*/).reply(404);
+}
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
@@ -23,26 +58,20 @@ describe("dependency resolving", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
   const otherVersion = SemanticVersion.parse("2.0.0");
 
-  function makeDependencies() {
-    const getRegistryPackument = mockFunctionOfType<GetRegistryPackument>();
+  const registryClient = new RegClient();
+  const resolveDependencies = ResolveDependenciesFromRegistries(
+    fetchCheckUrlExists,
+    getRegistryPackumentUsing(registryClient, noopLogger)
+  );
 
-    const checkIsBuiltInPackage = mockFunctionOfType<CheckIsBuiltInPackage>();
-    checkIsBuiltInPackage.mockResolvedValue(false);
-
-    const resolveDependencies = ResolveDependenciesFromRegistries(
-      getRegistryPackument,
-      checkIsBuiltInPackage
-    );
-    return {
-      resolveDependencies,
-      getRegistryPackument,
-      checkIsBuiltInPackage,
-    } as const;
-  }
+  afterEach(() => {
+    nock.cleanAll();
+  });
 
   it("should mark missing packages", async () => {
-    const { resolveDependencies, getRegistryPackument } = makeDependencies();
-    getRegistryPackument.mockResolvedValue(null);
+    mockUnityDocPages([]);
+    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
       sources,
@@ -55,20 +84,20 @@ describe("dependency resolving", () => {
     expect(node).toEqual({
       type: NodeType.Failed,
       errors: {
-        [sources[0]!.url]: expect.any(PackumentNotFoundError),
-        [sources[1]!.url]: expect.any(PackumentNotFoundError),
+        [exampleRegistryUrl]: expect.any(PackumentNotFoundError),
+        [unityRegistryUrl]: expect.any(PackumentNotFoundError),
       },
     });
   });
 
   it("should mark missing versions", async () => {
-    const { resolveDependencies, getRegistryPackument } = makeDependencies();
-    getRegistryPackument.mockResolvedValue({
-      name: somePackage,
-      versions: {
-        [otherVersion]: { name: somePackage, version: otherVersion },
-      },
-    });
+    mockUnityDocPages([]);
+    mockRegistryPackuments(exampleRegistryUrl, [
+      buildPackument(somePackage, (packument) =>
+        packument.addVersion(otherVersion)
+      ),
+    ]);
+    mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
       sources,
@@ -81,27 +110,24 @@ describe("dependency resolving", () => {
     expect(node).toEqual({
       type: NodeType.Failed,
       errors: {
-        [sources[0]!.url]: expect.any(VersionNotFoundError),
-        [sources[1]!.url]: expect.any(VersionNotFoundError),
+        [exampleRegistryUrl]: expect.any(VersionNotFoundError),
+        [unityRegistryUrl]: expect.any(PackumentNotFoundError),
       },
     });
   });
 
   it("should mark resolved remote packages", async () => {
-    const { resolveDependencies, getRegistryPackument } = makeDependencies();
+    mockUnityDocPages([]);
     // The first source does not have the package
-    getRegistryPackument.mockResolvedValueOnce(null);
+    mockRegistryPackuments(exampleRegistryUrl, []);
     // But the second does
-    getRegistryPackument.mockResolvedValueOnce({
-      name: somePackage,
-      versions: {
-        [someVersion]: {
-          name: somePackage,
-          version: someVersion,
-          dependencies: { [otherPackage]: someVersion },
-        },
-      },
-    });
+    mockRegistryPackuments(unityRegistryUrl, [
+      buildPackument(somePackage, (packument) =>
+        packument.addVersion(someVersion, (version) =>
+          version.addDependency(otherPackage, someVersion)
+        )
+      ),
+    ]);
 
     const graph = await resolveDependencies(
       sources,
@@ -114,14 +140,15 @@ describe("dependency resolving", () => {
     expect(node).toEqual({
       type: NodeType.Resolved,
       // Package is found in second source
-      source: sources[1]!.url,
+      source: unityRegistryUrl,
       dependencies: { [otherPackage]: someVersion },
     });
   });
 
   it("should mark resolved built-in packages", async () => {
-    const { resolveDependencies, checkIsBuiltInPackage } = makeDependencies();
-    checkIsBuiltInPackage.mockResolvedValue(true);
+    mockUnityDocPages([somePackage]);
+    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
       sources,
@@ -139,17 +166,15 @@ describe("dependency resolving", () => {
   });
 
   it("should mark dependencies when resolving shallow", async () => {
-    const { resolveDependencies, getRegistryPackument } = makeDependencies();
-    getRegistryPackument.mockResolvedValue({
-      name: somePackage,
-      versions: {
-        [someVersion]: {
-          name: somePackage,
-          version: someVersion,
-          dependencies: { [otherPackage]: someVersion },
-        },
-      },
-    });
+    mockUnityDocPages([]);
+    mockRegistryPackuments(exampleRegistryUrl, [
+      buildPackument(somePackage, (packument) =>
+        packument.addVersion(someVersion, (version) =>
+          version.addDependency(otherPackage, someVersion)
+        )
+      ),
+    ]);
+    mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
       sources,
@@ -165,28 +190,18 @@ describe("dependency resolving", () => {
   });
 
   it("should resolve dependencies when resolving deep", async () => {
-    const { resolveDependencies, getRegistryPackument } = makeDependencies();
-    // First resolve somePackage
-    getRegistryPackument.mockResolvedValueOnce({
-      name: somePackage,
-      versions: {
-        [someVersion]: {
-          name: somePackage,
-          version: someVersion,
-          dependencies: { [otherPackage]: someVersion },
-        },
-      },
-    });
-    // then resolve otherPackage
-    getRegistryPackument.mockResolvedValueOnce({
-      name: otherPackage,
-      versions: {
-        [someVersion]: {
-          name: otherPackage,
-          version: someVersion,
-        },
-      },
-    });
+    mockUnityDocPages([]);
+    mockRegistryPackuments(exampleRegistryUrl, [
+      buildPackument(somePackage, (packument) =>
+        packument.addVersion(someVersion, (version) =>
+          version.addDependency(otherPackage, someVersion)
+        )
+      ),
+      buildPackument(otherPackage, (packument) =>
+        packument.addVersion(someVersion)
+      ),
+    ]);
+    mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
       sources,
@@ -198,33 +213,19 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, otherPackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Resolved,
-      source: sources[0]!.url,
+      source: exampleRegistryUrl,
       dependencies: {},
     });
   });
 
   it("should search backup registry if version missing in primary registry", async () => {
-    const { resolveDependencies, getRegistryPackument } = makeDependencies();
-    // First resolve somePackage
-    getRegistryPackument.mockResolvedValueOnce({
-      name: somePackage,
-      versions: {
-        [otherVersion]: {
-          name: somePackage,
-          version: otherVersion,
-        },
-      },
-    });
-    // then resolve otherPackage
-    getRegistryPackument.mockResolvedValueOnce({
-      name: somePackage,
-      versions: {
-        [someVersion]: {
-          name: somePackage,
-          version: someVersion,
-        },
-      },
-    });
+    mockUnityDocPages([]);
+    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(unityRegistryUrl, [
+      buildPackument(somePackage, (packument) =>
+        packument.addVersion(someVersion)
+      ),
+    ]);
 
     const graph = await resolveDependencies(
       sources,
@@ -236,7 +237,7 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, somePackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Resolved,
-      source: sources[1]!.url,
+      source: unityRegistryUrl,
       dependencies: {},
     });
   });

@@ -3,7 +3,8 @@ import { UnityPackument } from "../../../src/domain/packument";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { CheckUrlExists } from "../../../src/io/check-url";
 import { GetRegistryPackument } from "../../../src/io/packument-io";
-import { CheckIsNonRegistryUnityPackage } from "../../../src/services/built-in-package-check";
+import { checkIsBuiltInPackageUsing } from "../../../src/services/built-in-package-check";
+import { partialApply } from "../../../src/utils/fp-utils";
 import { mockFunctionOfType } from "./func.mock";
 
 describe("is non-registry unity package", () => {
@@ -15,62 +16,47 @@ describe("is non-registry unity package", () => {
 
     const getRegistryPackument = mockFunctionOfType<GetRegistryPackument>();
 
-    const checkIsNonRegistryUnityPackage = CheckIsNonRegistryUnityPackage(
+    const checkIsBuiltInPackage = partialApply(
+      checkIsBuiltInPackageUsing,
       checkUrlExists,
       getRegistryPackument
     );
     return {
-      checkIsNonRegistryUnityPackage,
+      checkIsBuiltInPackage,
       checkUrlExists,
       getRegistryPackument,
     };
   }
 
   it("should be false if package is not a Unity package", async () => {
-    const { checkIsNonRegistryUnityPackage, checkUrlExists } =
-      makeDependencies();
+    const { checkIsBuiltInPackage, checkUrlExists } = makeDependencies();
     checkUrlExists.mockResolvedValue(false);
 
-    const actual = await checkIsNonRegistryUnityPackage(
-      somePackage,
-      someVersion
-    );
+    const actual = await checkIsBuiltInPackage(somePackage, someVersion);
 
     expect(actual).toBeFalsy();
   });
 
   it("should be false if package is Unity package and exists on Unity registry", async () => {
-    const {
-      checkIsNonRegistryUnityPackage,
-      checkUrlExists,
-      getRegistryPackument,
-    } = makeDependencies();
+    const { checkIsBuiltInPackage, checkUrlExists, getRegistryPackument } =
+      makeDependencies();
     checkUrlExists.mockResolvedValue(true);
     getRegistryPackument.mockResolvedValue({
       versions: { [someVersion]: {} },
     } as UnityPackument);
 
-    const actual = await checkIsNonRegistryUnityPackage(
-      somePackage,
-      someVersion
-    );
+    const actual = await checkIsBuiltInPackage(somePackage, someVersion);
 
     expect(actual).toBeFalsy();
   });
 
   it("should be true if package is Unity package, but does not exist on Unity registry", async () => {
-    const {
-      checkIsNonRegistryUnityPackage,
-      checkUrlExists,
-      getRegistryPackument,
-    } = makeDependencies();
+    const { checkIsBuiltInPackage, checkUrlExists, getRegistryPackument } =
+      makeDependencies();
     checkUrlExists.mockResolvedValue(true);
     getRegistryPackument.mockResolvedValue(null);
 
-    const actual = await checkIsNonRegistryUnityPackage(
-      somePackage,
-      someVersion
-    );
+    const actual = await checkIsBuiltInPackage(somePackage, someVersion);
 
     expect(actual).toBeTruthy();
   });
