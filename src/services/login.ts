@@ -1,9 +1,12 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
+import { GetAuthToken, getAuthTokenUsing } from "../io/get-auth-token";
 import { DebugLog } from "../logging";
-import { getAuthToken, GetAuthToken } from "../io/get-auth-token";
 import { putNpmAuthToken, StoreNpmAuthToken } from "./put-npm-auth-token";
-import { putRegistryAuthIntoUserUpmConfig, PutRegistryAuth } from "./put-registry-auth";
+import {
+  PutRegistryAuth,
+  putRegistryAuthIntoUserUpmConfig,
+} from "./put-registry-auth";
 
 /**
  * Function for logging in a user to a package registry. Supports both basic and
@@ -73,7 +76,7 @@ export const login = (
 ) =>
   UpmConfigLogin(
     putRegistryAuthIntoUserUpmConfig,
-    getAuthToken(registryClient, debugLog),
+    getAuthTokenUsing(registryClient, debugLog),
     putNpmAuthToken(homePath),
     debugLog
   );

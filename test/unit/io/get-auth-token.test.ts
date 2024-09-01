@@ -4,7 +4,7 @@ import { exampleRegistryUrl } from "../domain/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
 import { RegistryAuthenticationError } from "../../../src/io/common-errors";
 import { noopLogger } from "../../../src/logging";
-import { AuthenticateWithNpmRegistry } from "../../../src/io/get-auth-token";
+import { getAuthTokenUsing } from "../../../src/io/get-auth-token";
 
 describe("authenticate user with npm registry", () => {
   function makeDependencies() {
@@ -13,7 +13,7 @@ describe("authenticate user with npm registry", () => {
       get: jest.fn(),
     };
 
-    const authenticateUserWithNpmRegistry = AuthenticateWithNpmRegistry(
+    const authenticateUserWithNpmRegistry = getAuthTokenUsing(
       registryClient,
       noopLogger
     );
