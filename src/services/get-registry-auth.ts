@@ -29,6 +29,44 @@ export type GetRegistryAuth = (
 ) => Promise<Registry>;
 
 /**
+ * Checks whether a registry requires authentication. This just checks whether
+ * the url is for the Unity or OpenUPM registry.
+ * @param url The url to check.
+ * @returns Whether the url is known to not require authentication.
+ */
+export function isNonAuthUrl(url: RegistryUrl): boolean {
+  // We know there is no auth required for these registries
+  return url === openupmRegistryUrl || url === unityRegistryUrl;
+}
+
+/**
+ * Converts a {@link UpmAuth} object to an {@link NpmAuth} object.
+ * @param auth The input auth object to convert.
+ * @returns The converted auth object.
+ * @throws {Error} If auth contained bad base64 string.
+ */
+export function importNpmAuth(auth: UpmAuth): NpmAuth {
+  // Basic auth
+  if ("_auth" in auth) {
+    const decoded = decodeBase64(auth._auth);
+    const [username, password] = trySplitAtFirstOccurrenceOf(decoded, ":");
+    if (password === null)
+      throw new Error("Auth Base64 string was not in the user:pass format.");
+    return removeExplicitUndefined({
+      username,
+      password,
+      email: auth.email,
+      alwaysAuth: auth.alwaysAuth,
+    });
+  }
+
+  return removeExplicitUndefined({
+    token: auth.token,
+    alwaysAuth: auth.alwaysAuth,
+  });
+}
+
+/**
  * Makes a {@link GetRegistryAuth} function which gets it's information from
  * the users upm config.
  */
@@ -37,33 +75,10 @@ export function LoadRegistryAuthFromUpmConfig(
   loadUpmConfig: LoadUpmConfig,
   debugLog: DebugLog
 ): GetRegistryAuth {
-  function importNpmAuth(input: UpmAuth): NpmAuth {
-    // Basic auth
-    if ("_auth" in input) {
-      const decoded = decodeBase64(input._auth);
-      const [username, password] = trySplitAtFirstOccurrenceOf(decoded, ":");
-      if (password === null)
-        throw new Error("Auth Base64 string was not in the user:pass format.");
-      return removeExplicitUndefined({
-        username,
-        password,
-        email: input.email,
-        alwaysAuth: input.alwaysAuth,
-      });
-    }
-
-    return removeExplicitUndefined({
-      token: input.token,
-      alwaysAuth: input.alwaysAuth,
-    });
-  }
-
   let cachedConfig: UpmConfigContent | null = null;
 
   return async (systemUser, url) => {
-    // We know there is no auth required for these registries
-    if (url === openupmRegistryUrl || url === unityRegistryUrl)
-      return { url, auth: null };
+    if (isNonAuthUrl(url)) return { url, auth: null };
 
     // Only load config if we have dont have it in the cache
     if (cachedConfig === null) {
