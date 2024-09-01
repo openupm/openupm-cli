@@ -2,7 +2,7 @@ import { EOL } from "node:os";
 import path from "path";
 import { Npmrc } from "../domain/npmrc";
 import { splitLines } from "../utils/string-utils";
-import { ReadTextFile, writeTextFile, WriteTextFile } from "./text-file-io";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 /**
  * Gets the `.npmrc` path for a user.
@@ -32,23 +32,15 @@ export async function tryLoadNpmrcUsing(
 
 /**
  * Function for saving npmrc files. Overwrites the content of the file.
+ * @param writeFile IO function to use for writing the file.
  * @param path The path to the file.
  * @param npmrc The new lines for the file.
  */
-export type SaveNpmrc = (path: string, npmrc: Npmrc) => Promise<void>;
-
-/**
- * Makes a {@link SaveNpmrc} function which overwrites the content of a
- * `.npmrc` file.
- */
-export function WriteNpmrcPath(writeFile: WriteTextFile): SaveNpmrc {
-  return async (path, npmrc) => {
-    const content = npmrc.join(EOL);
-    return await writeFile(path, content);
-  };
+export async function saveNpmrcUsing(
+  writeFile: WriteTextFile,
+  path: string,
+  npmrc: Npmrc
+): Promise<void> {
+  const content = npmrc.join(EOL);
+  return await writeFile(path, content);
 }
-
-/**
- * Default {@link SaveNpmrc} function. Uses {@link WriteNpmrcPath}.
- */
-export const saveNpmrc = WriteNpmrcPath(writeTextFile);

@@ -2,11 +2,15 @@ import { emptyNpmrc, setToken } from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
 import {
   getHomeNpmrcPath,
-  saveNpmrc,
-  SaveNpmrc,
+  saveNpmrcUsing,
   tryLoadNpmrcUsing,
 } from "../io/npmrc-io";
-import { readTextFile, type ReadTextFile } from "../io/text-file-io";
+import {
+  readTextFile,
+  writeTextFile,
+  type ReadTextFile,
+  type WriteTextFile,
+} from "../io/text-file-io";
 import { partialApply } from "../utils/fp-utils";
 
 /**
@@ -26,10 +30,11 @@ export type StoreNpmAuthToken = (
  */
 export function StoreNpmAuthTokenInNpmrc(
   readTextFile: ReadTextFile,
-  saveNpmrc: SaveNpmrc,
+  writeTextFile: WriteTextFile,
   homePath: string
 ): StoreNpmAuthToken {
   const tryLoadNpmrc = partialApply(tryLoadNpmrcUsing, readTextFile);
+  const saveNpmrc = partialApply(saveNpmrcUsing, writeTextFile);
 
   return async (registry, token) => {
     const configPath = getHomeNpmrcPath(homePath);
@@ -44,4 +49,4 @@ export function StoreNpmAuthTokenInNpmrc(
  * Default {@link StoreNpmAuthToken} function. Uses {@link StoreNpmAuthTokenInNpmrc}.
  */
 export const putNpmAuthToken = (homePath: string) =>
-  StoreNpmAuthTokenInNpmrc(readTextFile, saveNpmrc, homePath);
+  StoreNpmAuthTokenInNpmrc(readTextFile, writeTextFile, homePath);
