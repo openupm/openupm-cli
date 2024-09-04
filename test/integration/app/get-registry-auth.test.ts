@@ -2,6 +2,7 @@ import {
   importNpmAuth,
   isNonAuthUrl,
   LoadRegistryAuthFromUpmConfig,
+  tryGetAuthEntry,
 } from "../../../src/app/get-registry-auth";
 import { Base64 } from "../../../src/domain/base64";
 import {
@@ -74,6 +75,36 @@ describe("get registry auth from upm config", () => {
     });
   });
 
+  describe("get entry", () => {
+    it("should have no auth if there is no entry for registry", () => {
+      const auth = tryGetAuthEntry({}, exampleRegistryUrl);
+
+      expect(auth).toBeNull();
+    });
+
+    it("should get auth for url without trailing slash", () => {
+      const auth = tryGetAuthEntry(
+        { npmAuth: { [exampleRegistryUrl]: { token: someToken } } },
+        exampleRegistryUrl
+      );
+
+      expect(auth).toEqual({
+        token: someToken,
+      });
+    });
+
+    it("should get auth for url with trailing slash", () => {
+      const auth = tryGetAuthEntry(
+        { npmAuth: { [exampleRegistryUrl + "/"]: { token: someToken } } },
+        exampleRegistryUrl
+      );
+
+      expect(auth).toEqual({
+        token: someToken,
+      });
+    });
+  });
+
   describe("service", () => {
     const someUpmConfigPath = "/home/user/.upmconfig.toml";
 
@@ -98,34 +129,6 @@ describe("get registry auth from upm config", () => {
       );
 
       expect(registry.auth).toBeNull();
-    });
-
-    it("should have no auth if there is no entry for registry", async () => {
-      const { getRegistryAuth, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue({});
-
-      const registry = await getRegistryAuth(
-        someUpmConfigPath,
-        exampleRegistryUrl
-      );
-
-      expect(registry.auth).toBeNull();
-    });
-
-    it("should get auth for url with trailing slash", async () => {
-      const { getRegistryAuth, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue({
-        npmAuth: { [exampleRegistryUrl + "/"]: { token: someToken } },
-      });
-
-      const registry = await getRegistryAuth(
-        someUpmConfigPath,
-        exampleRegistryUrl
-      );
-
-      expect(registry.auth).toEqual({
-        token: someToken,
-      });
     });
 
     it("should not load upmconfig for openupm registry url", async () => {

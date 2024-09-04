@@ -65,6 +65,25 @@ export function importNpmAuth(auth: UpmAuth): NpmAuth {
 }
 
 /**
+ * Attempts to find and import an auth entry from a {@link UpmConfigContent} object.
+ * @param upmConfig The upm-config content.
+ * @param url The url.
+ * @returns The imported auth object or null if not found.
+ */
+export function tryGetAuthEntry(
+  upmConfig: UpmConfigContent,
+  url: RegistryUrl
+): NpmAuth | null {
+  const entry =
+    upmConfig.npmAuth?.[url] ?? upmConfig.npmAuth?.[url + "/"] ?? null;
+  if (entry === null) {
+    return null;
+  }
+
+  return importNpmAuth(entry);
+}
+
+/**
  * Makes a {@link GetRegistryAuth} function which gets it's information from
  * the users upm config.
  */
@@ -88,16 +107,12 @@ export function LoadRegistryAuthFromUpmConfig(
       }
     }
 
-    const entry =
-      cachedConfig.npmAuth?.[url] ?? cachedConfig?.npmAuth?.[url + "/"] ?? null;
-    if (entry === null) {
+    const auth = tryGetAuthEntry(cachedConfig, url);
+    if (auth === null)
       debugLog(
         `.upmconfig.toml had no entry for registry "${url}". Will not use auth for that registry.`
       );
-      return { url, auth: null };
-    }
 
-    const auth = importNpmAuth(entry);
     return { url, auth };
   };
 }
