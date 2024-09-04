@@ -1,6 +1,6 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import { resolveDependenciesUsing } from "../../../src/app/dependency-resolving";
+import { resolveDependenciesUsing } from "../../../src/app/resolve-dependencies";
 import { PackumentNotFoundError } from "../../../src/common-errors";
 import {
   NodeType,

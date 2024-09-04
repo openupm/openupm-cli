@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
-import { resolveDependenciesUsing } from "../app/dependency-resolving";
+import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { PackumentNotFoundError } from "../common-errors";

@@ -46,7 +46,7 @@ import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import type { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
-import { resolveDependenciesUsing } from "./dependency-resolving";
+import { resolveDependenciesUsing } from "./resolve-dependencies";
 import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
 
 /**
