@@ -2,11 +2,12 @@ import { UnityProjectManifest } from "../../../src/domain/project-manifest";
 import {
   ManifestMalformedError,
   ManifestMissingError,
-  ReadProjectManifestFile,
+  loadProjectManifestUsing,
   serializeProjectManifest,
 } from "../../../src/io/project-manifest-io";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
+import { partialApply } from "../../../src/utils/fp-utils";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "../app/func.mock";
 
@@ -16,38 +17,39 @@ describe("project-manifest io", () => {
     function makeDependencies() {
       const readFile = mockFunctionOfType<ReadTextFile>();
 
-      const readProjectManifestFile = ReadProjectManifestFile(
+      const loadProjectManifest = partialApply(
+        loadProjectManifestUsing,
         readFile,
         noopLogger
       );
-      return { readProjectManifestFile, readFile } as const;
+      return { loadProjectManifest, readFile } as const;
     }
 
     it("should fail if file is missing", async () => {
-      const { readProjectManifestFile, readFile } = makeDependencies();
+      const { loadProjectManifest, readFile } = makeDependencies();
       readFile.mockResolvedValue(null);
 
       await expect(
-        readProjectManifestFile(exampleProjectPath)
+        loadProjectManifest(exampleProjectPath)
       ).rejects.toBeInstanceOf(ManifestMissingError);
     });
 
     it("should fail if manifest could not be parsed", async () => {
-      const { readProjectManifestFile, readFile } = makeDependencies();
+      const { loadProjectManifest, readFile } = makeDependencies();
       readFile.mockResolvedValue("not {} valid : json");
 
       await expect(
-        readProjectManifestFile(exampleProjectPath)
+        loadProjectManifest(exampleProjectPath)
       ).rejects.toBeInstanceOf(ManifestMalformedError);
     });
 
     it("should load valid manifest", async () => {
-      const { readProjectManifestFile, readFile } = makeDependencies();
+      const { loadProjectManifest, readFile } = makeDependencies();
       readFile.mockResolvedValue(
         `{ "dependencies": { "com.package.a": "1.0.0"} }`
       );
 
-      const actual = await readProjectManifestFile(exampleProjectPath);
+      const actual = await loadProjectManifest(exampleProjectPath);
 
       expect(actual).toEqual({
         dependencies: {

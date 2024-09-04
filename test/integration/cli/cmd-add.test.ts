@@ -22,13 +22,9 @@ import {
 import { DomainName } from "../../../src/domain/domain-name";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { UnityPackumentVersion } from "../../../src/domain/packument";
-import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import {
-  LoadProjectManifest,
-  SaveProjectManifest,
-} from "../../../src/io/project-manifest-io";
+import { SaveProjectManifest } from "../../../src/io/project-manifest-io";
 import { noopLogger } from "../../../src/logging";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
 import { buildPackument } from "../../common/data-packument";
@@ -37,106 +33,109 @@ import { exampleRegistryUrl } from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
 import { mockFunctionOfType } from "../app/func.mock";
 import { mockResolvedPackuments } from "../app/remote-packuments.mock";
-
-const somePackage = DomainName.parse("com.some.package");
-const otherPackage = DomainName.parse("com.other.package");
-const somePackument = buildPackument(somePackage, (packument) =>
-  packument.addVersion("1.0.0", (version) =>
-    version.set("unity", "2022.2").addDependency(otherPackage, "1.0.0")
-  )
-);
-const otherPackument = buildPackument(otherPackage, (packument) =>
-  packument.addVersion("1.0.0", (version) => version.set("unity", "2022.2"))
-);
-const badEditorPackument = buildPackument(somePackage, (packument) =>
-  packument.addVersion("1.0.0", (version) =>
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    version.set("unity", "bad value")
-  )
-);
-const incompatiblePackument = buildPackument(somePackage, (packument) =>
-  packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
-);
-
-const defaultEnv = {
-  cwd: "/users/some-user/projects/SomeProject",
-  upstream: true,
-  primaryRegistryUrl: exampleRegistryUrl,
-} as Env;
-
-const someVersion = SemanticVersion.parse("1.0.0");
-
-function makeDependencies() {
-  const parseEnv = mockFunctionOfType<ParseEnv>();
-  parseEnv.mockResolvedValue(defaultEnv);
-
-  const getRegistryPackumentVersion =
-    mockFunctionOfType<GetRegistryPackumentVersion>();
-  mockResolvedPackuments(
-    getRegistryPackumentVersion,
-    [exampleRegistryUrl, somePackument],
-    [exampleRegistryUrl, otherPackument]
-  );
-
-  const resolveDependencies = mockFunctionOfType<ResolveDependencies>();
-  let defaultGraph = makeGraphFromSeed(somePackage, someVersion);
-  defaultGraph = markRemoteResolved(
-    defaultGraph,
-    somePackage,
-    someVersion,
-    exampleRegistryUrl,
-    { [otherPackage]: someVersion }
-  );
-  defaultGraph = markRemoteResolved(
-    defaultGraph,
-    otherPackage,
-    someVersion,
-    exampleRegistryUrl,
-    {}
-  );
-  resolveDependencies.mockResolvedValue(defaultGraph);
-
-  const loadProjectManifest = mockFunctionOfType<LoadProjectManifest>();
-  loadProjectManifest.mockResolvedValue(emptyProjectManifest);
-
-  const writeProjectManifest = mockFunctionOfType<SaveProjectManifest>();
-  writeProjectManifest.mockResolvedValue(undefined);
-
-  const determineEditorVersion = mockFunctionOfType<DetermineEditorVersion>();
-  determineEditorVersion.mockResolvedValue(
-    makeEditorVersion(2022, 2, 1, "f", 2)
-  );
-
-  const getRegistryAuth = mockFunctionOfType<GetRegistryAuth>();
-  getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
-
-  const log = makeMockLogger();
-
-  const addCmd = makeAddCmd(
-    parseEnv,
-    getRegistryPackumentVersion,
-    resolveDependencies,
-    loadProjectManifest,
-    writeProjectManifest,
-    determineEditorVersion,
-    getRegistryAuth,
-    log,
-    noopLogger
-  );
-  return {
-    addCmd,
-    parseEnv,
-    getRegistryPackumentVersion,
-    resolveDependencies,
-    loadProjectManifest,
-    writeProjectManifest,
-    determineEditorVersion,
-    log,
-  } as const;
-}
+import { MockFs } from "../fs.mock";
 
 describe("cmd-add", () => {
+  const somePackage = DomainName.parse("com.some.package");
+  const otherPackage = DomainName.parse("com.other.package");
+  const somePackument = buildPackument(somePackage, (packument) =>
+    packument.addVersion("1.0.0", (version) =>
+      version.set("unity", "2022.2").addDependency(otherPackage, "1.0.0")
+    )
+  );
+  const otherPackument = buildPackument(otherPackage, (packument) =>
+    packument.addVersion("1.0.0", (version) => version.set("unity", "2022.2"))
+  );
+  const badEditorPackument = buildPackument(somePackage, (packument) =>
+    packument.addVersion("1.0.0", (version) =>
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      version.set("unity", "bad value")
+    )
+  );
+  const incompatiblePackument = buildPackument(somePackage, (packument) =>
+    packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
+  );
+
+  const someProjectDir = "/users/some-user/projects/SomeProject";
+  const defaultEnv = {
+    cwd: someProjectDir,
+    upstream: true,
+    primaryRegistryUrl: exampleRegistryUrl,
+  } as Env;
+
+  const someVersion = SemanticVersion.parse("1.0.0");
+
+  function makeDependencies() {
+    const parseEnv = mockFunctionOfType<ParseEnv>();
+    parseEnv.mockResolvedValue(defaultEnv);
+
+    const getRegistryPackumentVersion =
+      mockFunctionOfType<GetRegistryPackumentVersion>();
+    mockResolvedPackuments(
+      getRegistryPackumentVersion,
+      [exampleRegistryUrl, somePackument],
+      [exampleRegistryUrl, otherPackument]
+    );
+
+    const resolveDependencies = mockFunctionOfType<ResolveDependencies>();
+    let defaultGraph = makeGraphFromSeed(somePackage, someVersion);
+    defaultGraph = markRemoteResolved(
+      defaultGraph,
+      somePackage,
+      someVersion,
+      exampleRegistryUrl,
+      { [otherPackage]: someVersion }
+    );
+    defaultGraph = markRemoteResolved(
+      defaultGraph,
+      otherPackage,
+      someVersion,
+      exampleRegistryUrl,
+      {}
+    );
+    resolveDependencies.mockResolvedValue(defaultGraph);
+
+    const writeProjectManifest = mockFunctionOfType<SaveProjectManifest>();
+    writeProjectManifest.mockResolvedValue(undefined);
+
+    const determineEditorVersion = mockFunctionOfType<DetermineEditorVersion>();
+    determineEditorVersion.mockResolvedValue(
+      makeEditorVersion(2022, 2, 1, "f", 2)
+    );
+
+    const getRegistryAuth = mockFunctionOfType<GetRegistryAuth>();
+    getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
+
+    const log = makeMockLogger();
+
+    const mockFs = MockFs.makeEmpty().putUnityProject({
+      projectDirectory: someProjectDir,
+    });
+
+    const addCmd = makeAddCmd(
+      parseEnv,
+      getRegistryPackumentVersion,
+      resolveDependencies,
+      mockFs.read,
+      writeProjectManifest,
+      determineEditorVersion,
+      getRegistryAuth,
+      log,
+      noopLogger
+    );
+    return {
+      addCmd,
+      parseEnv,
+      getRegistryPackumentVersion,
+      resolveDependencies,
+      writeProjectManifest,
+      determineEditorVersion,
+      mockFs,
+      log,
+    } as const;
+  }
+
   it("should notify if editor-version is unknown", async () => {
     const { addCmd, determineEditorVersion, log } = makeDependencies();
     determineEditorVersion.mockResolvedValue("bad version");
@@ -283,13 +282,13 @@ describe("cmd-add", () => {
   });
 
   it("should replace package", async () => {
-    const { addCmd, writeProjectManifest, loadProjectManifest } =
-      makeDependencies();
-    loadProjectManifest.mockResolvedValue(
-      buildProjectManifest((manifest) =>
+    const { addCmd, writeProjectManifest, mockFs } = makeDependencies();
+    mockFs.putUnityProject({
+      projectDirectory: someProjectDir,
+      manifest: buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "0.1.0", true, true)
-      )
-    );
+      ),
+    });
 
     await addCmd(somePackage, {});
 
@@ -302,12 +301,13 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package was replaced", async () => {
-    const { addCmd, loadProjectManifest, log } = makeDependencies();
-    loadProjectManifest.mockResolvedValue(
-      buildProjectManifest((manifest) =>
+    const { addCmd, log, mockFs } = makeDependencies();
+    mockFs.putUnityProject({
+      projectDirectory: someProjectDir,
+      manifest: buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "0.1.0", true, true)
-      )
-    );
+      ),
+    });
 
     await addCmd(somePackage, {});
 
@@ -318,12 +318,13 @@ describe("cmd-add", () => {
   });
 
   it("should notify if package is already in manifest", async () => {
-    const { addCmd, loadProjectManifest, log } = makeDependencies();
-    loadProjectManifest.mockResolvedValue(
-      buildProjectManifest((manifest) =>
+    const { addCmd, log, mockFs } = makeDependencies();
+    mockFs.putUnityProject({
+      projectDirectory: someProjectDir,
+      manifest: buildProjectManifest((manifest) =>
         manifest.addDependency(somePackage, "1.0.0", true, true)
-      )
-    );
+      ),
+    });
 
     await addCmd(somePackage, {});
 
@@ -368,15 +369,15 @@ describe("cmd-add", () => {
   });
 
   it("should not save if nothing changed", async () => {
-    const { addCmd, loadProjectManifest, writeProjectManifest } =
-      makeDependencies();
-    loadProjectManifest.mockResolvedValue(
-      buildProjectManifest((manifest) =>
+    const { addCmd, writeProjectManifest, mockFs } = makeDependencies();
+    mockFs.putUnityProject({
+      projectDirectory: someProjectDir,
+      manifest: buildProjectManifest((manifest) =>
         manifest
           .addDependency(somePackage, "1.0.0", true, false)
           .addScope(otherPackage)
-      )
-    );
+      ),
+    });
 
     await addCmd(somePackage, {});
 

@@ -1,6 +1,9 @@
 import { Logger } from "npmlog";
 import { CustomError } from "ts-custom-error";
 import { Err } from "ts-results-es";
+import { ResolveDependencies } from "../app/dependency-resolving";
+import { DetermineEditorVersion } from "../app/determine-editor-version";
+import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";
@@ -26,13 +29,10 @@ import {
 } from "../domain/scoped-registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
-  LoadProjectManifest,
+  loadProjectManifestUsing,
   SaveProjectManifest,
 } from "../io/project-manifest-io";
 import { DebugLog } from "../logging";
-import { ResolveDependencies } from "../app/dependency-resolving";
-import { DetermineEditorVersion } from "../app/determine-editor-version";
-import { ParseEnv } from "../app/parse-env";
 import { areArraysEqual } from "../utils/array-utils";
 import {
   logFailedDependency,
@@ -41,10 +41,12 @@ import {
 import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
 
-import { ResolvePackumentVersionError } from "../domain/packument";
-import { unityRegistry } from "../domain/registry";
 import { GetRegistryAuth } from "../app/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
+import { ResolvePackumentVersionError } from "../domain/packument";
+import { unityRegistry } from "../domain/registry";
+import type { ReadTextFile } from "../io/text-file-io";
+import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
 
 export class PackageIncompatibleError extends CustomError {
@@ -123,13 +125,19 @@ export function makeAddCmd(
   parseEnv: ParseEnv,
   getRegistryPackumentVersion: GetRegistryPackumentVersion,
   resolveDependencies: ResolveDependencies,
-  loadProjectManifest: LoadProjectManifest,
+  readTextFile: ReadTextFile,
   saveProjectManifest: SaveProjectManifest,
   determineEditorVersion: DetermineEditorVersion,
   getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
 ): AddCmd {
+  const loadProjectManifest = partialApply(
+    loadProjectManifestUsing,
+    readTextFile,
+    debugLog
+  );
+
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
 

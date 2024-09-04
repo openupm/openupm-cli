@@ -3,15 +3,6 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { getRegistryPackumentUsing } from "../io/packument-io";
-import {
-  loadProjectManifestUsing,
-  saveProjectManifest,
-} from "../io/project-manifest-io";
-import { makeNpmRegistryClient } from "../io/reg-client";
-import { getHomePathFromEnv } from "../io/special-paths";
-import { getUpmConfigPath as getUpmConfigPathUsing } from "../io/upm-config-io";
-import { DebugLog } from "../logging";
 import { resolveDependencies as resolveDependenciesUsing } from "../app/dependency-resolving";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { getLatestVersion as getLatestVersionUsing } from "../app/get-latest-version";
@@ -21,6 +12,13 @@ import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
 import { removePackages as removePackagesUsing } from "../app/remove-packages";
 import { searchPackagesUsing } from "../app/search-packages";
+import { getRegistryPackumentUsing } from "../io/packument-io";
+import { saveProjectManifest } from "../io/project-manifest-io";
+import { makeNpmRegistryClient } from "../io/reg-client";
+import { getHomePathFromEnv } from "../io/special-paths";
+import { readTextFile } from "../io/text-file-io";
+import { getUpmConfigPath as getUpmConfigPathUsing } from "../io/upm-config-io";
+import { DebugLog } from "../logging";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
@@ -65,7 +63,7 @@ const addCmd = makeAddCmd(
   parseEnv,
   getRegistryPackumentVersionUsing(registryClient, debugLogToConsole),
   resolveDependenciesUsing(registryClient, debugLogToConsole),
-  loadProjectManifestUsing(debugLogToConsole),
+  readTextFile,
   saveProjectManifest,
   determineEditorVersionUsing(debugLogToConsole),
   getRegistryAuthUsing(homePath, debugLogToConsole),

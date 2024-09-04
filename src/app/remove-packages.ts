@@ -6,12 +6,13 @@ import { PackageUrl } from "../domain/package-url";
 import { UnityProjectManifest } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
-  LoadProjectManifest,
   loadProjectManifestUsing,
   saveProjectManifest,
   SaveProjectManifest,
 } from "../io/project-manifest-io";
+import { readTextFile, type ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -46,9 +47,16 @@ export type RemovePackages = (
  * packages from a project manifest.
  */
 export function RemovePackagesFromManifest(
-  loadProjectManifest: LoadProjectManifest,
-  saveProjectManifest: SaveProjectManifest
+  readTextFile: ReadTextFile,
+  saveProjectManifest: SaveProjectManifest,
+  debugLog: DebugLog
 ): RemovePackages {
+  const loadProjectManifest = partialApply(
+    loadProjectManifestUsing,
+    readTextFile,
+    debugLog
+  );
+
   return (projectPath, packageNames) => {
     // load manifest
     const initialManifest = resultifyAsyncOp<
@@ -72,7 +80,4 @@ export function RemovePackagesFromManifest(
  * Default {@link RemovePackages} function. Uses {@link RemovePackagesFromManifest}.
  */
 export const removePackages = (debugLog: DebugLog) =>
-  RemovePackagesFromManifest(
-    loadProjectManifestUsing(debugLog),
-    saveProjectManifest
-  );
+  RemovePackagesFromManifest(readTextFile, saveProjectManifest, debugLog);
