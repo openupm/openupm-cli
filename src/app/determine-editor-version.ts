@@ -1,10 +1,9 @@
 import { ReleaseVersion } from "../domain/editor-version";
 import { validateProjectVersion } from "../domain/project-version";
-import {
-  GetProjectVersion,
-  getProjectVersionUsing,
-} from "../io/project-version-io";
+import { loadProjectVersionUsing } from "../io/project-version-io";
+import { readTextFile, type ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 
 /**
  * Function for determining the editor-version for a Unity project.
@@ -21,10 +20,17 @@ export type DetermineEditorVersion = (
  * version based on the content of the project version file.
  */
 export function DetermineEditorVersionFromFile(
-  getProjectVersion: GetProjectVersion
+  readTextFile: ReadTextFile,
+  debugLog: DebugLog
 ): DetermineEditorVersion {
+  const loadPorjectVersion = partialApply(
+    loadProjectVersionUsing,
+    readTextFile,
+    debugLog
+  );
+
   return async (projectPath) => {
-    const unparsedEditorVersion = await getProjectVersion(projectPath);
+    const unparsedEditorVersion = await loadPorjectVersion(projectPath);
     return validateProjectVersion(unparsedEditorVersion);
   };
 }
@@ -33,4 +39,4 @@ export function DetermineEditorVersionFromFile(
  * Default {@link DetermineEditorVersion} function. Uses {@link DetermineEditorVersionFromFile}.
  */
 export const determineEditorVersionUsing = (debugLog: DebugLog) =>
-  DetermineEditorVersionFromFile(getProjectVersionUsing(debugLog));
+  DetermineEditorVersionFromFile(readTextFile, debugLog);
