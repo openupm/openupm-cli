@@ -9,7 +9,7 @@ import {
 } from "../io/text-file-io";
 import { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
-import { putNpmAuthToken, StoreNpmAuthToken } from "./put-npm-auth-token";
+import { saveNpmAuthTokenUsing } from "./put-npm-auth-token";
 import { putRegistryAuthUsing } from "./put-registry-auth";
 
 /**
@@ -39,14 +39,20 @@ export type Login = (
  * into the users upm config.
  */
 export function UpmConfigLogin(
+  homePath: string,
   getAuthToken: GetAuthToken,
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
-  putNpmAuthToken: StoreNpmAuthToken,
   debugLog: DebugLog
 ): Login {
   const putRegistryAuth = partialApply(
     putRegistryAuthUsing,
+    readTextFile,
+    writeTextFile
+  );
+
+  const putNpmAuthToken = partialApply(
+    saveNpmAuthTokenUsing,
     readTextFile,
     writeTextFile
   );
@@ -72,7 +78,7 @@ export function UpmConfigLogin(
     const auth: NpmAuth = { token, email, alwaysAuth };
     await putRegistryAuth(configPath, registry, auth);
 
-    const npmrcPath = await putNpmAuthToken(registry, token);
+    const npmrcPath = await putNpmAuthToken(homePath, registry, token);
     debugLog(`saved to npm config: ${npmrcPath}`);
   };
 }
@@ -86,9 +92,9 @@ export const login = (
   debugLog: DebugLog
 ) =>
   UpmConfigLogin(
+    homePath,
     getAuthTokenUsing(registryClient, debugLog),
     readTextFile,
     writeTextFile,
-    putNpmAuthToken(homePath),
     debugLog
   );
