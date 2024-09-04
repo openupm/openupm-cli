@@ -1,12 +1,17 @@
 import { homedir } from "os";
 import path from "path";
 import {
+  stringifyEditorVersion,
+  type ReleaseVersion,
+} from "../../src/domain/editor-version";
+import {
   emptyProjectManifest,
   manifestPathFor,
   parseProjectManifest,
   type UnityProjectManifest,
 } from "../../src/domain/project-manifest";
 import { serializeProjectManifest } from "../../src/io/project-manifest-io";
+import { projectVersionTxtPathFor } from "../../src/io/project-version-io";
 import type { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 
 type TextFileMap = Record<string, string>;
@@ -23,6 +28,10 @@ export type MockUnityProjectConfig = {
    * The projects manifest. Will be empty if omitted.
    */
   manifest?: UnityProjectManifest;
+  /**
+   * The editor version for the project. Will be a common lts if omitted.
+   */
+  projectVersion?: ReleaseVersion | string;
 };
 
 /**
@@ -44,7 +53,7 @@ export class MockFs {
    * @param content The file content.
    * @returns The mock fs, for chaining.
    */
-  public putText(path: string, content: string): MockFs {
+  public putText(path: string, content: string): this {
     this.textFiles = { ...this.textFiles, [path]: content };
     return this;
   }
@@ -71,18 +80,54 @@ export class MockFs {
   };
 
   /**
+   * Put a project manifest into the mock file-system.
+   * @param projectDirectory The Unity project directory.
+   * @param manifest The manifest.
+   */
+  public putProjectManifest(
+    projectDirectory: string,
+    manifest: UnityProjectManifest
+  ): this {
+    const manifestPath = manifestPathFor(projectDirectory);
+    this.putText(manifestPath, serializeProjectManifest(manifest));
+    return this;
+  }
+
+  /**
+   * Put a project version into the mock file-system.
+   * @param projectDirectory The Unity project directory.
+   * @param editorVersion The projects editor version.
+   */
+  public putProjectVersion(
+    projectDirectory: string,
+    editorVersion: string
+  ): this {
+    const projectVersionPath = projectVersionTxtPathFor(projectDirectory);
+    this.putText(projectVersionPath, `m_EditorVersion: ${editorVersion}`);
+    return this;
+  }
+
+  /**
    * Put a Unity project into the mock file-system. This will add:
    *  - A project manifest.
+   *  - Project version.
    * @param config Configuration options for the project.
    * @returns The mock fs, for chaining.
    */
-  public putUnityProject(config?: MockUnityProjectConfig): MockFs {
+  public putUnityProject(config?: MockUnityProjectConfig): this {
     const projectDirectory =
       config?.projectDirectory ?? path.join(homedir(), "/projects/SomeProject");
 
     const manifest = config?.manifest ?? emptyProjectManifest;
-    const manifestPath = manifestPathFor(projectDirectory);
-    this.putText(manifestPath, serializeProjectManifest(manifest));
+    this.putProjectManifest(projectDirectory, manifest);
+
+    const editorVersion =
+      config !== undefined && config.projectVersion !== undefined
+        ? typeof config.projectVersion === "string"
+          ? config.projectVersion
+          : stringifyEditorVersion(config.projectVersion)
+        : "2022.2.1f2";
+    this.putProjectVersion(projectDirectory, editorVersion);
 
     return this;
   }

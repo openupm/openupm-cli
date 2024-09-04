@@ -1,42 +1,29 @@
 import { ReleaseVersion } from "../domain/editor-version";
 import { validateProjectVersion } from "../domain/project-version";
 import { loadProjectVersionUsing } from "../io/project-version-io";
-import { readTextFile, type ReadTextFile } from "../io/text-file-io";
+import { type ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 
 /**
  * Function for determining the editor-version for a Unity project.
+ * @param readTextFile IO function for reading text files.
+ * @param debugLog Function for printing debug messages.
  * @param projectPath The path to the projects root directory.
  * @returns The editor-version. Either a parsed version object or the raw
  * version string if it could not be parsed.
  */
-export type DetermineEditorVersion = (
-  projectPath: string
-) => Promise<ReleaseVersion | string>;
-
-/**
- * Makes a {@link DetermineEditorVersion} function which determines the editor
- * version based on the content of the project version file.
- */
-export function DetermineEditorVersionFromFile(
+export async function determineEditorVersionUsing(
   readTextFile: ReadTextFile,
-  debugLog: DebugLog
-): DetermineEditorVersion {
+  debugLog: DebugLog,
+  projectPath: string
+): Promise<ReleaseVersion | string> {
   const loadProjectVersion = partialApply(
     loadProjectVersionUsing,
     readTextFile,
     debugLog
   );
 
-  return async (projectPath) => {
-    const unparsedEditorVersion = await loadProjectVersion(projectPath);
-    return validateProjectVersion(unparsedEditorVersion);
-  };
+  const unparsedEditorVersion = await loadProjectVersion(projectPath);
+  return validateProjectVersion(unparsedEditorVersion);
 }
-
-/**
- * Default {@link DetermineEditorVersion} function. Uses {@link DetermineEditorVersionFromFile}.
- */
-export const determineEditorVersionUsing = (debugLog: DebugLog) =>
-  DetermineEditorVersionFromFile(readTextFile, debugLog);

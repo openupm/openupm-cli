@@ -4,7 +4,6 @@ import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { resolveDependencies as resolveDependenciesUsing } from "../app/dependency-resolving";
-import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { getLatestVersion as getLatestVersionUsing } from "../app/get-latest-version";
 import { getRegistryAuthUsing } from "../app/get-registry-auth";
 import { getRegistryPackumentVersionUsing } from "../app/get-registry-packument-version";
@@ -63,7 +62,6 @@ const addCmd = makeAddCmd(
   resolveDependenciesUsing(registryClient, debugLogToConsole),
   readTextFile,
   writeTextFile,
-  determineEditorVersionUsing(debugLogToConsole),
   getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole

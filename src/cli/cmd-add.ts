@@ -2,7 +2,6 @@ import { Logger } from "npmlog";
 import { CustomError } from "ts-custom-error";
 import { Err } from "ts-results-es";
 import { ResolveDependencies } from "../app/dependency-resolving";
-import { DetermineEditorVersion } from "../app/determine-editor-version";
 import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
@@ -41,6 +40,7 @@ import {
 import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
 
+import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { GetRegistryAuth } from "../app/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
@@ -129,7 +129,6 @@ export function makeAddCmd(
   resolveDependencies: ResolveDependencies,
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
-  determineEditorVersion: DetermineEditorVersion,
   getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
@@ -151,7 +150,11 @@ export function makeAddCmd(
     // parse env
     const env = await parseEnv(options);
 
-    const editorVersion = await determineEditorVersion(env.cwd);
+    const editorVersion = await determineEditorVersionUsing(
+      readTextFile,
+      debugLog,
+      env.cwd
+    );
 
     if (typeof editorVersion === "string")
       log.warn(

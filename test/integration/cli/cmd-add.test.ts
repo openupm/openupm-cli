@@ -1,5 +1,4 @@
 import { ResolveDependencies } from "../../../src/app/dependency-resolving";
-import { DetermineEditorVersion } from "../../../src/app/determine-editor-version";
 import { GetRegistryAuth } from "../../../src/app/get-registry-auth";
 import {
   GetRegistryPackumentVersion,
@@ -20,7 +19,6 @@ import {
   markRemoteResolved,
 } from "../../../src/domain/dependency-graph";
 import { DomainName } from "../../../src/domain/domain-name";
-import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { UnityPackumentVersion } from "../../../src/domain/packument";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
@@ -96,11 +94,6 @@ describe("cmd-add", () => {
     );
     resolveDependencies.mockResolvedValue(defaultGraph);
 
-    const determineEditorVersion = mockFunctionOfType<DetermineEditorVersion>();
-    determineEditorVersion.mockResolvedValue(
-      makeEditorVersion(2022, 2, 1, "f", 2)
-    );
-
     const getRegistryAuth = mockFunctionOfType<GetRegistryAuth>();
     getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
 
@@ -116,7 +109,6 @@ describe("cmd-add", () => {
       resolveDependencies,
       mockFs.read,
       mockFs.write,
-      determineEditorVersion,
       getRegistryAuth,
       log,
       noopLogger
@@ -126,15 +118,14 @@ describe("cmd-add", () => {
       parseEnv,
       getRegistryPackumentVersion,
       resolveDependencies,
-      determineEditorVersion,
       mockFs,
       log,
     } as const;
   }
 
   it("should notify if editor-version is unknown", async () => {
-    const { addCmd, determineEditorVersion, log } = makeDependencies();
-    determineEditorVersion.mockResolvedValue("bad version");
+    const { addCmd, mockFs, log } = makeDependencies();
+    mockFs.putProjectVersion(someProjectDir, "bad version");
 
     await addCmd(somePackage, {});
 
