@@ -30,7 +30,7 @@ import {
 import { SemanticVersion } from "../domain/semantic-version";
 import {
   loadProjectManifestUsing,
-  SaveProjectManifest,
+  saveProjectManifestUsing,
 } from "../io/project-manifest-io";
 import { DebugLog } from "../logging";
 import { areArraysEqual } from "../utils/array-utils";
@@ -45,7 +45,7 @@ import { GetRegistryAuth } from "../app/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
-import type { ReadTextFile } from "../io/text-file-io";
+import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
 
@@ -126,7 +126,7 @@ export function makeAddCmd(
   getRegistryPackumentVersion: GetRegistryPackumentVersion,
   resolveDependencies: ResolveDependencies,
   readTextFile: ReadTextFile,
-  saveProjectManifest: SaveProjectManifest,
+  writeTextFile: WriteTextFile,
   determineEditorVersion: DetermineEditorVersion,
   getRegistryAuth: GetRegistryAuth,
   log: Logger,
@@ -136,6 +136,11 @@ export function makeAddCmd(
     loadProjectManifestUsing,
     readTextFile,
     debugLog
+  );
+
+  const saveProjectManifest = partialApply(
+    saveProjectManifestUsing,
+    writeTextFile
   );
 
   return async (pkgs, options) => {

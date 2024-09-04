@@ -7,10 +7,14 @@ import { UnityProjectManifest } from "../domain/project-manifest";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
   loadProjectManifestUsing,
-  saveProjectManifest,
-  SaveProjectManifest,
+  saveProjectManifestUsing,
 } from "../io/project-manifest-io";
-import { readTextFile, type ReadTextFile } from "../io/text-file-io";
+import {
+  readTextFile,
+  writeTextFile,
+  type ReadTextFile,
+  type WriteTextFile,
+} from "../io/text-file-io";
 import { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { resultifyAsyncOp } from "../utils/result-utils";
@@ -48,13 +52,18 @@ export type RemovePackages = (
  */
 export function RemovePackagesFromManifest(
   readTextFile: ReadTextFile,
-  saveProjectManifest: SaveProjectManifest,
+  writeTextFile: WriteTextFile,
   debugLog: DebugLog
 ): RemovePackages {
   const loadProjectManifest = partialApply(
     loadProjectManifestUsing,
     readTextFile,
     debugLog
+  );
+
+  const saveProjectManifest = partialApply(
+    saveProjectManifestUsing,
+    writeTextFile
   );
 
   return (projectPath, packageNames) => {
@@ -80,4 +89,4 @@ export function RemovePackagesFromManifest(
  * Default {@link RemovePackages} function. Uses {@link RemovePackagesFromManifest}.
  */
 export const removePackages = (debugLog: DebugLog) =>
-  RemovePackagesFromManifest(readTextFile, saveProjectManifest, debugLog);
+  RemovePackagesFromManifest(readTextFile, writeTextFile, debugLog);

@@ -6,7 +6,7 @@ import {
 } from "../domain/project-manifest";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-import { ReadTextFile, writeTextFile, WriteTextFile } from "./text-file-io";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {
@@ -41,16 +41,6 @@ export async function loadProjectManifestUsing(
 }
 
 /**
- * Function for replacing the project manifest for a Unity project.
- * @param projectPath The path to the project's directory.
- * @param manifest The manifest to write to the project.
- */
-export type SaveProjectManifest = (
-  projectPath: string,
-  manifest: UnityProjectManifest
-) => Promise<void>;
-
-/**
  * Serializes a {@link UnityProjectManifest} object into json format.
  * @param manifest The manifest to serialize.
  * @returns The serialized manifest.
@@ -71,21 +61,18 @@ export function serializeProjectManifest(
 }
 
 /**
- * Makes a {@link SaveProjectManifest} function which overwrites the contents
- * of a `manifest.json` file.
+ * Function for replacing the project manifest for a Unity project.
+ * @param writeFile IO function for overwriting the content of the manifest
+ * file.
+ * @param projectPath The path to the project's directory.
+ * @param manifest The manifest to write to the project.
  */
-export function WriteProjectManifestFile(
-  writeFile: WriteTextFile
-): SaveProjectManifest {
-  return async (projectPath, manifest) => {
-    const manifestPath = manifestPathFor(projectPath);
-    const content = serializeProjectManifest(manifest);
-    return await writeFile(manifestPath, content);
-  };
+export async function saveProjectManifestUsing(
+  writeFile: WriteTextFile,
+  projectPath: string,
+  manifest: UnityProjectManifest
+): Promise<void> {
+  const manifestPath = manifestPathFor(projectPath);
+  const content = serializeProjectManifest(manifest);
+  return await writeFile(manifestPath, content);
 }
-
-/**
- * Default {@link SaveProjectManifest} function. Uses {@link WriteProjectManifestFile}.
- */
-export const saveProjectManifest: SaveProjectManifest =
-  WriteProjectManifestFile(writeTextFile);

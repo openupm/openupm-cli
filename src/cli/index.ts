@@ -13,10 +13,9 @@ import { makeParseEnv } from "../app/parse-env";
 import { removePackages as removePackagesUsing } from "../app/remove-packages";
 import { searchPackagesUsing } from "../app/search-packages";
 import { getRegistryPackumentUsing } from "../io/packument-io";
-import { saveProjectManifest } from "../io/project-manifest-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
-import { readTextFile } from "../io/text-file-io";
+import { readTextFile, writeTextFile } from "../io/text-file-io";
 import { getUpmConfigPath as getUpmConfigPathUsing } from "../io/upm-config-io";
 import { DebugLog } from "../logging";
 import { eachValue } from "./cli-parsing";
@@ -64,7 +63,7 @@ const addCmd = makeAddCmd(
   getRegistryPackumentVersionUsing(registryClient, debugLogToConsole),
   resolveDependenciesUsing(registryClient, debugLogToConsole),
   readTextFile,
-  saveProjectManifest,
+  writeTextFile,
   determineEditorVersionUsing(debugLogToConsole),
   getRegistryAuthUsing(homePath, debugLogToConsole),
   log,

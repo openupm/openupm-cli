@@ -3,6 +3,7 @@ import path from "path";
 import {
   emptyProjectManifest,
   manifestPathFor,
+  parseProjectManifest,
   type UnityProjectManifest,
 } from "../../src/domain/project-manifest";
 import { serializeProjectManifest } from "../../src/io/project-manifest-io";
@@ -84,5 +85,19 @@ export class MockFs {
     this.putText(manifestPath, serializeProjectManifest(manifest));
 
     return this;
+  }
+
+  /**
+   * Attempts to get a Unity project manifest from the mock file-system.
+   * @param projectDirectory The Unity projects root directory.
+   * @returns The manifest or null if not found.
+   */
+  public tryGetUnityProject(
+    projectDirectory: string
+  ): UnityProjectManifest | null {
+    const manifestPath = manifestPathFor(projectDirectory);
+    const manifestText = this.tryGetText(manifestPath);
+    if (manifestText === null) return null;
+    return parseProjectManifest(manifestText);
   }
 }

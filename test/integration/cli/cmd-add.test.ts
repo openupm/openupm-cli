@@ -22,9 +22,9 @@ import {
 import { DomainName } from "../../../src/domain/domain-name";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { UnityPackumentVersion } from "../../../src/domain/packument";
+import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { SaveProjectManifest } from "../../../src/io/project-manifest-io";
 import { noopLogger } from "../../../src/logging";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
 import { buildPackument } from "../../common/data-packument";
@@ -96,9 +96,6 @@ describe("cmd-add", () => {
     );
     resolveDependencies.mockResolvedValue(defaultGraph);
 
-    const writeProjectManifest = mockFunctionOfType<SaveProjectManifest>();
-    writeProjectManifest.mockResolvedValue(undefined);
-
     const determineEditorVersion = mockFunctionOfType<DetermineEditorVersion>();
     determineEditorVersion.mockResolvedValue(
       makeEditorVersion(2022, 2, 1, "f", 2)
@@ -118,7 +115,7 @@ describe("cmd-add", () => {
       getRegistryPackumentVersion,
       resolveDependencies,
       mockFs.read,
-      writeProjectManifest,
+      mockFs.write,
       determineEditorVersion,
       getRegistryAuth,
       log,
@@ -129,7 +126,6 @@ describe("cmd-add", () => {
       parseEnv,
       getRegistryPackumentVersion,
       resolveDependencies,
-      writeProjectManifest,
       determineEditorVersion,
       mockFs,
       log,
@@ -258,12 +254,12 @@ describe("cmd-add", () => {
   });
 
   it("should add package", async () => {
-    const { addCmd, writeProjectManifest } = makeDependencies();
+    const { addCmd, mockFs } = makeDependencies();
 
     await addCmd(somePackage, {});
 
-    expect(writeProjectManifest).toHaveBeenCalledWith(
-      expect.any(String),
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
       expect.objectContaining({
         dependencies: { [somePackage]: "1.0.0" },
       })
@@ -282,7 +278,7 @@ describe("cmd-add", () => {
   });
 
   it("should replace package", async () => {
-    const { addCmd, writeProjectManifest, mockFs } = makeDependencies();
+    const { addCmd, mockFs } = makeDependencies();
     mockFs.putUnityProject({
       projectDirectory: someProjectDir,
       manifest: buildProjectManifest((manifest) =>
@@ -292,8 +288,8 @@ describe("cmd-add", () => {
 
     await addCmd(somePackage, {});
 
-    expect(writeProjectManifest).toHaveBeenCalledWith(
-      expect.any(String),
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
       expect.objectContaining({
         dependencies: { [somePackage]: "1.0.0" },
       })
@@ -335,12 +331,12 @@ describe("cmd-add", () => {
   });
 
   it("should add scope for package", async () => {
-    const { addCmd, writeProjectManifest } = makeDependencies();
+    const { addCmd, mockFs } = makeDependencies();
 
     await addCmd(somePackage, {});
 
-    expect(writeProjectManifest).toHaveBeenCalledWith(
-      expect.any(String),
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
       expect.objectContaining({
         scopedRegistries: [
           {
@@ -354,14 +350,14 @@ describe("cmd-add", () => {
   });
 
   it("should add package to testables when running with test option", async () => {
-    const { addCmd, writeProjectManifest } = makeDependencies();
+    const { addCmd, mockFs } = makeDependencies();
 
     await addCmd(somePackage, {
       test: true,
     });
 
-    expect(writeProjectManifest).toHaveBeenCalledWith(
-      expect.any(String),
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
       expect.objectContaining({
         testables: [somePackage],
       })
@@ -369,23 +365,25 @@ describe("cmd-add", () => {
   });
 
   it("should not save if nothing changed", async () => {
-    const { addCmd, writeProjectManifest, mockFs } = makeDependencies();
+    const { addCmd, mockFs } = makeDependencies();
+    const initial = buildProjectManifest((manifest) =>
+      manifest
+        .addDependency(somePackage, "1.0.0", true, false)
+        .addScope(otherPackage)
+    );
     mockFs.putUnityProject({
       projectDirectory: someProjectDir,
-      manifest: buildProjectManifest((manifest) =>
-        manifest
-          .addDependency(somePackage, "1.0.0", true, false)
-          .addScope(otherPackage)
-      ),
+      manifest: initial,
     });
 
     await addCmd(somePackage, {});
 
-    expect(writeProjectManifest).not.toHaveBeenCalled();
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(initial);
   });
 
   it("should be atomic", async () => {
-    const { addCmd, writeProjectManifest } = makeDependencies();
+    const { addCmd, mockFs } = makeDependencies();
 
     // The second package can not be added
     await addCmd(
@@ -395,7 +393,9 @@ describe("cmd-add", () => {
 
     // Because adding is atomic the manifest should only be written if
     // all packages were added.
-    expect(writeProjectManifest).not.toHaveBeenCalled();
+
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(emptyProjectManifest);
   });
 
   it("should suggest to open Unity after save", async () => {

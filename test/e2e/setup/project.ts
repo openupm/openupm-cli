@@ -5,12 +5,16 @@ import {
   emptyProjectManifest,
   UnityProjectManifest,
 } from "../../../src/domain/project-manifest";
-import { WriteProjectManifestFile } from "../../../src/io/project-manifest-io";
+import { saveProjectManifestUsing } from "../../../src/io/project-manifest-io";
 import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
 import { writeTextFile } from "../../../src/io/text-file-io";
+import { partialApply } from "../../../src/utils/fp-utils";
 import { dropDirectory } from "./directories";
 
-const writeProjectManifest = WriteProjectManifestFile(writeTextFile);
+const writeProjectManifest = partialApply(
+  saveProjectManifestUsing,
+  writeTextFile
+);
 
 /**
  * Prepares a mock Unity project for testing.
