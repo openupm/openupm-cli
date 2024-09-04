@@ -213,6 +213,10 @@ describe("dependency management", () => {
           arbManifestWithDependencyCount(10),
           arbDomainName,
           (manifest, missingPackage) => {
+            // In the rare case where the generated manifest has the dependency
+            // we skip this test.
+            if (hasDependency(manifest, missingPackage)) return;
+
             // A mix of packages that are in the package and one
             // which is not.
             const packagesToRemove = [
