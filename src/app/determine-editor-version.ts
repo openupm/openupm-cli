@@ -23,14 +23,14 @@ export function DetermineEditorVersionFromFile(
   readTextFile: ReadTextFile,
   debugLog: DebugLog
 ): DetermineEditorVersion {
-  const loadPorjectVersion = partialApply(
+  const loadProjectVersion = partialApply(
     loadProjectVersionUsing,
     readTextFile,
     debugLog
   );
 
   return async (projectPath) => {
-    const unparsedEditorVersion = await loadPorjectVersion(projectPath);
+    const unparsedEditorVersion = await loadProjectVersion(projectPath);
     return validateProjectVersion(unparsedEditorVersion);
   };
 }
