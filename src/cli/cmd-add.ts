@@ -124,9 +124,11 @@ export function makeAddCmd(
             )}`;
         }
       })
-      .forEach((message) => log.info("", message));
+      .forEach((message) => {
+        log.notice("", message);
+      });
 
-    log.info("", "please open Unity to apply changes.");
+    log.notice("", "please open Unity to apply changes.");
     return ResultCodes.Ok;
   };
 }
