@@ -1,10 +1,13 @@
 import fc from "fast-check";
+import path from "path";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
   addTestable,
   emptyProjectManifest,
   hasDependency,
+  manifestPathFor,
   mapScopedRegistry,
+  parseProjectManifest,
   removeDependency,
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
@@ -20,8 +23,8 @@ import {
   makeScopedRegistry,
 } from "../../../src/domain/scoped-registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildProjectManifest } from "./data-project-manifest";
-import { exampleRegistryUrl } from "./data-registry";
+import { buildProjectManifest } from "../../common/data-project-manifest";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
@@ -346,6 +349,45 @@ describe("project-manifest", () => {
           });
         })
       );
+    });
+  });
+
+  describe("path", () => {
+    it("should determine correct manifest path", () => {
+      const manifestPath = manifestPathFor("test-openupm-cli");
+      const expected = path.join(
+        "test-openupm-cli",
+        "Packages",
+        "manifest.json"
+      );
+      expect(manifestPath).toEqual(expected);
+    });
+  });
+
+  describe("parse", () => {
+    it("should parse valid manifest", () => {
+      const content = `{ "dependencies": { "com.package.a": "1.0.0"} }`;
+
+      const parsed = parseProjectManifest(content);
+
+      expect(parsed).toEqual({
+        dependencies: {
+          "com.package.a": "1.0.0",
+        },
+      });
+    });
+
+    it("should fail for bad json", () => {
+      const content = "not : valid // json";
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+
+    it("should fail incorrect json shape", () => {
+      // Valid json but not what we want
+      const content = `123`;
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
     });
   });
 });

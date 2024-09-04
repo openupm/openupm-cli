@@ -1,10 +1,9 @@
 import npmFetch from "npm-registry-fetch";
 import { DomainName } from "../domain/domain-name";
-import { Registry } from "../domain/registry";
+import { makeNpmFetchOptions, Registry } from "../domain/registry";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
-import { makeNpmFetchOptions } from "./npm-registry";
 import { SearchedPackument } from "./npm-search";
 
 /**

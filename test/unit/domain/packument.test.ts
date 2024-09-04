@@ -8,7 +8,7 @@ import {
   VersionNotFoundError,
 } from "../../../src/domain/packument";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildPackument } from "./data-packument";
+import { buildPackument } from "../../common/data-packument";
 
 describe("packument", () => {
   describe("get latest version", () => {

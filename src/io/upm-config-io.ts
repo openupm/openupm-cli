@@ -1,42 +1,11 @@
 import TOML from "@iarna/toml";
 import { z } from "zod";
 import { Base64 } from "../domain/base64";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import {
-  readTextFile,
-  ReadTextFile,
-  writeTextFile,
-  WriteTextFile,
-} from "./text-file-io";
-
-/**
- * Function which gets the path to the upmconfig file.
- * @param systemUser Whether to authenticate as a Windows system-user.
- * @returns The file path.
- */
-export type GetUpmConfigPath = (systemUser: boolean) => string;
-
-/**
- * Makes a {@link GetUpmConfigPath} function which resolves to the default
- * location of the `.upmconfig.toml` file.
- * @see https://docs.unity3d.com/Manual/upm-config.html#upmconfig
- */
-export function ResolveDefaultUpmConfigPath(
-  homePath: string
-): GetUpmConfigPath {
-  return (systemUser) =>
-    getUserUpmConfigPathFor(process.env, homePath, systemUser);
-}
-
-/**
- * Default {@link GetUpmConfigPath} function. Uses {@link ResolveDefaultUpmConfigPath}.
- */
-export const getUpmConfigPath = (homePath: string): GetUpmConfigPath =>
-  ResolveDefaultUpmConfigPath(homePath);
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),
@@ -75,54 +44,50 @@ export type UpmConfigContent = RemoveExplicitUndefined<
 >;
 
 /**
- * IO function for loading an upm-config file.
- * @param configFilePath Path of the upm-config file.
+ * Parses the content of a `.upmconfig.toml` file.
+ * @param fileContent The file content.
+ * @returns The parsed content.
+ */
+export function parseUpmConfig(fileContent: string): UpmConfigContent {
+  const tomlContent = TOML.parse(fileContent);
+  return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
+}
+
+/**
+ * Loads an upm-config file.
+ * @param readFile IO function for reading the file.
+ * @param filePath Path of the upm-config file.
  * @returns The config or null if it was not found.
  */
-export type LoadUpmConfig = (
-  configFilePath: string
-) => Promise<UpmConfigContent | null>;
-
-/**
- * Makes a {@link LoadUpmConfig} function which reads the content of a
- * `.upmconfig.toml` file.
- */
-export function ReadUpmConfigFile(readFile: ReadTextFile): LoadUpmConfig {
-  return async (configFilePath) => {
-    const stringContent = await readFile(configFilePath, true);
-    if (stringContent === null) return null;
-    const tomlContent = TOML.parse(stringContent);
-    return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
-  };
+export async function loadUpmConfigUsing(
+  readFile: ReadTextFile,
+  filePath: string
+): Promise<UpmConfigContent | null> {
+  const stringContent = await readFile(filePath);
+  if (stringContent === null) return null;
+  return parseUpmConfig(stringContent);
 }
 
 /**
- * Default {@link LoadUpmConfig} function. Uses {@link ReadUpmConfigFile}.
+ * Serializes a upm config to string.
+ * @param config The config.
+ * @returns The serialized string.
  */
-export const loadUpmConfig: LoadUpmConfig = ReadUpmConfigFile(readTextFile);
+export function serializeUpmConfig(config: UpmConfigContent): string {
+  return TOML.stringify(config);
+}
 
 /**
- * Save the upm config.
+ * Save the upm config by overwriting the `.upmconfig.toml` file.
+ * @param writeFile IO function for overwriting the file.
+ * @param filePath The path of the file that should be saved to.
  * @param config The config to save.
- * @param configFilePath The path of the file that should be saved to.
  */
-export type SaveUpmConfig = (
-  config: UpmConfigContent,
-  configFilePath: string
-) => Promise<void>;
-
-/**
- * Creates a {@link SaveUpmConfig} function which overwrites the content
- * of a `.upmconfig.toml` file.
- */
-export function WriteUpmConfigFile(writeFile: WriteTextFile): SaveUpmConfig {
-  return (config, configFilePath) => {
-    const content = TOML.stringify(config);
-    return writeFile(configFilePath, content);
-  };
+export function saveUpmConfigFileUsing(
+  writeFile: WriteTextFile,
+  filePath: string,
+  config: UpmConfigContent
+): Promise<void> {
+  const content = serializeUpmConfig(config);
+  return writeFile(filePath, content);
 }
-
-/**
- * Default {@link SaveUpmConfig} function. Uses {@link WriteUpmConfigFile}.
- */
-export const saveUpmConfig: SaveUpmConfig = WriteUpmConfigFile(writeTextFile);

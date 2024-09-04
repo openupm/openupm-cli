@@ -11,12 +11,10 @@ export type GetDirectoriesIn = (
 ) => Promise<ReadonlyArray<string>>;
 
 /**
- * Makes a {@link GetDirectoriesIn} function.
+ * {@link GetDirectoriesIn} function which uses the real file-system.
  */
-export function makeGetDirectoriesIn(): GetDirectoriesIn {
-  return async (directoryPath) => {
-    const entries = await fs.readdir(directoryPath, { withFileTypes: true });
-    const directories = entries.filter((it) => it.isDirectory());
-    return directories.map((it) => it.name);
-  };
-}
+export const getDirectoriesInFs: GetDirectoriesIn = async (directoryPath) => {
+  const entries = await fs.readdir(directoryPath, { withFileTypes: true });
+  const directories = entries.filter((it) => it.isDirectory());
+  return directories.map((it) => it.name);
+};

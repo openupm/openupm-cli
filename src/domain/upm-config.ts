@@ -1,7 +1,10 @@
 import path from "path";
 import { CustomError } from "ts-custom-error";
 
-const configFileName = ".upmconfig.toml";
+/**
+ * The file name for upm config files.
+ */
+export const upmConfigFileName = ".upmconfig.toml";
 
 export class NoSystemUserProfilePath extends CustomError {}
 
@@ -37,5 +40,5 @@ export function getUserUpmConfigPathFor(
   if (customDir !== undefined) return path.resolve(customDir);
 
   const directory = getConfigDirectory();
-  return path.join(directory, configFileName);
+  return path.join(directory, upmConfigFileName);
 }

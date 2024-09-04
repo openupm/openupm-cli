@@ -1,3 +1,5 @@
+import path from "node:path";
+import { z } from "zod";
 import { removeRecordKey } from "../utils/record-utils";
 import { removeTrailingSlash } from "../utils/string-utils";
 import { DomainName } from "./domain-name";
@@ -212,4 +214,27 @@ export function removeTestable(
     ...manifest,
     testables: manifest.testables.filter((it) => it !== packageName),
   };
+}
+
+/**
+ * Determines the path to the package manifest based on the project
+ * directory.
+ * @param projectPath The root path of the Unity project.
+ */
+export function manifestPathFor(projectPath: string): string {
+  return path.join(projectPath, "Packages/manifest.json");
+}
+
+// TODO: Add a better schema
+const projectManifestSchema = z.object({}).passthrough();
+
+/**
+ * Parses the content of a `manifest.json` file to a {@link UnityProjectManifest}.
+ * @param content The files content.
+ * @returns The parsed file.
+ * @throws {Error} If parsing failed.
+ */
+export function parseProjectManifest(content: string): UnityProjectManifest {
+  const json = JSON.parse(content);
+  return projectManifestSchema.parse(json) as UnityProjectManifest;
 }

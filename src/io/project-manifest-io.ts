@@ -1,15 +1,12 @@
-import path from "path";
 import { CustomError } from "ts-custom-error";
-import { z } from "zod";
-import { UnityProjectManifest } from "../domain/project-manifest";
+import {
+  manifestPathFor,
+  parseProjectManifest,
+  UnityProjectManifest,
+} from "../domain/project-manifest";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-import {
-  readTextFile,
-  ReadTextFile,
-  writeTextFile,
-  WriteTextFile,
-} from "./text-file-io";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {
@@ -20,76 +17,28 @@ export class ManifestMissingError extends CustomError {
 export class ManifestMalformedError extends CustomError {}
 
 /**
- * Determines the path to the package manifest based on the project
- * directory.
- * @param projectPath The root path of the Unity project.
- */
-export function manifestPathFor(projectPath: string): string {
-  return path.join(projectPath, "Packages/manifest.json");
-}
-
-/**
  * Function for loading the project manifest for a Unity project.
+ * @param readFile IO function for reading the manifest file.
+ * @param debugLog Logger for printing debug messages.
  * @param projectPath The path to the project's directory.
  * @returns The loaded manifest.
  */
-export type LoadProjectManifest = (
-  projectPath: string
-) => Promise<UnityProjectManifest>;
-
-// TODO: Add a better schema
-const projectManifestSchema = z.object({}).passthrough();
-
-/**
- * Parses the content of a `manifest.json` file to a {@link UnityProjectManifest}.
- * @param content The files content.
- * @returns The parsed file.
- * @throws {Error} If parsing failed.
- */
-export function parseProjectManifest(content: string): UnityProjectManifest {
-  const json = JSON.parse(content);
-  return projectManifestSchema.parse(json) as UnityProjectManifest;
-}
-
-/**
- * Makes a {@link LoadProjectManifest} function which reads the content
- * of a `manifest.json` file.
- */
-export function ReadProjectManifestFile(
+export async function loadProjectManifestUsing(
   readFile: ReadTextFile,
-  debugLog: DebugLog
-): LoadProjectManifest {
-  return async (projectPath) => {
-    const manifestPath = manifestPathFor(projectPath);
-
-    const content = await readFile(manifestPath, true);
-    if (content === null) throw new ManifestMissingError(manifestPath);
-
-    try {
-      return parseProjectManifest(content);
-    } catch (error) {
-      assertIsError(error);
-      debugLog("Manifest parse failed because of invalid json content.", error);
-      throw new ManifestMalformedError();
-    }
-  };
+  debugLog: DebugLog,
+  projectPath: string
+): Promise<UnityProjectManifest> {
+  const manifestPath = manifestPathFor(projectPath);
+  const content = await readFile(manifestPath);
+  if (content === null) throw new ManifestMissingError(manifestPath);
+  try {
+    return parseProjectManifest(content);
+  } catch (error) {
+    assertIsError(error);
+    debugLog("Manifest parse failed because of invalid json content.", error);
+    throw new ManifestMalformedError();
+  }
 }
-
-/**
- * Default {@link LoadProjectManifest} function. Uses {@link ReadProjectManifestFile}.
- */
-export const loadProjectManifestUsing = (debugLog: DebugLog) =>
-  ReadProjectManifestFile(readTextFile, debugLog);
-
-/**
- * Function for replacing the project manifest for a Unity project.
- * @param projectPath The path to the project's directory.
- * @param manifest The manifest to write to the project.
- */
-export type SaveProjectManifest = (
-  projectPath: string,
-  manifest: UnityProjectManifest
-) => Promise<void>;
 
 /**
  * Serializes a {@link UnityProjectManifest} object into json format.
@@ -112,21 +61,18 @@ export function serializeProjectManifest(
 }
 
 /**
- * Makes a {@link SaveProjectManifest} function which overwrites the contents
- * of a `manifest.json` file.
+ * Function for replacing the project manifest for a Unity project.
+ * @param writeFile IO function for overwriting the content of the manifest
+ * file.
+ * @param projectPath The path to the project's directory.
+ * @param manifest The manifest to write to the project.
  */
-export function WriteProjectManifestFile(
-  writeFile: WriteTextFile
-): SaveProjectManifest {
-  return async (projectPath, manifest) => {
-    const manifestPath = manifestPathFor(projectPath);
-    const content = serializeProjectManifest(manifest);
-    return await writeFile(manifestPath, content);
-  };
+export async function saveProjectManifestUsing(
+  writeFile: WriteTextFile,
+  projectPath: string,
+  manifest: UnityProjectManifest
+): Promise<void> {
+  const manifestPath = manifestPathFor(projectPath);
+  const content = serializeProjectManifest(manifest);
+  return await writeFile(manifestPath, content);
 }
-
-/**
- * Default {@link SaveProjectManifest} function. Uses {@link WriteProjectManifestFile}.
- */
-export const saveProjectManifest: SaveProjectManifest =
-  WriteProjectManifestFile(writeTextFile);

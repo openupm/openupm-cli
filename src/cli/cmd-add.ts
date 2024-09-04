@@ -26,13 +26,10 @@ import {
 } from "../domain/scoped-registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import {
-  LoadProjectManifest,
-  SaveProjectManifest,
+  loadProjectManifestUsing,
+  saveProjectManifestUsing,
 } from "../io/project-manifest-io";
 import { DebugLog } from "../logging";
-import { ResolveDependencies } from "../services/dependency-resolving";
-import { DetermineEditorVersion } from "../services/determine-editor-version";
-import { ParseEnv } from "../services/parse-env";
 import { areArraysEqual } from "../utils/array-utils";
 import {
   logFailedDependency,
@@ -41,11 +38,20 @@ import {
 import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
 
+import { resolveDependenciesUsing } from "../app/dependency-resolving";
+import { determineEditorVersionUsing } from "../app/determine-editor-version";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { FetchRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
-import { GetRegistryAuth } from "../services/get-registry-auth";
-import { GetRegistryPackumentVersion } from "../services/get-registry-packument-version";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { CheckUrlExists } from "../io/check-url";
+import type { GetRegistryPackument } from "../io/packument-io";
+import { getHomePathFromEnv } from "../io/special-paths";
+import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
+import { parseEnvUsing } from "./parse-env";
 
 export class PackageIncompatibleError extends CustomError {
   constructor(
@@ -120,32 +126,57 @@ function pickMostFixable(
  * Makes a {@link AddCmd} function.
  */
 export function makeAddCmd(
-  parseEnv: ParseEnv,
-  getRegistryPackumentVersion: GetRegistryPackumentVersion,
-  resolveDependencies: ResolveDependencies,
-  loadProjectManifest: LoadProjectManifest,
-  saveProjectManifest: SaveProjectManifest,
-  determineEditorVersion: DetermineEditorVersion,
-  getRegistryAuth: GetRegistryAuth,
+  checkUrlExists: CheckUrlExists,
+  fetchPackument: GetRegistryPackument,
+  readTextFile: ReadTextFile,
+  writeTextFile: WriteTextFile,
   log: Logger,
   debugLog: DebugLog
 ): AddCmd {
+  const loadProjectManifest = partialApply(
+    loadProjectManifestUsing,
+    readTextFile,
+    debugLog
+  );
+
+  const saveProjectManifest = partialApply(
+    saveProjectManifestUsing,
+    writeTextFile
+  );
+
+  const getRegistryPackumentVersion = partialApply(
+    FetchRegistryPackumentVersion,
+    fetchPackument
+  );
+
   return async (pkgs, options) => {
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
 
     // parse env
-    const env = await parseEnv(options);
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
 
-    const editorVersion = await determineEditorVersion(env.cwd);
+    const editorVersion = await determineEditorVersionUsing(
+      readTextFile,
+      debugLog,
+      env.cwd
+    );
 
     if (typeof editorVersion === "string")
       log.warn(
         "editor.version",
         `${editorVersion} is unknown, the editor version check is disabled`
       );
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
 
-    const primaryRegistry = await getRegistryAuth(
-      env.systemUser,
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
+      upmConfigPath,
       env.primaryRegistryUrl
     );
 
@@ -220,7 +251,9 @@ export function makeAddCmd(
         // pkgsInScope
         if (!isUpstreamPackage) {
           debugLog(`fetch: ${makePackageReference(name, requestedVersion)}`);
-          const dependencyGraph = await resolveDependencies(
+          const dependencyGraph = await resolveDependenciesUsing(
+            checkUrlExists,
+            fetchPackument,
             [primaryRegistry, unityRegistry],
             name,
             versionToAdd,

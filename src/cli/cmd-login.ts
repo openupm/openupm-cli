@@ -1,9 +1,14 @@
 import { Logger } from "npmlog";
+import { loginUsing } from "../app/login";
 import { coerceRegistryUrl } from "../domain/registry-url";
-import { GetUpmConfigPath } from "../io/upm-config-io";
-import { Login } from "../services/login";
-import { ParseEnv } from "../services/parse-env";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { GetAuthToken } from "../io/get-auth-token";
+import { getHomePathFromEnv } from "../io/special-paths";
+import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import type { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 import { CmdOptions } from "./options";
+import { parseEnvUsing } from "./parse-env";
 import {
   promptEmail,
   promptPassword,
@@ -55,14 +60,32 @@ export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
  * Makes a {@link LoginCmd} function.
  */
 export function makeLoginCmd(
-  parseEnv: ParseEnv,
-  getUpmConfigPath: GetUpmConfigPath,
-  login: Login,
+  homePath: string,
+  getAuthToken: GetAuthToken,
+  readTextFile: ReadTextFile,
+  writeTextFile: WriteTextFile,
+  debugLog: DebugLog,
   log: Logger
 ): LoginCmd {
+  const login = partialApply(
+    loginUsing,
+    homePath,
+    getAuthToken,
+    readTextFile,
+    writeTextFile,
+    debugLog
+  );
+
   return async (options) => {
     // parse env
-    const env = await parseEnv(options);
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
 
     // query parameters
     const username = options.username ?? (await promptUsername());
@@ -76,20 +99,18 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configPath = getUpmConfigPath(env.systemUser);
-
     await login(
       username,
       password,
       email,
       alwaysAuth,
       loginRegistry,
-      configPath,
+      upmConfigPath,
       options.basicAuth ? "basic" : "token"
     );
 
     log.notice("auth", `you are authenticated as '${username}'`);
-    log.notice("config", "saved unity config at " + configPath);
+    log.notice("config", "saved unity config at " + upmConfigPath);
     return ResultCodes.Ok;
   };
 }

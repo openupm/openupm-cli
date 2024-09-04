@@ -1,7 +1,7 @@
 import RegClient from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
-import { RegistryAuthenticationError } from "./common-errors";
 import { DebugLog } from "../logging";
+import { RegistryAuthenticationError } from "./common-errors";
 
 /**
  * A token authenticating a user.
@@ -27,7 +27,7 @@ export type GetAuthToken = (
  * Makes a {@link GetAuthToken} function which gets the token
  * by authenticating the user with a remote npm registry.
  */
-export function AuthenticateWithNpmRegistry(
+export function getAuthTokenUsing(
   registryClient: RegClient.Instance,
   debugLog: DebugLog
 ): GetAuthToken {
@@ -49,11 +49,3 @@ export function AuthenticateWithNpmRegistry(
       );
     });
 }
-
-/**
- * Default {@link GetAuthToken}. Uses {@link AuthenticateWithNpmRegistry}.
- */
-export const getAuthToken = (
-  registryClient: RegClient.Instance,
-  debugLog: DebugLog
-) => AuthenticateWithNpmRegistry(registryClient, debugLog);

@@ -8,7 +8,7 @@ import {
 import { DomainName } from "../../../src/domain/domain-name";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
-import { exampleRegistryUrl } from "./data-registry";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 
 describe("scoped-registry", () => {

@@ -7,7 +7,7 @@ import {
 import { stringifyEditorVersion } from "../domain/editor-version";
 import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
 import { NoSystemUserProfilePath } from "../domain/upm-config";
-import { EditorNotInstalledError } from "../io/builtin-packages";
+import { EditorNotInstalledError } from "../app/builtin-packages";
 import { RegistryAuthenticationError } from "../io/common-errors";
 import {
   ManifestMalformedError,
@@ -22,7 +22,7 @@ import {
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
 } from "../io/special-paths";
-import { RegistryAuthLoadError } from "../services/parse-env";
+import { RegistryAuthLoadError } from "./parse-env";
 import {
   CompatibilityCheckFailedError,
   PackageIncompatibleError,
