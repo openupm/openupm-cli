@@ -89,7 +89,7 @@ export type LoadUpmConfig = (
  */
 export function ReadUpmConfigFile(readFile: ReadTextFile): LoadUpmConfig {
   return async (configFilePath) => {
-    const stringContent = await readFile(configFilePath, true);
+    const stringContent = await readFile(configFilePath);
     if (stringContent === null) return null;
     const tomlContent = TOML.parse(stringContent);
     return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));

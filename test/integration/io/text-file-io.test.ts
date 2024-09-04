@@ -9,35 +9,24 @@ describe("text file io", () => {
       const expected = "content";
       jest.spyOn(fs, "readFile").mockResolvedValue(expected);
 
-      const actual = await readTextFile("path/to/file.txt", false);
+      const actual = await readTextFile("path/to/file.txt");
 
       expect(actual).toEqual(expected);
     });
 
-    it("should be null if optional file is missing", async () => {
+    it("should be null if file is missing", async () => {
       jest.spyOn(fs, "readFile").mockRejectedValue(makeNodeError("ENOENT"));
 
-      const content = await readTextFile("path/to/file.txt", true);
+      const content = await readTextFile("path/to/file.txt");
 
       expect(content).toBeNull();
-    });
-
-    it("should fail if non-optional file is missing", async () => {
-      const expected = makeNodeError("ENOENT");
-      jest.spyOn(fs, "readFile").mockRejectedValue(expected);
-
-      await expect(readTextFile("path/to/file.txt", false)).rejects.toEqual(
-        expected
-      );
     });
 
     it("should fail if file could not be read", async () => {
       const expected = makeNodeError("EACCES");
       jest.spyOn(fs, "readFile").mockRejectedValue(expected);
 
-      await expect(readTextFile("path/to/file.txt", false)).rejects.toEqual(
-        expected
-      );
+      await expect(readTextFile("path/to/file.txt")).rejects.toEqual(expected);
     });
   });
 

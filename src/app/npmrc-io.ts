@@ -1,7 +1,7 @@
 import { EOL } from "node:os";
 import { Npmrc } from "../domain/npmrc";
-import { splitLines } from "../utils/string-utils";
 import { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import { splitLines } from "../utils/string-utils";
 
 /**
  * Attempts to load the `.npmrc` file at a given path.
@@ -13,7 +13,7 @@ export async function tryLoadNpmrcUsing(
   readFile: ReadTextFile,
   path: string
 ): Promise<Npmrc | null> {
-  return readFile(path, true).then((content) =>
+  return readFile(path).then((content) =>
     content !== null
       ? // TODO: Check if lines are valid.
         splitLines(content)

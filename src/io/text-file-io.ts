@@ -6,29 +6,20 @@ import { assertIsNodeError } from "../utils/error-type-guards";
 /**
  * Function for loading the content of a text file.
  */
-export type ReadTextFile = {
+export type ReadTextFile =
   /**
    * @param path The path to the file.
-   * @param optional The file is expected to exist. Throws if not found.
-   * @returns The files text content.
-   */
-  (path: string, optional: false): Promise<string>;
-  /**
-   * @param path The path to the file.
-   * @param optional The file is expected to potentially not exist.
    * @returns The files text content or null if file was missing.
    */
-  (path: string, optional: true): Promise<string | null>;
-};
-
+  (path: string) => Promise<string | null>;
 /**
  * Makes a {@link ReadTextFile} function which reads from the file-system
  * using the {@link fs} module.
  */
-export const readTextFile: ReadTextFile = ((path, optional) =>
+export const readTextFile: ReadTextFile = ((path) =>
   fs.readFile(path, { encoding: "utf8" }).catch((error) => {
     assertIsNodeError(error);
-    if (optional && error.code === "ENOENT") return null;
+    if (error.code === "ENOENT") return null;
     throw error;
   })) as ReadTextFile;
 

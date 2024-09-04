@@ -41,7 +41,7 @@ export function ReadProjectManifestFile(
   return async (projectPath) => {
     const manifestPath = manifestPathFor(projectPath);
 
-    const content = await readFile(manifestPath, true);
+    const content = await readFile(manifestPath);
     if (content === null) throw new ManifestMissingError(manifestPath);
 
     try {

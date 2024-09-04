@@ -46,7 +46,7 @@ export function ReadProjectVersionFile(
   return async (projectDirPath) => {
     const filePath = projectVersionTxtPathFor(projectDirPath);
 
-    const content = await readFile(filePath, true);
+    const content = await readFile(filePath);
     if (content === null) throw new ProjectVersionMissingError(filePath);
 
     let yaml: AnyJson;
