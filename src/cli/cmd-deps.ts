@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
 import { ResolveDependencies } from "../app/dependency-resolving";
-import { GetLatestVersion } from "../app/get-latest-version";
+import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { GetRegistryAuth } from "../app/get-registry-auth";
 import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
@@ -15,6 +15,7 @@ import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../io/special-paths";
 import { DebugLog } from "../logging";
 import { queryAllRegistriesLazy } from "../utils/sources";
@@ -54,7 +55,7 @@ export type DepsCmd = (
 export function makeDepsCmd(
   parseEnv: ParseEnv,
   resolveDependencies: ResolveDependencies,
-  resolveLatestVersion: GetLatestVersion,
+  fetchPackument: GetRegistryPackument,
   getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
@@ -87,7 +88,11 @@ export function makeDepsCmd(
         ? requestedVersion
         : (
             await queryAllRegistriesLazy(sources, (source) =>
-              resolveLatestVersion(source, packageName)
+              fetchLatestPackumentVersionUsing(
+                fetchPackument,
+                source,
+                packageName
+              )
             )
           )?.value ?? null;
 

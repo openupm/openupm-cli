@@ -4,7 +4,6 @@ import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { resolveDependencies as resolveDependenciesUsing } from "../app/dependency-resolving";
-import { getLatestVersion as getLatestVersionUsing } from "../app/get-latest-version";
 import { getRegistryAuthUsing } from "../app/get-registry-auth";
 import { getRegistryPackumentVersionUsing } from "../app/get-registry-packument-version";
 import { login as loginUsing } from "../app/login";
@@ -53,8 +52,11 @@ const debugLogToConsole: DebugLog = function (message, context) {
 
 const parseEnv = makeParseEnv(log, process.cwd());
 const homePath = getHomePathFromEnv(process.env);
-
 const registryClient = makeNpmRegistryClient(log);
+const fetchPackument = getRegistryPackumentUsing(
+  registryClient,
+  debugLogToConsole
+);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -81,7 +83,7 @@ const searchCmd = makeSearchCmd(
 const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependenciesUsing(registryClient, debugLogToConsole),
-  getLatestVersionUsing(registryClient, debugLogToConsole),
+  fetchPackument,
   getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole
