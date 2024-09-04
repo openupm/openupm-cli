@@ -9,7 +9,7 @@ import { ReadTextFile } from "../../../src/io/text-file-io";
 import { noopLogger } from "../../../src/logging";
 import { partialApply } from "../../../src/utils/fp-utils";
 import { exampleRegistryUrl } from "../../common/data-registry";
-import { mockFunctionOfType } from "../app/func.mock";
+import { mockFunctionOfType } from "../func.mock";
 
 const exampleProjectPath = "/some/path";
 describe("project-manifest io", () => {
