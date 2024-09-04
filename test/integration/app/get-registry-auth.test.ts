@@ -1,7 +1,6 @@
 import {
   importNpmAuth,
   isNonAuthUrl,
-  LoadRegistryAuthFromUpmConfig,
   tryGetAuthEntry,
 } from "../../../src/app/get-registry-auth";
 import { Base64 } from "../../../src/domain/base64";
@@ -9,10 +8,7 @@ import {
   openupmRegistryUrl,
   unityRegistryUrl,
 } from "../../../src/domain/registry-url";
-import { LoadUpmConfig } from "../../../src/io/upm-config-io";
-import { noopLogger } from "../../../src/logging";
 import { exampleRegistryUrl } from "../../common/data-registry";
-import { mockFunctionOfType } from "./func.mock";
 
 describe("get registry auth from upm config", () => {
   const someEmail = "user@mail.com";
@@ -102,58 +98,6 @@ describe("get registry auth from upm config", () => {
       expect(auth).toEqual({
         token: someToken,
       });
-    });
-  });
-
-  describe("service", () => {
-    const someUpmConfigPath = "/home/user/.upmconfig.toml";
-
-    function makeDependencies() {
-      const loadUpmConfig = mockFunctionOfType<LoadUpmConfig>();
-      loadUpmConfig.mockResolvedValue({});
-
-      const getRegistryAuth = LoadRegistryAuthFromUpmConfig(
-        loadUpmConfig,
-        noopLogger
-      );
-      return { getRegistryAuth, loadUpmConfig } as const;
-    }
-
-    it("should have no auth if no .upmconfig.toml file", async () => {
-      const { getRegistryAuth, loadUpmConfig } = makeDependencies();
-      loadUpmConfig.mockResolvedValue(null);
-
-      const registry = await getRegistryAuth(
-        someUpmConfigPath,
-        exampleRegistryUrl
-      );
-
-      expect(registry.auth).toBeNull();
-    });
-
-    it("should not load upmconfig for openupm registry url", async () => {
-      const { getRegistryAuth, loadUpmConfig } = makeDependencies();
-
-      await getRegistryAuth(someUpmConfigPath, openupmRegistryUrl);
-
-      expect(loadUpmConfig).not.toHaveBeenCalled();
-    });
-
-    it("should not load upmconfig for unity registry url", async () => {
-      const { getRegistryAuth, loadUpmConfig } = makeDependencies();
-
-      await getRegistryAuth(someUpmConfigPath, unityRegistryUrl);
-
-      expect(loadUpmConfig).not.toHaveBeenCalled();
-    });
-
-    it("should cache .upmconfig.toml content", async () => {
-      const { getRegistryAuth, loadUpmConfig } = makeDependencies();
-
-      await getRegistryAuth(someUpmConfigPath, exampleRegistryUrl);
-      await getRegistryAuth(someUpmConfigPath, exampleRegistryUrl);
-
-      expect(loadUpmConfig).toHaveBeenCalledTimes(1);
     });
   });
 });

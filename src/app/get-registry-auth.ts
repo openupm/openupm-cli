@@ -6,13 +6,14 @@ import {
   RegistryUrl,
   unityRegistryUrl,
 } from "../domain/registry-url";
+import { readTextFile, type ReadTextFile } from "../io/text-file-io";
 import {
-  loadUpmConfig,
-  LoadUpmConfig,
+  loadUpmConfigUsing,
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
 import { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { removeExplicitUndefined } from "../utils/zod-utils";
 
@@ -88,9 +89,11 @@ export function tryGetAuthEntry(
  * the users upm config.
  */
 export function LoadRegistryAuthFromUpmConfig(
-  loadUpmConfig: LoadUpmConfig,
+  readTextFile: ReadTextFile,
   debugLog: DebugLog
 ): GetRegistryAuth {
+  const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
+
   let cachedConfig: UpmConfigContent | null = null;
 
   return async (configPath, url) => {
@@ -121,4 +124,4 @@ export function LoadRegistryAuthFromUpmConfig(
  * Default {@link GetRegistryAuth} function. Uses {@link LoadRegistryAuthFromUpmConfig}.
  */
 export const getRegistryAuthUsing = (debugLog: DebugLog) =>
-  LoadRegistryAuthFromUpmConfig(loadUpmConfig, debugLog);
+  LoadRegistryAuthFromUpmConfig(readTextFile, debugLog);

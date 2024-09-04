@@ -1,14 +1,15 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { encodeBase64 } from "../domain/base64";
 import { RegistryUrl } from "../domain/registry-url";
+import { readTextFile, type ReadTextFile } from "../io/text-file-io";
 import {
-  loadUpmConfig,
-  LoadUpmConfig,
+  loadUpmConfigUsing,
   saveUpmConfig,
   SaveUpmConfig,
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
+import { partialApply } from "../utils/fp-utils";
 import { removeExplicitUndefined } from "../utils/zod-utils";
 
 /**
@@ -75,9 +76,11 @@ export function putRegistryAuthIntoUpmConfig(
  * info into the users upm config.
  */
 export function PutRegistryAuthIntoUpmConfig(
-  loadUpmConfig: LoadUpmConfig,
+  readTextFile: ReadTextFile,
   saveUpmConfig: SaveUpmConfig
 ): PutRegistryAuth {
+  const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
+
   return async (configPath, registry, auth) => {
     const currentContent = await loadUpmConfig(configPath);
 
@@ -95,6 +98,6 @@ export function PutRegistryAuthIntoUpmConfig(
  * Default {@link PutRegistryAuth} function. Uses {@link PutRegistryAuthIntoUpmConfig}.
  */
 export const putRegistryAuthIntoUserUpmConfig = PutRegistryAuthIntoUpmConfig(
-  loadUpmConfig,
+  readTextFile,
   saveUpmConfig
 );

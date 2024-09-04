@@ -5,12 +5,7 @@ import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import {
-  readTextFile,
-  ReadTextFile,
-  writeTextFile,
-  WriteTextFile,
-} from "./text-file-io";
+import { ReadTextFile, writeTextFile, WriteTextFile } from "./text-file-io";
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),
@@ -49,31 +44,29 @@ export type UpmConfigContent = RemoveExplicitUndefined<
 >;
 
 /**
- * IO function for loading an upm-config file.
- * @param configFilePath Path of the upm-config file.
- * @returns The config or null if it was not found.
+ * Parses the content of a `.upmconfig.toml` file.
+ * @param fileContent The file content.
+ * @returns The parsed content.
  */
-export type LoadUpmConfig = (
-  configFilePath: string
-) => Promise<UpmConfigContent | null>;
-
-/**
- * Makes a {@link LoadUpmConfig} function which reads the content of a
- * `.upmconfig.toml` file.
- */
-export function ReadUpmConfigFile(readFile: ReadTextFile): LoadUpmConfig {
-  return async (configFilePath) => {
-    const stringContent = await readFile(configFilePath);
-    if (stringContent === null) return null;
-    const tomlContent = TOML.parse(stringContent);
-    return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
-  };
+export function parseUpmConfig(fileContent: string): UpmConfigContent {
+  const tomlContent = TOML.parse(fileContent);
+  return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
 }
 
 /**
- * Default {@link LoadUpmConfig} function. Uses {@link ReadUpmConfigFile}.
+ * Loads an upm-config file.
+ * @param readFile IO function for reading the file.
+ * @param filePath Path of the upm-config file.
+ * @returns The config or null if it was not found.
  */
-export const loadUpmConfig: LoadUpmConfig = ReadUpmConfigFile(readTextFile);
+export async function loadUpmConfigUsing(
+  readFile: ReadTextFile,
+  filePath: string
+): Promise<UpmConfigContent | null> {
+  const stringContent = await readFile(filePath);
+  if (stringContent === null) return null;
+  return parseUpmConfig(stringContent);
+}
 
 /**
  * Save the upm config.

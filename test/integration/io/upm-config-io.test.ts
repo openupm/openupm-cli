@@ -1,6 +1,7 @@
 import { EOL } from "node:os";
 import { ReadTextFile } from "../../../src/io/text-file-io";
-import { ReadUpmConfigFile } from "../../../src/io/upm-config-io";
+import { loadUpmConfigUsing } from "../../../src/io/upm-config-io";
+import { partialApply } from "../../../src/utils/fp-utils";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "../app/func.mock";
 
@@ -16,8 +17,8 @@ describe("upm-config-io", () => {
       const readFile = mockFunctionOfType<ReadTextFile>();
       readFile.mockResolvedValue("");
 
-      const readUpmConfigFile = ReadUpmConfigFile(readFile);
-      return { readUpmConfigFile, readFile } as const;
+      const loadUpmConfig = partialApply(loadUpmConfigUsing, readFile);
+      return { loadUpmConfig, readFile } as const;
     }
 
     function makeUpmConfigEntryToml(entry: {
@@ -37,25 +38,25 @@ describe("upm-config-io", () => {
     }
 
     it("should be null if file is not found", async () => {
-      const { readUpmConfigFile, readFile } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
       readFile.mockResolvedValue(null);
 
-      const actual = await readUpmConfigFile(someConfigPath);
+      const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toBeNull();
     });
 
     it("should load empty", async () => {
-      const { readUpmConfigFile, readFile } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
       readFile.mockResolvedValue("");
 
-      const actual = await readUpmConfigFile(someConfigPath);
+      const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toEqual({});
     });
 
     it("should load valid basic auth", async () => {
-      const { readUpmConfigFile, readFile } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
       readFile.mockResolvedValue(
         makeUpmConfigEntryToml({
           url: exampleRegistryUrl,
@@ -65,7 +66,7 @@ describe("upm-config-io", () => {
         })
       );
 
-      const actual = await readUpmConfigFile(someConfigPath);
+      const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toEqual({
         npmAuth: {
@@ -79,7 +80,7 @@ describe("upm-config-io", () => {
     });
 
     it("should load valid token auth", async () => {
-      const { readUpmConfigFile, readFile } = makeDependencies();
+      const { loadUpmConfig, readFile } = makeDependencies();
       readFile.mockResolvedValue(
         makeUpmConfigEntryToml({
           url: exampleRegistryUrl,
@@ -88,7 +89,7 @@ describe("upm-config-io", () => {
         })
       );
 
-      const actual = await readUpmConfigFile(someConfigPath);
+      const actual = await loadUpmConfig(someConfigPath);
 
       expect(actual).toEqual({
         npmAuth: {
