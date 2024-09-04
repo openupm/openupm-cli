@@ -1,7 +1,7 @@
 import { Logger } from "npmlog";
 import * as os from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { ParseEnv } from "../app/parse-env";
+import { ParseEnv } from "./parse-env";
 import { searchPackagesUsing } from "../app/search-packages";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetAllRegistryPackuments } from "../io/all-packuments-io";

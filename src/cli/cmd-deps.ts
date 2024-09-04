@@ -4,7 +4,7 @@ import os from "os";
 import { resolveDependenciesUsing } from "../app/dependency-resolving";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { ParseEnv } from "../app/parse-env";
+import { ParseEnv } from "./parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   makePackageReference,

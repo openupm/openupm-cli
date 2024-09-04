@@ -1,5 +1,5 @@
 import { Logger } from "npmlog";
-import { ParseEnv } from "../app/parse-env";
+import { ParseEnv } from "./parse-env";
 import { removeDependenciesUsing } from "../app/remove-dependencies";
 import { DomainName } from "../domain/domain-name";
 import { makePackageReference } from "../domain/package-reference";

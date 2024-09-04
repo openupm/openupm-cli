@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { Logger } from "npmlog";
 import path from "path";
 import { CustomError } from "ts-custom-error";
-import { CmdOptions } from "../cli/options";
+import { CmdOptions } from "./options";
 import {
   coerceRegistryUrl,
   openupmRegistryUrl,

@@ -1,6 +1,6 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import { Env, ParseEnv } from "../../../src/app/parse-env";
+import { Env, ParseEnv } from "../../../src/cli/parse-env";
 import {
   CompatibilityCheckFailedError,
   makeAddCmd,

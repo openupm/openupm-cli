@@ -22,7 +22,7 @@ import {
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
 } from "../io/special-paths";
-import { RegistryAuthLoadError } from "../app/parse-env";
+import { RegistryAuthLoadError } from "./parse-env";
 import {
   CompatibilityCheckFailedError,
   PackageIncompatibleError,

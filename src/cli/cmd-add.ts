@@ -1,7 +1,7 @@
 import { Logger } from "npmlog";
 import { CustomError } from "ts-custom-error";
 import { Err } from "ts-results-es";
-import { ParseEnv } from "../app/parse-env";
+import { ParseEnv } from "./parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";

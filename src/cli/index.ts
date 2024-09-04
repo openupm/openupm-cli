@@ -3,7 +3,7 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { makeParseEnv } from "../app/parse-env";
+import { makeParseEnv } from "./parse-env";
 import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
 import { fetchCheckUrlExists } from "../io/check-url";
 import { getAuthTokenUsing } from "../io/get-auth-token";

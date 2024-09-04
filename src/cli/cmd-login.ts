@@ -1,6 +1,6 @@
 import { Logger } from "npmlog";
 import { loginUsing } from "../app/login";
-import { ParseEnv } from "../app/parse-env";
+import { ParseEnv } from "./parse-env";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetAuthToken } from "../io/get-auth-token";

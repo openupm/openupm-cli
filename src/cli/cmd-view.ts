@@ -1,7 +1,7 @@
 import { Logger } from "npmlog";
 import { EOL } from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { ParseEnv } from "../app/parse-env";
+import { ParseEnv } from "./parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   hasVersion,

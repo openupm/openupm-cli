@@ -1,5 +1,5 @@
 import path from "path";
-import { makeParseEnv } from "../../../src/app/parse-env";
+import { makeParseEnv } from "../../../src/cli/parse-env";
 import { openupmRegistryUrl } from "../../../src/domain/registry-url";
 import { makeMockLogger } from "../../common/log.mock";
 import { exampleRegistryUrl } from "../../common/data-registry";
