@@ -6,8 +6,9 @@ import pkg from "../../package.json";
 import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
 import { removePackages as removePackagesUsing } from "../app/remove-packages";
-import { searchPackagesUsing } from "../app/search-packages";
+import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
 import { fetchCheckUrlExists } from "../io/check-url";
+import { searchRegistryUsing } from "../io/npm-search";
 import { getRegistryPackumentUsing } from "../io/packument-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
@@ -55,6 +56,8 @@ const fetchPackument = getRegistryPackumentUsing(
   registryClient,
   debugLogToConsole
 );
+const searchRegistry = searchRegistryUsing(debugLogToConsole);
+const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 
 const addCmd = makeAddCmd(
   parseEnv,
@@ -72,8 +75,9 @@ const loginCmd = makeLoginCmd(
 );
 const searchCmd = makeSearchCmd(
   parseEnv,
-  searchPackagesUsing(debugLogToConsole),
   readTextFile,
+  searchRegistry,
+  fetchAllPackuments,
   log,
   debugLogToConsole
 );

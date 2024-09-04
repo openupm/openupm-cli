@@ -2,11 +2,14 @@ import { Logger } from "npmlog";
 import * as os from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { ParseEnv } from "../app/parse-env";
-import { SearchPackages } from "../app/search-packages";
+import { searchPackagesUsing } from "../app/search-packages";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { GetAllRegistryPackuments } from "../io/all-packuments-io";
+import type { SearchRegistry } from "../io/npm-search";
 import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { ResultCodes } from "./result-codes";
@@ -36,11 +39,19 @@ export type SearchCmd = (
  */
 export function makeSearchCmd(
   parseEnv: ParseEnv,
-  searchPackages: SearchPackages,
   readTextFile: ReadTextFile,
+  searchRegistry: SearchRegistry,
+  fetchAllPackuments: GetAllRegistryPackuments,
   log: Logger,
   debugLog: DebugLog
 ): SearchCmd {
+  const searchPackages = partialApply(
+    searchPackagesUsing,
+    searchRegistry,
+    fetchAllPackuments,
+    debugLog
+  );
+
   return async (keyword, options) => {
     // parse env
     const env = await parseEnv(options);

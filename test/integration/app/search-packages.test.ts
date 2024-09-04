@@ -1,4 +1,4 @@
-import { ApiAndFallbackPackageSearch } from "../../../src/app/search-packages";
+import { searchPackagesUsing } from "../../../src/app/search-packages";
 import { DomainName } from "../../../src/domain/domain-name";
 import { Registry } from "../../../src/domain/registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
@@ -8,6 +8,7 @@ import {
 } from "../../../src/io/all-packuments-io";
 import { SearchedPackument, SearchRegistry } from "../../../src/io/npm-search";
 import { noopLogger } from "../../../src/logging";
+import { partialApply } from "../../../src/utils/fp-utils";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "./func.mock";
 
@@ -39,7 +40,8 @@ describe("search packages", () => {
     const fetchAllPackument = mockFunctionOfType<GetAllRegistryPackuments>();
     fetchAllPackument.mockResolvedValue(exampleAllPackumentsResult);
 
-    const searchPackages = ApiAndFallbackPackageSearch(
+    const searchPackages = partialApply(
+      searchPackagesUsing,
       searchRegistry,
       fetchAllPackument,
       noopLogger

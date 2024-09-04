@@ -1,29 +1,11 @@
 import { Registry } from "../domain/registry";
 import {
   GetAllRegistryPackuments,
-  getAllRegistryPackumentsUsing,
   type AllPackuments,
 } from "../io/all-packuments-io";
-import {
-  SearchedPackument,
-  SearchRegistry,
-  searchRegistryUsing,
-} from "../io/npm-search";
+import { SearchedPackument, SearchRegistry } from "../io/npm-search";
 import { DebugLog } from "../logging";
 import { assertIsError } from "../utils/error-type-guards";
-
-/**
- * A function for searching packages in a registry.
- * @param registry The registry to search.
- * @param keyword A keyword by which to search packages. Usually the name.
- * @param onUseAllFallback Callback that is used to notify clients when the
- * search api is not available and the /-/all endpoint is used instead.
- */
-export type SearchPackages = (
-  registry: Registry,
-  keyword: string,
-  onUseAllFallback?: () => void
-) => Promise<ReadonlyArray<SearchedPackument>>;
 
 function tryFindPackagesByKeyword(
   allPackuments: AllPackuments,
@@ -39,36 +21,33 @@ function tryFindPackagesByKeyword(
 }
 
 /**
- * Makes a {@licence SearchPackages} function which searches a registry both
- * using the search endpoint and, as a fallback, by querying all packages
- * and searching on the client side.
+ * A function for searching packages in a registry.
+ * @param searchRegistry IO function for searching a remote registry.
+ * @param getAllRegistryPackuments IO function for getting all packages from
+ * a remote registry.
+ * @param debugLog IO function for logging debug messages.
+ * @param registry The registry to search.
+ * @param keyword A keyword by which to search packages. Usually the name.
+ * @param onUseAllFallback Callback that is used to notify clients when the
+ * search api is not available and the /-/all endpoint is used instead.
  */
-export function ApiAndFallbackPackageSearch(
+export async function searchPackagesUsing(
   searchRegistry: SearchRegistry,
   getAllRegistryPackuments: GetAllRegistryPackuments,
-  debugLog: DebugLog
-): SearchPackages {
-  return async (registry, keyword, onUseOldSearch) => {
-    try {
-      // search endpoint
-      return await searchRegistry(registry, keyword);
-    } catch (error) {
-      assertIsError(error);
-      debugLog("Searching using search endpoint failed", error);
-      // search old search
-      onUseOldSearch && onUseOldSearch();
-      const allPackuments = await getAllRegistryPackuments(registry);
-      return tryFindPackagesByKeyword(allPackuments, keyword);
-    }
-  };
+  debugLog: DebugLog,
+  registry: Registry,
+  keyword: string,
+  onUseAllFallback?: () => void
+): Promise<ReadonlyArray<SearchedPackument>> {
+  try {
+    // search endpoint
+    return await searchRegistry(registry, keyword);
+  } catch (error) {
+    assertIsError(error);
+    debugLog("Searching using search endpoint failed", error);
+    // search old search
+    onUseAllFallback && onUseAllFallback();
+    const allPackuments = await getAllRegistryPackuments(registry);
+    return tryFindPackagesByKeyword(allPackuments, keyword);
+  }
 }
-
-/**
- * Default {@link SearchPackages} function. Uses {@link ApiAndFallbackPackageSearch}.
- */
-export const searchPackagesUsing = (debugLog: DebugLog) =>
-  ApiAndFallbackPackageSearch(
-    searchRegistryUsing(debugLog),
-    getAllRegistryPackumentsUsing(debugLog),
-    debugLog
-  );
