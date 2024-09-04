@@ -126,6 +126,7 @@ export function makeAddCmd(
       })
       .forEach((message) => log.info("", message));
 
+    log.info("", "please open Unity to apply changes.");
     return ResultCodes.Ok;
   };
 }
