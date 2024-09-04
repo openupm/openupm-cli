@@ -1,6 +1,5 @@
 import { Logger } from "npmlog";
 import { loginUsing } from "../app/login";
-import { ParseEnv } from "./parse-env";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetAuthToken } from "../io/get-auth-token";
@@ -9,6 +8,7 @@ import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import type { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { CmdOptions } from "./options";
+import { parseEnvUsing } from "./parse-env";
 import {
   promptEmail,
   promptPassword,
@@ -60,7 +60,6 @@ export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
  * Makes a {@link LoginCmd} function.
  */
 export function makeLoginCmd(
-  parseEnv: ParseEnv,
   homePath: string,
   getAuthToken: GetAuthToken,
   readTextFile: ReadTextFile,
@@ -79,7 +78,7 @@ export function makeLoginCmd(
 
   return async (options) => {
     // parse env
-    const env = await parseEnv(options);
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
 
     const homePath = getHomePathFromEnv(process.env);
     const upmConfigPath = getUserUpmConfigPathFor(

@@ -1,5 +1,4 @@
 import { Logger } from "npmlog";
-import { ParseEnv } from "./parse-env";
 import { removeDependenciesUsing } from "../app/remove-dependencies";
 import { DomainName } from "../domain/domain-name";
 import { makePackageReference } from "../domain/package-reference";
@@ -8,6 +7,7 @@ import type { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { logError } from "./error-logging";
 import { CmdOptions } from "./options";
+import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -34,7 +34,6 @@ export type RemoveCmd = (
  * Makes a {@link RemoveCmd} function.
  */
 export function makeRemoveCmd(
-  parseEnv: ParseEnv,
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
   debugLog: DebugLog,
@@ -49,7 +48,7 @@ export function makeRemoveCmd(
 
   return async (pkgs, options) => {
     // parse env
-    const env = await parseEnv(options);
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
 
     const removeResult = await removeDependencies(env.cwd, pkgs).promise;
     if (removeResult.isErr()) {

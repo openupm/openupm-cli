@@ -3,7 +3,6 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { makeParseEnv } from "./parse-env";
 import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
 import { fetchCheckUrlExists } from "../io/check-url";
 import { getAuthTokenUsing } from "../io/get-auth-token";
@@ -48,7 +47,6 @@ const debugLogToConsole: DebugLog = function (message, context) {
   return log.verbose("", `${message}${contextMessage}`);
 };
 
-const parseEnv = makeParseEnv(log, process.cwd());
 const homePath = getHomePathFromEnv(process.env);
 const registryClient = makeNpmRegistryClient(log);
 const fetchPackument = getRegistryPackumentUsing(
@@ -59,7 +57,6 @@ const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 
 const addCmd = makeAddCmd(
-  parseEnv,
   fetchCheckUrlExists,
   fetchPackument,
   readTextFile,
@@ -68,7 +65,6 @@ const addCmd = makeAddCmd(
   debugLogToConsole
 );
 const loginCmd = makeLoginCmd(
-  parseEnv,
   homePath,
   getAuthTokenUsing(registryClient, debugLogToConsole),
   readTextFile,
@@ -77,7 +73,6 @@ const loginCmd = makeLoginCmd(
   log
 );
 const searchCmd = makeSearchCmd(
-  parseEnv,
   readTextFile,
   searchRegistry,
   fetchAllPackuments,
@@ -85,7 +80,6 @@ const searchCmd = makeSearchCmd(
   debugLogToConsole
 );
 const depsCmd = makeDepsCmd(
-  parseEnv,
   readTextFile,
   fetchPackument,
   fetchCheckUrlExists,
@@ -93,14 +87,12 @@ const depsCmd = makeDepsCmd(
   debugLogToConsole
 );
 const removeCmd = makeRemoveCmd(
-  parseEnv,
   readTextFile,
   writeTextFile,
   debugLogToConsole,
   log
 );
 const viewCmd = makeViewCmd(
-  parseEnv,
   getRegistryPackumentUsing(registryClient, debugLogToConsole),
   readTextFile,
   debugLogToConsole,

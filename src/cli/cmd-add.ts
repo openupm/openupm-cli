@@ -1,7 +1,6 @@
 import { Logger } from "npmlog";
 import { CustomError } from "ts-custom-error";
 import { Err } from "ts-results-es";
-import { ParseEnv } from "./parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";
@@ -52,6 +51,7 @@ import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
+import { parseEnvUsing } from "./parse-env";
 
 export class PackageIncompatibleError extends CustomError {
   constructor(
@@ -126,7 +126,6 @@ function pickMostFixable(
  * Makes a {@link AddCmd} function.
  */
 export function makeAddCmd(
-  parseEnv: ParseEnv,
   checkUrlExists: CheckUrlExists,
   fetchPackument: GetRegistryPackument,
   readTextFile: ReadTextFile,
@@ -154,7 +153,7 @@ export function makeAddCmd(
     if (!Array.isArray(pkgs)) pkgs = [pkgs];
 
     // parse env
-    const env = await parseEnv(options);
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
 
     const editorVersion = await determineEditorVersionUsing(
       readTextFile,

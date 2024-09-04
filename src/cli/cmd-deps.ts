@@ -4,7 +4,6 @@ import os from "os";
 import { resolveDependenciesUsing } from "../app/dependency-resolving";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { ParseEnv } from "./parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   makePackageReference,
@@ -24,6 +23,7 @@ import { queryAllRegistriesLazy } from "../utils/sources";
 import { isZod } from "../utils/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { CmdOptions } from "./options";
+import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -55,7 +55,6 @@ export type DepsCmd = (
  * Makes a {@link DepsCmd} function.
  */
 export function makeDepsCmd(
-  parseEnv: ParseEnv,
   readTextFile: ReadTextFile,
   fetchPackument: GetRegistryPackument,
   checkUrlExists: CheckUrlExists,
@@ -64,7 +63,7 @@ export function makeDepsCmd(
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
-    const env = await parseEnv(options);
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
 
     const homePath = getHomePathFromEnv(process.env);
     const upmConfigPath = getUserUpmConfigPathFor(

@@ -1,6 +1,5 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import { Env, ParseEnv } from "../../../src/cli/parse-env";
 import {
   CompatibilityCheckFailedError,
   makeAddCmd,
@@ -20,7 +19,6 @@ import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
-import { mockFunctionOfType } from "../app/func.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
 
@@ -58,16 +56,8 @@ describe("cmd-add", () => {
   );
 
   const someProjectDir = "/users/some-user/projects/SomeProject";
-  const defaultEnv = {
-    cwd: someProjectDir,
-    upstream: true,
-    primaryRegistryUrl: exampleRegistryUrl,
-  } as Env;
 
   function makeDependencies() {
-    const parseEnv = mockFunctionOfType<ParseEnv>();
-    parseEnv.mockResolvedValue(defaultEnv);
-
     const fetchPackument = getRegistryPackumentUsing(
       new RegClient(),
       noopLogger
@@ -82,7 +72,6 @@ describe("cmd-add", () => {
       .putHomeUpmConfig({});
 
     const addCmd = makeAddCmd(
-      parseEnv,
       fetchCheckUrlExists,
       fetchPackument,
       mockFs.read,
@@ -92,7 +81,6 @@ describe("cmd-add", () => {
     );
     return {
       addCmd,
-      parseEnv,
       mockFs,
       log,
     } as const;
@@ -117,7 +105,11 @@ describe("cmd-add", () => {
     const { addCmd, mockFs, log } = makeDependencies();
     mockFs.putProjectVersion(someProjectDir, "bad version");
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
@@ -129,7 +121,10 @@ describe("cmd-add", () => {
     const { addCmd } = makeDependencies();
 
     const resultCode = await addCmd(badEditorPackument.name, {
+      chdir: someProjectDir,
       force: true,
+      registry: exampleRegistryUrl,
+      upstream: true,
     });
 
     expect(resultCode).toEqual(ResultCodes.Ok);
@@ -139,7 +134,10 @@ describe("cmd-add", () => {
     const { addCmd } = makeDependencies();
 
     const resultCode = await addCmd(incompatiblePackument.name, {
+      chdir: someProjectDir,
       force: true,
+      registry: exampleRegistryUrl,
+      upstream: true,
     });
 
     expect(resultCode).toEqual(ResultCodes.Ok);
@@ -148,24 +146,36 @@ describe("cmd-add", () => {
   it("should fail when adding package with incompatible with editor and not running with force", async () => {
     const { addCmd } = makeDependencies();
 
-    await expect(addCmd(incompatiblePackument.name, {})).rejects.toBeInstanceOf(
-      PackageIncompatibleError
-    );
+    await expect(
+      addCmd(incompatiblePackument.name, {
+        chdir: someProjectDir,
+        registry: exampleRegistryUrl,
+        upstream: true,
+      })
+    ).rejects.toBeInstanceOf(PackageIncompatibleError);
   });
 
   it("should fail if package could not be resolved", async () => {
     const { addCmd } = makeDependencies();
 
-    await expect(() => addCmd(unknownPackage, {})).rejects.toBeInstanceOf(
-      PackumentNotFoundError
-    );
+    await expect(() =>
+      addCmd(unknownPackage, {
+        chdir: someProjectDir,
+        registry: exampleRegistryUrl,
+        upstream: true,
+      })
+    ).rejects.toBeInstanceOf(PackumentNotFoundError);
   });
 
   it("should fail if packument had malformed target editor and not running with force", async () => {
     const { addCmd } = makeDependencies();
 
     await expect(() =>
-      addCmd(badEditorPackument.name, {})
+      addCmd(badEditorPackument.name, {
+        chdir: someProjectDir,
+        registry: exampleRegistryUrl,
+        upstream: true,
+      })
     ).rejects.toBeInstanceOf(CompatibilityCheckFailedError);
   });
 
@@ -173,7 +183,11 @@ describe("cmd-add", () => {
     const { addCmd } = makeDependencies();
 
     await expect(() =>
-      addCmd(packumentWithBadDependency.name, {})
+      addCmd(packumentWithBadDependency.name, {
+        chdir: someProjectDir,
+        registry: exampleRegistryUrl,
+        upstream: true,
+      })
     ).rejects.toBeInstanceOf(UnresolvedDependenciesError);
   });
 
@@ -181,6 +195,9 @@ describe("cmd-add", () => {
     const { addCmd } = makeDependencies();
 
     const resultCode = await addCmd(packumentWithBadDependency.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
       force: true,
     });
 
@@ -190,7 +207,11 @@ describe("cmd-add", () => {
   it("should add package", async () => {
     const { addCmd, mockFs } = makeDependencies();
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
@@ -203,7 +224,11 @@ describe("cmd-add", () => {
   it("should notify if package was added", async () => {
     const { addCmd, log } = makeDependencies();
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -220,7 +245,11 @@ describe("cmd-add", () => {
       ),
     });
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
@@ -239,7 +268,11 @@ describe("cmd-add", () => {
       ),
     });
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -256,7 +289,11 @@ describe("cmd-add", () => {
       ),
     });
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -267,7 +304,11 @@ describe("cmd-add", () => {
   it("should add scope for package", async () => {
     const { addCmd, mockFs } = makeDependencies();
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
@@ -287,7 +328,10 @@ describe("cmd-add", () => {
     const { addCmd, mockFs } = makeDependencies();
 
     await addCmd(somePackument.name, {
+      chdir: someProjectDir,
       test: true,
+      registry: exampleRegistryUrl,
+      upstream: true,
     });
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
@@ -310,7 +354,11 @@ describe("cmd-add", () => {
       manifest: initial,
     });
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(initial);
@@ -335,7 +383,11 @@ describe("cmd-add", () => {
   it("should suggest to open Unity after save", async () => {
     const { addCmd, log } = makeDependencies();
 
-    await addCmd(somePackument.name, {});
+    await addCmd(somePackument.name, {
+      chdir: someProjectDir,
+      registry: exampleRegistryUrl,
+      upstream: true,
+    });
 
     expect(log.notice).toHaveBeenCalledWith(
       "",
