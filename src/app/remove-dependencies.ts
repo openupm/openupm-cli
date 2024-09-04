@@ -9,12 +9,7 @@ import {
   loadProjectManifestUsing,
   saveProjectManifestUsing,
 } from "../io/project-manifest-io";
-import {
-  readTextFile,
-  writeTextFile,
-  type ReadTextFile,
-  type WriteTextFile,
-} from "../io/text-file-io";
+import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { resultifyAsyncOp } from "../utils/result-utils";
@@ -39,22 +34,21 @@ export type RemovedPackage = {
 export type RemovePackagesError = PackumentNotFoundError;
 
 /**
- * Service function for removing packages from a project.
+ * Removes dependencies from a project.
+ * @param readTextFile IO function for reading text files.
+ * @param writeTextFile IO function for writing text files.
+ * @param debugLog IO function for printing debug logs.
+ * @param projectPath The path of the projects root directory.
+ * @param packageNames The names of the dependencies to remove.
+ * @returns A list of the removed dependencies or an error.
  */
-export type RemovePackages = (
-  projectPath: string,
-  packageNames: ReadonlyArray<DomainName>
-) => AsyncResult<ReadonlyArray<RemovedPackage>, RemovePackagesError>;
-
-/**
- * Makes a {@link RemovePackages} which atomically removes a batch of
- * packages from a project manifest.
- */
-export function RemovePackagesFromManifest(
+export function removeDependenciesUsing(
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
-  debugLog: DebugLog
-): RemovePackages {
+  debugLog: DebugLog,
+  projectPath: string,
+  packageNames: ReadonlyArray<DomainName>
+): AsyncResult<ReadonlyArray<RemovedPackage>, RemovePackagesError> {
   const loadProjectManifest = partialApply(
     loadProjectManifestUsing,
     readTextFile,
@@ -66,27 +60,19 @@ export function RemovePackagesFromManifest(
     writeTextFile
   );
 
-  return (projectPath, packageNames) => {
-    // load manifest
-    const initialManifest = resultifyAsyncOp<
-      UnityProjectManifest,
-      RemovePackagesError
-    >(loadProjectManifest(projectPath));
+  // load manifest
+  const initialManifest = resultifyAsyncOp<
+    UnityProjectManifest,
+    RemovePackagesError
+  >(loadProjectManifest(projectPath));
 
-    // remove
-    const removeResult = initialManifest.andThen((it) =>
-      tryRemoveProjectDependencies(it, packageNames)
-    );
+  // remove
+  const removeResult = initialManifest.andThen((it) =>
+    tryRemoveProjectDependencies(it, packageNames)
+  );
 
-    return removeResult.map(async ([updatedManifest, removedPackages]) => {
-      await saveProjectManifest(projectPath, updatedManifest);
-      return removedPackages;
-    });
-  };
+  return removeResult.map(async ([updatedManifest, removedPackages]) => {
+    await saveProjectManifest(projectPath, updatedManifest);
+    return removedPackages;
+  });
 }
-
-/**
- * Default {@link RemovePackages} function. Uses {@link RemovePackagesFromManifest}.
- */
-export const removePackages = (debugLog: DebugLog) =>
-  RemovePackagesFromManifest(readTextFile, writeTextFile, debugLog);

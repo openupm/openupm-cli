@@ -1,11 +1,14 @@
-import { ParseEnv } from "../app/parse-env";
-import { makePackageReference } from "../domain/package-reference";
-import { CmdOptions } from "./options";
 import { Logger } from "npmlog";
-import { ResultCodes } from "./result-codes";
+import { ParseEnv } from "../app/parse-env";
+import { removeDependenciesUsing } from "../app/remove-dependencies";
 import { DomainName } from "../domain/domain-name";
-import { RemovePackages } from "../app/remove-packages";
+import { makePackageReference } from "../domain/package-reference";
+import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import type { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 import { logError } from "./error-logging";
+import { CmdOptions } from "./options";
+import { ResultCodes } from "./result-codes";
 
 /**
  * The possible result codes with which the remove command can exit.
@@ -32,14 +35,23 @@ export type RemoveCmd = (
  */
 export function makeRemoveCmd(
   parseEnv: ParseEnv,
-  removePackages: RemovePackages,
+  readTextFile: ReadTextFile,
+  writeTextFile: WriteTextFile,
+  debugLog: DebugLog,
   log: Logger
 ): RemoveCmd {
+  const removeDependencies = partialApply(
+    removeDependenciesUsing,
+    readTextFile,
+    writeTextFile,
+    debugLog
+  );
+
   return async (pkgs, options) => {
     // parse env
     const env = await parseEnv(options);
 
-    const removeResult = await removePackages(env.cwd, pkgs).promise;
+    const removeResult = await removeDependencies(env.cwd, pkgs).promise;
     if (removeResult.isErr()) {
       logError(log, removeResult.error);
       return ResultCodes.Error;

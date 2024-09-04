@@ -5,7 +5,6 @@ import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
-import { removePackages as removePackagesUsing } from "../app/remove-packages";
 import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
 import { fetchCheckUrlExists } from "../io/check-url";
 import { searchRegistryUsing } from "../io/npm-search";
@@ -91,7 +90,9 @@ const depsCmd = makeDepsCmd(
 );
 const removeCmd = makeRemoveCmd(
   parseEnv,
-  removePackagesUsing(debugLogToConsole),
+  readTextFile,
+  writeTextFile,
+  debugLogToConsole,
   log
 );
 const viewCmd = makeViewCmd(
