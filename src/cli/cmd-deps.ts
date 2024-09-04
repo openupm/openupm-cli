@@ -1,6 +1,10 @@
 import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
+import { ResolveDependencies } from "../app/dependency-resolving";
+import { GetLatestVersion } from "../app/get-latest-version";
+import { GetRegistryAuth } from "../app/get-registry-auth";
+import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   makePackageReference,
@@ -10,11 +14,9 @@ import {
 import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import { getHomePathFromEnv } from "../io/special-paths";
 import { DebugLog } from "../logging";
-import { ResolveDependencies } from "../app/dependency-resolving";
-import { GetLatestVersion } from "../app/get-latest-version";
-import { GetRegistryAuth } from "../app/get-registry-auth";
-import { ParseEnv } from "../app/parse-env";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { isZod } from "../utils/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
@@ -60,8 +62,15 @@ export function makeDepsCmd(
   return async (pkg, options) => {
     // parse env
     const env = await parseEnv(options);
+
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
     const primaryRegistry = await getRegistryAuth(
-      env.systemUser,
+      upmConfigPath,
       env.primaryRegistryUrl
     );
     const sources = [primaryRegistry, unityRegistry];

@@ -1,8 +1,9 @@
 import { Logger } from "npmlog";
-import { coerceRegistryUrl } from "../domain/registry-url";
-import { GetUpmConfigPath } from "../io/upm-config-io";
 import { Login } from "../app/login";
 import { ParseEnv } from "../app/parse-env";
+import { coerceRegistryUrl } from "../domain/registry-url";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import { getHomePathFromEnv } from "../io/special-paths";
 import { CmdOptions } from "./options";
 import {
   promptEmail,
@@ -56,13 +57,19 @@ export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
  */
 export function makeLoginCmd(
   parseEnv: ParseEnv,
-  getUpmConfigPath: GetUpmConfigPath,
   login: Login,
   log: Logger
 ): LoginCmd {
   return async (options) => {
     // parse env
     const env = await parseEnv(options);
+
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
 
     // query parameters
     const username = options.username ?? (await promptUsername());
@@ -76,20 +83,18 @@ export function makeLoginCmd(
 
     const alwaysAuth = options.alwaysAuth || false;
 
-    const configPath = getUpmConfigPath(env.systemUser);
-
     await login(
       username,
       password,
       email,
       alwaysAuth,
       loginRegistry,
-      configPath,
+      upmConfigPath,
       options.basicAuth ? "basic" : "token"
     );
 
     log.notice("auth", `you are authenticated as '${username}'`);
-    log.notice("config", "saved unity config at " + configPath);
+    log.notice("config", "saved unity config at " + upmConfigPath);
     return ResultCodes.Ok;
   };
 }

@@ -7,8 +7,6 @@ import {
   unityRegistryUrl,
 } from "../domain/registry-url";
 import {
-  getUpmConfigPath,
-  GetUpmConfigPath,
   loadUpmConfig,
   LoadUpmConfig,
   UpmAuth,
@@ -20,11 +18,11 @@ import { removeExplicitUndefined } from "../utils/zod-utils";
 
 /**
  * Service function for getting registry authentication.
- * @param systemUser Whether to authenticate as a Windows system-user.
+ * @param configPath The path of the upm-config file.
  * @param url The url for which to get authentication.
  */
 export type GetRegistryAuth = (
-  systemUser: boolean,
+  configPath: string,
   url: RegistryUrl
 ) => Promise<Registry>;
 
@@ -71,18 +69,16 @@ export function importNpmAuth(auth: UpmAuth): NpmAuth {
  * the users upm config.
  */
 export function LoadRegistryAuthFromUpmConfig(
-  getUpmConfigPath: GetUpmConfigPath,
   loadUpmConfig: LoadUpmConfig,
   debugLog: DebugLog
 ): GetRegistryAuth {
   let cachedConfig: UpmConfigContent | null = null;
 
-  return async (systemUser, url) => {
+  return async (configPath, url) => {
     if (isNonAuthUrl(url)) return { url, auth: null };
 
     // Only load config if we have dont have it in the cache
     if (cachedConfig === null) {
-      const configPath = getUpmConfigPath(systemUser);
       cachedConfig = await loadUpmConfig(configPath);
       if (cachedConfig === null) {
         debugLog(
@@ -109,9 +105,5 @@ export function LoadRegistryAuthFromUpmConfig(
 /**
  * Default {@link GetRegistryAuth} function. Uses {@link LoadRegistryAuthFromUpmConfig}.
  */
-export const getRegistryAuthUsing = (homePath: string, debugLog: DebugLog) =>
-  LoadRegistryAuthFromUpmConfig(
-    getUpmConfigPath(homePath),
-    loadUpmConfig,
-    debugLog
-  );
+export const getRegistryAuthUsing = (debugLog: DebugLog) =>
+  LoadRegistryAuthFromUpmConfig(loadUpmConfig, debugLog);

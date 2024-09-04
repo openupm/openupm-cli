@@ -8,7 +8,7 @@ import {
   openupmRegistryUrl,
   unityRegistryUrl,
 } from "../../../src/domain/registry-url";
-import { GetUpmConfigPath, LoadUpmConfig } from "../../../src/io/upm-config-io";
+import { LoadUpmConfig } from "../../../src/io/upm-config-io";
 import { noopLogger } from "../../../src/logging";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "./func.mock";
@@ -75,15 +75,13 @@ describe("get registry auth from upm config", () => {
   });
 
   describe("service", () => {
-    function makeDependencies() {
-      const getUpmConfigPath = mockFunctionOfType<GetUpmConfigPath>();
-      getUpmConfigPath.mockReturnValue("/home/user/.upmconfig.toml");
+    const someUpmConfigPath = "/home/user/.upmconfig.toml";
 
+    function makeDependencies() {
       const loadUpmConfig = mockFunctionOfType<LoadUpmConfig>();
       loadUpmConfig.mockResolvedValue({});
 
       const getRegistryAuth = LoadRegistryAuthFromUpmConfig(
-        getUpmConfigPath,
         loadUpmConfig,
         noopLogger
       );
@@ -94,7 +92,10 @@ describe("get registry auth from upm config", () => {
       const { getRegistryAuth, loadUpmConfig } = makeDependencies();
       loadUpmConfig.mockResolvedValue(null);
 
-      const registry = await getRegistryAuth(false, exampleRegistryUrl);
+      const registry = await getRegistryAuth(
+        someUpmConfigPath,
+        exampleRegistryUrl
+      );
 
       expect(registry.auth).toBeNull();
     });
@@ -103,7 +104,10 @@ describe("get registry auth from upm config", () => {
       const { getRegistryAuth, loadUpmConfig } = makeDependencies();
       loadUpmConfig.mockResolvedValue({});
 
-      const registry = await getRegistryAuth(false, exampleRegistryUrl);
+      const registry = await getRegistryAuth(
+        someUpmConfigPath,
+        exampleRegistryUrl
+      );
 
       expect(registry.auth).toBeNull();
     });
@@ -114,7 +118,10 @@ describe("get registry auth from upm config", () => {
         npmAuth: { [exampleRegistryUrl + "/"]: { token: someToken } },
       });
 
-      const registry = await getRegistryAuth(false, exampleRegistryUrl);
+      const registry = await getRegistryAuth(
+        someUpmConfigPath,
+        exampleRegistryUrl
+      );
 
       expect(registry.auth).toEqual({
         token: someToken,
@@ -124,7 +131,7 @@ describe("get registry auth from upm config", () => {
     it("should not load upmconfig for openupm registry url", async () => {
       const { getRegistryAuth, loadUpmConfig } = makeDependencies();
 
-      await getRegistryAuth(false, openupmRegistryUrl);
+      await getRegistryAuth(someUpmConfigPath, openupmRegistryUrl);
 
       expect(loadUpmConfig).not.toHaveBeenCalled();
     });
@@ -132,7 +139,7 @@ describe("get registry auth from upm config", () => {
     it("should not load upmconfig for unity registry url", async () => {
       const { getRegistryAuth, loadUpmConfig } = makeDependencies();
 
-      await getRegistryAuth(false, unityRegistryUrl);
+      await getRegistryAuth(someUpmConfigPath, unityRegistryUrl);
 
       expect(loadUpmConfig).not.toHaveBeenCalled();
     });
@@ -140,8 +147,8 @@ describe("get registry auth from upm config", () => {
     it("should cache .upmconfig.toml content", async () => {
       const { getRegistryAuth, loadUpmConfig } = makeDependencies();
 
-      await getRegistryAuth(false, exampleRegistryUrl);
-      await getRegistryAuth(false, exampleRegistryUrl);
+      await getRegistryAuth(someUpmConfigPath, exampleRegistryUrl);
+      await getRegistryAuth(someUpmConfigPath, exampleRegistryUrl);
 
       expect(loadUpmConfig).toHaveBeenCalledTimes(1);
     });

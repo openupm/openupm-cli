@@ -1,5 +1,7 @@
 import { Logger } from "npmlog";
 import { EOL } from "os";
+import { GetRegistryAuth } from "../app/get-registry-auth";
+import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   hasVersion,
@@ -7,9 +9,9 @@ import {
   splitPackageReference,
 } from "../domain/package-reference";
 import { unityRegistry } from "../domain/registry";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import { GetRegistryPackument } from "../io/packument-io";
-import { GetRegistryAuth } from "../app/get-registry-auth";
-import { ParseEnv } from "../app/parse-env";
+import { getHomePathFromEnv } from "../io/special-paths";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { CmdOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
@@ -47,8 +49,15 @@ export function makeViewCmd(
   return async (pkg, options) => {
     // parse env
     const env = await parseEnv(options);
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
+
     const primaryRegistry = await getRegistryAuth(
-      env.systemUser,
+      upmConfigPath,
       env.primaryRegistryUrl
     );
 

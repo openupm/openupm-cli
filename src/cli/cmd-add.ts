@@ -45,6 +45,8 @@ import { GetRegistryAuth } from "../app/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
@@ -156,9 +158,15 @@ export function makeAddCmd(
         "editor.version",
         `${editorVersion} is unknown, the editor version check is disabled`
       );
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
 
     const primaryRegistry = await getRegistryAuth(
-      env.systemUser,
+      upmConfigPath,
       env.primaryRegistryUrl
     );
 

@@ -16,7 +16,6 @@ import { getRegistryPackumentUsing } from "../io/packument-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
 import { readTextFile, writeTextFile } from "../io/text-file-io";
-import { getUpmConfigPath as getUpmConfigPathUsing } from "../io/upm-config-io";
 import { DebugLog } from "../logging";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
@@ -65,20 +64,19 @@ const addCmd = makeAddCmd(
   readTextFile,
   writeTextFile,
   determineEditorVersionUsing(debugLogToConsole),
-  getRegistryAuthUsing(homePath, debugLogToConsole),
+  getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole
 );
 const loginCmd = makeLoginCmd(
   parseEnv,
-  getUpmConfigPathUsing(homePath),
   loginUsing(homePath, registryClient, debugLogToConsole),
   log
 );
 const searchCmd = makeSearchCmd(
   parseEnv,
   searchPackagesUsing(debugLogToConsole),
-  getRegistryAuthUsing(homePath, debugLogToConsole),
+  getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole
 );
@@ -86,7 +84,7 @@ const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependenciesUsing(registryClient, debugLogToConsole),
   getLatestVersionUsing(registryClient, debugLogToConsole),
-  getRegistryAuthUsing(homePath, debugLogToConsole),
+  getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole
 );
@@ -98,7 +96,7 @@ const removeCmd = makeRemoveCmd(
 const viewCmd = makeViewCmd(
   parseEnv,
   getRegistryPackumentUsing(registryClient, debugLogToConsole),
-  getRegistryAuthUsing(homePath, debugLogToConsole),
+  getRegistryAuthUsing(debugLogToConsole),
   log
 );
 

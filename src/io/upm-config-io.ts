@@ -1,7 +1,6 @@
 import TOML from "@iarna/toml";
 import { z } from "zod";
 import { Base64 } from "../domain/base64";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
@@ -12,31 +11,6 @@ import {
   writeTextFile,
   WriteTextFile,
 } from "./text-file-io";
-
-/**
- * Function which gets the path to the upmconfig file.
- * @param systemUser Whether to authenticate as a Windows system-user.
- * @returns The file path.
- */
-export type GetUpmConfigPath = (systemUser: boolean) => string;
-
-/**
- * Makes a {@link GetUpmConfigPath} function which resolves to the default
- * location of the `.upmconfig.toml` file.
- * @see https://docs.unity3d.com/Manual/upm-config.html#upmconfig
- */
-export function ResolveDefaultUpmConfigPath(
-  homePath: string
-): GetUpmConfigPath {
-  return (systemUser) =>
-    getUserUpmConfigPathFor(process.env, homePath, systemUser);
-}
-
-/**
- * Default {@link GetUpmConfigPath} function. Uses {@link ResolveDefaultUpmConfigPath}.
- */
-export const getUpmConfigPath = (homePath: string): GetUpmConfigPath =>
-  ResolveDefaultUpmConfigPath(homePath);
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),
