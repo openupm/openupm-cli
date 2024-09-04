@@ -128,7 +128,7 @@ export function makeAddCmd(
         log.notice("", message);
       });
 
-    log.notice("", "please open Unity to apply changes.");
+    log.notice("", "please open Unity project to apply changes.");
     return ResultCodes.Ok;
   };
 }
