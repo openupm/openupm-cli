@@ -1,11 +1,15 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { encodeBase64 } from "../domain/base64";
 import { RegistryUrl } from "../domain/registry-url";
-import { readTextFile, type ReadTextFile } from "../io/text-file-io";
+import {
+  readTextFile,
+  writeTextFile,
+  type ReadTextFile,
+  type WriteTextFile,
+} from "../io/text-file-io";
 import {
   loadUpmConfigUsing,
-  saveUpmConfig,
-  SaveUpmConfig,
+  saveUpmConfigFileUsing,
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
@@ -77,9 +81,10 @@ export function putRegistryAuthIntoUpmConfig(
  */
 export function PutRegistryAuthIntoUpmConfig(
   readTextFile: ReadTextFile,
-  saveUpmConfig: SaveUpmConfig
+  writeTextFile: WriteTextFile
 ): PutRegistryAuth {
   const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
+  const saveUpmConfig = partialApply(saveUpmConfigFileUsing, writeTextFile);
 
   return async (configPath, registry, auth) => {
     const currentContent = await loadUpmConfig(configPath);
@@ -90,7 +95,7 @@ export function PutRegistryAuthIntoUpmConfig(
       auth
     );
 
-    await saveUpmConfig(newContent, configPath);
+    await saveUpmConfig(configPath, newContent);
   };
 }
 
@@ -99,5 +104,5 @@ export function PutRegistryAuthIntoUpmConfig(
  */
 export const putRegistryAuthIntoUserUpmConfig = PutRegistryAuthIntoUpmConfig(
   readTextFile,
-  saveUpmConfig
+  writeTextFile
 );

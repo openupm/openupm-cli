@@ -5,7 +5,7 @@ import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
 } from "../utils/zod-utils";
-import { ReadTextFile, writeTextFile, WriteTextFile } from "./text-file-io";
+import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 const authBaseSchema = z.object({
   alwaysAuth: z.optional(z.boolean()),
@@ -69,27 +69,16 @@ export async function loadUpmConfigUsing(
 }
 
 /**
- * Save the upm config.
+ * Save the upm config by overwriting the `.upmconfig.toml` file.
+ * @param writeFile IO function for overwriting the file.
+ * @param filePath The path of the file that should be saved to.
  * @param config The config to save.
- * @param configFilePath The path of the file that should be saved to.
  */
-export type SaveUpmConfig = (
-  config: UpmConfigContent,
-  configFilePath: string
-) => Promise<void>;
-
-/**
- * Creates a {@link SaveUpmConfig} function which overwrites the content
- * of a `.upmconfig.toml` file.
- */
-export function WriteUpmConfigFile(writeFile: WriteTextFile): SaveUpmConfig {
-  return (config, configFilePath) => {
-    const content = TOML.stringify(config);
-    return writeFile(configFilePath, content);
-  };
+export function saveUpmConfigFileUsing(
+  writeFile: WriteTextFile,
+  filePath: string,
+  config: UpmConfigContent
+): Promise<void> {
+  const content = TOML.stringify(config);
+  return writeFile(filePath, content);
 }
-
-/**
- * Default {@link SaveUpmConfig} function. Uses {@link WriteUpmConfigFile}.
- */
-export const saveUpmConfig: SaveUpmConfig = WriteUpmConfigFile(writeTextFile);
