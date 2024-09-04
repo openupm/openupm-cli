@@ -1,9 +1,13 @@
 import { Logger } from "npmlog";
-import { Login } from "../app/login";
+import { loginUsing } from "../app/login";
 import { ParseEnv } from "../app/parse-env";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { GetAuthToken } from "../io/get-auth-token";
 import { getHomePathFromEnv } from "../io/special-paths";
+import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import type { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
 import { CmdOptions } from "./options";
 import {
   promptEmail,
@@ -57,9 +61,22 @@ export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
  */
 export function makeLoginCmd(
   parseEnv: ParseEnv,
-  login: Login,
+  homePath: string,
+  getAuthToken: GetAuthToken,
+  readTextFile: ReadTextFile,
+  writeTextFile: WriteTextFile,
+  debugLog: DebugLog,
   log: Logger
 ): LoginCmd {
+  const login = partialApply(
+    loginUsing,
+    homePath,
+    getAuthToken,
+    readTextFile,
+    writeTextFile,
+    debugLog
+  );
+
   return async (options) => {
     // parse env
     const env = await parseEnv(options);

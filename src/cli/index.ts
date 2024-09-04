@@ -3,10 +3,10 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
 import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
 import { fetchCheckUrlExists } from "../io/check-url";
+import { getAuthTokenUsing } from "../io/get-auth-token";
 import { searchRegistryUsing } from "../io/npm-search";
 import { getRegistryPackumentUsing } from "../io/packument-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
@@ -69,7 +69,11 @@ const addCmd = makeAddCmd(
 );
 const loginCmd = makeLoginCmd(
   parseEnv,
-  loginUsing(homePath, registryClient, debugLogToConsole),
+  homePath,
+  getAuthTokenUsing(registryClient, debugLogToConsole),
+  readTextFile,
+  writeTextFile,
+  debugLogToConsole,
   log
 );
 const searchCmd = makeSearchCmd(
