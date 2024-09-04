@@ -1,12 +1,7 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { encodeBase64 } from "../domain/base64";
 import { RegistryUrl } from "../domain/registry-url";
-import {
-  readTextFile,
-  writeTextFile,
-  type ReadTextFile,
-  type WriteTextFile,
-} from "../io/text-file-io";
+import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
 import {
   loadUpmConfigUsing,
   saveUpmConfigFileUsing,
@@ -15,19 +10,6 @@ import {
 } from "../io/upm-config-io";
 import { partialApply } from "../utils/fp-utils";
 import { removeExplicitUndefined } from "../utils/zod-utils";
-
-/**
- * Service function for storing registry authentication. Internally this
- * will write it to the upmconfig.toml file.
- * @param configPath Path to the upmconfig file.
- * @param registry Url of the registry for which to authenticate.
- * @param auth Authentication information.
- */
-export type PutRegistryAuth = (
-  configPath: string,
-  registry: RegistryUrl,
-  auth: NpmAuth
-) => Promise<void>;
 
 function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
   const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;
@@ -76,33 +58,30 @@ export function putRegistryAuthIntoUpmConfig(
 }
 
 /**
- * Makes a {@link PutRegistryAuth} function which puts registry authentication
- * info into the users upm config.
+ * Stores registry authentication.
+ * @param readTextFile IO function for reading text files.
+ * @param writeTextFile IO function for writing text files.
+ * @param configPath Path to the upmconfig file.
+ * @param registry Url of the registry for which to authenticate.
+ * @param auth Authentication information.
  */
-export function PutRegistryAuthIntoUpmConfig(
+export async function putRegistryAuthUsing(
   readTextFile: ReadTextFile,
-  writeTextFile: WriteTextFile
-): PutRegistryAuth {
+  writeTextFile: WriteTextFile,
+  configPath: string,
+  registry: RegistryUrl,
+  auth: NpmAuth
+): Promise<void> {
   const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
   const saveUpmConfig = partialApply(saveUpmConfigFileUsing, writeTextFile);
 
-  return async (configPath, registry, auth) => {
-    const currentContent = await loadUpmConfig(configPath);
+  const currentContent = await loadUpmConfig(configPath);
 
-    const newContent: UpmConfigContent = putRegistryAuthIntoUpmConfig(
-      currentContent,
-      registry,
-      auth
-    );
+  const newContent: UpmConfigContent = putRegistryAuthIntoUpmConfig(
+    currentContent,
+    registry,
+    auth
+  );
 
-    await saveUpmConfig(configPath, newContent);
-  };
+  await saveUpmConfig(configPath, newContent);
 }
-
-/**
- * Default {@link PutRegistryAuth} function. Uses {@link PutRegistryAuthIntoUpmConfig}.
- */
-export const putRegistryAuthIntoUserUpmConfig = PutRegistryAuthIntoUpmConfig(
-  readTextFile,
-  writeTextFile
-);

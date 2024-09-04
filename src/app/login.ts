@@ -1,12 +1,16 @@
 import RegClient, { NpmAuth } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
 import { GetAuthToken, getAuthTokenUsing } from "../io/get-auth-token";
-import { DebugLog } from "../logging";
-import { putNpmAuthToken, StoreNpmAuthToken } from "./put-npm-auth-token";
 import {
-  PutRegistryAuth,
-  putRegistryAuthIntoUserUpmConfig,
-} from "./put-registry-auth";
+  readTextFile,
+  writeTextFile,
+  type ReadTextFile,
+  type WriteTextFile,
+} from "../io/text-file-io";
+import { DebugLog } from "../logging";
+import { partialApply } from "../utils/fp-utils";
+import { putNpmAuthToken, StoreNpmAuthToken } from "./put-npm-auth-token";
+import { putRegistryAuthUsing } from "./put-registry-auth";
 
 /**
  * Function for logging in a user to a package registry. Supports both basic and
@@ -35,11 +39,18 @@ export type Login = (
  * into the users upm config.
  */
 export function UpmConfigLogin(
-  putRegistryAuth: PutRegistryAuth,
   getAuthToken: GetAuthToken,
+  readTextFile: ReadTextFile,
+  writeTextFile: WriteTextFile,
   putNpmAuthToken: StoreNpmAuthToken,
   debugLog: DebugLog
 ): Login {
+  const putRegistryAuth = partialApply(
+    putRegistryAuthUsing,
+    readTextFile,
+    writeTextFile
+  );
+
   return async (
     username,
     password,
@@ -75,8 +86,9 @@ export const login = (
   debugLog: DebugLog
 ) =>
   UpmConfigLogin(
-    putRegistryAuthIntoUserUpmConfig,
     getAuthTokenUsing(registryClient, debugLog),
+    readTextFile,
+    writeTextFile,
     putNpmAuthToken(homePath),
     debugLog
   );
