@@ -1,8 +1,5 @@
-import {
-  isRelease,
-  ReleaseVersion,
-  tryParseEditorVersion,
-} from "../domain/editor-version";
+import { ReleaseVersion } from "../domain/editor-version";
+import { validateProjectVersion } from "../domain/project-version";
 import {
   GetProjectVersion,
   getProjectVersionUsing,
@@ -28,10 +25,7 @@ export function DetermineEditorVersionFromFile(
 ): DetermineEditorVersion {
   return async (projectPath) => {
     const unparsedEditorVersion = await getProjectVersion(projectPath);
-    const parsedEditorVersion = tryParseEditorVersion(unparsedEditorVersion);
-    return parsedEditorVersion !== null && isRelease(parsedEditorVersion)
-      ? parsedEditorVersion
-      : unparsedEditorVersion;
+    return validateProjectVersion(unparsedEditorVersion);
   };
 }
 
