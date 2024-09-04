@@ -3,12 +3,12 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { resolveDependencies as resolveDependenciesUsing } from "../app/dependency-resolving";
 import { getRegistryPackumentVersionUsing } from "../app/get-registry-packument-version";
 import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
 import { removePackages as removePackagesUsing } from "../app/remove-packages";
 import { searchPackagesUsing } from "../app/search-packages";
+import { fetchCheckUrlExists } from "../io/check-url";
 import { getRegistryPackumentUsing } from "../io/packument-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
@@ -59,8 +59,9 @@ const fetchPackument = getRegistryPackumentUsing(
 
 const addCmd = makeAddCmd(
   parseEnv,
+  fetchCheckUrlExists,
+  fetchPackument,
   getRegistryPackumentVersionUsing(registryClient, debugLogToConsole),
-  resolveDependenciesUsing(registryClient, debugLogToConsole),
   readTextFile,
   writeTextFile,
   log,
@@ -80,9 +81,9 @@ const searchCmd = makeSearchCmd(
 );
 const depsCmd = makeDepsCmd(
   parseEnv,
-  resolveDependenciesUsing(registryClient, debugLogToConsole),
   readTextFile,
   fetchPackument,
+  fetchCheckUrlExists,
   log,
   debugLogToConsole
 );

@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
-import { ResolveDependencies } from "../app/dependency-resolving";
+import { resolveDependenciesUsing } from "../app/dependency-resolving";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { ParseEnv } from "../app/parse-env";
@@ -15,6 +15,7 @@ import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { CheckUrlExists } from "../io/check-url";
 import type { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile } from "../io/text-file-io";
@@ -55,9 +56,9 @@ export type DepsCmd = (
  */
 export function makeDepsCmd(
   parseEnv: ParseEnv,
-  resolveDependencies: ResolveDependencies,
   readTextFile: ReadTextFile,
   fetchPackument: GetRegistryPackument,
+  checkUrlExists: CheckUrlExists,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {
@@ -105,7 +106,9 @@ export function makeDepsCmd(
     debugLog(
       `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
     );
-    const dependencyGraph = await resolveDependencies(
+    const dependencyGraph = await resolveDependenciesUsing(
+      checkUrlExists,
+      fetchPackument,
       sources,
       packageName,
       latestVersion,

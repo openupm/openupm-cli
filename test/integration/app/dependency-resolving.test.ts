@@ -1,6 +1,6 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import { ResolveDependenciesFromRegistries } from "../../../src/app/dependency-resolving";
+import { resolveDependenciesUsing } from "../../../src/app/dependency-resolving";
 import { PackumentNotFoundError } from "../../../src/common-errors";
 import {
   NodeType,
@@ -14,6 +14,7 @@ import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { fetchCheckUrlExists } from "../../../src/io/check-url";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
 import { noopLogger } from "../../../src/logging";
+import { partialApply } from "../../../src/utils/fp-utils";
 import { buildPackument } from "../../common/data-packument";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockUnityDocPages } from "../docs.mock";
@@ -32,7 +33,8 @@ describe("dependency resolving", () => {
   const otherVersion = SemanticVersion.parse("2.0.0");
 
   const registryClient = new RegClient();
-  const resolveDependencies = ResolveDependenciesFromRegistries(
+  const resolveDependencies = partialApply(
+    resolveDependenciesUsing,
     fetchCheckUrlExists,
     getRegistryPackumentUsing(registryClient, noopLogger)
   );

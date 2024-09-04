@@ -1,4 +1,5 @@
-import { ResolveDependencies } from "../../../src/app/dependency-resolving";
+import RegClient from "another-npm-registry-client";
+import nock from "nock";
 import {
   GetRegistryPackumentVersion,
   ResolvedPackumentVersion,
@@ -12,16 +13,13 @@ import {
 } from "../../../src/cli/cmd-add";
 import { ResultCodes } from "../../../src/cli/result-codes";
 import { PackumentNotFoundError } from "../../../src/common-errors";
-import {
-  makeGraphFromSeed,
-  markFailed,
-  markRemoteResolved,
-} from "../../../src/domain/dependency-graph";
 import { DomainName } from "../../../src/domain/domain-name";
 import { UnityPackumentVersion } from "../../../src/domain/packument";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { fetchCheckUrlExists } from "../../../src/io/check-url";
+import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
 import { noopLogger } from "../../../src/logging";
 import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
 import { buildPackument } from "../../common/data-packument";
@@ -31,8 +29,11 @@ import { makeMockLogger } from "../../common/log.mock";
 import { mockFunctionOfType } from "../app/func.mock";
 import { mockResolvedPackuments } from "../app/remote-packuments.mock";
 import { MockFs } from "../fs.mock";
+import { mockRegistryPackuments } from "../registry.mock";
 
 describe("cmd-add", () => {
+  const someVersion = SemanticVersion.parse("1.0.0");
+
   const somePackage = DomainName.parse("com.some.package");
   const otherPackage = DomainName.parse("com.other.package");
   const somePackument = buildPackument(somePackage, (packument) =>
@@ -53,6 +54,13 @@ describe("cmd-add", () => {
   const incompatiblePackument = buildPackument(somePackage, (packument) =>
     packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
   );
+  const packumentWithBadDependency = buildPackument(
+    "com.another.package",
+    (packument) =>
+      packument.addVersion("1.0.0", (version) =>
+        version.addDependency("com.unknown.package", someVersion)
+      )
+  );
 
   const someProjectDir = "/users/some-user/projects/SomeProject";
   const defaultEnv = {
@@ -60,8 +68,6 @@ describe("cmd-add", () => {
     upstream: true,
     primaryRegistryUrl: exampleRegistryUrl,
   } as Env;
-
-  const someVersion = SemanticVersion.parse("1.0.0");
 
   function makeDependencies() {
     const parseEnv = mockFunctionOfType<ParseEnv>();
@@ -72,26 +78,14 @@ describe("cmd-add", () => {
     mockResolvedPackuments(
       getRegistryPackumentVersion,
       [exampleRegistryUrl, somePackument],
-      [exampleRegistryUrl, otherPackument]
+      [exampleRegistryUrl, otherPackument],
+      [exampleRegistryUrl, packumentWithBadDependency]
     );
 
-    const resolveDependencies = mockFunctionOfType<ResolveDependencies>();
-    let defaultGraph = makeGraphFromSeed(somePackage, someVersion);
-    defaultGraph = markRemoteResolved(
-      defaultGraph,
-      somePackage,
-      someVersion,
-      exampleRegistryUrl,
-      { [otherPackage]: someVersion }
+    const fetchPackument = getRegistryPackumentUsing(
+      new RegClient(),
+      noopLogger
     );
-    defaultGraph = markRemoteResolved(
-      defaultGraph,
-      otherPackage,
-      someVersion,
-      exampleRegistryUrl,
-      {}
-    );
-    resolveDependencies.mockResolvedValue(defaultGraph);
 
     const log = makeMockLogger();
 
@@ -103,8 +97,9 @@ describe("cmd-add", () => {
 
     const addCmd = makeAddCmd(
       parseEnv,
+      fetchCheckUrlExists,
+      fetchPackument,
       getRegistryPackumentVersion,
-      resolveDependencies,
       mockFs.read,
       mockFs.write,
       log,
@@ -114,11 +109,23 @@ describe("cmd-add", () => {
       addCmd,
       parseEnv,
       getRegistryPackumentVersion,
-      resolveDependencies,
       mockFs,
       log,
     } as const;
   }
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
+  beforeEach(() => {
+    mockRegistryPackuments(exampleRegistryUrl, [
+      somePackument,
+      otherPackument,
+      packumentWithBadDependency,
+    ]);
+    mockRegistryPackuments(unityRegistryUrl, []);
+  });
 
   it("should notify if editor-version is unknown", async () => {
     const { addCmd, mockFs, log } = makeDependencies();
@@ -172,19 +179,6 @@ describe("cmd-add", () => {
     );
   });
 
-  it("should not fetch dependencies for upstream packages", async () => {
-    const { addCmd, getRegistryPackumentVersion, resolveDependencies } =
-      makeDependencies();
-    mockResolvedPackuments(getRegistryPackumentVersion, [
-      unityRegistryUrl,
-      somePackument,
-    ]);
-
-    await addCmd(somePackage, {});
-
-    expect(resolveDependencies).not.toHaveBeenCalled();
-  });
-
   it("should fail if package could not be resolved", async () => {
     const { addCmd, getRegistryPackumentVersion } = makeDependencies();
     getRegistryPackumentVersion.mockReturnValue(
@@ -214,27 +208,17 @@ describe("cmd-add", () => {
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
-    const { addCmd, resolveDependencies } = makeDependencies();
-    let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
-      [exampleRegistryUrl]: new PackumentNotFoundError(otherPackage),
-    });
-    resolveDependencies.mockResolvedValue(failedGraph);
+    const { addCmd } = makeDependencies();
 
-    await expect(() => addCmd(somePackage, {})).rejects.toBeInstanceOf(
-      UnresolvedDependenciesError
-    );
+    await expect(() =>
+      addCmd(packumentWithBadDependency.name, {})
+    ).rejects.toBeInstanceOf(UnresolvedDependenciesError);
   });
 
   it("should add package with unresolved dependency when running with force", async () => {
-    const { addCmd, resolveDependencies } = makeDependencies();
-    let failedGraph = makeGraphFromSeed(otherPackage, someVersion);
-    failedGraph = markFailed(failedGraph, otherPackage, someVersion, {
-      [exampleRegistryUrl]: new PackumentNotFoundError(otherPackage),
-    });
-    resolveDependencies.mockResolvedValue(failedGraph);
+    const { addCmd } = makeDependencies();
 
-    const resultCode = await addCmd(somePackage, {
+    const resultCode = await addCmd(packumentWithBadDependency.name, {
       force: true,
     });
 

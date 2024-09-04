@@ -1,7 +1,6 @@
 import { Logger } from "npmlog";
 import { CustomError } from "ts-custom-error";
 import { Err } from "ts-results-es";
-import { ResolveDependencies } from "../app/dependency-resolving";
 import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import { NodeType, traverseDependencyGraph } from "../domain/dependency-graph";
@@ -40,12 +39,15 @@ import {
 import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
 
+import { resolveDependenciesUsing } from "../app/dependency-resolving";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { CheckUrlExists } from "../io/check-url";
+import type { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import { partialApply } from "../utils/fp-utils";
@@ -125,8 +127,9 @@ function pickMostFixable(
  */
 export function makeAddCmd(
   parseEnv: ParseEnv,
+  checkUrlExists: CheckUrlExists,
+  fetchPackument: GetRegistryPackument,
   getRegistryPackumentVersion: GetRegistryPackumentVersion,
-  resolveDependencies: ResolveDependencies,
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
   log: Logger,
@@ -245,7 +248,9 @@ export function makeAddCmd(
         // pkgsInScope
         if (!isUpstreamPackage) {
           debugLog(`fetch: ${makePackageReference(name, requestedVersion)}`);
-          const dependencyGraph = await resolveDependencies(
+          const dependencyGraph = await resolveDependenciesUsing(
+            checkUrlExists,
+            fetchPackument,
             [primaryRegistry, unityRegistry],
             name,
             versionToAdd,
