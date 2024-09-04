@@ -1,5 +1,4 @@
 import { ResolveDependencies } from "../../../src/app/dependency-resolving";
-import { GetRegistryAuth } from "../../../src/app/get-registry-auth";
 import {
   GetRegistryPackumentVersion,
   ResolvedPackumentVersion,
@@ -94,14 +93,13 @@ describe("cmd-add", () => {
     );
     resolveDependencies.mockResolvedValue(defaultGraph);
 
-    const getRegistryAuth = mockFunctionOfType<GetRegistryAuth>();
-    getRegistryAuth.mockResolvedValue({ url: exampleRegistryUrl, auth: null });
-
     const log = makeMockLogger();
 
-    const mockFs = MockFs.makeEmpty().putUnityProject({
-      projectDirectory: someProjectDir,
-    });
+    const mockFs = MockFs.makeEmpty()
+      .putUnityProject({
+        projectDirectory: someProjectDir,
+      })
+      .putHomeUpmConfig({});
 
     const addCmd = makeAddCmd(
       parseEnv,
@@ -109,7 +107,6 @@ describe("cmd-add", () => {
       resolveDependencies,
       mockFs.read,
       mockFs.write,
-      getRegistryAuth,
       log,
       noopLogger
     );

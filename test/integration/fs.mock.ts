@@ -10,9 +10,14 @@ import {
   parseProjectManifest,
   type UnityProjectManifest,
 } from "../../src/domain/project-manifest";
+import { upmConfigFileName } from "../../src/domain/upm-config";
 import { serializeProjectManifest } from "../../src/io/project-manifest-io";
 import { projectVersionTxtPathFor } from "../../src/io/project-version-io";
 import type { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
+import {
+  serializeUpmConfig,
+  type UpmConfigContent,
+} from "../../src/io/upm-config-io";
 
 type TextFileMap = Record<string, string>;
 
@@ -144,5 +149,27 @@ export class MockFs {
     const manifestText = this.tryGetText(manifestPath);
     if (manifestText === null) return null;
     return parseProjectManifest(manifestText);
+  }
+
+  /**
+   * Puts a upm-config into the mock file-system.
+   * @param upmConfigPath The path to which to write the config.
+   * @param upmConfig The upm config.
+   */
+  public putUpmConfig(
+    upmConfigPath: string,
+    upmConfig: UpmConfigContent
+  ): this {
+    this.putText(upmConfigPath, serializeUpmConfig(upmConfig));
+    return this;
+  }
+
+  /**
+   * Puts a upm-config into the home directory of the mock file-system.
+   * @param upmConfig The upm config.
+   */
+  public putHomeUpmConfig(upmConfig: UpmConfigContent): this {
+    const upmConfigPath = path.join(homedir(), upmConfigFileName);
+    return this.putUpmConfig(upmConfigPath, upmConfig);
   }
 }

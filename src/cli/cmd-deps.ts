@@ -3,7 +3,7 @@ import { Logger } from "npmlog";
 import os from "os";
 import { ResolveDependencies } from "../app/dependency-resolving";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
-import { GetRegistryAuth } from "../app/get-registry-auth";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
@@ -17,6 +17,7 @@ import { SemanticVersion } from "../domain/semantic-version";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../io/special-paths";
+import type { ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { isZod } from "../utils/zod-utils";
@@ -55,8 +56,8 @@ export type DepsCmd = (
 export function makeDepsCmd(
   parseEnv: ParseEnv,
   resolveDependencies: ResolveDependencies,
+  readTextFile: ReadTextFile,
   fetchPackument: GetRegistryPackument,
-  getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {
@@ -70,7 +71,9 @@ export function makeDepsCmd(
       homePath,
       env.systemUser
     );
-    const primaryRegistry = await getRegistryAuth(
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
       upmConfigPath,
       env.primaryRegistryUrl
     );

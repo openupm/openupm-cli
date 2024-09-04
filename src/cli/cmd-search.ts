@@ -1,10 +1,11 @@
 import { Logger } from "npmlog";
 import * as os from "os";
-import { GetRegistryAuth } from "../app/get-registry-auth";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { ParseEnv } from "../app/parse-env";
 import { SearchPackages } from "../app/search-packages";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import { getHomePathFromEnv } from "../io/special-paths";
+import type { ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../logging";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
@@ -36,7 +37,7 @@ export type SearchCmd = (
 export function makeSearchCmd(
   parseEnv: ParseEnv,
   searchPackages: SearchPackages,
-  getRegistryAuth: GetRegistryAuth,
+  readTextFile: ReadTextFile,
   log: Logger,
   debugLog: DebugLog
 ): SearchCmd {
@@ -50,7 +51,9 @@ export function makeSearchCmd(
       env.systemUser
     );
 
-    const primaryRegistry = await getRegistryAuth(
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
       upmConfigPath,
       env.primaryRegistryUrl
     );

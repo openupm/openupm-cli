@@ -6,7 +6,7 @@ import {
   RegistryUrl,
   unityRegistryUrl,
 } from "../domain/registry-url";
-import { readTextFile, type ReadTextFile } from "../io/text-file-io";
+import { type ReadTextFile } from "../io/text-file-io";
 import {
   loadUpmConfigUsing,
   UpmAuth,
@@ -16,16 +16,6 @@ import { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
 import { removeExplicitUndefined } from "../utils/zod-utils";
-
-/**
- * Service function for getting registry authentication.
- * @param configPath The path of the upm-config file.
- * @param url The url for which to get authentication.
- */
-export type GetRegistryAuth = (
-  configPath: string,
-  url: RegistryUrl
-) => Promise<Registry>;
 
 /**
  * Checks whether a registry requires authentication. This just checks whether
@@ -85,43 +75,40 @@ export function tryGetAuthEntry(
 }
 
 /**
- * Makes a {@link GetRegistryAuth} function which gets it's information from
- * the users upm config.
+ * Gets registry authentication.
+ * @param readTextFile IO function for reading text files.
+ * @param debugLog Logging function for debug messages.
+ * @param configPath The path of the upm-config file.
+ * @param url The url for which to get authentication.
  */
-export function LoadRegistryAuthFromUpmConfig(
+export async function loadRegistryAuthUsing(
   readTextFile: ReadTextFile,
-  debugLog: DebugLog
-): GetRegistryAuth {
+  debugLog: DebugLog,
+  configPath: string,
+  url: RegistryUrl
+): Promise<Registry> {
   const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
 
   let cachedConfig: UpmConfigContent | null = null;
 
-  return async (configPath, url) => {
-    if (isNonAuthUrl(url)) return { url, auth: null };
+  if (isNonAuthUrl(url)) return { url, auth: null };
 
-    // Only load config if we have dont have it in the cache
+  // Only load config if we have dont have it in the cache
+  if (cachedConfig === null) {
+    cachedConfig = await loadUpmConfig(configPath);
     if (cachedConfig === null) {
-      cachedConfig = await loadUpmConfig(configPath);
-      if (cachedConfig === null) {
-        debugLog(
-          `No .upmconfig.toml file found. Will use no auth for registry "${url}".`
-        );
-        return { url, auth: null };
-      }
-    }
-
-    const auth = tryGetAuthEntry(cachedConfig, url);
-    if (auth === null)
       debugLog(
-        `.upmconfig.toml had no entry for registry "${url}". Will not use auth for that registry.`
+        `No .upmconfig.toml file found. Will use no auth for registry "${url}".`
       );
+      return { url, auth: null };
+    }
+  }
 
-    return { url, auth };
-  };
+  const auth = tryGetAuthEntry(cachedConfig, url);
+  if (auth === null)
+    debugLog(
+      `.upmconfig.toml had no entry for registry "${url}". Will not use auth for that registry.`
+    );
+
+  return { url, auth };
 }
-
-/**
- * Default {@link GetRegistryAuth} function. Uses {@link LoadRegistryAuthFromUpmConfig}.
- */
-export const getRegistryAuthUsing = (debugLog: DebugLog) =>
-  LoadRegistryAuthFromUpmConfig(readTextFile, debugLog);

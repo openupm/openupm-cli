@@ -41,7 +41,7 @@ import { CmdOptions } from "./options";
 import { ResultCodes } from "./result-codes";
 
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
-import { GetRegistryAuth } from "../app/get-registry-auth";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
@@ -129,7 +129,6 @@ export function makeAddCmd(
   resolveDependencies: ResolveDependencies,
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
-  getRegistryAuth: GetRegistryAuth,
   log: Logger,
   debugLog: DebugLog
 ): AddCmd {
@@ -168,7 +167,9 @@ export function makeAddCmd(
       env.systemUser
     );
 
-    const primaryRegistry = await getRegistryAuth(
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
       upmConfigPath,
       env.primaryRegistryUrl
     );

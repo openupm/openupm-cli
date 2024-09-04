@@ -4,7 +4,6 @@ import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { resolveDependencies as resolveDependenciesUsing } from "../app/dependency-resolving";
-import { getRegistryAuthUsing } from "../app/get-registry-auth";
 import { getRegistryPackumentVersionUsing } from "../app/get-registry-packument-version";
 import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
@@ -64,7 +63,6 @@ const addCmd = makeAddCmd(
   resolveDependenciesUsing(registryClient, debugLogToConsole),
   readTextFile,
   writeTextFile,
-  getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole
 );
@@ -76,15 +74,15 @@ const loginCmd = makeLoginCmd(
 const searchCmd = makeSearchCmd(
   parseEnv,
   searchPackagesUsing(debugLogToConsole),
-  getRegistryAuthUsing(debugLogToConsole),
+  readTextFile,
   log,
   debugLogToConsole
 );
 const depsCmd = makeDepsCmd(
   parseEnv,
   resolveDependenciesUsing(registryClient, debugLogToConsole),
+  readTextFile,
   fetchPackument,
-  getRegistryAuthUsing(debugLogToConsole),
   log,
   debugLogToConsole
 );
@@ -96,7 +94,8 @@ const removeCmd = makeRemoveCmd(
 const viewCmd = makeViewCmd(
   parseEnv,
   getRegistryPackumentUsing(registryClient, debugLogToConsole),
-  getRegistryAuthUsing(debugLogToConsole),
+  readTextFile,
+  debugLogToConsole,
   log
 );
 

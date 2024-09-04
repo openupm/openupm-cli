@@ -69,6 +69,15 @@ export async function loadUpmConfigUsing(
 }
 
 /**
+ * Serializes a upm config to string.
+ * @param config The config.
+ * @returns The serialized string.
+ */
+export function serializeUpmConfig(config: UpmConfigContent): string {
+  return TOML.stringify(config);
+}
+
+/**
  * Save the upm config by overwriting the `.upmconfig.toml` file.
  * @param writeFile IO function for overwriting the file.
  * @param filePath The path of the file that should be saved to.
@@ -79,6 +88,6 @@ export function saveUpmConfigFileUsing(
   filePath: string,
   config: UpmConfigContent
 ): Promise<void> {
-  const content = TOML.stringify(config);
+  const content = serializeUpmConfig(config);
   return writeFile(filePath, content);
 }

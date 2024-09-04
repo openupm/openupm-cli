@@ -1,6 +1,6 @@
 import { Logger } from "npmlog";
 import { EOL } from "os";
-import { GetRegistryAuth } from "../app/get-registry-auth";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { ParseEnv } from "../app/parse-env";
 import { PackumentNotFoundError } from "../common-errors";
 import {
@@ -12,6 +12,8 @@ import { unityRegistry } from "../domain/registry";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../io/special-paths";
+import type { ReadTextFile } from "../io/text-file-io";
+import type { DebugLog } from "../logging";
 import { queryAllRegistriesLazy } from "../utils/sources";
 import { CmdOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
@@ -43,7 +45,8 @@ export type ViewCmd = (
 export function makeViewCmd(
   parseEnv: ParseEnv,
   getRegistryPackument: GetRegistryPackument,
-  getRegistryAuth: GetRegistryAuth,
+  readTextFile: ReadTextFile,
+  debugLog: DebugLog,
   log: Logger
 ): ViewCmd {
   return async (pkg, options) => {
@@ -56,7 +59,9 @@ export function makeViewCmd(
       env.systemUser
     );
 
-    const primaryRegistry = await getRegistryAuth(
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
       upmConfigPath,
       env.primaryRegistryUrl
     );
