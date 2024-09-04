@@ -1,13 +1,23 @@
 import { EOL } from "node:os";
 import { Logger } from "npmlog";
 import {
+  CompatibilityCheckFailedError,
+  PackageIncompatibleError,
+  UnresolvedDependenciesError,
+  type UnresolvedDependency,
+} from "../app/add-dependencies";
+import { EditorNotInstalledError } from "../app/builtin-packages";
+import {
   EditorVersionNotSupportedError,
   PackumentNotFoundError,
 } from "../common-errors";
 import { stringifyEditorVersion } from "../domain/editor-version";
-import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
+import {
+  NoVersionsError,
+  VersionNotFoundError,
+  type ResolvePackumentVersionError,
+} from "../domain/packument";
 import { NoSystemUserProfilePath } from "../domain/upm-config";
-import { EditorNotInstalledError } from "../app/builtin-packages";
 import { RegistryAuthenticationError } from "../io/common-errors";
 import {
   ManifestMalformedError,
@@ -22,13 +32,26 @@ import {
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
 } from "../io/special-paths";
+import { recordEntries } from "../utils/record-utils";
 import { RegistryAuthLoadError } from "./parse-env";
-import {
-  CompatibilityCheckFailedError,
-  PackageIncompatibleError,
-  UnresolvedDependenciesError,
-} from "./cmd-add";
 import { ResultCodes } from "./result-codes";
+
+function errorMessageFor(error: ResolvePackumentVersionError): string {
+  if (error instanceof PackumentNotFoundError) return "package not found";
+  else return "version not found";
+}
+
+function stringifyUnresolvedDependency(
+  dependency: UnresolvedDependency
+): string {
+  return (
+    `${dependency.name}@${dependency.version}${EOL}` +
+    recordEntries(dependency.errors).map(
+      ([errorSource, error]) =>
+        `  - "${errorSource}": ${errorMessageFor(error)}`
+    )
+  );
+}
 
 function makeErrorMessageFor(error: unknown): string {
   if (error instanceof RegistryAuthLoadError)
@@ -48,7 +71,10 @@ function makeErrorMessageFor(error: unknown): string {
       error.editorVersion
     )}.`;
   if (error instanceof UnresolvedDependenciesError)
-    return `"${error.packageRef}" has one or more unresolved dependencies and was not added.`;
+    return (
+      `"${error.packageRef}" has one or more unresolved dependencies and was not added.${EOL}` +
+      `${error.dependencies.map(stringifyUnresolvedDependency).join(EOL)}`
+    );
   if (error instanceof NoVersionsError)
     return `"${error.packageName}" can not be added because it has no published versions.`;
   if (error instanceof VersionNotFoundError)

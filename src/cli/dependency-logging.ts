@@ -1,13 +1,5 @@
-import {
-  makePackageReference,
-  PackageReference,
-} from "../domain/package-reference";
-import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
-import { DebugLog } from "../logging";
-import { recordEntries } from "../utils/record-utils";
-import { Logger } from "npmlog";
-import { DomainName } from "../domain/domain-name";
-import { SemanticVersion } from "../domain/semantic-version";
+import { Chalk } from "chalk";
+import { PackumentNotFoundError } from "../common-errors";
 import {
   DependencyGraph,
   FailedNode,
@@ -16,12 +8,19 @@ import {
   ResolvedNode,
   tryGetGraphNode,
 } from "../domain/dependency-graph";
+import { DomainName } from "../domain/domain-name";
+import {
+  makePackageReference,
+  PackageReference,
+} from "../domain/package-reference";
 import {
   ResolvePackumentVersionError,
   VersionNotFoundError,
 } from "../domain/packument";
-import { PackumentNotFoundError } from "../common-errors";
-import { Chalk } from "chalk";
+import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
+import { SemanticVersion } from "../domain/semantic-version";
+import { DebugLog } from "../logging";
+import { recordEntries } from "../utils/record-utils";
 
 /**
  * Logs information about a resolved dependency to a logger.
@@ -39,33 +38,6 @@ export function logResolvedDependency(
       : "";
   const message = `${packageRef} ${tag}`;
   debugLog(message);
-}
-
-function errorMessageFor(error: ResolvePackumentVersionError): string {
-  if (error instanceof PackumentNotFoundError) return "package not found";
-  else return "version not found";
-}
-
-/**
- * Prints information about a dependency that could not be resolved to a logger.
- * @param log The logger to print to.
- * @param dependencyName The name of the dependency.
- * @param dependencyVersion The version of the dependency.
- * @param dependency The failed node from the dependency graph.
- */
-export function logFailedDependency(
-  log: Logger,
-  dependencyName: DomainName,
-  dependencyVersion: SemanticVersion,
-  dependency: FailedNode
-) {
-  log.warn(
-    "",
-    `Failed to resolve dependency "${dependencyName}@${dependencyVersion}"`
-  );
-  recordEntries(dependency.errors).forEach(([errorSource, error]) =>
-    log.warn("", `  - "${errorSource}": ${errorMessageFor(error)}`)
-  );
 }
 
 /**
