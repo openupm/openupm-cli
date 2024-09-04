@@ -1,9 +1,5 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
-import {
-  GetRegistryPackumentVersion,
-  ResolvedPackumentVersion,
-} from "../../../src/app/get-registry-packument-version";
 import { Env, ParseEnv } from "../../../src/app/parse-env";
 import {
   CompatibilityCheckFailedError,
@@ -14,51 +10,50 @@ import {
 import { ResultCodes } from "../../../src/cli/result-codes";
 import { PackumentNotFoundError } from "../../../src/common-errors";
 import { DomainName } from "../../../src/domain/domain-name";
-import { UnityPackumentVersion } from "../../../src/domain/packument";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { fetchCheckUrlExists } from "../../../src/io/check-url";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
 import { noopLogger } from "../../../src/logging";
-import { AsyncErr, AsyncOk } from "../../../src/utils/result-utils";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
 import { mockFunctionOfType } from "../app/func.mock";
-import { mockResolvedPackuments } from "../app/remote-packuments.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
 
 describe("cmd-add", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
+  const unknownPackage = DomainName.parse("com.unknown.parse");
 
-  const somePackage = DomainName.parse("com.some.package");
-  const otherPackage = DomainName.parse("com.other.package");
-  const somePackument = buildPackument(somePackage, (packument) =>
-    packument.addVersion("1.0.0", (version) =>
-      version.set("unity", "2022.2").addDependency(otherPackage, "1.0.0")
-    )
-  );
-  const otherPackument = buildPackument(otherPackage, (packument) =>
+  const otherPackument = buildPackument("com.other.package", (packument) =>
     packument.addVersion("1.0.0", (version) => version.set("unity", "2022.2"))
   );
-  const badEditorPackument = buildPackument(somePackage, (packument) =>
+  const somePackument = buildPackument("com.some.package", (packument) =>
+    packument.addVersion("1.0.0", (version) =>
+      version.set("unity", "2022.2").addDependency(otherPackument.name, "1.0.0")
+    )
+  );
+
+  const badEditorPackument = buildPackument("com.bad.package", (packument) =>
     packument.addVersion("1.0.0", (version) =>
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       version.set("unity", "bad value")
     )
   );
-  const incompatiblePackument = buildPackument(somePackage, (packument) =>
-    packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
+  const incompatiblePackument = buildPackument(
+    "com.incompatible.package",
+    (packument) =>
+      packument.addVersion("1.0.0", (version) => version.set("unity", "2023.1"))
   );
   const packumentWithBadDependency = buildPackument(
-    "com.another.package",
+    "com.bad-dep.package",
     (packument) =>
       packument.addVersion("1.0.0", (version) =>
-        version.addDependency("com.unknown.package", someVersion)
+        version.addDependency(unknownPackage, someVersion)
       )
   );
 
@@ -72,15 +67,6 @@ describe("cmd-add", () => {
   function makeDependencies() {
     const parseEnv = mockFunctionOfType<ParseEnv>();
     parseEnv.mockResolvedValue(defaultEnv);
-
-    const getRegistryPackumentVersion =
-      mockFunctionOfType<GetRegistryPackumentVersion>();
-    mockResolvedPackuments(
-      getRegistryPackumentVersion,
-      [exampleRegistryUrl, somePackument],
-      [exampleRegistryUrl, otherPackument],
-      [exampleRegistryUrl, packumentWithBadDependency]
-    );
 
     const fetchPackument = getRegistryPackumentUsing(
       new RegClient(),
@@ -99,7 +85,6 @@ describe("cmd-add", () => {
       parseEnv,
       fetchCheckUrlExists,
       fetchPackument,
-      getRegistryPackumentVersion,
       mockFs.read,
       mockFs.write,
       log,
@@ -108,7 +93,6 @@ describe("cmd-add", () => {
     return {
       addCmd,
       parseEnv,
-      getRegistryPackumentVersion,
       mockFs,
       log,
     } as const;
@@ -123,6 +107,8 @@ describe("cmd-add", () => {
       somePackument,
       otherPackument,
       packumentWithBadDependency,
+      badEditorPackument,
+      incompatiblePackument,
     ]);
     mockRegistryPackuments(unityRegistryUrl, []);
   });
@@ -131,7 +117,7 @@ describe("cmd-add", () => {
     const { addCmd, mockFs, log } = makeDependencies();
     mockFs.putProjectVersion(someProjectDir, "bad version");
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     expect(log.warn).toHaveBeenCalledWith(
       "editor.version",
@@ -140,13 +126,9 @@ describe("cmd-add", () => {
   });
 
   it("should add package with invalid editor version when running with force", async () => {
-    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
-    mockResolvedPackuments(getRegistryPackumentVersion, [
-      exampleRegistryUrl,
-      badEditorPackument,
-    ]);
+    const { addCmd } = makeDependencies();
 
-    const resultCode = await addCmd(somePackage, {
+    const resultCode = await addCmd(badEditorPackument.name, {
       force: true,
     });
 
@@ -154,13 +136,9 @@ describe("cmd-add", () => {
   });
 
   it("should add package with incompatible with editor when running with force", async () => {
-    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
-    mockResolvedPackuments(getRegistryPackumentVersion, [
-      exampleRegistryUrl,
-      incompatiblePackument,
-    ]);
+    const { addCmd } = makeDependencies();
 
-    const resultCode = await addCmd(somePackage, {
+    const resultCode = await addCmd(incompatiblePackument.name, {
       force: true,
     });
 
@@ -168,43 +146,27 @@ describe("cmd-add", () => {
   });
 
   it("should fail when adding package with incompatible with editor and not running with force", async () => {
-    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
-    mockResolvedPackuments(getRegistryPackumentVersion, [
-      exampleRegistryUrl,
-      incompatiblePackument,
-    ]);
+    const { addCmd } = makeDependencies();
 
-    await expect(addCmd(somePackage, {})).rejects.toBeInstanceOf(
+    await expect(addCmd(incompatiblePackument.name, {})).rejects.toBeInstanceOf(
       PackageIncompatibleError
     );
   });
 
   it("should fail if package could not be resolved", async () => {
-    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
-    getRegistryPackumentVersion.mockReturnValue(
-      AsyncErr(new PackumentNotFoundError(somePackage))
-    );
+    const { addCmd } = makeDependencies();
 
-    await expect(() => addCmd(somePackage, {})).rejects.toBeInstanceOf(
+    await expect(() => addCmd(unknownPackage, {})).rejects.toBeInstanceOf(
       PackumentNotFoundError
     );
   });
 
   it("should fail if packument had malformed target editor and not running with force", async () => {
-    const { addCmd, getRegistryPackumentVersion } = makeDependencies();
-    getRegistryPackumentVersion.mockReturnValue(
-      AsyncOk({
-        packumentVersion: {
-          name: somePackage,
-          version: someVersion,
-          unity: "bad vesion",
-        } as unknown as UnityPackumentVersion,
-      } as unknown as ResolvedPackumentVersion)
-    );
+    const { addCmd } = makeDependencies();
 
-    await expect(() => addCmd(somePackage, {})).rejects.toBeInstanceOf(
-      CompatibilityCheckFailedError
-    );
+    await expect(() =>
+      addCmd(badEditorPackument.name, {})
+    ).rejects.toBeInstanceOf(CompatibilityCheckFailedError);
   });
 
   it("should fail if dependency could not be resolved and not running with force", async () => {
@@ -228,12 +190,12 @@ describe("cmd-add", () => {
   it("should add package", async () => {
     const { addCmd, mockFs } = makeDependencies();
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
       expect.objectContaining({
-        dependencies: { [somePackage]: "1.0.0" },
+        dependencies: { [somePackument.name]: "1.0.0" },
       })
     );
   });
@@ -241,7 +203,7 @@ describe("cmd-add", () => {
   it("should notify if package was added", async () => {
     const { addCmd, log } = makeDependencies();
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -254,16 +216,16 @@ describe("cmd-add", () => {
     mockFs.putUnityProject({
       projectDirectory: someProjectDir,
       manifest: buildProjectManifest((manifest) =>
-        manifest.addDependency(somePackage, "0.1.0", true, true)
+        manifest.addDependency(somePackument.name, "0.1.0", true, true)
       ),
     });
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
       expect.objectContaining({
-        dependencies: { [somePackage]: "1.0.0" },
+        dependencies: { [somePackument.name]: "1.0.0" },
       })
     );
   });
@@ -273,11 +235,11 @@ describe("cmd-add", () => {
     mockFs.putUnityProject({
       projectDirectory: someProjectDir,
       manifest: buildProjectManifest((manifest) =>
-        manifest.addDependency(somePackage, "0.1.0", true, true)
+        manifest.addDependency(somePackument.name, "0.1.0", true, true)
       ),
     });
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -290,11 +252,11 @@ describe("cmd-add", () => {
     mockFs.putUnityProject({
       projectDirectory: someProjectDir,
       manifest: buildProjectManifest((manifest) =>
-        manifest.addDependency(somePackage, "1.0.0", true, true)
+        manifest.addDependency(somePackument.name, "1.0.0", true, true)
       ),
     });
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "manifest",
@@ -305,7 +267,7 @@ describe("cmd-add", () => {
   it("should add scope for package", async () => {
     const { addCmd, mockFs } = makeDependencies();
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
@@ -314,7 +276,7 @@ describe("cmd-add", () => {
           {
             name: "example.com",
             url: exampleRegistryUrl,
-            scopes: [otherPackage, somePackage],
+            scopes: [otherPackument.name, somePackument.name],
           },
         ],
       })
@@ -324,14 +286,14 @@ describe("cmd-add", () => {
   it("should add package to testables when running with test option", async () => {
     const { addCmd, mockFs } = makeDependencies();
 
-    await addCmd(somePackage, {
+    await addCmd(somePackument.name, {
       test: true,
     });
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(
       expect.objectContaining({
-        testables: [somePackage],
+        testables: [somePackument.name],
       })
     );
   });
@@ -340,15 +302,15 @@ describe("cmd-add", () => {
     const { addCmd, mockFs } = makeDependencies();
     const initial = buildProjectManifest((manifest) =>
       manifest
-        .addDependency(somePackage, "1.0.0", true, false)
-        .addScope(otherPackage)
+        .addDependency(somePackument.name, "1.0.0", true, false)
+        .addScope(otherPackument.name)
     );
     mockFs.putUnityProject({
       projectDirectory: someProjectDir,
       manifest: initial,
     });
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     const actual = mockFs.tryGetUnityProject(someProjectDir);
     expect(actual).toEqual(initial);
@@ -359,7 +321,7 @@ describe("cmd-add", () => {
 
     // The second package can not be added
     await addCmd(
-      [somePackage, DomainName.parse("com.unknown.package")],
+      [somePackument.name, DomainName.parse("com.unknown.package")],
       {}
     ).catch(() => {});
 
@@ -373,7 +335,7 @@ describe("cmd-add", () => {
   it("should suggest to open Unity after save", async () => {
     const { addCmd, log } = makeDependencies();
 
-    await addCmd(somePackage, {});
+    await addCmd(somePackument.name, {});
 
     expect(log.notice).toHaveBeenCalledWith(
       "",

@@ -3,7 +3,6 @@ import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
-import { getRegistryPackumentVersionUsing } from "../app/get-registry-packument-version";
 import { login as loginUsing } from "../app/login";
 import { makeParseEnv } from "../app/parse-env";
 import { removePackages as removePackagesUsing } from "../app/remove-packages";
@@ -61,7 +60,6 @@ const addCmd = makeAddCmd(
   parseEnv,
   fetchCheckUrlExists,
   fetchPackument,
-  getRegistryPackumentVersionUsing(registryClient, debugLogToConsole),
   readTextFile,
   writeTextFile,
   log,

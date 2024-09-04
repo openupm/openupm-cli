@@ -1,4 +1,3 @@
-import RegClient from "another-npm-registry-client";
 import { AsyncResult, Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../common-errors";
 import { DomainName } from "../domain/domain-name";
@@ -11,11 +10,7 @@ import {
 } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
-import {
-  GetRegistryPackument,
-  getRegistryPackumentUsing,
-} from "../io/packument-io";
-import { DebugLog } from "../logging";
+import { GetRegistryPackument } from "../io/packument-io";
 import { resultifyAsyncOp } from "../utils/result-utils";
 
 /**
@@ -37,45 +32,29 @@ export interface ResolvedPackumentVersion {
 }
 
 /**
- * Function for resolving a specific packument version.
+ * Resolves a specific packument version.
+ * @param fetchPackument IO function for fetching remote packages.
  * @param packageName The name of the package to resolve.
  * @param requestedVersion The version that should be resolved.
  * @param source The registry to resolve the packument from.
+ * @returns The resolved packument or an error.
  */
-export type GetRegistryPackumentVersion = (
+export function FetchRegistryPackumentVersion(
+  fetchPackument: GetRegistryPackument,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,
   source: Registry
-) => AsyncResult<ResolvedPackumentVersion, ResolvePackumentVersionError>;
-
-/**
- * Makes a {@link GetRegistryPackumentVersion} function which fetches the
- * packument version from a remote npm registry.
- */
-export function FetchRegistryPackumentVersion(
-  getRegistryPackument: GetRegistryPackument
-): GetRegistryPackumentVersion {
-  return (packageName, requestedVersion, source) =>
-    resultifyAsyncOp<UnityPackument | null, ResolvePackumentVersionError>(
-      getRegistryPackument(source, packageName)
-    ).andThen((packument) => {
-      if (packument === null)
-        return Err(new PackumentNotFoundError(packageName));
-      return tryResolvePackumentVersion(packument, requestedVersion).map(
-        (packumentVersion) => ({
-          packument,
-          packumentVersion,
-          source: source.url,
-        })
-      );
-    });
+): AsyncResult<ResolvedPackumentVersion, ResolvePackumentVersionError> {
+  return resultifyAsyncOp<UnityPackument | null, ResolvePackumentVersionError>(
+    fetchPackument(source, packageName)
+  ).andThen((packument) => {
+    if (packument === null) return Err(new PackumentNotFoundError(packageName));
+    return tryResolvePackumentVersion(packument, requestedVersion).map(
+      (packumentVersion) => ({
+        packument,
+        packumentVersion,
+        source: source.url,
+      })
+    );
+  });
 }
-
-/**
- * Default {@link GetRegistryPackumentVersion} function. Uses {@link FetchRegistryPackumentVersion}.
- */
-export const getRegistryPackumentVersionUsing = (
-  regClient: RegClient.Instance,
-  debugLog: DebugLog
-) =>
-  FetchRegistryPackumentVersion(getRegistryPackumentUsing(regClient, debugLog));

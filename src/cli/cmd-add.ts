@@ -42,7 +42,7 @@ import { ResultCodes } from "./result-codes";
 import { resolveDependenciesUsing } from "../app/dependency-resolving";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { GetRegistryPackumentVersion } from "../app/get-registry-packument-version";
+import { FetchRegistryPackumentVersion } from "../app/get-registry-packument-version";
 import { ResolvePackumentVersionError } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
@@ -129,7 +129,6 @@ export function makeAddCmd(
   parseEnv: ParseEnv,
   checkUrlExists: CheckUrlExists,
   fetchPackument: GetRegistryPackument,
-  getRegistryPackumentVersion: GetRegistryPackumentVersion,
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
   log: Logger,
@@ -144,6 +143,11 @@ export function makeAddCmd(
   const saveProjectManifest = partialApply(
     saveProjectManifestUsing,
     writeTextFile
+  );
+
+  const getRegistryPackumentVersion = partialApply(
+    FetchRegistryPackumentVersion,
+    fetchPackument
   );
 
   return async (pkgs, options) => {
