@@ -1,10 +1,10 @@
-import { prepareHomeDirectory } from "./setup/directories";
-import { runOpenupm } from "./run";
-import { prepareUnityProject } from "./setup/project";
 import { ResultCodes } from "../../src/cli/result-codes";
-import { getProjectManifest } from "./check/project-manifest";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
 import { RegistryUrl } from "../../src/domain/registry-url";
+import { getProjectManifest } from "./check/project-manifest";
+import { runOpenupm } from "./run";
+import { prepareHomeDirectory } from "./setup/directories";
+import { prepareUnityProject } from "./setup/project";
 
 describe("add packages", () => {
   type SuccessfulAddCase = {
@@ -106,6 +106,23 @@ describe("add packages", () => {
         },
       ],
       ["dev.comradevanti.totask.asyncoperation"]
+    );
+  });
+
+  it("should add package with both openupm and unity dependencies", async () => {
+    // See https://github.com/openupm/openupm-cli/issues/392
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "com.realitycollective.service-framework",
+          addVersion: "1.0.8",
+          expectedVersion: "1.0.8",
+        },
+      ],
+      [
+        "com.realitycollective.service-framework",
+        "com.realitycollective.utilities",
+      ]
     );
   });
 
