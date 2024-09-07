@@ -4,8 +4,8 @@ import {
   parseProjectManifest,
   UnityProjectManifest,
 } from "../domain/project-manifest";
-import { DebugLog } from "../logging";
-import { assertIsError } from "../utils/error-type-guards";
+import { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 export class ManifestMissingError extends CustomError {

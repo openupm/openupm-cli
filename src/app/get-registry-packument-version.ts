@@ -1,5 +1,5 @@
 import { AsyncResult, Err } from "ts-results-es";
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import { DomainName } from "../domain/domain-name";
 import { ResolvableVersion } from "../domain/package-reference";
 import {
@@ -11,7 +11,7 @@ import {
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
 import { GetRegistryPackument } from "../io/packument-io";
-import { resultifyAsyncOp } from "../utils/result-utils";
+import { resultifyAsyncOp } from "../domain/result-utils";
 
 /**
  * A successfully resolved packument-version.

@@ -12,10 +12,10 @@ import {
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
-import { DebugLog } from "../logging";
-import { partialApply } from "../utils/fp-utils";
-import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
-import { removeExplicitUndefined } from "../utils/zod-utils";
+import { DebugLog } from "../domain/logging";
+import { partialApply } from "../domain/fp-utils";
+import { trySplitAtFirstOccurrenceOf } from "../domain/string-utils";
+import { removeExplicitUndefined } from "../domain/zod-utils";
 
 /**
  * Checks whether a registry requires authentication. This just checks whether

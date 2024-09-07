@@ -10,7 +10,7 @@ import { EditorNotInstalledError } from "../app/builtin-packages";
 import {
   EditorVersionNotSupportedError,
   PackumentNotFoundError,
-} from "../common-errors";
+} from "../domain/common-errors";
 import { stringifyEditorVersion } from "../domain/editor-version";
 import {
   NoVersionsError,
@@ -32,7 +32,7 @@ import {
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
 } from "../io/special-paths";
-import { recordEntries } from "../utils/record-utils";
+import { recordEntries } from "../domain/record-utils";
 import { RegistryAuthLoadError } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 

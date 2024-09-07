@@ -5,7 +5,7 @@ import {
   RegistryAuthenticationError,
 } from "../../../src/io/common-errors";
 import { searchRegistryUsing } from "../../../src/io/npm-search";
-import { noopLogger } from "../../../src/logging";
+import { noopLogger } from "../../../src/domain/logging";
 import { exampleRegistryUrl } from "../../common/data-registry";
 
 jest.mock("libnpmsearch");

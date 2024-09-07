@@ -1,4 +1,4 @@
-import { recordEntries } from "../utils/record-utils";
+import { recordEntries } from "./record-utils";
 import { DomainName } from "./domain-name";
 import { ResolvePackumentVersionError } from "./packument";
 import { RegistryUrl } from "./registry-url";

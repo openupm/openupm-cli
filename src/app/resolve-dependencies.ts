@@ -1,4 +1,4 @@
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import {
   DependencyGraph,
   makeGraphFromSeed,
@@ -17,7 +17,7 @@ import { RegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
 import { type CheckUrlExists } from "../io/check-url";
 import { GetRegistryPackument } from "../io/packument-io";
-import { partialApply } from "../utils/fp-utils";
+import { partialApply } from "../domain/fp-utils";
 import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
 
 /**

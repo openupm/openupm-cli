@@ -4,8 +4,8 @@ import {
   type AllPackuments,
 } from "../io/all-packuments-io";
 import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import { DebugLog } from "../logging";
-import { assertIsError } from "../utils/error-type-guards";
+import { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards";
 
 function tryFindPackagesByKeyword(
   allPackuments: AllPackuments,

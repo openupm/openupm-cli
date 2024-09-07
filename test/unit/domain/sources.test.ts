@@ -1,4 +1,4 @@
-import { queryAllRegistriesLazy } from "../../../src/utils/sources";
+import { queryAllRegistriesLazy } from "../../../src/app/sources";
 import { Registry } from "../../../src/domain/registry";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";

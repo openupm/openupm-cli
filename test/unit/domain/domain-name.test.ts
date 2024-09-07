@@ -1,4 +1,4 @@
-import { isZod } from "../../../src/utils/zod-utils";
+import { isZod } from "../../../src/domain/zod-utils";
 import { DomainName } from "../../../src/domain/domain-name";
 
 describe("domain-name", () => {

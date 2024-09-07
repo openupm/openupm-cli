@@ -3,8 +3,4 @@ module.exports = {
   testEnvironment: "node",
   verbose: true,
   clearMocks: true,
-  setupFilesAfterEnv: [
-    "./test/project-manifest-assertions.ts",
-    "./test/result-assertions.ts",
-  ],
 };

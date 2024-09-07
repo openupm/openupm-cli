@@ -1,4 +1,4 @@
-import { removeExplicitUndefined } from "../../../src/utils/zod-utils";
+import { removeExplicitUndefined } from "../../../src/domain/zod-utils";
 
 describe("zod utils", () => {
   describe("remove explicit undefined", () => {

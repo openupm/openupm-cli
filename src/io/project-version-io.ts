@@ -3,9 +3,9 @@ import path from "path";
 import { CustomError } from "ts-custom-error";
 import * as YAML from "yaml";
 import { z } from "zod";
-import { DebugLog } from "../logging";
-import { assertIsError } from "../utils/error-type-guards";
-import { isZod } from "../utils/zod-utils";
+import { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards";
+import { isZod } from "../domain/zod-utils";
 import { ReadTextFile } from "./text-file-io";
 
 export class ProjectVersionMissingError extends CustomError {

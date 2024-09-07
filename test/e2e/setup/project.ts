@@ -8,7 +8,7 @@ import {
 import { saveProjectManifestUsing } from "../../../src/io/project-manifest-io";
 import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
 import { writeTextFile } from "../../../src/io/text-file-io";
-import { partialApply } from "../../../src/utils/fp-utils";
+import { partialApply } from "../../../src/domain/fp-utils";
 import { dropDirectory } from "./directories";
 
 const writeProjectManifest = partialApply(

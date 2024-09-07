@@ -5,7 +5,7 @@ import {
   UnityPackumentVersion,
 } from "../../src/domain/packument";
 import { SemanticVersion } from "../../src/domain/semantic-version";
-import { isZod } from "../../src/utils/zod-utils";
+import { isZod } from "../../src/domain/zod-utils";
 
 /**
  * Builder class for {@link UnityPackumentVersion}.

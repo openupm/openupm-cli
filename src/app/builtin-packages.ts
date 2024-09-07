@@ -8,8 +8,8 @@ import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
 } from "../io/special-paths";
-import { assertIsNodeError } from "../utils/error-type-guards";
-import { resultifyAsyncOp } from "../utils/result-utils";
+import { assertIsNodeError } from "../domain/error-type-guards";
+import { resultifyAsyncOp } from "../domain/result-utils";
 
 /**
  * Error for when an editor-version is not installed.

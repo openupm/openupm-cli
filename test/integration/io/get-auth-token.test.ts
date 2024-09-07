@@ -2,7 +2,7 @@ import RegClient from "another-npm-registry-client";
 import "assert";
 import { RegistryAuthenticationError } from "../../../src/io/common-errors";
 import { getAuthTokenUsing } from "../../../src/io/get-auth-token";
-import { noopLogger } from "../../../src/logging";
+import { noopLogger } from "../../../src/domain/logging";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
 

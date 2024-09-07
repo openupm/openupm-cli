@@ -4,7 +4,7 @@ import { Base64 } from "../domain/base64";
 import {
   removeExplicitUndefined,
   RemoveExplicitUndefined,
-} from "../utils/zod-utils";
+} from "../domain/zod-utils";
 import { ReadTextFile, WriteTextFile } from "./text-file-io";
 
 const authBaseSchema = z.object({

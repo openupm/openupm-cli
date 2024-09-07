@@ -1,7 +1,7 @@
 import { emptyNpmrc, getHomeNpmrcPath, setToken } from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
 import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
-import { partialApply } from "../utils/fp-utils";
+import { partialApply } from "../domain/fp-utils";
 import { saveNpmrcUsing, tryLoadNpmrcUsing } from "./npmrc-io";
 
 /**

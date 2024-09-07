@@ -2,7 +2,7 @@ import RegClient from "another-npm-registry-client";
 import { DomainName } from "../../../src/domain/domain-name";
 import { Registry } from "../../../src/domain/registry";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
-import { noopLogger } from "../../../src/logging";
+import { noopLogger } from "../../../src/domain/logging";
 import { buildPackument } from "../../common/data-packument";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockRegClientGetResult } from "./registry-client.mock";

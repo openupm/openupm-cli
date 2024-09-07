@@ -11,7 +11,7 @@ import {
   UnityProjectManifest,
 } from "../../src/domain/project-manifest";
 import { exampleRegistryUrl } from "./data-registry";
-import { assertZod } from "../../src/utils/zod-utils";
+import { assertZod } from "../../src/domain/zod-utils";
 import { DomainName } from "../../src/domain/domain-name";
 
 /**

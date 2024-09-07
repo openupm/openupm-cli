@@ -1,7 +1,7 @@
 import RegClient from "another-npm-registry-client";
 import nock from "nock";
 import { resolveDependenciesUsing } from "../../../src/app/resolve-dependencies";
-import { PackumentNotFoundError } from "../../../src/common-errors";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import {
   NodeType,
   tryGetGraphNode,
@@ -13,8 +13,8 @@ import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { fetchCheckUrlExists } from "../../../src/io/check-url";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
-import { noopLogger } from "../../../src/logging";
-import { partialApply } from "../../../src/utils/fp-utils";
+import { noopLogger } from "../../../src/domain/logging";
+import { partialApply } from "../../../src/domain/fp-utils";
 import { buildPackument } from "../../common/data-packument";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockUnityDocPages } from "../docs.mock";

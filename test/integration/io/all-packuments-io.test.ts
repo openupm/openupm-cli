@@ -5,7 +5,7 @@ import {
   HttpErrorLike,
   RegistryAuthenticationError,
 } from "../../../src/io/common-errors";
-import { noopLogger } from "../../../src/logging";
+import { noopLogger } from "../../../src/domain/logging";
 import { exampleRegistryUrl } from "../../common/data-registry";
 
 jest.mock("npm-registry-fetch");

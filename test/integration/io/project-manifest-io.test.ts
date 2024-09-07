@@ -6,8 +6,8 @@ import {
   serializeProjectManifest,
 } from "../../../src/io/project-manifest-io";
 import { ReadTextFile } from "../../../src/io/text-file-io";
-import { noopLogger } from "../../../src/logging";
-import { partialApply } from "../../../src/utils/fp-utils";
+import { noopLogger } from "../../../src/domain/logging";
+import { partialApply } from "../../../src/domain/fp-utils";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "../func.mock";
 

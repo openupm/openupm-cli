@@ -11,7 +11,7 @@ import { getRegistryPackumentUsing } from "../io/packument-io";
 import { makeNpmRegistryClient } from "../io/reg-client";
 import { getHomePathFromEnv } from "../io/special-paths";
 import { readTextFile, writeTextFile } from "../io/text-file-io";
-import { DebugLog } from "../logging";
+import { DebugLog } from "../domain/logging";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";

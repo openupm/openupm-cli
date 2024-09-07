@@ -1,7 +1,7 @@
 import path from "node:path";
 import { z } from "zod";
-import { removeRecordKey } from "../utils/record-utils";
-import { removeTrailingSlash } from "../utils/string-utils";
+import { removeRecordKey } from "./record-utils";
+import { removeTrailingSlash } from "./string-utils";
 import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
 import { RegistryUrl } from "./registry-url";

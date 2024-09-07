@@ -1,5 +1,5 @@
 import { AsyncResult } from "ts-results-es";
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import { tryRemoveProjectDependencies } from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
 import { PackageUrl } from "../domain/package-url";
@@ -10,9 +10,9 @@ import {
   saveProjectManifestUsing,
 } from "../io/project-manifest-io";
 import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
-import { DebugLog } from "../logging";
-import { partialApply } from "../utils/fp-utils";
-import { resultifyAsyncOp } from "../utils/result-utils";
+import { DebugLog } from "../domain/logging";
+import { partialApply } from "../domain/fp-utils";
+import { resultifyAsyncOp } from "../domain/result-utils";
 
 /**
  * Contains information about a package that was removed from a project.

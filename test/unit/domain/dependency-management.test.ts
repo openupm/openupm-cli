@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { PackumentNotFoundError } from "../../../src/common-errors";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import {
   tryRemoveProjectDependencies,
   tryRemoveProjectDependency,
@@ -11,7 +11,7 @@ import {
 } from "../../../src/domain/project-manifest";
 import { RegistryUrl } from "../../../src/domain/registry-url";
 import { makeScopedRegistry } from "../../../src/domain/scoped-registry";
-import { recordKeys } from "../../../src/utils/record-utils";
+import { recordKeys } from "../../../src/domain/record-utils";
 import { arbDomainName } from "./domain-name.arb";
 import {
   arbManifest,

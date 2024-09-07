@@ -1,6 +1,6 @@
 import { Err, Ok, type Result } from "ts-results-es";
-import { PackumentNotFoundError } from "../common-errors";
-import { omitKey } from "../utils/object-utils";
+import { PackumentNotFoundError } from "./common-errors";
+import { omitKey } from "./object-utils";
 import type { DomainName } from "./domain-name";
 import type { PackageUrl } from "./package-url";
 import {

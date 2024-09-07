@@ -7,7 +7,7 @@ import {
   UnresolvedDependenciesError,
   type AddResult,
 } from "../../../src/app/add-dependencies";
-import { PackumentNotFoundError } from "../../../src/common-errors";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import { DomainName } from "../../../src/domain/domain-name";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
@@ -16,8 +16,8 @@ import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { fetchCheckUrlExists } from "../../../src/io/check-url";
 import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
-import { noopLogger } from "../../../src/logging";
-import { partialApply } from "../../../src/utils/fp-utils";
+import { noopLogger } from "../../../src/domain/logging";
+import { partialApply } from "../../../src/domain/fp-utils";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
 import { exampleRegistryUrl } from "../../common/data-registry";

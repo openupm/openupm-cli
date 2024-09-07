@@ -3,7 +3,7 @@ import {
   tryGetTargetEditorVersionFor,
 } from "../../../src/domain/package-manifest";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
-import { MalformedPackumentError } from "../../../src/common-errors";
+import { MalformedPackumentError } from "../../../src/domain/common-errors";
 
 describe("package manifest", () => {
   describe("get dependency list", () => {

@@ -1,8 +1,8 @@
 import { UnityProjectManifest } from "../../../src/domain/project-manifest";
 import { loadProjectManifestUsing } from "../../../src/io/project-manifest-io";
 import { readTextFile } from "../../../src/io/text-file-io";
-import { noopLogger } from "../../../src/logging";
-import { partialApply } from "../../../src/utils/fp-utils";
+import { noopLogger } from "../../../src/domain/logging";
+import { partialApply } from "../../../src/domain/fp-utils";
 
 const loadProjectManifest = partialApply(
   loadProjectManifestUsing,

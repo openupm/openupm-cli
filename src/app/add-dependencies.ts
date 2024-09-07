@@ -1,7 +1,7 @@
 import { CustomError } from "ts-custom-error";
 import type { Err } from "ts-results-es";
 import { logResolvedDependency } from "../cli/dependency-logging";
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import {
   type FailedNode,
   NodeType,
@@ -43,9 +43,9 @@ import {
   saveProjectManifestUsing,
 } from "../io/project-manifest-io";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
-import type { DebugLog } from "../logging";
-import { partialApply } from "../utils/fp-utils";
-import { isZod } from "../utils/zod-utils";
+import type { DebugLog } from "../domain/logging";
+import { partialApply } from "../domain/fp-utils";
+import { isZod } from "../domain/zod-utils";
 import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";
 

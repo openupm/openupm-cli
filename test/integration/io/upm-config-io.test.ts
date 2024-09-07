@@ -1,11 +1,9 @@
 import { EOL } from "node:os";
+import { partialApply } from "../../../src/domain/fp-utils";
 import { ReadTextFile } from "../../../src/io/text-file-io";
 import { loadUpmConfigUsing } from "../../../src/io/upm-config-io";
-import { partialApply } from "../../../src/utils/fp-utils";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockFunctionOfType } from "../func.mock";
-
-jest.mock("../../../src/utils/env-util");
 
 describe("upm-config-io", () => {
   describe("read file", () => {

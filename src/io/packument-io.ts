@@ -2,8 +2,8 @@ import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
-import { DebugLog } from "../logging";
-import { assertIsHttpError } from "../utils/error-type-guards";
+import { DebugLog } from "../domain/logging";
+import { assertIsHttpError } from "../domain/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
 
 /**

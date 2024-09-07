@@ -8,8 +8,8 @@ import {
   UpmAuth,
   UpmConfigContent,
 } from "../io/upm-config-io";
-import { partialApply } from "../utils/fp-utils";
-import { removeExplicitUndefined } from "../utils/zod-utils";
+import { partialApply } from "../domain/fp-utils";
+import { removeExplicitUndefined } from "../domain/zod-utils";
 
 function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
   const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;

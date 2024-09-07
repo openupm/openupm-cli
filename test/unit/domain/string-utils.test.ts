@@ -1,4 +1,4 @@
-import { splitLines } from "../../../src/utils/string-utils";
+import { splitLines } from "../../../src/domain/string-utils";
 
 describe("string utils", () => {
   describe("split into lines", () => {

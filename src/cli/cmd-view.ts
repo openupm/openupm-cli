@@ -1,7 +1,7 @@
 import { Logger } from "npmlog";
 import { EOL } from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import {
   hasVersion,
   PackageReference,
@@ -12,8 +12,8 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile } from "../io/text-file-io";
-import type { DebugLog } from "../logging";
-import { queryAllRegistriesLazy } from "../utils/sources";
+import type { DebugLog } from "../domain/logging";
+import { queryAllRegistriesLazy } from "../app/sources";
 import { CmdOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";

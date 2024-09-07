@@ -1,5 +1,5 @@
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { isZod } from "../../../src/utils/zod-utils";
+import { isZod } from "../../../src/domain/zod-utils";
 
 describe("semantic-version", () => {
   describe("validate", () => {

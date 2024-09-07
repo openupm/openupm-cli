@@ -1,6 +1,6 @@
 import RegClient, { type AddUserResponse } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
-import { DebugLog } from "../logging";
+import { DebugLog } from "../domain/logging";
 import { RegistryAuthenticationError } from "./common-errors";
 
 /**

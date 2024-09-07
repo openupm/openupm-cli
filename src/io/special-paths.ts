@@ -1,7 +1,7 @@
 import os from "os";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
-import { EditorVersionNotSupportedError } from "../common-errors";
+import { EditorVersionNotSupportedError } from "../domain/common-errors";
 import {
   compareEditorVersion,
   EditorVersion,

@@ -5,8 +5,8 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetAuthToken } from "../io/get-auth-token";
 import { getHomePathFromEnv } from "../io/special-paths";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
-import type { DebugLog } from "../logging";
-import { partialApply } from "../utils/fp-utils";
+import type { DebugLog } from "../domain/logging";
+import { partialApply } from "../domain/fp-utils";
 import { CmdOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import {

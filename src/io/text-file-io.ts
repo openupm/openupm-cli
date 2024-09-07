@@ -1,7 +1,7 @@
 import fse from "fs-extra";
 import fs from "fs/promises";
 import path from "path";
-import { assertIsNodeError } from "../utils/error-type-guards";
+import { assertIsNodeError } from "../domain/error-type-guards";
 
 /**
  * Function for loading the content of a text file.

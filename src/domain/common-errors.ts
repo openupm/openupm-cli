@@ -1,6 +1,6 @@
 import { CustomError } from "ts-custom-error";
-import { EditorVersion } from "./domain/editor-version";
-import { DomainName } from "./domain/domain-name";
+import type { DomainName } from "./domain-name";
+import type { EditorVersion } from "./editor-version";
 
 /**
  * Error for when the packument was not found.

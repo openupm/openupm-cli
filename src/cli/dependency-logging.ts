@@ -1,5 +1,5 @@
 import { Chalk } from "chalk";
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import {
   DependencyGraph,
   FailedNode,
@@ -19,8 +19,8 @@ import {
 } from "../domain/packument";
 import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
-import { DebugLog } from "../logging";
-import { recordEntries } from "../utils/record-utils";
+import { DebugLog } from "../domain/logging";
+import { recordEntries } from "../domain/record-utils";
 
 /**
  * Logs information about a resolved dependency to a logger.

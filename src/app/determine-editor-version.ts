@@ -2,8 +2,8 @@ import { ReleaseVersion } from "../domain/editor-version";
 import { validateProjectVersion } from "../domain/project-version";
 import { loadProjectVersionUsing } from "../io/project-version-io";
 import { type ReadTextFile } from "../io/text-file-io";
-import { DebugLog } from "../logging";
-import { partialApply } from "../utils/fp-utils";
+import { DebugLog } from "../domain/logging";
+import { partialApply } from "../domain/fp-utils";
 
 /**
  * Function for determining the editor-version for a Unity project.

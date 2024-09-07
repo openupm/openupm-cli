@@ -1,6 +1,7 @@
 import os from "os";
 import path from "path";
-import { EditorVersionNotSupportedError } from "../../../src/common-errors";
+import { Ok } from "ts-results-es";
+import { EditorVersionNotSupportedError } from "../../../src/domain/common-errors";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import {
   getHomePathFromEnv,
@@ -41,7 +42,7 @@ describe("special-paths", () => {
 
       const result = tryGetEditorInstallPath(version);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(result).toEqual(Ok(expected));
     });
 
     it("should be in user dir on linux for versions >= 2019.2", () => {
@@ -51,7 +52,7 @@ describe("special-paths", () => {
 
       const result = tryGetEditorInstallPath(version);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(result).toEqual(Ok(expected));
     });
 
     it("should be fail on linux for versions < 2019.2", () => {
@@ -61,7 +62,8 @@ describe("special-paths", () => {
 
       const result = tryGetEditorInstallPath(version);
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      const error = result.unwrapErr();
+      expect(error).toEqual(expected);
     });
 
     it("should be in applications on mac", () => {
@@ -71,7 +73,7 @@ describe("special-paths", () => {
 
       const result = tryGetEditorInstallPath(version);
 
-      expect(result).toBeOk((actual) => expect(actual).toEqual(expected));
+      expect(result).toEqual(Ok(expected));
     });
 
     it("should fail for versions < 2018.1", () => {
@@ -81,7 +83,8 @@ describe("special-paths", () => {
 
       const result = tryGetEditorInstallPath(version);
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      const error = result.unwrapErr();
+      expect(error).toEqual(expected);
     });
 
     it("should fail for unsupported os", () => {
@@ -91,7 +94,8 @@ describe("special-paths", () => {
 
       const result = tryGetEditorInstallPath(version);
 
-      expect(result).toBeError((actual) => expect(actual).toEqual(expected));
+      const error = result.unwrapErr();
+      expect(error).toEqual(expected);
     });
   });
 });
