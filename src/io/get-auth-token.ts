@@ -1,4 +1,4 @@
-import RegClient from "another-npm-registry-client";
+import RegClient, { type AddUserResponse } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
 import { DebugLog } from "../logging";
 import { RegistryAuthenticationError } from "./common-errors";
@@ -32,20 +32,23 @@ export function getAuthTokenUsing(
   debugLog: DebugLog
 ): GetAuthToken {
   return (registryUrl, username, email, password) =>
-    new Promise((resolve, reject) => {
+    new Promise<[AddUserResponse, Response]>((resolve, reject) => {
       registryClient.adduser(
         registryUrl,
         { auth: { username, email, password } },
         (error, responseData, _, response) => {
-          if (response !== undefined && !responseData.ok) {
-            debugLog(
-              "Npm registry login failed because of not-ok response.",
-              response
-            );
-            reject(new RegistryAuthenticationError(registryUrl));
-          } else if (responseData.ok) resolve(responseData.token);
-          reject(error);
+          if (error !== null) reject(error);
+          else resolve([responseData, response]);
         }
       );
+    }).then(async ([data, response]) => {
+      if (!data.ok) {
+        await debugLog(
+          "Npm registry login failed because of not-ok response.",
+          response
+        );
+        throw new RegistryAuthenticationError(registryUrl);
+      }
+      return data.token;
     });
 }

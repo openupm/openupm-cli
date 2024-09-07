@@ -1,9 +1,9 @@
 import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
-import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { PackumentNotFoundError } from "../common-errors";
 import {
   makePackageReference,
@@ -102,7 +102,7 @@ export function makeDepsCmd(
     if (latestVersion === null) throw new PackumentNotFoundError(packageName);
 
     const deep = options.deep || false;
-    debugLog(
+    await debugLog(
       `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
     );
     const dependencyGraph = await resolveDependenciesUsing(

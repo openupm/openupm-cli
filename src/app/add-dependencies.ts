@@ -46,8 +46,8 @@ import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import type { DebugLog } from "../logging";
 import { partialApply } from "../utils/fp-utils";
 import { isZod } from "../utils/zod-utils";
-import { resolveDependenciesUsing } from "./resolve-dependencies";
 import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
+import { resolveDependenciesUsing } from "./resolve-dependencies";
 
 /**
  * Error that is thrown when a package should be added that is incompatible
@@ -274,7 +274,7 @@ export async function addDependenciesUsing(
         } catch (error) {
           if (!force) {
             const packageRef = makePackageReference(packageName, versionToAdd);
-            debugLog(
+            await debugLog(
               `"${packageRef}" is malformed. Target editor version could not be determined.`
             );
             throw new CompatibilityCheckFailedError(packageRef);
@@ -295,7 +295,7 @@ export async function addDependenciesUsing(
 
       // packagesInScope
       if (!isUpstreamPackage) {
-        debugLog(
+        await debugLog(
           `fetch: ${makePackageReference(packageName, requestedVersion)}`
         );
         const dependencyGraph = await resolveDependenciesUsing(
@@ -330,7 +330,11 @@ export async function addDependenciesUsing(
             dependencyName,
             dependencyVersion
           );
-          logResolvedDependency(debugLog, dependencyRef, dependency.source);
+          await logResolvedDependency(
+            debugLog,
+            dependencyRef,
+            dependency.source
+          );
 
           const isUnityPackage =
             dependency.source === "built-in" ||

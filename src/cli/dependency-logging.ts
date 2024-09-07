@@ -25,7 +25,7 @@ import { recordEntries } from "../utils/record-utils";
 /**
  * Logs information about a resolved dependency to a logger.
  */
-export function logResolvedDependency(
+export async function logResolvedDependency(
   debugLog: DebugLog,
   packageRef: PackageReference,
   source: RegistryUrl | "built-in"
@@ -37,7 +37,7 @@ export function logResolvedDependency(
       ? "[upstream]"
       : "";
   const message = `${packageRef} ${tag}`;
-  debugLog(message);
+  await debugLog(message);
 }
 
 /**

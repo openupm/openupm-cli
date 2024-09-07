@@ -35,7 +35,10 @@ export async function loadProjectManifestUsing(
     return parseProjectManifest(content);
   } catch (error) {
     assertIsError(error);
-    debugLog("Manifest parse failed because of invalid json content.", error);
+    await debugLog(
+      "Manifest parse failed because of invalid json content.",
+      error
+    );
     throw new ManifestMalformedError();
   }
 }

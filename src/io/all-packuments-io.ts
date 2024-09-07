@@ -30,7 +30,7 @@ export function getAllRegistryPackumentsUsing(
   debugLog: DebugLog
 ): GetAllRegistryPackuments {
   return async (registry) => {
-    debugLog(`Getting all packages from ${registry.url}.`);
+    await debugLog(`Getting all packages from ${registry.url}.`);
     try {
       const result = await npmFetch.json(
         "/-/all",
@@ -39,7 +39,7 @@ export function getAllRegistryPackumentsUsing(
       return result as AllPackuments;
     } catch (error) {
       assertIsError(error);
-      debugLog(`Failed to get all packages from ${registry.url}.`, error);
+      await debugLog(`Failed to get all packages from ${registry.url}.`, error);
 
       throw makeRegistryInteractionError(error, registry.url);
     }

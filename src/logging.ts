@@ -6,11 +6,7 @@
  * @param message The message to be logged.
  * @param context Optional context object. Will be stringified and appended
  * to the message.
- * @returns Nothing. Could be asynchronous.
  */
-export type DebugLog = (
-  message: string,
-  context?: object
-) => void | Promise<void>;
+export type DebugLog = (message: string, context?: object) => Promise<void>;
 
-export const noopLogger: DebugLog = () => {};
+export const noopLogger: DebugLog = async () => {};

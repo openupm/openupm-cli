@@ -50,7 +50,7 @@ export async function loadProjectVersionUsing(
     yaml = YAML.parse(content);
   } catch (error) {
     assertIsError(error);
-    debugLog("ProjectVersion.txt has malformed yaml.", error);
+    await debugLog("ProjectVersion.txt has malformed yaml.", error);
     throw new ProjectVersionMalformedError();
   }
 

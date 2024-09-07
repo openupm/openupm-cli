@@ -79,7 +79,9 @@ export function makeSearchCmd(
       return ResultCodes.Ok;
     }
 
-    debugLog(`${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`);
+    await debugLog(
+      `${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`
+    );
     log.notice("", formatAsTable(results));
     return ResultCodes.Ok;
   };

@@ -97,7 +97,7 @@ export async function loadRegistryAuthUsing(
   if (cachedConfig === null) {
     cachedConfig = await loadUpmConfig(configPath);
     if (cachedConfig === null) {
-      debugLog(
+      await debugLog(
         `No .upmconfig.toml file found. Will use no auth for registry "${url}".`
       );
       return { url, auth: null };
@@ -106,7 +106,7 @@ export async function loadRegistryAuthUsing(
 
   const auth = tryGetAuthEntry(cachedConfig, url);
   if (auth === null)
-    debugLog(
+    await debugLog(
       `.upmconfig.toml had no entry for registry "${url}". Will not use auth for that registry.`
     );
 

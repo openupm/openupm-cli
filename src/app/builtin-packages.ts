@@ -1,16 +1,15 @@
-import { ReleaseVersion } from "../domain/editor-version";
+import path from "path";
+import { CustomError } from "ts-custom-error";
 import { AsyncResult } from "ts-results-es";
+import { DomainName } from "../domain/domain-name";
+import { ReleaseVersion } from "../domain/editor-version";
+import { GetDirectoriesIn } from "../io/directory-io";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
 } from "../io/special-paths";
-import { DomainName } from "../domain/domain-name";
-import { CustomError } from "ts-custom-error";
-import path from "path";
-import { DebugLog } from "../logging";
 import { assertIsNodeError } from "../utils/error-type-guards";
 import { resultifyAsyncOp } from "../utils/result-utils";
-import { GetDirectoriesIn } from "../io/directory-io";
 
 /**
  * Error for when an editor-version is not installed.
@@ -37,14 +36,12 @@ export type FindBuiltInPackagesError =
  * Finds the names of built-in packages using an installed editor.
  * @param getDirectoriesIn IO function for getting the names of all sub directories
  * of a directory.
- * @param debugLog Logger for printing debug messages.
  * @param editorVersion The version of the editor for which to get the built-in
  * packages.
  * @returns A result with the names or an error.
  */
 export function findBuiltInPackagesUsing(
   getDirectoriesIn: GetDirectoriesIn,
-  debugLog: DebugLog,
   editorVersion: ReleaseVersion
 ): AsyncResult<ReadonlyArray<DomainName>, FindBuiltInPackagesError> {
   const pathResult = tryGetEditorInstallPath(editorVersion);
@@ -62,13 +59,8 @@ export function findBuiltInPackagesUsing(
       .mapErr((error) => {
         assertIsNodeError(error);
 
-        if (error.code === "ENOENT") {
-          debugLog(
-            "Failed to get directories in built-in package directory",
-            error
-          );
+        if (error.code === "ENOENT")
           return new EditorNotInstalledError(editorVersion);
-        }
 
         throw error;
       })

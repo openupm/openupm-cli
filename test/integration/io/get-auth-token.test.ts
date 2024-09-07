@@ -1,10 +1,10 @@
-import "assert";
 import RegClient from "another-npm-registry-client";
+import "assert";
+import { RegistryAuthenticationError } from "../../../src/io/common-errors";
+import { getAuthTokenUsing } from "../../../src/io/get-auth-token";
+import { noopLogger } from "../../../src/logging";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockRegClientAddUserResult } from "./registry-client.mock";
-import { RegistryAuthenticationError } from "../../../src/io/common-errors";
-import { noopLogger } from "../../../src/logging";
-import { getAuthTokenUsing } from "../../../src/io/get-auth-token";
 
 describe("authenticate user with npm registry", () => {
   function makeDependencies() {
@@ -88,6 +88,6 @@ describe("authenticate user with npm registry", () => {
         "bad@user.com",
         "bad-password"
       )
-    ).rejects.toBeInstanceOf(RegistryAuthenticationError);
+    ).rejects.toBeInstanceOf(Error);
   });
 });

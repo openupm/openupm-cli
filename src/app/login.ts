@@ -57,11 +57,11 @@ export async function loginUsing(
 
   // npm login
   const token = await getAuthToken(registry, username, email, password);
-  debugLog(`npm login successful`);
+  await debugLog(`npm login successful`);
 
   const auth: NpmAuth = { token, email, alwaysAuth };
   await putRegistryAuth(configPath, registry, auth);
 
   const npmrcPath = await putNpmAuthToken(homePath, registry, token);
-  debugLog(`saved to npm config: ${npmrcPath}`);
+  await debugLog(`saved to npm config: ${npmrcPath}`);
 }

@@ -35,7 +35,7 @@ const log = npmlog;
  * {@link DebugLog} function which uses {@link npmlog} to print logs to
  * the console.
  */
-const debugLogToConsole: DebugLog = function (message, context) {
+const debugLogToConsole: DebugLog = async function (message, context) {
   const contextMessage =
     context !== undefined
       ? `\n${

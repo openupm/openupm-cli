@@ -44,7 +44,7 @@ export async function searchPackagesUsing(
     return await searchRegistry(registry, keyword);
   } catch (error) {
     assertIsError(error);
-    debugLog("Searching using search endpoint failed", error);
+    await debugLog("Searching using search endpoint failed", error);
     // search old search
     onUseAllFallback && onUseAllFallback();
     const allPackuments = await getAllRegistryPackuments(registry);
