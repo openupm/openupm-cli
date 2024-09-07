@@ -17,6 +17,9 @@ export type Registry = Readonly<{
   auth: NpmAuth | null;
 }>;
 
+/**
+ * The official Unity registry.
+ */
 export const unityRegistry: Registry = {
   url: unityRegistryUrl,
   auth: null,

@@ -9,6 +9,12 @@ export function makeNodeError(code: string): NodeJS.ErrnoException {
   return error;
 }
 
+/**
+ * A premade EACCES node error.
+ */
 export const eaccesError = makeNodeError("EACCES");
 
+/**
+ * A premade ENOENT node error.
+ */
 export const enoentError = makeNodeError("ENOENT");

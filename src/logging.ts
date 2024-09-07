@@ -9,4 +9,7 @@
  */
 export type DebugLog = (message: string, context?: object) => Promise<void>;
 
+/**
+ * A {@link DebugLog} which does nothing.
+ */
 export const noopLogger: DebugLog = async () => {};

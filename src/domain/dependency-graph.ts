@@ -1,8 +1,8 @@
-import { DomainName } from "./domain-name";
-import { SemanticVersion } from "./semantic-version";
-import { RegistryUrl } from "./registry-url";
 import { recordEntries } from "../utils/record-utils";
+import { DomainName } from "./domain-name";
 import { ResolvePackumentVersionError } from "./packument";
+import { RegistryUrl } from "./registry-url";
+import { SemanticVersion } from "./semantic-version";
 
 export enum NodeType {
   Unresolved,
@@ -14,9 +14,22 @@ type UnresolvedNode = Readonly<{
   type: NodeType.Unresolved;
 }>;
 
+/**
+ * A resolved node in a {@link DependencyGraph}.
+ */
 export type ResolvedNode = Readonly<{
+  /**
+   * Indicates that the node is resolved.
+   */
   type: NodeType.Resolved;
+  /**
+   * The source from which the dependency was resolved. Either the url of the
+   * source registry or "built-in".
+   */
   source: RegistryUrl | "built-in";
+  /**
+   * A map of dependencies for this node.
+   */
   dependencies: Readonly<Record<DomainName, SemanticVersion>>;
 }>;
 
@@ -36,6 +49,9 @@ export type FailedNode = Readonly<{
   errors: Readonly<Record<RegistryUrl, ResolvePackumentVersionError>>;
 }>;
 
+/**
+ * A node in a {@link DependencyGraph}.
+ */
 export type GraphNode = UnresolvedNode | ResolvedNode | FailedNode;
 
 /**
