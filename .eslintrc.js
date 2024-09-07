@@ -29,6 +29,7 @@ module.exports = {
     "jsdoc/require-throws": 1,
     "jsdoc/require-description-complete-sentence": 1,
     "jsdoc/check-param-names": [1, { checkDestructured: false }],
+    "@typescript-eslint/no-floating-promises": "error",
   },
   parser: "@typescript-eslint/parser",
   parserOptions: {
