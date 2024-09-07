@@ -1,3 +1,10 @@
+## [4.1.2](https://github.com/openupm/openupm-cli/compare/4.1.1...4.1.2) (2024-09-07)
+
+
+### Bug Fixes
+
+* partially resolved dependencies ([#393](https://github.com/openupm/openupm-cli/issues/393)) ([13b5577](https://github.com/openupm/openupm-cli/commit/13b557750fc54a56aad21337055f72a0e275a82f))
+
 ## [4.1.1](https://github.com/openupm/openupm-cli/compare/4.1.0...4.1.1) (2024-08-31)
 
 
