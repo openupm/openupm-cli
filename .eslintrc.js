@@ -14,7 +14,7 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "jsdoc/require-returns": 0,
     "jsdoc/require-jsdoc": [
-      1,
+      "warn",
       {
         publicOnly: true,
         contexts: [
@@ -22,6 +22,7 @@ module.exports = {
           "TSInterfaceDeclaration",
           "TSPropertySignature",
           "TSMethodSignature",
+          "ExportNamedDeclaration > VariableDeclaration",
         ],
       },
     ],
