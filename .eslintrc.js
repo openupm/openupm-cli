@@ -31,5 +31,8 @@ module.exports = {
     "jsdoc/check-param-names": [1, { checkDestructured: false }],
   },
   parser: "@typescript-eslint/parser",
+  parserOptions: {
+    project: "./tsconfig.json",
+  },
   plugins: ["@typescript-eslint", "jsdoc"],
 };
