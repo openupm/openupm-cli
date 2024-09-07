@@ -61,7 +61,7 @@ export function ResolveDependenciesFromRegistries(
     const isBuiltIn = await checkIsBuiltInPackage(packageName, version);
     if (isBuiltIn) {
       graph = markBuiltInResolved(graph, packageName, version);
-      return graph;
+      return await resolveRecursively(graph, sources, deep);
     }
 
     const errors: Record<RegistryUrl, ResolvePackumentVersionError> = {};
@@ -95,7 +95,7 @@ export function ResolveDependenciesFromRegistries(
     }
 
     graph = markFailed(graph, packageName, version, errors);
-    return graph;
+    return await resolveRecursively(graph, sources, deep);
   }
 
   return (sources, packageName, version, deep) =>
