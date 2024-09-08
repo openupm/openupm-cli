@@ -1,7 +1,7 @@
-import { queryAllRegistriesLazy } from "../../../src/app/sources";
+import { queryAllRegistriesLazy } from "../../../src/app/query-registries";
 import { Registry } from "../../../src/domain/registry";
-import { exampleRegistryUrl } from "../../common/data-registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
+import { exampleRegistryUrl } from "../../common/data-registry";
 
 describe("sources", () => {
   describe("query registries lazy", () => {

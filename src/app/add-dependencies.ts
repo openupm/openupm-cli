@@ -13,6 +13,8 @@ import {
   type ReleaseVersion,
   compareEditorVersion,
 } from "../domain/editor-version";
+import { partialApply } from "../domain/fp-utils";
+import type { DebugLog } from "../domain/logging";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import {
   type PackageReference,
@@ -36,18 +38,14 @@ import {
   makeEmptyScopedRegistryFor,
 } from "../domain/scoped-registry";
 import { SemanticVersion } from "../domain/semantic-version";
+import { isZod } from "../domain/zod-utils";
 import type { CheckUrlExists } from "../io/check-url";
 import type { GetRegistryPackument } from "../io/packument-io";
-import {
-  loadProjectManifestUsing,
-  saveProjectManifestUsing,
-} from "../io/project-manifest-io";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
-import type { DebugLog } from "../domain/logging";
-import { partialApply } from "../domain/fp-utils";
-import { isZod } from "../domain/zod-utils";
+import { loadProjectManifestUsing } from "./get-dependencies";
 import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";
+import { saveProjectManifestUsing } from "./write-dependencies";
 
 /**
  * Error that is thrown when a package should be added that is incompatible

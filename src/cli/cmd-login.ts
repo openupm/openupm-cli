@@ -3,7 +3,7 @@ import { loginUsing } from "../app/login";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetAuthToken } from "../io/get-auth-token";
-import { getHomePathFromEnv } from "../io/special-paths";
+import { getHomePathFromEnv } from "../domain/special-paths";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import type { DebugLog } from "../domain/logging";
 import { partialApply } from "../domain/fp-utils";

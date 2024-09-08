@@ -5,7 +5,7 @@ import { searchPackagesUsing } from "../app/search-packages";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { GetAllRegistryPackuments } from "../io/all-packuments-io";
 import type { SearchRegistry } from "../io/npm-search";
-import { getHomePathFromEnv } from "../io/special-paths";
+import { getHomePathFromEnv } from "../domain/special-paths";
 import type { ReadTextFile } from "../io/text-file-io";
 import { DebugLog } from "../domain/logging";
 import { partialApply } from "../domain/fp-utils";

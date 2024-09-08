@@ -8,16 +8,16 @@ import {
   emptyProjectManifest,
   manifestPathFor,
   parseProjectManifest,
+  serializeProjectManifest,
   type UnityProjectManifest,
 } from "../../src/domain/project-manifest";
-import { upmConfigFileName } from "../../src/domain/upm-config";
-import { serializeProjectManifest } from "../../src/io/project-manifest-io";
-import { projectVersionTxtPathFor } from "../../src/io/project-version-io";
-import type { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
+import { projectVersionTxtPathFor } from "../../src/domain/project-version-txt";
 import {
   serializeUpmConfig,
-  type UpmConfigContent,
-} from "../../src/io/upm-config-io";
+  upmConfigFileName,
+  type UpmConfig,
+} from "../../src/domain/upm-config";
+import type { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
 
 type TextFileMap = Record<string, string>;
 
@@ -156,10 +156,7 @@ export class MockFs {
    * @param upmConfigPath The path to which to write the config.
    * @param upmConfig The upm config.
    */
-  public putUpmConfig(
-    upmConfigPath: string,
-    upmConfig: UpmConfigContent
-  ): this {
+  public putUpmConfig(upmConfigPath: string, upmConfig: UpmConfig): this {
     this.putText(upmConfigPath, serializeUpmConfig(upmConfig));
     return this;
   }
@@ -168,7 +165,7 @@ export class MockFs {
    * Puts a upm-config into the home directory of the mock file-system.
    * @param upmConfig The upm config.
    */
-  public putHomeUpmConfig(upmConfig: UpmConfigContent): this {
+  public putHomeUpmConfig(upmConfig: UpmConfig): this {
     const upmConfigPath = path.join(homedir(), upmConfigFileName);
     return this.putUpmConfig(upmConfigPath, upmConfig);
   }

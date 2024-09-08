@@ -8,6 +8,14 @@ import {
 } from "../app/add-dependencies";
 import { EditorNotInstalledError } from "../app/builtin-packages";
 import {
+  ProjectVersionMalformedError,
+  ProjectVersionMissingError,
+} from "../app/determine-editor-version";
+import {
+  ManifestMalformedError,
+  ManifestMissingError,
+} from "../app/get-dependencies";
+import {
   EditorVersionNotSupportedError,
   PackumentNotFoundError,
 } from "../domain/common-errors";
@@ -17,22 +25,14 @@ import {
   VersionNotFoundError,
   type ResolvePackumentVersionError,
 } from "../domain/packument";
+import { recordEntries } from "../domain/record-utils";
 import { NoSystemUserProfilePath } from "../domain/upm-config";
 import { RegistryAuthenticationError } from "../io/common-errors";
-import {
-  ManifestMalformedError,
-  ManifestMissingError,
-} from "../io/project-manifest-io";
-import {
-  ProjectVersionMalformedError,
-  ProjectVersionMissingError,
-} from "../io/project-version-io";
 import {
   NoHomePathError,
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
-} from "../io/special-paths";
-import { recordEntries } from "../domain/record-utils";
+} from "../domain/special-paths";
 import { RegistryAuthLoadError } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 

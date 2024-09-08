@@ -9,7 +9,7 @@ import {
   OSNotSupportedError,
   tryGetEditorInstallPath,
   VersionNotSupportedOnOsError,
-} from "../../../src/io/special-paths";
+} from "../../../src/domain/special-paths";
 
 describe("special-paths", () => {
   describe("home from env", () => {

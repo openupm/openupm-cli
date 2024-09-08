@@ -1,5 +1,12 @@
+import TOML from "@iarna/toml";
 import path from "path";
 import { CustomError } from "ts-custom-error";
+import { z } from "zod";
+import { Base64 } from "./base64";
+import {
+  type RemoveExplicitUndefined,
+  removeExplicitUndefined,
+} from "./zod-utils";
 
 /**
  * The file name for upm config files.
@@ -7,6 +14,44 @@ import { CustomError } from "ts-custom-error";
 export const upmConfigFileName = ".upmconfig.toml";
 
 export class NoSystemUserProfilePath extends CustomError {}
+
+const authBaseSchema = z.object({
+  alwaysAuth: z.optional(z.boolean()),
+});
+
+const basicAuthSchema = authBaseSchema.and(
+  z.object({
+    email: z.string().email(),
+    _auth: Base64,
+  })
+);
+
+const tokenAuthSchema = authBaseSchema.and(
+  z.object({
+    email: z.optional(z.string().email()),
+    token: z.string(),
+  })
+);
+
+const upmAuthSchema = basicAuthSchema.or(tokenAuthSchema);
+
+const upmConfigContentSchema = z.object({
+  npmAuth: z.optional(z.record(z.string(), upmAuthSchema)),
+});
+
+/**
+ * Schema for an entry in a .upmconfig.toml file.
+ */
+export type UpmConfigEntry = RemoveExplicitUndefined<
+  z.TypeOf<typeof upmAuthSchema>
+>;
+
+/**
+ * The content of a .upmconfig.toml file.
+ */
+export type UpmConfig = RemoveExplicitUndefined<
+  z.TypeOf<typeof upmConfigContentSchema>
+>;
 
 /**
  * Determines the path to the users `.upmconfig.toml` file, based on the
@@ -41,4 +86,23 @@ export function getUserUpmConfigPathFor(
 
   const directory = getConfigDirectory();
   return path.join(directory, upmConfigFileName);
+}
+
+/**
+ * Parses the content of a `.upmconfig.toml` file.
+ * @param fileContent The file content.
+ * @returns The parsed content.
+ */
+export function parseUpmConfig(fileContent: string): UpmConfig {
+  const tomlContent = TOML.parse(fileContent);
+  return removeExplicitUndefined(upmConfigContentSchema.parse(tomlContent));
+}
+
+/**
+ * Serializes a upm config to string.
+ * @param config The config.
+ * @returns The serialized string.
+ */
+export function serializeUpmConfig(config: UpmConfig): string {
+  return TOML.stringify(config);
 }

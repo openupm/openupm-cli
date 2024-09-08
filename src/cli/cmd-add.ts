@@ -9,7 +9,7 @@ import {
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { CheckUrlExists } from "../io/check-url";
 import type { GetRegistryPackument } from "../io/packument-io";
-import { getHomePathFromEnv } from "../io/special-paths";
+import { getHomePathFromEnv } from "../domain/special-paths";
 import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
 import { DebugLog } from "../domain/logging";
 import { recordEntries } from "../domain/record-utils";

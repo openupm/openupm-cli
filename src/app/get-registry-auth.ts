@@ -1,21 +1,18 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { decodeBase64 } from "../domain/base64";
+import { partialApply } from "../domain/fp-utils";
+import { DebugLog } from "../domain/logging";
 import { Registry } from "../domain/registry";
 import {
   openupmRegistryUrl,
   RegistryUrl,
   unityRegistryUrl,
 } from "../domain/registry-url";
-import { type ReadTextFile } from "../io/text-file-io";
-import {
-  loadUpmConfigUsing,
-  UpmAuth,
-  UpmConfigContent,
-} from "../io/upm-config-io";
-import { DebugLog } from "../domain/logging";
-import { partialApply } from "../domain/fp-utils";
 import { trySplitAtFirstOccurrenceOf } from "../domain/string-utils";
+import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config";
 import { removeExplicitUndefined } from "../domain/zod-utils";
+import { type ReadTextFile } from "../io/text-file-io";
+import { loadUpmConfigUsing } from "./get-upm-config";
 
 /**
  * Checks whether a registry requires authentication. This just checks whether
@@ -30,28 +27,28 @@ export function isNonAuthUrl(url: RegistryUrl): boolean {
 
 /**
  * Converts a {@link UpmAuth} object to an {@link NpmAuth} object.
- * @param auth The input auth object to convert.
+ * @param entry The input auth object to convert.
  * @returns The converted auth object.
  * @throws {Error} If auth contained bad base64 string.
  */
-export function importNpmAuth(auth: UpmAuth): NpmAuth {
+export function importNpmAuth(entry: UpmConfigEntry): NpmAuth {
   // Basic auth
-  if ("_auth" in auth) {
-    const decoded = decodeBase64(auth._auth);
+  if ("_auth" in entry) {
+    const decoded = decodeBase64(entry._auth);
     const [username, password] = trySplitAtFirstOccurrenceOf(decoded, ":");
     if (password === null)
       throw new Error("Auth Base64 string was not in the user:pass format.");
     return removeExplicitUndefined({
       username,
       password,
-      email: auth.email,
-      alwaysAuth: auth.alwaysAuth,
+      email: entry.email,
+      alwaysAuth: entry.alwaysAuth,
     });
   }
 
   return removeExplicitUndefined({
-    token: auth.token,
-    alwaysAuth: auth.alwaysAuth,
+    token: entry.token,
+    alwaysAuth: entry.alwaysAuth,
   });
 }
 
@@ -62,7 +59,7 @@ export function importNpmAuth(auth: UpmAuth): NpmAuth {
  * @returns The imported auth object or null if not found.
  */
 export function tryGetAuthEntry(
-  upmConfig: UpmConfigContent,
+  upmConfig: UpmConfig,
   url: RegistryUrl
 ): NpmAuth | null {
   const entry =
@@ -89,7 +86,7 @@ export async function loadRegistryAuthUsing(
 ): Promise<Registry> {
   const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
 
-  let cachedConfig: UpmConfigContent | null = null;
+  let cachedConfig: UpmConfig | null = null;
 
   if (isNonAuthUrl(url)) return { url, auth: null };
 

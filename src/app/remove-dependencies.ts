@@ -2,17 +2,15 @@ import { AsyncResult } from "ts-results-es";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import { tryRemoveProjectDependencies } from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
+import { partialApply } from "../domain/fp-utils";
+import { DebugLog } from "../domain/logging";
 import { PackageUrl } from "../domain/package-url";
 import { UnityProjectManifest } from "../domain/project-manifest";
-import { SemanticVersion } from "../domain/semantic-version";
-import {
-  loadProjectManifestUsing,
-  saveProjectManifestUsing,
-} from "../io/project-manifest-io";
-import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
-import { DebugLog } from "../domain/logging";
-import { partialApply } from "../domain/fp-utils";
 import { resultifyAsyncOp } from "../domain/result-utils";
+import { SemanticVersion } from "../domain/semantic-version";
+import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
+import { loadProjectManifestUsing } from "./get-dependencies";
+import { saveProjectManifestUsing } from "./write-dependencies";
 
 /**
  * Contains information about a package that was removed from a project.

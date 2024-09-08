@@ -1,8 +1,14 @@
-import { emptyNpmrc, getHomeNpmrcPath, setToken } from "../domain/npmrc";
+import { EOL } from "node:os";
+import {
+  emptyNpmrc,
+  getHomeNpmrcPath,
+  parseNpmrc,
+  serializeNpmrc,
+  setToken,
+  type Npmrc,
+} from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
 import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
-import { partialApply } from "../domain/fp-utils";
-import { saveNpmrcUsing, tryLoadNpmrcUsing } from "./npmrc-io";
 
 /**
  * Stores an auth token in the users `.npmrc` for npm authentication.
@@ -20,8 +26,16 @@ export async function saveNpmAuthTokenUsing(
   registry: RegistryUrl,
   token: string
 ): Promise<string> {
-  const tryLoadNpmrc = partialApply(tryLoadNpmrcUsing, readTextFile);
-  const saveNpmrc = partialApply(saveNpmrcUsing, writeTextFile);
+  async function tryLoadNpmrc(path: string): Promise<Npmrc | null> {
+    return readTextFile(path).then((content) =>
+      content !== null ? parseNpmrc(content) : null
+    );
+  }
+
+  async function saveNpmrc(path: string, npmrc: Npmrc): Promise<void> {
+    const content = serializeNpmrc(EOL, npmrc);
+    return await writeTextFile(path, content);
+  }
 
   const configPath = getHomeNpmrcPath(homePath);
   const initial = (await tryLoadNpmrc(configPath)) || emptyNpmrc;

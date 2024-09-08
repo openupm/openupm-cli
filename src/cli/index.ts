@@ -1,17 +1,17 @@
 import { createCommand } from "@commander-js/extra-typings";
+import RegClient from "another-npm-registry-client";
 import npmlog from "npmlog";
 import pkginfo from "pkginfo";
 import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
+import { DebugLog } from "../domain/logging";
+import { getHomePathFromEnv } from "../domain/special-paths";
 import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
 import { fetchCheckUrlExists } from "../io/check-url";
 import { getAuthTokenUsing } from "../io/get-auth-token";
 import { searchRegistryUsing } from "../io/npm-search";
 import { getRegistryPackumentUsing } from "../io/packument-io";
-import { makeNpmRegistryClient } from "../io/reg-client";
-import { getHomePathFromEnv } from "../io/special-paths";
 import { readTextFile, writeTextFile } from "../io/text-file-io";
-import { DebugLog } from "../domain/logging";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
@@ -48,7 +48,7 @@ const debugLogToConsole: DebugLog = async function (message, context) {
 };
 
 const homePath = getHomePathFromEnv(process.env);
-const registryClient = makeNpmRegistryClient(log);
+const registryClient = new RegClient({ log });
 const fetchPackument = getRegistryPackumentUsing(
   registryClient,
   debugLogToConsole

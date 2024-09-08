@@ -10,10 +10,10 @@ import {
 import { unityRegistry } from "../domain/registry";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import { GetRegistryPackument } from "../io/packument-io";
-import { getHomePathFromEnv } from "../io/special-paths";
+import { getHomePathFromEnv } from "../domain/special-paths";
 import type { ReadTextFile } from "../io/text-file-io";
 import type { DebugLog } from "../domain/logging";
-import { queryAllRegistriesLazy } from "../app/sources";
+import { queryAllRegistriesLazy } from "../app/query-registries";
 import { CmdOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";

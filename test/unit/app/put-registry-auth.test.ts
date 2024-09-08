@@ -1,6 +1,6 @@
 import { putRegistryAuthIntoUpmConfig } from "../../../src/app/put-registry-auth";
 import { Base64 } from "../../../src/domain/base64";
-import { type UpmConfigContent } from "../../../src/io/upm-config-io";
+import type { UpmConfig } from "../../../src/domain/upm-config";
 import { exampleRegistryUrl } from "../../common/data-registry";
 
 describe("put registry auth into upm config", () => {
@@ -23,7 +23,7 @@ describe("put registry auth into upm config", () => {
   });
 
   it("should replace entry of same type", () => {
-    const initial: UpmConfigContent = {
+    const initial: UpmConfig = {
       npmAuth: {
         [exampleRegistryUrl]: {
           _auth: "dXNlcjpwYXNz" as Base64, // user:pass
@@ -49,7 +49,7 @@ describe("put registry auth into upm config", () => {
   });
 
   it("should replace entry of different type", () => {
-    const initial: UpmConfigContent = {
+    const initial: UpmConfig = {
       npmAuth: {
         [exampleRegistryUrl]: {
           token: someToken,
@@ -74,7 +74,7 @@ describe("put registry auth into upm config", () => {
   });
 
   it("should replace entry for url that has trailing slash", () => {
-    const initial: UpmConfigContent = {
+    const initial: UpmConfig = {
       // This entry has an url with a trailing slash, but it should
       // still be replaced.
       [exampleRegistryUrl + "/"]: {
@@ -99,7 +99,7 @@ describe("put registry auth into upm config", () => {
   });
 
   it("should keep email of token entry", () => {
-    const initial: UpmConfigContent = {
+    const initial: UpmConfig = {
       npmAuth: {
         [exampleRegistryUrl]: {
           token: someToken,
@@ -123,7 +123,7 @@ describe("put registry auth into upm config", () => {
   });
 
   it("should keep always auth if no replacement was provided", () => {
-    const initial: UpmConfigContent = {
+    const initial: UpmConfig = {
       npmAuth: {
         [exampleRegistryUrl]: {
           token: someToken,

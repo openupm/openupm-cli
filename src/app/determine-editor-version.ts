@@ -1,9 +1,41 @@
+import { CustomError } from "ts-custom-error";
 import { ReleaseVersion } from "../domain/editor-version";
-import { validateProjectVersion } from "../domain/project-version";
-import { loadProjectVersionUsing } from "../io/project-version-io";
-import { type ReadTextFile } from "../io/text-file-io";
-import { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards";
 import { partialApply } from "../domain/fp-utils";
+import { DebugLog } from "../domain/logging";
+import {
+  projectVersionTxtPathFor,
+  tryParseProjectVersionTxt,
+  validateProjectVersion,
+} from "../domain/project-version-txt";
+import { type ReadTextFile } from "../io/text-file-io";
+
+export class ProjectVersionMissingError extends CustomError {
+  public constructor(public readonly expectedPath: string) {
+    super();
+  }
+}
+
+export class ProjectVersionMalformedError extends CustomError {}
+
+async function loadProjectVersionUsing(
+  readFile: ReadTextFile,
+  debugLog: DebugLog,
+  projectDirPath: string
+): Promise<string> {
+  const filePath = projectVersionTxtPathFor(projectDirPath);
+
+  const content = await readFile(filePath);
+  if (content === null) throw new ProjectVersionMissingError(filePath);
+
+  try {
+    return tryParseProjectVersionTxt(content);
+  } catch (error) {
+    assertIsError(error);
+    await debugLog("ProjectVersion.txt has malformed yaml.", error);
+    throw new ProjectVersionMalformedError();
+  }
+}
 
 /**
  * Function for determining the editor-version for a Unity project.

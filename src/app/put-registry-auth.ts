@@ -1,17 +1,17 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { encodeBase64 } from "../domain/base64";
-import { RegistryUrl } from "../domain/registry-url";
-import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
-import {
-  loadUpmConfigUsing,
-  saveUpmConfigFileUsing,
-  UpmAuth,
-  UpmConfigContent,
-} from "../io/upm-config-io";
 import { partialApply } from "../domain/fp-utils";
+import { RegistryUrl } from "../domain/registry-url";
+import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config";
 import { removeExplicitUndefined } from "../domain/zod-utils";
+import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
+import { loadUpmConfigUsing } from "./get-upm-config";
+import { saveUpmConfigFileUsing } from "./write-upm-config";
 
-function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
+function mergeEntries(
+  oldEntry: UpmConfigEntry | null,
+  newEntry: NpmAuth
+): UpmConfigEntry {
   const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;
 
   if ("token" in newEntry) {
@@ -39,14 +39,14 @@ function mergeEntries(oldEntry: UpmAuth | null, newEntry: NpmAuth): UpmAuth {
  * @returns An updated upm config content with the auth data.
  */
 export function putRegistryAuthIntoUpmConfig(
-  currentContent: UpmConfigContent | null,
+  currentContent: UpmConfig | null,
   registry: RegistryUrl,
   auth: NpmAuth
-): UpmConfigContent {
+): UpmConfig {
   const oldEntries = currentContent?.npmAuth ?? {};
   // Search the entry both with and without trailing slash
   const oldEntry = oldEntries[registry] ?? oldEntries[registry + "/"] ?? null;
-  const newContent: UpmConfigContent = removeExplicitUndefined({
+  const newContent: UpmConfig = removeExplicitUndefined({
     npmAuth: {
       ...oldEntries,
       // Remove entry with trailing slash
@@ -77,7 +77,7 @@ export async function putRegistryAuthUsing(
 
   const currentContent = await loadUpmConfig(configPath);
 
-  const newContent: UpmConfigContent = putRegistryAuthIntoUpmConfig(
+  const newContent: UpmConfig = putRegistryAuthIntoUpmConfig(
     currentContent,
     registry,
     auth

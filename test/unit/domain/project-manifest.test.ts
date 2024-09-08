@@ -12,6 +12,7 @@ import {
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
   removeTestable,
+  serializeProjectManifest,
   setDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
@@ -388,6 +389,23 @@ describe("project-manifest", () => {
       const content = `123`;
 
       expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+  });
+
+  describe("serialize manifest", () => {
+    it("should prune empty scoped registries", () => {
+      const manifest: UnityProjectManifest = {
+        dependencies: {},
+        scopedRegistries: [
+          // Scoped registry with no scopes
+          { name: "some registry", url: exampleRegistryUrl, scopes: [] },
+        ],
+      };
+
+      const json = serializeProjectManifest(manifest);
+
+      // The registry should not be in the output json
+      expect(json).not.toContain("some registry");
     });
   });
 });

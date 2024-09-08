@@ -7,7 +7,7 @@ import { GetDirectoriesIn } from "../io/directory-io";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
-} from "../io/special-paths";
+} from "../domain/special-paths";
 import { assertIsNodeError } from "../domain/error-type-guards";
 import { resultifyAsyncOp } from "../domain/result-utils";
 
