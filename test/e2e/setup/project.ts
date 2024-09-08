@@ -1,16 +1,20 @@
 import fse from "fs-extra";
 import path from "path";
 import yaml from "yaml";
+import { partialApply } from "../../../src/domain/fp-utils";
 import {
   emptyProjectManifest,
   UnityProjectManifest,
 } from "../../../src/domain/project-manifest";
-import { WriteProjectManifestFile } from "../../../src/io/project-manifest-io";
-import { projectVersionTxtPathFor } from "../../../src/io/project-version-io";
+import { projectVersionTxtPathFor } from "../../../src/domain/project-version-txt";
+import { saveProjectManifestUsing } from "../../../src/app/write-dependencies";
 import { writeTextFile } from "../../../src/io/text-file-io";
 import { dropDirectory } from "./directories";
 
-const writeProjectManifest = WriteProjectManifestFile(writeTextFile);
+const writeProjectManifest = partialApply(
+  saveProjectManifestUsing,
+  writeTextFile
+);
 
 /**
  * Prepares a mock Unity project for testing.

@@ -1,3 +1,4 @@
+import { Ok } from "ts-results-es";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
   NoVersionsError,
@@ -8,7 +9,7 @@ import {
   VersionNotFoundError,
 } from "../../../src/domain/packument";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildPackument } from "./data-packument";
+import { buildPackument } from "../../common/data-packument";
 
 describe("packument", () => {
   describe("get latest version", () => {
@@ -89,25 +90,19 @@ describe("packument", () => {
     it("should find latest version when requested", () => {
       const result = tryResolvePackumentVersion(somePackument, "latest");
 
-      expect(result).toBeOk((value) =>
-        expect(value).toEqual(somePackument.versions[someHighVersion]!)
-      );
+      expect(result).toEqual(Ok(somePackument.versions[someHighVersion]!));
     });
 
     it("should find latest version when requesting no particular version", () => {
       const result = tryResolvePackumentVersion(somePackument, undefined);
 
-      expect(result).toBeOk((value) =>
-        expect(value).toEqual(somePackument.versions[someHighVersion]!)
-      );
+      expect(result).toEqual(Ok(somePackument.versions[someHighVersion]!));
     });
 
     it("should find specific version", () => {
       const result = tryResolvePackumentVersion(somePackument, someLowVersion);
 
-      expect(result).toBeOk((value) =>
-        expect(value).toEqual(somePackument.versions[someLowVersion]!)
-      );
+      expect(result).toEqual(Ok(somePackument.versions[someLowVersion]!));
     });
 
     it("should fail if version is not found", () => {
@@ -118,9 +113,8 @@ describe("packument", () => {
         someNonExistentVersion
       );
 
-      expect(result).toBeError((error) =>
-        expect(error).toBeInstanceOf(VersionNotFoundError)
-      );
+      const error = result.unwrapErr();
+      expect(error).toBeInstanceOf(VersionNotFoundError);
     });
   });
 

@@ -1,7 +1,7 @@
-import RegClient from "another-npm-registry-client";
+import RegClient, { type AddUserResponse } from "another-npm-registry-client";
 import { RegistryUrl } from "../domain/registry-url";
+import { DebugLog } from "../domain/logging";
 import { RegistryAuthenticationError } from "./common-errors";
-import { DebugLog } from "../logging";
 
 /**
  * A token authenticating a user.
@@ -27,33 +27,28 @@ export type GetAuthToken = (
  * Makes a {@link GetAuthToken} function which gets the token
  * by authenticating the user with a remote npm registry.
  */
-export function AuthenticateWithNpmRegistry(
+export function getAuthTokenUsing(
   registryClient: RegClient.Instance,
   debugLog: DebugLog
 ): GetAuthToken {
   return (registryUrl, username, email, password) =>
-    new Promise((resolve, reject) => {
+    new Promise<[AddUserResponse, Response]>((resolve, reject) => {
       registryClient.adduser(
         registryUrl,
         { auth: { username, email, password } },
         (error, responseData, _, response) => {
-          if (response !== undefined && !responseData.ok) {
-            debugLog(
-              "Npm registry login failed because of not-ok response.",
-              response
-            );
-            reject(new RegistryAuthenticationError(registryUrl));
-          } else if (responseData.ok) resolve(responseData.token);
-          reject(error);
+          if (error !== null) reject(error);
+          else resolve([responseData, response]);
         }
       );
+    }).then(async ([data, response]) => {
+      if (!data.ok) {
+        await debugLog(
+          "Npm registry login failed because of not-ok response.",
+          response
+        );
+        throw new RegistryAuthenticationError(registryUrl);
+      }
+      return data.token;
     });
 }
-
-/**
- * Default {@link GetAuthToken}. Uses {@link AuthenticateWithNpmRegistry}.
- */
-export const getAuthToken = (
-  registryClient: RegClient.Instance,
-  debugLog: DebugLog
-) => AuthenticateWithNpmRegistry(registryClient, debugLog);

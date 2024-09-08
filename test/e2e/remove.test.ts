@@ -1,7 +1,7 @@
 import { ResultCodes } from "../../src/cli/result-codes";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
-import { buildProjectManifest } from "../unit/domain/data-project-manifest";
-import { exampleRegistryUrl } from "../unit/domain/data-registry";
+import { buildProjectManifest } from "../common/data-project-manifest";
+import { exampleRegistryUrl } from "../common/data-registry";
 import { getProjectManifest } from "./check/project-manifest";
 import { runOpenupm } from "./run";
 import { prepareHomeDirectory } from "./setup/directories";

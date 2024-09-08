@@ -2,8 +2,8 @@ import RegClient from "another-npm-registry-client";
 import { DomainName } from "../domain/domain-name";
 import { UnityPackument } from "../domain/packument";
 import { Registry } from "../domain/registry";
-import { DebugLog } from "../logging";
-import { assertIsHttpError } from "../utils/error-type-guards";
+import { DebugLog } from "../domain/logging";
+import { assertIsHttpError } from "../domain/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
 
 /**
@@ -27,19 +27,21 @@ export function getRegistryPackumentUsing(
 ): GetRegistryPackument {
   return (registry, name) => {
     const url = `${registry.url}/${name}`;
-    return new Promise((resolve, reject) => {
+    return new Promise<UnityPackument | null>((resolve, reject) => {
       return registryClient.get(
         url,
         { auth: registry.auth || undefined },
         (error, packument) => {
           if (error !== null) {
-            debugLog("Fetching a packument failed.", error);
             assertIsHttpError(error);
             if (error.statusCode === 404) resolve(null);
-            else reject(makeRegistryInteractionError(error, registry.url));
+            else reject(error);
           } else resolve(packument);
         }
       );
+    }).catch(async (error) => {
+      await debugLog("Fetching a packument failed.", error);
+      throw makeRegistryInteractionError(error, registry.url);
     });
   };
 }

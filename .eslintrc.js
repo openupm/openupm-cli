@@ -14,7 +14,7 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "jsdoc/require-returns": 0,
     "jsdoc/require-jsdoc": [
-      1,
+      "warn",
       {
         publicOnly: true,
         contexts: [
@@ -22,6 +22,7 @@ module.exports = {
           "TSInterfaceDeclaration",
           "TSPropertySignature",
           "TSMethodSignature",
+          "ExportNamedDeclaration > VariableDeclaration",
         ],
       },
     ],
@@ -29,7 +30,11 @@ module.exports = {
     "jsdoc/require-throws": 1,
     "jsdoc/require-description-complete-sentence": 1,
     "jsdoc/check-param-names": [1, { checkDestructured: false }],
+    "@typescript-eslint/no-floating-promises": "error",
   },
   parser: "@typescript-eslint/parser",
+  parserOptions: {
+    project: "./tsconfig.json",
+  },
   plugins: ["@typescript-eslint", "jsdoc"],
 };

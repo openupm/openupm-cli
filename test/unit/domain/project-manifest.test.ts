@@ -1,14 +1,18 @@
 import fc from "fast-check";
+import path from "path";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
   addTestable,
   emptyProjectManifest,
   hasDependency,
+  manifestPathFor,
   mapScopedRegistry,
+  parseProjectManifest,
   removeDependency,
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
   removeTestable,
+  serializeProjectManifest,
   setDependency,
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
@@ -20,8 +24,8 @@ import {
   makeScopedRegistry,
 } from "../../../src/domain/scoped-registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildProjectManifest } from "./data-project-manifest";
-import { exampleRegistryUrl } from "./data-registry";
+import { buildProjectManifest } from "../../common/data-project-manifest";
+import { exampleRegistryUrl } from "../../common/data-registry";
 import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
@@ -346,6 +350,62 @@ describe("project-manifest", () => {
           });
         })
       );
+    });
+  });
+
+  describe("path", () => {
+    it("should determine correct manifest path", () => {
+      const manifestPath = manifestPathFor("test-openupm-cli");
+      const expected = path.join(
+        "test-openupm-cli",
+        "Packages",
+        "manifest.json"
+      );
+      expect(manifestPath).toEqual(expected);
+    });
+  });
+
+  describe("parse", () => {
+    it("should parse valid manifest", () => {
+      const content = `{ "dependencies": { "com.package.a": "1.0.0"} }`;
+
+      const parsed = parseProjectManifest(content);
+
+      expect(parsed).toEqual({
+        dependencies: {
+          "com.package.a": "1.0.0",
+        },
+      });
+    });
+
+    it("should fail for bad json", () => {
+      const content = "not : valid // json";
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+
+    it("should fail incorrect json shape", () => {
+      // Valid json but not what we want
+      const content = `123`;
+
+      expect(() => parseProjectManifest(content)).toThrow(Error);
+    });
+  });
+
+  describe("serialize manifest", () => {
+    it("should prune empty scoped registries", () => {
+      const manifest: UnityProjectManifest = {
+        dependencies: {},
+        scopedRegistries: [
+          // Scoped registry with no scopes
+          { name: "some registry", url: exampleRegistryUrl, scopes: [] },
+        ],
+      };
+
+      const json = serializeProjectManifest(manifest);
+
+      // The registry should not be in the output json
+      expect(json).not.toContain("some registry");
     });
   });
 });

@@ -6,7 +6,7 @@ import {
   UnityPackument,
   VersionedPackument,
 } from "../domain/packument";
-import { recordKeys } from "../utils/record-utils";
+import { recordKeys } from "../domain/record-utils";
 
 /**
  * A type describing the minimum required properties of a packument

@@ -1,6 +1,6 @@
 import { CustomError } from "ts-custom-error";
 import { RegistryUrl } from "../domain/registry-url";
-import { isHttpError } from "../utils/error-type-guards";
+import { isHttpError } from "../domain/error-type-guards";
 
 /**
  * Error for when authentication with a registry failed.

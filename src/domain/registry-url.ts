@@ -1,5 +1,5 @@
-import { removeTrailingSlash } from "../utils/string-utils";
 import { z } from "zod";
+import { removeTrailingSlash } from "./string-utils";
 
 /**
  * Schema for {@link RegistryUrl}.
@@ -28,6 +28,14 @@ export function coerceRegistryUrl(s: string): RegistryUrl {
   return RegistryUrl.parse(s);
 }
 
+/**
+ * The registry url for the official Unity package registry.
+ */
 export const unityRegistryUrl = RegistryUrl.parse("https://packages.unity.com");
 
-export const openupmRegistryUrl = RegistryUrl.parse("https://package.openupm.com");
+/**
+ * The registry url for the OpenUpm package registry.
+ */
+export const openupmRegistryUrl = RegistryUrl.parse(
+  "https://package.openupm.com"
+);

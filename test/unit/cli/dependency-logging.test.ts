@@ -6,8 +6,8 @@ import {
 } from "../../../src/domain/dependency-graph";
 import { stringifyDependencyGraph } from "../../../src/cli/dependency-logging";
 import { makePackageReference } from "../../../src/domain/package-reference";
-import { exampleRegistryUrl } from "../domain/data-registry";
-import { PackumentNotFoundError } from "../../../src/common-errors";
+import { exampleRegistryUrl } from "../../common/data-registry";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { VersionNotFoundError } from "../../../src/domain/packument";
 import { DomainName } from "../../../src/domain/domain-name";

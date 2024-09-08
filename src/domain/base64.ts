@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/**
+ * Zod parser for {@link Base64}.
+ */
 export const Base64 = z.string().base64().brand("Base64");
 
 /**

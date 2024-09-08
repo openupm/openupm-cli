@@ -1,34 +1,57 @@
 import { EOL } from "node:os";
 import { Logger } from "npmlog";
 import {
-  EditorVersionNotSupportedError,
-  PackumentNotFoundError,
-} from "../common-errors";
-import { stringifyEditorVersion } from "../domain/editor-version";
-import { NoVersionsError, VersionNotFoundError } from "../domain/packument";
-import { NoSystemUserProfilePath } from "../domain/upm-config";
-import { EditorNotInstalledError } from "../io/builtin-packages";
-import { RegistryAuthenticationError } from "../io/common-errors";
-import {
-  ManifestMalformedError,
-  ManifestMissingError,
-} from "../io/project-manifest-io";
+  CompatibilityCheckFailedError,
+  PackageIncompatibleError,
+  UnresolvedDependenciesError,
+  type UnresolvedDependency,
+} from "../app/add-dependencies";
+import { EditorNotInstalledError } from "../app/builtin-packages";
 import {
   ProjectVersionMalformedError,
   ProjectVersionMissingError,
-} from "../io/project-version-io";
+} from "../app/determine-editor-version";
+import {
+  ManifestMalformedError,
+  ManifestMissingError,
+} from "../app/get-dependencies";
+import {
+  EditorVersionNotSupportedError,
+  PackumentNotFoundError,
+} from "../domain/common-errors";
+import { stringifyEditorVersion } from "../domain/editor-version";
+import {
+  NoVersionsError,
+  VersionNotFoundError,
+  type ResolvePackumentVersionError,
+} from "../domain/packument";
+import { recordEntries } from "../domain/record-utils";
+import { NoSystemUserProfilePath } from "../domain/upm-config";
+import { RegistryAuthenticationError } from "../io/common-errors";
 import {
   NoHomePathError,
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
-} from "../io/special-paths";
-import { RegistryAuthLoadError } from "../services/parse-env";
-import {
-  CompatibilityCheckFailedError,
-  PackageIncompatibleError,
-  UnresolvedDependenciesError,
-} from "./cmd-add";
+} from "../domain/special-paths";
+import { RegistryAuthLoadError } from "./parse-env";
 import { ResultCodes } from "./result-codes";
+
+function errorMessageFor(error: ResolvePackumentVersionError): string {
+  if (error instanceof PackumentNotFoundError) return "package not found";
+  else return "version not found";
+}
+
+function stringifyUnresolvedDependency(
+  dependency: UnresolvedDependency
+): string {
+  return (
+    `${dependency.name}@${dependency.version}${EOL}` +
+    recordEntries(dependency.errors).map(
+      ([errorSource, error]) =>
+        `  - "${errorSource}": ${errorMessageFor(error)}`
+    )
+  );
+}
 
 function makeErrorMessageFor(error: unknown): string {
   if (error instanceof RegistryAuthLoadError)
@@ -48,7 +71,10 @@ function makeErrorMessageFor(error: unknown): string {
       error.editorVersion
     )}.`;
   if (error instanceof UnresolvedDependenciesError)
-    return `"${error.packageRef}" has one or more unresolved dependencies and was not added.`;
+    return (
+      `"${error.packageRef}" has one or more unresolved dependencies and was not added.${EOL}` +
+      `${error.dependencies.map(stringifyUnresolvedDependency).join(EOL)}`
+    );
   if (error instanceof NoVersionsError)
     return `"${error.packageName}" can not be added because it has no published versions.`;
   if (error instanceof VersionNotFoundError)

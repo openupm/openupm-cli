@@ -1,11 +1,10 @@
 import npmSearch from "libnpmsearch";
 import { UnityPackument } from "../domain/packument";
-import { Registry } from "../domain/registry";
+import { makeNpmFetchOptions, Registry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { DebugLog } from "../logging";
-import { assertIsError } from "../utils/error-type-guards";
+import { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
-import { makeNpmFetchOptions } from "./npm-registry";
 
 /**
  * A type representing a searched packument. Instead of having all versions
@@ -37,9 +36,9 @@ export function searchRegistryUsing(debugLog: DebugLog): SearchRegistry {
     npmSearch(keyword, makeNpmFetchOptions(registry))
       // NOTE: The results of the search will be packument objects, so we can change the type
       .then((results) => results as SearchedPackument[])
-      .catch((error) => {
+      .catch(async (error) => {
         assertIsError(error);
-        debugLog("A http request failed.", error);
+        await debugLog("A http request failed.", error);
         throw makeRegistryInteractionError(error, registry.url);
       });
 }

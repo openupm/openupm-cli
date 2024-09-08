@@ -1,7 +1,10 @@
 import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
-import { PackumentNotFoundError } from "../common-errors";
+import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { resolveDependenciesUsing } from "../app/resolve-dependencies";
+import { PackumentNotFoundError } from "../domain/common-errors";
 import {
   makePackageReference,
   PackageReference,
@@ -10,15 +13,17 @@ import {
 import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { DebugLog } from "../logging";
-import { ResolveDependencies } from "../services/dependency-resolving";
-import { GetLatestVersion } from "../services/get-latest-version";
-import { GetRegistryAuth } from "../services/get-registry-auth";
-import { ParseEnv } from "../services/parse-env";
-import { queryAllRegistriesLazy } from "../utils/sources";
-import { isZod } from "../utils/zod-utils";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { CheckUrlExists } from "../io/check-url";
+import type { GetRegistryPackument } from "../io/packument-io";
+import { getHomePathFromEnv } from "../domain/special-paths";
+import type { ReadTextFile } from "../io/text-file-io";
+import { DebugLog } from "../domain/logging";
+import { queryAllRegistriesLazy } from "../app/query-registries";
+import { isZod } from "../domain/zod-utils";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { CmdOptions } from "./options";
+import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -50,18 +55,26 @@ export type DepsCmd = (
  * Makes a {@link DepsCmd} function.
  */
 export function makeDepsCmd(
-  parseEnv: ParseEnv,
-  resolveDependencies: ResolveDependencies,
-  resolveLatestVersion: GetLatestVersion,
-  getRegistryAuth: GetRegistryAuth,
+  readTextFile: ReadTextFile,
+  fetchPackument: GetRegistryPackument,
+  checkUrlExists: CheckUrlExists,
   log: Logger,
   debugLog: DebugLog
 ): DepsCmd {
   return async (pkg, options) => {
     // parse env
-    const env = await parseEnv(options);
-    const primaryRegistry = await getRegistryAuth(
-      env.systemUser,
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
+      upmConfigPath,
       env.primaryRegistryUrl
     );
     const sources = [primaryRegistry, unityRegistry];
@@ -78,17 +91,23 @@ export function makeDepsCmd(
         ? requestedVersion
         : (
             await queryAllRegistriesLazy(sources, (source) =>
-              resolveLatestVersion(source, packageName)
+              fetchLatestPackumentVersionUsing(
+                fetchPackument,
+                source,
+                packageName
+              )
             )
           )?.value ?? null;
 
     if (latestVersion === null) throw new PackumentNotFoundError(packageName);
 
     const deep = options.deep || false;
-    debugLog(
+    await debugLog(
       `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
     );
-    const dependencyGraph = await resolveDependencies(
+    const dependencyGraph = await resolveDependenciesUsing(
+      checkUrlExists,
+      fetchPackument,
       sources,
       packageName,
       latestVersion,

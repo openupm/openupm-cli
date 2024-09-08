@@ -1,7 +1,7 @@
 import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
-import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
-import { isZod } from "../utils/zod-utils";
+import { trySplitAtFirstOccurrenceOf } from "./string-utils";
+import { isZod } from "./zod-utils";
 
 /**
  * Represents a package at a specific version. The version is here is a

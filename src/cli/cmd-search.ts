@@ -1,11 +1,17 @@
 import { Logger } from "npmlog";
 import * as os from "os";
-import { DebugLog } from "../logging";
-import { GetRegistryAuth } from "../services/get-registry-auth";
-import { ParseEnv } from "../services/parse-env";
-import { SearchPackages } from "../services/search-packages";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { searchPackagesUsing } from "../app/search-packages";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { GetAllRegistryPackuments } from "../io/all-packuments-io";
+import type { SearchRegistry } from "../io/npm-search";
+import { getHomePathFromEnv } from "../domain/special-paths";
+import type { ReadTextFile } from "../io/text-file-io";
+import { DebugLog } from "../domain/logging";
+import { partialApply } from "../domain/fp-utils";
 import { CmdOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
+import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -32,17 +38,33 @@ export type SearchCmd = (
  * Makes a {@link SearchCmd} function.
  */
 export function makeSearchCmd(
-  parseEnv: ParseEnv,
-  searchPackages: SearchPackages,
-  getRegistryAuth: GetRegistryAuth,
+  readTextFile: ReadTextFile,
+  searchRegistry: SearchRegistry,
+  fetchAllPackuments: GetAllRegistryPackuments,
   log: Logger,
   debugLog: DebugLog
 ): SearchCmd {
+  const searchPackages = partialApply(
+    searchPackagesUsing,
+    searchRegistry,
+    fetchAllPackuments,
+    debugLog
+  );
+
   return async (keyword, options) => {
     // parse env
-    const env = await parseEnv(options);
-    const primaryRegistry = await getRegistryAuth(
-      env.systemUser,
+    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+    const homePath = getHomePathFromEnv(process.env);
+    const upmConfigPath = getUserUpmConfigPathFor(
+      process.env,
+      homePath,
+      env.systemUser
+    );
+
+    const primaryRegistry = await loadRegistryAuthUsing(
+      readTextFile,
+      debugLog,
+      upmConfigPath,
       env.primaryRegistryUrl
     );
 
@@ -57,7 +79,9 @@ export function makeSearchCmd(
       return ResultCodes.Ok;
     }
 
-    debugLog(`${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`);
+    await debugLog(
+      `${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`
+    );
     log.notice("", formatAsTable(results));
     return ResultCodes.Ok;
   };

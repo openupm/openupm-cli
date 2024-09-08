@@ -1,10 +1,12 @@
-import { removeRecordKey } from "../utils/record-utils";
-import { removeTrailingSlash } from "../utils/string-utils";
+import path from "node:path";
+import { z } from "zod";
 import { DomainName } from "./domain-name";
 import { PackageUrl } from "./package-url";
+import { removeRecordKey } from "./record-utils";
 import { RegistryUrl } from "./registry-url";
 import { ScopedRegistry } from "./scoped-registry";
 import { SemanticVersion } from "./semantic-version";
+import { removeTrailingSlash } from "./string-utils";
 
 /**
  * The content of the project-manifest (manifest.json) of a Unity project.
@@ -212,4 +214,47 @@ export function removeTestable(
     ...manifest,
     testables: manifest.testables.filter((it) => it !== packageName),
   };
+}
+
+/**
+ * Determines the path to the package manifest based on the project
+ * directory.
+ * @param projectPath The root path of the Unity project.
+ */
+export function manifestPathFor(projectPath: string): string {
+  return path.join(projectPath, "Packages/manifest.json");
+}
+
+// TODO: Add a better schema
+const projectManifestSchema = z.object({}).passthrough();
+
+/**
+ * Parses the content of a `manifest.json` file to a {@link UnityProjectManifest}.
+ * @param content The files content.
+ * @returns The parsed file.
+ * @throws {Error} If parsing failed.
+ */
+export function parseProjectManifest(content: string): UnityProjectManifest {
+  const json = JSON.parse(content);
+  return projectManifestSchema.parse(json) as UnityProjectManifest;
+}
+
+/**
+ * Serializes a {@link UnityProjectManifest} object into json format.
+ * @param manifest The manifest to serialize.
+ * @returns The serialized manifest.
+ */
+export function serializeProjectManifest(
+  manifest: UnityProjectManifest
+): string {
+  // Remove empty scoped registries
+  if (manifest.scopedRegistries !== undefined)
+    manifest = {
+      ...manifest,
+      scopedRegistries: manifest.scopedRegistries.filter(
+        (it) => it.scopes.length > 0
+      ),
+    };
+
+  return JSON.stringify(manifest, null, 2);
 }

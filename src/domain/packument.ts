@@ -1,12 +1,12 @@
 import { Dist } from "@npm/types";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
-import { recordKeys } from "../utils/record-utils";
+import { recordKeys } from "./record-utils";
 import { DomainName } from "./domain-name";
 import { UnityPackageManifest } from "./package-manifest";
 import { SemanticVersion } from "./semantic-version";
 
-import { PackumentNotFoundError } from "../common-errors";
+import { PackumentNotFoundError } from "./common-errors";
 import { ResolvableVersion } from "./package-reference";
 
 /**

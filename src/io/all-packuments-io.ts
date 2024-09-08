@@ -1,10 +1,9 @@
 import npmFetch from "npm-registry-fetch";
 import { DomainName } from "../domain/domain-name";
-import { Registry } from "../domain/registry";
-import { DebugLog } from "../logging";
-import { assertIsError } from "../utils/error-type-guards";
+import { makeNpmFetchOptions, Registry } from "../domain/registry";
+import { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards";
 import { makeRegistryInteractionError } from "./common-errors";
-import { makeNpmFetchOptions } from "./npm-registry";
 import { SearchedPackument } from "./npm-search";
 
 /**
@@ -31,7 +30,7 @@ export function getAllRegistryPackumentsUsing(
   debugLog: DebugLog
 ): GetAllRegistryPackuments {
   return async (registry) => {
-    debugLog(`Getting all packages from ${registry.url}.`);
+    await debugLog(`Getting all packages from ${registry.url}.`);
     try {
       const result = await npmFetch.json(
         "/-/all",
@@ -40,7 +39,7 @@ export function getAllRegistryPackumentsUsing(
       return result as AllPackuments;
     } catch (error) {
       assertIsError(error);
-      debugLog(`Failed to get all packages from ${registry.url}.`, error);
+      await debugLog(`Failed to get all packages from ${registry.url}.`, error);
 
       throw makeRegistryInteractionError(error, registry.url);
     }

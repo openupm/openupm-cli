@@ -1,9 +1,9 @@
 import { DomainName } from "./domain-name";
 import { SemanticVersion } from "./semantic-version";
 import { PackageUrl } from "./package-url";
-import { trySplitAtFirstOccurrenceOf } from "../utils/string-utils";
+import { trySplitAtFirstOccurrenceOf } from "./string-utils";
 import assert from "assert";
-import { assertZod, isZod } from "../utils/zod-utils";
+import { assertZod, isZod } from "./zod-utils";
 
 /**
  * A string with the format of one of the supported version tags.

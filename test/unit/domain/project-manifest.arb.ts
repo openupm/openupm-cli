@@ -1,6 +1,6 @@
 import fc, { type Arbitrary } from "fast-check";
 import { type UnityProjectManifest } from "../../../src/domain/project-manifest";
-import { UnityProjectManifestBuilder } from "./data-project-manifest";
+import { UnityProjectManifestBuilder } from "../../common/data-project-manifest";
 import { arbDomainName } from "./domain-name.arb";
 import { arbSemanticVersion } from "./semantic-version.arb";
 

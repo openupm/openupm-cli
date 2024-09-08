@@ -11,8 +11,8 @@ import {
   tryGetGraphNode,
   tryGetNextUnresolved,
 } from "../../../src/domain/dependency-graph";
-import { exampleRegistryUrl } from "./data-registry";
-import { PackumentNotFoundError } from "../../../src/common-errors";
+import { exampleRegistryUrl } from "../../common/data-registry";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 
 describe("dependency graph", () => {
   const somePackage = DomainName.parse("com.some.package");
