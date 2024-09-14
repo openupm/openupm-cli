@@ -11,7 +11,7 @@ import {
 import { trySplitAtFirstOccurrenceOf } from "../domain/string-utils";
 import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config";
 import { removeExplicitUndefined } from "../domain/zod-utils";
-import { type ReadTextFile } from "../io/text-file-io";
+import { type ReadTextFile } from "../io/fs";
 import { loadUpmConfigUsing } from "./get-upm-config";
 
 /**

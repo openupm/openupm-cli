@@ -6,7 +6,7 @@ import {
   manifestPathFor,
   parseProjectManifest,
 } from "../domain/project-manifest";
-import type { ReadTextFile } from "../io/text-file-io";
+import type { ReadTextFile } from "../io/fs";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {

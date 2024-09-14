@@ -10,8 +10,8 @@ import {
 } from "../domain/packument";
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
-import { GetRegistryPackument } from "../io/packument-io";
 import { resultifyAsyncOp } from "../domain/result-utils";
+import type { GetRegistryPackument } from "../io/registry";
 
 /**
  * A successfully resolved packument-version.

@@ -1,11 +1,12 @@
+import { assertIsError } from "../domain/error-type-guards";
+import { DebugLog } from "../domain/logging";
 import { Registry } from "../domain/registry";
 import {
   GetAllRegistryPackuments,
   type AllPackuments,
-} from "../io/all-packuments-io";
-import { SearchedPackument, SearchRegistry } from "../io/npm-search";
-import { DebugLog } from "../domain/logging";
-import { assertIsError } from "../domain/error-type-guards";
+  type SearchedPackument,
+  type SearchRegistry,
+} from "../io/registry";
 
 function tryFindPackagesByKeyword(
   allPackuments: AllPackuments,

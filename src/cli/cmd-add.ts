@@ -2,17 +2,17 @@ import { Logger } from "npmlog";
 import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { DebugLog } from "../domain/logging";
 import {
   makePackageReference,
   PackageReference,
 } from "../domain/package-reference";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
-import type { CheckUrlExists } from "../io/check-url";
-import type { GetRegistryPackument } from "../io/packument-io";
-import { getHomePathFromEnv } from "../domain/special-paths";
-import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
-import { DebugLog } from "../domain/logging";
 import { recordEntries } from "../domain/record-utils";
+import { getHomePathFromEnv } from "../domain/special-paths";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
+import type { ReadTextFile, WriteTextFile } from "../io/fs";
+import type { GetRegistryPackument } from "../io/registry";
+import type { CheckUrlExists } from "../io/www";
 import { CmdOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";

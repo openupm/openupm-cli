@@ -7,14 +7,14 @@ import {
   tryGetGraphNode,
 } from "../../../src/domain/dependency-graph";
 import { DomainName } from "../../../src/domain/domain-name";
+import { partialApply } from "../../../src/domain/fp-utils";
+import { noopLogger } from "../../../src/domain/logging";
 import { VersionNotFoundError } from "../../../src/domain/packument";
 import { Registry } from "../../../src/domain/registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { fetchCheckUrlExists } from "../../../src/io/check-url";
-import { getRegistryPackumentUsing } from "../../../src/io/packument-io";
-import { noopLogger } from "../../../src/domain/logging";
-import { partialApply } from "../../../src/domain/fp-utils";
+import { getRegistryPackumentUsing } from "../../../src/io/registry";
+import { fetchCheckUrlExists } from "../../../src/io/www";
 import { buildPackument } from "../../common/data-packument";
 import { exampleRegistryUrl } from "../../common/data-registry";
 import { mockUnityDocPages } from "../docs.mock";

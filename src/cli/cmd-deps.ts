@@ -3,8 +3,10 @@ import { Logger } from "npmlog";
 import os from "os";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { queryAllRegistriesLazy } from "../app/query-registries";
 import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { PackumentNotFoundError } from "../domain/common-errors";
+import { DebugLog } from "../domain/logging";
 import {
   makePackageReference,
   PackageReference,
@@ -13,14 +15,12 @@ import {
 import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
-import type { CheckUrlExists } from "../io/check-url";
-import type { GetRegistryPackument } from "../io/packument-io";
 import { getHomePathFromEnv } from "../domain/special-paths";
-import type { ReadTextFile } from "../io/text-file-io";
-import { DebugLog } from "../domain/logging";
-import { queryAllRegistriesLazy } from "../app/query-registries";
+import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import { isZod } from "../domain/zod-utils";
+import type { ReadTextFile } from "../io/fs";
+import type { GetRegistryPackument } from "../io/registry";
+import type { CheckUrlExists } from "../io/www";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { CmdOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";

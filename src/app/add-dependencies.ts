@@ -39,9 +39,9 @@ import {
 } from "../domain/scoped-registry";
 import { SemanticVersion } from "../domain/semantic-version";
 import { isZod } from "../domain/zod-utils";
-import type { CheckUrlExists } from "../io/check-url";
-import type { GetRegistryPackument } from "../io/packument-io";
-import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import type { ReadTextFile, WriteTextFile } from "../io/fs";
+import type { GetRegistryPackument } from "../io/registry";
+import type { CheckUrlExists } from "../io/www";
 import { loadProjectManifestUsing } from "./get-dependencies";
 import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";

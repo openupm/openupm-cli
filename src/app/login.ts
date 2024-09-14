@@ -1,9 +1,9 @@
 import { NpmAuth } from "another-npm-registry-client";
-import { RegistryUrl } from "../domain/registry-url";
-import { GetAuthToken } from "../io/get-auth-token";
-import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
-import { DebugLog } from "../domain/logging";
 import { partialApply } from "../domain/fp-utils";
+import { DebugLog } from "../domain/logging";
+import { RegistryUrl } from "../domain/registry-url";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs";
+import type { GetAuthToken } from "../io/registry";
 import { saveNpmAuthTokenUsing } from "./put-npm-auth-token";
 import { putRegistryAuthUsing } from "./put-registry-auth";
 

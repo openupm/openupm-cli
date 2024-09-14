@@ -8,7 +8,7 @@ import {
   tryParseProjectVersionTxt,
   validateProjectVersion,
 } from "../domain/project-version-txt";
-import { type ReadTextFile } from "../io/text-file-io";
+import { type ReadTextFile } from "../io/fs";
 
 export class ProjectVersionMissingError extends CustomError {
   public constructor(public readonly expectedPath: string) {

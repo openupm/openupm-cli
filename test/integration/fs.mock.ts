@@ -17,7 +17,7 @@ import {
   upmConfigFileName,
   type UpmConfig,
 } from "../../src/domain/upm-config";
-import type { ReadTextFile, WriteTextFile } from "../../src/io/text-file-io";
+import type { ReadTextFile, WriteTextFile } from "../../src/io/fs";
 
 type TextFileMap = Record<string, string>;
 

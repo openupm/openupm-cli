@@ -6,12 +6,14 @@ import updateNotifier from "update-notifier";
 import pkg from "../../package.json";
 import { DebugLog } from "../domain/logging";
 import { getHomePathFromEnv } from "../domain/special-paths";
-import { getAllRegistryPackumentsUsing } from "../io/all-packuments-io";
-import { fetchCheckUrlExists } from "../io/check-url";
-import { getAuthTokenUsing } from "../io/get-auth-token";
-import { searchRegistryUsing } from "../io/npm-search";
-import { getRegistryPackumentUsing } from "../io/packument-io";
-import { readTextFile, writeTextFile } from "../io/text-file-io";
+import { readTextFile, writeTextFile } from "../io/fs";
+import {
+  getAllRegistryPackumentsUsing,
+  getAuthTokenUsing,
+  getRegistryPackumentUsing,
+  searchRegistryUsing,
+} from "../io/registry";
+import { fetchCheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";

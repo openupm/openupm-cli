@@ -8,7 +8,7 @@ import {
   type Npmrc,
 } from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
-import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs";
 
 /**
  * Stores an auth token in the users `.npmrc` for npm authentication.

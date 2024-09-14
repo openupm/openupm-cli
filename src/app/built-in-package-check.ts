@@ -2,8 +2,8 @@ import { DomainName } from "../domain/domain-name";
 import { packumentHasVersion } from "../domain/packument";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
-import { CheckUrlExists } from "../io/check-url";
-import { GetRegistryPackument } from "../io/packument-io";
+import type { GetRegistryPackument } from "../io/registry";
+import { CheckUrlExists } from "../io/www";
 
 /**
  * Gets the documentation page url for a package.

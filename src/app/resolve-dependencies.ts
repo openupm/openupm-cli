@@ -8,6 +8,7 @@ import {
   tryGetNextUnresolved,
 } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";
+import { partialApply } from "../domain/fp-utils";
 import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
@@ -15,9 +16,8 @@ import {
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
-import { type CheckUrlExists } from "../io/check-url";
-import { GetRegistryPackument } from "../io/packument-io";
-import { partialApply } from "../domain/fp-utils";
+import type { GetRegistryPackument } from "../io/registry";
+import { type CheckUrlExists } from "../io/www";
 import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
 
 /**

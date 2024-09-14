@@ -2,7 +2,7 @@ import { Logger } from "npmlog";
 import { removeDependenciesUsing } from "../app/remove-dependencies";
 import { DomainName } from "../domain/domain-name";
 import { makePackageReference } from "../domain/package-reference";
-import type { ReadTextFile, WriteTextFile } from "../io/text-file-io";
+import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { DebugLog } from "../domain/logging";
 import { partialApply } from "../domain/fp-utils";
 import { logError } from "./error-logging";

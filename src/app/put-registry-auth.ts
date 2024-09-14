@@ -4,7 +4,7 @@ import { partialApply } from "../domain/fp-utils";
 import { RegistryUrl } from "../domain/registry-url";
 import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config";
 import { removeExplicitUndefined } from "../domain/zod-utils";
-import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs";
 import { loadUpmConfigUsing } from "./get-upm-config";
 import { saveUpmConfigFileUsing } from "./write-upm-config";
 

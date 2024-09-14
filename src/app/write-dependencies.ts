@@ -3,7 +3,7 @@ import {
   serializeProjectManifest,
   UnityProjectManifest,
 } from "../domain/project-manifest";
-import { WriteTextFile } from "../io/text-file-io";
+import { WriteTextFile } from "../io/fs";
 
 /**
  * Function for replacing the project manifest for a Unity project.

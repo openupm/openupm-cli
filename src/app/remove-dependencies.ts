@@ -8,7 +8,7 @@ import { PackageUrl } from "../domain/package-url";
 import { UnityProjectManifest } from "../domain/project-manifest";
 import { resultifyAsyncOp } from "../domain/result-utils";
 import { SemanticVersion } from "../domain/semantic-version";
-import { type ReadTextFile, type WriteTextFile } from "../io/text-file-io";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs";
 import { loadProjectManifestUsing } from "./get-dependencies";
 import { saveProjectManifestUsing } from "./write-dependencies";
 
