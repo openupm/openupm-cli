@@ -9,6 +9,7 @@ import {
 } from "../domain/npmrc";
 import { RegistryUrl } from "../domain/registry-url";
 import { type ReadTextFile, type WriteTextFile } from "../io/fs";
+import type { AuthToken } from "../domain/auth";
 
 /**
  * Stores an auth token in the users `.npmrc` for npm authentication.
@@ -24,7 +25,7 @@ export async function saveNpmAuthTokenUsing(
   writeTextFile: WriteTextFile,
   homePath: string,
   registry: RegistryUrl,
-  token: string
+  token: AuthToken
 ): Promise<string> {
   async function tryLoadNpmrc(path: string): Promise<Npmrc | null> {
     return readTextFile(path).then((content) =>

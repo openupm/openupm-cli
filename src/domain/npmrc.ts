@@ -1,4 +1,5 @@
 import path from "path";
+import type { AuthToken } from "./auth";
 import { RegistryUrl } from "./registry-url";
 import { splitLines } from "./string-utils";
 
@@ -29,7 +30,7 @@ export const getHomeNpmrcPath = (homePath: string): string =>
 export function setToken(
   npmrc: Npmrc,
   registry: RegistryUrl,
-  token: string
+  token: AuthToken
 ): Npmrc {
   let lines = [...npmrc];
   const quotes = /[?=]/.test(token) ? '"' : "";

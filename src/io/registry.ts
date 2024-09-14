@@ -12,6 +12,7 @@ import {
   makeRegistryInteractionError,
   RegistryAuthenticationError,
 } from "./common-errors";
+import type { AuthToken } from "../domain/auth";
 
 type AllPackuments = Readonly<{
   // eslint-disable-next-line jsdoc/require-jsdoc
@@ -50,11 +51,6 @@ export function getAllRegistryPackumentsUsing(
     }
   };
 }
-
-/**
- * A token authenticating a user.
- */
-type AuthToken = string;
 
 /**
  * Function for getting the authentication token for a npm reigstry.
