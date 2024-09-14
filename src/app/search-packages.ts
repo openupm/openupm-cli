@@ -3,23 +3,9 @@ import { DebugLog } from "../domain/logging";
 import { Registry } from "../domain/registry";
 import {
   GetAllRegistryPackuments,
-  type AllPackuments,
   type SearchedPackument,
   type SearchRegistry,
 } from "../io/registry";
-
-function tryFindPackagesByKeyword(
-  allPackuments: AllPackuments,
-  keyword: string
-): ReadonlyArray<SearchedPackument> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { _updated, ...packumentEntries } = allPackuments;
-  const packuments = Object.values(packumentEntries);
-  const klc = keyword.toLowerCase();
-  return packuments.filter((packument) =>
-    packument.name.toLowerCase().includes(klc)
-  );
-}
 
 /**
  * A function for searching packages in a registry.
@@ -49,6 +35,9 @@ export async function searchPackagesUsing(
     // search old search
     onUseAllFallback && onUseAllFallback();
     const allPackuments = await getAllRegistryPackuments(registry);
-    return tryFindPackagesByKeyword(allPackuments, keyword);
+    const klc = keyword.toLowerCase();
+    return allPackuments.filter((packument) =>
+      packument.name.toLowerCase().includes(klc)
+    );
   }
 }

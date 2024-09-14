@@ -66,15 +66,14 @@ describe("registry io", () => {
     });
 
     it("should succeed on ok response", async () => {
-      const expected = {
-        _update: 123,
-      };
-      jest.mocked(npmFetch.json).mockResolvedValue(expected);
+      jest.mocked(npmFetch.json).mockResolvedValue({
+        _updated: 123,
+      });
       const { fetchAllRegistryPackuments } = makeDependencies();
 
       const actual = await fetchAllRegistryPackuments(exampleRegistry);
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual([]);
     });
   });
 

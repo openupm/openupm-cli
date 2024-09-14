@@ -14,10 +14,7 @@ import {
   RegistryAuthenticationError,
 } from "./common-errors";
 
-/**
- * The result of querying the /-/all endpoint.
- */
-export type AllPackuments = Readonly<{
+type AllPackuments = Readonly<{
   // eslint-disable-next-line jsdoc/require-jsdoc
   _updated: number;
   [name: DomainName]: SearchedPackument;
@@ -29,7 +26,7 @@ export type AllPackuments = Readonly<{
  */
 export type GetAllRegistryPackuments = (
   registry: Registry
-) => Promise<AllPackuments>;
+) => Promise<ReadonlyArray<SearchedPackument>>;
 
 /**
  * Makes a {@link GetAllRegistryPackuments} function.
@@ -40,15 +37,16 @@ export function getAllRegistryPackumentsUsing(
   return async (registry) => {
     await debugLog(`Getting all packages from ${registry.url}.`);
     try {
-      const result = await npmFetch.json(
+      const allPackuments = (await npmFetch.json(
         "/-/all",
         makeNpmFetchOptions(registry)
-      );
-      return result as AllPackuments;
+      )) as AllPackuments;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _updated, ...packumentEntries } = allPackuments;
+      return Object.values(packumentEntries);
     } catch (error) {
       assertIsError(error);
       await debugLog(`Failed to get all packages from ${registry.url}.`, error);
-
       throw makeRegistryInteractionError(error, registry.url);
     }
   };
