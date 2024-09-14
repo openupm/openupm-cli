@@ -1,13 +1,12 @@
 import { Dist } from "@npm/types";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
-import { recordKeys } from "./record-utils";
+import { PackumentNotFoundError } from "./common-errors";
 import { DomainName } from "./domain-name";
 import { UnityPackageManifest } from "./package-manifest";
-import { SemanticVersion } from "./semantic-version";
-
-import { PackumentNotFoundError } from "./common-errors";
 import { ResolvableVersion } from "./package-reference";
+import { recordKeys } from "./record-utils";
+import { SemanticVersion } from "./semantic-version";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -67,6 +66,16 @@ export type UnityPackument = Readonly<{
  * to be determined.
  */
 export type VersionedPackument = Pick<UnityPackument, "dist-tags" | "version">;
+
+/**
+ * A type representing a searched packument. Instead of having all versions
+ * this type only includes the latest version.
+ */
+export type SearchedPackument = Readonly<
+  Omit<UnityPackument, "versions"> & {
+    versions: Readonly<Record<SemanticVersion, "latest">>;
+  }
+>;
 
 const hasLatestDistTag = <T extends VersionedPackument>(
   packument: T

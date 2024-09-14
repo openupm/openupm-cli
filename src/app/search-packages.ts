@@ -3,9 +3,9 @@ import { DebugLog } from "../domain/logging";
 import { Registry } from "../domain/registry";
 import {
   GetAllRegistryPackuments,
-  type SearchedPackument,
   type SearchRegistry,
 } from "../io/registry";
+import { type SearchedPackument } from "../domain/packument";
 
 /**
  * A function for searching packages in a registry.

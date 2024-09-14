@@ -5,10 +5,9 @@ import npmFetch from "npm-registry-fetch";
 import { DomainName } from "../domain/domain-name";
 import { assertIsError, assertIsHttpError } from "../domain/error-type-guards";
 import { DebugLog } from "../domain/logging";
-import type { UnityPackument } from "../domain/packument";
+import type { SearchedPackument, UnityPackument } from "../domain/packument";
 import { makeNpmFetchOptions, Registry } from "../domain/registry";
 import type { RegistryUrl } from "../domain/registry-url";
-import type { SemanticVersion } from "../domain/semantic-version";
 import {
   makeRegistryInteractionError,
   RegistryAuthenticationError,
@@ -101,16 +100,6 @@ export function getAuthTokenUsing(
       return data.token;
     });
 }
-
-/**
- * A type representing a searched packument. Instead of having all versions
- * this type only includes the latest version.
- */
-export type SearchedPackument = Readonly<
-  Omit<UnityPackument, "versions"> & {
-    versions: Readonly<Record<SemanticVersion, "latest">>;
-  }
->;
 
 /**
  * Function for searching packuments on a npm registry.
