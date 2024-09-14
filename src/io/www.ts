@@ -5,7 +5,7 @@ import fetch from "node-fetch";
  * @param url The url to check.
  * @returns A boolean indicating whether the url exists.
  */
-export type CheckUrlExists = (url: string) => Promise<boolean>;
+export type CheckUrlExists = (url: URL) => Promise<boolean>;
 
 /**
  * {@link CheckUrlExists} function which uses {@link fetch} to send a

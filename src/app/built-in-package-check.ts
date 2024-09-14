@@ -10,8 +10,8 @@ import { CheckUrlExists } from "../io/www";
  * @param packageName The name of the package.
  * @returns The url.
  */
-export function docUrlForPackage(packageName: DomainName) {
-  return `https://docs.unity3d.com/Manual/${packageName}.html`;
+export function docUrlForPackage(packageName: DomainName): URL {
+  return new URL(`https://docs.unity3d.com/Manual/${packageName}.html`);
 }
 
 /**
