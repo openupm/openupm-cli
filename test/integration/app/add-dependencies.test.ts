@@ -13,14 +13,14 @@ import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { partialApply } from "../../../src/domain/fp-utils";
 import { noopLogger } from "../../../src/domain/logging";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
-import { unityRegistry, type Registry } from "../../../src/domain/registry";
+import { unityRegistry } from "../../../src/domain/registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { getRegistryPackumentUsing } from "../../../src/io/registry";
 import { fetchCheckUrlExists } from "../../../src/io/www";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
-import { someRegistryUrl } from "../../common/data-registry";
+import { someRegistry, someRegistryUrl } from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
@@ -28,7 +28,6 @@ import { mockRegistryPackuments } from "../registry.mock";
 describe("add dependencies", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
   const unknownPackage = DomainName.parse("com.unknown.parse");
-  const someRegistry: Registry = { url: someRegistryUrl, auth: null };
 
   const otherPackument = buildPackument("com.other.package", (packument) =>
     packument.addVersion(someVersion, (version) =>
