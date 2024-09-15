@@ -225,139 +225,172 @@ export async function addDependenciesUsing(
     fetchPackument
   );
 
+  function addDependencyToManifest(
+    manifest: UnityProjectManifest,
+    packageName: DomainName,
+    version: PackageUrl | SemanticVersion
+  ): [UnityProjectManifest, AddResult] {
+    const oldVersion = manifest.dependencies[packageName];
+
+    manifest = setDependency(manifest, packageName, version);
+
+    if (!oldVersion) {
+      return [
+        manifest,
+        {
+          type: "added",
+          version: version,
+        },
+      ];
+    } else if (oldVersion !== version) {
+      return [
+        manifest,
+        {
+          type: "upgraded",
+          fromVersion: oldVersion,
+          toVersion: version,
+        },
+      ];
+    } else {
+      return [
+        manifest,
+        {
+          type: "noChange",
+          version: version,
+        },
+      ];
+    }
+  }
+
+  async function resolveDependency(
+    packageName: DomainName,
+    requestedVersion: Exclude<VersionReference | undefined, PackageUrl>
+  ): Promise<[SemanticVersion, ReadonlyArray<DomainName>, boolean]> {
+    let isUnityPackage = false;
+    const packagesInScope = Array.of<DomainName>();
+    let versionToAdd = requestedVersion;
+
+    let resolveResult = await getRegistryPackumentVersion(
+      packageName,
+      requestedVersion,
+      primaryRegistry
+    ).promise;
+    if (resolveResult.isErr() && useUnity) {
+      const unityResult = await getRegistryPackumentVersion(
+        packageName,
+        requestedVersion,
+        unityRegistry
+      ).promise;
+      if (unityResult.isOk()) {
+        resolveResult = unityResult;
+      } else {
+        resolveResult = pickMostFixable(resolveResult, unityResult);
+      }
+    }
+
+    if (resolveResult.isErr()) throw resolveResult.error;
+
+    const packumentVersion = resolveResult.value.packumentVersion;
+    isUnityPackage = resolveResult.value.source === unityRegistryUrl;
+    versionToAdd = packumentVersion.version;
+
+    // Only do compatibility check when we have a editor version to check against
+    if (editorVersion !== null) {
+      let targetEditorVersion: EditorVersion | null;
+      try {
+        targetEditorVersion = tryGetTargetEditorVersionFor(packumentVersion);
+      } catch (error) {
+        if (!force) {
+          const packageRef = makePackageReference(packageName, versionToAdd);
+          await debugLog(
+            `"${packageRef}" is malformed. Target editor version could not be determined.`
+          );
+          throw new CompatibilityCheckFailedError(packageRef);
+        }
+        targetEditorVersion = null;
+      }
+
+      // verify editor version
+      const isCompatible =
+        targetEditorVersion === null ||
+        compareEditorVersion(editorVersion, targetEditorVersion) >= 0;
+      if (!isCompatible && !force)
+        throw new PackageIncompatibleError(
+          makePackageReference(packageName, versionToAdd),
+          targetEditorVersion!
+        );
+    }
+
+    // packagesInScope
+    if (!isUnityPackage) {
+      await debugLog(
+        `fetch: ${makePackageReference(packageName, requestedVersion)}`
+      );
+      const dependencyGraph = await resolveDependenciesUsing(
+        checkUrlExists,
+        fetchPackument,
+        [primaryRegistry, unityRegistry],
+        packageName,
+        versionToAdd,
+        true
+      );
+
+      const unresolvedDependencies = Array.of<UnresolvedDependency>();
+      for (const [
+        dependencyName,
+        dependencyVersion,
+        dependency,
+      ] of traverseDependencyGraph(dependencyGraph)) {
+        if (dependency.type === NodeType.Failed) {
+          // If the manifest already has the dependency than it does not
+          // really matter that it was not resolved.
+          if (!hasDependency(manifest, dependencyName))
+            unresolvedDependencies.push({
+              name: dependencyName,
+              version: dependencyVersion,
+              errors: dependency.errors,
+            });
+          continue;
+        }
+        if (dependency.type === NodeType.Unresolved) continue;
+
+        const dependencyRef = makePackageReference(
+          dependencyName,
+          dependencyVersion
+        );
+        await logResolvedDependency(debugLog, dependencyRef, dependency.source);
+
+        const isUnityPackage =
+          dependency.source === "built-in" ||
+          dependency.source === unityRegistryUrl;
+        if (isUnityPackage) continue;
+
+        // add depsValid to packagesInScope.
+        packagesInScope.push(dependencyName);
+      }
+
+      // print suggestion for depsInvalid
+      if (unresolvedDependencies.length > 0 && !force)
+        throw new UnresolvedDependenciesError(
+          makePackageReference(packageName, versionToAdd),
+          unresolvedDependencies
+        );
+    } else packagesInScope.push(packageName);
+
+    return [versionToAdd, packagesInScope, isUnityPackage];
+  }
+
   async function addSingle(
     manifest: UnityProjectManifest,
     packageName: DomainName,
     requestedVersion: VersionReference | undefined
   ): Promise<[UnityProjectManifest, AddResult]> {
-    let isUnityPackage = false;
-
-    // packages that added to scope registry
-    const packagesInScope = Array.of<DomainName>();
-    let versionToAdd = requestedVersion;
-    if (
-      requestedVersion === undefined ||
-      !isZod(requestedVersion, PackageUrl)
-    ) {
-      let resolveResult = await getRegistryPackumentVersion(
-        packageName,
-        requestedVersion,
-        primaryRegistry
-      ).promise;
-      if (resolveResult.isErr() && useUnity) {
-        const unityResult = await getRegistryPackumentVersion(
-          packageName,
-          requestedVersion,
-          unityRegistry
-        ).promise;
-        if (unityResult.isOk()) {
-          resolveResult = unityResult;
-        } else {
-          resolveResult = pickMostFixable(resolveResult, unityResult);
-        }
-      }
-
-      if (resolveResult.isErr()) throw resolveResult.error;
-
-      const packumentVersion = resolveResult.value.packumentVersion;
-      isUnityPackage = resolveResult.value.source === unityRegistryUrl;
-      versionToAdd = packumentVersion.version;
-
-      // Only do compatibility check when we have a editor version to check against
-      if (editorVersion !== null) {
-        let targetEditorVersion: EditorVersion | null;
-        try {
-          targetEditorVersion = tryGetTargetEditorVersionFor(packumentVersion);
-        } catch (error) {
-          if (!force) {
-            const packageRef = makePackageReference(packageName, versionToAdd);
-            await debugLog(
-              `"${packageRef}" is malformed. Target editor version could not be determined.`
-            );
-            throw new CompatibilityCheckFailedError(packageRef);
-          }
-          targetEditorVersion = null;
-        }
-
-        // verify editor version
-        const isCompatible =
-          targetEditorVersion === null ||
-          compareEditorVersion(editorVersion, targetEditorVersion) >= 0;
-        if (!isCompatible && !force)
-          throw new PackageIncompatibleError(
-            makePackageReference(packageName, versionToAdd),
-            targetEditorVersion!
-          );
-      }
-
-      // packagesInScope
-      if (!isUnityPackage) {
-        await debugLog(
-          `fetch: ${makePackageReference(packageName, requestedVersion)}`
-        );
-        const dependencyGraph = await resolveDependenciesUsing(
-          checkUrlExists,
-          fetchPackument,
-          [primaryRegistry, unityRegistry],
-          packageName,
-          versionToAdd,
-          true
-        );
-
-        const unresolvedDependencies = Array.of<UnresolvedDependency>();
-        for (const [
-          dependencyName,
-          dependencyVersion,
-          dependency,
-        ] of traverseDependencyGraph(dependencyGraph)) {
-          if (dependency.type === NodeType.Failed) {
-            // If the manifest already has the dependency than it does not
-            // really matter that it was not resolved.
-            if (!hasDependency(manifest, dependencyName))
-              unresolvedDependencies.push({
-                name: dependencyName,
-                version: dependencyVersion,
-                errors: dependency.errors,
-              });
-            continue;
-          }
-          if (dependency.type === NodeType.Unresolved) continue;
-
-          const dependencyRef = makePackageReference(
-            dependencyName,
-            dependencyVersion
-          );
-          await logResolvedDependency(
-            debugLog,
-            dependencyRef,
-            dependency.source
-          );
-
-          const isUnityPackage =
-            dependency.source === "built-in" ||
-            dependency.source === unityRegistryUrl;
-          if (isUnityPackage) continue;
-
-          // add depsValid to packagesInScope.
-          packagesInScope.push(dependencyName);
-        }
-
-        // print suggestion for depsInvalid
-        if (unresolvedDependencies.length > 0 && !force)
-          throw new UnresolvedDependenciesError(
-            makePackageReference(packageName, versionToAdd),
-            unresolvedDependencies
-          );
-      } else packagesInScope.push(packageName);
-    }
-    // add to dependencies
-    const oldVersion = manifest.dependencies[packageName];
-
-    manifest = setDependency(
-      manifest,
-      packageName,
-      versionToAdd as PackageUrl | SemanticVersion
-    );
+    const [versionToAdd, packagesInScope, isUnityPackage] = !isZod(
+      requestedVersion,
+      PackageUrl
+    )
+      ? await resolveDependency(packageName, requestedVersion)
+      : [requestedVersion, [], false];
 
     if (!isUnityPackage && packagesInScope.length > 0) {
       manifest = mapScopedRegistry(manifest, primaryRegistry.url, (initial) => {
@@ -371,32 +404,11 @@ export async function addDependenciesUsing(
     }
     if (shouldAddTestable) manifest = addTestable(manifest, packageName);
 
-    if (!oldVersion) {
-      return [
-        manifest,
-        {
-          type: "added",
-          version: versionToAdd as PackageUrl | SemanticVersion,
-        },
-      ];
-    } else if (oldVersion !== versionToAdd) {
-      return [
-        manifest,
-        {
-          type: "upgraded",
-          fromVersion: oldVersion,
-          toVersion: versionToAdd as PackageUrl | SemanticVersion,
-        },
-      ];
-    } else {
-      return [
-        manifest,
-        {
-          type: "noChange",
-          version: versionToAdd as PackageUrl | SemanticVersion,
-        },
-      ];
-    }
+    return addDependencyToManifest(
+      manifest,
+      packageName,
+      versionToAdd as SemanticVersion | PackageUrl
+    );
   }
 
   let manifest = await loadProjectManifest(projectDirectory);
