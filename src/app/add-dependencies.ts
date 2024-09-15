@@ -7,7 +7,7 @@ import {
   NodeType,
   traverseDependencyGraph,
 } from "../domain/dependency-graph";
-import type { DomainName } from "../domain/domain-name";
+import { DomainName } from "../domain/domain-name";
 import {
   type EditorVersion,
   type ReleaseVersion,
@@ -225,6 +225,68 @@ export async function addDependenciesUsing(
     fetchPackument
   );
 
+  async function resolveScopesFor(
+    packageName: DomainName,
+    verison: SemanticVersion,
+    isUnityPackage: boolean
+  ): Promise<ReadonlyArray<DomainName>> {
+    if (isUnityPackage) return [packageName];
+
+    await debugLog(`fetch: ${makePackageReference(packageName, verison)}`);
+    const dependencyGraph = await resolveDependenciesUsing(
+      checkUrlExists,
+      fetchPackument,
+      [primaryRegistry, unityRegistry],
+      packageName,
+      verison,
+      true
+    );
+
+    const unresolvedDependencies = Array.of<UnresolvedDependency>();
+    const scopes = Array.of<DomainName>();
+    for (const [
+      dependencyName,
+      dependencyVersion,
+      dependency,
+    ] of traverseDependencyGraph(dependencyGraph)) {
+      if (dependency.type === NodeType.Failed) {
+        // If the manifest already has the dependency than it does not
+        // really matter that it was not resolved.
+        if (!hasDependency(manifest, dependencyName))
+          unresolvedDependencies.push({
+            name: dependencyName,
+            version: dependencyVersion,
+            errors: dependency.errors,
+          });
+        continue;
+      }
+      if (dependency.type === NodeType.Unresolved) continue;
+
+      const dependencyRef = makePackageReference(
+        dependencyName,
+        dependencyVersion
+      );
+      await logResolvedDependency(debugLog, dependencyRef, dependency.source);
+
+      const isUnityPackage =
+        dependency.source === "built-in" ||
+        dependency.source === unityRegistryUrl;
+      if (isUnityPackage) continue;
+
+      // add depsValid to packagesInScope.
+      scopes.push(dependencyName);
+
+      // print suggestion for depsInvalid
+      if (unresolvedDependencies.length > 0 && !force)
+        throw new UnresolvedDependenciesError(
+          makePackageReference(packageName, verison),
+          unresolvedDependencies
+        );
+    }
+
+    return scopes;
+  }
+
   function addDependencyToManifest(
     manifest: UnityProjectManifest,
     packageName: DomainName,
@@ -265,9 +327,8 @@ export async function addDependenciesUsing(
   async function resolveDependency(
     packageName: DomainName,
     requestedVersion: Exclude<VersionReference | undefined, PackageUrl>
-  ): Promise<[SemanticVersion, ReadonlyArray<DomainName>, boolean]> {
+  ): Promise<[SemanticVersion, boolean]> {
     let isUnityPackage = false;
-    const packagesInScope = Array.of<DomainName>();
     let versionToAdd = requestedVersion;
 
     let resolveResult = await getRegistryPackumentVersion(
@@ -321,63 +382,16 @@ export async function addDependenciesUsing(
         );
     }
 
-    // packagesInScope
-    if (!isUnityPackage) {
-      await debugLog(
-        `fetch: ${makePackageReference(packageName, requestedVersion)}`
-      );
-      const dependencyGraph = await resolveDependenciesUsing(
-        checkUrlExists,
-        fetchPackument,
-        [primaryRegistry, unityRegistry],
-        packageName,
-        versionToAdd,
-        true
-      );
+    return [versionToAdd, isUnityPackage];
+  }
 
-      const unresolvedDependencies = Array.of<UnresolvedDependency>();
-      for (const [
-        dependencyName,
-        dependencyVersion,
-        dependency,
-      ] of traverseDependencyGraph(dependencyGraph)) {
-        if (dependency.type === NodeType.Failed) {
-          // If the manifest already has the dependency than it does not
-          // really matter that it was not resolved.
-          if (!hasDependency(manifest, dependencyName))
-            unresolvedDependencies.push({
-              name: dependencyName,
-              version: dependencyVersion,
-              errors: dependency.errors,
-            });
-          continue;
-        }
-        if (dependency.type === NodeType.Unresolved) continue;
-
-        const dependencyRef = makePackageReference(
-          dependencyName,
-          dependencyVersion
-        );
-        await logResolvedDependency(debugLog, dependencyRef, dependency.source);
-
-        const isUnityPackage =
-          dependency.source === "built-in" ||
-          dependency.source === unityRegistryUrl;
-        if (isUnityPackage) continue;
-
-        // add depsValid to packagesInScope.
-        packagesInScope.push(dependencyName);
-      }
-
-      // print suggestion for depsInvalid
-      if (unresolvedDependencies.length > 0 && !force)
-        throw new UnresolvedDependenciesError(
-          makePackageReference(packageName, versionToAdd),
-          unresolvedDependencies
-        );
-    } else packagesInScope.push(packageName);
-
-    return [versionToAdd, packagesInScope, isUnityPackage];
+  function addUrlDependency(
+    manifest: UnityProjectManifest,
+    packageName: DomainName,
+    version: PackageUrl
+  ): [UnityProjectManifest, AddResult] {
+    if (shouldAddTestable) manifest = addTestable(manifest, packageName);
+    return addDependencyToManifest(manifest, packageName, version);
   }
 
   async function addSingle(
@@ -385,12 +399,19 @@ export async function addDependenciesUsing(
     packageName: DomainName,
     requestedVersion: VersionReference | undefined
   ): Promise<[UnityProjectManifest, AddResult]> {
-    const [versionToAdd, packagesInScope, isUnityPackage] = !isZod(
-      requestedVersion,
-      PackageUrl
-    )
-      ? await resolveDependency(packageName, requestedVersion)
-      : [requestedVersion, [], false];
+    if (isZod(requestedVersion, PackageUrl))
+      return addUrlDependency(manifest, packageName, requestedVersion);
+
+    const [versionToAdd, isUnityPackage] = await resolveDependency(
+      packageName,
+      requestedVersion
+    );
+
+    const packagesInScope = await resolveScopesFor(
+      packageName,
+      versionToAdd,
+      isUnityPackage
+    );
 
     if (!isUnityPackage && packagesInScope.length > 0) {
       manifest = mapScopedRegistry(manifest, primaryRegistry.url, (initial) => {
