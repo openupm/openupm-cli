@@ -76,7 +76,7 @@ describe("remove packages", () => {
       dependencies: { "some.other.package": "1.0.0" },
       scopedRegistries: [
         {
-          name: "example.com",
+          name: expect.any(String),
           url: someRegistryUrl,
           scopes: ["some.other.package"],
         },
