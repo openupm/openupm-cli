@@ -31,6 +31,7 @@ import {
   mapScopedRegistry,
   setDependency,
 } from "../domain/project-manifest";
+import { recordEntries } from "../domain/record-utils";
 import { type Registry } from "../domain/registry";
 import { type RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import {
@@ -228,9 +229,9 @@ export async function addDependenciesUsing(
   async function resolveScopesFor(
     packageName: DomainName,
     verison: SemanticVersion,
-    isUnityPackage: boolean
-  ): Promise<ReadonlyArray<DomainName>> {
-    if (isUnityPackage) return [packageName];
+    source: RegistryUrl
+  ): Promise<Readonly<Record<RegistryUrl, ReadonlyArray<DomainName>>>> {
+    if (source === unityRegistryUrl) return {};
 
     await debugLog(`fetch: ${makePackageReference(packageName, verison)}`);
     const dependencyGraph = await resolveDependenciesUsing(
@@ -243,7 +244,7 @@ export async function addDependenciesUsing(
     );
 
     const unresolvedDependencies = Array.of<UnresolvedDependency>();
-    const scopes = Array.of<DomainName>();
+    const scopes: Record<RegistryUrl, DomainName[]> = {};
     for (const [
       dependencyName,
       dependencyVersion,
@@ -273,8 +274,8 @@ export async function addDependenciesUsing(
         dependency.source === unityRegistryUrl;
       if (isUnityPackage) continue;
 
-      // add depsValid to packagesInScope.
-      scopes.push(dependencyName);
+      if (!(dependency.source in scopes)) scopes[dependency.source] = [];
+      scopes[dependency.source]!.push(dependencyName);
     }
 
     // print suggestion for depsInvalid
@@ -401,23 +402,22 @@ export async function addDependenciesUsing(
       requestedVersion
     );
 
-    const isUnityPackage = source === unityRegistryUrl;
-
-    const packagesInScope = await resolveScopesFor(
+    const scopesBySource = await resolveScopesFor(
       packageName,
       versionToAdd,
-      isUnityPackage
+      source
     );
 
-    if (!isUnityPackage && packagesInScope.length > 0) {
-      manifest = mapScopedRegistry(manifest, source, (initial) => {
-        let updated = initial ?? makeEmptyScopedRegistryFor(source);
+    recordEntries(scopesBySource).forEach(([scopeSource, scopes]) => {
+      manifest = mapScopedRegistry(manifest, scopeSource, (initial) => {
+        let updated = initial ?? makeEmptyScopedRegistryFor(scopeSource);
 
-        updated = packagesInScope.reduce(addScope, updated!);
+        updated = scopes.reduce(addScope, updated!);
 
         return updated;
       });
-    }
+    });
+
     if (shouldAddTestable) manifest = addTestable(manifest, packageName);
 
     return addDependencyToManifest(manifest, packageName, versionToAdd);

@@ -20,7 +20,12 @@ import { getRegistryPackumentUsing } from "../../../src/io/registry";
 import { fetchCheckUrlExists } from "../../../src/io/www";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
-import { someRegistry, someRegistryUrl } from "../../common/data-registry";
+import {
+  otherRegistry,
+  otherRegistryUrl,
+  someRegistry,
+  someRegistryUrl,
+} from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
@@ -34,11 +39,20 @@ describe("add dependencies", () => {
       version.set("unity", "2022.2")
     )
   );
+
   const somePackument = buildPackument("com.some.package", (packument) =>
     packument.addVersion(someVersion, (version) =>
       version
         .set("unity", "2022.2")
         .addDependency(otherPackument.name, someVersion)
+    )
+  );
+
+  const anotherPackument = buildPackument("com.another.package", (packument) =>
+    packument.addVersion(someVersion, (version) =>
+      version
+        .set("unity", "2022.2")
+        .addDependency(somePackument.name, someVersion)
     )
   );
 
@@ -100,6 +114,7 @@ describe("add dependencies", () => {
   });
 
   beforeEach(() => {
+    mockRegistryPackuments(otherRegistryUrl, [anotherPackument]);
     mockRegistryPackuments(someRegistryUrl, [
       somePackument,
       packumentWithBadDependency,
@@ -317,6 +332,38 @@ describe("add dependencies", () => {
     expect(actual).toEqual(
       expect.objectContaining({
         testables: [somePackument.name],
+      })
+    );
+  });
+
+  it("should add package with dependencies in multiple registries", async () => {
+    const { addDependencies, mockFs } = makeDependencies();
+
+    await addDependencies(
+      someProjectDir,
+      null,
+      [someRegistry, otherRegistry, unityRegistry],
+      false,
+      false,
+      [anotherPackument.name]
+    );
+
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
+      expect.objectContaining({
+        dependencies: { [anotherPackument.name]: someVersion },
+        scopedRegistries: expect.arrayContaining([
+          {
+            name: expect.any(String),
+            url: otherRegistryUrl,
+            scopes: [anotherPackument.name],
+          },
+          {
+            name: expect.any(String),
+            url: someRegistryUrl,
+            scopes: [somePackument.name],
+          },
+        ]),
       })
     );
   });
