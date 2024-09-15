@@ -275,14 +275,14 @@ export async function addDependenciesUsing(
 
       // add depsValid to packagesInScope.
       scopes.push(dependencyName);
-
-      // print suggestion for depsInvalid
-      if (unresolvedDependencies.length > 0 && !force)
-        throw new UnresolvedDependenciesError(
-          makePackageReference(packageName, verison),
-          unresolvedDependencies
-        );
     }
+
+    // print suggestion for depsInvalid
+    if (unresolvedDependencies.length > 0 && !force)
+      throw new UnresolvedDependenciesError(
+        makePackageReference(packageName, verison),
+        unresolvedDependencies
+      );
 
     return scopes;
   }
