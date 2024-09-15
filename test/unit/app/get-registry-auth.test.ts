@@ -8,7 +8,7 @@ import {
   openupmRegistryUrl,
   unityRegistryUrl,
 } from "../../../src/domain/registry-url";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 
 describe("get registry auth from upm config", () => {
   const someEmail = "user@mail.com";
@@ -26,7 +26,7 @@ describe("get registry auth from upm config", () => {
     });
 
     it("should be false for other registries", () => {
-      const actual = isNonAuthUrl(exampleRegistryUrl);
+      const actual = isNonAuthUrl(someRegistryUrl);
       expect(actual).toBeFalsy();
     });
   });
@@ -73,15 +73,15 @@ describe("get registry auth from upm config", () => {
 
   describe("get entry", () => {
     it("should have no auth if there is no entry for registry", () => {
-      const auth = tryGetAuthEntry({}, exampleRegistryUrl);
+      const auth = tryGetAuthEntry({}, someRegistryUrl);
 
       expect(auth).toBeNull();
     });
 
     it("should get auth for url without trailing slash", () => {
       const auth = tryGetAuthEntry(
-        { npmAuth: { [exampleRegistryUrl]: { token: someToken } } },
-        exampleRegistryUrl
+        { npmAuth: { [someRegistryUrl]: { token: someToken } } },
+        someRegistryUrl
       );
 
       expect(auth).toEqual({
@@ -91,8 +91,8 @@ describe("get registry auth from upm config", () => {
 
     it("should get auth for url with trailing slash", () => {
       const auth = tryGetAuthEntry(
-        { npmAuth: { [exampleRegistryUrl + "/"]: { token: someToken } } },
-        exampleRegistryUrl
+        { npmAuth: { [someRegistryUrl + "/"]: { token: someToken } } },
+        someRegistryUrl
       );
 
       expect(auth).toEqual({

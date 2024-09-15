@@ -3,7 +3,7 @@ import {
   HttpErrorLike,
   RegistryAuthenticationError,
 } from "../../../src/io/common-errors";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 
 describe("common error utilities", () => {
   describe("make registry interaction errors", () => {
@@ -12,7 +12,7 @@ describe("common error utilities", () => {
 
       const actual = makeRegistryInteractionError(
         error,
-        exampleRegistryUrl
+        someRegistryUrl
       );
 
       expect(actual).toEqual(error);
@@ -27,7 +27,7 @@ describe("common error utilities", () => {
 
       const actual = makeRegistryInteractionError(
         error,
-        exampleRegistryUrl
+        someRegistryUrl
       );
 
       expect(actual).toEqual(error);
@@ -42,7 +42,7 @@ describe("common error utilities", () => {
 
       const actual = makeRegistryInteractionError(
         error,
-        exampleRegistryUrl
+        someRegistryUrl
       );
 
       expect(actual).toBeInstanceOf(RegistryAuthenticationError);

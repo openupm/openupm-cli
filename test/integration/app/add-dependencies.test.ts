@@ -20,7 +20,7 @@ import { getRegistryPackumentUsing } from "../../../src/io/registry";
 import { fetchCheckUrlExists } from "../../../src/io/www";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
@@ -28,7 +28,7 @@ import { mockRegistryPackuments } from "../registry.mock";
 describe("add dependencies", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
   const unknownPackage = DomainName.parse("com.unknown.parse");
-  const someRegistry: Registry = { url: exampleRegistryUrl, auth: null };
+  const someRegistry: Registry = { url: someRegistryUrl, auth: null };
 
   const otherPackument = buildPackument("com.other.package", (packument) =>
     packument.addVersion(someVersion, (version) =>
@@ -101,7 +101,7 @@ describe("add dependencies", () => {
   });
 
   beforeEach(() => {
-    mockRegistryPackuments(exampleRegistryUrl, [
+    mockRegistryPackuments(someRegistryUrl, [
       somePackument,
       otherPackument,
       packumentWithBadDependency,
@@ -298,8 +298,8 @@ describe("add dependencies", () => {
       expect.objectContaining({
         scopedRegistries: [
           {
-            name: "example.com",
-            url: exampleRegistryUrl,
+            name: expect.any(String),
+            url: someRegistryUrl,
             scopes: [otherPackument.name, somePackument.name],
           },
         ],

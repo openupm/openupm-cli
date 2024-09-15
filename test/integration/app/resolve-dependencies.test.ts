@@ -16,13 +16,13 @@ import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { getRegistryPackumentUsing } from "../../../src/io/registry";
 import { fetchCheckUrlExists } from "../../../src/io/www";
 import { buildPackument } from "../../common/data-packument";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 import { mockUnityDocPages } from "../docs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
-    { url: exampleRegistryUrl, auth: null },
+    { url: someRegistryUrl, auth: null },
     { url: unityRegistryUrl, auth: null },
   ];
 
@@ -45,7 +45,7 @@ describe("dependency resolving", () => {
 
   it("should mark missing packages", async () => {
     mockUnityDocPages([]);
-    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(someRegistryUrl, []);
     mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
@@ -59,7 +59,7 @@ describe("dependency resolving", () => {
     expect(node).toEqual({
       type: NodeType.Failed,
       errors: {
-        [exampleRegistryUrl]: expect.any(PackumentNotFoundError),
+        [someRegistryUrl]: expect.any(PackumentNotFoundError),
         [unityRegistryUrl]: expect.any(PackumentNotFoundError),
       },
     });
@@ -67,7 +67,7 @@ describe("dependency resolving", () => {
 
   it("should mark missing versions", async () => {
     mockUnityDocPages([]);
-    mockRegistryPackuments(exampleRegistryUrl, [
+    mockRegistryPackuments(someRegistryUrl, [
       buildPackument(somePackage, (packument) =>
         packument.addVersion(otherVersion)
       ),
@@ -85,7 +85,7 @@ describe("dependency resolving", () => {
     expect(node).toEqual({
       type: NodeType.Failed,
       errors: {
-        [exampleRegistryUrl]: expect.any(VersionNotFoundError),
+        [someRegistryUrl]: expect.any(VersionNotFoundError),
         [unityRegistryUrl]: expect.any(PackumentNotFoundError),
       },
     });
@@ -94,7 +94,7 @@ describe("dependency resolving", () => {
   it("should mark resolved remote packages", async () => {
     mockUnityDocPages([]);
     // The first source does not have the package
-    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(someRegistryUrl, []);
     // But the second does
     mockRegistryPackuments(unityRegistryUrl, [
       buildPackument(somePackage, (packument) =>
@@ -122,7 +122,7 @@ describe("dependency resolving", () => {
 
   it("should mark resolved built-in packages", async () => {
     mockUnityDocPages([somePackage]);
-    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(someRegistryUrl, []);
     mockRegistryPackuments(unityRegistryUrl, []);
 
     const graph = await resolveDependencies(
@@ -142,7 +142,7 @@ describe("dependency resolving", () => {
 
   it("should mark dependencies when resolving shallow", async () => {
     mockUnityDocPages([]);
-    mockRegistryPackuments(exampleRegistryUrl, [
+    mockRegistryPackuments(someRegistryUrl, [
       buildPackument(somePackage, (packument) =>
         packument.addVersion(someVersion, (version) =>
           version.addDependency(otherPackage, someVersion)
@@ -166,7 +166,7 @@ describe("dependency resolving", () => {
 
   it("should resolve dependencies when resolving deep", async () => {
     mockUnityDocPages([]);
-    mockRegistryPackuments(exampleRegistryUrl, [
+    mockRegistryPackuments(someRegistryUrl, [
       buildPackument(somePackage, (packument) =>
         packument.addVersion(someVersion, (version) =>
           version.addDependency(otherPackage, someVersion)
@@ -188,14 +188,14 @@ describe("dependency resolving", () => {
     const node = tryGetGraphNode(graph, otherPackage, someVersion);
     expect(node).toEqual({
       type: NodeType.Resolved,
-      source: exampleRegistryUrl,
+      source: someRegistryUrl,
       dependencies: {},
     });
   });
 
   it("should search backup registry if version missing in primary registry", async () => {
     mockUnityDocPages([]);
-    mockRegistryPackuments(exampleRegistryUrl, []);
+    mockRegistryPackuments(someRegistryUrl, []);
     mockRegistryPackuments(unityRegistryUrl, [
       buildPackument(somePackage, (packument) =>
         packument.addVersion(someVersion)

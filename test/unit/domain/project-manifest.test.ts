@@ -25,7 +25,7 @@ import {
 } from "../../../src/domain/scoped-registry";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { buildProjectManifest } from "../../common/data-project-manifest";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 import { arbDomainName } from "./domain-name.arb";
 
 describe("project-manifest", () => {
@@ -129,7 +129,7 @@ describe("project-manifest", () => {
       const manifest = emptyProjectManifest;
 
       expect.assertions(1);
-      mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
+      mapScopedRegistry(manifest, someRegistryUrl, (registry) => {
         expect(registry).toBeNull();
         return registry;
       });
@@ -137,11 +137,11 @@ describe("project-manifest", () => {
 
     it("should have scoped-registry as input if found", () => {
       let manifest = emptyProjectManifest;
-      const expected = makeScopedRegistry("test", exampleRegistryUrl);
+      const expected = makeScopedRegistry("test", someRegistryUrl);
       manifest = setScopedRegistry(manifest, expected);
 
       expect.assertions(1);
-      mapScopedRegistry(manifest, exampleRegistryUrl, (registry) => {
+      mapScopedRegistry(manifest, someRegistryUrl, (registry) => {
         expect(registry).toEqual(expected);
         return registry;
       });
@@ -149,28 +149,28 @@ describe("project-manifest", () => {
 
     it("should not have scoped-registry after returning null", () => {
       let manifest = emptyProjectManifest;
-      const initial = makeScopedRegistry("test", exampleRegistryUrl);
+      const initial = makeScopedRegistry("test", someRegistryUrl);
       manifest = setScopedRegistry(manifest, initial);
 
-      manifest = mapScopedRegistry(manifest, exampleRegistryUrl, () => null);
+      manifest = mapScopedRegistry(manifest, someRegistryUrl, () => null);
 
-      const actual = tryGetScopedRegistryByUrl(manifest, exampleRegistryUrl);
+      const actual = tryGetScopedRegistryByUrl(manifest, someRegistryUrl);
       expect(actual).toBeNull();
     });
 
     it("should not updated scoped-registry after returning it", () => {
       let manifest = emptyProjectManifest;
-      const initial = makeScopedRegistry("test", exampleRegistryUrl);
+      const initial = makeScopedRegistry("test", someRegistryUrl);
       const expected = addScope(initial, DomainName.parse("wow"));
       manifest = setScopedRegistry(manifest, initial);
 
       manifest = mapScopedRegistry(
         manifest,
-        exampleRegistryUrl,
+        someRegistryUrl,
         () => expected
       );
 
-      const actual = tryGetScopedRegistryByUrl(manifest, exampleRegistryUrl);
+      const actual = tryGetScopedRegistryByUrl(manifest, someRegistryUrl);
       expect(actual).toEqual(expected);
     });
   });
@@ -398,7 +398,7 @@ describe("project-manifest", () => {
         dependencies: {},
         scopedRegistries: [
           // Scoped registry with no scopes
-          { name: "some registry", url: exampleRegistryUrl, scopes: [] },
+          { name: "some registry", url: someRegistryUrl, scopes: [] },
         ],
       };
 

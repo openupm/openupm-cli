@@ -1,7 +1,7 @@
 import { ResultCodes } from "../../src/cli/result-codes";
 import { emptyProjectManifest } from "../../src/domain/project-manifest";
 import { buildProjectManifest } from "../common/data-project-manifest";
-import { exampleRegistryUrl } from "../common/data-registry";
+import { someRegistryUrl } from "../common/data-registry";
 import { getProjectManifest } from "./check/project-manifest";
 import { runOpenupm } from "./run";
 import { prepareHomeDirectory } from "./setup/directories";
@@ -77,7 +77,7 @@ describe("remove packages", () => {
       scopedRegistries: [
         {
           name: "example.com",
-          url: exampleRegistryUrl,
+          url: someRegistryUrl,
           scopes: ["some.other.package"],
         },
       ],

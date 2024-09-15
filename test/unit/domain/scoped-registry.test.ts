@@ -8,13 +8,13 @@ import {
 import { DomainName } from "../../../src/domain/domain-name";
 import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 
 describe("scoped-registry", () => {
   describe("construction", () => {
     it("should have empty scopes list if scopes are not specified", () => {
-      const registry = makeScopedRegistry("test", exampleRegistryUrl);
+      const registry = makeScopedRegistry("test", someRegistryUrl);
       expect(registry.scopes).toHaveLength(0);
     });
 
@@ -27,7 +27,7 @@ describe("scoped-registry", () => {
 
   describe("add scope", () => {
     it("should keep scope-list alphabetical", () => {
-      let registry = makeScopedRegistry("test", exampleRegistryUrl);
+      let registry = makeScopedRegistry("test", someRegistryUrl);
 
       registry = addScope(registry, DomainName.parse("b"));
       registry = addScope(registry, DomainName.parse("a"));
@@ -38,7 +38,7 @@ describe("scoped-registry", () => {
     it("should filter duplicates", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          let registry = makeScopedRegistry("test", exampleRegistryUrl);
+          let registry = makeScopedRegistry("test", someRegistryUrl);
 
           registry = addScope(registry, packumentName);
           registry = addScope(registry, packumentName);
@@ -53,7 +53,7 @@ describe("scoped-registry", () => {
     it("should have scope that was added", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          let registry = makeScopedRegistry("test", exampleRegistryUrl);
+          let registry = makeScopedRegistry("test", someRegistryUrl);
 
           registry = addScope(registry, packumentName);
 
@@ -65,7 +65,7 @@ describe("scoped-registry", () => {
     it("should not have scope that was not added", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          const registry = makeScopedRegistry("test", exampleRegistryUrl);
+          const registry = makeScopedRegistry("test", someRegistryUrl);
 
           expect(hasScope(registry, packumentName)).toBeFalsy();
         })
@@ -77,7 +77,7 @@ describe("scoped-registry", () => {
     it("should not have scope after removing it", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          let registry = makeScopedRegistry("test", exampleRegistryUrl, [
+          let registry = makeScopedRegistry("test", someRegistryUrl, [
             packumentName,
           ]);
 
@@ -89,7 +89,7 @@ describe("scoped-registry", () => {
     });
 
     it("should not do nothing if scope does not exist", () => {
-      let registry = makeScopedRegistry("test", exampleRegistryUrl, [
+      let registry = makeScopedRegistry("test", someRegistryUrl, [
         DomainName.parse("a"),
       ]);
 
@@ -101,7 +101,7 @@ describe("scoped-registry", () => {
     it("should remove duplicate scopes", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          let registry = makeScopedRegistry("test", exampleRegistryUrl, [
+          let registry = makeScopedRegistry("test", someRegistryUrl, [
             packumentName,
             packumentName,
           ]);

@@ -5,7 +5,7 @@ import {
   NoSystemUserProfilePath,
   parseUpmConfig,
 } from "../../../src/domain/upm-config";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 
 describe("upm config", () => {
   describe("get user config path", () => {
@@ -87,7 +87,7 @@ describe("upm config", () => {
     it("should parse valid basic auth", () => {
       const actual = parseUpmConfig(
         makeUpmConfigEntryToml({
-          url: exampleRegistryUrl,
+          url: someRegistryUrl,
           _auth: "dXNlcjpwYXNz", // user:pass
           email: someEmail,
           alwaysAuth: true,
@@ -96,7 +96,7 @@ describe("upm config", () => {
 
       expect(actual).toEqual({
         npmAuth: {
-          [exampleRegistryUrl]: {
+          [someRegistryUrl]: {
             _auth: "dXNlcjpwYXNz", // user:pass
             email: someEmail,
             alwaysAuth: true,
@@ -108,7 +108,7 @@ describe("upm config", () => {
     it("should load valid token auth", () => {
       const actual = parseUpmConfig(
         makeUpmConfigEntryToml({
-          url: exampleRegistryUrl,
+          url: someRegistryUrl,
           token: someToken,
           alwaysAuth: true,
         })
@@ -116,7 +116,7 @@ describe("upm config", () => {
 
       expect(actual).toEqual({
         npmAuth: {
-          [exampleRegistryUrl]: {
+          [someRegistryUrl]: {
             token: someToken,
             alwaysAuth: true,
           },

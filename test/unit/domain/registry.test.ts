@@ -1,23 +1,23 @@
 import { NpmAuth } from "another-npm-registry-client";
 import { makeNpmFetchOptions, Registry } from "../../../src/domain/registry";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 
 describe("npm registry", () => {
   describe("make fetch options from registry object", () => {
     it("should use input registry url", () => {
       const registry: Registry = {
-        url: exampleRegistryUrl,
+        url: someRegistryUrl,
         auth: null,
       };
 
       const options = makeNpmFetchOptions(registry);
 
-      expect(options.registry).toEqual(exampleRegistryUrl);
+      expect(options.registry).toEqual(someRegistryUrl);
     });
 
     it("should have no auth data if input does not have one", () => {
       const registry: Registry = {
-        url: exampleRegistryUrl,
+        url: someRegistryUrl,
         auth: null,
       };
 
@@ -33,7 +33,7 @@ describe("npm registry", () => {
     it("should use token auth info", () => {
       const auth: NpmAuth = { token: "Some token", alwaysAuth: true };
       const registry: Registry = {
-        url: exampleRegistryUrl,
+        url: someRegistryUrl,
         auth,
       };
 
@@ -54,7 +54,7 @@ describe("npm registry", () => {
         alwaysAuth: true,
       };
       const registry: Registry = {
-        url: exampleRegistryUrl,
+        url: someRegistryUrl,
         auth,
       };
 

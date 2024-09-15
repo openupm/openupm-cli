@@ -3,7 +3,6 @@ import { default as npmSearch, default as search } from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
 import { DomainName } from "../../../src/domain/domain-name";
 import { noopLogger } from "../../../src/domain/logging";
-import { Registry } from "../../../src/domain/registry";
 import {
   HttpErrorLike,
   RegistryAuthenticationError,
@@ -15,7 +14,7 @@ import {
   searchRegistryUsing,
 } from "../../../src/io/registry";
 import { buildPackument } from "../../common/data-packument";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistry, someRegistryUrl } from "../../common/data-registry";
 import {
   mockRegClientAddUserResult,
   mockRegClientGetResult,
@@ -25,11 +24,6 @@ jest.mock("npm-registry-fetch");
 jest.mock("libnpmsearch");
 
 describe("registry io", () => {
-  const exampleRegistry: Registry = {
-    url: exampleRegistryUrl,
-    auth: null,
-  };
-
   describe("fetch all packuments", () => {
     function makeDependencies() {
       const fetchAllRegistryPackuments =
@@ -46,7 +40,7 @@ describe("registry io", () => {
       jest.mocked(npmFetch.json).mockRejectedValue(expected);
       const { fetchAllRegistryPackuments } = makeDependencies();
 
-      await expect(fetchAllRegistryPackuments(exampleRegistry)).rejects.toEqual(
+      await expect(fetchAllRegistryPackuments(someRegistry)).rejects.toEqual(
         expected
       );
     });
@@ -61,7 +55,7 @@ describe("registry io", () => {
       const { fetchAllRegistryPackuments } = makeDependencies();
 
       await expect(
-        fetchAllRegistryPackuments(exampleRegistry)
+        fetchAllRegistryPackuments(someRegistry)
       ).rejects.toBeInstanceOf(RegistryAuthenticationError);
     });
 
@@ -71,7 +65,7 @@ describe("registry io", () => {
       });
       const { fetchAllRegistryPackuments } = makeDependencies();
 
-      const actual = await fetchAllRegistryPackuments(exampleRegistry);
+      const actual = await fetchAllRegistryPackuments(someRegistry);
 
       expect(actual).toEqual([]);
     });
@@ -105,7 +99,7 @@ describe("registry io", () => {
       );
 
       const actual = await authenticateUserWithNpmRegistry(
-        exampleRegistryUrl,
+        someRegistryUrl,
         "valid-user",
         "valid@user.com",
         "valid-password"
@@ -131,7 +125,7 @@ describe("registry io", () => {
 
       await expect(
         authenticateUserWithNpmRegistry(
-          exampleRegistryUrl,
+          someRegistryUrl,
           "bad-user",
           "bad@user.com",
           "bad-password"
@@ -154,7 +148,7 @@ describe("registry io", () => {
 
       await expect(
         authenticateUserWithNpmRegistry(
-          exampleRegistryUrl,
+          someRegistryUrl,
           "bad-user",
           "bad@user.com",
           "bad-password"
@@ -178,9 +172,7 @@ describe("registry io", () => {
       jest.mocked(npmSearch).mockRejectedValue(expected);
       const { npmApiSearch } = makeDependencies();
 
-      await expect(npmApiSearch(exampleRegistry, "wow")).rejects.toEqual(
-        expected
-      );
+      await expect(npmApiSearch(someRegistry, "wow")).rejects.toEqual(expected);
     });
 
     it("should fail for auth error response", async () => {
@@ -192,7 +184,7 @@ describe("registry io", () => {
       jest.mocked(npmSearch).mockRejectedValue(expected);
       const { npmApiSearch } = makeDependencies();
 
-      await expect(npmApiSearch(exampleRegistry, "wow")).rejects.toBeInstanceOf(
+      await expect(npmApiSearch(someRegistry, "wow")).rejects.toBeInstanceOf(
         RegistryAuthenticationError
       );
     });
@@ -202,7 +194,7 @@ describe("registry io", () => {
       jest.mocked(npmSearch).mockResolvedValue(expected);
       const { npmApiSearch } = makeDependencies();
 
-      const actual = await npmApiSearch(exampleRegistry, "wow");
+      const actual = await npmApiSearch(someRegistry, "wow");
 
       expect(actual).toEqual(expected);
     });
@@ -210,10 +202,6 @@ describe("registry io", () => {
 
   describe("fetch", () => {
     const packageA = DomainName.parse("package-a");
-    const exampleRegistry: Registry = {
-      url: exampleRegistryUrl,
-      auth: null,
-    };
 
     function makeDependencies() {
       const regClient: jest.Mocked<RegClient.Instance> = {
@@ -233,7 +221,7 @@ describe("registry io", () => {
       const { fetchRegistryPackument, regClient } = makeDependencies();
       mockRegClientGetResult(regClient, null, packument);
 
-      const actual = await fetchRegistryPackument(exampleRegistry, packageA);
+      const actual = await fetchRegistryPackument(someRegistry, packageA);
 
       expect(actual).toEqual(packument);
     });
@@ -250,7 +238,7 @@ describe("registry io", () => {
         null
       );
 
-      const actual = await fetchRegistryPackument(exampleRegistry, packageA);
+      const actual = await fetchRegistryPackument(someRegistry, packageA);
 
       expect(actual).toBeNull();
     });
@@ -268,7 +256,7 @@ describe("registry io", () => {
       );
 
       await expect(
-        fetchRegistryPackument(exampleRegistry, packageA)
+        fetchRegistryPackument(someRegistry, packageA)
       ).rejects.toBeInstanceOf(Error);
     });
   });

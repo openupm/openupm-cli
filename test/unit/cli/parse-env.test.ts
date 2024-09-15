@@ -8,7 +8,7 @@ import {
   determineUseUpstream,
 } from "../../../src/cli/parse-env";
 import { openupmRegistryUrl } from "../../../src/domain/registry-url";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -124,10 +124,10 @@ describe("parse env", () => {
 
     it("should be custom registry url if overridden", () => {
       const actual = determinePrimaryRegistryUrl({
-        registry: exampleRegistryUrl,
+        registry: someRegistryUrl,
       });
 
-      expect(actual).toEqual(exampleRegistryUrl);
+      expect(actual).toEqual(someRegistryUrl);
     });
   });
 

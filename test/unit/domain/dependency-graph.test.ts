@@ -11,7 +11,7 @@ import {
   tryGetGraphNode,
   tryGetNextUnresolved,
 } from "../../../src/domain/dependency-graph";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 
 describe("dependency graph", () => {
@@ -27,7 +27,7 @@ describe("dependency graph", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         { [otherPackage]: someVersion, [anotherPackage]: someVersion }
       );
 
@@ -70,7 +70,7 @@ describe("dependency graph", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         { [otherPackage]: someVersion }
       );
 
@@ -110,14 +110,14 @@ describe("dependency graph", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         {}
       );
 
       const node = tryGetGraphNode(graph, somePackage, someVersion);
       expect(node).toEqual({
         type: NodeType.Resolved,
-        source: exampleRegistryUrl,
+        source: someRegistryUrl,
         dependencies: {},
       });
     });
@@ -129,7 +129,7 @@ describe("dependency graph", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         { [otherPackage]: someVersion }
       );
 
@@ -146,7 +146,7 @@ describe("dependency graph", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         { [otherPackage]: someVersion, [anotherPackage]: someVersion }
       );
       graph = markBuiltInResolved(graph, anotherPackage, someVersion);
@@ -154,7 +154,7 @@ describe("dependency graph", () => {
         graph,
         otherPackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         // anotherPackage is already resolved and should not be marked as unresolved
         { [anotherPackage]: someVersion }
       );
@@ -169,7 +169,7 @@ describe("dependency graph", () => {
       let graph = makeGraphFromSeed(somePackage, someVersion);
 
       const errors = {
-        [exampleRegistryUrl]: new PackumentNotFoundError(somePackage),
+        [someRegistryUrl]: new PackumentNotFoundError(somePackage),
       };
       graph = markFailed(graph, somePackage, someVersion, errors);
 

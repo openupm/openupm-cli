@@ -1,8 +1,4 @@
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import {
-  addScope,
-  makeScopedRegistry,
-} from "../../src/domain/scoped-registry";
+import { DomainName } from "../../src/domain/domain-name";
 import {
   addTestable,
   emptyProjectManifest,
@@ -10,9 +6,10 @@ import {
   setDependency,
   UnityProjectManifest,
 } from "../../src/domain/project-manifest";
-import { exampleRegistryUrl } from "./data-registry";
+import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
+import { SemanticVersion } from "../../src/domain/semantic-version";
 import { assertZod } from "../../src/domain/zod-utils";
-import { DomainName } from "../../src/domain/domain-name";
+import { someRegistryUrl } from "./data-registry";
 
 /**
  * Builder class for {@link UnityProjectManifest}.
@@ -30,9 +27,12 @@ export class UnityProjectManifestBuilder {
     assertZod(name, DomainName);
 
     return new UnityProjectManifestBuilder(
-      mapScopedRegistry(this.manifest, exampleRegistryUrl, (registry) => {
+      mapScopedRegistry(this.manifest, someRegistryUrl, (registry) => {
         if (registry === null)
-          registry = makeScopedRegistry("example.com", exampleRegistryUrl);
+          registry = makeScopedRegistry(
+            new URL(someRegistryUrl).hostname,
+            someRegistryUrl
+          );
         return addScope(registry, name);
       })
     );

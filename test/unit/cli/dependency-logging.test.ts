@@ -6,7 +6,7 @@ import {
 } from "../../../src/domain/dependency-graph";
 import { stringifyDependencyGraph } from "../../../src/cli/dependency-logging";
 import { makePackageReference } from "../../../src/domain/package-reference";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { VersionNotFoundError } from "../../../src/domain/packument";
@@ -56,7 +56,7 @@ describe("dependency-logging", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         {
           [otherPackage]: otherVersion,
           [anotherPackage]: someVersion,
@@ -76,7 +76,7 @@ describe("dependency-logging", () => {
     it("should output failed package in correct format", () => {
       let graph = makeGraphFromSeed(somePackage, someVersion);
       graph = markFailed(graph, somePackage, someVersion, {
-        [exampleRegistryUrl]: new PackumentNotFoundError(somePackage),
+        [someRegistryUrl]: new PackumentNotFoundError(somePackage),
         [unityRegistryUrl]: new VersionNotFoundError(
           somePackage,
           someVersion,
@@ -89,7 +89,7 @@ describe("dependency-logging", () => {
       // Print name@version plus error message in next line
       expect(actual).toEqual([
         `${makePackageReference(somePackage, someVersion)}`,
-        `  - "${exampleRegistryUrl}": package not found`,
+        `  - "${someRegistryUrl}": package not found`,
         `  - "${unityRegistryUrl}": version not found`,
       ]);
     });
@@ -100,7 +100,7 @@ describe("dependency-logging", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         {
           [otherPackage]: otherVersion,
           [thatPackage]: someVersion,
@@ -110,7 +110,7 @@ describe("dependency-logging", () => {
         graph,
         otherPackage,
         otherVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         {
           [anotherPackage]: someVersion,
         }
@@ -135,7 +135,7 @@ describe("dependency-logging", () => {
         graph,
         somePackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         {
           [otherPackage]: otherVersion,
           [anotherPackage]: someVersion,
@@ -145,14 +145,14 @@ describe("dependency-logging", () => {
         graph,
         otherPackage,
         otherVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         { [anotherPackage]: someVersion }
       );
       graph = markRemoteResolved(
         graph,
         anotherPackage,
         someVersion,
-        exampleRegistryUrl,
+        someRegistryUrl,
         { [thatPackage]: someVersion }
       );
       graph = markBuiltInResolved(graph, thatPackage, someVersion);

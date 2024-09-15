@@ -1,7 +1,7 @@
 import { putRegistryAuthIntoUpmConfig } from "../../../src/app/put-registry-auth";
 import { Base64 } from "../../../src/domain/base64";
 import type { UpmConfig } from "../../../src/domain/upm-config";
-import { exampleRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry";
 
 describe("put registry auth into upm config", () => {
   const someEmail = "user@mail.com";
@@ -9,13 +9,13 @@ describe("put registry auth into upm config", () => {
   const otherToken = "8zseg974wge4g94whfheghf";
 
   it("should add entry if it does not exist", () => {
-    const actual = putRegistryAuthIntoUpmConfig(null, exampleRegistryUrl, {
+    const actual = putRegistryAuthIntoUpmConfig(null, someRegistryUrl, {
       token: someToken,
     });
 
     expect(actual).toEqual({
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           token: someToken,
         },
       },
@@ -25,14 +25,14 @@ describe("put registry auth into upm config", () => {
   it("should replace entry of same type", () => {
     const initial: UpmConfig = {
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           _auth: "dXNlcjpwYXNz" as Base64, // user:pass
           email: "other@email.com",
         },
       },
     };
 
-    const actual = putRegistryAuthIntoUpmConfig(initial, exampleRegistryUrl, {
+    const actual = putRegistryAuthIntoUpmConfig(initial, someRegistryUrl, {
       username: "user",
       password: "pass",
       email: someEmail,
@@ -40,7 +40,7 @@ describe("put registry auth into upm config", () => {
 
     expect(actual).toEqual({
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           _auth: "dXNlcjpwYXNz" as Base64, // user:pass
           email: someEmail,
         },
@@ -51,13 +51,13 @@ describe("put registry auth into upm config", () => {
   it("should replace entry of different type", () => {
     const initial: UpmConfig = {
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           token: someToken,
         },
       },
     };
 
-    const actual = putRegistryAuthIntoUpmConfig(initial, exampleRegistryUrl, {
+    const actual = putRegistryAuthIntoUpmConfig(initial, someRegistryUrl, {
       username: "user",
       password: "pass",
       email: someEmail,
@@ -65,7 +65,7 @@ describe("put registry auth into upm config", () => {
 
     expect(actual).toEqual({
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           _auth: "dXNlcjpwYXNz" as Base64, // user:pass
           email: someEmail,
         },
@@ -77,12 +77,12 @@ describe("put registry auth into upm config", () => {
     const initial: UpmConfig = {
       // This entry has an url with a trailing slash, but it should
       // still be replaced.
-      [exampleRegistryUrl + "/"]: {
+      [someRegistryUrl + "/"]: {
         token: someToken,
       },
     };
 
-    const actual = putRegistryAuthIntoUpmConfig(initial, exampleRegistryUrl, {
+    const actual = putRegistryAuthIntoUpmConfig(initial, someRegistryUrl, {
       username: "user",
       password: "pass",
       email: someEmail,
@@ -90,7 +90,7 @@ describe("put registry auth into upm config", () => {
 
     expect(actual).toEqual({
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           _auth: "dXNlcjpwYXNz" as Base64, // user:pass
           email: someEmail,
         },
@@ -101,20 +101,20 @@ describe("put registry auth into upm config", () => {
   it("should keep email of token entry", () => {
     const initial: UpmConfig = {
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           token: someToken,
           email: someEmail,
         },
       },
     };
 
-    const actual = putRegistryAuthIntoUpmConfig(initial, exampleRegistryUrl, {
+    const actual = putRegistryAuthIntoUpmConfig(initial, someRegistryUrl, {
       token: otherToken,
     });
 
     expect(actual).toEqual({
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           token: otherToken,
           email: someEmail,
         },
@@ -125,20 +125,20 @@ describe("put registry auth into upm config", () => {
   it("should keep always auth if no replacement was provided", () => {
     const initial: UpmConfig = {
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           token: someToken,
           alwaysAuth: true,
         },
       },
     };
 
-    const actual = putRegistryAuthIntoUpmConfig(initial, exampleRegistryUrl, {
+    const actual = putRegistryAuthIntoUpmConfig(initial, someRegistryUrl, {
       token: otherToken,
     });
 
     expect(actual).toEqual({
       npmAuth: {
-        [exampleRegistryUrl]: {
+        [someRegistryUrl]: {
           token: otherToken,
           alwaysAuth: true,
         },
