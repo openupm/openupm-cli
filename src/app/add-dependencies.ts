@@ -189,7 +189,7 @@ function pickMostFixable(
  * compatibility. If set to null then compatibility will not be checked.
  * @param primaryRegistry The primary registry from which to resolve
  * dependencies.
- * @param useUpstream Whether to fall back to the upstream registry.
+ * @param useUnity Whether to fall back to the Unity registry.
  * @param force Whether to force add the dependencies.
  * @param shouldAddTestable Whether to also add dependencies to the `testables`.
  * @param pkgs References to the dependencies to add.
@@ -204,7 +204,7 @@ export async function addDependenciesUsing(
   projectDirectory: string,
   editorVersion: ReleaseVersion | null,
   primaryRegistry: Registry,
-  useUpstream: boolean,
+  useUnity: boolean,
   force: boolean,
   shouldAddTestable: boolean,
   pkgs: ReadonlyArray<PackageReference>
@@ -230,8 +230,7 @@ export async function addDependenciesUsing(
     packageName: DomainName,
     requestedVersion: VersionReference | undefined
   ): Promise<[UnityProjectManifest, AddResult]> {
-    // is upstream package flag
-    let isUpstreamPackage = false;
+    let isUnityPackage = false;
 
     // packages that added to scope registry
     const packagesInScope = Array.of<DomainName>();
@@ -245,17 +244,17 @@ export async function addDependenciesUsing(
         requestedVersion,
         primaryRegistry
       ).promise;
-      if (resolveResult.isErr() && useUpstream) {
-        const upstreamResult = await getRegistryPackumentVersion(
+      if (resolveResult.isErr() && useUnity) {
+        const unityResult = await getRegistryPackumentVersion(
           packageName,
           requestedVersion,
           unityRegistry
         ).promise;
-        if (upstreamResult.isOk()) {
-          resolveResult = upstreamResult;
-          isUpstreamPackage = true;
+        if (unityResult.isOk()) {
+          resolveResult = unityResult;
+          isUnityPackage = true;
         } else {
-          resolveResult = pickMostFixable(resolveResult, upstreamResult);
+          resolveResult = pickMostFixable(resolveResult, unityResult);
         }
       }
 
@@ -292,7 +291,7 @@ export async function addDependenciesUsing(
       }
 
       // packagesInScope
-      if (!isUpstreamPackage) {
+      if (!isUnityPackage) {
         await debugLog(
           `fetch: ${makePackageReference(packageName, requestedVersion)}`
         );
@@ -360,7 +359,7 @@ export async function addDependenciesUsing(
       versionToAdd as PackageUrl | SemanticVersion
     );
 
-    if (!isUpstreamPackage && packagesInScope.length > 0) {
+    if (!isUnityPackage && packagesInScope.length > 0) {
       manifest = mapScopedRegistry(manifest, primaryRegistry.url, (initial) => {
         let updated =
           initial ?? makeEmptyScopedRegistryFor(primaryRegistry.url);
