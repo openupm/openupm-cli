@@ -102,12 +102,11 @@ describe("add dependencies", () => {
   beforeEach(() => {
     mockRegistryPackuments(someRegistryUrl, [
       somePackument,
-      otherPackument,
       packumentWithBadDependency,
       badEditorPackument,
       incompatiblePackument,
     ]);
-    mockRegistryPackuments(unityRegistryUrl, []);
+    mockRegistryPackuments(unityRegistryUrl, [otherPackument]);
   });
 
   it("should add package with invalid editor version when running with force", async () => {
@@ -295,7 +294,7 @@ describe("add dependencies", () => {
           {
             name: expect.any(String),
             url: someRegistryUrl,
-            scopes: [otherPackument.name, somePackument.name],
+            scopes: [somePackument.name],
           },
         ],
       })
