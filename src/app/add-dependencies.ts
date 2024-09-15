@@ -404,11 +404,7 @@ export async function addDependenciesUsing(
     }
     if (shouldAddTestable) manifest = addTestable(manifest, packageName);
 
-    return addDependencyToManifest(
-      manifest,
-      packageName,
-      versionToAdd as SemanticVersion | PackageUrl
-    );
+    return addDependencyToManifest(manifest, packageName, versionToAdd);
   }
 
   let manifest = await loadProjectManifest(projectDirectory);
