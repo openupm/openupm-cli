@@ -252,7 +252,6 @@ export async function addDependenciesUsing(
         ).promise;
         if (unityResult.isOk()) {
           resolveResult = unityResult;
-          isUnityPackage = true;
         } else {
           resolveResult = pickMostFixable(resolveResult, unityResult);
         }
@@ -261,6 +260,7 @@ export async function addDependenciesUsing(
       if (resolveResult.isErr()) throw resolveResult.error;
 
       const packumentVersion = resolveResult.value.packumentVersion;
+      isUnityPackage = resolveResult.value.source === unityRegistryUrl;
       versionToAdd = packumentVersion.version;
 
       // Only do compatibility check when we have a editor version to check against
