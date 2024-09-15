@@ -32,7 +32,7 @@ import {
   setDependency,
 } from "../domain/project-manifest";
 import { type Registry, unityRegistry } from "../domain/registry";
-import { unityRegistryUrl } from "../domain/registry-url";
+import { type RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import {
   addScope,
   makeEmptyScopedRegistryFor,
@@ -327,8 +327,7 @@ export async function addDependenciesUsing(
   async function resolveDependency(
     packageName: DomainName,
     requestedVersion: Exclude<VersionReference | undefined, PackageUrl>
-  ): Promise<[SemanticVersion, boolean]> {
-    let isUnityPackage = false;
+  ): Promise<[SemanticVersion, RegistryUrl]> {
     let versionToAdd = requestedVersion;
 
     let resolveResult = await getRegistryPackumentVersion(
@@ -352,7 +351,7 @@ export async function addDependenciesUsing(
     if (resolveResult.isErr()) throw resolveResult.error;
 
     const packumentVersion = resolveResult.value.packumentVersion;
-    isUnityPackage = resolveResult.value.source === unityRegistryUrl;
+    const source = resolveResult.value.source;
     versionToAdd = packumentVersion.version;
 
     // Only do compatibility check when we have a editor version to check against
@@ -382,7 +381,7 @@ export async function addDependenciesUsing(
         );
     }
 
-    return [versionToAdd, isUnityPackage];
+    return [versionToAdd, source];
   }
 
   async function addSingle(
@@ -395,10 +394,12 @@ export async function addDependenciesUsing(
     if (isZod(requestedVersion, PackageUrl))
       return addDependencyToManifest(manifest, packageName, requestedVersion);
 
-    const [versionToAdd, isUnityPackage] = await resolveDependency(
+    const [versionToAdd, source] = await resolveDependency(
       packageName,
       requestedVersion
     );
+
+    const isUnityPackage = source === unityRegistryUrl;
 
     const packagesInScope = await resolveScopesFor(
       packageName,
