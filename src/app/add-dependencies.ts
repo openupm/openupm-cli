@@ -1,5 +1,5 @@
 import { CustomError } from "ts-custom-error";
-import type { Err } from "ts-results-es";
+import { Err, Result } from "ts-results-es";
 import { logResolvedDependency } from "../cli/dependency-logging";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import {
@@ -31,7 +31,7 @@ import {
   mapScopedRegistry,
   setDependency,
 } from "../domain/project-manifest";
-import { type Registry, unityRegistry } from "../domain/registry";
+import { type Registry } from "../domain/registry";
 import { type RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import {
   addScope,
@@ -40,10 +40,13 @@ import {
 import { SemanticVersion } from "../domain/semantic-version";
 import { isZod } from "../domain/zod-utils";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import type { GetRegistryPackument } from "../io/registry";
+import { type GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { loadProjectManifestUsing } from "./get-dependencies";
-import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
+import {
+  FetchRegistryPackumentVersion,
+  type ResolvedPackumentVersion,
+} from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";
 import { saveProjectManifestUsing } from "./write-dependencies";
 
@@ -187,9 +190,7 @@ function pickMostFixable(
  * @param projectDirectory The projects root directory.
  * @param editorVersion The projects editor version. Will be used to check
  * compatibility. If set to null then compatibility will not be checked.
- * @param primaryRegistry The primary registry from which to resolve
- * dependencies.
- * @param useUnity Whether to fall back to the Unity registry.
+ * @param sources The sources from which to resolve the packuments.
  * @param force Whether to force add the dependencies.
  * @param shouldAddTestable Whether to also add dependencies to the `testables`.
  * @param pkgs References to the dependencies to add.
@@ -203,8 +204,7 @@ export async function addDependenciesUsing(
   debugLog: DebugLog,
   projectDirectory: string,
   editorVersion: ReleaseVersion | null,
-  primaryRegistry: Registry,
-  useUnity: boolean,
+  sources: ReadonlyArray<Registry>,
   force: boolean,
   shouldAddTestable: boolean,
   pkgs: ReadonlyArray<PackageReference>
@@ -236,7 +236,7 @@ export async function addDependenciesUsing(
     const dependencyGraph = await resolveDependenciesUsing(
       checkUrlExists,
       fetchPackument,
-      [primaryRegistry, unityRegistry],
+      sources,
       packageName,
       verison,
       true
@@ -330,28 +330,30 @@ export async function addDependenciesUsing(
   ): Promise<[SemanticVersion, RegistryUrl]> {
     let versionToAdd = requestedVersion;
 
-    let resolveResult = await getRegistryPackumentVersion(
-      packageName,
-      requestedVersion,
-      primaryRegistry
-    ).promise;
-    if (resolveResult.isErr() && useUnity) {
-      const unityResult = await getRegistryPackumentVersion(
+    let totalResolveResult: Result<
+      ResolvedPackumentVersion,
+      ResolvePackumentVersionError
+    > = Err(new PackumentNotFoundError(packageName));
+
+    for (const source of sources) {
+      const resolveResult = await getRegistryPackumentVersion(
         packageName,
         requestedVersion,
-        unityRegistry
+        source
       ).promise;
-      if (unityResult.isOk()) {
-        resolveResult = unityResult;
+
+      if (resolveResult.isOk()) {
+        totalResolveResult = resolveResult;
+        break;
       } else {
-        resolveResult = pickMostFixable(resolveResult, unityResult);
+        totalResolveResult = pickMostFixable(totalResolveResult, resolveResult);
       }
     }
 
-    if (resolveResult.isErr()) throw resolveResult.error;
+    if (totalResolveResult.isErr()) throw totalResolveResult.error;
 
-    const packumentVersion = resolveResult.value.packumentVersion;
-    const source = resolveResult.value.source;
+    const packumentVersion = totalResolveResult.value.packumentVersion;
+    const source = totalResolveResult.value.source;
     versionToAdd = packumentVersion.version;
 
     // Only do compatibility check when we have a editor version to check against
@@ -408,9 +410,8 @@ export async function addDependenciesUsing(
     );
 
     if (!isUnityPackage && packagesInScope.length > 0) {
-      manifest = mapScopedRegistry(manifest, primaryRegistry.url, (initial) => {
-        let updated =
-          initial ?? makeEmptyScopedRegistryFor(primaryRegistry.url);
+      manifest = mapScopedRegistry(manifest, source, (initial) => {
+        let updated = initial ?? makeEmptyScopedRegistryFor(source);
 
         updated = packagesInScope.reduce(addScope, updated!);
 

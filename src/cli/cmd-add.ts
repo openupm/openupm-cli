@@ -6,6 +6,7 @@ import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { DebugLog } from "../domain/logging";
 import { makePackageReference } from "../domain/package-reference";
 import { recordEntries } from "../domain/record-utils";
+import { unityRegistry } from "../domain/registry";
 import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
@@ -104,6 +105,9 @@ openupm add <pkg>@<version> [otherPkgs...]`
           options.registry
         );
 
+        const sources = [primaryRegistry];
+        if (options.upstream) sources.push(unityRegistry);
+
         const addResults = await addDependenciesUsing(
           readTextFile,
           writeTextFile,
@@ -112,8 +116,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
           debugLog,
           projectDirectory,
           typeof editorVersion === "string" ? null : editorVersion,
-          primaryRegistry,
-          options.upstream,
+          sources,
           options.force,
           options.test,
           pkgs

@@ -13,7 +13,7 @@ import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { partialApply } from "../../../src/domain/fp-utils";
 import { noopLogger } from "../../../src/domain/logging";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
-import type { Registry } from "../../../src/domain/registry";
+import { unityRegistry, type Registry } from "../../../src/domain/registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { getRegistryPackumentUsing } from "../../../src/io/registry";
@@ -117,8 +117,7 @@ describe("add dependencies", () => {
     const result = await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       true,
       false,
       [badEditorPackument.name]
@@ -138,8 +137,7 @@ describe("add dependencies", () => {
     const result = await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       true,
       false,
       [incompatiblePackument.name]
@@ -160,8 +158,7 @@ describe("add dependencies", () => {
       addDependencies(
         someProjectDir,
         makeEditorVersion(2020, 1, 1, "f", 1),
-        someRegistry,
-        true,
+        [someRegistry, unityRegistry],
         false,
         false,
         [incompatiblePackument.name]
@@ -176,8 +173,7 @@ describe("add dependencies", () => {
       addDependencies(
         someProjectDir,
         makeEditorVersion(2020, 1, 1, "f", 1),
-        someRegistry,
-        true,
+        [someRegistry, unityRegistry],
         true,
         false,
         [unknownPackage]
@@ -192,8 +188,7 @@ describe("add dependencies", () => {
       addDependencies(
         someProjectDir,
         makeEditorVersion(2020, 1, 1, "f", 1),
-        someRegistry,
-        true,
+        [someRegistry, unityRegistry],
         false,
         false,
         [badEditorPackument.name]
@@ -205,9 +200,14 @@ describe("add dependencies", () => {
     const { addDependencies } = makeDependencies();
 
     await expect(() =>
-      addDependencies(someProjectDir, null, someRegistry, true, false, false, [
-        packumentWithBadDependency.name,
-      ])
+      addDependencies(
+        someProjectDir,
+        null,
+        [someRegistry, unityRegistry],
+        false,
+        false,
+        [packumentWithBadDependency.name]
+      )
     ).rejects.toBeInstanceOf(UnresolvedDependenciesError);
   });
 
@@ -217,8 +217,7 @@ describe("add dependencies", () => {
     const result = await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       true,
       false,
       [packumentWithBadDependency.name]
@@ -238,8 +237,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       false,
       [somePackument.name]
@@ -265,8 +263,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       false,
       [somePackument.name]
@@ -286,8 +283,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       false,
       [somePackument.name]
@@ -313,8 +309,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       true,
       [somePackument.name]
@@ -334,8 +329,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       true,
       // The second package can not be added
