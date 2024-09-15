@@ -385,22 +385,15 @@ export async function addDependenciesUsing(
     return [versionToAdd, isUnityPackage];
   }
 
-  function addUrlDependency(
-    manifest: UnityProjectManifest,
-    packageName: DomainName,
-    version: PackageUrl
-  ): [UnityProjectManifest, AddResult] {
-    if (shouldAddTestable) manifest = addTestable(manifest, packageName);
-    return addDependencyToManifest(manifest, packageName, version);
-  }
-
   async function addSingle(
     manifest: UnityProjectManifest,
     packageName: DomainName,
     requestedVersion: VersionReference | undefined
   ): Promise<[UnityProjectManifest, AddResult]> {
+    if (shouldAddTestable) manifest = addTestable(manifest, packageName);
+
     if (isZod(requestedVersion, PackageUrl))
-      return addUrlDependency(manifest, packageName, requestedVersion);
+      return addDependencyToManifest(manifest, packageName, requestedVersion);
 
     const [versionToAdd, isUnityPackage] = await resolveDependency(
       packageName,
