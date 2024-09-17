@@ -58,14 +58,6 @@ const fetchPackument = getRegistryPackumentUsing(
 const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 
-const loginCmd = makeLoginCmd(
-  homePath,
-  getAuthTokenUsing(registryClient, debugLogToConsole),
-  readTextFile,
-  writeTextFile,
-  debugLogToConsole,
-  log
-);
 const searchCmd = makeSearchCmd(
   readTextFile,
   searchRegistry,
@@ -181,24 +173,16 @@ program.addCommand(
   )
 );
 
-program
-  .command("login")
-  .aliases(["add-user", "adduser"])
-  .option("-u, --username <username>", "username")
-  .option("-p, --password <password>", "password")
-  .option("-e, --email <email>", "email address")
-  .option("--basic-auth", "use basic authentication instead of token")
-  .option(
-    "--always-auth",
-    "always auth for tarball hosted on a different domain"
+program.addCommand(
+  makeLoginCmd(
+    homePath,
+    getAuthTokenUsing(registryClient, debugLogToConsole),
+    readTextFile,
+    writeTextFile,
+    debugLogToConsole,
+    log
   )
-  .description("authenticate with a scoped registry")
-  .action(
-    withErrorLogger(log, async function (options) {
-      const resultCode = await loginCmd(makeCmdOptions(options));
-      process.exit(resultCode);
-    })
-  );
+);
 
 // prompt for invalid command
 program.on("command:*", function () {

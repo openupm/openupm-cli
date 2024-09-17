@@ -1,3 +1,4 @@
+import { Command, Option } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import { loginUsing } from "../app/login";
 import { partialApply } from "../domain/fp-utils";
@@ -7,7 +8,8 @@ import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { GetAuthToken } from "../io/registry";
-import { CmdOptions } from "./options";
+import { withErrorLogger } from "./error-logging";
+import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import {
   promptEmail,
@@ -15,46 +17,28 @@ import {
   promptRegistryUrl,
   promptUsername,
 } from "./prompts";
-import { ResultCodes } from "./result-codes";
 
-/**
- * Options for logging in a user. These come from the CLI.
- * All properties are optional. If missing they will either be prompted
- * from the user or get default values.
- */
-export type LoginOptions = CmdOptions<{
-  /**
-   * The username to log in with.
-   */
-  username?: string;
-  /**
-   * The password to log in with.
-   */
-  password?: string;
-  /**
-   * The email to log in with.
-   */
-  email?: string;
-  /**
-   * Whether to use basic or token-based authentication.
-   */
-  basicAuth?: boolean;
-  /**
-   * Whether to always authenticate.
-   */
-  alwaysAuth?: boolean;
-}>;
+const usernameOpt = new Option("-u, --username <username>", "username").default(
+  null
+);
 
-/**
- * The possible result codes with which the login command can exit.
- */
-export type LoginResultCode = ResultCodes.Ok | ResultCodes.Error;
+const passwordOpt = new Option("-p, --password <password>", "password").default(
+  null
+);
 
-/**
- * Cmd-handler for logging in users.
- * @param options Options for logging in.
- */
-export type LoginCmd = (options: LoginOptions) => Promise<LoginResultCode>;
+const emailOpt = new Option("-e, --email <email>", "email address").default(
+  null
+);
+
+const basicAuthOpt = new Option(
+  "--basic-auth",
+  "use basic authentication instead of token"
+).default(false);
+
+const alwaysAuthOpt = new Option(
+  "--always-auth",
+  "always auth for tarball hosted on a different domain"
+).default(false);
 
 /**
  * Makes a {@link LoginCmd} function.
@@ -66,7 +50,7 @@ export function makeLoginCmd(
   writeTextFile: WriteTextFile,
   debugLog: DebugLog,
   log: Logger
-): LoginCmd {
+) {
   const login = partialApply(
     loginUsing,
     homePath,
@@ -76,41 +60,55 @@ export function makeLoginCmd(
     debugLog
   );
 
-  return async (options) => {
-    // parse env
-    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+  return new Command("login")
+    .aliases(["add-user", "adduser"])
+    .addOption(usernameOpt)
+    .addOption(passwordOpt)
+    .addOption(emailOpt)
+    .addOption(basicAuthOpt)
+    .addOption(alwaysAuthOpt)
+    .description("authenticate with a scoped registry")
+    .action(
+      withErrorLogger(log, async function (loginOptions, cmd) {
+        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
-    const homePath = getHomePathFromEnv(process.env);
-    const upmConfigPath = getUserUpmConfigPathFor(
-      process.env,
-      homePath,
-      env.systemUser
+        // parse env
+        const env = await parseEnvUsing(
+          log,
+          process.env,
+          process.cwd(),
+          globalOptions
+        );
+
+        const homePath = getHomePathFromEnv(process.env);
+        const upmConfigPath = getUserUpmConfigPathFor(
+          process.env,
+          homePath,
+          env.systemUser
+        );
+
+        // query parameters
+        const username = loginOptions.username ?? (await promptUsername());
+        const password = loginOptions.password ?? (await promptPassword());
+        const email = loginOptions.email ?? (await promptEmail());
+
+        const loginRegistry =
+          globalOptions.registry !== undefined
+            ? coerceRegistryUrl(globalOptions.registry)
+            : await promptRegistryUrl();
+
+        await login(
+          username,
+          password,
+          email,
+          loginOptions.alwaysAuth,
+          loginRegistry,
+          upmConfigPath,
+          loginOptions.basicAuth ? "basic" : "token"
+        );
+
+        log.notice("auth", `you are authenticated as '${username}'`);
+        log.notice("config", "saved unity config at " + upmConfigPath);
+      })
     );
-
-    // query parameters
-    const username = options.username ?? (await promptUsername());
-    const password = options.password ?? (await promptPassword());
-    const email = options.email ?? (await promptEmail());
-
-    const loginRegistry =
-      options.registry !== undefined
-        ? coerceRegistryUrl(options.registry)
-        : await promptRegistryUrl();
-
-    const alwaysAuth = options.alwaysAuth || false;
-
-    await login(
-      username,
-      password,
-      email,
-      alwaysAuth,
-      loginRegistry,
-      upmConfigPath,
-      options.basicAuth ? "basic" : "token"
-    );
-
-    log.notice("auth", `you are authenticated as '${username}'`);
-    log.notice("config", "saved unity config at " + upmConfigPath);
-    return ResultCodes.Ok;
-  };
 }
