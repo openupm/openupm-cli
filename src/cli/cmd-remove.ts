@@ -8,8 +8,6 @@ import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import { eachValue } from "./cli-parsing";
 import { logError, withErrorLogger } from "./error-logging";
 import { workDirOpt } from "./opt-wd";
-import { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 import { mustBeDomainName } from "./validators";
 
@@ -52,15 +50,10 @@ export function makeRemoveCmd(
     .action(
       withErrorLogger(
         log,
-        async function (packageName, otherPackageNames, removeOptions, cmd) {
-          const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
+        async function (packageName, otherPackageNames, options) {
           const pkgs = [packageName, ...otherPackageNames];
 
-          const projectDir = removeOptions.chdir;
-
-          // parse env
-          await parseEnvUsing(log, process.env, globalOptions);
+          const projectDir = options.chdir;
 
           const removeResult = await removeDependencies(projectDir, pkgs)
             .promise;

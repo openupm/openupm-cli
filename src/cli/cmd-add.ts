@@ -17,8 +17,6 @@ import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { upstreamOpt } from "./opt-upstream";
 import { workDirOpt } from "./opt-wd";
-import type { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
 import { mustBePackageReference } from "./validators";
 
 const pkgArg = new Argument(
@@ -75,15 +73,10 @@ openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
     )
     .action(
-      withErrorLogger(log, async function (pkg, otherPkgs, addOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
+      withErrorLogger(log, async function (pkg, otherPkgs, options) {
         const pkgs = [pkg].concat(otherPkgs);
 
-        const projectDirectory = addOptions.chdir;
-
-        // parse env
-        const env = await parseEnvUsing(log, process.env, globalOptions);
+        const projectDirectory = options.chdir;
 
         const editorVersion = await determineEditorVersionUsing(
           readTextFile,
@@ -101,14 +94,14 @@ openupm add <pkg>@<version> [otherPkgs...]`
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          addOptions.systemUser
+          options.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          addOptions.registry
+          options.registry
         );
 
         const addResults = await addDependenciesUsing(
@@ -120,9 +113,9 @@ openupm add <pkg>@<version> [otherPkgs...]`
           projectDirectory,
           typeof editorVersion === "string" ? null : editorVersion,
           primaryRegistry,
-          addOptions.upstream,
-          addOptions.force,
-          addOptions.test,
+          options.upstream,
+          options.force,
+          options.test,
           pkgs
         );
 

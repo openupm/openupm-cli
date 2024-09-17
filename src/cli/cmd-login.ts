@@ -9,8 +9,6 @@ import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { GetAuthToken } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
 import { systemUserOpt } from "./opt-system-user";
-import { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
 import {
   promptEmail,
   promptPassword,
@@ -79,34 +77,28 @@ export function makeLoginCmd(
     .addOption(systemUserOpt)
     .description("authenticate with a scoped registry")
     .action(
-      withErrorLogger(log, async function (loginOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        await parseEnvUsing(log, process.env, globalOptions);
-
+      withErrorLogger(log, async function (options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          loginOptions.systemUser
+          options.systemUser
         );
 
         // query parameters
-        const username = loginOptions.username ?? (await promptUsername());
-        const password = loginOptions.password ?? (await promptPassword());
-        const email = loginOptions.email ?? (await promptEmail());
-        const loginRegistry =
-          loginOptions.registry ?? (await promptRegistryUrl());
+        const username = options.username ?? (await promptUsername());
+        const password = options.password ?? (await promptPassword());
+        const email = options.email ?? (await promptEmail());
+        const loginRegistry = options.registry ?? (await promptRegistryUrl());
 
         await login(
           username,
           password,
           email,
-          loginOptions.alwaysAuth,
+          options.alwaysAuth,
           loginRegistry,
           upmConfigPath,
-          loginOptions.basicAuth ? "basic" : "token"
+          options.basicAuth ? "basic" : "token"
         );
 
         log.notice("auth", `you are authenticated as '${username}'`);

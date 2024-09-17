@@ -12,9 +12,7 @@ import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
-import { GlobalOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
-import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -48,23 +46,19 @@ export function makeSearchCmd(
     .aliases(["s", "se", "find"])
     .description("Search package by keyword")
     .action(
-      withErrorLogger(log, async function (keyword, searchOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        await parseEnvUsing(log, process.env, globalOptions);
+      withErrorLogger(log, async function (keyword, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          searchOptions.systemUser
+          options.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          searchOptions.registry
+          options.registry
         );
 
         let usedEndpoint = "npmsearch";

@@ -15,9 +15,7 @@ import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { upstreamOpt } from "./opt-upstream";
-import { GlobalOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
-import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 import { mustBePackageReference } from "./validators";
 
@@ -43,23 +41,19 @@ export function makeViewCmd(
     .aliases(["v", "info", "show"])
     .description("view package information")
     .action(
-      withErrorLogger(log, async function (pkg, viewOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        const env = await parseEnvUsing(log, process.env, globalOptions);
+      withErrorLogger(log, async function (pkg, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          viewOptions.systemUser
+          options.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          viewOptions.registry
+          options.registry
         );
 
         // parse name
@@ -75,7 +69,7 @@ export function makeViewCmd(
         // verify name
         const sources = [
           primaryRegistry,
-          ...(viewOptions.upstream ? [unityRegistry] : []),
+          ...(options.upstream ? [unityRegistry] : []),
         ];
         const packumentFromRegistry = await queryAllRegistriesLazy(
           sources,

@@ -1,4 +1,5 @@
 import { createCommand, Option } from "@commander-js/extra-typings";
+import chalk from "chalk";
 import type { Logger } from "npmlog";
 import pkginfo from "pkginfo";
 import type { DebugLog } from "../domain/logging";
@@ -22,6 +23,8 @@ const verboseOpt = new Option(
   "-v, --verbose",
   "output extra debugging"
 ).default(false);
+
+const colorOpt = new Option("--no-color", "disable color").default(true);
 
 /**
  * Makes the openupm cli app with the given dependencies.
@@ -49,11 +52,20 @@ export function makeOpenupmCli(
   const program = createCommand()
     .version(module.exports.version)
     .addOption(verboseOpt)
-    .option("--no-color", "disable color");
+    .addOption(colorOpt);
 
   program.on("option:verbose", function () {
     const verbose = program.opts().verbose;
     log.level = verbose ? "verbose" : "notice";
+  });
+
+  program.on(`option:${colorOpt.name()}`, function () {
+    const useColor = program.opts().color && process.env["NODE_ENV"] !== "test";
+
+    if (!useColor) {
+      chalk.level = 0;
+      log.disableColor();
+    }
   });
 
   program.addCommand(

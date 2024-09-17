@@ -25,8 +25,6 @@ import { stringifyDependencyGraph } from "./dependency-logging";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
-import { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 import { mustBePackageReference } from "./validators";
 
@@ -66,23 +64,18 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
     )
     .action(
-      withErrorLogger(log, async function (pkg, depsOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        await parseEnvUsing(log, process.env, globalOptions);
-
+      withErrorLogger(log, async function (pkg, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          depsOptions.systemUser
+          options.systemUser
         );
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          depsOptions.registry
+          options.registry
         );
         const sources = [primaryRegistry, unityRegistry];
 
@@ -115,7 +108,7 @@ openupm deps <pkg>@<version>`
 
         await debugLog(
           `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${
-            depsOptions.deep
+            options.deep
           }`
         );
         const dependencyGraph = await resolveDependenciesUsing(
@@ -124,7 +117,7 @@ openupm deps <pkg>@<version>`
           sources,
           packageName,
           latestVersion,
-          depsOptions.deep
+          options.deep
         );
 
         const output = stringifyDependencyGraph(
