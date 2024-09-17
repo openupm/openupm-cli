@@ -16,7 +16,15 @@ import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
- * Makes a {@link SearchCmd} function.
+ * Makes the `openupm search` cli command with the given dependencies.
+ * @param readTextFile IO function for reading a text file.
+ * @param searchRegistry IO function for sending a search request to a
+ * registry.
+ * @param fetchAllPackuments IO function for getting all packages from a
+ * registry.
+ * @param log Logger for cli output.
+ * @param debugLog IO function for debug-logs.
+ * @returns The command.
  */
 export function makeSearchCmd(
   readTextFile: ReadTextFile,
