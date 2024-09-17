@@ -73,13 +73,6 @@ const searchCmd = makeSearchCmd(
   log,
   debugLogToConsole
 );
-const depsCmd = makeDepsCmd(
-  readTextFile,
-  fetchPackument,
-  fetchCheckUrlExists,
-  log,
-  debugLogToConsole
-);
 const removeCmd = makeRemoveCmd(
   readTextFile,
   writeTextFile,
@@ -178,22 +171,15 @@ program
     })
   );
 
-program
-  .command("deps")
-  .argument("<pkg>", "Reference to a package", mustBePackageReference)
-  .alias("dep")
-  .option("-d, --deep", "view package dependencies recursively")
-  .description(
-    `view package dependencies
-openupm deps <pkg>
-openupm deps <pkg>@<version>`
+program.addCommand(
+  makeDepsCmd(
+    readTextFile,
+    fetchPackument,
+    fetchCheckUrlExists,
+    log,
+    debugLogToConsole
   )
-  .action(
-    withErrorLogger(log, async function (pkg, options) {
-      const resultCode = await depsCmd(pkg, makeCmdOptions(options));
-      process.exit(resultCode);
-    })
-  );
+);
 
 program
   .command("login")
