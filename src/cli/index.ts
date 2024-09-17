@@ -49,7 +49,6 @@ export function makeOpenupmCli(
   const program = createCommand()
     .version(module.exports.version)
     .addOption(verboseOpt)
-    .option("--no-upstream", "don't use upstream unity registry")
     .option("--no-color", "disable color");
 
   program.on("option:verbose", function () {

@@ -7,10 +7,6 @@ export type GlobalOptions = Readonly<{
    */
   color?: boolean;
   /**
-   * Whether to fall back to the Unity registry.
-   */
-  upstream?: boolean;
-  /**
    * Whether to run commands for the chinese locale.
    */
   cn?: boolean;

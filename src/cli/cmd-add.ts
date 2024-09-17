@@ -15,6 +15,7 @@ import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
+import { upstreamOpt } from "./opt-upstream";
 import { workDirOpt } from "./opt-wd";
 import type { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
@@ -67,6 +68,7 @@ export function makeAddCmd(
     .addOption(primaryRegistryUrlOpt)
     .addOption(workDirOpt)
     .addOption(systemUserOpt)
+    .addOption(upstreamOpt)
     .description(
       `add package to manifest json
 openupm add <pkg> [otherPkgs...]
@@ -118,7 +120,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
           projectDirectory,
           typeof editorVersion === "string" ? null : editorVersion,
           primaryRegistry,
-          env.upstream,
+          addOptions.upstream,
           addOptions.force,
           addOptions.test,
           pkgs

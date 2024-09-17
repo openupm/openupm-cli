@@ -11,16 +11,6 @@ export class RegistryAuthLoadError extends CustomError {
 }
 
 /**
- * Contains information about the environment and context a command is run in.
- */
-export type Env = Readonly<{
-  /**
-   * Whether to fall back to the Unity registry.
-   */
-  upstream: boolean;
-}>;
-
-/**
  * Determines whether to use color for output.
  * @param envVars Environment variables.
  * @param options Cmd options.
@@ -30,14 +20,6 @@ export function determineUseColor(
   options: CmdOptions
 ): boolean {
   return options.color !== false && envVars["NODE_ENV"] !== "test";
-}
-
-/**
- * Determines whether to use the upstream registry.
- * @param options Cmd options.
- */
-export function determineUseUpstream(options: CmdOptions): boolean {
-  return options.upstream !== false;
 }
 
 /**
@@ -52,18 +34,11 @@ export async function parseEnvUsing(
   log: Logger,
   envVars: Record<string, string | undefined>,
   options: CmdOptions
-): Promise<Env> {
+): Promise<void> {
   // color
   const useColor = determineUseColor(envVars, options);
   if (!useColor) {
     chalk.level = 0;
     log.disableColor();
   }
-
-  // upstream
-  const upstream = determineUseUpstream(options);
-
-  return {
-    upstream,
-  };
 }
