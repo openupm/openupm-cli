@@ -26,13 +26,13 @@ import {
   type ResolvePackumentVersionError,
 } from "../domain/packument";
 import { recordEntries } from "../domain/record-utils";
-import { NoSystemUserProfilePath } from "../domain/upm-config";
-import { RegistryAuthenticationError } from "../io/common-errors";
 import {
   NoHomePathError,
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
 } from "../domain/special-paths";
+import { NoSystemUserProfilePath } from "../domain/upm-config";
+import { RegistryAuthenticationError } from "../io/common-errors";
 import { RegistryAuthLoadError } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
@@ -166,16 +166,16 @@ export function logError(log: Logger, error: unknown) {
  * @returns A new function that has the same behaviour as the original but with
  * error logging.
  */
-export function withErrorLogger<
-  TArgs extends unknown[],
-  TOut extends ResultCodes
->(
+export function withErrorLogger<TArgs extends unknown[], TOut>(
   log: Logger,
   cmd: (...args: TArgs) => Promise<TOut>
 ): (...args: TArgs) => Promise<TOut> {
-  return (...args) =>
-    cmd(...args).catch((error) => {
+  return async (...args) => {
+    try {
+      return await cmd(...args);
+    } catch (error) {
       logError(log, error);
       process.exit(ResultCodes.Error);
-    });
+    }
+  };
 }

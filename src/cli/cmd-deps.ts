@@ -1,3 +1,4 @@
+import { Argument, Command, Option } from "@commander-js/extra-typings";
 import chalk from "chalk";
 import { Logger } from "npmlog";
 import os from "os";
@@ -9,7 +10,6 @@ import { PackumentNotFoundError } from "../domain/common-errors";
 import { DebugLog } from "../domain/logging";
 import {
   makePackageReference,
-  PackageReference,
   splitPackageReference,
 } from "../domain/package-reference";
 import { PackageUrl } from "../domain/package-url";
@@ -22,37 +22,28 @@ import type { ReadTextFile } from "../io/fs";
 import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { stringifyDependencyGraph } from "./dependency-logging";
-import { CmdOptions } from "./options";
+import { withErrorLogger } from "./error-logging";
+import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
+import { mustBePackageReference } from "./validators";
+
+const pkgArg = new Argument("<pkg>", "Reference to a package").argParser(
+  mustBePackageReference
+);
+
+const deepOpt = new Option(
+  "-d, --deep",
+  "view package dependencies recursively"
+).default(false);
 
 /**
- * Options passed to the deps command.
- */
-export type DepsOptions = CmdOptions<{
-  /**
-   * Whether to print only direct or deep dependencies.
-   */
-  deep?: boolean;
-}>;
-
-/**
- * The possible result codes with which the deps command can exit.
- */
-export type DepsResultCode = ResultCodes.Ok | ResultCodes.Error;
-
-/**
- * Cmd-handler for listing dependencies for a package.
- * @param pkg Reference to a package.
- * @param options Command options.
- */
-export type DepsCmd = (
-  pkg: PackageReference,
-  options: DepsOptions
-) => Promise<DepsResultCode>;
-
-/**
- * Makes a {@link DepsCmd} function.
+ * Makes the `openupm deps` command with the given dependencies.
+ * @param readTextFile IO function for reading text files.
+ * @param fetchPackument IO function for fetching remote packuments.
+ * @param checkUrlExists IO function for checking whether a url exists.
+ * @param log Logger for printing output.
+ * @param debugLog IO function for printing debug logs.
  */
 export function makeDepsCmd(
   readTextFile: ReadTextFile,
@@ -60,68 +51,90 @@ export function makeDepsCmd(
   checkUrlExists: CheckUrlExists,
   log: Logger,
   debugLog: DebugLog
-): DepsCmd {
-  return async (pkg, options) => {
-    // parse env
-    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+) {
+  return new Command("deps")
+    .alias("dep")
+    .addArgument(pkgArg)
+    .addOption(deepOpt)
+    .description(
+      `view package dependencies
+openupm deps <pkg>
+openupm deps <pkg>@<version>`
+    )
+    .action(
+      withErrorLogger(log, async function (pkg, depsOptions, cmd) {
+        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
-    const homePath = getHomePathFromEnv(process.env);
-    const upmConfigPath = getUserUpmConfigPathFor(
-      process.env,
-      homePath,
-      env.systemUser
+        // parse env
+        const env = await parseEnvUsing(
+          log,
+          process.env,
+          process.cwd(),
+          globalOptions
+        );
+
+        const homePath = getHomePathFromEnv(process.env);
+        const upmConfigPath = getUserUpmConfigPathFor(
+          process.env,
+          homePath,
+          env.systemUser
+        );
+        const primaryRegistry = await loadRegistryAuthUsing(
+          readTextFile,
+          debugLog,
+          upmConfigPath,
+          env.primaryRegistryUrl
+        );
+        const sources = [primaryRegistry, unityRegistry];
+
+        const [packageName, requestedVersion] = splitPackageReference(pkg);
+
+        if (
+          requestedVersion !== undefined &&
+          isZod(requestedVersion, PackageUrl)
+        ) {
+          log.error("", "cannot get dependencies for url-version");
+          return process.exit(ResultCodes.Error);
+        }
+
+        const latestVersion =
+          requestedVersion !== undefined &&
+          isZod(requestedVersion, SemanticVersion)
+            ? requestedVersion
+            : (
+                await queryAllRegistriesLazy(sources, (source) =>
+                  fetchLatestPackumentVersionUsing(
+                    fetchPackument,
+                    source,
+                    packageName
+                  )
+                )
+              )?.value ?? null;
+
+        if (latestVersion === null)
+          throw new PackumentNotFoundError(packageName);
+
+        await debugLog(
+          `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${
+            depsOptions.deep
+          }`
+        );
+        const dependencyGraph = await resolveDependenciesUsing(
+          checkUrlExists,
+          fetchPackument,
+          sources,
+          packageName,
+          latestVersion,
+          depsOptions.deep
+        );
+
+        const output = stringifyDependencyGraph(
+          dependencyGraph,
+          packageName,
+          latestVersion,
+          chalk
+        ).join(os.EOL);
+        log.notice("", output);
+      })
     );
-    const primaryRegistry = await loadRegistryAuthUsing(
-      readTextFile,
-      debugLog,
-      upmConfigPath,
-      env.primaryRegistryUrl
-    );
-    const sources = [primaryRegistry, unityRegistry];
-
-    const [packageName, requestedVersion] = splitPackageReference(pkg);
-
-    if (requestedVersion !== undefined && isZod(requestedVersion, PackageUrl)) {
-      log.error("", "cannot get dependencies for url-version");
-      return ResultCodes.Error;
-    }
-
-    const latestVersion =
-      requestedVersion !== undefined && isZod(requestedVersion, SemanticVersion)
-        ? requestedVersion
-        : (
-            await queryAllRegistriesLazy(sources, (source) =>
-              fetchLatestPackumentVersionUsing(
-                fetchPackument,
-                source,
-                packageName
-              )
-            )
-          )?.value ?? null;
-
-    if (latestVersion === null) throw new PackumentNotFoundError(packageName);
-
-    const deep = options.deep || false;
-    await debugLog(
-      `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${deep}`
-    );
-    const dependencyGraph = await resolveDependenciesUsing(
-      checkUrlExists,
-      fetchPackument,
-      sources,
-      packageName,
-      latestVersion,
-      deep
-    );
-
-    const output = stringifyDependencyGraph(
-      dependencyGraph,
-      packageName,
-      latestVersion,
-      chalk
-    ).join(os.EOL);
-    log.notice("", output);
-
-    return ResultCodes.Ok;
-  };
 }

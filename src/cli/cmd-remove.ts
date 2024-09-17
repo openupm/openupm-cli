@@ -1,44 +1,40 @@
+import { Argument, Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import { removeDependenciesUsing } from "../app/remove-dependencies";
-import { DomainName } from "../domain/domain-name";
+import { partialApply } from "../domain/fp-utils";
+import type { DebugLog } from "../domain/logging";
 import { makePackageReference } from "../domain/package-reference";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import type { DebugLog } from "../domain/logging";
-import { partialApply } from "../domain/fp-utils";
-import { logError } from "./error-logging";
-import { CmdOptions } from "./options";
+import { eachValue } from "./cli-parsing";
+import { logError, withErrorLogger } from "./error-logging";
+import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
+import { mustBeDomainName } from "./validators";
+
+const pkgArg = new Argument("<pkg>", "Name of the package to remove").argParser(
+  mustBeDomainName
+);
+
+const otherPkgsArg = new Argument(
+  "[otherPkgs...]",
+  "Names of additional packages to remove"
+).argParser(eachValue(mustBeDomainName));
 
 /**
- * The possible result codes with which the remove command can exit.
- */
-export type RemoveResultCode = ResultCodes.Ok | ResultCodes.Error;
-
-/**
- * Options passed to the remove command.
- */
-export type RemoveOptions = CmdOptions;
-
-/**
- * Cmd-handler for removing packages.
- * @param pkgs One or multiple packages to remove.
- * @param options Command options.
- */
-export type RemoveCmd = (
-  pkgs: ReadonlyArray<DomainName>,
-  options: RemoveOptions
-) => Promise<RemoveResultCode>;
-
-/**
- * Makes a {@link RemoveCmd} function.
+ * Makes the `openupm remove` cli command with the given dependencies.
+ * @param readTextFile IO function for reading a text file.
+ * @param writeTextFile IO function for writing a text file.
+ * @param debugLog IO function for debug-logs.
+ * @param log Logger for cli output.
+ * @returns The command.
  */
 export function makeRemoveCmd(
   readTextFile: ReadTextFile,
   writeTextFile: WriteTextFile,
   debugLog: DebugLog,
   log: Logger
-): RemoveCmd {
+) {
   const removeDependencies = partialApply(
     removeDependenciesUsing,
     readTextFile,
@@ -46,30 +42,46 @@ export function makeRemoveCmd(
     debugLog
   );
 
-  return async (pkgs, options) => {
-    // parse env
-    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+  return new Command("remove")
+    .aliases(["rm", "uninstall"])
+    .addArgument(pkgArg)
+    .addArgument(otherPkgsArg)
+    .description("remove package from manifest json")
+    .action(
+      withErrorLogger(
+        log,
+        async function (packageName, otherPackageNames, _, cmd) {
+          const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
+          const pkgs = [packageName, ...otherPackageNames];
 
-    const removeResult = await removeDependencies(env.cwd, pkgs).promise;
-    if (removeResult.isErr()) {
-      logError(log, removeResult.error);
-      return ResultCodes.Error;
-    }
-    const removedPackages = removeResult.value;
+          // parse env
+          const env = await parseEnvUsing(
+            log,
+            process.env,
+            process.cwd(),
+            globalOptions
+          );
 
-    removedPackages.forEach((removedPackage) => {
-      log.notice(
-        "",
-        `Removed "${makePackageReference(
-          removedPackage.name,
-          removedPackage.version
-        )}".`
-      );
-    });
+          const removeResult = await removeDependencies(env.cwd, pkgs).promise;
+          if (removeResult.isErr()) {
+            logError(log, removeResult.error);
+            return process.exit(ResultCodes.Error);
+          }
+          const removedPackages = removeResult.value;
 
-    // print manifest notice
-    log.notice("", "please open Unity project to apply changes");
+          removedPackages.forEach((removedPackage) => {
+            log.notice(
+              "",
+              `Removed "${makePackageReference(
+                removedPackage.name,
+                removedPackage.version
+              )}".`
+            );
+          });
 
-    return ResultCodes.Ok;
-  };
+          // print manifest notice
+          log.notice("", "please open Unity project to apply changes");
+        }
+      )
+    );
 }
