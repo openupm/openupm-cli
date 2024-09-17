@@ -3,10 +3,6 @@
  */
 export type GlobalOptions = Readonly<{
   /**
-   * Whether to print logs.
-   */
-  verbose?: boolean;
-  /**
    * Whether to use color in the console.
    */
   color?: boolean;

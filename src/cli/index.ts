@@ -1,4 +1,4 @@
-import { createCommand } from "@commander-js/extra-typings";
+import { createCommand, Option } from "@commander-js/extra-typings";
 import type { Logger } from "npmlog";
 import pkginfo from "pkginfo";
 import type { DebugLog } from "../domain/logging";
@@ -17,6 +17,11 @@ import { makeLoginCmd } from "./cmd-login";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
+
+const verboseOpt = new Option(
+  "-v, --verbose",
+  "output extra debugging"
+).default(false);
 
 /**
  * Makes the openupm cli app with the given dependencies.
@@ -43,10 +48,15 @@ export function makeOpenupmCli(
   pkginfo(module);
   const program = createCommand()
     .version(module.exports.version)
-    .option("-v, --verbose", "output extra debugging")
+    .addOption(verboseOpt)
     .option("--system-user", "auth for Windows system user")
     .option("--no-upstream", "don't use upstream unity registry")
     .option("--no-color", "disable color");
+
+  program.on("option:verbose", function () {
+    const verbose = program.opts().verbose;
+    log.level = verbose ? "verbose" : "notice";
+  });
 
   program.addCommand(
     makeAddCmd(

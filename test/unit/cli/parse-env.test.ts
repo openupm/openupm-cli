@@ -1,35 +1,10 @@
 import {
   determineIsSystemUser,
-  determineLogLevel,
   determineUseColor,
   determineUseUpstream,
 } from "../../../src/cli/parse-env";
 
 describe("parse env", () => {
-  describe("log-level", () => {
-    it("should be verbose if verbose option is true", () => {
-      const actual = determineLogLevel({
-        verbose: true,
-      });
-
-      expect(actual).toEqual("verbose");
-    });
-
-    it("should be notice if verbose option is false", () => {
-      const actual = determineLogLevel({
-        verbose: false,
-      });
-
-      expect(actual).toEqual("notice");
-    });
-
-    it("should be notice if verbose option is missing", () => {
-      const actual = determineLogLevel({});
-
-      expect(actual).toEqual("notice");
-    });
-  });
-
   describe("color", () => {
     it("should use color if color option is true", () => {
       const actual = determineUseColor(

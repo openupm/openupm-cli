@@ -25,14 +25,6 @@ export type Env = Readonly<{
 }>;
 
 /**
- * Determines which log level to use for output.
- * @param options Cmd options.
- */
-export function determineLogLevel(options: CmdOptions): "verbose" | "notice" {
-  return options.verbose ? "verbose" : "notice";
-}
-
-/**
  * Determines whether to use color for output.
  * @param envVars Environment variables.
  * @param options Cmd options.
@@ -73,9 +65,6 @@ export async function parseEnvUsing(
   envVars: Record<string, string | undefined>,
   options: CmdOptions
 ): Promise<Env> {
-  // log level
-  log.level = determineLogLevel(options);
-
   // color
   const useColor = determineUseColor(envVars, options);
   if (!useColor) {
