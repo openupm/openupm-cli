@@ -7,6 +7,7 @@ import { makePackageReference } from "../domain/package-reference";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import { eachValue } from "./cli-parsing";
 import { logError, withErrorLogger } from "./error-logging";
+import { workDirOpt } from "./opt-wd";
 import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
@@ -46,23 +47,23 @@ export function makeRemoveCmd(
     .aliases(["rm", "uninstall"])
     .addArgument(pkgArg)
     .addArgument(otherPkgsArg)
+    .addOption(workDirOpt)
     .description("remove package from manifest json")
     .action(
       withErrorLogger(
         log,
-        async function (packageName, otherPackageNames, _, cmd) {
+        async function (packageName, otherPackageNames, removeOptions, cmd) {
           const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
+
           const pkgs = [packageName, ...otherPackageNames];
 
-          // parse env
-          const env = await parseEnvUsing(
-            log,
-            process.env,
-            process.cwd(),
-            globalOptions
-          );
+          const projectDir = removeOptions.chdir;
 
-          const removeResult = await removeDependencies(env.cwd, pkgs).promise;
+          // parse env
+          await parseEnvUsing(log, process.env, globalOptions);
+
+          const removeResult = await removeDependencies(projectDir, pkgs)
+            .promise;
           if (removeResult.isErr()) {
             logError(log, removeResult.error);
             return process.exit(ResultCodes.Error);

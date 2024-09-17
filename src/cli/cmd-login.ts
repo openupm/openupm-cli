@@ -81,12 +81,7 @@ export function makeLoginCmd(
         const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
         // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
+        const env = await parseEnvUsing(log, process.env, globalOptions);
 
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(

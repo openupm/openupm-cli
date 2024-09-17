@@ -1,13 +1,9 @@
-import path from "path";
 import {
-  determineCwd,
   determineIsSystemUser,
   determineLogLevel,
   determineUseColor,
   determineUseUpstream,
 } from "../../../src/cli/parse-env";
-
-const testRootPath = "/users/some-user/projects/MyUnityProject";
 
 describe("parse env", () => {
   describe("log-level", () => {
@@ -109,24 +105,6 @@ describe("parse env", () => {
       });
 
       expect(actual).toBeFalsy();
-    });
-  });
-
-  describe("cwd", () => {
-    it("should be process directory by default", () => {
-      const actual = determineCwd(testRootPath, {});
-
-      expect(actual).toEqual(testRootPath);
-    });
-
-    it("should be specified path if overridden", () => {
-      const expected = path.resolve("/some/other/path");
-
-      const actual = determineCwd(testRootPath, {
-        chdir: expected,
-      });
-
-      expect(actual).toEqual(expected);
     });
   });
 });

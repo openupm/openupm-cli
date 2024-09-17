@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import { Logger } from "npmlog";
-import path from "path";
 import { CustomError } from "ts-custom-error";
 import { CmdOptions } from "./options";
 
@@ -16,10 +15,6 @@ export class RegistryAuthLoadError extends CustomError {
  */
 export type Env = Readonly<{
   /**
-   * The working directory.
-   */
-  cwd: string;
-  /**
    * Whether the user is a system-user.
    */
   systemUser: boolean;
@@ -28,15 +23,6 @@ export type Env = Readonly<{
    */
   upstream: boolean;
 }>;
-
-/**
- * Determines the directory in which to execute commands.
- * @param processCwd The process cwd.
- * @param options Cmd options.
- */
-export function determineCwd(processCwd: string, options: CmdOptions): string {
-  return options.chdir !== undefined ? path.resolve(options.chdir) : processCwd;
-}
 
 /**
  * Determines which log level to use for output.
@@ -79,14 +65,12 @@ export function determineIsSystemUser(options: CmdOptions): boolean {
  * command-options for further usage.
  * @param log The logger that is used in the application.
  * @param envVars Environment variables.
- * @param processCwd The process directory.
  * @param options The options passed to the current command.
  * @returns Environment information.
  */
 export async function parseEnvUsing(
   log: Logger,
   envVars: Record<string, string | undefined>,
-  processCwd: string,
   options: CmdOptions
 ): Promise<Env> {
   // log level
@@ -105,11 +89,7 @@ export async function parseEnvUsing(
   // auth
   const systemUser = determineIsSystemUser(options);
 
-  // cwd
-  const cwd = determineCwd(processCwd, options);
-
   return {
-    cwd,
     systemUser,
     upstream,
   };

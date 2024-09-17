@@ -14,6 +14,7 @@ import type { CheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
+import { workDirOpt } from "./opt-wd";
 import type { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { mustBePackageReference } from "./validators";
@@ -63,6 +64,7 @@ export function makeAddCmd(
     .addOption(addTestableOpt)
     .addOption(forceOpt)
     .addOption(primaryRegistryUrlOpt)
+    .addOption(workDirOpt)
     .description(
       `add package to manifest json
 openupm add <pkg> [otherPkgs...]
@@ -74,18 +76,15 @@ openupm add <pkg>@<version> [otherPkgs...]`
 
         const pkgs = [pkg].concat(otherPkgs);
 
+        const projectDirectory = addOptions.chdir;
+
         // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
+        const env = await parseEnvUsing(log, process.env, globalOptions);
 
         const editorVersion = await determineEditorVersionUsing(
           readTextFile,
           debugLog,
-          env.cwd
+          projectDirectory
         );
 
         if (typeof editorVersion === "string")
@@ -93,8 +92,6 @@ openupm add <pkg>@<version> [otherPkgs...]`
             "editor.version",
             `${editorVersion} is unknown, the editor version check is disabled`
           );
-
-        const projectDirectory = env.cwd;
 
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(

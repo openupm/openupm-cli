@@ -43,7 +43,6 @@ export function makeOpenupmCli(
   pkginfo(module);
   const program = createCommand()
     .version(module.exports.version)
-    .option("-c, --chdir <path>", "change the working directory")
     .option("-v, --verbose", "output extra debugging")
     .option("--system-user", "auth for Windows system user")
     .option("--no-upstream", "don't use upstream unity registry")

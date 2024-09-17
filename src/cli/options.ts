@@ -22,10 +22,6 @@ export type GlobalOptions = Readonly<{
    * Whether to authenticate as a Windows system-user.
    */
   systemUser?: boolean;
-  /**
-   * Override working directory.
-   */
-  chdir?: string;
 }>;
 
 /**
