@@ -14,7 +14,6 @@ import {
   searchRegistryUsing,
 } from "../io/registry";
 import { fetchCheckUrlExists } from "../io/www";
-import { eachValue } from "./cli-parsing";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
@@ -23,11 +22,7 @@ import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
 import { withErrorLogger } from "./error-logging";
 import { CmdOptions } from "./options";
-import {
-  mustBeDomainName,
-  mustBePackageReference,
-  mustBeRegistryUrl,
-} from "./validators";
+import { mustBePackageReference, mustBeRegistryUrl } from "./validators";
 
 // Composition root
 
@@ -64,12 +59,6 @@ const searchCmd = makeSearchCmd(
   fetchAllPackuments,
   log,
   debugLogToConsole
-);
-const removeCmd = makeRemoveCmd(
-  readTextFile,
-  writeTextFile,
-  debugLogToConsole,
-  log
 );
 const viewCmd = makeViewCmd(
   getRegistryPackumentUsing(registryClient, debugLogToConsole),
@@ -115,29 +104,9 @@ program.addCommand(
   )
 );
 
-program
-  .command("remove")
-  .argument("<pkg>", "Name of the package to remove", mustBeDomainName)
-  .argument(
-    "[otherPkgs...]",
-    "Names of additional packages to remove",
-    eachValue(mustBeDomainName)
-  )
-  .aliases(["rm", "uninstall"])
-  .description("remove package from manifest json")
-  .action(
-    withErrorLogger(
-      log,
-      async function (packageName, otherPackageNames, options) {
-        const packageNames = [packageName].concat(otherPackageNames);
-        const resultCode = await removeCmd(
-          packageNames,
-          makeCmdOptions(options)
-        );
-        process.exit(resultCode);
-      }
-    )
-  );
+program.addCommand(
+  makeRemoveCmd(readTextFile, writeTextFile, debugLogToConsole, log)
+);
 
 program
   .command("search")
