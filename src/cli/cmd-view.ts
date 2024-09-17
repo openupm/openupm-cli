@@ -12,9 +12,10 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile } from "../io/fs";
 import type { GetRegistryPackument } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
-import { GlobalOptions } from "./options";
+import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
+import { upstreamOpt } from "./opt-upstream";
 import { formatPackumentInfo } from "./output-formatting";
-import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 import { mustBePackageReference } from "./validators";
 
@@ -34,31 +35,25 @@ export function makeViewCmd(
 ) {
   return new Command("view")
     .argument("<pkg>", "Reference to a package", mustBePackageReference)
+    .addOption(primaryRegistryUrlOpt)
+    .addOption(systemUserOpt)
+    .addOption(upstreamOpt)
     .aliases(["v", "info", "show"])
     .description("view package information")
     .action(
-      withErrorLogger(log, async function (pkg, _, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
+      withErrorLogger(log, async function (pkg, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          options.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          options.registry
         );
 
         // parse name
@@ -74,7 +69,7 @@ export function makeViewCmd(
         // verify name
         const sources = [
           primaryRegistry,
-          ...(env.upstream ? [unityRegistry] : []),
+          ...(options.upstream ? [unityRegistry] : []),
         ];
         const packumentFromRegistry = await queryAllRegistriesLazy(
           sources,

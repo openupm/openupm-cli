@@ -23,8 +23,8 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { withErrorLogger } from "./error-logging";
-import { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
+import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
 import { ResultCodes } from "./result-codes";
 import { mustBePackageReference } from "./validators";
 
@@ -56,34 +56,26 @@ export function makeDepsCmd(
     .alias("dep")
     .addArgument(pkgArg)
     .addOption(deepOpt)
+    .addOption(primaryRegistryUrlOpt)
+    .addOption(systemUserOpt)
     .description(
       `view package dependencies
 openupm deps <pkg>
 openupm deps <pkg>@<version>`
     )
     .action(
-      withErrorLogger(log, async function (pkg, depsOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
-
+      withErrorLogger(log, async function (pkg, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          options.systemUser
         );
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          options.registry
         );
         const sources = [primaryRegistry, unityRegistry];
 
@@ -116,7 +108,7 @@ openupm deps <pkg>@<version>`
 
         await debugLog(
           `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${
-            depsOptions.deep
+            options.deep
           }`
         );
         const dependencyGraph = await resolveDependenciesUsing(
@@ -125,7 +117,7 @@ openupm deps <pkg>@<version>`
           sources,
           packageName,
           latestVersion,
-          depsOptions.deep
+          options.deep
         );
 
         const output = stringifyDependencyGraph(

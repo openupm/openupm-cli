@@ -3,33 +3,13 @@
  */
 export type GlobalOptions = Readonly<{
   /**
-   * Override package registry to use.
-   */
-  registry?: string;
-  /**
-   * Whether to print logs.
-   */
-  verbose?: boolean;
-  /**
    * Whether to use color in the console.
    */
   color?: boolean;
   /**
-   * Whether to fall back to the Unity registry.
-   */
-  upstream?: boolean;
-  /**
    * Whether to run commands for the chinese locale.
    */
   cn?: boolean;
-  /**
-   * Whether to authenticate as a Windows system-user.
-   */
-  systemUser?: boolean;
-  /**
-   * Override working directory.
-   */
-  chdir?: string;
 }>;
 
 /**

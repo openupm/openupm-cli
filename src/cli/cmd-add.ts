@@ -13,8 +13,10 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
-import type { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
+import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
+import { upstreamOpt } from "./opt-upstream";
+import { workDirOpt } from "./opt-wd";
 import { mustBePackageReference } from "./validators";
 
 const pkgArg = new Argument(
@@ -61,29 +63,25 @@ export function makeAddCmd(
     .addArgument(otherPkgsArg)
     .addOption(addTestableOpt)
     .addOption(forceOpt)
+    .addOption(primaryRegistryUrlOpt)
+    .addOption(workDirOpt)
+    .addOption(systemUserOpt)
+    .addOption(upstreamOpt)
     .description(
       `add package to manifest json
 openupm add <pkg> [otherPkgs...]
 openupm add <pkg>@<version> [otherPkgs...]`
     )
     .action(
-      withErrorLogger(log, async function (pkg, otherPkgs, addOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
+      withErrorLogger(log, async function (pkg, otherPkgs, options) {
         const pkgs = [pkg].concat(otherPkgs);
 
-        // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
+        const projectDirectory = options.chdir;
 
         const editorVersion = await determineEditorVersionUsing(
           readTextFile,
           debugLog,
-          env.cwd
+          projectDirectory
         );
 
         if (typeof editorVersion === "string")
@@ -92,20 +90,18 @@ openupm add <pkg>@<version> [otherPkgs...]`
             `${editorVersion} is unknown, the editor version check is disabled`
           );
 
-        const projectDirectory = env.cwd;
-
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          options.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          options.registry
         );
 
         const addResults = await addDependenciesUsing(
@@ -117,9 +113,9 @@ openupm add <pkg>@<version> [otherPkgs...]`
           projectDirectory,
           typeof editorVersion === "string" ? null : editorVersion,
           primaryRegistry,
-          env.upstream,
-          addOptions.force,
-          addOptions.test,
+          options.upstream,
+          options.force,
+          options.test,
           pkgs
         );
 

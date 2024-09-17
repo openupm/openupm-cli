@@ -33,7 +33,6 @@ import {
 } from "../domain/special-paths";
 import { NoSystemUserProfilePath } from "../domain/upm-config";
 import { RegistryAuthenticationError } from "../io/common-errors";
-import { RegistryAuthLoadError } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 function errorMessageFor(error: ResolvePackumentVersionError): string {
@@ -54,8 +53,6 @@ function stringifyUnresolvedDependency(
 }
 
 function makeErrorMessageFor(error: unknown): string {
-  if (error instanceof RegistryAuthLoadError)
-    return "Could not load registry authentication information.";
   if (error instanceof PackumentNotFoundError)
     return `Package "${error.packageName}" could not be found.`;
   if (error instanceof EditorVersionNotSupportedError)
@@ -103,8 +100,6 @@ function makeErrorMessageFor(error: unknown): string {
 }
 
 function tryMakeFixSuggestionFor(error: unknown): string | null {
-  if (error instanceof RegistryAuthLoadError)
-    return "Most likely this means that something is wrong with your .upmconfig.toml.";
   if (error instanceof PackumentNotFoundError)
     return "Did you make a typo when spelling the name?";
   if (error instanceof CompatibilityCheckFailedError)

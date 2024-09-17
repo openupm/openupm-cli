@@ -10,9 +10,9 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile } from "../io/fs";
 import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
-import { GlobalOptions } from "./options";
+import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
 import { formatAsTable } from "./output-formatting";
-import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
 
 /**
@@ -41,31 +41,24 @@ export function makeSearchCmd(
   );
   return new Command("search")
     .argument("<keyword>", "The keyword to search")
+    .addOption(primaryRegistryUrlOpt)
+    .addOption(systemUserOpt)
     .aliases(["s", "se", "find"])
     .description("Search package by keyword")
     .action(
-      withErrorLogger(log, async function (keyword, _, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
+      withErrorLogger(log, async function (keyword, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          options.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          options.registry
         );
 
         let usedEndpoint = "npmsearch";

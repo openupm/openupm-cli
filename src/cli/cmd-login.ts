@@ -3,20 +3,19 @@ import { Logger } from "npmlog";
 import { loginUsing } from "../app/login";
 import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
-import { coerceRegistryUrl } from "../domain/registry-url";
 import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { GetAuthToken } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
-import { GlobalOptions } from "./options";
-import { parseEnvUsing } from "./parse-env";
+import { systemUserOpt } from "./opt-system-user";
 import {
   promptEmail,
   promptPassword,
   promptRegistryUrl,
   promptUsername,
 } from "./prompts";
+import { mustBeRegistryUrl } from "./validators";
 
 const usernameOpt = new Option("-u, --username <username>", "username").default(
   null
@@ -29,6 +28,13 @@ const passwordOpt = new Option("-p, --password <password>", "password").default(
 const emailOpt = new Option("-e, --email <email>", "email address").default(
   null
 );
+
+const registryOpt = new Option(
+  "-r, --registry <url>",
+  "url of registry into which to login"
+)
+  .argParser(mustBeRegistryUrl)
+  .default(null);
 
 const basicAuthOpt = new Option(
   "--basic-auth",
@@ -67,44 +73,32 @@ export function makeLoginCmd(
     .addOption(emailOpt)
     .addOption(basicAuthOpt)
     .addOption(alwaysAuthOpt)
+    .addOption(registryOpt)
+    .addOption(systemUserOpt)
     .description("authenticate with a scoped registry")
     .action(
-      withErrorLogger(log, async function (loginOptions, cmd) {
-        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
-
-        // parse env
-        const env = await parseEnvUsing(
-          log,
-          process.env,
-          process.cwd(),
-          globalOptions
-        );
-
+      withErrorLogger(log, async function (options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          options.systemUser
         );
 
         // query parameters
-        const username = loginOptions.username ?? (await promptUsername());
-        const password = loginOptions.password ?? (await promptPassword());
-        const email = loginOptions.email ?? (await promptEmail());
-
-        const loginRegistry =
-          globalOptions.registry !== undefined
-            ? coerceRegistryUrl(globalOptions.registry)
-            : await promptRegistryUrl();
+        const username = options.username ?? (await promptUsername());
+        const password = options.password ?? (await promptPassword());
+        const email = options.email ?? (await promptEmail());
+        const loginRegistry = options.registry ?? (await promptRegistryUrl());
 
         await login(
           username,
           password,
           email,
-          loginOptions.alwaysAuth,
+          options.alwaysAuth,
           loginRegistry,
           upmConfigPath,
-          loginOptions.basicAuth ? "basic" : "token"
+          options.basicAuth ? "basic" : "token"
         );
 
         log.notice("auth", `you are authenticated as '${username}'`);

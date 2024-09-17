@@ -1,4 +1,5 @@
-import { createCommand } from "@commander-js/extra-typings";
+import { createCommand, Option } from "@commander-js/extra-typings";
+import chalk from "chalk";
 import type { Logger } from "npmlog";
 import pkginfo from "pkginfo";
 import type { DebugLog } from "../domain/logging";
@@ -17,7 +18,13 @@ import { makeLoginCmd } from "./cmd-login";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
-import { mustBeRegistryUrl } from "./validators";
+
+const verboseOpt = new Option(
+  "-v, --verbose",
+  "output extra debugging"
+).default(false);
+
+const colorOpt = new Option("--no-color", "disable color").default(true);
 
 /**
  * Makes the openupm cli app with the given dependencies.
@@ -44,12 +51,22 @@ export function makeOpenupmCli(
   pkginfo(module);
   const program = createCommand()
     .version(module.exports.version)
-    .option("-c, --chdir <path>", "change the working directory")
-    .option("-r, --registry <url>", "specify registry url", mustBeRegistryUrl)
-    .option("-v, --verbose", "output extra debugging")
-    .option("--system-user", "auth for Windows system user")
-    .option("--no-upstream", "don't use upstream unity registry")
-    .option("--no-color", "disable color");
+    .addOption(verboseOpt)
+    .addOption(colorOpt);
+
+  program.on("option:verbose", function () {
+    const verbose = program.opts().verbose;
+    log.level = verbose ? "verbose" : "notice";
+  });
+
+  program.on(`option:${colorOpt.name()}`, function () {
+    const useColor = program.opts().color && process.env["NODE_ENV"] !== "test";
+
+    if (!useColor) {
+      chalk.level = 0;
+      log.disableColor();
+    }
+  });
 
   program.addCommand(
     makeAddCmd(
