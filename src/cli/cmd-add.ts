@@ -1,4 +1,4 @@
-import { Command } from "@commander-js/extra-typings";
+import { Argument, Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
@@ -16,6 +16,11 @@ import { withErrorLogger } from "./error-logging";
 import type { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { mustBePackageReference } from "./validators";
+
+const pkgArg = new Argument(
+  "<pkg>",
+  "Reference to the package that should be added"
+).argParser(mustBePackageReference);
 
 /**
  * Makes the `openupm add` cli command with the given dependencies.
@@ -36,11 +41,7 @@ export function makeAddCmd(
   debugLog: DebugLog
 ) {
   return new Command("add")
-    .argument(
-      "<pkg>",
-      "Reference to the package that should be added",
-      mustBePackageReference
-    )
+    .addArgument(pkgArg)
     .argument(
       "[otherPkgs...]",
       "References to additional packages that should be added",
