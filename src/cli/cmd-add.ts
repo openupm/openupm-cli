@@ -1,54 +1,31 @@
+import { Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { DebugLog } from "../domain/logging";
-import {
-  makePackageReference,
-  PackageReference,
-} from "../domain/package-reference";
+import { makePackageReference } from "../domain/package-reference";
 import { recordEntries } from "../domain/record-utils";
 import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
-import { CmdOptions } from "./options";
+import { eachValue } from "./cli-parsing";
+import { withErrorLogger } from "./error-logging";
+import type { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
-import { ResultCodes } from "./result-codes";
+import { mustBePackageReference } from "./validators";
 
 /**
- * Options passed to the add command.
- */
-export type AddOptions = CmdOptions<{
-  /**
-   * Whether to also add the packages to testables.
-   */
-  test?: boolean;
-  /**
-   * Whether to run with force. This will add packages even if validation
-   * was not possible.
-   */
-  force?: boolean;
-}>;
-
-/**
- * The different command result codes for the add command.
- */
-export type AddResultCode = ResultCodes.Ok | ResultCodes.Error;
-
-/**
- * Cmd-handler for adding packages.
- * @param pkgs One or multiple references to packages to add.
- * @param options Options specifying how to add the packages.
- */
-type AddCmd = (
-  pkgs: PackageReference | PackageReference[],
-  options: AddOptions
-) => Promise<AddResultCode>;
-
-/**
- * Makes a {@link AddCmd} function.
+ * Makes the `openupm add` cli command with the given dependencies.
+ * @param checkUrlExists IO function to check whether a url exists.
+ * @param fetchPackument IO function for fetching a packument.
+ * @param readTextFile IO function for reading a text file.
+ * @param writeTextFile IO function for writing a text file.
+ * @param log Logger for cli output.
+ * @param debugLog IO function for debug-logs.
+ * @returns The command.
  */
 export function makeAddCmd(
   checkUrlExists: CheckUrlExists,
@@ -57,78 +34,108 @@ export function makeAddCmd(
   writeTextFile: WriteTextFile,
   log: Logger,
   debugLog: DebugLog
-): AddCmd {
-  return async (pkgs, options) => {
-    if (!Array.isArray(pkgs)) pkgs = [pkgs];
+) {
+  return new Command("add")
+    .argument(
+      "<pkg>",
+      "Reference to the package that should be added",
+      mustBePackageReference
+    )
+    .argument(
+      "[otherPkgs...]",
+      "References to additional packages that should be added",
+      eachValue(mustBePackageReference)
+    )
+    .aliases(["install", "i"])
+    .option("-t, --test", "add package as testable")
+    .option(
+      "-f, --force",
+      "force add package if missing deps or editor version is not qualified"
+    )
+    .description(
+      `add package to manifest json
+openupm add <pkg> [otherPkgs...]
+openupm add <pkg>@<version> [otherPkgs...]`
+    )
+    .action(
+      withErrorLogger(log, async function (pkg, otherPkgs, addOptions, cmd) {
+        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
-    // parse env
-    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
+        const pkgs = [pkg].concat(otherPkgs);
 
-    const editorVersion = await determineEditorVersionUsing(
-      readTextFile,
-      debugLog,
-      env.cwd
-    );
+        // parse env
+        const env = await parseEnvUsing(
+          log,
+          process.env,
+          process.cwd(),
+          globalOptions
+        );
 
-    if (typeof editorVersion === "string")
-      log.warn(
-        "editor.version",
-        `${editorVersion} is unknown, the editor version check is disabled`
-      );
+        const editorVersion = await determineEditorVersionUsing(
+          readTextFile,
+          debugLog,
+          env.cwd
+        );
 
-    const projectDirectory = env.cwd;
+        if (typeof editorVersion === "string")
+          log.warn(
+            "editor.version",
+            `${editorVersion} is unknown, the editor version check is disabled`
+          );
 
-    const homePath = getHomePathFromEnv(process.env);
-    const upmConfigPath = getUserUpmConfigPathFor(
-      process.env,
-      homePath,
-      env.systemUser
-    );
+        const projectDirectory = env.cwd;
 
-    const primaryRegistry = await loadRegistryAuthUsing(
-      readTextFile,
-      debugLog,
-      upmConfigPath,
-      env.primaryRegistryUrl
-    );
+        const homePath = getHomePathFromEnv(process.env);
+        const upmConfigPath = getUserUpmConfigPathFor(
+          process.env,
+          homePath,
+          env.systemUser
+        );
 
-    const addResults = await addDependenciesUsing(
-      readTextFile,
-      writeTextFile,
-      fetchPackument,
-      checkUrlExists,
-      debugLog,
-      projectDirectory,
-      typeof editorVersion === "string" ? null : editorVersion,
-      primaryRegistry,
-      env.upstream,
-      options.force === true,
-      options.test === true,
-      pkgs
-    );
+        const primaryRegistry = await loadRegistryAuthUsing(
+          readTextFile,
+          debugLog,
+          upmConfigPath,
+          env.primaryRegistryUrl
+        );
 
-    recordEntries(addResults)
-      .map(([packageName, addResult]) => {
-        switch (addResult.type) {
-          case "added":
-            return `added ${makePackageReference(
-              packageName,
-              addResult.version
-            )}`;
-          case "upgraded":
-            return `modified ${packageName} ${addResult.fromVersion} => ${addResult.toVersion}`;
-          case "noChange":
-            return `existed ${makePackageReference(
-              packageName,
-              addResult.version
-            )}`;
-        }
+        const addResults = await addDependenciesUsing(
+          readTextFile,
+          writeTextFile,
+          fetchPackument,
+          checkUrlExists,
+          debugLog,
+          projectDirectory,
+          typeof editorVersion === "string" ? null : editorVersion,
+          primaryRegistry,
+          env.upstream,
+          addOptions.force === true,
+          addOptions.test === true,
+          pkgs
+        );
+
+        recordEntries(addResults)
+          .map(([packageName, addResult]) => {
+            switch (addResult.type) {
+              case "added":
+                return `added ${makePackageReference(
+                  packageName,
+                  addResult.version
+                )}`;
+              case "upgraded":
+                return `modified ${packageName} ${addResult.fromVersion} => ${addResult.toVersion}`;
+              case "noChange":
+                return `existed ${makePackageReference(
+                  packageName,
+                  addResult.version
+                )}`;
+            }
+          })
+          .forEach((message) => {
+            log.notice("", message);
+          });
+
+        log.notice("", "please open Unity project to apply changes.");
       })
-      .forEach((message) => {
-        log.notice("", message);
-      });
-
-    log.notice("", "please open Unity project to apply changes.");
-    return ResultCodes.Ok;
-  };
+    );
 }

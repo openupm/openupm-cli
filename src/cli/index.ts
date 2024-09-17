@@ -58,14 +58,6 @@ const fetchPackument = getRegistryPackumentUsing(
 const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 
-const addCmd = makeAddCmd(
-  fetchCheckUrlExists,
-  fetchPackument,
-  readTextFile,
-  writeTextFile,
-  log,
-  debugLogToConsole
-);
 const loginCmd = makeLoginCmd(
   homePath,
   getAuthTokenUsing(registryClient, debugLogToConsole),
@@ -127,36 +119,16 @@ function makeCmdOptions<T extends Record<string, unknown>>(
   return { ...specificOptions, ...program.opts() };
 }
 
-program
-  .command("add")
-  .argument(
-    "<pkg>",
-    "Reference to the package that should be added",
-    mustBePackageReference
+program.addCommand(
+  makeAddCmd(
+    fetchCheckUrlExists,
+    fetchPackument,
+    readTextFile,
+    writeTextFile,
+    log,
+    debugLogToConsole
   )
-  .argument(
-    "[otherPkgs...]",
-    "References to additional packages that should be added",
-    eachValue(mustBePackageReference)
-  )
-  .aliases(["install", "i"])
-  .option("-t, --test", "add package as testable")
-  .option(
-    "-f, --force",
-    "force add package if missing deps or editor version is not qualified"
-  )
-  .description(
-    `add package to manifest json
-openupm add <pkg> [otherPkgs...]
-openupm add <pkg>@<version> [otherPkgs...]`
-  )
-  .action(
-    withErrorLogger(log, async function (pkg, otherPkgs, options) {
-      const pkgs = [pkg].concat(otherPkgs);
-      const resultCode = await addCmd(pkgs, makeCmdOptions(options));
-      process.exit(resultCode);
-    })
-  );
+);
 
 program
   .command("remove")

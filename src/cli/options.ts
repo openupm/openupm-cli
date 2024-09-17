@@ -1,7 +1,7 @@
 /**
  * Options which are shared between commands.
  */
-type GlobalOptions = Readonly<{
+export type GlobalOptions = Readonly<{
   /**
    * Override package registry to use.
    */
