@@ -1,3 +1,4 @@
+import { Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import * as os from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
@@ -8,30 +9,11 @@ import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile } from "../io/fs";
 import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
-import { CmdOptions } from "./options";
+import { withErrorLogger } from "./error-logging";
+import { GlobalOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
-
-/**
- * The possible result codes with which the search command can exit.
- */
-export type SearchResultCode = ResultCodes.Ok | ResultCodes.Error;
-
-/**
- * Options passed to the search command.
- */
-export type SearchOptions = CmdOptions;
-
-/**
- * Cmd-handler for searching the registry.
- * @param keyword The keyword to search for.
- * @param options Command options.
- */
-export type SearchCmd = (
-  keyword: string,
-  options: SearchOptions
-) => Promise<SearchResultCode>;
 
 /**
  * Makes a {@link SearchCmd} function.
@@ -42,46 +24,60 @@ export function makeSearchCmd(
   fetchAllPackuments: GetAllRegistryPackuments,
   log: Logger,
   debugLog: DebugLog
-): SearchCmd {
+) {
   const searchPackages = partialApply(
     searchPackagesUsing,
     searchRegistry,
     fetchAllPackuments,
     debugLog
   );
+  return new Command("search")
+    .argument("<keyword>", "The keyword to search")
+    .aliases(["s", "se", "find"])
+    .description("Search package by keyword")
+    .action(
+      withErrorLogger(log, async function (keyword, _, cmd) {
+        const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
-  return async (keyword, options) => {
-    // parse env
-    const env = await parseEnvUsing(log, process.env, process.cwd(), options);
-    const homePath = getHomePathFromEnv(process.env);
-    const upmConfigPath = getUserUpmConfigPathFor(
-      process.env,
-      homePath,
-      env.systemUser
+        // parse env
+        const env = await parseEnvUsing(
+          log,
+          process.env,
+          process.cwd(),
+          globalOptions
+        );
+        const homePath = getHomePathFromEnv(process.env);
+        const upmConfigPath = getUserUpmConfigPathFor(
+          process.env,
+          homePath,
+          env.systemUser
+        );
+
+        const primaryRegistry = await loadRegistryAuthUsing(
+          readTextFile,
+          debugLog,
+          upmConfigPath,
+          env.primaryRegistryUrl
+        );
+
+        let usedEndpoint = "npmsearch";
+        const results = await searchPackages(primaryRegistry, keyword, () => {
+          usedEndpoint = "endpoint.all";
+          log.warn(
+            "",
+            "fast search endpoint is not available, using old search."
+          );
+        });
+
+        if (results.length === 0) {
+          log.notice("", `No matches found for "${keyword}"`);
+          return process.exit(ResultCodes.Ok);
+        }
+
+        await debugLog(
+          `${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`
+        );
+        log.notice("", formatAsTable(results));
+      })
     );
-
-    const primaryRegistry = await loadRegistryAuthUsing(
-      readTextFile,
-      debugLog,
-      upmConfigPath,
-      env.primaryRegistryUrl
-    );
-
-    let usedEndpoint = "npmsearch";
-    const results = await searchPackages(primaryRegistry, keyword, () => {
-      usedEndpoint = "endpoint.all";
-      log.warn("", "fast search endpoint is not available, using old search.");
-    });
-
-    if (results.length === 0) {
-      log.notice("", `No matches found for "${keyword}"`);
-      return ResultCodes.Ok;
-    }
-
-    await debugLog(
-      `${usedEndpoint}: ${results.map((it) => it.name).join(os.EOL)}`
-    );
-    log.notice("", formatAsTable(results));
-    return ResultCodes.Ok;
-  };
 }

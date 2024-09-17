@@ -53,13 +53,6 @@ const fetchPackument = getRegistryPackumentUsing(
 const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 
-const searchCmd = makeSearchCmd(
-  readTextFile,
-  searchRegistry,
-  fetchAllPackuments,
-  log,
-  debugLogToConsole
-);
 const viewCmd = makeViewCmd(
   getRegistryPackumentUsing(registryClient, debugLogToConsole),
   readTextFile,
@@ -108,17 +101,15 @@ program.addCommand(
   makeRemoveCmd(readTextFile, writeTextFile, debugLogToConsole, log)
 );
 
-program
-  .command("search")
-  .argument("<keyword>", "The keyword to search")
-  .aliases(["s", "se", "find"])
-  .description("Search package by keyword")
-  .action(
-    withErrorLogger(log, async function (keyword, options) {
-      const resultCode = await searchCmd(keyword, makeCmdOptions(options));
-      process.exit(resultCode);
-    })
-  );
+program.addCommand(
+  makeSearchCmd(
+    readTextFile,
+    searchRegistry,
+    fetchAllPackuments,
+    log,
+    debugLogToConsole
+  )
+);
 
 program
   .command("view")
