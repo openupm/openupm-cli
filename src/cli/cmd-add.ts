@@ -22,6 +22,11 @@ const pkgArg = new Argument(
   "Reference to the package that should be added"
 ).argParser(mustBePackageReference);
 
+const otherPkgsArg = new Argument(
+  "[otherPkgs...]",
+  "References to additional packages that should be added"
+).argParser(eachValue(mustBePackageReference));
+
 /**
  * Makes the `openupm add` cli command with the given dependencies.
  * @param checkUrlExists IO function to check whether a url exists.
@@ -42,11 +47,7 @@ export function makeAddCmd(
 ) {
   return new Command("add")
     .addArgument(pkgArg)
-    .argument(
-      "[otherPkgs...]",
-      "References to additional packages that should be added",
-      eachValue(mustBePackageReference)
-    )
+    .addArgument(otherPkgsArg)
     .aliases(["install", "i"])
     .option("-t, --test", "add package as testable")
     .option(
