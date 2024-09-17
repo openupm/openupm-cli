@@ -11,6 +11,7 @@ import type { ReadTextFile } from "../io/fs";
 import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
 import { GlobalOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";
@@ -43,6 +44,7 @@ export function makeSearchCmd(
   return new Command("search")
     .argument("<keyword>", "The keyword to search")
     .addOption(primaryRegistryUrlOpt)
+    .addOption(systemUserOpt)
     .aliases(["s", "se", "find"])
     .description("Search package by keyword")
     .action(
@@ -50,12 +52,12 @@ export function makeSearchCmd(
         const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
         // parse env
-        const env = await parseEnvUsing(log, process.env, globalOptions);
+        await parseEnvUsing(log, process.env, globalOptions);
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          searchOptions.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(

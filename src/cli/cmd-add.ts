@@ -14,6 +14,7 @@ import type { CheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
 import { workDirOpt } from "./opt-wd";
 import type { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
@@ -65,6 +66,7 @@ export function makeAddCmd(
     .addOption(forceOpt)
     .addOption(primaryRegistryUrlOpt)
     .addOption(workDirOpt)
+    .addOption(systemUserOpt)
     .description(
       `add package to manifest json
 openupm add <pkg> [otherPkgs...]
@@ -97,7 +99,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          addOptions.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(

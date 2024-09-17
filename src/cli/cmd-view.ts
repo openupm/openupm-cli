@@ -13,6 +13,7 @@ import type { ReadTextFile } from "../io/fs";
 import type { GetRegistryPackument } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
 import { GlobalOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";
@@ -36,6 +37,7 @@ export function makeViewCmd(
   return new Command("view")
     .argument("<pkg>", "Reference to a package", mustBePackageReference)
     .addOption(primaryRegistryUrlOpt)
+    .addOption(systemUserOpt)
     .aliases(["v", "info", "show"])
     .description("view package information")
     .action(
@@ -48,7 +50,7 @@ export function makeViewCmd(
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          viewOptions.systemUser
         );
 
         const primaryRegistry = await loadRegistryAuthUsing(

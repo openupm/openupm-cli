@@ -24,6 +24,7 @@ import type { CheckUrlExists } from "../io/www";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
+import { systemUserOpt } from "./opt-system-user";
 import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
@@ -58,6 +59,7 @@ export function makeDepsCmd(
     .addArgument(pkgArg)
     .addOption(deepOpt)
     .addOption(primaryRegistryUrlOpt)
+    .addOption(systemUserOpt)
     .description(
       `view package dependencies
 openupm deps <pkg>
@@ -68,13 +70,13 @@ openupm deps <pkg>@<version>`
         const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
         // parse env
-        const env = await parseEnvUsing(log, process.env, globalOptions);
+        await parseEnvUsing(log, process.env, globalOptions);
 
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          depsOptions.systemUser
         );
         const primaryRegistry = await loadRegistryAuthUsing(
           readTextFile,

@@ -15,10 +15,6 @@ export class RegistryAuthLoadError extends CustomError {
  */
 export type Env = Readonly<{
   /**
-   * Whether the user is a system-user.
-   */
-  systemUser: boolean;
-  /**
    * Whether to fall back to the Unity registry.
    */
   upstream: boolean;
@@ -45,14 +41,6 @@ export function determineUseUpstream(options: CmdOptions): boolean {
 }
 
 /**
- * Determines whether to authenticate as the system-user.
- * @param options Cmd options.
- */
-export function determineIsSystemUser(options: CmdOptions): boolean {
-  return options.systemUser === true;
-}
-
-/**
  * Function for parsing environment information and global
  * command-options for further usage.
  * @param log The logger that is used in the application.
@@ -75,11 +63,7 @@ export async function parseEnvUsing(
   // upstream
   const upstream = determineUseUpstream(options);
 
-  // auth
-  const systemUser = determineIsSystemUser(options);
-
   return {
-    systemUser,
     upstream,
   };
 }

@@ -8,6 +8,7 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { GetAuthToken } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
+import { systemUserOpt } from "./opt-system-user";
 import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import {
@@ -75,19 +76,20 @@ export function makeLoginCmd(
     .addOption(basicAuthOpt)
     .addOption(alwaysAuthOpt)
     .addOption(registryOpt)
+    .addOption(systemUserOpt)
     .description("authenticate with a scoped registry")
     .action(
       withErrorLogger(log, async function (loginOptions, cmd) {
         const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
         // parse env
-        const env = await parseEnvUsing(log, process.env, globalOptions);
+        await parseEnvUsing(log, process.env, globalOptions);
 
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
           homePath,
-          env.systemUser
+          loginOptions.systemUser
         );
 
         // query parameters

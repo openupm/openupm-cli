@@ -1,5 +1,4 @@
 import {
-  determineIsSystemUser,
   determineUseColor,
   determineUseUpstream,
 } from "../../../src/cli/parse-env";
@@ -53,30 +52,6 @@ describe("parse env", () => {
     it("should not use upstream if upstream option is false", () => {
       const actual = determineUseUpstream({
         upstream: false,
-      });
-
-      expect(actual).toBeFalsy();
-    });
-  });
-
-  describe("system-user", () => {
-    it("should be system-user if option is true", () => {
-      const actual = determineIsSystemUser({
-        systemUser: true,
-      });
-
-      expect(actual).toBeTruthy();
-    });
-
-    it("should not be system-user if option is missing", () => {
-      const actual = determineIsSystemUser({});
-
-      expect(actual).toBeFalsy();
-    });
-
-    it("should not be system-user if option is false", () => {
-      const actual = determineIsSystemUser({
-        systemUser: false,
       });
 
       expect(actual).toBeFalsy();

@@ -14,10 +14,6 @@ export type GlobalOptions = Readonly<{
    * Whether to run commands for the chinese locale.
    */
   cn?: boolean;
-  /**
-   * Whether to authenticate as a Windows system-user.
-   */
-  systemUser?: boolean;
 }>;
 
 /**
