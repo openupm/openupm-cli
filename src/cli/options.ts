@@ -3,10 +3,6 @@
  */
 export type GlobalOptions = Readonly<{
   /**
-   * Override package registry to use.
-   */
-  registry?: string;
-  /**
    * Whether to print logs.
    */
   verbose?: boolean;

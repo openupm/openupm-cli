@@ -12,6 +12,7 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile } from "../io/fs";
 import type { GetRegistryPackument } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
+import { primaryRegistryUrlOpt } from "./opt-registry";
 import { GlobalOptions } from "./options";
 import { formatPackumentInfo } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";
@@ -34,10 +35,11 @@ export function makeViewCmd(
 ) {
   return new Command("view")
     .argument("<pkg>", "Reference to a package", mustBePackageReference)
+    .addOption(primaryRegistryUrlOpt)
     .aliases(["v", "info", "show"])
     .description("view package information")
     .action(
-      withErrorLogger(log, async function (pkg, _, cmd) {
+      withErrorLogger(log, async function (pkg, viewOptions, cmd) {
         const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
         // parse env
@@ -58,7 +60,7 @@ export function makeViewCmd(
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          viewOptions.registry
         );
 
         // parse name

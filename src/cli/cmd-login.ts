@@ -3,7 +3,6 @@ import { Logger } from "npmlog";
 import { loginUsing } from "../app/login";
 import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
-import { coerceRegistryUrl } from "../domain/registry-url";
 import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
@@ -17,6 +16,7 @@ import {
   promptRegistryUrl,
   promptUsername,
 } from "./prompts";
+import { mustBeRegistryUrl } from "./validators";
 
 const usernameOpt = new Option("-u, --username <username>", "username").default(
   null
@@ -29,6 +29,13 @@ const passwordOpt = new Option("-p, --password <password>", "password").default(
 const emailOpt = new Option("-e, --email <email>", "email address").default(
   null
 );
+
+const registryOpt = new Option(
+  "-r, --registry <url>",
+  "url of registry into which to login"
+)
+  .argParser(mustBeRegistryUrl)
+  .default(null);
 
 const basicAuthOpt = new Option(
   "--basic-auth",
@@ -67,6 +74,7 @@ export function makeLoginCmd(
     .addOption(emailOpt)
     .addOption(basicAuthOpt)
     .addOption(alwaysAuthOpt)
+    .addOption(registryOpt)
     .description("authenticate with a scoped registry")
     .action(
       withErrorLogger(log, async function (loginOptions, cmd) {
@@ -91,11 +99,8 @@ export function makeLoginCmd(
         const username = loginOptions.username ?? (await promptUsername());
         const password = loginOptions.password ?? (await promptPassword());
         const email = loginOptions.email ?? (await promptEmail());
-
         const loginRegistry =
-          globalOptions.registry !== undefined
-            ? coerceRegistryUrl(globalOptions.registry)
-            : await promptRegistryUrl();
+          loginOptions.registry ?? (await promptRegistryUrl());
 
         await login(
           username,

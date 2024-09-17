@@ -3,12 +3,9 @@ import {
   determineCwd,
   determineIsSystemUser,
   determineLogLevel,
-  determinePrimaryRegistryUrl,
   determineUseColor,
   determineUseUpstream,
 } from "../../../src/cli/parse-env";
-import { openupmRegistryUrl } from "../../../src/domain/registry-url";
-import { someRegistryUrl } from "../../common/data-registry";
 
 const testRootPath = "/users/some-user/projects/MyUnityProject";
 
@@ -112,22 +109,6 @@ describe("parse env", () => {
       });
 
       expect(actual).toBeFalsy();
-    });
-  });
-
-  describe("registry", () => {
-    it("should be openupm by default", () => {
-      const actual = determinePrimaryRegistryUrl({});
-
-      expect(actual).toEqual(openupmRegistryUrl);
-    });
-
-    it("should be custom registry url if overridden", () => {
-      const actual = determinePrimaryRegistryUrl({
-        registry: someRegistryUrl,
-      });
-
-      expect(actual).toEqual(someRegistryUrl);
     });
   });
 

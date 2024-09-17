@@ -2,11 +2,6 @@ import chalk from "chalk";
 import { Logger } from "npmlog";
 import path from "path";
 import { CustomError } from "ts-custom-error";
-import {
-  coerceRegistryUrl,
-  openupmRegistryUrl,
-  RegistryUrl,
-} from "../domain/registry-url";
 import { CmdOptions } from "./options";
 
 /**
@@ -32,10 +27,6 @@ export type Env = Readonly<{
    * Whether to fall back to the Unity registry.
    */
   upstream: boolean;
-  /**
-   * The primary registry url.
-   */
-  primaryRegistryUrl: RegistryUrl;
 }>;
 
 /**
@@ -84,15 +75,6 @@ export function determineIsSystemUser(options: CmdOptions): boolean {
 }
 
 /**
- * Determines the primary registry url.
- * @param options Cmd options.
- */
-export function determinePrimaryRegistryUrl(options: CmdOptions): RegistryUrl {
-  if (options.registry === undefined) return openupmRegistryUrl;
-  return coerceRegistryUrl(options.registry);
-}
-
-/**
  * Function for parsing environment information and global
  * command-options for further usage.
  * @param log The logger that is used in the application.
@@ -123,15 +105,11 @@ export async function parseEnvUsing(
   // auth
   const systemUser = determineIsSystemUser(options);
 
-  // registries
-  const primaryRegistryUrl = determinePrimaryRegistryUrl(options);
-
   // cwd
   const cwd = determineCwd(processCwd, options);
 
   return {
     cwd,
-    primaryRegistryUrl,
     systemUser,
     upstream,
   };

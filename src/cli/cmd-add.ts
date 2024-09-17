@@ -13,6 +13,7 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
+import { primaryRegistryUrlOpt } from "./opt-registry";
 import type { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { mustBePackageReference } from "./validators";
@@ -61,6 +62,7 @@ export function makeAddCmd(
     .addArgument(otherPkgsArg)
     .addOption(addTestableOpt)
     .addOption(forceOpt)
+    .addOption(primaryRegistryUrlOpt)
     .description(
       `add package to manifest json
 openupm add <pkg> [otherPkgs...]
@@ -105,7 +107,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          addOptions.registry
         );
 
         const addResults = await addDependenciesUsing(

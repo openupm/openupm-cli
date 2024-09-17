@@ -10,6 +10,7 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile } from "../io/fs";
 import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
+import { primaryRegistryUrlOpt } from "./opt-registry";
 import { GlobalOptions } from "./options";
 import { formatAsTable } from "./output-formatting";
 import { parseEnvUsing } from "./parse-env";
@@ -41,10 +42,11 @@ export function makeSearchCmd(
   );
   return new Command("search")
     .argument("<keyword>", "The keyword to search")
+    .addOption(primaryRegistryUrlOpt)
     .aliases(["s", "se", "find"])
     .description("Search package by keyword")
     .action(
-      withErrorLogger(log, async function (keyword, _, cmd) {
+      withErrorLogger(log, async function (keyword, searchOptions, cmd) {
         const globalOptions = cmd.optsWithGlobals<GlobalOptions>();
 
         // parse env
@@ -65,7 +67,7 @@ export function makeSearchCmd(
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          searchOptions.registry
         );
 
         let usedEndpoint = "npmsearch";

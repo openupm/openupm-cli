@@ -23,6 +23,7 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { withErrorLogger } from "./error-logging";
+import { primaryRegistryUrlOpt } from "./opt-registry";
 import { GlobalOptions } from "./options";
 import { parseEnvUsing } from "./parse-env";
 import { ResultCodes } from "./result-codes";
@@ -56,6 +57,7 @@ export function makeDepsCmd(
     .alias("dep")
     .addArgument(pkgArg)
     .addOption(deepOpt)
+    .addOption(primaryRegistryUrlOpt)
     .description(
       `view package dependencies
 openupm deps <pkg>
@@ -83,7 +85,7 @@ openupm deps <pkg>@<version>`
           readTextFile,
           debugLog,
           upmConfigPath,
-          env.primaryRegistryUrl
+          depsOptions.registry
         );
         const sources = [primaryRegistry, unityRegistry];
 

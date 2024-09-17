@@ -17,7 +17,6 @@ import { makeLoginCmd } from "./cmd-login";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
-import { mustBeRegistryUrl } from "./validators";
 
 /**
  * Makes the openupm cli app with the given dependencies.
@@ -45,7 +44,6 @@ export function makeOpenupmCli(
   const program = createCommand()
     .version(module.exports.version)
     .option("-c, --chdir <path>", "change the working directory")
-    .option("-r, --registry <url>", "specify registry url", mustBeRegistryUrl)
     .option("-v, --verbose", "output extra debugging")
     .option("--system-user", "auth for Windows system user")
     .option("--no-upstream", "don't use upstream unity registry")
