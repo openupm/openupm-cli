@@ -20,9 +20,7 @@ import { makeLoginCmd } from "./cmd-login";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
-import { withErrorLogger } from "./error-logging";
-import { CmdOptions } from "./options";
-import { mustBePackageReference, mustBeRegistryUrl } from "./validators";
+import { mustBeRegistryUrl } from "./validators";
 
 // Composition root
 
@@ -53,15 +51,7 @@ const fetchPackument = getRegistryPackumentUsing(
 const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 
-const viewCmd = makeViewCmd(
-  getRegistryPackumentUsing(registryClient, debugLogToConsole),
-  readTextFile,
-  debugLogToConsole,
-  log
-);
-
 // update-notifier
-
 pkginfo(module);
 const notifier = updateNotifier({ pkg });
 notifier.notify();
@@ -74,17 +64,6 @@ const program = createCommand()
   .option("--system-user", "auth for Windows system user")
   .option("--no-upstream", "don't use upstream unity registry")
   .option("--no-color", "disable color");
-
-/**
- * Creates a CmdOptions object by adding global options to the given
- * specific options.
- * @param specificOptions The specific options.
- */
-function makeCmdOptions<T extends Record<string, unknown>>(
-  specificOptions: T
-): CmdOptions<T> {
-  return { ...specificOptions, ...program.opts() };
-}
 
 program.addCommand(
   makeAddCmd(
@@ -111,17 +90,14 @@ program.addCommand(
   )
 );
 
-program
-  .command("view")
-  .argument("<pkg>", "Reference to a package", mustBePackageReference)
-  .aliases(["v", "info", "show"])
-  .description("view package information")
-  .action(
-    withErrorLogger(log, async function (pkg, options) {
-      const resultCode = await viewCmd(pkg, makeCmdOptions(options));
-      process.exit(resultCode);
-    })
-  );
+program.addCommand(
+  makeViewCmd(
+    getRegistryPackumentUsing(registryClient, debugLogToConsole),
+    readTextFile,
+    debugLogToConsole,
+    log
+  )
+);
 
 program.addCommand(
   makeDepsCmd(
