@@ -1,4 +1,4 @@
-import { Argument, Command } from "@commander-js/extra-typings";
+import { Argument, Command, Option } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
@@ -27,6 +27,16 @@ const otherPkgsArg = new Argument(
   "References to additional packages that should be added"
 ).argParser(eachValue(mustBePackageReference));
 
+const addTestableOpt = new Option(
+  "-t, --test",
+  "add package as testable"
+).default(false);
+
+const forceOpt = new Option(
+  "-f, --force",
+  "force add package if missing deps or editor version is not qualified"
+).default(false);
+
 /**
  * Makes the `openupm add` cli command with the given dependencies.
  * @param checkUrlExists IO function to check whether a url exists.
@@ -46,14 +56,11 @@ export function makeAddCmd(
   debugLog: DebugLog
 ) {
   return new Command("add")
+    .aliases(["install", "i"])
     .addArgument(pkgArg)
     .addArgument(otherPkgsArg)
-    .aliases(["install", "i"])
-    .option("-t, --test", "add package as testable")
-    .option(
-      "-f, --force",
-      "force add package if missing deps or editor version is not qualified"
-    )
+    .addOption(addTestableOpt)
+    .addOption(forceOpt)
     .description(
       `add package to manifest json
 openupm add <pkg> [otherPkgs...]
@@ -111,8 +118,8 @@ openupm add <pkg>@<version> [otherPkgs...]`
           typeof editorVersion === "string" ? null : editorVersion,
           primaryRegistry,
           env.upstream,
-          addOptions.force === true,
-          addOptions.test === true,
+          addOptions.force,
+          addOptions.test,
           pkgs
         );
 
