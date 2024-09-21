@@ -1,5 +1,5 @@
 import { CustomError } from "ts-custom-error";
-import type { Err } from "ts-results-es";
+import { Err, Result } from "ts-results-es";
 import { logResolvedDependency } from "../cli/dependency-logging";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import {
@@ -7,7 +7,7 @@ import {
   NodeType,
   traverseDependencyGraph,
 } from "../domain/dependency-graph";
-import type { DomainName } from "../domain/domain-name";
+import { DomainName } from "../domain/domain-name";
 import {
   type EditorVersion,
   type ReleaseVersion,
@@ -31,8 +31,9 @@ import {
   mapScopedRegistry,
   setDependency,
 } from "../domain/project-manifest";
-import { type Registry, unityRegistry } from "../domain/registry";
-import { unityRegistryUrl } from "../domain/registry-url";
+import { recordEntries } from "../domain/record-utils";
+import { type Registry } from "../domain/registry";
+import { type RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
 import {
   addScope,
   makeEmptyScopedRegistryFor,
@@ -40,10 +41,13 @@ import {
 import { SemanticVersion } from "../domain/semantic-version";
 import { isZod } from "../domain/zod-utils";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import type { GetRegistryPackument } from "../io/registry";
+import { type GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { loadProjectManifestUsing } from "./get-dependencies";
-import { FetchRegistryPackumentVersion } from "./get-registry-packument-version";
+import {
+  FetchRegistryPackumentVersion,
+  type ResolvedPackumentVersion,
+} from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";
 import { saveProjectManifestUsing } from "./write-dependencies";
 
@@ -187,9 +191,7 @@ function pickMostFixable(
  * @param projectDirectory The projects root directory.
  * @param editorVersion The projects editor version. Will be used to check
  * compatibility. If set to null then compatibility will not be checked.
- * @param primaryRegistry The primary registry from which to resolve
- * dependencies.
- * @param useUpstream Whether to fall back to the upstream registry.
+ * @param sources The sources from which to resolve the packuments.
  * @param force Whether to force add the dependencies.
  * @param shouldAddTestable Whether to also add dependencies to the `testables`.
  * @param pkgs References to the dependencies to add.
@@ -203,8 +205,7 @@ export async function addDependenciesUsing(
   debugLog: DebugLog,
   projectDirectory: string,
   editorVersion: ReleaseVersion | null,
-  primaryRegistry: Registry,
-  useUpstream: boolean,
+  sources: ReadonlyArray<Registry>,
   force: boolean,
   shouldAddTestable: boolean,
   pkgs: ReadonlyArray<PackageReference>
@@ -225,168 +226,92 @@ export async function addDependenciesUsing(
     fetchPackument
   );
 
-  async function addSingle(
-    manifest: UnityProjectManifest,
+  async function resolveScopesFor(
     packageName: DomainName,
-    requestedVersion: VersionReference | undefined
-  ): Promise<[UnityProjectManifest, AddResult]> {
-    // is upstream package flag
-    let isUpstreamPackage = false;
+    verison: SemanticVersion,
+    source: RegistryUrl
+  ): Promise<Readonly<Record<RegistryUrl, ReadonlyArray<DomainName>>>> {
+    if (source === unityRegistryUrl) return {};
 
-    // packages that added to scope registry
-    const packagesInScope = Array.of<DomainName>();
-    let versionToAdd = requestedVersion;
-    if (
-      requestedVersion === undefined ||
-      !isZod(requestedVersion, PackageUrl)
-    ) {
-      let resolveResult = await getRegistryPackumentVersion(
-        packageName,
-        requestedVersion,
-        primaryRegistry
-      ).promise;
-      if (resolveResult.isErr() && useUpstream) {
-        const upstreamResult = await getRegistryPackumentVersion(
-          packageName,
-          requestedVersion,
-          unityRegistry
-        ).promise;
-        if (upstreamResult.isOk()) {
-          resolveResult = upstreamResult;
-          isUpstreamPackage = true;
-        } else {
-          resolveResult = pickMostFixable(resolveResult, upstreamResult);
-        }
-      }
-
-      if (resolveResult.isErr()) throw resolveResult.error;
-
-      const packumentVersion = resolveResult.value.packumentVersion;
-      versionToAdd = packumentVersion.version;
-
-      // Only do compatibility check when we have a editor version to check against
-      if (editorVersion !== null) {
-        let targetEditorVersion: EditorVersion | null;
-        try {
-          targetEditorVersion = tryGetTargetEditorVersionFor(packumentVersion);
-        } catch (error) {
-          if (!force) {
-            const packageRef = makePackageReference(packageName, versionToAdd);
-            await debugLog(
-              `"${packageRef}" is malformed. Target editor version could not be determined.`
-            );
-            throw new CompatibilityCheckFailedError(packageRef);
-          }
-          targetEditorVersion = null;
-        }
-
-        // verify editor version
-        const isCompatible =
-          targetEditorVersion === null ||
-          compareEditorVersion(editorVersion, targetEditorVersion) >= 0;
-        if (!isCompatible && !force)
-          throw new PackageIncompatibleError(
-            makePackageReference(packageName, versionToAdd),
-            targetEditorVersion!
-          );
-      }
-
-      // packagesInScope
-      if (!isUpstreamPackage) {
-        await debugLog(
-          `fetch: ${makePackageReference(packageName, requestedVersion)}`
-        );
-        const dependencyGraph = await resolveDependenciesUsing(
-          checkUrlExists,
-          fetchPackument,
-          [primaryRegistry, unityRegistry],
-          packageName,
-          versionToAdd,
-          true
-        );
-
-        const unresolvedDependencies = Array.of<UnresolvedDependency>();
-        for (const [
-          dependencyName,
-          dependencyVersion,
-          dependency,
-        ] of traverseDependencyGraph(dependencyGraph)) {
-          if (dependency.type === NodeType.Failed) {
-            // If the manifest already has the dependency than it does not
-            // really matter that it was not resolved.
-            if (!hasDependency(manifest, dependencyName))
-              unresolvedDependencies.push({
-                name: dependencyName,
-                version: dependencyVersion,
-                errors: dependency.errors,
-              });
-            continue;
-          }
-          if (dependency.type === NodeType.Unresolved) continue;
-
-          const dependencyRef = makePackageReference(
-            dependencyName,
-            dependencyVersion
-          );
-          await logResolvedDependency(
-            debugLog,
-            dependencyRef,
-            dependency.source
-          );
-
-          const isUnityPackage =
-            dependency.source === "built-in" ||
-            dependency.source === unityRegistryUrl;
-          if (isUnityPackage) continue;
-
-          // add depsValid to packagesInScope.
-          packagesInScope.push(dependencyName);
-        }
-
-        // print suggestion for depsInvalid
-        if (unresolvedDependencies.length > 0 && !force)
-          throw new UnresolvedDependenciesError(
-            makePackageReference(packageName, versionToAdd),
-            unresolvedDependencies
-          );
-      } else packagesInScope.push(packageName);
-    }
-    // add to dependencies
-    const oldVersion = manifest.dependencies[packageName];
-
-    manifest = setDependency(
-      manifest,
+    await debugLog(`fetch: ${makePackageReference(packageName, verison)}`);
+    const dependencyGraph = await resolveDependenciesUsing(
+      checkUrlExists,
+      fetchPackument,
+      sources,
       packageName,
-      versionToAdd as PackageUrl | SemanticVersion
+      verison,
+      true
     );
 
-    if (!isUpstreamPackage && packagesInScope.length > 0) {
-      manifest = mapScopedRegistry(manifest, primaryRegistry.url, (initial) => {
-        let updated =
-          initial ?? makeEmptyScopedRegistryFor(primaryRegistry.url);
+    const unresolvedDependencies = Array.of<UnresolvedDependency>();
+    const scopes: Record<RegistryUrl, DomainName[]> = {};
+    for (const [
+      dependencyName,
+      dependencyVersion,
+      dependency,
+    ] of traverseDependencyGraph(dependencyGraph)) {
+      if (dependency.type === NodeType.Failed) {
+        // If the manifest already has the dependency than it does not
+        // really matter that it was not resolved.
+        if (!hasDependency(manifest, dependencyName))
+          unresolvedDependencies.push({
+            name: dependencyName,
+            version: dependencyVersion,
+            errors: dependency.errors,
+          });
+        continue;
+      }
+      if (dependency.type === NodeType.Unresolved) continue;
 
-        updated = packagesInScope.reduce(addScope, updated!);
+      const dependencyRef = makePackageReference(
+        dependencyName,
+        dependencyVersion
+      );
+      await logResolvedDependency(debugLog, dependencyRef, dependency.source);
 
-        return updated;
-      });
+      const isUnityPackage =
+        dependency.source === "built-in" ||
+        dependency.source === unityRegistryUrl;
+      if (isUnityPackage) continue;
+
+      if (!(dependency.source in scopes)) scopes[dependency.source] = [];
+      scopes[dependency.source]!.push(dependencyName);
     }
-    if (shouldAddTestable) manifest = addTestable(manifest, packageName);
+
+    // print suggestion for depsInvalid
+    if (unresolvedDependencies.length > 0 && !force)
+      throw new UnresolvedDependenciesError(
+        makePackageReference(packageName, verison),
+        unresolvedDependencies
+      );
+
+    return scopes;
+  }
+
+  function addDependencyToManifest(
+    manifest: UnityProjectManifest,
+    packageName: DomainName,
+    version: PackageUrl | SemanticVersion
+  ): [UnityProjectManifest, AddResult] {
+    const oldVersion = manifest.dependencies[packageName];
+
+    manifest = setDependency(manifest, packageName, version);
 
     if (!oldVersion) {
       return [
         manifest,
         {
           type: "added",
-          version: versionToAdd as PackageUrl | SemanticVersion,
+          version: version,
         },
       ];
-    } else if (oldVersion !== versionToAdd) {
+    } else if (oldVersion !== version) {
       return [
         manifest,
         {
           type: "upgraded",
           fromVersion: oldVersion,
-          toVersion: versionToAdd as PackageUrl | SemanticVersion,
+          toVersion: version,
         },
       ];
     } else {
@@ -394,10 +319,108 @@ export async function addDependenciesUsing(
         manifest,
         {
           type: "noChange",
-          version: versionToAdd as PackageUrl | SemanticVersion,
+          version: version,
         },
       ];
     }
+  }
+
+  async function resolveDependency(
+    packageName: DomainName,
+    requestedVersion: Exclude<VersionReference | undefined, PackageUrl>
+  ): Promise<[SemanticVersion, RegistryUrl]> {
+    let versionToAdd = requestedVersion;
+
+    let totalResolveResult: Result<
+      ResolvedPackumentVersion,
+      ResolvePackumentVersionError
+    > = Err(new PackumentNotFoundError(packageName));
+
+    for (const source of sources) {
+      const resolveResult = await getRegistryPackumentVersion(
+        packageName,
+        requestedVersion,
+        source
+      ).promise;
+
+      if (resolveResult.isOk()) {
+        totalResolveResult = resolveResult;
+        break;
+      } else {
+        totalResolveResult = pickMostFixable(totalResolveResult, resolveResult);
+      }
+    }
+
+    if (totalResolveResult.isErr()) throw totalResolveResult.error;
+
+    const packumentVersion = totalResolveResult.value.packumentVersion;
+    const source = totalResolveResult.value.source;
+    versionToAdd = packumentVersion.version;
+
+    // Only do compatibility check when we have a editor version to check against
+    if (editorVersion !== null) {
+      let targetEditorVersion: EditorVersion | null;
+      try {
+        targetEditorVersion = tryGetTargetEditorVersionFor(packumentVersion);
+      } catch (error) {
+        if (!force) {
+          const packageRef = makePackageReference(packageName, versionToAdd);
+          await debugLog(
+            `"${packageRef}" is malformed. Target editor version could not be determined.`
+          );
+          throw new CompatibilityCheckFailedError(packageRef);
+        }
+        targetEditorVersion = null;
+      }
+
+      // verify editor version
+      const isCompatible =
+        targetEditorVersion === null ||
+        compareEditorVersion(editorVersion, targetEditorVersion) >= 0;
+      if (!isCompatible && !force)
+        throw new PackageIncompatibleError(
+          makePackageReference(packageName, versionToAdd),
+          targetEditorVersion!
+        );
+    }
+
+    return [versionToAdd, source];
+  }
+
+  async function addSingle(
+    manifest: UnityProjectManifest,
+    packageName: DomainName,
+    requestedVersion: VersionReference | undefined
+  ): Promise<[UnityProjectManifest, AddResult]> {
+    if (shouldAddTestable) manifest = addTestable(manifest, packageName);
+
+    if (isZod(requestedVersion, PackageUrl))
+      return addDependencyToManifest(manifest, packageName, requestedVersion);
+
+    const [versionToAdd, source] = await resolveDependency(
+      packageName,
+      requestedVersion
+    );
+
+    const scopesBySource = await resolveScopesFor(
+      packageName,
+      versionToAdd,
+      source
+    );
+
+    recordEntries(scopesBySource).forEach(([scopeSource, scopes]) => {
+      manifest = mapScopedRegistry(manifest, scopeSource, (initial) => {
+        let updated = initial ?? makeEmptyScopedRegistryFor(scopeSource);
+
+        updated = scopes.reduce(addScope, updated!);
+
+        return updated;
+      });
+    });
+
+    if (shouldAddTestable) manifest = addTestable(manifest, packageName);
+
+    return addDependencyToManifest(manifest, packageName, versionToAdd);
   }
 
   let manifest = await loadProjectManifest(projectDirectory);

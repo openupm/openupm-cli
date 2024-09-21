@@ -34,7 +34,7 @@ export async function logResolvedDependency(
     source === "built-in"
       ? "[internal] "
       : source === unityRegistryUrl
-      ? "[upstream]"
+      ? "[unity]"
       : "";
   const message = `${packageRef} ${tag}`;
   await debugLog(message);

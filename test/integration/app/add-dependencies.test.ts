@@ -13,14 +13,19 @@ import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { partialApply } from "../../../src/domain/fp-utils";
 import { noopLogger } from "../../../src/domain/logging";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
-import type { Registry } from "../../../src/domain/registry";
+import { unityRegistry } from "../../../src/domain/registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
 import { SemanticVersion } from "../../../src/domain/semantic-version";
 import { getRegistryPackumentUsing } from "../../../src/io/registry";
 import { fetchCheckUrlExists } from "../../../src/io/www";
 import { buildPackument } from "../../common/data-packument";
 import { buildProjectManifest } from "../../common/data-project-manifest";
-import { someRegistryUrl } from "../../common/data-registry";
+import {
+  otherRegistry,
+  otherRegistryUrl,
+  someRegistry,
+  someRegistryUrl,
+} from "../../common/data-registry";
 import { makeMockLogger } from "../../common/log.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
@@ -28,18 +33,26 @@ import { mockRegistryPackuments } from "../registry.mock";
 describe("add dependencies", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
   const unknownPackage = DomainName.parse("com.unknown.parse");
-  const someRegistry: Registry = { url: someRegistryUrl, auth: null };
 
   const otherPackument = buildPackument("com.other.package", (packument) =>
     packument.addVersion(someVersion, (version) =>
       version.set("unity", "2022.2")
     )
   );
+
   const somePackument = buildPackument("com.some.package", (packument) =>
     packument.addVersion(someVersion, (version) =>
       version
         .set("unity", "2022.2")
         .addDependency(otherPackument.name, someVersion)
+    )
+  );
+
+  const anotherPackument = buildPackument("com.another.package", (packument) =>
+    packument.addVersion(someVersion, (version) =>
+      version
+        .set("unity", "2022.2")
+        .addDependency(somePackument.name, someVersion)
     )
   );
 
@@ -101,14 +114,14 @@ describe("add dependencies", () => {
   });
 
   beforeEach(() => {
+    mockRegistryPackuments(otherRegistryUrl, [anotherPackument]);
     mockRegistryPackuments(someRegistryUrl, [
       somePackument,
-      otherPackument,
       packumentWithBadDependency,
       badEditorPackument,
       incompatiblePackument,
     ]);
-    mockRegistryPackuments(unityRegistryUrl, []);
+    mockRegistryPackuments(unityRegistryUrl, [otherPackument]);
   });
 
   it("should add package with invalid editor version when running with force", async () => {
@@ -117,8 +130,7 @@ describe("add dependencies", () => {
     const result = await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       true,
       false,
       [badEditorPackument.name]
@@ -138,8 +150,7 @@ describe("add dependencies", () => {
     const result = await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       true,
       false,
       [incompatiblePackument.name]
@@ -160,8 +171,7 @@ describe("add dependencies", () => {
       addDependencies(
         someProjectDir,
         makeEditorVersion(2020, 1, 1, "f", 1),
-        someRegistry,
-        true,
+        [someRegistry, unityRegistry],
         false,
         false,
         [incompatiblePackument.name]
@@ -176,8 +186,7 @@ describe("add dependencies", () => {
       addDependencies(
         someProjectDir,
         makeEditorVersion(2020, 1, 1, "f", 1),
-        someRegistry,
-        true,
+        [someRegistry, unityRegistry],
         true,
         false,
         [unknownPackage]
@@ -192,8 +201,7 @@ describe("add dependencies", () => {
       addDependencies(
         someProjectDir,
         makeEditorVersion(2020, 1, 1, "f", 1),
-        someRegistry,
-        true,
+        [someRegistry, unityRegistry],
         false,
         false,
         [badEditorPackument.name]
@@ -205,9 +213,14 @@ describe("add dependencies", () => {
     const { addDependencies } = makeDependencies();
 
     await expect(() =>
-      addDependencies(someProjectDir, null, someRegistry, true, false, false, [
-        packumentWithBadDependency.name,
-      ])
+      addDependencies(
+        someProjectDir,
+        null,
+        [someRegistry, unityRegistry],
+        false,
+        false,
+        [packumentWithBadDependency.name]
+      )
     ).rejects.toBeInstanceOf(UnresolvedDependenciesError);
   });
 
@@ -217,8 +230,7 @@ describe("add dependencies", () => {
     const result = await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       true,
       false,
       [packumentWithBadDependency.name]
@@ -238,8 +250,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       false,
       [somePackument.name]
@@ -265,8 +276,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       false,
       [somePackument.name]
@@ -286,8 +296,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       false,
       [somePackument.name]
@@ -300,7 +309,7 @@ describe("add dependencies", () => {
           {
             name: expect.any(String),
             url: someRegistryUrl,
-            scopes: [otherPackument.name, somePackument.name],
+            scopes: [somePackument.name],
           },
         ],
       })
@@ -313,8 +322,7 @@ describe("add dependencies", () => {
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       true,
       [somePackument.name]
@@ -328,14 +336,45 @@ describe("add dependencies", () => {
     );
   });
 
+  it("should add package with dependencies in multiple registries", async () => {
+    const { addDependencies, mockFs } = makeDependencies();
+
+    await addDependencies(
+      someProjectDir,
+      null,
+      [someRegistry, otherRegistry, unityRegistry],
+      false,
+      false,
+      [anotherPackument.name]
+    );
+
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
+      expect.objectContaining({
+        dependencies: { [anotherPackument.name]: someVersion },
+        scopedRegistries: expect.arrayContaining([
+          {
+            name: expect.any(String),
+            url: otherRegistryUrl,
+            scopes: [anotherPackument.name],
+          },
+          {
+            name: expect.any(String),
+            url: someRegistryUrl,
+            scopes: [somePackument.name],
+          },
+        ]),
+      })
+    );
+  });
+
   it("should be atomic", async () => {
     const { addDependencies, mockFs } = makeDependencies();
 
     await addDependencies(
       someProjectDir,
       null,
-      someRegistry,
-      true,
+      [someRegistry, unityRegistry],
       false,
       true,
       // The second package can not be added

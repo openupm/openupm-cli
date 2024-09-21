@@ -293,7 +293,7 @@ describe("add packages", () => {
     );
   });
 
-  it("should add package from upstream if no matching version was found in primary registry", async () => {
+  it("should add package from Unity registry if no matching version was found in primary registry", async () => {
     // See https://github.com/openupm/openupm-cli/issues/41
     await testSuccessfulAdd(
       [

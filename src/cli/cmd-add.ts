@@ -6,6 +6,8 @@ import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { DebugLog } from "../domain/logging";
 import { makePackageReference } from "../domain/package-reference";
 import { recordEntries } from "../domain/record-utils";
+import { unityRegistry } from "../domain/registry";
+import { openupmRegistryUrl } from "../domain/registry-url";
 import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
@@ -13,7 +15,7 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
-import { primaryRegistryUrlOpt } from "./opt-registry";
+import { primaryRegistriesUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { upstreamOpt } from "./opt-upstream";
 import { workDirOpt } from "./opt-wd";
@@ -63,7 +65,7 @@ export function makeAddCmd(
     .addArgument(otherPkgsArg)
     .addOption(addTestableOpt)
     .addOption(forceOpt)
-    .addOption(primaryRegistryUrlOpt)
+    .addOption(primaryRegistriesUrlOpt)
     .addOption(workDirOpt)
     .addOption(systemUserOpt)
     .addOption(upstreamOpt)
@@ -97,12 +99,13 @@ openupm add <pkg>@<version> [otherPkgs...]`
           options.systemUser
         );
 
-        const primaryRegistry = await loadRegistryAuthUsing(
-          readTextFile,
-          debugLog,
-          upmConfigPath,
-          options.registry
+        const sources = await Promise.all(
+          (options.registry ?? [openupmRegistryUrl]).map((it) =>
+            loadRegistryAuthUsing(readTextFile, debugLog, upmConfigPath, it)
+          )
         );
+
+        if (options.upstream) sources.push(unityRegistry);
 
         const addResults = await addDependenciesUsing(
           readTextFile,
@@ -112,8 +115,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
           debugLog,
           projectDirectory,
           typeof editorVersion === "string" ? null : editorVersion,
-          primaryRegistry,
-          options.upstream,
+          sources,
           options.force,
           options.test,
           pkgs
