@@ -39,7 +39,7 @@ export interface ResolvedPackumentVersion {
  * @param source The registry to resolve the packument from.
  * @returns The resolved packument or an error.
  */
-export function FetchRegistryPackumentVersion(
+export function fetchRegistryPackumentVersionUsing(
   fetchPackument: GetRegistryPackument,
   packageName: DomainName,
   requestedVersion: ResolvableVersion,

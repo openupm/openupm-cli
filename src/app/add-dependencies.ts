@@ -45,7 +45,7 @@ import { type GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { loadProjectManifestUsing } from "./get-dependencies";
 import {
-  FetchRegistryPackumentVersion,
+  fetchRegistryPackumentVersionUsing,
   type ResolvedPackumentVersion,
 } from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";
@@ -222,7 +222,7 @@ export async function addDependenciesUsing(
   );
 
   const getRegistryPackumentVersion = partialApply(
-    FetchRegistryPackumentVersion,
+    fetchRegistryPackumentVersionUsing,
     fetchPackument
   );
 
