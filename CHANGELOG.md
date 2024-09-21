@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/openupm/openupm-cli/compare/4.1.2...4.2.0) (2024-09-21)
+
+
+### Features
+
+* multiple upstreams ([#397](https://github.com/openupm/openupm-cli/issues/397)) ([6d61364](https://github.com/openupm/openupm-cli/commit/6d613647715f468d78fd398d7243666a5354693e))
+
 ## [4.1.2](https://github.com/openupm/openupm-cli/compare/4.1.1...4.1.2) (2024-09-07)
 
 
