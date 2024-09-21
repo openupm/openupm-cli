@@ -33,12 +33,19 @@ export function makeSearchCmd(
   log: Logger,
   debugLog: DebugLog
 ) {
+  const getRegistryAuth = partialApply(
+    loadRegistryAuthUsing,
+    readTextFile,
+    debugLog
+  );
+
   const searchPackages = partialApply(
     searchPackagesUsing,
     searchRegistry,
     fetchAllPackuments,
     debugLog
   );
+
   return new Command("search")
     .argument("<keyword>", "The keyword to search")
     .addOption(primaryRegistryUrlOpt)
@@ -54,9 +61,7 @@ export function makeSearchCmd(
           options.systemUser
         );
 
-        const primaryRegistry = await loadRegistryAuthUsing(
-          readTextFile,
-          debugLog,
+        const primaryRegistry = await getRegistryAuth(
           upmConfigPath,
           options.registry
         );

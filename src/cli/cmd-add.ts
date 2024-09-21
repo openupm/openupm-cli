@@ -3,6 +3,7 @@ import { Logger } from "npmlog";
 import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
+import { partialApply } from "../domain/fp-utils";
 import { DebugLog } from "../domain/logging";
 import { makePackageReference } from "../domain/package-reference";
 import { recordEntries } from "../domain/record-utils";
@@ -59,6 +60,27 @@ export function makeAddCmd(
   log: Logger,
   debugLog: DebugLog
 ) {
+  const determineEditorVersion = partialApply(
+    determineEditorVersionUsing,
+    readTextFile,
+    debugLog
+  );
+
+  const getRegistryAuth = partialApply(
+    loadRegistryAuthUsing,
+    readTextFile,
+    debugLog
+  );
+
+  const addDependencies = partialApply(
+    addDependenciesUsing,
+    readTextFile,
+    writeTextFile,
+    fetchPackument,
+    checkUrlExists,
+    debugLog
+  );
+
   return new Command("add")
     .aliases(["install", "i"])
     .addArgument(pkgArg)
@@ -80,11 +102,7 @@ openupm add <pkg>@<version> [otherPkgs...]`
 
         const projectDirectory = options.chdir;
 
-        const editorVersion = await determineEditorVersionUsing(
-          readTextFile,
-          debugLog,
-          projectDirectory
-        );
+        const editorVersion = await determineEditorVersion(projectDirectory);
 
         if (typeof editorVersion === "string")
           log.warn(
@@ -101,18 +119,13 @@ openupm add <pkg>@<version> [otherPkgs...]`
 
         const sources = await Promise.all(
           (options.registry ?? [openupmRegistryUrl]).map((it) =>
-            loadRegistryAuthUsing(readTextFile, debugLog, upmConfigPath, it)
+            getRegistryAuth(upmConfigPath, it)
           )
         );
 
         if (options.upstream) sources.push(unityRegistry);
 
-        const addResults = await addDependenciesUsing(
-          readTextFile,
-          writeTextFile,
-          fetchPackument,
-          checkUrlExists,
-          debugLog,
+        const addResults = await addDependencies(
           projectDirectory,
           typeof editorVersion === "string" ? null : editorVersion,
           sources,

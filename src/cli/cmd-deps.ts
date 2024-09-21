@@ -7,6 +7,7 @@ import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { queryAllRegistriesLazy } from "../app/query-registries";
 import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { PackumentNotFoundError } from "../domain/common-errors";
+import { partialApply } from "../domain/fp-utils";
 import { DebugLog } from "../domain/logging";
 import {
   makePackageReference,
@@ -52,6 +53,23 @@ export function makeDepsCmd(
   log: Logger,
   debugLog: DebugLog
 ) {
+  const getRegistryAuth = partialApply(
+    loadRegistryAuthUsing,
+    readTextFile,
+    debugLog
+  );
+
+  const getLatestVersion = partialApply(
+    fetchLatestPackumentVersionUsing,
+    fetchPackument
+  );
+
+  const resolveDependencies = partialApply(
+    resolveDependenciesUsing,
+    checkUrlExists,
+    fetchPackument
+  );
+
   return new Command("deps")
     .alias("dep")
     .addArgument(pkgArg)
@@ -71,9 +89,7 @@ openupm deps <pkg>@<version>`
           homePath,
           options.systemUser
         );
-        const primaryRegistry = await loadRegistryAuthUsing(
-          readTextFile,
-          debugLog,
+        const primaryRegistry = await getRegistryAuth(
           upmConfigPath,
           options.registry
         );
@@ -95,11 +111,7 @@ openupm deps <pkg>@<version>`
             ? requestedVersion
             : (
                 await queryAllRegistriesLazy(sources, (source) =>
-                  fetchLatestPackumentVersionUsing(
-                    fetchPackument,
-                    source,
-                    packageName
-                  )
+                  getLatestVersion(source, packageName)
                 )
               )?.value ?? null;
 
@@ -111,9 +123,7 @@ openupm deps <pkg>@<version>`
             options.deep
           }`
         );
-        const dependencyGraph = await resolveDependenciesUsing(
-          checkUrlExists,
-          fetchPackument,
+        const dependencyGraph = await resolveDependencies(
           sources,
           packageName,
           latestVersion,

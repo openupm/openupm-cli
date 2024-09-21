@@ -226,6 +226,12 @@ export async function addDependenciesUsing(
     fetchPackument
   );
 
+  const resolveDependencies = partialApply(
+    resolveDependenciesUsing,
+    checkUrlExists,
+    fetchPackument
+  );
+
   async function resolveScopesFor(
     packageName: DomainName,
     verison: SemanticVersion,
@@ -234,9 +240,8 @@ export async function addDependenciesUsing(
     if (source === unityRegistryUrl) return {};
 
     await debugLog(`fetch: ${makePackageReference(packageName, verison)}`);
-    const dependencyGraph = await resolveDependenciesUsing(
-      checkUrlExists,
-      fetchPackument,
+
+    const dependencyGraph = await resolveDependencies(
       sources,
       packageName,
       verison,

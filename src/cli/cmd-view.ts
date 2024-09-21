@@ -4,6 +4,7 @@ import { EOL } from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { queryAllRegistriesLazy } from "../app/query-registries";
 import { PackumentNotFoundError } from "../domain/common-errors";
+import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
 import { hasVersion, splitPackageReference } from "../domain/package-reference";
 import { unityRegistry } from "../domain/registry";
@@ -33,6 +34,12 @@ export function makeViewCmd(
   debugLog: DebugLog,
   log: Logger
 ) {
+  const getRegistryAuth = partialApply(
+    loadRegistryAuthUsing,
+    readTextFile,
+    debugLog
+  );
+
   return new Command("view")
     .argument("<pkg>", "Reference to a package", mustBePackageReference)
     .addOption(primaryRegistryUrlOpt)
@@ -49,9 +56,7 @@ export function makeViewCmd(
           options.systemUser
         );
 
-        const primaryRegistry = await loadRegistryAuthUsing(
-          readTextFile,
-          debugLog,
+        const primaryRegistry = await getRegistryAuth(
           upmConfigPath,
           options.registry
         );
