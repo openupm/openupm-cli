@@ -24,7 +24,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
       - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
       - [Troubleshooting](#troubleshooting)
     - [Command options](#command-options)
-  - [Work with Unity official (upstream) registry](#work-with-unity-official-upstream-registry)
+  - [Work with different registries](#work-with-different-registries)
   - [Work with proxy](#work-with-proxy)
   - [Contributors](#contributors)
 
@@ -240,22 +240,40 @@ Show verbose logging
 openupm --verbose ...
 ```
 
-## Work with Unity official (upstream) registry
+## Work with different registries
 
-Most commands can fall back to Unity upstream registry if necessary, to make it easier to mix the official registry with a 3rd-party registry. i.e.
+By default the openupm will query any package from the following registries: 
 
-```
-$ openupm add com.unity.addressables com.littlebigfun.addressable-importer
-added: com.unity.addressables@1.4.0                # from unity registry
-added: com.littlebigfun.addressable-importer@0.4.1 # from openupm registry
-...
-```
+1. Openupm (https://package.openupm.com)
+2. Unity (https://packages.unity.com)
 
-Turn off Unity official (upstream) registry
+Any package will be searched on these registries in the order that they are listed above. If you want to install packages from your own third party registries you can do this via the `--registry` option.
 
-```
-openupm --no-upstream ...
-```
+```openupm --registry https://package.my-registry.com add com.my.package```
+
+This will query the following registries:
+
+1. The private registry (https://package.my-registry.com)
+2. Unity (https://packages.unity.com)
+
+Let's say `com.my.package` depends on a Openupm package. With the above configuration the install would fail because Openupm is not part of the queried registries. To fix, add Openupm to the --registry option.
+
+```openupm --registry https://package.my-registry.com https://package.openupm.com add com.my.package```
+
+The query will now look like this:
+
+1. The private registry (https://package.my-registry.com)
+2. Openupm (https://package.openupm.com)
+3. Unity (https://packages.unity.com)
+
+Finally, it may not always be desirable to search the Unity registry. If you want to remove it from the registry list, run with the `--no-upstream` option.
+
+```openupm --registry https://package.my-registry.com https://package.openupm.com --no-upstream add com.my.package```
+
+The resulting query is:
+
+1. The private registry (https://package.my-registry.com)
+2. Openupm (https://package.openupm.com)
 
 ## Work with proxy
 
