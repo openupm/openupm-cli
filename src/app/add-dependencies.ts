@@ -7,6 +7,10 @@ import {
   NodeType,
   traverseDependencyGraph,
 } from "../domain/dependency-graph";
+import {
+  type AddResult,
+  addProjectDependency,
+} from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
 import {
   type EditorVersion,
@@ -25,12 +29,10 @@ import {
 import { PackageUrl } from "../domain/package-url";
 import type { ResolvePackumentVersionError } from "../domain/packument";
 import {
-  type DependencyVersion,
   type UnityProjectManifest,
   addTestable,
   hasDependency,
   mapScopedRegistry,
-  setDependency,
 } from "../domain/project-manifest";
 import { recordEntries } from "../domain/record-utils";
 import { type Registry } from "../domain/registry";
@@ -123,46 +125,6 @@ export class CompatibilityCheckFailedError extends CustomError {
     super();
   }
 }
-
-/**
- * The result of adding a dependency.
- */
-export type AddResult =
-  | {
-      /**
-       * Indicates that the dependency was added.
-       */
-      type: "added";
-      /**
-       * The version that was added.
-       */
-      version: DependencyVersion;
-    }
-  | {
-      /**
-       * Indicates that the dependency was already present in the manifest and
-       * only it's version was changed.
-       */
-      type: "upgraded";
-      /**
-       * The version that was in the manifest previously.
-       */
-      fromVersion: DependencyVersion;
-      /**
-       * The new version.
-       */
-      toVersion: DependencyVersion;
-    }
-  | {
-      /**
-       * Indicates that the manifest already contained the dependency.
-       */
-      type: "noChange";
-      /**
-       * The version in the manifest.
-       */
-      version: DependencyVersion;
-    };
 
 function pickMostFixable(
   a: Err<ResolvePackumentVersionError>,
@@ -294,43 +256,6 @@ export async function addDependenciesUsing(
     return scopes;
   }
 
-  function addDependencyToManifest(
-    manifest: UnityProjectManifest,
-    packageName: DomainName,
-    version: PackageUrl | SemanticVersion
-  ): [UnityProjectManifest, AddResult] {
-    const oldVersion = manifest.dependencies[packageName];
-
-    manifest = setDependency(manifest, packageName, version);
-
-    if (!oldVersion) {
-      return [
-        manifest,
-        {
-          type: "added",
-          version: version,
-        },
-      ];
-    } else if (oldVersion !== version) {
-      return [
-        manifest,
-        {
-          type: "upgraded",
-          fromVersion: oldVersion,
-          toVersion: version,
-        },
-      ];
-    } else {
-      return [
-        manifest,
-        {
-          type: "noChange",
-          version: version,
-        },
-      ];
-    }
-  }
-
   async function resolveDependency(
     packageName: DomainName,
     requestedVersion: Exclude<VersionReference | undefined, PackageUrl>
@@ -401,7 +326,7 @@ export async function addDependenciesUsing(
     if (shouldAddTestable) manifest = addTestable(manifest, packageName);
 
     if (isZod(requestedVersion, PackageUrl))
-      return addDependencyToManifest(manifest, packageName, requestedVersion);
+      return addProjectDependency(manifest, packageName, requestedVersion);
 
     const [versionToAdd, source] = await resolveDependency(
       packageName,
@@ -426,7 +351,7 @@ export async function addDependenciesUsing(
 
     if (shouldAddTestable) manifest = addTestable(manifest, packageName);
 
-    return addDependencyToManifest(manifest, packageName, versionToAdd);
+    return addProjectDependency(manifest, packageName, versionToAdd);
   }
 
   let manifest = await loadProjectManifest(projectDirectory);

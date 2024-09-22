@@ -5,9 +5,9 @@ import {
   CompatibilityCheckFailedError,
   PackageIncompatibleError,
   UnresolvedDependenciesError,
-  type AddResult,
 } from "../../../src/app/add-dependencies";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
+import type { AddResult } from "../../../src/domain/dependency-management";
 import { DomainName } from "../../../src/domain/domain-name";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { partialApply } from "../../../src/domain/fp-utils";

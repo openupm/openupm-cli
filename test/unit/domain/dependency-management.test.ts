@@ -1,6 +1,8 @@
 import fc from "fast-check";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import {
+  addProjectDependency,
+  AddResult,
   tryRemoveProjectDependencies,
   tryRemoveProjectDependency,
 } from "../../../src/domain/dependency-management";
@@ -8,12 +10,14 @@ import { DomainName } from "../../../src/domain/domain-name";
 import {
   hasDependency,
   mapScopedRegistry,
+  removeDependency,
 } from "../../../src/domain/project-manifest";
+import { recordKeys } from "../../../src/domain/record-utils";
 import { RegistryUrl } from "../../../src/domain/registry-url";
 import { makeScopedRegistry } from "../../../src/domain/scoped-registry";
-import { recordKeys } from "../../../src/domain/record-utils";
 import { arbDomainName } from "./domain-name.arb";
 import {
+  abrDependencyVersion,
   arbManifest,
   arbManifestWithDependencyCount,
   arbNonEmptyManifest,
@@ -231,6 +235,108 @@ describe("dependency management", () => {
             ).unwrapErr();
 
             expect(error).toEqual(new PackumentNotFoundError(missingPackage));
+          }
+        )
+      );
+    });
+  });
+
+  describe("add single", () => {
+    it("should have dependency after adding", () => {
+      fc.assert(
+        fc.property(
+          arbManifest,
+          arbDomainName,
+          abrDependencyVersion,
+          (manifest, packageName, version) => {
+            const [updated] = addProjectDependency(
+              manifest,
+              packageName,
+              version
+            );
+
+            expect(updated.dependencies?.[packageName]).toEqual(version);
+          }
+        )
+      );
+    });
+
+    it("should have correct change for added dependency", () => {
+      fc.assert(
+        fc.property(
+          arbManifest,
+          arbDomainName,
+          abrDependencyVersion,
+          (manifest, packageName, version) => {
+            // Make sure manifest does not have dependency
+            manifest = removeDependency(manifest, packageName);
+
+            const [, change] = addProjectDependency(
+              manifest,
+              packageName,
+              version
+            );
+
+            expect(change).toEqual<AddResult>({ type: "added", version });
+          }
+        )
+      );
+    });
+
+    it("should have correct change for updated dependency", () => {
+      fc.assert(
+        fc.property(
+          arbManifest,
+          arbDomainName,
+          abrDependencyVersion,
+          abrDependencyVersion,
+          (manifest, packageName, previousVersion, version) => {
+            // If generated versions are equal, we cancel the test
+            if (previousVersion === version) return;
+
+            // Add previous version
+            manifest = addProjectDependency(
+              manifest,
+              packageName,
+              previousVersion
+            )[0];
+
+            const [, change] = addProjectDependency(
+              manifest,
+              packageName,
+              version
+            );
+
+            expect(change).toEqual<AddResult>({
+              type: "upgraded",
+              fromVersion: previousVersion,
+              toVersion: version,
+            });
+          }
+        )
+      );
+    });
+
+    it("should have correct change for existing dependency", () => {
+      fc.assert(
+        fc.property(
+          arbManifest,
+          arbDomainName,
+          abrDependencyVersion,
+          (manifest, packageName, version) => {
+            // Make sure version is already in the manifest
+            manifest = addProjectDependency(manifest, packageName, version)[0];
+
+            const [, change] = addProjectDependency(
+              manifest,
+              packageName,
+              version
+            );
+
+            expect(change).toEqual<AddResult>({
+              type: "noChange",
+              version,
+            });
           }
         )
       );

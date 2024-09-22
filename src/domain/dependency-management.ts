@@ -9,6 +9,7 @@ import {
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
   removeTestable,
+  setDependency,
 } from "./project-manifest";
 /**
  * A package that was removed from the manifest.
@@ -85,4 +86,89 @@ export function tryRemoveProjectDependencies(
         ]
       )
   );
+}
+
+/**
+ * The result of adding a dependency.
+ */
+export type AddResult =
+  | {
+      /**
+       * Indicates that the dependency was added.
+       */
+      type: "added";
+      /**
+       * The version that was added.
+       */
+      version: DependencyVersion;
+    }
+  | {
+      /**
+       * Indicates that the dependency was already present in the manifest and
+       * only it's version was changed.
+       */
+      type: "upgraded";
+      /**
+       * The version that was in the manifest previously.
+       */
+      fromVersion: DependencyVersion;
+      /**
+       * The new version.
+       */
+      toVersion: DependencyVersion;
+    }
+  | {
+      /**
+       * Indicates that the manifest already contained the dependency.
+       */
+      type: "noChange";
+      /**
+       * The version in the manifest.
+       */
+      version: DependencyVersion;
+    };
+
+/**
+ * Adds a dependency to a project manifest.
+ * @param manifest The manifest to add the dependency to.
+ * @param packageName The name of the dependency to add.
+ * @param version Version of the dependency to add.
+ * @returns Tuple containing the updated manifest and an object containing
+ * information about how the manifest changed.
+ */
+export function addProjectDependency(
+  manifest: UnityProjectManifest,
+  packageName: DomainName,
+  version: DependencyVersion
+): [UnityProjectManifest, AddResult] {
+  const oldVersion = manifest.dependencies[packageName];
+
+  manifest = setDependency(manifest, packageName, version);
+
+  if (!oldVersion) {
+    return [
+      manifest,
+      {
+        type: "added",
+        version: version,
+      },
+    ];
+  } else if (oldVersion !== version) {
+    return [
+      manifest,
+      {
+        type: "upgraded",
+        fromVersion: oldVersion,
+        toVersion: version,
+      },
+    ];
+  } else {
+    return [
+      manifest,
+      {
+        type: "noChange",
+        version: version,
+      },
+    ];
+  }
 }
