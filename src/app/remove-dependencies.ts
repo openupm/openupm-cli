@@ -4,10 +4,11 @@ import { tryRemoveProjectDependencies } from "../domain/dependency-management";
 import { DomainName } from "../domain/domain-name";
 import { partialApply } from "../domain/fp-utils";
 import { DebugLog } from "../domain/logging";
-import { PackageUrl } from "../domain/package-url";
-import { UnityProjectManifest } from "../domain/project-manifest";
+import {
+  UnityProjectManifest,
+  type DependencyVersion,
+} from "../domain/project-manifest";
 import { resultifyAsyncOp } from "../domain/result-utils";
-import { SemanticVersion } from "../domain/semantic-version";
 import { type ReadTextFile, type WriteTextFile } from "../io/fs";
 import { loadProjectManifestUsing } from "./get-dependencies";
 import { saveProjectManifestUsing } from "./write-dependencies";
@@ -23,7 +24,7 @@ export type RemovedPackage = {
   /**
    * The version of the removed package.
    */
-  version: SemanticVersion | PackageUrl;
+  version: DependencyVersion;
 };
 
 /**

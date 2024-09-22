@@ -25,6 +25,7 @@ import {
 import { PackageUrl } from "../domain/package-url";
 import type { ResolvePackumentVersionError } from "../domain/packument";
 import {
+  type DependencyVersion,
   type UnityProjectManifest,
   addTestable,
   hasDependency,
@@ -45,8 +46,8 @@ import { type GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { loadProjectManifestUsing } from "./get-dependencies";
 import {
-  fetchRegistryPackumentVersionUsing,
   type ResolvedPackumentVersion,
+  fetchRegistryPackumentVersionUsing,
 } from "./get-registry-packument-version";
 import { resolveDependenciesUsing } from "./resolve-dependencies";
 import { saveProjectManifestUsing } from "./write-dependencies";
@@ -135,7 +136,7 @@ export type AddResult =
       /**
        * The version that was added.
        */
-      version: SemanticVersion | PackageUrl;
+      version: DependencyVersion;
     }
   | {
       /**
@@ -146,11 +147,11 @@ export type AddResult =
       /**
        * The version that was in the manifest previously.
        */
-      fromVersion: SemanticVersion | PackageUrl;
+      fromVersion: DependencyVersion;
       /**
        * The new version.
        */
-      toVersion: SemanticVersion | PackageUrl;
+      toVersion: DependencyVersion;
     }
   | {
       /**
@@ -160,7 +161,7 @@ export type AddResult =
       /**
        * The version in the manifest.
        */
-      version: SemanticVersion | PackageUrl;
+      version: DependencyVersion;
     };
 
 function pickMostFixable(

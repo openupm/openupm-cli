@@ -1,16 +1,15 @@
 import { Err, Ok, type Result } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
-import { omitKey } from "./object-utils";
 import type { DomainName } from "./domain-name";
-import type { PackageUrl } from "./package-url";
+import { omitKey } from "./object-utils";
 import {
+  type DependencyVersion,
   type UnityProjectManifest,
   removeDependency,
   removeEmptyScopedRegistries,
   removeScopeFromAllScopedRegistries,
   removeTestable,
 } from "./project-manifest";
-import type { SemanticVersion } from "./semantic-version";
 /**
  * A package that was removed from the manifest.
  */
@@ -22,7 +21,7 @@ export type RemovedPackage = {
   /**
    * The version of the removed package.
    */
-  version: SemanticVersion | PackageUrl;
+  version: DependencyVersion;
 };
 
 /**

@@ -9,6 +9,11 @@ import { SemanticVersion } from "./semantic-version";
 import { removeTrailingSlash } from "./string-utils";
 
 /**
+ * The version of a dependency in a manifest.
+ */
+export type DependencyVersion = SemanticVersion | PackageUrl;
+
+/**
  * The content of the project-manifest (manifest.json) of a Unity project.
  * @see https://docs.unity3d.com/Manual/upm-manifestPrj.html
  */
@@ -18,7 +23,7 @@ export type UnityProjectManifest = Readonly<{
    * direct dependencies. Each entry maps the package name to the minimum
    * version required for the project.
    */
-  dependencies: Readonly<Record<DomainName, SemanticVersion | PackageUrl>>;
+  dependencies: Readonly<Record<DomainName, DependencyVersion>>;
   /**
    * Specify custom registries in addition to the default registry.
    * This allows you to host your own packages.
@@ -46,7 +51,7 @@ export const emptyProjectManifest: UnityProjectManifest = { dependencies: {} };
 export function setDependency(
   manifest: UnityProjectManifest,
   name: DomainName,
-  version: SemanticVersion | PackageUrl
+  version: DependencyVersion
 ): UnityProjectManifest {
   return {
     ...manifest,
