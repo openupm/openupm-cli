@@ -1,10 +1,12 @@
+import fc from "fast-check";
 import {
   isPackageReference,
   makePackageReference,
   splitPackageReference,
 } from "../../../src/domain/package-reference";
-import fc from "fast-check";
 import { arbDomainName } from "./domain-name.arb";
+import { arbPackageUrl } from "./package-url.arb";
+import { arbSemanticVersion } from "./semantic-version.arb";
 
 describe("package-reference", () => {
   describe("validation", () => {
@@ -85,11 +87,26 @@ describe("package-reference", () => {
     }
 
     it("should split package without version", () =>
-      shouldSplitCorrectly("com.abc.my-package"));
+      fc.assert(
+        fc.property(arbDomainName, (packageName) =>
+          shouldSplitCorrectly(packageName)
+        )
+      ));
+
     it("should split package with semantic version", () =>
-      shouldSplitCorrectly("com.abc.my-package", "1.0.0"));
-    it("should split package with file-url", () =>
-      shouldSplitCorrectly("com.abc.my-package", "file://./my-package"));
+      fc.assert(
+        fc.property(arbDomainName, arbSemanticVersion, (packageName, version) =>
+          shouldSplitCorrectly(packageName, version)
+        )
+      ));
+
+    it("should split package with package-url", () =>
+      fc.assert(
+        fc.property(arbDomainName, arbPackageUrl, (packageName, version) =>
+          shouldSplitCorrectly(packageName, version)
+        )
+      ));
+
     it("should split package with latest-tag", () =>
       shouldSplitCorrectly("com.abc.my-package", "latest"));
   });
