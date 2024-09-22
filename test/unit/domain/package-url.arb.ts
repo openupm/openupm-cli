@@ -6,28 +6,28 @@ import { arbDomainName } from "./domain-name.arb";
  * Arbitrary {@link PackageUrl} with `http` protocol.
  */
 export const arbHttpPackageUrl = arbDomainName
-  .map((packageName) => `http://github.com/user/${{ packageName }}`)
+  .map((packageName) => `http://github.com/user/${packageName}`)
   .map(PackageUrl.parse);
 
 /**
  * Arbitrary {@link PackageUrl} with `https` protocol.
  */
 export const arbHttpsPackageUrl = arbDomainName
-  .map((packageName) => `https://github.com/user/${{ packageName }}`)
+  .map((packageName) => `https://github.com/user/${packageName}`)
   .map(PackageUrl.parse);
 
 /**
  * Arbitrary {@link PackageUrl} with `git` protocol.
  */
 export const arbGitPackageUrl = arbDomainName
-  .map((packageName) => `git@github:user/${{ packageName }}`)
+  .map((packageName) => `git@github:user/${packageName}`)
   .map(PackageUrl.parse);
 
 /**
  * Arbitrary {@link PackageUrl} with `file` protocol.
  */
 export const arbFilePackageUrl = arbDomainName
-  .map((packageName) => `file://users/some-user/projects/${{ packageName }}`)
+  .map((packageName) => `file://users/some-user/projects/${packageName}`)
   .map(PackageUrl.parse);
 
 /**
