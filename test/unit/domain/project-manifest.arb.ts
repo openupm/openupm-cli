@@ -1,8 +1,20 @@
 import fc, { type Arbitrary } from "fast-check";
-import { type UnityProjectManifest } from "../../../src/domain/project-manifest";
+import {
+  type DependencyVersion,
+  type UnityProjectManifest,
+} from "../../../src/domain/project-manifest";
 import { UnityProjectManifestBuilder } from "../../common/data-project-manifest";
 import { arbDomainName } from "./domain-name.arb";
+import { arbPackageUrl } from "./package-url.arb";
 import { arbSemanticVersion } from "./semantic-version.arb";
+
+/**
+ * Arbitrary {@link abrDependencyVersion}.
+ */
+export const abrDependencyVersion: Arbitrary<DependencyVersion> = fc.oneof(
+  arbSemanticVersion,
+  arbPackageUrl
+);
 
 function withArbDependencies(
   builder: UnityProjectManifestBuilder,
@@ -11,7 +23,7 @@ function withArbDependencies(
   if (dependencyCount === 0) return fc.constant(builder.manifest);
 
   return fc
-    .tuple(arbDomainName, arbSemanticVersion, fc.boolean())
+    .tuple(arbDomainName, abrDependencyVersion, fc.boolean())
     .chain(([packageName, version, withTestable]) => {
       const withDependency = builder.addDependency(
         packageName,

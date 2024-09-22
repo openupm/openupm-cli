@@ -1,15 +1,27 @@
+import { AssertionError } from "assert";
 import { DomainName } from "../../src/domain/domain-name";
+import { PackageUrl } from "../../src/domain/package-url";
 import {
   addTestable,
   emptyProjectManifest,
   mapScopedRegistry,
   setDependency,
   UnityProjectManifest,
+  type DependencyVersion,
 } from "../../src/domain/project-manifest";
 import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
 import { SemanticVersion } from "../../src/domain/semantic-version";
-import { assertZod } from "../../src/domain/zod-utils";
+import { assertZod, isZod } from "../../src/domain/zod-utils";
 import { someRegistryUrl } from "./data-registry";
+
+function assertIsDependencyVersion(x: unknown): asserts x is DependencyVersion {
+  if (!isZod(x, SemanticVersion) && !isZod(x, PackageUrl))
+    throw new AssertionError({
+      message: "Value is not a dependency version",
+      actual: x,
+      expected: "Some dependency version.",
+    });
+}
 
 /**
  * Builder class for {@link UnityProjectManifest}.
@@ -61,7 +73,8 @@ export class UnityProjectManifestBuilder {
     testable: boolean
   ): UnityProjectManifestBuilder {
     assertZod(name, DomainName);
-    assertZod(version, SemanticVersion);
+    assertIsDependencyVersion(version);
+
     let updated: UnityProjectManifestBuilder = new UnityProjectManifestBuilder(
       setDependency(this.manifest, name, version)
     );
