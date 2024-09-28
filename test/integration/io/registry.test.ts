@@ -1,7 +1,5 @@
-import type RegClient from "another-npm-registry-client";
 import { default as npmSearch, default as search } from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
-import { DomainName } from "../../../src/domain/domain-name";
 import { noopLogger } from "../../../src/domain/logging";
 import {
   HttpErrorLike,
@@ -9,12 +7,9 @@ import {
 } from "../../../src/io/common-errors";
 import {
   getAllRegistryPackumentsUsing,
-  getRegistryPackumentUsing,
   searchRegistryUsing,
 } from "../../../src/io/registry";
-import { buildPackument } from "../../common/data-packument";
 import { someRegistry } from "../../common/data-registry";
-import { mockRegClientGetResult } from "./registry-client.mock";
 
 jest.mock("npm-registry-fetch");
 jest.mock("libnpmsearch");
@@ -107,67 +102,6 @@ describe("registry io", () => {
       const actual = await npmApiSearch(someRegistry, "wow");
 
       expect(actual).toEqual(expected);
-    });
-  });
-
-  describe("fetch", () => {
-    const packageA = DomainName.parse("package-a");
-
-    function makeDependencies() {
-      const regClient: jest.Mocked<RegClient.Instance> = {
-        adduser: jest.fn(),
-        get: jest.fn(),
-      };
-
-      const fetchRegistryPackument = getRegistryPackumentUsing(
-        regClient,
-        noopLogger
-      );
-      return { fetchRegistryPackument, regClient } as const;
-    }
-    it("should get existing packument", async () => {
-      // TODO: Use prop test
-      const packument = buildPackument(packageA);
-      const { fetchRegistryPackument, regClient } = makeDependencies();
-      mockRegClientGetResult(regClient, null, packument);
-
-      const actual = await fetchRegistryPackument(someRegistry, packageA);
-
-      expect(actual).toEqual(packument);
-    });
-
-    it("should not find unknown packument", async () => {
-      const { fetchRegistryPackument, regClient } = makeDependencies();
-      mockRegClientGetResult(
-        regClient,
-        {
-          message: "not found",
-          name: "FakeError",
-          statusCode: 404,
-        },
-        null
-      );
-
-      const actual = await fetchRegistryPackument(someRegistry, packageA);
-
-      expect(actual).toBeNull();
-    });
-
-    it("should fail for errors", async () => {
-      const { fetchRegistryPackument, regClient } = makeDependencies();
-      mockRegClientGetResult(
-        regClient,
-        {
-          message: "Unauthorized",
-          name: "FakeError",
-          statusCode: 401,
-        },
-        null
-      );
-
-      await expect(
-        fetchRegistryPackument(someRegistry, packageA)
-      ).rejects.toBeInstanceOf(Error);
     });
   });
 });
