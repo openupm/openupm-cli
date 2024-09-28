@@ -1,4 +1,3 @@
-import RegClient from "another-npm-registry-client";
 import nock from "nock";
 import { resolveDependenciesUsing } from "../../../src/app/resolve-dependencies";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
@@ -32,11 +31,10 @@ describe("dependency resolving", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
   const otherVersion = SemanticVersion.parse("2.0.0");
 
-  const registryClient = new RegClient();
   const resolveDependencies = partialApply(
     resolveDependenciesUsing,
     fetchCheckUrlExists,
-    getRegistryPackumentUsing(registryClient, noopLogger)
+    getRegistryPackumentUsing(noopLogger)
   );
 
   afterEach(() => {

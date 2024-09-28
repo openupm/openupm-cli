@@ -1,4 +1,3 @@
-import type RegClient from "another-npm-registry-client";
 import npmSearch from "libnpmsearch";
 import { loginCouch } from "npm-profile";
 import npmFetch from "npm-registry-fetch";
@@ -129,26 +128,19 @@ export type GetRegistryPackument = (
  * from a remote npm registry.
  */
 export function getRegistryPackumentUsing(
-  registryClient: RegClient.Instance,
   debugLog: DebugLog
 ): GetRegistryPackument {
-  return (registry, name) => {
+  return async (registry, name) => {
     const url = `${registry.url}/${name}`;
-    return new Promise<UnityPackument | null>((resolve, reject) => {
-      return registryClient.get(
-        url,
-        { auth: registry.auth || undefined },
-        (error, packument) => {
-          if (error !== null) {
-            assertIsHttpError(error);
-            if (error.statusCode === 404) resolve(null);
-            else reject(error);
-          } else resolve(packument);
-        }
-      );
-    }).catch(async (error) => {
+    try {
+      const json = await npmFetch.json(url);
+      // TODO: Validate object
+      return json as UnityPackument;
+    } catch (error) {
+      assertIsHttpError(error);
+      if (error.statusCode === 404) return null;
       await debugLog("Fetching a packument failed.", error);
       throw makeRegistryInteractionError(error, registry.url);
-    });
+    }
   };
 }
