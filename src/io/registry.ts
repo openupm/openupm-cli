@@ -1,7 +1,8 @@
 import type RegClient from "another-npm-registry-client";
-import type { AddUserResponse } from "another-npm-registry-client";
 import npmSearch from "libnpmsearch";
+import { loginCouch } from "npm-profile";
 import npmFetch from "npm-registry-fetch";
+import type { AuthToken } from "../domain/auth";
 import { DomainName } from "../domain/domain-name";
 import { assertIsError, assertIsHttpError } from "../domain/error-type-guards";
 import { DebugLog } from "../domain/logging";
@@ -12,7 +13,6 @@ import {
   makeRegistryInteractionError,
   RegistryAuthenticationError,
 } from "./common-errors";
-import type { AuthToken } from "../domain/auth";
 
 type AllPackuments = Readonly<{
   // eslint-disable-next-line jsdoc/require-jsdoc
@@ -71,30 +71,19 @@ export type GetAuthToken = (
  * Makes a {@link GetAuthToken} function which gets the token
  * by authenticating the user with a remote npm registry.
  */
-export function getAuthTokenUsing(
-  registryClient: RegClient.Instance,
-  debugLog: DebugLog
-): GetAuthToken {
-  return (registryUrl, username, email, password) =>
-    new Promise<[AddUserResponse, Response]>((resolve, reject) => {
-      registryClient.adduser(
-        registryUrl,
-        { auth: { username, email, password } },
-        (error, responseData, _, response) => {
-          if (error !== null) reject(error);
-          else resolve([responseData, response]);
-        }
-      );
-    }).then(async ([data, response]) => {
-      if (!data.ok) {
-        await debugLog(
-          "Npm registry login failed because of not-ok response.",
-          response
-        );
-        throw new RegistryAuthenticationError(registryUrl);
-      }
-      return data.token;
-    });
+export function getAuthTokenUsing(debugLog: DebugLog): GetAuthToken {
+  return async (registryUrl, username, email, password) => {
+    try {
+      const result = await loginCouch(username, email, password, {
+        registry: registryUrl,
+      });
+      return result.token;
+    } catch (error) {
+      assertIsError(error);
+      await debugLog("Npm registry login failed.", error);
+      throw new RegistryAuthenticationError(registryUrl);
+    }
+  };
 }
 
 /**

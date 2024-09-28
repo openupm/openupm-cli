@@ -36,7 +36,7 @@ const fetchPackument = getRegistryPackumentUsing(
 );
 const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
-const getAuthToken = getAuthTokenUsing(registryClient, debugLogToConsole);
+const getAuthToken = getAuthTokenUsing(debugLogToConsole);
 
 const openupmCli = makeOpenupmCli(
   fetchPackument,
