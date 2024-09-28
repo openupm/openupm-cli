@@ -9,16 +9,12 @@ import {
 } from "../../../src/io/common-errors";
 import {
   getAllRegistryPackumentsUsing,
-  getAuthTokenUsing,
   getRegistryPackumentUsing,
   searchRegistryUsing,
 } from "../../../src/io/registry";
 import { buildPackument } from "../../common/data-packument";
-import { someRegistry, someRegistryUrl } from "../../common/data-registry";
-import {
-  mockRegClientAddUserResult,
-  mockRegClientGetResult,
-} from "./registry-client.mock";
+import { someRegistry } from "../../common/data-registry";
+import { mockRegClientGetResult } from "./registry-client.mock";
 
 jest.mock("npm-registry-fetch");
 jest.mock("libnpmsearch");
@@ -68,92 +64,6 @@ describe("registry io", () => {
       const actual = await fetchAllRegistryPackuments(someRegistry);
 
       expect(actual).toEqual([]);
-    });
-  });
-
-  describe("authenticate user with npm registry", () => {
-    function makeDependencies() {
-      const registryClient: jest.Mocked<RegClient.Instance> = {
-        adduser: jest.fn(),
-        get: jest.fn(),
-      };
-
-      const authenticateUserWithNpmRegistry = getAuthTokenUsing(
-        registryClient,
-        noopLogger
-      );
-      return { authenticateUserWithNpmRegistry, registryClient } as const;
-    }
-    it("should give token for valid user", async () => {
-      const expected = "some token";
-      const { authenticateUserWithNpmRegistry, registryClient } =
-        makeDependencies();
-      mockRegClientAddUserResult(
-        registryClient,
-        null,
-        {
-          ok: true,
-          token: expected,
-        },
-        null
-      );
-
-      const actual = await authenticateUserWithNpmRegistry(
-        someRegistryUrl,
-        "valid-user",
-        "valid@user.com",
-        "valid-password"
-      );
-
-      expect(actual).toEqual(expected);
-    });
-
-    it("should fail for not-ok response", async () => {
-      const { authenticateUserWithNpmRegistry, registryClient } =
-        makeDependencies();
-      mockRegClientAddUserResult(
-        registryClient,
-        null,
-        {
-          ok: false,
-        },
-        {
-          statusMessage: "bad user",
-          statusCode: 401,
-        }
-      );
-
-      await expect(
-        authenticateUserWithNpmRegistry(
-          someRegistryUrl,
-          "bad-user",
-          "bad@user.com",
-          "bad-password"
-        )
-      ).rejects.toBeInstanceOf(RegistryAuthenticationError);
-    });
-
-    it("should fail for error response", async () => {
-      const { authenticateUserWithNpmRegistry, registryClient } =
-        makeDependencies();
-      mockRegClientAddUserResult(
-        registryClient,
-        new Error(),
-        { ok: false },
-        {
-          statusMessage: "bad user",
-          statusCode: 401,
-        }
-      );
-
-      await expect(
-        authenticateUserWithNpmRegistry(
-          someRegistryUrl,
-          "bad-user",
-          "bad@user.com",
-          "bad-password"
-        )
-      ).rejects.toBeInstanceOf(Error);
     });
   });
 
