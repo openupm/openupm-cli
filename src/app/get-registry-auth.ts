@@ -1,4 +1,4 @@
-import { NpmAuth } from "another-npm-registry-client";
+import type { AuthOptions } from "npm-registry-fetch";
 import { decodeBase64 } from "../domain/base64";
 import { partialApply } from "../domain/fp-utils";
 import { DebugLog } from "../domain/logging";
@@ -31,7 +31,7 @@ export function isNonAuthUrl(url: RegistryUrl): boolean {
  * @returns The converted auth object.
  * @throws {Error} If auth contained bad base64 string.
  */
-export function importNpmAuth(entry: UpmConfigEntry): NpmAuth {
+export function importNpmAuth(entry: UpmConfigEntry): AuthOptions {
   // Basic auth
   if ("_auth" in entry) {
     const decoded = decodeBase64(entry._auth);
@@ -61,7 +61,7 @@ export function importNpmAuth(entry: UpmConfigEntry): NpmAuth {
 export function tryGetAuthEntry(
   upmConfig: UpmConfig,
   url: RegistryUrl
-): NpmAuth | null {
+): AuthOptions | null {
   const entry =
     upmConfig.npmAuth?.[url] ?? upmConfig.npmAuth?.[url + "/"] ?? null;
   if (entry === null) {

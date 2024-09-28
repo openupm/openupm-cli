@@ -1,4 +1,4 @@
-import { NpmAuth } from "another-npm-registry-client";
+import type { AuthOptions } from "npm-registry-fetch";
 import { makeNpmFetchOptions, Registry } from "../../../src/domain/registry";
 import { someRegistryUrl } from "../../common/data-registry";
 
@@ -31,7 +31,7 @@ describe("npm registry", () => {
     });
 
     it("should use token auth info", () => {
-      const auth: NpmAuth = { token: "Some token", alwaysAuth: true };
+      const auth: AuthOptions = { token: "Some token", alwaysAuth: true };
       const registry: Registry = {
         url: someRegistryUrl,
         auth,
@@ -47,7 +47,7 @@ describe("npm registry", () => {
     });
 
     it("should use basic auth info", () => {
-      const auth: NpmAuth = {
+      const auth: AuthOptions = {
         username: "user",
         password: "pass",
         email: "user@mail.com",

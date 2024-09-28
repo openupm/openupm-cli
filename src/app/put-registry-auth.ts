@@ -1,4 +1,4 @@
-import { NpmAuth } from "another-npm-registry-client";
+import type { AuthOptions } from "npm-registry-fetch";
 import { encodeBase64 } from "../domain/base64";
 import { partialApply } from "../domain/fp-utils";
 import { RegistryUrl } from "../domain/registry-url";
@@ -10,7 +10,7 @@ import { saveUpmConfigFileUsing } from "./write-upm-config";
 
 function mergeEntries(
   oldEntry: UpmConfigEntry | null,
-  newEntry: NpmAuth
+  newEntry: AuthOptions
 ): UpmConfigEntry {
   const alwaysAuth = newEntry.alwaysAuth ?? oldEntry?.alwaysAuth;
 
@@ -41,7 +41,7 @@ function mergeEntries(
 export function putRegistryAuthIntoUpmConfig(
   currentContent: UpmConfig | null,
   registry: RegistryUrl,
-  auth: NpmAuth
+  auth: AuthOptions
 ): UpmConfig {
   const oldEntries = currentContent?.npmAuth ?? {};
   // Search the entry both with and without trailing slash
@@ -70,7 +70,7 @@ export async function putRegistryAuthUsing(
   writeTextFile: WriteTextFile,
   configPath: string,
   registry: RegistryUrl,
-  auth: NpmAuth
+  auth: AuthOptions
 ): Promise<void> {
   const loadUpmConfig = partialApply(loadUpmConfigUsing, readTextFile);
   const saveUpmConfig = partialApply(saveUpmConfigFileUsing, writeTextFile);
