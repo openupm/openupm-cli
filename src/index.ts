@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import RegClient from "another-npm-registry-client";
 import npmlog from "npmlog";
 import updateNotifier from "update-notifier";
 import pkg from "../package.json";
@@ -29,11 +28,7 @@ const debugLogToConsole: DebugLog = async function (message, context) {
   return log.verbose("", `${message}${contextMessage}`);
 };
 
-const registryClient = new RegClient({ log });
-const fetchPackument = getRegistryPackumentUsing(
-  registryClient,
-  debugLogToConsole
-);
+const fetchPackument = getRegistryPackumentUsing(debugLogToConsole);
 const searchRegistry = searchRegistryUsing(debugLogToConsole);
 const fetchAllPackuments = getAllRegistryPackumentsUsing(debugLogToConsole);
 const getAuthToken = getAuthTokenUsing(debugLogToConsole);
