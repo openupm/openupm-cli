@@ -68,7 +68,6 @@
   "dependencies": {
     "@commander-js/extra-typings": "^9.5.0",
     "@iarna/toml": "^2.2.5",
-    "another-npm-registry-client": "^8.7.0",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "commander": "^9.5.0",
