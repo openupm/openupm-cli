@@ -1,4 +1,4 @@
-import { NpmAuth } from "another-npm-registry-client";
+import type { AuthOptions } from "npm-registry-fetch";
 import { partialApply } from "../domain/fp-utils";
 import { DebugLog } from "../domain/logging";
 import { RegistryUrl } from "../domain/registry-url";
@@ -51,7 +51,7 @@ export async function loginUsing(
   );
 
   if (authMode === "basic") {
-    const auth: NpmAuth = { username, password, email, alwaysAuth };
+    const auth: AuthOptions = { username, password, email, alwaysAuth };
     return await putRegistryAuth(configPath, registry, auth);
   }
 
@@ -59,7 +59,7 @@ export async function loginUsing(
   const token = await getAuthToken(registry, username, email, password);
   await debugLog(`npm login successful`);
 
-  const auth: NpmAuth = { token, email, alwaysAuth };
+  const auth: AuthOptions = { token, email, alwaysAuth };
   await putRegistryAuth(configPath, registry, auth);
 
   const npmrcPath = await putNpmAuthToken(homePath, registry, token);

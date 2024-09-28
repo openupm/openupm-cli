@@ -1,5 +1,4 @@
-import { NpmAuth } from "another-npm-registry-client";
-import npmFetch from "npm-registry-fetch";
+import npmFetch, { type AuthOptions } from "npm-registry-fetch";
 import { RegistryUrl, unityRegistryUrl } from "./registry-url";
 
 /**
@@ -14,7 +13,7 @@ export type Registry = Readonly<{
    * The authentication information used for this registry. Null if the registry
    * does not require authentication.
    */
-  auth: NpmAuth | null;
+  auth: AuthOptions | null;
 }>;
 
 /**
