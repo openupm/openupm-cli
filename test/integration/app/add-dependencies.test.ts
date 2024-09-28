@@ -1,4 +1,3 @@
-import RegClient from "another-npm-registry-client";
 import nock from "nock";
 import {
   addDependenciesUsing,
@@ -81,10 +80,7 @@ describe("add dependencies", () => {
   const someProjectDir = "/users/some-user/projects/SomeProject";
 
   function makeDependencies() {
-    const fetchPackument = getRegistryPackumentUsing(
-      new RegClient(),
-      noopLogger
-    );
+    const fetchPackument = getRegistryPackumentUsing(noopLogger);
 
     const log = makeMockLogger();
 
