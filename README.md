@@ -97,6 +97,16 @@ The add command fails if the package is not qualified:
 
 You shall either resolve these issues manually or add the option `-f` to continue.
 
+You may specify the version to add in a few different ways:
+
+- A specific version like `com.my.package@1.2.0`
+- The latest tag like `com.my.package@latest` which will install the latest
+published version, including pre-releases.
+- No version at all like `com.my.package` which is identical to using the 
+"latest" tag.
+- The stable tag like `com.my.package@stable` which will install the latest
+stable version, ie. excluding pre-releases.
+
 You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
 
 ```
