@@ -50,7 +50,12 @@ export type PackageReference = DomainName | ReferenceWithVersion;
  * @param s The string.
  */
 function isVersionReference(s: string): s is VersionReference {
-  return s === "latest" || isZod(s, SemanticVersion) || isZod(s, PackageUrl);
+  return (
+    s === "latest" ||
+    s === "stable" ||
+    isZod(s, SemanticVersion) ||
+    isZod(s, PackageUrl)
+  );
 }
 
 /**
