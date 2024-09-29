@@ -76,14 +76,15 @@ export function splitPackageReference(
  */
 export function makePackageReference(
   name: string,
-  version?: string
+  version: string | null
 ): PackageReference {
   assertZod(name, DomainName);
+  if (version === null) return name;
   assert(
-    version === undefined || isVersionReference(version),
-    `"${version}" is valid version-reference`
+    isVersionReference(version),
+    `"${version}" is not a valid version reference.`
   );
-  return version !== undefined ? `${name}@${version}` : name;
+  return `${name}@${version}`;
 }
 
 /**

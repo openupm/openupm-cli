@@ -80,7 +80,7 @@ describe("package-reference", () => {
   describe("split", () => {
     function shouldSplitCorrectly(name: string, version?: string) {
       const [actualName, actualVersion] = splitPackageReference(
-        makePackageReference(name, version)
+        makePackageReference(name, version ?? null)
       );
       expect(actualName).toEqual(name);
       expect(actualVersion).toEqual(version ?? null);
