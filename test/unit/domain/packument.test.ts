@@ -38,7 +38,7 @@ describe("packument", () => {
 
       const version = tryGetLatestVersion(packument);
 
-      expect(version).toBeUndefined();
+      expect(version).toBeNull();
     });
   });
 
