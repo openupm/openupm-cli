@@ -1,6 +1,7 @@
 import { Ok } from "ts-results-es";
 import { DomainName } from "../../../src/domain/domain-name";
 import {
+  NoStableError,
   NoVersionsError,
   packumentHasVersion,
   tryGetLatestVersion,
@@ -87,10 +88,30 @@ describe("packument", () => {
       ).toThrow(NoVersionsError);
     });
 
-    it("should find latest version when requested", () => {
-      const result = tryResolvePackumentVersion(somePackument, "latest");
+    it("should find latest version for packument where latest is stable", () => {
+      const packument = buildPackument(somePackage, (packument) =>
+        packument.addVersion("0.8.0").addVersion("1.0.0")
+      );
 
-      expect(result).toEqual(Ok(somePackument.versions[someHighVersion]!));
+      const packumentVersion = tryResolvePackumentVersion(
+        packument,
+        "latest"
+      ).unwrap();
+
+      expect(packumentVersion.version).toEqual("1.0.0");
+    });
+
+    it("should find latest version for packument where latest is pre", () => {
+      const packument = buildPackument(somePackage, (packument) =>
+        packument.addVersion("1.0.0").addVersion("1.1.0-pre")
+      );
+
+      const packumentVersion = tryResolvePackumentVersion(
+        packument,
+        "latest"
+      ).unwrap();
+
+      expect(packumentVersion.version).toEqual("1.1.0-pre");
     });
 
     it("should find specific version", () => {
@@ -109,6 +130,29 @@ describe("packument", () => {
 
       const error = result.unwrapErr();
       expect(error).toBeInstanceOf(VersionNotFoundError);
+    });
+
+    it("should find latest stable version if there is one", () => {
+      const packument = buildPackument(somePackage, (packument) =>
+        packument.addVersion("2.0.0-pre").addVersion("1.0.0")
+      );
+
+      const packumentVersion = tryResolvePackumentVersion(
+        packument,
+        "stable"
+      ).unwrap();
+
+      expect(packumentVersion.version).toEqual("1.0.0");
+    });
+
+    it("should fail to find latest stable version if there is none", () => {
+      const packument = buildPackument(somePackage, (packument) =>
+        packument.addVersion("1.0.0-pre.0").addVersion("1.0.0-pre.1")
+      );
+
+      const error = tryResolvePackumentVersion(packument, "stable").unwrapErr();
+
+      expect(error).toBeInstanceOf(NoStableError);
     });
   });
 
