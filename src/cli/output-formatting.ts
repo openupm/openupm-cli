@@ -39,7 +39,7 @@ export function formatAsTable(
     if (packument.date) {
       date = packument.date.toISOString().slice(0, 10);
     }
-    assert(version !== undefined);
+    assert(version !== null);
     return [name, version, date];
   }
 
@@ -65,7 +65,7 @@ export function formatPackumentInfo(
 
   const versionCount = recordKeys(packument.versions).length;
   const ver = tryGetLatestVersion(packument);
-  assert(ver !== undefined);
+  assert(ver !== null);
   const verInfo = packument.versions[ver]!;
   const license = verInfo.license || "proprietary or unlicensed";
   const displayName = verInfo.displayName;

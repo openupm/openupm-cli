@@ -90,15 +90,15 @@ const hasLatestDistTag = <T extends VersionedPackument>(
  * @param packument The package. All properties are assumed to be potentially
  * missing.
  */
-export const tryGetLatestVersion = function (
+export function tryGetLatestVersion(
   packument: VersionedPackument
-): SemanticVersion | undefined {
+): SemanticVersion | null {
   if (hasLatestDistTag(packument)) return packument["dist-tags"].latest;
 
   if (packument.version !== undefined) return packument.version;
 
-  return undefined;
-};
+  return null;
+}
 
 /**
  * Attempts to get a specific version from a packument.
@@ -193,7 +193,7 @@ export function tryResolvePackumentVersion(
   // Find the latest version
   if (requestedVersion === undefined || requestedVersion === "latest") {
     let latestVersion = tryGetLatestVersion(packument);
-    if (latestVersion === undefined) latestVersion = availableVersions.at(-1)!;
+    if (latestVersion === null) latestVersion = availableVersions.at(-1)!;
     return Ok(tryGetPackumentVersion(packument, latestVersion)!);
   }
 
