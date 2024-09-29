@@ -93,12 +93,6 @@ describe("packument", () => {
       expect(result).toEqual(Ok(somePackument.versions[someHighVersion]!));
     });
 
-    it("should find latest version when requesting no particular version", () => {
-      const result = tryResolvePackumentVersion(somePackument, undefined);
-
-      expect(result).toEqual(Ok(somePackument.versions[someHighVersion]!));
-    });
-
     it("should find specific version", () => {
       const result = tryResolvePackumentVersion(somePackument, someLowVersion);
 

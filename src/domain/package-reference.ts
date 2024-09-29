@@ -1,8 +1,8 @@
-import { DomainName } from "./domain-name";
-import { SemanticVersion } from "./semantic-version";
-import { PackageUrl } from "./package-url";
-import { trySplitAtFirstOccurrenceOf } from "./string-utils";
 import assert from "assert";
+import { DomainName } from "./domain-name";
+import { PackageUrl } from "./package-url";
+import { SemanticVersion } from "./semantic-version";
+import { trySplitAtFirstOccurrenceOf } from "./string-utils";
 import { assertZod, isZod } from "./zod-utils";
 
 /**
@@ -26,9 +26,7 @@ export type ReferenceWithVersion = `${DomainName}@${VersionReference}`;
  * A version-reference that is resolvable.
  * Mostly this excludes {@link PackageUrl}s.
  */
-export type ResolvableVersion =
-  | Exclude<VersionReference, PackageUrl>
-  | undefined;
+export type ResolvableVersion = Exclude<VersionReference, PackageUrl>;
 
 /**
  * References a package. Could be just the name or a reference to a specific
