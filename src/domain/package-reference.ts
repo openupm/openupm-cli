@@ -60,12 +60,12 @@ export function isPackageReference(s: string): s is PackageReference {
  */
 export function splitPackageReference(
   reference: PackageReference
-): [DomainName, VersionReference | undefined] {
+): [DomainName, VersionReference | null] {
   const [name, version] = trySplitAtFirstOccurrenceOf(reference, "@") as [
     DomainName,
     VersionReference | null
   ];
-  return [name, version ?? undefined];
+  return [name, version];
 }
 
 /**

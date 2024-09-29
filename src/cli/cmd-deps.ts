@@ -97,17 +97,13 @@ openupm deps <pkg>@<version>`
 
         const [packageName, requestedVersion] = splitPackageReference(pkg);
 
-        if (
-          requestedVersion !== undefined &&
-          isZod(requestedVersion, PackageUrl)
-        ) {
+        if (requestedVersion !== null && isZod(requestedVersion, PackageUrl)) {
           log.error("", "cannot get dependencies for url-version");
           return process.exit(ResultCodes.Error);
         }
 
         const latestVersion =
-          requestedVersion !== undefined &&
-          isZod(requestedVersion, SemanticVersion)
+          requestedVersion !== null && isZod(requestedVersion, SemanticVersion)
             ? requestedVersion
             : (
                 await queryAllRegistriesLazy(sources, (source) =>

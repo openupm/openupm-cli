@@ -83,7 +83,7 @@ describe("package-reference", () => {
         makePackageReference(name, version)
       );
       expect(actualName).toEqual(name);
-      expect(actualVersion).toEqual(version);
+      expect(actualVersion).toEqual(version ?? null);
     }
 
     it("should split package without version", () =>
