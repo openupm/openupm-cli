@@ -157,7 +157,7 @@ export type ResolvePackumentVersionError =
  */
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
-  requestedVersion: undefined | "latest"
+  requestedVersion: "latest"
 ): Result<UnityPackumentVersion, never>;
 /**
  * Attempts to resolve a specific version from a packument.
@@ -191,7 +191,7 @@ export function tryResolvePackumentVersion(
   if (availableVersions.length === 0) throw new NoVersionsError(packument.name);
 
   // Find the latest version
-  if (requestedVersion === undefined || requestedVersion === "latest") {
+  if (requestedVersion === "latest") {
     let latestVersion = tryGetLatestVersion(packument);
     if (latestVersion === null) latestVersion = availableVersions.at(-1)!;
     return Ok(tryGetPackumentVersion(packument, latestVersion)!);

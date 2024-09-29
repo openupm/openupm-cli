@@ -258,7 +258,7 @@ export async function addDependenciesUsing(
 
   async function resolveDependency(
     packageName: DomainName,
-    requestedVersion: Exclude<VersionReference | undefined, PackageUrl>
+    requestedVersion: Exclude<VersionReference, PackageUrl>
   ): Promise<[SemanticVersion, RegistryUrl]> {
     let versionToAdd = requestedVersion;
 
@@ -321,7 +321,7 @@ export async function addDependenciesUsing(
   async function addSingle(
     manifest: UnityProjectManifest,
     packageName: DomainName,
-    requestedVersion: VersionReference | undefined
+    requestedVersion: VersionReference
   ): Promise<[UnityProjectManifest, AddResult]> {
     if (shouldAddTestable) manifest = addTestable(manifest, packageName);
 
@@ -362,7 +362,8 @@ export async function addDependenciesUsing(
     const [newManifest, result] = await addSingle(
       manifest,
       packageName,
-      version
+      // If no version was specified we resolve latest
+      version ?? "latest"
     );
     manifest = newManifest;
     results[packageName] = result;
