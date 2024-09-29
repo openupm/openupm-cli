@@ -6,10 +6,20 @@ import { trySplitAtFirstOccurrenceOf } from "./string-utils";
 import { assertZod, isZod } from "./zod-utils";
 
 /**
- * A string with the format of one of the supported version tags.
- * NOTE: Currently we only support "latest".
+ * The "latest" tag string. Specifies that the latest version is requested.
  */
-export type PackageTag = "latest";
+export type LatestTag = "latest";
+
+/**
+ * The "stable" tag string. Specifies that the latest stable version is
+ * requested.
+ */
+export type StableTag = "stable";
+
+/**
+ * A string with the format of one of the supported version tags.
+ */
+export type PackageTag = LatestTag | StableTag;
 
 /**
  * Reference to a version, either directly by a semantic version or via an
@@ -23,7 +33,7 @@ export type VersionReference = SemanticVersion | PackageUrl | PackageTag;
 export type ReferenceWithVersion = `${DomainName}@${VersionReference}`;
 
 /**
- * A version-reference that is resolvable.
+ * A {@link VersionReference} that is resolvable.
  * Mostly this excludes {@link PackageUrl}s.
  */
 export type ResolvableVersion = Exclude<VersionReference, PackageUrl>;

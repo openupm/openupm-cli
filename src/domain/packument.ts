@@ -4,9 +4,13 @@ import { Err, Ok, Result } from "ts-results-es";
 import { PackumentNotFoundError } from "./common-errors";
 import { DomainName } from "./domain-name";
 import { UnityPackageManifest } from "./package-manifest";
-import { ResolvableVersion } from "./package-reference";
+import {
+  ResolvableVersion,
+  type LatestTag,
+  type StableTag,
+} from "./package-reference";
 import { recordKeys } from "./record-utils";
-import { SemanticVersion } from "./semantic-version";
+import { compareVersions, isStable, SemanticVersion } from "./semantic-version";
 
 /**
  * Contains information about a specific version of a package. This is based on
@@ -141,6 +145,21 @@ export class VersionNotFoundError extends CustomError {
 }
 
 /**
+ * Error for when the latest stable version of a packument was requested, but
+ * the packument had no stable versions.
+ */
+export class NoStableError extends CustomError {
+  constructor(
+    /**
+     * The name of the packument.
+     */
+    public readonly packageName: DomainName
+  ) {
+    super();
+  }
+}
+
+/**
  * A failed attempt at resolving a packument-version.
  */
 export type ResolvePackumentVersionError =
@@ -157,8 +176,20 @@ export type ResolvePackumentVersionError =
  */
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
-  requestedVersion: "latest"
+  requestedVersion: LatestTag
 ): Result<UnityPackumentVersion, never>;
+/**
+ * Resolved the latest stable version from a packument.
+ * @param packument The packument.
+ * @param requestedVersion The version to resolve. In this case indicates that
+ * the latest stable version is requested.
+ * @returns Result containing the resolved version or an error.
+ * @throws {NoVersionsError} If the packument had no versions at all.
+ */
+export function tryResolvePackumentVersion(
+  packument: UnityPackument,
+  requestedVersion: StableTag
+): Result<UnityPackumentVersion, NoStableError>;
 /**
  * Attempts to resolve a specific version from a packument.
  * @param packument The packument.
@@ -187,24 +218,27 @@ export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion
 ) {
-  const availableVersions = recordKeys(packument.versions);
-  if (availableVersions.length === 0) throw new NoVersionsError(packument.name);
+  const allVersions = recordKeys(packument.versions);
+  if (allVersions.length === 0) throw new NoVersionsError(packument.name);
+  const sortedVersions = allVersions.slice().sort(compareVersions);
 
   // Find the latest version
   if (requestedVersion === "latest") {
     let latestVersion = tryGetLatestVersion(packument);
-    if (latestVersion === null) latestVersion = availableVersions.at(-1)!;
+    if (latestVersion === null) latestVersion = sortedVersions.at(-1)!;
     return Ok(tryGetPackumentVersion(packument, latestVersion)!);
   }
 
+  if (requestedVersion === "stable") {
+    const version = sortedVersions.findLast(isStable);
+    if (version === undefined) return Err(new NoStableError(packument.name));
+    return Ok(tryGetPackumentVersion(packument, version)!);
+  }
+
   // Find a specific version
-  if (!availableVersions.includes(requestedVersion))
+  if (!sortedVersions.includes(requestedVersion))
     return Err(
-      new VersionNotFoundError(
-        packument.name,
-        requestedVersion,
-        availableVersions
-      )
+      new VersionNotFoundError(packument.name, requestedVersion, sortedVersions)
     );
 
   return Ok(tryGetPackumentVersion(packument, requestedVersion)!);

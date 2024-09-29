@@ -74,13 +74,17 @@ class UnityPackumentBuilder {
 
   /**
    * Adds a version to this package.
+   * The order in which you add versions to the packument is important because
+   * every time you call this function the version specified in the packument's
+   * "dist-tags" is overriden to the given version.
    * @param version The name of the version.
    * @param build A builder function.
+   * @returns The builder for chaining.
    */
   addVersion(
     version: string,
     build?: (builder: UnityPackumentVersionBuilder) => unknown
-  ): UnityPackumentBuilder {
+  ): this {
     assert(isZod(version, SemanticVersion), `${version} is semantic version`);
     const builder = new UnityPackumentVersionBuilder(
       this.packument.name,

@@ -21,6 +21,7 @@ import {
 } from "../domain/common-errors";
 import { stringifyEditorVersion } from "../domain/editor-version";
 import {
+  NoStableError,
   NoVersionsError,
   VersionNotFoundError,
   type ResolvePackumentVersionError,
@@ -96,6 +97,8 @@ function makeErrorMessageFor(error: unknown): string {
     return "Could not determine path of home directory.";
   if (error instanceof NoSystemUserProfilePath)
     return "Could not determine path of system user directory.";
+  if (error instanceof NoStableError)
+    return "Seems like the package you requested has no stable versions.";
   return "A fatal error occurred.";
 }
 
