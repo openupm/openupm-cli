@@ -124,13 +124,13 @@ openupm view <pkg>
 
 ### View package dependencies
 ```
-open deps <pkg>
+openupm deps <pkg>
 ```
 
 Using option `--deep` to view dependencies recursively
 
 ```
-open deps <pkg> --deep
+openupm deps <pkg> --deep
 ```
 
 ### Authenticate with a scoped registry
