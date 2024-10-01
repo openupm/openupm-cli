@@ -1,3 +1,16 @@
+# [4.3.0](https://github.com/openupm/openupm-cli/compare/4.2.0...4.3.0) (2024-10-01)
+
+
+### Bug Fixes
+
+* **readme:** typos ([36ab4d6](https://github.com/openupm/openupm-cli/commit/36ab4d6b83e884bd133af525f169da967c529292))
+
+
+### Features
+
+* enable stable cli input ([9287e83](https://github.com/openupm/openupm-cli/commit/9287e83ef45199a10bf531d8045765bc202014b2))
+* stable version resolving logic ([11559d0](https://github.com/openupm/openupm-cli/commit/11559d086493571c9f2b12ac07221ed9e021375c))
+
 # [4.2.0](https://github.com/openupm/openupm-cli/compare/4.1.2...4.2.0) (2024-09-21)
 
 
