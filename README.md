@@ -24,7 +24,6 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
       - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
       - [Troubleshooting](#troubleshooting)
     - [Command options](#command-options)
-  - [Work with different registries](#work-with-different-registries)
   - [Work with proxy](#work-with-proxy)
   - [Contributors](#contributors)
 
@@ -77,41 +76,13 @@ Please install [Node.js 18 or above](https://nodejs.org/en/download/).
 
 ### Add packages
 
-```
-openupm add <pkg> [otherPkgs..]
-openupm add <pkg>@<version>
-openupm add <pkg>@git@github.com:...
-openupm add <pkg>@https://github.com/...
-openupm add <pkg>@file:...
+Use `openupm add` to add one or more packages to your project.
+
+```sh
+openupm add com.my.package@1.2.3
 ```
 
-The add command adds the package to the `manifest.json` and configures the scope registry by adding scopes for the package and its dependencies that available on the registry.
-
-The add command doesn't verify package or resolve dependencies for Git, HTTPS, and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of the version string.
-
-The add command fails if the package is not qualified:
-
-- the package has a missing dependency
-- the package requires a non-existed dependency version
-- the package requires a higher editor version
-
-You shall either resolve these issues manually or add the option `-f` to continue.
-
-You may specify the version to add in a few different ways:
-
-- A specific version like `com.my.package@1.2.0`
-- The latest tag like `com.my.package@latest` which will install the latest
-published version, including pre-releases.
-- No version at all like `com.my.package` which is identical to using the 
-"latest" tag.
-- The stable tag like `com.my.package@stable` which will install the latest
-stable version, ie. excluding pre-releases.
-
-You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
-
-```
-openupm --test <pkg>
-```
+Checkout [the commands doc page](./docs/cmd-add.md) for more information.
 
 ### Remove packages
 ```
@@ -249,41 +220,6 @@ Show verbose logging
 ```
 openupm --verbose ...
 ```
-
-## Work with different registries
-
-By default the openupm will query any package from the following registries: 
-
-1. Openupm (https://package.openupm.com)
-2. Unity (https://packages.unity.com)
-
-Any package will be searched on these registries in the order that they are listed above. If you want to install packages from your own third party registries you can do this via the `--registry` option.
-
-```openupm --registry https://package.my-registry.com add com.my.package```
-
-This will query the following registries:
-
-1. The private registry (https://package.my-registry.com)
-2. Unity (https://packages.unity.com)
-
-Let's say `com.my.package` depends on a Openupm package. With the above configuration the install would fail because Openupm is not part of the queried registries. To fix, add Openupm to the --registry option.
-
-```openupm --registry https://package.my-registry.com https://package.openupm.com add com.my.package```
-
-The query will now look like this:
-
-1. The private registry (https://package.my-registry.com)
-2. Openupm (https://package.openupm.com)
-3. Unity (https://packages.unity.com)
-
-Finally, it may not always be desirable to search the Unity registry. If you want to remove it from the registry list, run with the `--no-upstream` option.
-
-```openupm --registry https://package.my-registry.com https://package.openupm.com --no-upstream add com.my.package```
-
-The resulting query is:
-
-1. The private registry (https://package.my-registry.com)
-2. Openupm (https://package.openupm.com)
 
 ## Work with proxy
 
