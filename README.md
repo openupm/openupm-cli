@@ -76,7 +76,7 @@ Please install [Node.js 18 or above](https://nodejs.org/en/download/).
 
 ### Add packages
 
-Use `openupm add` to add one or more packages to your project.
+Use `openupm add` to add one or more dependencies to your project.
 
 ```sh
 openupm add com.my.package@1.2.3
