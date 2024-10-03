@@ -85,9 +85,14 @@ openupm add com.my.package@1.2.3
 Checkout [the commands doc page](./docs/cmd-add.md) for more information.
 
 ### Remove packages
+
+Use `openupm remove` to remove one or more dependencies from your project.
+
+```sh
+openupm remove com.my.package
 ```
-openupm remove <pkg> [otherPkgs...]
-```
+
+Checkout [the commands doc page](./docs/cmd-remove.md) for more information.
 
 ### Search packages
 ```
