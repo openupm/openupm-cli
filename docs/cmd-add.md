@@ -8,6 +8,8 @@ _Currently openupm does not install the dependencies into the project itself. Th
 
 You should run this command inside the projects root directory.
 
+This command has the following aliases: `install` and `i`. On this doc page we will always use the primary command name `add`.
+
 ## Arguments
 
 ### Packages
