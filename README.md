@@ -105,9 +105,14 @@ openupm search something
 Checkout [the commands doc page](./docs/cmd-search.md) for more information.
 
 ### View package information
+
+Use `openupm view` to view detailed information about a remote package.
+
+```sh
+openupm view com.my.package
 ```
-openupm view <pkg>
-```
+
+Checkout [the commands doc page](./docs/cmd-view.md) for more information.
 
 ### View package dependencies
 ```
