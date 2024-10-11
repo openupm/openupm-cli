@@ -17,7 +17,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [Search packages](#search-packages)
     - [View package information](#view-package-information)
     - [View package dependencies](#view-package-dependencies)
-    - [Command options](#command-options)
+    - [Global command options](#global-command-options)
   - [Work with proxy](#work-with-proxy)
   - [Contributors](#contributors)
 
@@ -118,28 +118,9 @@ openupm deps com.my.package
 
 Checkout [the commands doc page](./docs/cmd-deps.md) for more information.
 
-### Command options
+### Global command options
 
-The cli assumes the current working directory (CWD) is the root of a Unity project (the parent of the `Assets` folder). However, you can specify the CWD.
-
-```
-openupm --chdir <unity-project-path>
-```
-
-Specify another 3rd-party registry (defaults to the openupm registry)
-
-```
-openupm --registry <registry-url>
-
-i.e.
-openupm --registry http://127.0.0.1:4873
-```
-
-Show verbose logging
-
-```
-openupm --verbose ...
-```
+There are also some global options that work for every command. You can read about them [here](./docs/global-opts.md).
 
 ## Work with proxy
 
