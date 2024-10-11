@@ -32,13 +32,13 @@ The command-line tool installs the 3rd-party registry as a scoped registry and m
 - Requires [nodejs 18 or above](https://nodejs.org/en/download/).
 - Install via npm:
 
-  ```
+  ```sh
   npm install -g openupm-cli
   ```
 
 - Or install via [yarn](https://yarnpkg.com/):
 
-  ```
+  ```sh
   yarn global add openupm-cli
   ```
 
@@ -56,7 +56,7 @@ C:\Users\{yourName}\AppData\Roaming\npm
 
 ### Cannot find module 'node:net'
 
-```
+```sh
 internal/modules/cjs/loader.js:818
   throw err;
   ^
