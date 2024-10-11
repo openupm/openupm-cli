@@ -18,6 +18,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [View package information](#view-package-information)
     - [View package dependencies](#view-package-dependencies)
     - [Global command options](#global-command-options)
+    - [General help pages](#general-help-pages)
   - [Work with proxy](#work-with-proxy)
   - [Contributors](#contributors)
 
@@ -121,6 +122,13 @@ Checkout [the commands doc page](./docs/cmd-deps.md) for more information.
 ### Global command options
 
 There are also some global options that work for every command. You can read about them [here](./docs/global-opts.md).
+
+### General help pages
+
+We also have a few guide pages on specific topics if you need help:
+
+- [Working with 3rd party registries](./docs/help-registry.md)
+- [Using Windows system-user authentication](./docs/help-system-user.md)
 
 ## Work with proxy
 
