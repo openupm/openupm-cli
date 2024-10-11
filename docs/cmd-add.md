@@ -20,47 +20,7 @@ Specify one or more packages for openupm to add. The general format for a packag
 openupm add com.my.package@1.0.0
 ```
 
-The version may be one of the following options:
-
-#### No version
-
-This is identical to using the `latest` tag.  
-
-Example: `com.my.package`
-
-#### A specific version
-
-Installs the specific given version.
-
-Example: `com.my.package@1.2.0`
-
-#### The latest tag
-
-This resolves the latest published version, including pre-releases. 
-
-Example: `com.my.package@latest`
-
-#### The stable tag
-
-This resolves the latest published stable version, excluding pre-releases
-
-Example: `com.my.package@latest`
-
-
-#### A git url
-
-A `http` or `git` based url to a git repository. Checkout the [Unity documentation on the topic](https://docs.unity3d.com/Manual/upm-git.html#syntax) [^1].
-
-Examples (taken from the Unity documentation):
-
-- `com.my.package@https://github.example.com/myuser/myrepository1.git`
-- `com.my.package@git@github.example.com/myuser/myrepository2.git`
-
-#### A local file url
-
-A `file` based url to a local package. Check out the [Unity documentation on the topic](https://docs.unity3d.com/Manual/upm-localpath.html) [^1].
-
-Example (Taken from Unity documentation): `com.my.package@file:../github/my_package_folder`
+The version may be a specific version, a predefined tag or a url version[^1]. For more information about how the version can be specified checkout the corresponding [help page](./help-package-reference.md).
 
 ## Options
 
