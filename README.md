@@ -95,13 +95,14 @@ openupm remove com.my.package
 Checkout [the commands doc page](./docs/cmd-remove.md) for more information.
 
 ### Search packages
-```
-openupm search <keyword>
+
+Use `openupm search` to search for remote packages by name.
+
+```sh
+openupm search something
 ```
 
-If the registry doesn't support the new search endpoint, it will fall back to the old `/-/all` endpoint. If no package was found, it will search the Unity official registry instead.
-
-Because the upstream Unity registry doesn't support the search endpoint as of December 2019, the search command will only query the current registry.
+Checkout [the commands doc page](./docs/cmd-search.md) for more information.
 
 ### View package information
 ```

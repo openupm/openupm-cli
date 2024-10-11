@@ -110,14 +110,8 @@ If you need to run openupm from somewhere else you can change the working direct
 openupm add com.my.package -c /home/user/dev/MyProject
 ```
 
-### Windows system user
+### Windows system-user authentication
 
-By default openupm collects registry authentication credentials from the users local `.upmconfig.toml`.
-
-If you want to authenticate with registries using the `.upmconfig.toml` file for the Windows system user then pass the `--system-user` option.
-
-```sh
-openupm add com.my.package --system-user
-```
+This command supports Windows system-user authentication. For more information check out the corresponding [article](./help-system-user.md).
 
 [^1]: openupm does not validate or resolve indirect dependencies for url-based dependencies.
