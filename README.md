@@ -19,7 +19,6 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [View package dependencies](#view-package-dependencies)
     - [Global command options](#global-command-options)
     - [General help pages](#general-help-pages)
-  - [Work with proxy](#work-with-proxy)
   - [Contributors](#contributors)
 
 ## How it works
@@ -129,16 +128,8 @@ We also have a few guide pages on specific topics if you need help:
 
 - [Working with 3rd party registries](./docs/help-registry.md)
 - [Using Windows system-user authentication](./docs/help-system-user.md)
+- [Work with proxies](./docs/help-proxy.md)
 
-## Work with proxy
-
-OpenUPM-CLI supports HTTP, HTTPS, or SOCKS proxy specified by the http_proxy environment variable.
-
-```
-http_proxy="http://127.0.0.1:8080" openupm ...
-```
-
-You may need to set both http_proxy and https_proxy environment variables at the system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).
 
 ## Contributors
 
