@@ -115,15 +115,14 @@ openupm view com.my.package
 Checkout [the commands doc page](./docs/cmd-view.md) for more information.
 
 ### View package dependencies
-```
-openupm deps <pkg>
+
+Use `openupm deps` to print package dependencies.
+
+```sh
+openupm deps com.my.package
 ```
 
-Using option `--deep` to view dependencies recursively
-
-```
-openupm deps <pkg> --deep
-```
+Checkout [the commands doc page](./docs/cmd-deps.md) for more information.
 
 ### Authenticate with a scoped registry
 
