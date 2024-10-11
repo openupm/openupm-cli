@@ -18,7 +18,7 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [View package information](#view-package-information)
     - [View package dependencies](#view-package-dependencies)
     - [Global command options](#global-command-options)
-    - [General help pages](#general-help-pages)
+  - [General help pages](#general-help-pages)
   - [Contributors](#contributors)
 
 ## How it works
@@ -122,7 +122,7 @@ Checkout [the commands doc page](./docs/cmd-deps.md) for more information.
 
 There are also some global options that work for every command. You can read about them [here](./docs/global-opts.md).
 
-### General help pages
+## General help pages
 
 We also have a few guide pages on specific topics if you need help:
 
