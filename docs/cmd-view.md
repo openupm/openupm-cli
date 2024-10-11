@@ -14,7 +14,7 @@ This command has the following aliases: `v`, `info` and `show`. On this doc page
 The name of the package to view. You should not include a version. 
 
 ```sh
-openupm view com.some.package
+openupm view com.my.package
 ```
 
 ## Options
