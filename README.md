@@ -128,8 +128,6 @@ We also have a few guide pages on specific topics if you need help:
 
 - [Working with 3rd party registries](./docs/help-registry.md)
 - [Using Windows system-user authentication](./docs/help-system-user.md)
-- [Work with proxies](./docs/help-proxy.md)
-
 
 ## Contributors
 
