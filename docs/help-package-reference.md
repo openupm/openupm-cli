@@ -28,7 +28,7 @@ Example: `com.my.package@1.2.0`
 
 This resolves the latest published stable version, excluding pre-releases
 
-Example: `com.my.package@latest`
+Example: `com.my.package@stable`
 
 ## A remote package url
 
