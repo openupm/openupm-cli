@@ -26,6 +26,16 @@ const verboseOpt = new Option(
 
 const colorOpt = new Option("--no-color", "disable color").default(true);
 
+const registryDeprecatedOpt = new Option("-r, --registry <url>")
+  .argParser(() => true)
+  .default(false)
+  .hideHelp(true);
+
+const chdirDeprecatedOpt = new Option("-c, --chdir <path>")
+  .argParser(() => true)
+  .default(false)
+  .hideHelp(true);
+
 /**
  * Makes the openupm cli app with the given dependencies.
  * @param fetchPackument IO function for fetching registry packuments.
@@ -52,7 +62,9 @@ export function makeOpenupmCli(
   const program = createCommand()
     .version(module.exports.version)
     .addOption(verboseOpt)
-    .addOption(colorOpt);
+    .addOption(colorOpt)
+    .addOption(chdirDeprecatedOpt)
+    .addOption(registryDeprecatedOpt);
 
   program.on("option:verbose", function () {
     const verbose = program.opts().verbose;
@@ -66,6 +78,24 @@ export function makeOpenupmCli(
       chalk.level = 0;
       log.disableColor();
     }
+  });
+
+  program.on(`option:${chdirDeprecatedOpt.name()}`, function () {
+    log.warn(
+      "",
+      `--chdir/-c is no longer supported as a global option!
+Instead, you should add it to the specific command you are running.
+Example: openupm add --chdir /some/path com.my.package`
+    );
+  });
+
+  program.on(`option:${registryDeprecatedOpt.name()}`, function () {
+    log.warn(
+      "",
+      `--registry/-r is no longer supported as a global option!
+Instead, you should add it to the specific command you are running.
+Example: openupm add -r https://packages.my-registry.com com.my.package`
+    );
   });
 
   program.addCommand(
