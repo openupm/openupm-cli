@@ -17,15 +17,8 @@ The tool is designed to work with [the OpenUPM registry](https://openupm.com), b
     - [Search packages](#search-packages)
     - [View package information](#view-package-information)
     - [View package dependencies](#view-package-dependencies)
-    - [Authenticate with a scoped registry](#authenticate-with-a-scoped-registry)
-      - [Using token](#using-token)
-      - [Using basic authentication](#using-basic-authentication)
-      - [Always auth](#always-auth)
-      - [Authenticate for the Windows system user](#authenticate-for-the-windows-system-user)
-      - [Troubleshooting](#troubleshooting)
-    - [Command options](#command-options)
-  - [Work with different registries](#work-with-different-registries)
-  - [Work with proxy](#work-with-proxy)
+    - [Global command options](#global-command-options)
+  - [General help pages](#general-help-pages)
   - [Contributors](#contributors)
 
 ## How it works
@@ -39,13 +32,13 @@ The command-line tool installs the 3rd-party registry as a scoped registry and m
 - Requires [nodejs 18 or above](https://nodejs.org/en/download/).
 - Install via npm:
 
-  ```
+  ```sh
   npm install -g openupm-cli
   ```
 
 - Or install via [yarn](https://yarnpkg.com/):
 
-  ```
+  ```sh
   yarn global add openupm-cli
   ```
 
@@ -63,7 +56,7 @@ C:\Users\{yourName}\AppData\Roaming\npm
 
 ### Cannot find module 'node:net'
 
-```
+```sh
 internal/modules/cjs/loader.js:818
   throw err;
   ^
@@ -77,223 +70,64 @@ Please install [Node.js 18 or above](https://nodejs.org/en/download/).
 
 ### Add packages
 
-```
-openupm add <pkg> [otherPkgs..]
-openupm add <pkg>@<version>
-openupm add <pkg>@git@github.com:...
-openupm add <pkg>@https://github.com/...
-openupm add <pkg>@file:...
+Use `openupm add` to add one or more dependencies to your project.
+
+```sh
+openupm add com.my.package@1.2.3
 ```
 
-The add command adds the package to the `manifest.json` and configures the scope registry by adding scopes for the package and its dependencies that available on the registry.
-
-The add command doesn't verify package or resolve dependencies for Git, HTTPS, and file protocol. See https://docs.unity3d.com/Manual/upm-git.html for more examples of the version string.
-
-The add command fails if the package is not qualified:
-
-- the package has a missing dependency
-- the package requires a non-existed dependency version
-- the package requires a higher editor version
-
-You shall either resolve these issues manually or add the option `-f` to continue.
-
-You may specify the version to add in a few different ways:
-
-- A specific version like `com.my.package@1.2.0`
-- The latest tag like `com.my.package@latest` which will install the latest
-published version, including pre-releases.
-- No version at all like `com.my.package` which is identical to using the 
-"latest" tag.
-- The stable tag like `com.my.package@stable` which will install the latest
-stable version, ie. excluding pre-releases.
-
-You can also add [testables](https://docs.unity3d.com/Manual/cus-tests.html) when importing:
-
-```
-openupm --test <pkg>
-```
+Checkout [the commands doc page](./docs/cmd-add.md) for more information.
 
 ### Remove packages
+
+Use `openupm remove` to remove one or more dependencies from your project.
+
+```sh
+openupm remove com.my.package
 ```
-openupm remove <pkg> [otherPkgs...]
-```
+
+Checkout [the commands doc page](./docs/cmd-remove.md) for more information.
 
 ### Search packages
-```
-openupm search <keyword>
+
+Use `openupm search` to search for remote packages by name.
+
+```sh
+openupm search something
 ```
 
-If the registry doesn't support the new search endpoint, it will fall back to the old `/-/all` endpoint. If no package was found, it will search the Unity official registry instead.
-
-Because the upstream Unity registry doesn't support the search endpoint as of December 2019, the search command will only query the current registry.
+Checkout [the commands doc page](./docs/cmd-search.md) for more information.
 
 ### View package information
+
+Use `openupm view` to view detailed information about a remote package.
+
+```sh
+openupm view com.my.package
 ```
-openupm view <pkg>
-```
+
+Checkout [the commands doc page](./docs/cmd-view.md) for more information.
 
 ### View package dependencies
-```
-openupm deps <pkg>
-```
 
-Using option `--deep` to view dependencies recursively
+Use `openupm deps` to print package dependencies.
 
-```
-openupm deps <pkg> --deep
+```sh
+openupm deps com.my.package
 ```
 
-### Authenticate with a scoped registry
+Checkout [the commands doc page](./docs/cmd-deps.md) for more information.
 
-Starting from Unity 2019.3.4f1, you can configure the`.upmconfig.toml` file to authenticate with a scoped registry. The `openupm login` command helps you authenticate with a npm server and store the info to the UPM config file.
+### Global command options
 
-There are two ways to authenticate with a npm server:
-- using token (recommended): a server-generated string for the grant of access and publishing rights.
-- using basic authentication: the `username:password` pair (base64 encoded) is stored to authenticate with the server on each request.
+There are also some global options that work for every command. You can read about them [here](./docs/global-opts.md).
 
-After login, all openupm-cli commands will use `.upmconfig.toml` configuration to authenticate with your private scoped registry.
+## General help pages
 
-#### Using token
+We also have a few guide pages on specific topics if you need help:
 
-```
-openupm login -u <username> -e <email> -r <registry> -p <password>
-
-i.e.
-openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873
-```
-
-If you don't provide a username, email, or password, it will prompt you to input the value. If your npm server doesn't require an email field, you can provide a dummy one like `yourname@example.com`. Notice that requesting a new token is not meant to invalidate old ones for most NPM servers.
-
-For the npm server to allow user creation via CLI, providing a new username will create a new user with the information you just provided.
-
-The token is also stored in the `.npmrc` file for convenience.
-
-#### Using basic authentication
-
-Adding `--basic-auth` option to use basic authentication.
-
-```
-openupm login -u <username> -e <email> -r <registry> -p <password> --basic-auth
-
-i.e.
-openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --basic-auth
-```
-
-Notice that your username and password is not verified during the login command, but simply stored in the .upmconfig.toml file. Because verify the password against your npm server will generate a token, which is not what you want here. Please type your password carefully.
-
-Unlike using the token, `.npmrc` lacks syntax to support multiple registries for basic authentication. Hence, the `.npmrc` is not updated for the basic authentication.
-
-#### Always auth
-
-Adding `--always-auth` option if tarball files are hosted on a different domain other than the registry domain.
-
-```
-openupm login -u <username> -e <email> -r <registry> -p <password> --always-auth
-
-i.e.
-openupm login -u user1 -e user1@example.com -r http://127.0.0.1:4873 --always-auth
-```
-
-#### Authenticate for the Windows system user
-
-Make sure you have the right permission, then add `--system-user` option to authenticate for the Windows system user.
-
-#### Troubleshooting
-
-You can verify the authentication in `.upmconfig.toml` file:
-
-- Windows: `%USERPROFILE%/.upmconfig.toml`
-- Windows (System user) : `%ALLUSERSPROFILE%Unity/config/ServiceAccounts/.upmconfig.toml`
-- MacOS and Linux: `~/.upmconfig.toml`
-
-For token, it will look like:
-
-```
-[npmAuth."http://127.0.0.1:4873"]
-email = "email address"
-alwaysAuth = false
-token = "token string"
-```
-
-For basic authentication, it will look like:
-```
-[npmAuth."http://127.0.0.1:4873"]
-email = "email address"
-alwaysAuth = true
-_auth = "base64 string"
-```
-
-Notice that the registry address should match exactly with your `manifest.json`. The last slash is always trimmed. i.e. `http://127.0.0.1:4873` instead of `http://127.0.0.1:4873/`.
-
-Learn more about authentication at https://forum.unity.com/threads/npm-registry-authentication.836308/
-
-### Command options
-
-The cli assumes the current working directory (CWD) is the root of a Unity project (the parent of the `Assets` folder). However, you can specify the CWD.
-
-```
-openupm --chdir <unity-project-path>
-```
-
-Specify another 3rd-party registry (defaults to the openupm registry)
-
-```
-openupm --registry <registry-url>
-
-i.e.
-openupm --registry http://127.0.0.1:4873
-```
-
-Show verbose logging
-
-```
-openupm --verbose ...
-```
-
-## Work with different registries
-
-By default the openupm will query any package from the following registries: 
-
-1. Openupm (https://package.openupm.com)
-2. Unity (https://packages.unity.com)
-
-Any package will be searched on these registries in the order that they are listed above. If you want to install packages from your own third party registries you can do this via the `--registry` option.
-
-```openupm --registry https://package.my-registry.com add com.my.package```
-
-This will query the following registries:
-
-1. The private registry (https://package.my-registry.com)
-2. Unity (https://packages.unity.com)
-
-Let's say `com.my.package` depends on a Openupm package. With the above configuration the install would fail because Openupm is not part of the queried registries. To fix, add Openupm to the --registry option.
-
-```openupm --registry https://package.my-registry.com https://package.openupm.com add com.my.package```
-
-The query will now look like this:
-
-1. The private registry (https://package.my-registry.com)
-2. Openupm (https://package.openupm.com)
-3. Unity (https://packages.unity.com)
-
-Finally, it may not always be desirable to search the Unity registry. If you want to remove it from the registry list, run with the `--no-upstream` option.
-
-```openupm --registry https://package.my-registry.com https://package.openupm.com --no-upstream add com.my.package```
-
-The resulting query is:
-
-1. The private registry (https://package.my-registry.com)
-2. Openupm (https://package.openupm.com)
-
-## Work with proxy
-
-OpenUPM-CLI supports HTTP, HTTPS, or SOCKS proxy specified by the http_proxy environment variable.
-
-```
-http_proxy="http://127.0.0.1:8080" openupm ...
-```
-
-You may need to set both http_proxy and https_proxy environment variables at the system-level to [enable Unity work with a proxy](https://forum.unity.com/threads/using-unity-when-behind-a-proxy.69896/).
+- [Working with 3rd party registries](./docs/help-registry.md)
+- [Using Windows system-user authentication](./docs/help-system-user.md)
 
 ## Contributors
 
