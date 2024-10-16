@@ -21,8 +21,16 @@ jobs:
     - name: login
       run: npx npm-cli-login -u tester -p 123456 -e tester@example.com -r http://localhost:4873
     - name: publish
-      run: npm publish --registry http://localhost:4873
-      working-directory: .github/verdaccio/com.example.demo
+      run: |
+        root_dir=$(pwd)
+        for dir in .github/verdaccio/*/; do
+          if [ -f "$dir/package.json" ]; then
+            echo "Publishing $dir"
+            cd "$dir"
+            npm publish --registry http://localhost:4873
+            cd "$root_dir"
+          fi
+        done
     - name: check
       run: npm info com.example.demo --json --registry http://localhost:4873
       working-directory: .github/verdaccio/com.example.demo
