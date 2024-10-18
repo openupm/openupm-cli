@@ -1,7 +1,5 @@
-name: CI
-
+name: Run tests
 on: push
-
 jobs:
   unit-test: 
     runs-on: ubuntu-latest
@@ -16,7 +14,7 @@ jobs:
         run: npm ci
       - name: Unit tests
         run: npm run test:unit
-        
+
   integration-test:
     runs-on: ubuntu-latest
     name: Integration Tests
@@ -56,27 +54,3 @@ jobs:
         run: npm run build
       - name: run tests
         run: npm run test:e2e
-        
-  release:
-    runs-on: ubuntu-latest
-    needs: 
-      - unit-test
-      - integration-test
-      - e2e-test
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v4
-      - name: npm install
-        run: npm install
-      - name: Build
-        run: npm run build
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v3
-        with:
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-          branch: master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
