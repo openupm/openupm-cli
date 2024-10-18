@@ -57,7 +57,7 @@ jobs:
       - name: Add test packages
         run: |
           root_dir=$(pwd)
-          for dir in .github/verdaccio/*/; do
+          for dir in .github/verdaccio/*/*/; do
             if [ -f "$dir/package.json" ]; then
               echo "Publishing $dir"
               cd "$dir"
