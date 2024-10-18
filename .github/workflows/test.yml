@@ -5,21 +5,22 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js 
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: npm ci
+      - name: Install dependencies
         run: npm ci
-      - name: Unit tests
+      - name: Run tests
         run: npm run test:unit
 
   integration-test:
     runs-on: ubuntu-latest
     name: Integration Tests
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,14 +44,15 @@ jobs:
           - "22.x" # Latest
     name: E2E Tests
     steps:
-      - uses: actions/checkout@v4
-      - name: setup node.js
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: install deps
+      - name: Install dependencies
         run: npm ci
-      - name: build
+      - name: Build
         run: npm run build
-      - name: run tests
+      - name: Run tests
         run: npm run test:e2e
