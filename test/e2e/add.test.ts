@@ -5,7 +5,7 @@ import { getProjectManifest } from "./check/project-manifest";
 import { runOpenupm } from "./run";
 import { prepareHomeDirectory } from "./setup/directories";
 import { prepareUnityProject } from "./setup/project";
-import { testRegistryUrl as e2eTestRegistryUrl } from "./setup/test-registry";
+import { e2eTestRegistryUrl } from "./setup/test-registry";
 
 describe("add packages", () => {
   type SuccessfulAddCase = {
