@@ -5,30 +5,30 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
-      - name: Setup Node.js 
+      - name: Setup Node.js 🧰
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: Install dependencies
+      - name: Install dependencies 📦
         run: npm ci
-      - name: Run tests
+      - name: Run tests 🧪
         run: npm run test:unit
 
   integration-test:
     runs-on: ubuntu-latest
     name: Integration Tests
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
-      - name: Setup Node.js
+      - name: Setup Node.js 🧰
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: Install dependencies
+      - name: Install dependencies 📦
         run: npm ci
-      - name: Run tests
+      - name: Run tests 🧪
         run: npm run test:integration
 
   e2e-test:
@@ -46,15 +46,15 @@ jobs:
           - "22.x" # Latest
     name: E2E Tests
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
-      - name: Setup Node.js
+      - name: Setup Node.js 🧰
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: Add test user
+      - name: Add test user 👤
         run: npx npm-cli-login -u tester -p 123456 -e tester@example.com -r http://localhost:4873
-      - name: Add test packages
+      - name: Add test packages 📦
         run: |
           root_dir=$(pwd)
           for dir in .github/verdaccio/*/*/; do
@@ -65,9 +65,9 @@ jobs:
               cd "$root_dir"
             fi
           done
-      - name: Install dependencies
+      - name: Install dependencies 📦
         run: npm ci
-      - name: Build
+      - name: Build 🔨
         run: npm run build
-      - name: Run tests
+      - name: Run tests 🧪
         run: npm run test:e2e
