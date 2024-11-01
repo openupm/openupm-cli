@@ -1,11 +1,11 @@
 import type { AuthOptions } from "npm-registry-fetch";
-import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
-import { RegistryUrl } from "../domain/registry-url";
-import { type ReadTextFile, type WriteTextFile } from "../io/fs";
-import type { GetAuthToken } from "../io/registry";
-import { saveNpmAuthTokenUsing } from "./put-npm-auth-token";
-import { putRegistryAuthUsing } from "./put-registry-auth";
+import { partialApply } from "../domain/fp-utils.js";
+import { DebugLog } from "../domain/logging.js";
+import { RegistryUrl } from "../domain/registry-url.js";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs.js";
+import type { GetAuthToken } from "../io/registry.js";
+import { saveNpmAuthTokenUsing } from "./put-npm-auth-token.js";
+import { putRegistryAuthUsing } from "./put-registry-auth.js";
 
 /**
  * Logs a user into a package registry. Supports both basic and

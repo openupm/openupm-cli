@@ -1,6 +1,6 @@
 import fc from "fast-check";
-import { PackageUrl } from "../../../src/domain/package-url";
-import { arbDomainName } from "./domain-name.arb";
+import { PackageUrl } from "../../../src/domain/package-url.js";
+import { arbDomainName } from "./domain-name.arb.js";
 
 /**
  * Arbitrary {@link PackageUrl} with `http` protocol.

@@ -1,5 +1,5 @@
 import npmFetch, { type AuthOptions } from "npm-registry-fetch";
-import { RegistryUrl, unityRegistryUrl } from "./registry-url";
+import { RegistryUrl, unityRegistryUrl } from "./registry-url.js";
 
 /**
  * Represents a remote npm-registry.

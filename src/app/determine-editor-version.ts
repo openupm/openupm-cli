@@ -1,14 +1,14 @@
 import { CustomError } from "ts-custom-error";
-import { ReleaseVersion } from "../domain/editor-version";
-import { assertIsError } from "../domain/error-type-guards";
-import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
+import { ReleaseVersion } from "../domain/editor-version.js";
+import { assertIsError } from "../domain/error-type-guards.js";
+import { partialApply } from "../domain/fp-utils.js";
+import { DebugLog } from "../domain/logging.js";
 import {
   projectVersionTxtPathFor,
   tryParseProjectVersionTxt,
   validateProjectVersion,
-} from "../domain/project-version-txt";
-import { type ReadTextFile } from "../io/fs";
+} from "../domain/project-version-txt.js";
+import { type ReadTextFile } from "../io/fs.js";
 
 export class ProjectVersionMissingError extends CustomError {
   public constructor(public readonly expectedPath: string) {

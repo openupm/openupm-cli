@@ -1,13 +1,13 @@
 import { Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
-import { loadProjectManifestUsing } from "../app/get-dependencies";
-import { partialApply } from "../domain/fp-utils";
-import type { DebugLog } from "../domain/logging";
-import { makePackageSpec } from "../domain/package-spec";
-import { recordEntries } from "../domain/record-utils";
-import type { ReadTextFile } from "../io/fs";
-import { withErrorLogger } from "./error-logging";
-import { workDirOpt } from "./opt-wd";
+import { loadProjectManifestUsing } from "../app/get-dependencies.js";
+import { partialApply } from "../domain/fp-utils.js";
+import type { DebugLog } from "../domain/logging.js";
+import { makePackageSpec } from "../domain/package-spec.js";
+import { recordEntries } from "../domain/record-utils.js";
+import type { ReadTextFile } from "../io/fs.js";
+import { withErrorLogger } from "./error-logging.js";
+import { workDirOpt } from "./opt-wd.js";
 
 /**
  * Makes the `openupm ls` cli command with the given dependencies.

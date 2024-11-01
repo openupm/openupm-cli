@@ -1,6 +1,6 @@
 import type { AuthOptions } from "npm-registry-fetch";
-import { makeNpmFetchOptions, Registry } from "../../../src/domain/registry";
-import { someRegistryUrl } from "../../common/data-registry";
+import { makeNpmFetchOptions, Registry } from "../../../src/domain/registry.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
 
 describe("npm registry", () => {
   describe("make fetch options from registry object", () => {

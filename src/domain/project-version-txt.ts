@@ -5,7 +5,7 @@ import {
   isRelease,
   tryParseEditorVersion,
   type ReleaseVersion,
-} from "./editor-version";
+} from "./editor-version.js";
 
 /**
  * Constructs the path to a ProjectVersion.txt file based on the path to

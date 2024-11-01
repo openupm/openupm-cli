@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
 
 const segment = fc.integer({ min: 0, max: 10 });
 

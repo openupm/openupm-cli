@@ -1,12 +1,12 @@
 import type { AuthOptions } from "npm-registry-fetch";
-import { encodeBase64 } from "../domain/base64";
-import { partialApply } from "../domain/fp-utils";
-import { RegistryUrl } from "../domain/registry-url";
-import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config";
-import { removeExplicitUndefined } from "../domain/zod-utils";
-import { type ReadTextFile, type WriteTextFile } from "../io/fs";
-import { loadUpmConfigUsing } from "./get-upm-config";
-import { saveUpmConfigFileUsing } from "./write-upm-config";
+import { encodeBase64 } from "../domain/base64.js";
+import { partialApply } from "../domain/fp-utils.js";
+import { RegistryUrl } from "../domain/registry-url.js";
+import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config.js";
+import { removeExplicitUndefined } from "../domain/zod-utils.js";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs.js";
+import { loadUpmConfigUsing } from "./get-upm-config.js";
+import { saveUpmConfigFileUsing } from "./write-upm-config.js";
 
 function mergeEntries(
   oldEntry: UpmConfigEntry | null,

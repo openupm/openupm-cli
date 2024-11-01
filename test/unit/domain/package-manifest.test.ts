@@ -1,9 +1,9 @@
-import { MalformedPackumentError } from "../../../src/domain/common-errors";
-import { makeEditorVersion } from "../../../src/domain/editor-version";
+import { MalformedPackumentError } from "../../../src/domain/common-errors.js";
+import { makeEditorVersion } from "../../../src/domain/editor-version.js";
 import {
   dependenciesOf,
   tryGetTargetEditorVersionFor,
-} from "../../../src/domain/package-manifest";
+} from "../../../src/domain/package-manifest.js";
 
 describe("package manifest", () => {
   describe("get dependency list", () => {

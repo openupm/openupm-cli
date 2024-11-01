@@ -1,5 +1,5 @@
-import { type UpmConfig, serializeUpmConfig } from "../domain/upm-config";
-import type { WriteTextFile } from "../io/fs";
+import { type UpmConfig, serializeUpmConfig } from "../domain/upm-config.js";
+import type { WriteTextFile } from "../io/fs.js";
 
 /**
  * Save the upm config by overwriting the `.upmconfig.toml` file.

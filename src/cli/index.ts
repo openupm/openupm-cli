@@ -1,24 +1,24 @@
 import { createCommand, Option } from "@commander-js/extra-typings";
 import chalk from "chalk";
 import type { Logger } from "npmlog";
-import pkginfo from "pkginfo";
-import type { DebugLog } from "../domain/logging";
-import { getHomePathFromEnv } from "../domain/special-paths";
-import { readTextFile, writeTextFile } from "../io/fs";
+import packageJson from "../../package.json" with { type: "json" };
+import type { DebugLog } from "../domain/logging.js";
+import { getHomePathFromEnv } from "../domain/special-paths.js";
+import { readTextFile, writeTextFile } from "../io/fs.js";
 import {
   type GetAllRegistryPackuments,
   type GetAuthToken,
   type GetRegistryPackument,
   type SearchRegistry,
-} from "../io/registry";
-import { fetchCheckUrlExists } from "../io/www";
-import { makeAddCmd } from "./cmd-add";
-import { makeDepsCmd } from "./cmd-deps";
-import { makeLoginCmd } from "./cmd-login";
-import { makeLsCmd } from "./cmd-ls";
-import { makeRemoveCmd } from "./cmd-remove";
-import { makeSearchCmd } from "./cmd-search";
-import { makeViewCmd } from "./cmd-view";
+} from "../io/registry.js";
+import { fetchCheckUrlExists } from "../io/www.js";
+import { makeAddCmd } from "./cmd-add.js";
+import { makeDepsCmd } from "./cmd-deps.js";
+import { makeLoginCmd } from "./cmd-login.js";
+import { makeLsCmd } from "./cmd-ls.js";
+import { makeRemoveCmd } from "./cmd-remove.js";
+import { makeSearchCmd } from "./cmd-search.js";
+import { makeViewCmd } from "./cmd-view.js";
 
 const verboseOpt = new Option(
   "-v, --verbose",
@@ -49,9 +49,8 @@ export function makeOpenupmCli(
 ) {
   const homePath = getHomePathFromEnv(process.env);
 
-  pkginfo(module);
   const program = createCommand()
-    .version(module.exports.version)
+    .version(packageJson.version)
     .addOption(verboseOpt)
     .addOption(colorOpt);
 

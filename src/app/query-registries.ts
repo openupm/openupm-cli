@@ -1,5 +1,5 @@
-import { Registry } from "../domain/registry";
-import { RegistryUrl } from "../domain/registry-url";
+import { Registry } from "../domain/registry.js";
+import { RegistryUrl } from "../domain/registry-url.js";
 
 /**
  * A value that was resolved from a remote registry.

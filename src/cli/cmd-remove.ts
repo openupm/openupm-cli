@@ -1,15 +1,15 @@
 import { Argument, Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
-import { removeDependenciesUsing } from "../app/remove-dependencies";
-import { partialApply } from "../domain/fp-utils";
-import type { DebugLog } from "../domain/logging";
-import { makePackageSpec } from "../domain/package-spec";
-import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import { eachValue } from "./cli-parsing";
-import { logError, withErrorLogger } from "./error-logging";
-import { workDirOpt } from "./opt-wd";
-import { ResultCodes } from "./result-codes";
-import { mustBeDomainName } from "./validators";
+import { removeDependenciesUsing } from "../app/remove-dependencies.js";
+import { partialApply } from "../domain/fp-utils.js";
+import type { DebugLog } from "../domain/logging.js";
+import { makePackageSpec } from "../domain/package-spec.js";
+import type { ReadTextFile, WriteTextFile } from "../io/fs.js";
+import { eachValue } from "./cli-parsing.js";
+import { logError, withErrorLogger } from "./error-logging.js";
+import { workDirOpt } from "./opt-wd.js";
+import { ResultCodes } from "./result-codes.js";
+import { mustBeDomainName } from "./validators.js";
 
 const packageNamesArg = new Argument(
   "<pkg...>",

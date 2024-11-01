@@ -2,8 +2,8 @@ import {
   makeRegistryInteractionError,
   HttpErrorLike,
   RegistryAuthenticationError,
-} from "../../../src/io/common-errors";
-import { someRegistryUrl } from "../../common/data-registry";
+} from "../../../src/io/common-errors.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
 
 describe("common error utilities", () => {
   describe("make registry interaction errors", () => {

@@ -1,5 +1,5 @@
 import { Chalk } from "chalk";
-import { PackumentNotFoundError } from "../domain/common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors.js";
 import {
   DependencyGraph,
   FailedNode,
@@ -7,20 +7,20 @@ import {
   NodeType,
   ResolvedNode,
   tryGetGraphNode,
-} from "../domain/dependency-graph";
-import { DomainName } from "../domain/domain-name";
+} from "../domain/dependency-graph.js";
+import { DomainName } from "../domain/domain-name.js";
 import {
   makePackageSpec,
   PackageSpec,
-} from "../domain/package-spec";
+} from "../domain/package-spec.js";
 import {
   ResolvePackumentVersionError,
   VersionNotFoundError,
-} from "../domain/packument";
-import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
-import { SemanticVersion } from "../domain/semantic-version";
-import { DebugLog } from "../domain/logging";
-import { recordEntries } from "../domain/record-utils";
+} from "../domain/packument.js";
+import { RegistryUrl, unityRegistryUrl } from "../domain/registry-url.js";
+import { SemanticVersion } from "../domain/semantic-version.js";
+import { DebugLog } from "../domain/logging.js";
+import { recordEntries } from "../domain/record-utils.js";
 
 /**
  * Logs information about a resolved dependency to a logger.

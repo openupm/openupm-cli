@@ -1,5 +1,5 @@
-import { runOpenupm } from "./run";
-import { prepareHomeDirectory } from "./setup/directories";
+import { runOpenupm } from "./run.js";
+import { prepareHomeDirectory } from "./setup/directories.js";
 
 describe("help", () => {
   it("should show help when running with no commands", async () => {

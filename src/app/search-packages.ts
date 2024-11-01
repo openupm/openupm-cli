@@ -1,11 +1,11 @@
-import { assertIsError } from "../domain/error-type-guards";
-import { DebugLog } from "../domain/logging";
-import { Registry } from "../domain/registry";
+import { assertIsError } from "../domain/error-type-guards.js";
+import { DebugLog } from "../domain/logging.js";
+import { Registry } from "../domain/registry.js";
 import {
   GetAllRegistryPackuments,
   type SearchRegistry,
-} from "../io/registry";
-import { type SearchedPackument } from "../domain/packument";
+} from "../io/registry.js";
+import { type SearchedPackument } from "../domain/packument.js";
 
 /**
  * A function for searching packages in a registry.

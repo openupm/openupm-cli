@@ -1,17 +1,17 @@
 import { AsyncResult, Err } from "ts-results-es";
-import { PackumentNotFoundError } from "../domain/common-errors";
-import { DomainName } from "../domain/domain-name";
-import { ResolvableVersion } from "../domain/package-spec";
+import { PackumentNotFoundError } from "../domain/common-errors.js";
+import { DomainName } from "../domain/domain-name.js";
+import { ResolvableVersion } from "../domain/package-spec.js";
 import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
   UnityPackument,
   UnityPackumentVersion,
-} from "../domain/packument";
-import { Registry } from "../domain/registry";
-import { RegistryUrl } from "../domain/registry-url";
-import { resultifyAsyncOp } from "../domain/result-utils";
-import type { GetRegistryPackument } from "../io/registry";
+} from "../domain/packument.js";
+import { Registry } from "../domain/registry.js";
+import { RegistryUrl } from "../domain/registry-url.js";
+import { resultifyAsyncOp } from "../domain/result-utils.js";
+import type { GetRegistryPackument } from "../io/registry.js";
 
 /**
  * A successfully resolved packument-version.

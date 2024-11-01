@@ -1,7 +1,7 @@
 import { Err, Ok, type Result } from "ts-results-es";
-import { PackumentNotFoundError } from "./common-errors";
-import type { DomainName } from "./domain-name";
-import { omitKey } from "./object-utils";
+import { PackumentNotFoundError } from "./common-errors.js";
+import type { DomainName } from "./domain-name.js";
+import { omitKey } from "./object-utils.js";
 import {
   type DependencyVersion,
   type UnityProjectManifest,
@@ -10,7 +10,7 @@ import {
   removeScopeFromAllScopedRegistries,
   removeTestable,
   setDependency,
-} from "./project-manifest";
+} from "./project-manifest.js";
 /**
  * A package that was removed from the manifest.
  */

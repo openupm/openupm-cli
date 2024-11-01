@@ -1,5 +1,5 @@
-import { DomainName } from "../../../src/domain/domain-name";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
+import { DomainName } from "../../../src/domain/domain-name.js";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
 import {
   graphNodeCount,
   makeGraphFromSeed,
@@ -10,9 +10,9 @@ import {
   traverseDependencyGraph,
   tryGetGraphNode,
   tryGetNextUnresolved,
-} from "../../../src/domain/dependency-graph";
-import { someRegistryUrl } from "../../common/data-registry";
-import { PackumentNotFoundError } from "../../../src/domain/common-errors";
+} from "../../../src/domain/dependency-graph.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors.js";
 
 describe("dependency graph", () => {
   const somePackage = DomainName.parse("com.some.package");

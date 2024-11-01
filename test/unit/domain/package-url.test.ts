@@ -1,7 +1,7 @@
-import { PackageUrl } from "../../../src/domain/package-url";
+import { PackageUrl } from "../../../src/domain/package-url.js";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.arb";
-import { isZod } from "../../../src/domain/zod-utils";
+import { arbDomainName } from "./domain-name.arb.js";
+import { isZod } from "../../../src/domain/zod-utils.js";
 
 describe("package-url", () => {
   describe("validation", () => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { removeTrailingSlash } from "./string-utils";
+import { removeTrailingSlash } from "./string-utils.js";
 
 /**
  * Schema for {@link RegistryUrl}.

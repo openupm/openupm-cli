@@ -3,21 +3,21 @@ import path from "path";
 import {
   stringifyEditorVersion,
   type ReleaseVersion,
-} from "../../src/domain/editor-version";
+} from "../../src/domain/editor-version.js";
 import {
   emptyProjectManifest,
   manifestPathFor,
   parseProjectManifest,
   serializeProjectManifest,
   type UnityProjectManifest,
-} from "../../src/domain/project-manifest";
-import { projectVersionTxtPathFor } from "../../src/domain/project-version-txt";
+} from "../../src/domain/project-manifest.js";
+import { projectVersionTxtPathFor } from "../../src/domain/project-version-txt.js";
 import {
   serializeUpmConfig,
   upmConfigFileName,
   type UpmConfig,
-} from "../../src/domain/upm-config";
-import type { ReadTextFile, WriteTextFile } from "../../src/io/fs";
+} from "../../src/domain/upm-config.js";
+import type { ReadTextFile, WriteTextFile } from "../../src/io/fs.js";
 
 type TextFileMap = Record<string, string>;
 

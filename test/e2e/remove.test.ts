@@ -1,11 +1,11 @@
-import { ResultCodes } from "../../src/cli/result-codes";
-import { emptyProjectManifest } from "../../src/domain/project-manifest";
-import { buildProjectManifest } from "../common/data-project-manifest";
-import { someRegistryUrl } from "../common/data-registry";
-import { getProjectManifest } from "./check/project-manifest";
-import { runOpenupm } from "./run";
-import { prepareHomeDirectory } from "./setup/directories";
-import { prepareUnityProject } from "./setup/project";
+import { ResultCodes } from "../../src/cli/result-codes.js";
+import { emptyProjectManifest } from "../../src/domain/project-manifest.js";
+import { buildProjectManifest } from "../common/data-project-manifest.js";
+import { someRegistryUrl } from "../common/data-registry.js";
+import { getProjectManifest } from "./check/project-manifest.js";
+import { runOpenupm } from "./run.js";
+import { prepareHomeDirectory } from "./setup/directories.js";
+import { prepareUnityProject } from "./setup/project.js";
 
 describe("remove packages", () => {
   it("should not accept package reference with version", async () => {

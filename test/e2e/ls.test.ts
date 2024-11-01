@@ -1,8 +1,8 @@
-import { ResultCodes } from "../../src/cli/result-codes";
-import { buildProjectManifest } from "../common/data-project-manifest";
-import { runOpenupm } from "./run";
-import { prepareHomeDirectory } from "./setup/directories";
-import { prepareUnityProject } from "./setup/project";
+import { ResultCodes } from "../../src/cli/result-codes.js";
+import { buildProjectManifest } from "../common/data-project-manifest.js";
+import { runOpenupm } from "./run.js";
+import { prepareHomeDirectory } from "./setup/directories.js";
+import { prepareUnityProject } from "./setup/project.js";
 
 describe("list installed packages", () => {
   test("should list installed packages", async () => {

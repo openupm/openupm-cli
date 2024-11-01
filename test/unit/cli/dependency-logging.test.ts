@@ -3,15 +3,15 @@ import {
   markBuiltInResolved,
   markFailed,
   markRemoteResolved,
-} from "../../../src/domain/dependency-graph";
-import { stringifyDependencyGraph } from "../../../src/cli/dependency-logging";
-import { makePackageSpec } from "../../../src/domain/package-spec";
-import { someRegistryUrl } from "../../common/data-registry";
-import { PackumentNotFoundError } from "../../../src/domain/common-errors";
-import { unityRegistryUrl } from "../../../src/domain/registry-url";
-import { VersionNotFoundError } from "../../../src/domain/packument";
-import { DomainName } from "../../../src/domain/domain-name";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
+} from "../../../src/domain/dependency-graph.js";
+import { stringifyDependencyGraph } from "../../../src/cli/dependency-logging.js";
+import { makePackageSpec } from "../../../src/domain/package-spec.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors.js";
+import { unityRegistryUrl } from "../../../src/domain/registry-url.js";
+import { VersionNotFoundError } from "../../../src/domain/packument.js";
+import { DomainName } from "../../../src/domain/domain-name.js";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
 
 describe("dependency-logging", () => {
   describe("graph", () => {

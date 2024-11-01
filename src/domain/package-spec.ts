@@ -1,9 +1,9 @@
 import assert from "assert";
-import { DomainName } from "./domain-name";
-import { PackageUrl } from "./package-url";
-import { SemanticVersion } from "./semantic-version";
-import { trySplitAtFirstOccurrenceOf } from "./string-utils";
-import { assertZod, isZod } from "./zod-utils";
+import { DomainName } from "./domain-name.js";
+import { PackageUrl } from "./package-url.js";
+import { SemanticVersion } from "./semantic-version.js";
+import { trySplitAtFirstOccurrenceOf } from "./string-utils.js";
+import { assertZod, isZod } from "./zod-utils.js";
 
 /**
  * The "latest" tag string. Specifies that the latest version is requested.

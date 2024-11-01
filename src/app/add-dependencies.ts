@@ -1,58 +1,58 @@
 import { CustomError } from "ts-custom-error";
 import { Err, Result } from "ts-results-es";
-import { logResolvedDependency } from "../cli/dependency-logging";
-import { PackumentNotFoundError } from "../domain/common-errors";
+import { logResolvedDependency } from "../cli/dependency-logging.js";
+import { PackumentNotFoundError } from "../domain/common-errors.js";
 import {
   type FailedNode,
   NodeType,
   traverseDependencyGraph,
-} from "../domain/dependency-graph";
+} from "../domain/dependency-graph.js";
 import {
   type AddResult,
   addProjectDependency,
-} from "../domain/dependency-management";
-import { DomainName } from "../domain/domain-name";
+} from "../domain/dependency-management.js";
+import { DomainName } from "../domain/domain-name.js";
 import {
   type EditorVersion,
   type ReleaseVersion,
   compareEditorVersion,
-} from "../domain/editor-version";
-import { partialApply } from "../domain/fp-utils";
-import type { DebugLog } from "../domain/logging";
-import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
+} from "../domain/editor-version.js";
+import { partialApply } from "../domain/fp-utils.js";
+import type { DebugLog } from "../domain/logging.js";
+import { tryGetTargetEditorVersionFor } from "../domain/package-manifest.js";
 import {
   type PackageSpec,
   type VersionReference,
   makePackageSpec,
   splitPackageSpec,
-} from "../domain/package-spec";
-import { PackageUrl } from "../domain/package-url";
-import type { ResolvePackumentVersionError } from "../domain/packument";
+} from "../domain/package-spec.js";
+import { PackageUrl } from "../domain/package-url.js";
+import type { ResolvePackumentVersionError } from "../domain/packument.js";
 import {
   type UnityProjectManifest,
   addTestable,
   hasDependency,
   mapScopedRegistry,
-} from "../domain/project-manifest";
-import { recordEntries } from "../domain/record-utils";
-import { type Registry } from "../domain/registry";
-import { type RegistryUrl, unityRegistryUrl } from "../domain/registry-url";
+} from "../domain/project-manifest.js";
+import { recordEntries } from "../domain/record-utils.js";
+import { type Registry } from "../domain/registry.js";
+import { type RegistryUrl, unityRegistryUrl } from "../domain/registry-url.js";
 import {
   addScope,
   makeEmptyScopedRegistryFor,
-} from "../domain/scoped-registry";
-import { SemanticVersion } from "../domain/semantic-version";
-import { isZod } from "../domain/zod-utils";
-import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import { type GetRegistryPackument } from "../io/registry";
-import type { CheckUrlExists } from "../io/www";
-import { loadProjectManifestUsing } from "./get-dependencies";
+} from "../domain/scoped-registry.js";
+import { SemanticVersion } from "../domain/semantic-version.js";
+import { isZod } from "../domain/zod-utils.js";
+import type { ReadTextFile, WriteTextFile } from "../io/fs.js";
+import { type GetRegistryPackument } from "../io/registry.js";
+import type { CheckUrlExists } from "../io/www.js";
+import { loadProjectManifestUsing } from "./get-dependencies.js";
 import {
   type ResolvedPackumentVersion,
   fetchRegistryPackumentVersionUsing,
-} from "./get-registry-packument-version";
-import { resolveDependenciesUsing } from "./resolve-dependencies";
-import { saveProjectManifestUsing } from "./write-dependencies";
+} from "./get-registry-packument-version.js";
+import { resolveDependenciesUsing } from "./resolve-dependencies.js";
+import { saveProjectManifestUsing } from "./write-dependencies.js";
 
 /**
  * Error that is thrown when a package should be added that is incompatible

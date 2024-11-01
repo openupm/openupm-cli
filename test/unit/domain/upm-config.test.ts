@@ -4,8 +4,8 @@ import {
   getUserUpmConfigPathFor,
   NoSystemUserProfilePath,
   parseUpmConfig,
-} from "../../../src/domain/upm-config";
-import { someRegistryUrl } from "../../common/data-registry";
+} from "../../../src/domain/upm-config.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
 
 describe("upm config", () => {
   describe("get user config path", () => {

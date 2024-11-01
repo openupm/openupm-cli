@@ -6,10 +6,10 @@ import {
   serializeNpmrc,
   setToken,
   type Npmrc,
-} from "../domain/npmrc";
-import { RegistryUrl } from "../domain/registry-url";
-import { type ReadTextFile, type WriteTextFile } from "../io/fs";
-import type { AuthToken } from "../domain/auth";
+} from "../domain/npmrc.js";
+import { RegistryUrl } from "../domain/registry-url.js";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs.js";
+import type { AuthToken } from "../domain/auth.js";
 
 /**
  * Stores an auth token in the users `.npmrc` for npm authentication.

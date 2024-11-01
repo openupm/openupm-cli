@@ -1,11 +1,11 @@
 import assert from "assert";
-import { DomainName } from "../../src/domain/domain-name";
+import { DomainName } from "../../src/domain/domain-name.js";
 import {
   UnityPackument,
   UnityPackumentVersion,
-} from "../../src/domain/packument";
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import { isZod } from "../../src/domain/zod-utils";
+} from "../../src/domain/packument.js";
+import { SemanticVersion } from "../../src/domain/semantic-version.js";
+import { isZod } from "../../src/domain/zod-utils.js";
 
 /**
  * Builder class for {@link UnityPackumentVersion}.

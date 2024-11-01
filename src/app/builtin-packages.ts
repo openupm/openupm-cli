@@ -1,15 +1,15 @@
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import { AsyncResult } from "ts-results-es";
-import { DomainName } from "../domain/domain-name";
-import { ReleaseVersion } from "../domain/editor-version";
-import { assertIsNodeError } from "../domain/error-type-guards";
-import { resultifyAsyncOp } from "../domain/result-utils";
+import { DomainName } from "../domain/domain-name.js";
+import { ReleaseVersion } from "../domain/editor-version.js";
+import { assertIsNodeError } from "../domain/error-type-guards.js";
+import { resultifyAsyncOp } from "../domain/result-utils.js";
 import {
   GetEditorInstallPathError,
   tryGetEditorInstallPath,
-} from "../domain/special-paths";
-import type { GetDirectoriesIn } from "../io/fs";
+} from "../domain/special-paths.js";
+import type { GetDirectoriesIn } from "../io/fs.js";
 
 /**
  * Error for when an editor-version is not installed.

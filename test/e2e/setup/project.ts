@@ -1,15 +1,15 @@
 import fse from "fs-extra";
 import path from "path";
 import yaml from "yaml";
-import { partialApply } from "../../../src/domain/fp-utils";
+import { partialApply } from "../../../src/domain/fp-utils.js";
 import {
   emptyProjectManifest,
   UnityProjectManifest,
-} from "../../../src/domain/project-manifest";
-import { projectVersionTxtPathFor } from "../../../src/domain/project-version-txt";
-import { saveProjectManifestUsing } from "../../../src/app/write-dependencies";
-import { writeTextFile } from "../../../src/io/fs";
-import { dropDirectory } from "./directories";
+} from "../../../src/domain/project-manifest.js";
+import { projectVersionTxtPathFor } from "../../../src/domain/project-version-txt.js";
+import { saveProjectManifestUsing } from "../../../src/app/write-dependencies.js";
+import { writeTextFile } from "../../../src/io/fs.js";
+import { dropDirectory } from "./directories.js";
 
 const writeProjectManifest = partialApply(
   saveProjectManifestUsing,

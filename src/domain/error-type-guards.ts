@@ -1,5 +1,5 @@
 import { AssertionError } from "assert";
-import { HttpErrorLike } from "../io/common-errors";
+import { HttpErrorLike } from "../io/common-errors.js";
 
 /**
  * Type guard for checking if a value is an {@link Error}.

@@ -2,8 +2,8 @@ import {
   manifestPathFor,
   serializeProjectManifest,
   UnityProjectManifest,
-} from "../domain/project-manifest";
-import { WriteTextFile } from "../io/fs";
+} from "../domain/project-manifest.js";
+import { WriteTextFile } from "../io/fs.js";
 
 /**
  * Function for replacing the project manifest for a Unity project.
