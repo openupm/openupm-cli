@@ -47,13 +47,15 @@ export function makeSearchCmd(
   );
 
   return new Command("search")
-    .argument("<keyword>", "The keyword to search")
+    .argument("<search term>", "The term to search for")
     .addOption(primaryRegistryUrlOpt)
     .addOption(systemUserOpt)
     .aliases(["s", "se", "find"])
-    .description("Search package by keyword")
+    .summary("search packages matching a term")
+    .description(`Search all packages matching a given search term.
+openupm search math`)
     .action(
-      withErrorLogger(log, async function (keyword, options) {
+      withErrorLogger(log, async function (searchTerm, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
@@ -67,16 +69,20 @@ export function makeSearchCmd(
         );
 
         let usedEndpoint = "npmsearch";
-        const results = await searchPackages(primaryRegistry, keyword, () => {
-          usedEndpoint = "endpoint.all";
-          log.warn(
-            "",
-            "fast search endpoint is not available, using old search."
-          );
-        });
+        const results = await searchPackages(
+          primaryRegistry,
+          searchTerm,
+          () => {
+            usedEndpoint = "endpoint.all";
+            log.warn(
+              "",
+              "fast search endpoint is not available, using old search."
+            );
+          }
+        );
 
         if (results.length === 0) {
-          log.notice("", `No matches found for "${keyword}"`);
+          log.notice("", `No matches found for "${searchTerm}"`);
           return process.exit(ResultCodes.Ok);
         }
 

@@ -11,14 +11,9 @@ import { workDirOpt } from "./opt-wd";
 import { ResultCodes } from "./result-codes";
 import { mustBeDomainName } from "./validators";
 
-const packageNameArg = new Argument(
-  "<pkg>",
-  "Name of the package to remove"
-).argParser(mustBeDomainName);
-
-const otherPackageNamesArg = new Argument(
-  "[otherPkgs...]",
-  "Names of additional packages to remove"
+const packageNamesArg = new Argument(
+  "<pkg...>",
+  "Names of the packages to remove"
 ).argParser(eachValue(mustBeDomainName));
 
 /**
@@ -43,42 +38,38 @@ export function makeRemoveCmd(
   );
 
   return new Command("remove")
-    .aliases(["rm", "uninstall"])
-    .addArgument(packageNameArg)
-    .addArgument(otherPackageNamesArg)
+    .aliases(["rm", "r", "un", "unlink", "uninstall"])
+    .addArgument(packageNamesArg)
     .addOption(workDirOpt)
-    .description("remove package from manifest json")
+    .summary("remove dependency from project")
+    .description(
+      `Remove one or more dependencies from a project.
+openupm remove com.my.package`
+    )
     .action(
-      withErrorLogger(
-        log,
-        async function (packageName, otherPackageNames, options) {
-          const packageNames = [packageName, ...otherPackageNames];
+      withErrorLogger(log, async function (packageNames, options) {
+        const projectDir = options.chdir;
 
-          const projectDir = options.chdir;
-
-          const removeResult = await removeDependencies(
-            projectDir,
-            packageNames
-          ).promise;
-          if (removeResult.isErr()) {
-            logError(log, removeResult.error);
-            return process.exit(ResultCodes.Error);
-          }
-          const removedPackages = removeResult.value;
-
-          removedPackages.forEach((removedPackage) => {
-            log.notice(
-              "",
-              `Removed "${makePackageSpec(
-                removedPackage.name,
-                removedPackage.version
-              )}".`
-            );
-          });
-
-          // print manifest notice
-          log.notice("", "please open Unity project to apply changes");
+        const removeResult = await removeDependencies(projectDir, packageNames)
+          .promise;
+        if (removeResult.isErr()) {
+          logError(log, removeResult.error);
+          return process.exit(ResultCodes.Error);
         }
-      )
+        const removedPackages = removeResult.value;
+
+        removedPackages.forEach((removedPackage) => {
+          log.notice(
+            "",
+            `Removed "${makePackageSpec(
+              removedPackage.name,
+              removedPackage.version
+            )}".`
+          );
+        });
+
+        // print manifest notice
+        log.notice("", "please open Unity project to apply changes");
+      })
     );
 }

@@ -22,14 +22,9 @@ import { upstreamOpt } from "./opt-upstream";
 import { workDirOpt } from "./opt-wd";
 import { mustBePackageSpec } from "./validators";
 
-const packageSpecArg = new Argument(
-  "<pkg>",
-  "Reference to the package that should be added"
-).argParser(mustBePackageSpec);
-
-const otherPackageSpecsArg = new Argument(
-  "[otherPkgs...]",
-  "References to additional packages that should be added"
+const packageSpecsArg = new Argument(
+  "<package-spec...>",
+  "Specs of packages that should be added"
 ).argParser(eachValue(mustBePackageSpec));
 
 const addTestableOpt = new Option(
@@ -82,83 +77,91 @@ export function makeAddCmd(
   );
 
   return new Command("add")
-    .aliases(["install", "i"])
-    .addArgument(packageSpecArg)
-    .addArgument(otherPackageSpecsArg)
+    .aliases([
+      "ad",
+      "i",
+      "in",
+      "ins",
+      "inst",
+      "insta",
+      "instal",
+      "isnt",
+      "isnta",
+      "isntal",
+      "isntall",
+      "install",
+    ])
+    .addArgument(packageSpecsArg)
     .addOption(addTestableOpt)
     .addOption(forceOpt)
     .addOption(primaryRegistriesUrlOpt)
     .addOption(workDirOpt)
     .addOption(systemUserOpt)
     .addOption(upstreamOpt)
+    .summary("add a dependency to the project")
     .description(
-      `add package to manifest json
-openupm add <pkg> [otherPkgs...]
-openupm add <pkg>@<version> [otherPkgs...]`
+      `Add a dependency to the project as well as all indirect dependencies.
+openupm add com.some.package@latest
+openupm add com.some.package@1.2.3`
     )
     .action(
-      withErrorLogger(
-        log,
-        async function (packageSpec, otherPackageSpecs, options) {
-          const packageSpecs = [packageSpec].concat(otherPackageSpecs);
+      withErrorLogger(log, async function (packageSpecs, options) {
+        const projectDirectory = options.chdir;
 
-          const projectDirectory = options.chdir;
+        const editorVersion = await determineEditorVersion(projectDirectory);
 
-          const editorVersion = await determineEditorVersion(projectDirectory);
-
-          if (typeof editorVersion === "string")
-            log.warn(
-              "editor.version",
-              `${editorVersion} is unknown, the editor version check is disabled`
-            );
-
-          const homePath = getHomePathFromEnv(process.env);
-          const upmConfigPath = getUserUpmConfigPathFor(
-            process.env,
-            homePath,
-            options.systemUser
+        if (typeof editorVersion === "string")
+          log.warn(
+            "editor.version",
+            `${editorVersion} is unknown, the editor version check is disabled`
           );
 
-          const sources = await Promise.all(
-            (options.registry ?? [openupmRegistryUrl]).map((it) =>
-              getRegistryAuth(upmConfigPath, it)
-            )
-          );
+        const homePath = getHomePathFromEnv(process.env);
+        const upmConfigPath = getUserUpmConfigPathFor(
+          process.env,
+          homePath,
+          options.systemUser
+        );
 
-          if (options.upstream) sources.push(unityRegistry);
+        const sources = await Promise.all(
+          (options.registry ?? [openupmRegistryUrl]).map((it) =>
+            getRegistryAuth(upmConfigPath, it)
+          )
+        );
 
-          const addResults = await addDependencies(
-            projectDirectory,
-            typeof editorVersion === "string" ? null : editorVersion,
-            sources,
-            options.force,
-            options.test,
-            packageSpecs
-          );
+        if (options.upstream) sources.push(unityRegistry);
 
-          recordEntries(addResults)
-            .map(([packageName, addResult]) => {
-              switch (addResult.type) {
-                case "added":
-                  return `added ${makePackageSpec(
-                    packageName,
-                    addResult.version
-                  )}`;
-                case "upgraded":
-                  return `modified ${packageName} ${addResult.fromVersion} => ${addResult.toVersion}`;
-                case "noChange":
-                  return `existed ${makePackageSpec(
-                    packageName,
-                    addResult.version
-                  )}`;
-              }
-            })
-            .forEach((message) => {
-              log.notice("", message);
-            });
+        const addResults = await addDependencies(
+          projectDirectory,
+          typeof editorVersion === "string" ? null : editorVersion,
+          sources,
+          options.force,
+          options.test,
+          packageSpecs
+        );
 
-          log.notice("", "please open Unity project to apply changes.");
-        }
-      )
+        recordEntries(addResults)
+          .map(([packageName, addResult]) => {
+            switch (addResult.type) {
+              case "added":
+                return `added ${makePackageSpec(
+                  packageName,
+                  addResult.version
+                )}`;
+              case "upgraded":
+                return `modified ${packageName} ${addResult.fromVersion} => ${addResult.toVersion}`;
+              case "noChange":
+                return `existed ${makePackageSpec(
+                  packageName,
+                  addResult.version
+                )}`;
+            }
+          })
+          .forEach((message) => {
+            log.notice("", message);
+          });
+
+        log.notice("", "please open Unity project to apply changes.");
+      })
     );
 }
