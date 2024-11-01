@@ -206,6 +206,20 @@ describe("add packages", () => {
     );
   });
 
+  it("should add 3rd party package", async () => {
+    await testSuccessfulAdd(
+      [
+        {
+          packageName: "com.some.package",
+          expectedVersion: "1.0.0",
+          addVersion: "latest",
+        },
+      ],
+      ["com.some.package"],
+      e2eTestRegistryUrl
+    );
+  });
+
   it("should be atomic", async () => {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
