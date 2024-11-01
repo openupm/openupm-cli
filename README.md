@@ -118,6 +118,16 @@ openupm deps com.my.package
 
 Checkout [the commands doc page](./docs/cmd-deps.md) for more information.
 
+### List installed packages
+
+Use `openupm ls` to print the names and versions of installed packages.
+
+```sh
+openupm ls
+```
+
+Checkout [the commands doc page](./docs/cmd-ls.md) for more information.
+
 ### Global command options
 
 There are also some global options that work for every command. You can read about them [here](./docs/global-opts.md).
