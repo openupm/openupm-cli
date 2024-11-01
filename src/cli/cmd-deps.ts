@@ -27,8 +27,8 @@ import { ResultCodes } from "./result-codes";
 import { mustBePackageSpec } from "./validators";
 
 const packageSpecArg = new Argument(
-  "<pkg>",
-  "Reference to a package"
+  "<package-spec>",
+  "Spec of package for which to view dependencies"
 ).argParser(mustBePackageSpec);
 
 const deepOpt = new Option(
