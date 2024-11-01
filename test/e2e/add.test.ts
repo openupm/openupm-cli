@@ -5,6 +5,7 @@ import { getProjectManifest } from "./check/project-manifest";
 import { runOpenupm } from "./run";
 import { prepareHomeDirectory } from "./setup/directories";
 import { prepareUnityProject } from "./setup/project";
+import { testRegistryUrl as e2eTestRegistryUrl } from "./setup/test-registry";
 
 describe("add packages", () => {
   type SuccessfulAddCase = {
@@ -298,13 +299,14 @@ describe("add packages", () => {
     await testSuccessfulAdd(
       [
         {
-          packageName: "jp.keijiro.metamesh",
-          addVersion: "1.2.0",
-          expectedVersion: "1.2.0",
+          // The test registry contains the package, but not this version so it should fallback to the Unity registry.
+          packageName: "com.unity.mathematics",
+          addVersion: "1.2.1",
+          expectedVersion: "1.2.1",
         },
       ],
-      ["jp.keijiro.metamesh"],
-      RegistryUrl.parse("https://registry.npmjs.com")
+      [],
+      e2eTestRegistryUrl
     );
   });
 });
