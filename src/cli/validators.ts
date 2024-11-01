@@ -1,15 +1,16 @@
 import { DomainName } from "../domain/domain-name";
-import { isPackageReference } from "../domain/package-reference";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { isPackageSpec, type PackageSpec } from "../domain/package-spec";
 import { coerceRegistryUrl } from "../domain/registry-url";
 import { isZod } from "../domain/zod-utils";
 import { mustBeParsable, mustSatisfy } from "./cli-parsing";
 
 /**
- * {@link CliValueParser} for checking that a string is a {@link PackageReference}.
+ * {@link CliValueParser} for checking that a string is a {@link PackageSpec}.
  */
-export const mustBePackageReference = mustSatisfy(
-  isPackageReference,
-  (input) => `"${input}" is not a valid package-reference`
+export const mustBePackageSpec = mustSatisfy(
+  isPackageSpec,
+  (input) => `"${input}" is not a valid package-spec`
 );
 
 /**

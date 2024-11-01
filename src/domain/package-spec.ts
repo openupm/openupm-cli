@@ -28,9 +28,9 @@ export type PackageTag = LatestTag | StableTag;
 export type VersionReference = SemanticVersion | PackageUrl | PackageTag;
 
 /**
- * A package reference that includes a version.
+ * A package-spec that includes a version.
  */
-export type ReferenceWithVersion = `${DomainName}@${VersionReference}`;
+export type PackageAtVersion = `${DomainName}@${VersionReference}`;
 
 /**
  * A {@link VersionReference} that is resolvable.
@@ -42,8 +42,9 @@ export type ResolvableVersion = Exclude<VersionReference, PackageUrl>;
  * References a package. Could be just the name or a reference to a specific
  * version. Not as specific as a {@link PackageId} as other version-formats
  * besides semantic versions, such as "latest" are also allowed.
+ * @see https://docs.npmjs.com/cli/v8/using-npm/package-spec
  */
-export type PackageReference = DomainName | ReferenceWithVersion;
+export type PackageSpec = DomainName | PackageAtVersion;
 
 /**
  * Checks if a string is a version-reference.
@@ -59,10 +60,10 @@ function isVersionReference(s: string): s is VersionReference {
 }
 
 /**
- * Checks if a string is a package-reference.
+ * Checks if a string is a package-spec.
  * @param s The string.
  */
-export function isPackageReference(s: string): s is PackageReference {
+export function isPackageSpec(s: string): s is PackageSpec {
   const [name, version] = trySplitAtFirstOccurrenceOf(s, "@");
   return (
     isZod(name, DomainName) && (version === null || isVersionReference(version))
@@ -70,13 +71,13 @@ export function isPackageReference(s: string): s is PackageReference {
 }
 
 /**
- * Split a package-reference into the name and version if present.
- * @param reference The reference.
+ * Split a package-spec into the name and version if present.
+ * @param spec The spec.
  */
-export function splitPackageReference(
-  reference: PackageReference
+export function splitPackageSpec(
+  spec: PackageSpec
 ): [DomainName, VersionReference | null] {
-  const [name, version] = trySplitAtFirstOccurrenceOf(reference, "@") as [
+  const [name, version] = trySplitAtFirstOccurrenceOf(spec, "@") as [
     DomainName,
     VersionReference | null
   ];
@@ -84,15 +85,15 @@ export function splitPackageReference(
 }
 
 /**
- * Constructs a package-reference.
+ * Constructs a package-spec.
  * @param name The package-name. Will be validated to be a {@link DomainName}.
  * @param version Optional version-reference. Will be validated to be a
  * {@link VersionReference}.
  */
-export function makePackageReference(
+export function makePackageSpec(
   name: string,
   version: string | null
-): PackageReference {
+): PackageSpec {
   assertZod(name, DomainName);
   if (version === null) return name;
   assert(
@@ -103,11 +104,9 @@ export function makePackageReference(
 }
 
 /**
- * Checks if the package-reference includes a version.
- * @param reference The package-reference.
+ * Checks if the package-spec includes a version.
+ * @param spec The package-spec.
  */
-export function hasVersion(
-  reference: PackageReference
-): reference is ReferenceWithVersion {
-  return reference.includes("@");
+export function hasVersion(spec: PackageSpec): spec is PackageAtVersion {
+  return spec.includes("@");
 }

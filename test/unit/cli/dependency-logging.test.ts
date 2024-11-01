@@ -5,7 +5,7 @@ import {
   markRemoteResolved,
 } from "../../../src/domain/dependency-graph";
 import { stringifyDependencyGraph } from "../../../src/cli/dependency-logging";
-import { makePackageReference } from "../../../src/domain/package-reference";
+import { makePackageSpec } from "../../../src/domain/package-spec";
 import { someRegistryUrl } from "../../common/data-registry";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
@@ -46,7 +46,7 @@ describe("dependency-logging", () => {
 
       // Print just name@version
       expect(actual).toEqual([
-        `${makePackageReference(somePackage, someVersion)}`,
+        `${makePackageSpec(somePackage, someVersion)}`,
       ]);
     });
 
@@ -67,9 +67,9 @@ describe("dependency-logging", () => {
 
       // Print name@version plus dependencies in the next lines
       expect(actual).toEqual([
-        `${makePackageReference(somePackage, someVersion)}`,
-        `└─ ${makePackageReference(otherPackage, otherVersion)}`,
-        `└─ ${makePackageReference(anotherPackage, someVersion)}`,
+        `${makePackageSpec(somePackage, someVersion)}`,
+        `└─ ${makePackageSpec(otherPackage, otherVersion)}`,
+        `└─ ${makePackageSpec(anotherPackage, someVersion)}`,
       ]);
     });
 
@@ -88,7 +88,7 @@ describe("dependency-logging", () => {
 
       // Print name@version plus error message in next line
       expect(actual).toEqual([
-        `${makePackageReference(somePackage, someVersion)}`,
+        `${makePackageSpec(somePackage, someVersion)}`,
         `  - "${someRegistryUrl}": package not found`,
         `  - "${unityRegistryUrl}": version not found`,
       ]);
@@ -122,10 +122,10 @@ describe("dependency-logging", () => {
 
       // Print | next to nested trees
       expect(actual).toEqual([
-        `${makePackageReference(somePackage, someVersion)}`,
-        `└─ ${makePackageReference(otherPackage, otherVersion)}`,
-        `│  └─ ${makePackageReference(anotherPackage, someVersion)}`,
-        `└─ ${makePackageReference(thatPackage, someVersion)}`,
+        `${makePackageSpec(somePackage, someVersion)}`,
+        `└─ ${makePackageSpec(otherPackage, otherVersion)}`,
+        `│  └─ ${makePackageSpec(anotherPackage, someVersion)}`,
+        `└─ ${makePackageSpec(thatPackage, someVersion)}`,
       ]);
     });
 
@@ -160,13 +160,13 @@ describe("dependency-logging", () => {
       const actual = stringifyDependencyGraph(graph, somePackage, someVersion);
 
       expect(actual).toEqual([
-        `${makePackageReference(somePackage, someVersion)}`,
-        `└─ ${makePackageReference(otherPackage, otherVersion)}`,
-        `│  └─ ${makePackageReference(anotherPackage, someVersion)}`,
-        `│     └─ ${makePackageReference(thatPackage, someVersion)}`,
+        `${makePackageSpec(somePackage, someVersion)}`,
+        `└─ ${makePackageSpec(otherPackage, otherVersion)}`,
+        `│  └─ ${makePackageSpec(anotherPackage, someVersion)}`,
+        `│     └─ ${makePackageSpec(thatPackage, someVersion)}`,
         // Because this package was printed before, now only its name is printed
         // with a string at the end that indicates that this is a duplicate.
-        `└─ ${makePackageReference(anotherPackage, someVersion)} ..`,
+        `└─ ${makePackageSpec(anotherPackage, someVersion)} ..`,
       ]);
     });
   });

@@ -3,7 +3,7 @@ import { Logger } from "npmlog";
 import { removeDependenciesUsing } from "../app/remove-dependencies";
 import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
-import { makePackageReference } from "../domain/package-reference";
+import { makePackageSpec } from "../domain/package-spec";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import { eachValue } from "./cli-parsing";
 import { logError, withErrorLogger } from "./error-logging";
@@ -11,11 +11,12 @@ import { workDirOpt } from "./opt-wd";
 import { ResultCodes } from "./result-codes";
 import { mustBeDomainName } from "./validators";
 
-const pkgArg = new Argument("<pkg>", "Name of the package to remove").argParser(
-  mustBeDomainName
-);
+const packageNameArg = new Argument(
+  "<pkg>",
+  "Name of the package to remove"
+).argParser(mustBeDomainName);
 
-const otherPkgsArg = new Argument(
+const otherPackageNamesArg = new Argument(
   "[otherPkgs...]",
   "Names of additional packages to remove"
 ).argParser(eachValue(mustBeDomainName));
@@ -43,20 +44,22 @@ export function makeRemoveCmd(
 
   return new Command("remove")
     .aliases(["rm", "uninstall"])
-    .addArgument(pkgArg)
-    .addArgument(otherPkgsArg)
+    .addArgument(packageNameArg)
+    .addArgument(otherPackageNamesArg)
     .addOption(workDirOpt)
     .description("remove package from manifest json")
     .action(
       withErrorLogger(
         log,
         async function (packageName, otherPackageNames, options) {
-          const pkgs = [packageName, ...otherPackageNames];
+          const packageNames = [packageName, ...otherPackageNames];
 
           const projectDir = options.chdir;
 
-          const removeResult = await removeDependencies(projectDir, pkgs)
-            .promise;
+          const removeResult = await removeDependencies(
+            projectDir,
+            packageNames
+          ).promise;
           if (removeResult.isErr()) {
             logError(log, removeResult.error);
             return process.exit(ResultCodes.Error);
@@ -66,7 +69,7 @@ export function makeRemoveCmd(
           removedPackages.forEach((removedPackage) => {
             log.notice(
               "",
-              `Removed "${makePackageReference(
+              `Removed "${makePackageSpec(
                 removedPackage.name,
                 removedPackage.version
               )}".`

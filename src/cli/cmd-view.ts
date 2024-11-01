@@ -6,7 +6,7 @@ import { queryAllRegistriesLazy } from "../app/query-registries";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
-import { hasVersion, splitPackageReference } from "../domain/package-reference";
+import { hasVersion, splitPackageSpec } from "../domain/package-spec";
 import { unityRegistry } from "../domain/registry";
 import { getHomePathFromEnv } from "../domain/special-paths";
 import { getUserUpmConfigPathFor } from "../domain/upm-config";
@@ -18,7 +18,7 @@ import { systemUserOpt } from "./opt-system-user";
 import { upstreamOpt } from "./opt-upstream";
 import { formatPackumentInfo } from "./output-formatting";
 import { ResultCodes } from "./result-codes";
-import { mustBePackageReference } from "./validators";
+import { mustBePackageSpec } from "./validators";
 
 /**
  * Makes the `openupm view` cli command with the given dependencies.
@@ -41,14 +41,14 @@ export function makeViewCmd(
   );
 
   return new Command("view")
-    .argument("<pkg>", "Reference to a package", mustBePackageReference)
+    .argument("<pkg>", "Reference to a package", mustBePackageSpec)
     .addOption(primaryRegistryUrlOpt)
     .addOption(systemUserOpt)
     .addOption(upstreamOpt)
     .aliases(["v", "info", "show"])
     .description("view package information")
     .action(
-      withErrorLogger(log, async function (pkg, options) {
+      withErrorLogger(log, async function (packageSpec, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
@@ -62,8 +62,8 @@ export function makeViewCmd(
         );
 
         // parse name
-        if (hasVersion(pkg)) {
-          const [name] = splitPackageReference(pkg);
+        if (hasVersion(packageSpec)) {
+          const [name] = splitPackageSpec(packageSpec);
           log.warn(
             "",
             `please do not specify a version (Write only '${name}').`
@@ -78,10 +78,10 @@ export function makeViewCmd(
         ];
         const packumentFromRegistry = await queryAllRegistriesLazy(
           sources,
-          (source) => getRegistryPackument(source, pkg)
+          (source) => getRegistryPackument(source, packageSpec)
         );
         const packument = packumentFromRegistry?.value ?? null;
-        if (packument === null) throw new PackumentNotFoundError(pkg);
+        if (packument === null) throw new PackumentNotFoundError(packageSpec);
 
         const output = formatPackumentInfo(packument, EOL);
         log.notice("", output);

@@ -61,16 +61,16 @@ function makeErrorMessageFor(error: unknown): string {
       error.version
     )}.`;
   if (error instanceof CompatibilityCheckFailedError)
-    return `Could not confirm editor compatibility for ${error.packageRef}.`;
+    return `Could not confirm editor compatibility for ${error.packageSpec}.`;
   if (error instanceof PackageIncompatibleError)
     return `"${
-      error.packageRef
+      error.packageSpec
     }" is not compatible with Unity ${stringifyEditorVersion(
       error.editorVersion
     )}.`;
   if (error instanceof UnresolvedDependenciesError)
     return (
-      `"${error.packageRef}" has one or more unresolved dependencies and was not added.${EOL}` +
+      `"${error.packageSpec}" has one or more unresolved dependencies and was not added.${EOL}` +
       `${error.dependencies.map(stringifyUnresolvedDependency).join(EOL)}`
     );
   if (error instanceof NoVersionsError)

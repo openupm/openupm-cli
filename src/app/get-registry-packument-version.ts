@@ -1,7 +1,7 @@
 import { AsyncResult, Err } from "ts-results-es";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import { DomainName } from "../domain/domain-name";
-import { ResolvableVersion } from "../domain/package-reference";
+import { ResolvableVersion } from "../domain/package-spec";
 import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
