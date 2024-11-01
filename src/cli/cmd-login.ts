@@ -75,7 +75,11 @@ export function makeLoginCmd(
     .addOption(alwaysAuthOpt)
     .addOption(registryOpt)
     .addOption(systemUserOpt)
-    .description("authenticate with a scoped registry")
+    .summary("authenticate with a 3rd party registry")
+    .description(
+      `Authenticate with a specified 3rd party registry and stores credentials in the users \`.npmrc\`.
+openupm login -r https://packages.my-registry.com -u user123 -p ****** -e user123@mail.com`
+    )
     .action(
       withErrorLogger(log, async function (options) {
         const homePath = getHomePathFromEnv(process.env);
