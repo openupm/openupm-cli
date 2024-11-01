@@ -41,12 +41,16 @@ export function makeViewCmd(
   );
 
   return new Command("view")
-    .argument("<pkg>", "Reference to a package", mustBePackageSpec)
+    .argument("<package-spec>", "Spec of a package", mustBePackageSpec)
     .addOption(primaryRegistryUrlOpt)
     .addOption(systemUserOpt)
     .addOption(upstreamOpt)
     .aliases(["v", "info", "show"])
-    .description("view package information")
+    .summary("view package information")
+    .description(
+      `Print information about a remote package.
+openupm view com.some.package`
+    )
     .action(
       withErrorLogger(log, async function (packageSpec, options) {
         const homePath = getHomePathFromEnv(process.env);
