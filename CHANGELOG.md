@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/openupm/openupm-cli/compare/4.4.0...4.5.0) (2024-11-01)
+
+
+### Features
+
+* add list cmd ([#414](https://github.com/openupm/openupm-cli/issues/414)) ([dbfac8c](https://github.com/openupm/openupm-cli/commit/dbfac8c765afca503e3d88dcd1b2bc7c41e7555f)), closes [#351](https://github.com/openupm/openupm-cli/issues/351)
+
 # [4.4.0](https://github.com/openupm/openupm-cli/compare/4.3.0...4.4.0) (2024-11-01)
 
 
