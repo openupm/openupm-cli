@@ -15,6 +15,7 @@ import { fetchCheckUrlExists } from "../io/www";
 import { makeAddCmd } from "./cmd-add";
 import { makeDepsCmd } from "./cmd-deps";
 import { makeLoginCmd } from "./cmd-login";
+import { makeLsCmd } from "./cmd-ls";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
@@ -113,6 +114,8 @@ export function makeOpenupmCli(
       log
     )
   );
+
+  program.addCommand(makeLsCmd(readTextFile, debugLog, log));
 
   // prompt for invalid command
   program.on("command:*", function () {
