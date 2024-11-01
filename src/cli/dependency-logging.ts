@@ -10,9 +10,9 @@ import {
 } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";
 import {
-  makePackageReference,
-  PackageReference,
-} from "../domain/package-reference";
+  makePackageSpec,
+  PackageSpec,
+} from "../domain/package-spec";
 import {
   ResolvePackumentVersionError,
   VersionNotFoundError,
@@ -27,7 +27,7 @@ import { recordEntries } from "../domain/record-utils";
  */
 export async function logResolvedDependency(
   debugLog: DebugLog,
-  packageRef: PackageReference,
+  packageSpec: PackageSpec,
   source: RegistryUrl | "built-in"
 ) {
   const tag =
@@ -36,7 +36,7 @@ export async function logResolvedDependency(
       : source === unityRegistryUrl
       ? "[unity]"
       : "";
-  const message = `${packageRef} ${tag}`;
+  const message = `${packageSpec} ${tag}`;
   await debugLog(message);
 }
 
@@ -54,7 +54,7 @@ export function stringifyDependencyGraph(
   rootVersion: SemanticVersion,
   chalk?: Chalk
 ): readonly string[] {
-  const printedRefs = new Set<PackageReference>();
+  const printedRefs = new Set<PackageSpec>();
 
   function tryColor(chalk: Chalk | undefined, s: string) {
     return chalk !== undefined ? chalk(s) : s;
@@ -67,7 +67,7 @@ export function stringifyDependencyGraph(
     const node = tryGetGraphNode(graph, packageName, version);
     if (node === null)
       throw new RangeError(
-        `Dependency graph did not contain a node for ${makePackageReference(
+        `Dependency graph did not contain a node for ${makePackageSpec(
           rootPackage,
           rootVersion
         )}`
@@ -86,8 +86,8 @@ export function stringifyDependencyGraph(
     }
   }
 
-  function makeDuplicateLine(packageRef: PackageReference): string {
-    return tryColor(chalk?.blueBright, `${packageRef} ..`);
+  function makeDuplicateLine(packageSpec: PackageSpec): string {
+    return tryColor(chalk?.blueBright, `${packageSpec} ..`);
   }
 
   function makeErrorLines(errors: FailedNode["errors"]): readonly string[] {
@@ -133,17 +133,17 @@ export function stringifyDependencyGraph(
     version: SemanticVersion
   ): readonly string[] {
     const node = getNode(packageName, version);
-    const packageRef = makePackageReference(packageName, version);
+    const packageSpec = makePackageSpec(packageName, version);
 
     // We only print package@version once. If two packages depend on the
     // same package@version, we print a short version of it.
-    const isDuplicate = printedRefs.has(packageRef);
-    if (isDuplicate) return [makeDuplicateLine(packageRef)];
-    else printedRefs.add(packageRef);
+    const isDuplicate = printedRefs.has(packageSpec);
+    if (isDuplicate) return [makeDuplicateLine(packageSpec)];
+    else printedRefs.add(packageSpec);
 
     if (node.type === NodeType.Unresolved)
       // package@version
-      return [packageRef];
+      return [packageSpec];
 
     if (node.type === NodeType.Failed) {
       /*
@@ -152,7 +152,7 @@ export function stringifyDependencyGraph(
          -  url2: package not found
        */
       const errorLines = makeErrorLines(node.errors);
-      return [tryColor(chalk?.red, packageRef), ...errorLines];
+      return [tryColor(chalk?.red, packageSpec), ...errorLines];
     }
 
     // Resolved node
@@ -161,7 +161,7 @@ export function stringifyDependencyGraph(
       └─ dependency@version
      */
     const dependencyLines = makeDependencyLines(node.dependencies);
-    return [packageRef, ...dependencyLines];
+    return [packageSpec, ...dependencyLines];
   }
 
   return stringifyRecursively(rootPackage, rootVersion);

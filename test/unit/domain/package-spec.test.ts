@@ -1,19 +1,19 @@
 import fc from "fast-check";
 import {
-  isPackageReference,
-  makePackageReference,
-  splitPackageReference,
-} from "../../../src/domain/package-reference";
+  isPackageSpec,
+  makePackageSpec,
+  splitPackageSpec,
+} from "../../../src/domain/package-spec";
 import { arbDomainName } from "./domain-name.arb";
 import { arbPackageUrl } from "./package-url.arb";
 import { arbSemanticVersion } from "./semantic-version.arb";
 
-describe("package-reference", () => {
+describe("package-spec", () => {
   describe("validation", () => {
     it("should be ok for just name", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
-          expect(isPackageReference(packumentName)).toBeTruthy();
+          expect(isPackageSpec(packumentName)).toBeTruthy();
         })
       );
     });
@@ -22,7 +22,7 @@ describe("package-reference", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `${packumentName}@1.2.3`;
-          expect(isPackageReference(input)).toBeTruthy();
+          expect(isPackageSpec(input)).toBeTruthy();
         })
       );
     });
@@ -31,7 +31,7 @@ describe("package-reference", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `${packumentName}@file:/path/to/${packumentName}`;
-          expect(isPackageReference(input)).toBeTruthy();
+          expect(isPackageSpec(input)).toBeTruthy();
         })
       );
     });
@@ -40,7 +40,7 @@ describe("package-reference", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `${packumentName}@http://my.server/${packumentName}`;
-          expect(isPackageReference(input)).toBeTruthy();
+          expect(isPackageSpec(input)).toBeTruthy();
         })
       );
     });
@@ -49,7 +49,7 @@ describe("package-reference", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `${packumentName}@git@github:user/${packumentName}`;
-          expect(isPackageReference(input)).toBeTruthy();
+          expect(isPackageSpec(input)).toBeTruthy();
         })
       );
     });
@@ -58,7 +58,7 @@ describe("package-reference", () => {
       fc.assert(
         fc.property(arbDomainName, (packumentName) => {
           const input = `${packumentName}@latest`;
-          expect(isPackageReference(input)).toBeTruthy();
+          expect(isPackageSpec(input)).toBeTruthy();
         })
       );
     });
@@ -73,14 +73,14 @@ describe("package-reference", () => {
       // Bad tag
       "my.package@ltst",
     ])(`"should not be ok for "%s"`, (input) => {
-      expect(isPackageReference(input)).not.toBeTruthy();
+      expect(isPackageSpec(input)).not.toBeTruthy();
     });
   });
 
   describe("split", () => {
     function shouldSplitCorrectly(name: string, version?: string) {
-      const [actualName, actualVersion] = splitPackageReference(
-        makePackageReference(name, version ?? null)
+      const [actualName, actualVersion] = splitPackageSpec(
+        makePackageSpec(name, version ?? null)
       );
       expect(actualName).toEqual(name);
       expect(actualVersion).toEqual(version ?? null);

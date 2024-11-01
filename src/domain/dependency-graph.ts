@@ -1,6 +1,6 @@
-import { recordEntries } from "./record-utils";
 import { DomainName } from "./domain-name";
 import { ResolvePackumentVersionError } from "./packument";
+import { recordEntries } from "./record-utils";
 import { RegistryUrl } from "./registry-url";
 import { SemanticVersion } from "./semantic-version";
 
@@ -125,7 +125,7 @@ export function makeGraphFromSeed(
 }
 
 /**
- * Attempts to get the next unresolved package reference from a dependency
+ * Attempts to get the next unresolved package-spec from a dependency
  * graph.
  * @param graph The graph to search.
  * @returns A tuple with the name and version of the next unresolved package or

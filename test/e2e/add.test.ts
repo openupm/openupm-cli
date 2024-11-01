@@ -22,14 +22,14 @@ describe("add packages", () => {
     const homeDir = await prepareHomeDirectory();
     const projectDir = await prepareUnityProject(homeDir);
 
-    const pkgRefs = cases.map((it) =>
+    const packageSpecs = cases.map((it) =>
       it.addVersion !== undefined
         ? `${it.packageName}@${it.addVersion}`
         : it.packageName
     );
     const output = await runOpenupm(projectDir, [
       "add",
-      ...pkgRefs,
+      ...packageSpecs,
       ...(registryOverride !== undefined
         ? [`--registry=${registryOverride}`]
         : []),
@@ -289,7 +289,7 @@ describe("add packages", () => {
     expect(output.stdOut).toEqual([]);
     expect(output.stdErr).toEqual(
       expect.arrayContaining([
-        expect.stringContaining(`"1,2,3" is not a valid package-reference`),
+        expect.stringContaining(`"1,2,3" is not a valid package-spec`),
       ])
     );
   });

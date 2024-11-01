@@ -8,7 +8,7 @@ import {
   ResolvableVersion,
   type LatestTag,
   type StableTag,
-} from "./package-reference";
+} from "./package-spec";
 import { recordKeys } from "./record-utils";
 import { compareVersions, isStable, SemanticVersion } from "./semantic-version";
 

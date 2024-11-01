@@ -21,11 +21,11 @@ import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import {
-  type PackageReference,
+  type PackageSpec,
   type VersionReference,
-  makePackageReference,
-  splitPackageReference,
-} from "../domain/package-reference";
+  makePackageSpec,
+  splitPackageSpec,
+} from "../domain/package-spec";
 import { PackageUrl } from "../domain/package-url";
 import type { ResolvePackumentVersionError } from "../domain/packument";
 import {
@@ -63,7 +63,7 @@ export class PackageIncompatibleError extends CustomError {
     /**
      * The package that was added.
      */
-    public readonly packageRef: PackageReference,
+    public readonly packageSpec: PackageSpec,
     /**
      * The packages target editor version.
      */
@@ -101,7 +101,7 @@ export class UnresolvedDependenciesError extends CustomError {
     /**
      * The package that should have been added.
      */
-    public readonly packageRef: PackageReference,
+    public readonly packageSpec: PackageSpec,
     /**
      * The dependencies which could not be resolved.
      */
@@ -120,7 +120,7 @@ export class CompatibilityCheckFailedError extends CustomError {
     /**
      * The package that could not be added.
      */
-    public readonly packageRef: PackageReference
+    public readonly packageSpec: PackageSpec
   ) {
     super();
   }
@@ -157,7 +157,7 @@ function pickMostFixable(
  * @param sources The sources from which to resolve the packuments.
  * @param force Whether to force add the dependencies.
  * @param shouldAddTestable Whether to also add dependencies to the `testables`.
- * @param pkgs References to the dependencies to add.
+ * @param packageSpecs Specs of the dependencies to add.
  * @returns A summary of the added packages.
  */
 export async function addDependenciesUsing(
@@ -171,7 +171,7 @@ export async function addDependenciesUsing(
   sources: ReadonlyArray<Registry>,
   force: boolean,
   shouldAddTestable: boolean,
-  pkgs: ReadonlyArray<PackageReference>
+  packageSpecs: ReadonlyArray<PackageSpec>
 ): Promise<Readonly<Record<DomainName, AddResult>>> {
   const loadProjectManifest = partialApply(
     loadProjectManifestUsing,
@@ -202,7 +202,7 @@ export async function addDependenciesUsing(
   ): Promise<Readonly<Record<RegistryUrl, ReadonlyArray<DomainName>>>> {
     if (source === unityRegistryUrl) return {};
 
-    await debugLog(`fetch: ${makePackageReference(packageName, verison)}`);
+    await debugLog(`fetch: ${makePackageSpec(packageName, verison)}`);
 
     const dependencyGraph = await resolveDependencies(
       sources,
@@ -231,10 +231,7 @@ export async function addDependenciesUsing(
       }
       if (dependency.type === NodeType.Unresolved) continue;
 
-      const dependencyRef = makePackageReference(
-        dependencyName,
-        dependencyVersion
-      );
+      const dependencyRef = makePackageSpec(dependencyName, dependencyVersion);
       await logResolvedDependency(debugLog, dependencyRef, dependency.source);
 
       const isUnityPackage =
@@ -249,7 +246,7 @@ export async function addDependenciesUsing(
     // print suggestion for depsInvalid
     if (unresolvedDependencies.length > 0 && !force)
       throw new UnresolvedDependenciesError(
-        makePackageReference(packageName, verison),
+        makePackageSpec(packageName, verison),
         unresolvedDependencies
       );
 
@@ -295,11 +292,11 @@ export async function addDependenciesUsing(
         targetEditorVersion = tryGetTargetEditorVersionFor(packumentVersion);
       } catch (error) {
         if (!force) {
-          const packageRef = makePackageReference(packageName, versionToAdd);
+          const packageSpec = makePackageSpec(packageName, versionToAdd);
           await debugLog(
-            `"${packageRef}" is malformed. Target editor version could not be determined.`
+            `"${packageSpec}" is malformed. Target editor version could not be determined.`
           );
-          throw new CompatibilityCheckFailedError(packageRef);
+          throw new CompatibilityCheckFailedError(packageSpec);
         }
         targetEditorVersion = null;
       }
@@ -310,7 +307,7 @@ export async function addDependenciesUsing(
         compareEditorVersion(editorVersion, targetEditorVersion) >= 0;
       if (!isCompatible && !force)
         throw new PackageIncompatibleError(
-          makePackageReference(packageName, versionToAdd),
+          makePackageSpec(packageName, versionToAdd),
           targetEditorVersion!
         );
     }
@@ -357,8 +354,8 @@ export async function addDependenciesUsing(
   let manifest = await loadProjectManifest(projectDirectory);
 
   const results: Record<DomainName, AddResult> = {};
-  for (const pkg of pkgs) {
-    const [packageName, version] = splitPackageReference(pkg);
+  for (const packageSpec of packageSpecs) {
+    const [packageName, version] = splitPackageSpec(packageSpec);
     const [newManifest, result] = await addSingle(
       manifest,
       packageName,

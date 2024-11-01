@@ -9,10 +9,7 @@ import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import { partialApply } from "../domain/fp-utils";
 import { DebugLog } from "../domain/logging";
-import {
-  makePackageReference,
-  splitPackageReference,
-} from "../domain/package-reference";
+import { makePackageSpec, splitPackageSpec } from "../domain/package-spec";
 import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
 import { SemanticVersion } from "../domain/semantic-version";
@@ -27,11 +24,12 @@ import { withErrorLogger } from "./error-logging";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { ResultCodes } from "./result-codes";
-import { mustBePackageReference } from "./validators";
+import { mustBePackageSpec } from "./validators";
 
-const pkgArg = new Argument("<pkg>", "Reference to a package").argParser(
-  mustBePackageReference
-);
+const packageSpecArg = new Argument(
+  "<pkg>",
+  "Reference to a package"
+).argParser(mustBePackageSpec);
 
 const deepOpt = new Option(
   "-d, --deep",
@@ -72,7 +70,7 @@ export function makeDepsCmd(
 
   return new Command("deps")
     .alias("dep")
-    .addArgument(pkgArg)
+    .addArgument(packageSpecArg)
     .addOption(deepOpt)
     .addOption(primaryRegistryUrlOpt)
     .addOption(systemUserOpt)
@@ -82,7 +80,7 @@ openupm deps <pkg>
 openupm deps <pkg>@<version>`
     )
     .action(
-      withErrorLogger(log, async function (pkg, options) {
+      withErrorLogger(log, async function (packageSpec, options) {
         const homePath = getHomePathFromEnv(process.env);
         const upmConfigPath = getUserUpmConfigPathFor(
           process.env,
@@ -95,7 +93,7 @@ openupm deps <pkg>@<version>`
         );
         const sources = [primaryRegistry, unityRegistry];
 
-        const [packageName, requestedVersion] = splitPackageReference(pkg);
+        const [packageName, requestedVersion] = splitPackageSpec(packageSpec);
 
         if (requestedVersion !== null && isZod(requestedVersion, PackageUrl)) {
           log.error("", "cannot get dependencies for url-version");
@@ -115,7 +113,7 @@ openupm deps <pkg>@<version>`
           throw new PackumentNotFoundError(packageName);
 
         await debugLog(
-          `fetch: ${makePackageReference(packageName, latestVersion)}, deep=${
+          `fetch: ${makePackageSpec(packageName, latestVersion)}, deep=${
             options.deep
           }`
         );
