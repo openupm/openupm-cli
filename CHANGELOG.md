@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/openupm/openupm-cli/compare/4.3.0...4.4.0) (2024-11-01)
+
+
+### Features
+
+* make cli closer to npm ([#413](https://github.com/openupm/openupm-cli/issues/413)) ([f0b89c6](https://github.com/openupm/openupm-cli/commit/f0b89c60d78d7bd5aeedcf3e18d5c9a17aea4447))
+
 # [4.3.0](https://github.com/openupm/openupm-cli/compare/4.2.0...4.3.0) (2024-10-01)
 
 
