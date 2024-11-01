@@ -1,6 +1,6 @@
-import { isPackageId } from "../../../src/domain/package-id";
+import { isPackageId } from "../../../src/domain/package-id.js";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.arb";
+import { arbDomainName } from "./domain-name.arb.js";
 
 describe("package-id", () => {
   describe("validate", () => {

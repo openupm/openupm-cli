@@ -1,15 +1,15 @@
 import { default as npmSearch, default as search } from "libnpmsearch";
 import npmFetch from "npm-registry-fetch";
-import { noopLogger } from "../../../src/domain/logging";
+import { noopLogger } from "../../../src/domain/logging.js";
 import {
   HttpErrorLike,
   RegistryAuthenticationError,
-} from "../../../src/io/common-errors";
+} from "../../../src/io/common-errors.js";
 import {
   getAllRegistryPackumentsUsing,
   searchRegistryUsing,
-} from "../../../src/io/registry";
-import { someRegistry } from "../../common/data-registry";
+} from "../../../src/io/registry.js";
+import { someRegistry } from "../../common/data-registry.js";
 
 jest.mock("npm-registry-fetch");
 jest.mock("libnpmsearch");

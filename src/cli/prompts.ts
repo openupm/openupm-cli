@@ -1,5 +1,5 @@
 import promptly from "promptly";
-import { RegistryUrl } from "../domain/registry-url";
+import { RegistryUrl } from "../domain/registry-url.js";
 
 /**
  * Prompts the user for their username.

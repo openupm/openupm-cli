@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import path from "path";
-import { DomainName } from "../../../src/domain/domain-name";
+import { DomainName } from "../../../src/domain/domain-name.js";
 import {
   addTestable,
   emptyProjectManifest,
@@ -17,16 +17,16 @@ import {
   setScopedRegistry,
   tryGetScopedRegistryByUrl,
   type UnityProjectManifest,
-} from "../../../src/domain/project-manifest";
-import { RegistryUrl } from "../../../src/domain/registry-url";
+} from "../../../src/domain/project-manifest.js";
+import { RegistryUrl } from "../../../src/domain/registry-url.js";
 import {
   addScope,
   makeScopedRegistry,
-} from "../../../src/domain/scoped-registry";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildProjectManifest } from "../../common/data-project-manifest";
-import { someRegistryUrl } from "../../common/data-registry";
-import { arbDomainName } from "./domain-name.arb";
+} from "../../../src/domain/scoped-registry.js";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
+import { buildProjectManifest } from "../../common/data-project-manifest.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
+import { arbDomainName } from "./domain-name.arb.js";
 
 describe("project-manifest", () => {
   describe("set dependency", () => {

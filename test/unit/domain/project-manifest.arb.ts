@@ -2,11 +2,11 @@ import fc, { type Arbitrary } from "fast-check";
 import {
   type DependencyVersion,
   type UnityProjectManifest,
-} from "../../../src/domain/project-manifest";
-import { UnityProjectManifestBuilder } from "../../common/data-project-manifest";
-import { arbDomainName } from "./domain-name.arb";
-import { arbPackageUrl } from "./package-url.arb";
-import { arbSemanticVersion } from "./semantic-version.arb";
+} from "../../../src/domain/project-manifest.js";
+import { UnityProjectManifestBuilder } from "../../common/data-project-manifest.js";
+import { arbDomainName } from "./domain-name.arb.js";
+import { arbPackageUrl } from "./package-url.arb.js";
+import { arbSemanticVersion } from "./semantic-version.arb.js";
 
 /**
  * Arbitrary {@link abrDependencyVersion}.

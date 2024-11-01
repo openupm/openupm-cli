@@ -1,6 +1,6 @@
-import { queryAllRegistriesLazy } from "../../../src/app/query-registries";
-import { Registry } from "../../../src/domain/registry";
-import { otherRegistry, someRegistry } from "../../common/data-registry";
+import { queryAllRegistriesLazy } from "../../../src/app/query-registries.js";
+import { Registry } from "../../../src/domain/registry.js";
+import { otherRegistry, someRegistry } from "../../common/data-registry.js";
 
 describe("sources", () => {
   describe("query registries lazy", () => {

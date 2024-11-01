@@ -6,6 +6,7 @@
   "engines": {
     "node": ">=18"
   },
+  "type": "module",
   "scripts": {
     "test:e2e": "jest --testMatch \"**/e2e/**/*.test.ts\" --runInBand",
     "test:integration": "jest --testMatch \"**/integration/**/*.test.ts\" --runInBand",
@@ -46,9 +47,9 @@
     "@types/node": "^18.19.31",
     "@types/npm-profile": "^5.0.5",
     "@types/npmlog": "^4.1.4",
-    "@types/pkginfo": "^0.4.1",
     "@types/promptly": "^3.0.3",
     "@types/request": "^2.48.12",
+    "@types/semver": "^7.5.8",
     "@types/update-notifier": "^5.1.0",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
@@ -63,6 +64,7 @@
     "rimraf": "^5.0.5",
     "semantic-release": "^22.0.12",
     "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
   "dependencies": {
@@ -78,9 +80,8 @@
     "npm-profile": "^11.0.0",
     "npm-registry-fetch": "^13.1.1",
     "npmlog": "^6.0.2",
-    "pkginfo": "^0.4.1",
     "promptly": "^3.2.0",
-    "semver": "^7.5.4",
+    "semver": "^7.6.3",
     "ts-custom-error": "^3.3.1",
     "ts-results-es": "^4.1.0",
     "update-notifier": "^5.1.0",

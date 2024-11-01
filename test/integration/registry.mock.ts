@@ -1,6 +1,6 @@
 import nock from "nock";
-import type { UnityPackument } from "../../src/domain/packument";
-import type { RegistryUrl } from "../../src/domain/registry-url";
+import type { UnityPackument } from "../../src/domain/packument.js";
+import type { RegistryUrl } from "../../src/domain/registry-url.js";
 
 /**
  * Mocks which packuments exist on a remote package registry.

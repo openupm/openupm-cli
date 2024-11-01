@@ -1,5 +1,5 @@
 import { Ok } from "ts-results-es";
-import { DomainName } from "../../../src/domain/domain-name";
+import { DomainName } from "../../../src/domain/domain-name.js";
 import {
   NoStableError,
   NoVersionsError,
@@ -8,9 +8,9 @@ import {
   tryGetPackumentVersion,
   tryResolvePackumentVersion,
   VersionNotFoundError,
-} from "../../../src/domain/packument";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { buildPackument } from "../../common/data-packument";
+} from "../../../src/domain/packument.js";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
+import { buildPackument } from "../../common/data-packument.js";
 
 describe("packument", () => {
   describe("get latest version", () => {

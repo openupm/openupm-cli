@@ -2,11 +2,11 @@ import TOML from "@iarna/toml";
 import path from "path";
 import { CustomError } from "ts-custom-error";
 import { z } from "zod";
-import { Base64 } from "./base64";
+import { Base64 } from "./base64.js";
 import {
   type RemoveExplicitUndefined,
   removeExplicitUndefined,
-} from "./zod-utils";
+} from "./zod-utils.js";
 
 /**
  * The file name for upm config files.

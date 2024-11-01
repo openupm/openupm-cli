@@ -1,8 +1,8 @@
-import { DomainName } from "../domain/domain-name";
-import { tryResolvePackumentVersion } from "../domain/packument";
-import { Registry } from "../domain/registry";
-import { SemanticVersion } from "../domain/semantic-version";
-import type { GetRegistryPackument } from "../io/registry";
+import { DomainName } from "../domain/domain-name.js";
+import { tryResolvePackumentVersion } from "../domain/packument.js";
+import { Registry } from "../domain/registry.js";
+import { SemanticVersion } from "../domain/semantic-version.js";
+import type { GetRegistryPackument } from "../io/registry.js";
 
 /**
  * Gets the latest published version of a package from a npm registry.

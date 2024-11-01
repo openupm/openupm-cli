@@ -4,12 +4,12 @@ import {
   makeEmptyScopedRegistryFor,
   makeScopedRegistry,
   removeScope,
-} from "../../../src/domain/scoped-registry";
-import { DomainName } from "../../../src/domain/domain-name";
+} from "../../../src/domain/scoped-registry.js";
+import { DomainName } from "../../../src/domain/domain-name.js";
 import fc from "fast-check";
-import { arbDomainName } from "./domain-name.arb";
-import { someRegistryUrl } from "../../common/data-registry";
-import { unityRegistryUrl } from "../../../src/domain/registry-url";
+import { arbDomainName } from "./domain-name.arb.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
+import { unityRegistryUrl } from "../../../src/domain/registry-url.js";
 
 describe("scoped-registry", () => {
   describe("construction", () => {

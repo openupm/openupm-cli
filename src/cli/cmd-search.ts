@@ -1,19 +1,19 @@
 import { Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import * as os from "os";
-import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { searchPackagesUsing } from "../app/search-packages";
-import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
-import { getHomePathFromEnv } from "../domain/special-paths";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
-import type { ReadTextFile } from "../io/fs";
-import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
-import { withErrorLogger } from "./error-logging";
-import { primaryRegistryUrlOpt } from "./opt-registry";
-import { systemUserOpt } from "./opt-system-user";
-import { formatAsTable } from "./output-formatting";
-import { ResultCodes } from "./result-codes";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth.js";
+import { searchPackagesUsing } from "../app/search-packages.js";
+import { partialApply } from "../domain/fp-utils.js";
+import { DebugLog } from "../domain/logging.js";
+import { getHomePathFromEnv } from "../domain/special-paths.js";
+import { getUserUpmConfigPathFor } from "../domain/upm-config.js";
+import type { ReadTextFile } from "../io/fs.js";
+import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry.js";
+import { withErrorLogger } from "./error-logging.js";
+import { primaryRegistryUrlOpt } from "./opt-registry.js";
+import { systemUserOpt } from "./opt-system-user.js";
+import { formatAsTable } from "./output-formatting.js";
+import { ResultCodes } from "./result-codes.js";
 
 /**
  * Makes the `openupm search` cli command with the given dependencies.

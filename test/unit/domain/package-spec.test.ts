@@ -3,10 +3,10 @@ import {
   isPackageSpec,
   makePackageSpec,
   splitPackageSpec,
-} from "../../../src/domain/package-spec";
-import { arbDomainName } from "./domain-name.arb";
-import { arbPackageUrl } from "./package-url.arb";
-import { arbSemanticVersion } from "./semantic-version.arb";
+} from "../../../src/domain/package-spec.js";
+import { arbDomainName } from "./domain-name.arb.js";
+import { arbPackageUrl } from "./package-url.arb.js";
+import { arbSemanticVersion } from "./semantic-version.arb.js";
 
 describe("package-spec", () => {
   describe("validation", () => {

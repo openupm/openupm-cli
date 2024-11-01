@@ -1,5 +1,5 @@
-import { isZod } from "../../../src/domain/zod-utils";
-import { DomainName } from "../../../src/domain/domain-name";
+import { isZod } from "../../../src/domain/zod-utils.js";
+import { DomainName } from "../../../src/domain/domain-name.js";
 
 describe("domain-name", () => {
   describe("validation", () => {

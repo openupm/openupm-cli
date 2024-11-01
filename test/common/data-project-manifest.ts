@@ -1,6 +1,6 @@
 import { AssertionError } from "assert";
-import { DomainName } from "../../src/domain/domain-name";
-import { PackageUrl } from "../../src/domain/package-url";
+import { DomainName } from "../../src/domain/domain-name.js";
+import { PackageUrl } from "../../src/domain/package-url.js";
 import {
   addTestable,
   emptyProjectManifest,
@@ -8,11 +8,11 @@ import {
   setDependency,
   UnityProjectManifest,
   type DependencyVersion,
-} from "../../src/domain/project-manifest";
-import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry";
-import { SemanticVersion } from "../../src/domain/semantic-version";
-import { assertZod, isZod } from "../../src/domain/zod-utils";
-import { someRegistryUrl } from "./data-registry";
+} from "../../src/domain/project-manifest.js";
+import { addScope, makeScopedRegistry } from "../../src/domain/scoped-registry.js";
+import { SemanticVersion } from "../../src/domain/semantic-version.js";
+import { assertZod, isZod } from "../../src/domain/zod-utils.js";
+import { someRegistryUrl } from "./data-registry.js";
 
 function assertIsDependencyVersion(x: unknown): asserts x is DependencyVersion {
   if (!isZod(x, SemanticVersion) && !isZod(x, PackageUrl))

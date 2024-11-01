@@ -1,4 +1,4 @@
-import { PackumentNotFoundError } from "../domain/common-errors";
+import { PackumentNotFoundError } from "../domain/common-errors.js";
 import {
   DependencyGraph,
   makeGraphFromSeed,
@@ -6,19 +6,19 @@ import {
   markFailed,
   markRemoteResolved,
   tryGetNextUnresolved,
-} from "../domain/dependency-graph";
-import { DomainName } from "../domain/domain-name";
-import { partialApply } from "../domain/fp-utils";
+} from "../domain/dependency-graph.js";
+import { DomainName } from "../domain/domain-name.js";
+import { partialApply } from "../domain/fp-utils.js";
 import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
-} from "../domain/packument";
-import { Registry } from "../domain/registry";
-import { RegistryUrl } from "../domain/registry-url";
-import { SemanticVersion } from "../domain/semantic-version";
-import type { GetRegistryPackument } from "../io/registry";
-import { type CheckUrlExists } from "../io/www";
-import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
+} from "../domain/packument.js";
+import { Registry } from "../domain/registry.js";
+import { RegistryUrl } from "../domain/registry-url.js";
+import { SemanticVersion } from "../domain/semantic-version.js";
+import type { GetRegistryPackument } from "../io/registry.js";
+import { type CheckUrlExists } from "../io/www.js";
+import { checkIsBuiltInPackageUsing } from "./built-in-package-check.js";
 
 /**
  * Resolves all dependencies for a package.

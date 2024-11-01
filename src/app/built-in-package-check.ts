@@ -1,9 +1,9 @@
-import { DomainName } from "../domain/domain-name";
-import { packumentHasVersion } from "../domain/packument";
-import { unityRegistry } from "../domain/registry";
-import { SemanticVersion } from "../domain/semantic-version";
-import type { GetRegistryPackument } from "../io/registry";
-import { CheckUrlExists } from "../io/www";
+import { DomainName } from "../domain/domain-name.js";
+import { packumentHasVersion } from "../domain/packument.js";
+import { unityRegistry } from "../domain/registry.js";
+import { SemanticVersion } from "../domain/semantic-version.js";
+import type { GetRegistryPackument } from "../io/registry.js";
+import { CheckUrlExists } from "../io/www.js";
 
 /**
  * Gets the documentation page url for a package.

@@ -1,5 +1,5 @@
-import { RegistryUrl } from "./registry-url";
-import { DomainName } from "./domain-name";
+import { RegistryUrl } from "./registry-url.js";
+import { DomainName } from "./domain-name.js";
 
 /**
  * Contains information about a scoped registry.

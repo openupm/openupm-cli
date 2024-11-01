@@ -1,15 +1,15 @@
 import os from "os";
 import path from "path";
 import { Ok } from "ts-results-es";
-import { EditorVersionNotSupportedError } from "../../../src/domain/common-errors";
-import { makeEditorVersion } from "../../../src/domain/editor-version";
+import { EditorVersionNotSupportedError } from "../../../src/domain/common-errors.js";
+import { makeEditorVersion } from "../../../src/domain/editor-version.js";
 import {
   getHomePathFromEnv,
   NoHomePathError,
   OSNotSupportedError,
   tryGetEditorInstallPath,
   VersionNotSupportedOnOsError,
-} from "../../../src/domain/special-paths";
+} from "../../../src/domain/special-paths.js";
 
 describe("special-paths", () => {
   describe("home from env", () => {

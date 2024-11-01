@@ -1,7 +1,7 @@
 import {
   compareEditorVersion,
   tryParseEditorVersion,
-} from "../../../src/domain/editor-version";
+} from "../../../src/domain/editor-version.js";
 
 import assert from "assert";
 

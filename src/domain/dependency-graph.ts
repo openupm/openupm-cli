@@ -1,8 +1,8 @@
-import { DomainName } from "./domain-name";
-import { ResolvePackumentVersionError } from "./packument";
-import { recordEntries } from "./record-utils";
-import { RegistryUrl } from "./registry-url";
-import { SemanticVersion } from "./semantic-version";
+import { DomainName } from "./domain-name.js";
+import { ResolvePackumentVersionError } from "./packument.js";
+import { recordEntries } from "./record-utils.js";
+import { RegistryUrl } from "./registry-url.js";
+import { SemanticVersion } from "./semantic-version.js";
 
 export enum NodeType {
   Unresolved,

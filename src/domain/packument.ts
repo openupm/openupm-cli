@@ -1,16 +1,16 @@
 import { Dist } from "@npm/types";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
-import { PackumentNotFoundError } from "./common-errors";
-import { DomainName } from "./domain-name";
-import { UnityPackageManifest } from "./package-manifest";
+import { PackumentNotFoundError } from "./common-errors.js";
+import { DomainName } from "./domain-name.js";
+import { UnityPackageManifest } from "./package-manifest.js";
 import {
   ResolvableVersion,
   type LatestTag,
   type StableTag,
-} from "./package-spec";
-import { recordKeys } from "./record-utils";
-import { compareVersions, isStable, SemanticVersion } from "./semantic-version";
+} from "./package-spec.js";
+import { recordKeys } from "./record-utils.js";
+import { compareVersions, isStable, SemanticVersion } from "./semantic-version.js";
 
 /**
  * Contains information about a specific version of a package. This is based on

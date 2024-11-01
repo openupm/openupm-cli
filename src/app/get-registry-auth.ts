@@ -1,18 +1,18 @@
 import type { AuthOptions } from "npm-registry-fetch";
-import { decodeBase64 } from "../domain/base64";
-import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
-import { Registry } from "../domain/registry";
+import { decodeBase64 } from "../domain/base64.js";
+import { partialApply } from "../domain/fp-utils.js";
+import { DebugLog } from "../domain/logging.js";
+import { Registry } from "../domain/registry.js";
 import {
   openupmRegistryUrl,
   RegistryUrl,
   unityRegistryUrl,
-} from "../domain/registry-url";
-import { trySplitAtFirstOccurrenceOf } from "../domain/string-utils";
-import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config";
-import { removeExplicitUndefined } from "../domain/zod-utils";
-import { type ReadTextFile } from "../io/fs";
-import { loadUpmConfigUsing } from "./get-upm-config";
+} from "../domain/registry-url.js";
+import { trySplitAtFirstOccurrenceOf } from "../domain/string-utils.js";
+import type { UpmConfig, UpmConfigEntry } from "../domain/upm-config.js";
+import { removeExplicitUndefined } from "../domain/zod-utils.js";
+import { type ReadTextFile } from "../io/fs.js";
+import { loadUpmConfigUsing } from "./get-upm-config.js";
 
 /**
  * Checks whether a registry requires authentication. This just checks whether

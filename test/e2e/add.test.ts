@@ -1,11 +1,11 @@
-import { ResultCodes } from "../../src/cli/result-codes";
-import { emptyProjectManifest } from "../../src/domain/project-manifest";
-import { RegistryUrl } from "../../src/domain/registry-url";
-import { getProjectManifest } from "./check/project-manifest";
-import { runOpenupm } from "./run";
-import { prepareHomeDirectory } from "./setup/directories";
-import { prepareUnityProject } from "./setup/project";
-import { e2eTestRegistryUrl } from "./setup/test-registry";
+import { ResultCodes } from "../../src/cli/result-codes.js";
+import { emptyProjectManifest } from "../../src/domain/project-manifest.js";
+import { RegistryUrl } from "../../src/domain/registry-url.js";
+import { getProjectManifest } from "./check/project-manifest.js";
+import { runOpenupm } from "./run.js";
+import { prepareHomeDirectory } from "./setup/directories.js";
+import { prepareUnityProject } from "./setup/project.js";
+import { e2eTestRegistryUrl } from "./setup/test-registry.js";
 
 describe("add packages", () => {
   type SuccessfulAddCase = {

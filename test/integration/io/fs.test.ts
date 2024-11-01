@@ -5,8 +5,8 @@ import {
   getDirectoriesInFs,
   readTextFile,
   writeTextFile,
-} from "../../../src/io/fs";
-import { makeNodeError } from "./node-error.mock";
+} from "../../../src/io/fs.js";
+import { makeNodeError } from "./node-error.mock.js";
 
 describe("fs io", () => {
   describe("directory io", () => {

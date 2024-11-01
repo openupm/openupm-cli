@@ -1,6 +1,6 @@
-import { ResultCodes } from "../../src/cli/result-codes";
-import { runOpenupm } from "./run";
-import { prepareHomeDirectory } from "./setup/directories";
+import { ResultCodes } from "../../src/cli/result-codes.js";
+import { runOpenupm } from "./run.js";
+import { prepareHomeDirectory } from "./setup/directories.js";
 
 describe("cmd-search", () => {
   it("should print packument information", async () => {

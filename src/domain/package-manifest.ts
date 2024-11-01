@@ -1,10 +1,10 @@
-import { DomainName } from "./domain-name";
-import { SemanticVersion } from "./semantic-version";
+import { DomainName } from "./domain-name.js";
+import { SemanticVersion } from "./semantic-version.js";
 import { Maintainer } from "@npm/types";
-import { recordEntries } from "./record-utils";
-import { EditorVersion, tryParseEditorVersion } from "./editor-version";
+import { recordEntries } from "./record-utils.js";
+import { EditorVersion, tryParseEditorVersion } from "./editor-version.js";
 
-import { MalformedPackumentError } from "./common-errors";
+import { MalformedPackumentError } from "./common-errors.js";
 
 type MajorMinor = `${number}.${number}`;
 

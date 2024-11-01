@@ -5,36 +5,36 @@ import {
   PackageIncompatibleError,
   UnresolvedDependenciesError,
   type UnresolvedDependency,
-} from "../app/add-dependencies";
-import { EditorNotInstalledError } from "../app/builtin-packages";
+} from "../app/add-dependencies.js";
+import { EditorNotInstalledError } from "../app/builtin-packages.js";
 import {
   ProjectVersionMalformedError,
   ProjectVersionMissingError,
-} from "../app/determine-editor-version";
+} from "../app/determine-editor-version.js";
 import {
   ManifestMalformedError,
   ManifestMissingError,
-} from "../app/get-dependencies";
+} from "../app/get-dependencies.js";
 import {
   EditorVersionNotSupportedError,
   PackumentNotFoundError,
-} from "../domain/common-errors";
-import { stringifyEditorVersion } from "../domain/editor-version";
+} from "../domain/common-errors.js";
+import { stringifyEditorVersion } from "../domain/editor-version.js";
 import {
   NoStableError,
   NoVersionsError,
   VersionNotFoundError,
   type ResolvePackumentVersionError,
-} from "../domain/packument";
-import { recordEntries } from "../domain/record-utils";
+} from "../domain/packument.js";
+import { recordEntries } from "../domain/record-utils.js";
 import {
   NoHomePathError,
   OSNotSupportedError,
   VersionNotSupportedOnOsError,
-} from "../domain/special-paths";
-import { NoSystemUserProfilePath } from "../domain/upm-config";
-import { RegistryAuthenticationError } from "../io/common-errors";
-import { ResultCodes } from "./result-codes";
+} from "../domain/special-paths.js";
+import { NoSystemUserProfilePath } from "../domain/upm-config.js";
+import { RegistryAuthenticationError } from "../io/common-errors.js";
+import { ResultCodes } from "./result-codes.js";
 
 function errorMessageFor(error: ResolvePackumentVersionError): string {
   if (error instanceof PackumentNotFoundError) return "package not found";

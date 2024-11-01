@@ -1,7 +1,7 @@
 import path from "path";
-import type { AuthToken } from "./auth";
-import { RegistryUrl } from "./registry-url";
-import { splitLines } from "./string-utils";
+import type { AuthToken } from "./auth.js";
+import { RegistryUrl } from "./registry-url.js";
+import { splitLines } from "./string-utils.js";
 
 /**
  * The content lines of a npmrc file.

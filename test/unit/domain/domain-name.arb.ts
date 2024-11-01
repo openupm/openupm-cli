@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { DomainName } from "../../../src/domain/domain-name";
+import { DomainName } from "../../../src/domain/domain-name.js";
 
 /**
  * Single char string [A-Z].

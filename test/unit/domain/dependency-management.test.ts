@@ -1,27 +1,27 @@
 import fc from "fast-check";
-import { PackumentNotFoundError } from "../../../src/domain/common-errors";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors.js";
 import {
   addProjectDependency,
   AddResult,
   tryRemoveProjectDependencies,
   tryRemoveProjectDependency,
-} from "../../../src/domain/dependency-management";
-import { DomainName } from "../../../src/domain/domain-name";
+} from "../../../src/domain/dependency-management.js";
+import { DomainName } from "../../../src/domain/domain-name.js";
 import {
   hasDependency,
   mapScopedRegistry,
   removeDependency,
-} from "../../../src/domain/project-manifest";
-import { recordKeys } from "../../../src/domain/record-utils";
-import { RegistryUrl } from "../../../src/domain/registry-url";
-import { makeScopedRegistry } from "../../../src/domain/scoped-registry";
-import { arbDomainName } from "./domain-name.arb";
+} from "../../../src/domain/project-manifest.js";
+import { recordKeys } from "../../../src/domain/record-utils.js";
+import { RegistryUrl } from "../../../src/domain/registry-url.js";
+import { makeScopedRegistry } from "../../../src/domain/scoped-registry.js";
+import { arbDomainName } from "./domain-name.arb.js";
 import {
   abrDependencyVersion,
   arbManifest,
   arbManifestWithDependencyCount,
   arbNonEmptyManifest,
-} from "./project-manifest.arb";
+} from "./project-manifest.arb.js";
 
 describe("dependency management", () => {
   describe("remove single", () => {

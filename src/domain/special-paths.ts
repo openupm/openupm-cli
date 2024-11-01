@@ -1,14 +1,14 @@
 import os from "os";
 import { CustomError } from "ts-custom-error";
 import { Err, Ok, Result } from "ts-results-es";
-import { EditorVersionNotSupportedError } from "./common-errors";
+import { EditorVersionNotSupportedError } from "./common-errors.js";
 import {
   compareEditorVersion,
   EditorVersion,
   makeEditorVersion,
   ReleaseVersion,
   stringifyEditorVersion,
-} from "./editor-version";
+} from "./editor-version.js";
 
 /**
  * Error for when a specific OS does not support a specific editor-version.

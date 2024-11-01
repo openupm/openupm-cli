@@ -3,9 +3,9 @@ import {
   emptyNpmrc,
   getHomeNpmrcPath,
   setToken,
-} from "../../../src/domain/npmrc";
+} from "../../../src/domain/npmrc.js";
 
-import { someRegistryUrl } from "../../common/data-registry";
+import { someRegistryUrl } from "../../common/data-registry.js";
 
 const exampleToken = "123-456-789";
 const normalizedRegistryUrl = `${someRegistryUrl.substring(

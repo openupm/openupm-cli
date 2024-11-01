@@ -1,8 +1,8 @@
-import { makeEditorVersion } from "../../../src/domain/editor-version";
+import { makeEditorVersion } from "../../../src/domain/editor-version.js";
 import {
   tryParseProjectVersionTxt,
   validateProjectVersion,
-} from "../../../src/domain/project-version-txt";
+} from "../../../src/domain/project-version-txt.js";
 
 describe("ProjectVersion.txt", () => {
   describe("parsing", () => {

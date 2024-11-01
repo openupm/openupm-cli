@@ -1,5 +1,5 @@
 import nock from "nock";
-import type { DomainName } from "../../src/domain/domain-name";
+import type { DomainName } from "../../src/domain/domain-name.js";
 
 /**
  * Mocks which packages have an entry on the Unity documentation.

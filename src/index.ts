@@ -2,15 +2,15 @@
 
 import npmlog from "npmlog";
 import updateNotifier from "update-notifier";
-import pkg from "../package.json";
-import { makeOpenupmCli } from "./cli";
-import type { DebugLog } from "./domain/logging";
+import pkg from "../package.json" with { type: "json" };
+import { makeOpenupmCli } from "./cli/index.js";
+import type { DebugLog } from "./domain/logging.js";
 import {
   getAllRegistryPackumentsUsing,
   getAuthTokenUsing,
   getRegistryPackumentUsing,
   searchRegistryUsing,
-} from "./io/registry";
+} from "./io/registry.js";
 
 // Composition root
 

@@ -1,5 +1,5 @@
-import { coerceRegistryUrl, RegistryUrl } from "../../../src/domain/registry-url";
-import { isZod } from "../../../src/domain/zod-utils";
+import { coerceRegistryUrl, RegistryUrl } from "../../../src/domain/registry-url.js";
+import { isZod } from "../../../src/domain/zod-utils.js";
 
 describe("registry-url", () => {
   describe("validation", () => {

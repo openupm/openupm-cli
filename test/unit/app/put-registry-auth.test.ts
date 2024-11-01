@@ -1,7 +1,7 @@
-import { putRegistryAuthIntoUpmConfig } from "../../../src/app/put-registry-auth";
-import { Base64 } from "../../../src/domain/base64";
-import type { UpmConfig } from "../../../src/domain/upm-config";
-import { someRegistryUrl } from "../../common/data-registry";
+import { putRegistryAuthIntoUpmConfig } from "../../../src/app/put-registry-auth.js";
+import { Base64 } from "../../../src/domain/base64.js";
+import type { UpmConfig } from "../../../src/domain/upm-config.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
 
 describe("put registry auth into upm config", () => {
   const someEmail = "user@mail.com";

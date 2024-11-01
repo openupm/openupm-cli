@@ -1,24 +1,24 @@
 import { Command } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
 import { EOL } from "os";
-import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { queryAllRegistriesLazy } from "../app/query-registries";
-import { PackumentNotFoundError } from "../domain/common-errors";
-import { partialApply } from "../domain/fp-utils";
-import type { DebugLog } from "../domain/logging";
-import { hasVersion, splitPackageSpec } from "../domain/package-spec";
-import { unityRegistry } from "../domain/registry";
-import { getHomePathFromEnv } from "../domain/special-paths";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
-import type { ReadTextFile } from "../io/fs";
-import type { GetRegistryPackument } from "../io/registry";
-import { withErrorLogger } from "./error-logging";
-import { primaryRegistryUrlOpt } from "./opt-registry";
-import { systemUserOpt } from "./opt-system-user";
-import { upstreamOpt } from "./opt-upstream";
-import { formatPackumentInfo } from "./output-formatting";
-import { ResultCodes } from "./result-codes";
-import { mustBePackageSpec } from "./validators";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth.js";
+import { queryAllRegistriesLazy } from "../app/query-registries.js";
+import { PackumentNotFoundError } from "../domain/common-errors.js";
+import { partialApply } from "../domain/fp-utils.js";
+import type { DebugLog } from "../domain/logging.js";
+import { hasVersion, splitPackageSpec } from "../domain/package-spec.js";
+import { unityRegistry } from "../domain/registry.js";
+import { getHomePathFromEnv } from "../domain/special-paths.js";
+import { getUserUpmConfigPathFor } from "../domain/upm-config.js";
+import type { ReadTextFile } from "../io/fs.js";
+import type { GetRegistryPackument } from "../io/registry.js";
+import { withErrorLogger } from "./error-logging.js";
+import { primaryRegistryUrlOpt } from "./opt-registry.js";
+import { systemUserOpt } from "./opt-system-user.js";
+import { upstreamOpt } from "./opt-upstream.js";
+import { formatPackumentInfo } from "./output-formatting.js";
+import { ResultCodes } from "./result-codes.js";
+import { mustBePackageSpec } from "./validators.js";
 
 /**
  * Makes the `openupm view` cli command with the given dependencies.

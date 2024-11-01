@@ -1,5 +1,5 @@
-import { parseUpmConfig, type UpmConfig } from "../domain/upm-config";
-import { ReadTextFile } from "../io/fs";
+import { parseUpmConfig, type UpmConfig } from "../domain/upm-config.js";
+import { ReadTextFile } from "../io/fs.js";
 
 /**
  * Loads an upm-config file.

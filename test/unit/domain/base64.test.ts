@@ -1,4 +1,4 @@
-import { decodeBase64, encodeBase64 } from "../../../src/domain/base64";
+import { decodeBase64, encodeBase64 } from "../../../src/domain/base64.js";
 import fc from "fast-check";
 
 describe("base 64", () => {

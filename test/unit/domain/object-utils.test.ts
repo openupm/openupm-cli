@@ -1,4 +1,4 @@
-import { omitKey } from "../../../src/domain/object-utils";
+import { omitKey } from "../../../src/domain/object-utils.js";
 
 describe("object utils", () => {
   describe("omit key", () => {

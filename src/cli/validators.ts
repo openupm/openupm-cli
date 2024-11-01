@@ -1,9 +1,9 @@
-import { DomainName } from "../domain/domain-name";
+import { DomainName } from "../domain/domain-name.js";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isPackageSpec, type PackageSpec } from "../domain/package-spec";
-import { coerceRegistryUrl } from "../domain/registry-url";
-import { isZod } from "../domain/zod-utils";
-import { mustBeParsable, mustSatisfy } from "./cli-parsing";
+import { isPackageSpec, type PackageSpec } from "../domain/package-spec.js";
+import { coerceRegistryUrl } from "../domain/registry-url.js";
+import { isZod } from "../domain/zod-utils.js";
+import { mustBeParsable, mustSatisfy } from "./cli-parsing.js";
 
 /**
  * {@link CliValueParser} for checking that a string is a {@link PackageSpec}.

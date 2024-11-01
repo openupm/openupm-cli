@@ -1,5 +1,5 @@
-import type { Registry } from "../../src/domain/registry";
-import { RegistryUrl } from "../../src/domain/registry-url";
+import type { Registry } from "../../src/domain/registry.js";
+import { RegistryUrl } from "../../src/domain/registry-url.js";
 
 /**
  * Some registry url for testing.

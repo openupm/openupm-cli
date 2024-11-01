@@ -1,12 +1,12 @@
 import path from "node:path";
 import { z } from "zod";
-import { DomainName } from "./domain-name";
-import { PackageUrl } from "./package-url";
-import { removeRecordKey } from "./record-utils";
-import { RegistryUrl } from "./registry-url";
-import { ScopedRegistry } from "./scoped-registry";
-import { SemanticVersion } from "./semantic-version";
-import { removeTrailingSlash } from "./string-utils";
+import { DomainName } from "./domain-name.js";
+import { PackageUrl } from "./package-url.js";
+import { removeRecordKey } from "./record-utils.js";
+import { RegistryUrl } from "./registry-url.js";
+import { ScopedRegistry } from "./scoped-registry.js";
+import { SemanticVersion } from "./semantic-version.js";
+import { removeTrailingSlash } from "./string-utils.js";
 
 /**
  * The version of a dependency in a manifest.

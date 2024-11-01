@@ -1,4 +1,4 @@
-import semver from "semver/preload";
+import semver from "semver";
 import { z } from "zod";
 
 /**

@@ -1,12 +1,12 @@
 import { CustomError } from "ts-custom-error";
-import { assertIsError } from "../domain/error-type-guards";
-import type { DebugLog } from "../domain/logging";
+import { assertIsError } from "../domain/error-type-guards.js";
+import type { DebugLog } from "../domain/logging.js";
 import {
   type UnityProjectManifest,
   manifestPathFor,
   parseProjectManifest,
-} from "../domain/project-manifest";
-import type { ReadTextFile } from "../io/fs";
+} from "../domain/project-manifest.js";
+import type { ReadTextFile } from "../io/fs.js";
 
 export class ManifestMissingError extends CustomError {
   public constructor(public expectedPath: string) {

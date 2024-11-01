@@ -1,4 +1,4 @@
-import { RegistryUrl } from "../../../src/domain/registry-url";
+import { RegistryUrl } from "../../../src/domain/registry-url.js";
 
 /**
  * Registry url of the local e2e test package registry.

@@ -1,17 +1,17 @@
 import { AsyncResult } from "ts-results-es";
-import { PackumentNotFoundError } from "../domain/common-errors";
-import { tryRemoveProjectDependencies } from "../domain/dependency-management";
-import { DomainName } from "../domain/domain-name";
-import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
+import { PackumentNotFoundError } from "../domain/common-errors.js";
+import { tryRemoveProjectDependencies } from "../domain/dependency-management.js";
+import { DomainName } from "../domain/domain-name.js";
+import { partialApply } from "../domain/fp-utils.js";
+import { DebugLog } from "../domain/logging.js";
 import {
   UnityProjectManifest,
   type DependencyVersion,
-} from "../domain/project-manifest";
-import { resultifyAsyncOp } from "../domain/result-utils";
-import { type ReadTextFile, type WriteTextFile } from "../io/fs";
-import { loadProjectManifestUsing } from "./get-dependencies";
-import { saveProjectManifestUsing } from "./write-dependencies";
+} from "../domain/project-manifest.js";
+import { resultifyAsyncOp } from "../domain/result-utils.js";
+import { type ReadTextFile, type WriteTextFile } from "../io/fs.js";
+import { loadProjectManifestUsing } from "./get-dependencies.js";
+import { saveProjectManifestUsing } from "./write-dependencies.js";
 
 /**
  * Contains information about a package that was removed from a project.

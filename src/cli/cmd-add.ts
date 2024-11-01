@@ -1,26 +1,26 @@
 import { Argument, Command, Option } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
-import { addDependenciesUsing } from "../app/add-dependencies";
-import { determineEditorVersionUsing } from "../app/determine-editor-version";
-import { loadRegistryAuthUsing } from "../app/get-registry-auth";
-import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
-import { makePackageSpec } from "../domain/package-spec";
-import { recordEntries } from "../domain/record-utils";
-import { unityRegistry } from "../domain/registry";
-import { openupmRegistryUrl } from "../domain/registry-url";
-import { getHomePathFromEnv } from "../domain/special-paths";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
-import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import type { GetRegistryPackument } from "../io/registry";
-import type { CheckUrlExists } from "../io/www";
-import { eachValue } from "./cli-parsing";
-import { withErrorLogger } from "./error-logging";
-import { primaryRegistriesUrlOpt } from "./opt-registry";
-import { systemUserOpt } from "./opt-system-user";
-import { upstreamOpt } from "./opt-upstream";
-import { workDirOpt } from "./opt-wd";
-import { mustBePackageSpec } from "./validators";
+import { addDependenciesUsing } from "../app/add-dependencies.js";
+import { determineEditorVersionUsing } from "../app/determine-editor-version.js";
+import { loadRegistryAuthUsing } from "../app/get-registry-auth.js";
+import { partialApply } from "../domain/fp-utils.js";
+import { DebugLog } from "../domain/logging.js";
+import { makePackageSpec } from "../domain/package-spec.js";
+import { recordEntries } from "../domain/record-utils.js";
+import { unityRegistry } from "../domain/registry.js";
+import { openupmRegistryUrl } from "../domain/registry-url.js";
+import { getHomePathFromEnv } from "../domain/special-paths.js";
+import { getUserUpmConfigPathFor } from "../domain/upm-config.js";
+import type { ReadTextFile, WriteTextFile } from "../io/fs.js";
+import type { GetRegistryPackument } from "../io/registry.js";
+import type { CheckUrlExists } from "../io/www.js";
+import { eachValue } from "./cli-parsing.js";
+import { withErrorLogger } from "./error-logging.js";
+import { primaryRegistriesUrlOpt } from "./opt-registry.js";
+import { systemUserOpt } from "./opt-system-user.js";
+import { upstreamOpt } from "./opt-upstream.js";
+import { workDirOpt } from "./opt-wd.js";
+import { mustBePackageSpec } from "./validators.js";
 
 const packageSpecsArg = new Argument(
   "<package-spec...>",

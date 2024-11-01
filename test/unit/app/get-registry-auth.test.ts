@@ -2,13 +2,13 @@ import {
   importNpmAuth,
   isNonAuthUrl,
   tryGetAuthEntry,
-} from "../../../src/app/get-registry-auth";
-import { Base64 } from "../../../src/domain/base64";
+} from "../../../src/app/get-registry-auth.js";
+import { Base64 } from "../../../src/domain/base64.js";
 import {
   openupmRegistryUrl,
   unityRegistryUrl,
-} from "../../../src/domain/registry-url";
-import { someRegistryUrl } from "../../common/data-registry";
+} from "../../../src/domain/registry-url.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
 
 describe("get registry auth from upm config", () => {
   const someEmail = "user@mail.com";

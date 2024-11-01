@@ -1,21 +1,21 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { Logger } from "npmlog";
-import { loginUsing } from "../app/login";
-import { partialApply } from "../domain/fp-utils";
-import type { DebugLog } from "../domain/logging";
-import { getHomePathFromEnv } from "../domain/special-paths";
-import { getUserUpmConfigPathFor } from "../domain/upm-config";
-import type { ReadTextFile, WriteTextFile } from "../io/fs";
-import type { GetAuthToken } from "../io/registry";
-import { withErrorLogger } from "./error-logging";
-import { systemUserOpt } from "./opt-system-user";
+import { loginUsing } from "../app/login.js";
+import { partialApply } from "../domain/fp-utils.js";
+import type { DebugLog } from "../domain/logging.js";
+import { getHomePathFromEnv } from "../domain/special-paths.js";
+import { getUserUpmConfigPathFor } from "../domain/upm-config.js";
+import type { ReadTextFile, WriteTextFile } from "../io/fs.js";
+import type { GetAuthToken } from "../io/registry.js";
+import { withErrorLogger } from "./error-logging.js";
+import { systemUserOpt } from "./opt-system-user.js";
 import {
   promptEmail,
   promptPassword,
   promptRegistryUrl,
   promptUsername,
-} from "./prompts";
-import { mustBeRegistryUrl } from "./validators";
+} from "./prompts.js";
+import { mustBeRegistryUrl } from "./validators.js";
 
 const usernameOpt = new Option("-u, --username <username>", "username").default(
   null

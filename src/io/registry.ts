@@ -1,17 +1,17 @@
 import npmSearch from "libnpmsearch";
 import { loginCouch } from "npm-profile";
 import npmFetch from "npm-registry-fetch";
-import type { AuthToken } from "../domain/auth";
-import { DomainName } from "../domain/domain-name";
-import { assertIsError, assertIsHttpError } from "../domain/error-type-guards";
-import { DebugLog } from "../domain/logging";
-import type { SearchedPackument, UnityPackument } from "../domain/packument";
-import { makeNpmFetchOptions, Registry } from "../domain/registry";
-import type { RegistryUrl } from "../domain/registry-url";
+import type { AuthToken } from "../domain/auth.js";
+import { DomainName } from "../domain/domain-name.js";
+import { assertIsError, assertIsHttpError } from "../domain/error-type-guards.js";
+import { DebugLog } from "../domain/logging.js";
+import type { SearchedPackument, UnityPackument } from "../domain/packument.js";
+import { makeNpmFetchOptions, Registry } from "../domain/registry.js";
+import type { RegistryUrl } from "../domain/registry-url.js";
 import {
   makeRegistryInteractionError,
   RegistryAuthenticationError,
-} from "./common-errors";
+} from "./common-errors.js";
 
 type AllPackuments = Readonly<{
   // eslint-disable-next-line jsdoc/require-jsdoc

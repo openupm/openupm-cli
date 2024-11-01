@@ -4,30 +4,30 @@ import {
   CompatibilityCheckFailedError,
   PackageIncompatibleError,
   UnresolvedDependenciesError,
-} from "../../../src/app/add-dependencies";
-import { PackumentNotFoundError } from "../../../src/domain/common-errors";
-import type { AddResult } from "../../../src/domain/dependency-management";
-import { DomainName } from "../../../src/domain/domain-name";
-import { makeEditorVersion } from "../../../src/domain/editor-version";
-import { partialApply } from "../../../src/domain/fp-utils";
-import { noopLogger } from "../../../src/domain/logging";
-import { emptyProjectManifest } from "../../../src/domain/project-manifest";
-import { unityRegistry } from "../../../src/domain/registry";
-import { unityRegistryUrl } from "../../../src/domain/registry-url";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { getRegistryPackumentUsing } from "../../../src/io/registry";
-import { fetchCheckUrlExists } from "../../../src/io/www";
-import { buildPackument } from "../../common/data-packument";
-import { buildProjectManifest } from "../../common/data-project-manifest";
+} from "../../../src/app/add-dependencies.js";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors.js";
+import type { AddResult } from "../../../src/domain/dependency-management.js";
+import { DomainName } from "../../../src/domain/domain-name.js";
+import { makeEditorVersion } from "../../../src/domain/editor-version.js";
+import { partialApply } from "../../../src/domain/fp-utils.js";
+import { noopLogger } from "../../../src/domain/logging.js";
+import { emptyProjectManifest } from "../../../src/domain/project-manifest.js";
+import { unityRegistry } from "../../../src/domain/registry.js";
+import { unityRegistryUrl } from "../../../src/domain/registry-url.js";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
+import { getRegistryPackumentUsing } from "../../../src/io/registry.js";
+import { fetchCheckUrlExists } from "../../../src/io/www.js";
+import { buildPackument } from "../../common/data-packument.js";
+import { buildProjectManifest } from "../../common/data-project-manifest.js";
 import {
   otherRegistry,
   otherRegistryUrl,
   someRegistry,
   someRegistryUrl,
-} from "../../common/data-registry";
-import { makeMockLogger } from "../../common/log.mock";
-import { MockFs } from "../fs.mock";
-import { mockRegistryPackuments } from "../registry.mock";
+} from "../../common/data-registry.js";
+import { makeMockLogger } from "../../common/log.mock.js";
+import { MockFs } from "../fs.mock.js";
+import { mockRegistryPackuments } from "../registry.mock.js";
 
 describe("add dependencies", () => {
   const someVersion = SemanticVersion.parse("1.0.0");

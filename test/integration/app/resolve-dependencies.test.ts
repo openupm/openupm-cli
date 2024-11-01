@@ -1,23 +1,23 @@
 import nock from "nock";
-import { resolveDependenciesUsing } from "../../../src/app/resolve-dependencies";
-import { PackumentNotFoundError } from "../../../src/domain/common-errors";
+import { resolveDependenciesUsing } from "../../../src/app/resolve-dependencies.js";
+import { PackumentNotFoundError } from "../../../src/domain/common-errors.js";
 import {
   NodeType,
   tryGetGraphNode,
-} from "../../../src/domain/dependency-graph";
-import { DomainName } from "../../../src/domain/domain-name";
-import { partialApply } from "../../../src/domain/fp-utils";
-import { noopLogger } from "../../../src/domain/logging";
-import { VersionNotFoundError } from "../../../src/domain/packument";
-import { Registry } from "../../../src/domain/registry";
-import { unityRegistryUrl } from "../../../src/domain/registry-url";
-import { SemanticVersion } from "../../../src/domain/semantic-version";
-import { getRegistryPackumentUsing } from "../../../src/io/registry";
-import { fetchCheckUrlExists } from "../../../src/io/www";
-import { buildPackument } from "../../common/data-packument";
-import { someRegistryUrl } from "../../common/data-registry";
-import { mockUnityDocPages } from "../docs.mock";
-import { mockRegistryPackuments } from "../registry.mock";
+} from "../../../src/domain/dependency-graph.js";
+import { DomainName } from "../../../src/domain/domain-name.js";
+import { partialApply } from "../../../src/domain/fp-utils.js";
+import { noopLogger } from "../../../src/domain/logging.js";
+import { VersionNotFoundError } from "../../../src/domain/packument.js";
+import { Registry } from "../../../src/domain/registry.js";
+import { unityRegistryUrl } from "../../../src/domain/registry-url.js";
+import { SemanticVersion } from "../../../src/domain/semantic-version.js";
+import { getRegistryPackumentUsing } from "../../../src/io/registry.js";
+import { fetchCheckUrlExists } from "../../../src/io/www.js";
+import { buildPackument } from "../../common/data-packument.js";
+import { someRegistryUrl } from "../../common/data-registry.js";
+import { mockUnityDocPages } from "../docs.mock.js";
+import { mockRegistryPackuments } from "../registry.mock.js";
 
 describe("dependency resolving", () => {
   const sources: Registry[] = [
