@@ -39,7 +39,7 @@
     "@npm/types": "^1.0.2",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@types/cli-table": "^0.3.2",
+    "@types/cli-table": "^0.3.4",
     "@types/fs-extra": "^11.0.3",
     "@types/jest": "^29.5.12",
     "@types/libnpmsearch": "^2.0.4",
