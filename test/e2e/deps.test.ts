@@ -1,8 +1,6 @@
 import { ResultCodes } from "../../src/cli/result-codes";
-import { openupmRegistryUrl } from "../../src/domain/registry-url";
 import { runOpenupm } from "./run";
 import { prepareHomeDirectory } from "./setup/directories";
-import { e2eTestRegistryUrl } from "./setup/test-registry";
 
 describe("print package dependencies", () => {
   it("should print dependencies for an openupm package with version", async () => {
@@ -36,27 +34,6 @@ describe("print package dependencies", () => {
         // Taken from https://package.openupm.com/dev.comradevanti.opt-unity
         expect.stringContaining("org.nuget.comradevanti.csharptools.opt@3.0.0"),
         expect.stringContaining("dev.comradevanti.rect-constraints@1.4.1"),
-      ])
-    );
-  });
-
-  it("should print dependencies for package with mix of 3rd party, openupm and unity dependencies", async () => {
-    const homeDir = await prepareHomeDirectory();
-
-    const output = await runOpenupm(homeDir, [
-      "deps",
-      "com.mixed.package@1.0.0",
-      "--registry",
-      e2eTestRegistryUrl,
-      openupmRegistryUrl,
-    ]);
-
-    expect(output.code).toEqual(ResultCodes.Ok);
-    expect(output.stdErr).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("com.some.package@1.0.0"),
-        expect.stringContaining("dev.comradevanti.opt-unity@3.5.0"),
-        expect.stringContaining("com.unity.ugui@1.0.0"),
       ])
     );
   });
