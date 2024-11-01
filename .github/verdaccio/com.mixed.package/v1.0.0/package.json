@@ -1,0 +1,9 @@
+{
+  "name": "com.mixed.package",
+  "version": "1.0.0",
+  "dependencies": {
+    "com.some.package": "1.0.0",
+    "dev.comradevanti.opt-unity": "3.5.0",
+    "com.unity.ugui": "1.0.0"
+  }
+}
