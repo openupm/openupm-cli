@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const segmentRegex = /^(?!.*--|^-.*|.*-$)[a-zA-Z0-9-]+$/;
+const segmentRegex = /^(?!.*--|^-.*|.*-$)[a-zA-Z0-9-_]+$/;
 
 function domainSegmentsIn(hostName: string): string[] {
   return hostName.split(".");
