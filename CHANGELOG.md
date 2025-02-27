@@ -1,3 +1,10 @@
+## [4.5.1](https://github.com/openupm/openupm-cli/compare/4.5.0...4.5.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* allow underscores in domain name segments ([#421](https://github.com/openupm/openupm-cli/issues/421)) ([6fbc3db](https://github.com/openupm/openupm-cli/commit/6fbc3dbac48e173539077f1e1fe4ad4e04ea6edc)), closes [#420](https://github.com/openupm/openupm-cli/issues/420)
+
 # [4.5.0](https://github.com/openupm/openupm-cli/compare/4.4.0...4.5.0) (2024-11-01)
 
 
