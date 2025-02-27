@@ -9,6 +9,7 @@ describe("domain-name", () => {
       "com.openupm",
       "at.ac.my-school",
       "dev.comradevanti123",
+      "org.nuget.sqlitepclraw.bundle_e_sqlite3",
     ])(`should be ok for "%s"`, (s) => {
       expect(isZod(s, DomainName)).toBeTruthy();
     });
