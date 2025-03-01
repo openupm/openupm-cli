@@ -9,7 +9,7 @@ This command has the `list` alias. On this doc page we will always use the prima
 
 ### Project directory
 
-By default openupm expects that you run the add command inside your Unity projects root directory. Based on this it determines relative paths to your package manifest etc.
+By default openupm expects that you run the `ls` command inside your Unity projects root directory. Based on this it determines relative paths to your package manifest etc.
 
 If you need to run openupm from somewhere else you can change the working directory using the `--chdir`/`-c` option. This option accepts an **absolute** path to a Unity projects root directory.
 
