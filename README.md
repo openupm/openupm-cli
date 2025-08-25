@@ -161,6 +161,7 @@ We also have a few guide pages on specific topics if you need help:
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/alelievr"><img src="https://avatars.githubusercontent.com/u/6877923?v=4?s=100" width="100px;" alt="Antoine Lelievre"/><br /><sub><b>Antoine Lelievre</b></sub></a><br /><a href="https://github.com/openupm/openupm-cli/issues?q=author%3Aalelievr" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://tomorrow.comes.today"><img src="https://avatars.githubusercontent.com/u/6391063?v=4?s=100" width="100px;" alt="Tyler Temp"/><br /><sub><b>Tyler Temp</b></sub></a><br /><a href="https://github.com/openupm/openupm-cli/issues?q=author%3ATylerTemp" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://marcbernardtools.com/"><img src="https://avatars.githubusercontent.com/u/59966492?v=4?s=100" width="100px;" alt="Marc Bernard"/><br /><sub><b>Marc Bernard</b></sub></a><br /><a href="https://github.com/openupm/openupm-cli/commits?author=mbtools" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/StigOlavsen"><img src="https://avatars.githubusercontent.com/u/7004085?v=4?s=100" width="100px;" alt="Stig Olavsen"/><br /><sub><b>Stig Olavsen</b></sub></a><br /><a href="https://github.com/openupm/openupm-cli/commits?author=StigOlavsen" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
