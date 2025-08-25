@@ -128,7 +128,7 @@ export const tryParseEditorVersion = function (
     locBuild?: `${number}`;
   };
   const regex =
-    /^(?<major>\d+)\.(?<minor>[1234])(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
+    /^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+)((?<flag>a|b|f|c)(?<build>\d+)((?<loc>c)(?<locBuild>\d+))?)?)?/;
   const match = regex.exec(version);
   if (!match) return null;
   const groups = <RegexMatchGroups>match.groups;
