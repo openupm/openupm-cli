@@ -70,6 +70,17 @@ describe("editor-version", () => {
     it("should not parse invalid version", () => {
       expect(tryParseEditorVersion("2019") === null).toBeTruthy();
     });
+    it("should parse 6000.x.y.zfn", () => {
+      const version = tryParseEditorVersion("6000.0.26f1");
+      assert(version !== null);
+      expect(version).toEqual({
+        major: 6000,
+        minor: 0,
+        patch: 26,
+        flag: "f",
+        build: 1,
+      });
+    });
   });
 
   describe("compareEditorVersion", () => {
