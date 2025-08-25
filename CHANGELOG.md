@@ -1,3 +1,10 @@
+## [4.5.2](https://github.com/openupm/openupm-cli/compare/4.5.1...4.5.2) (2025-08-25)
+
+
+### Bug Fixes
+
+* Allow any number for minor version number ([#423](https://github.com/openupm/openupm-cli/issues/423)) ([6ad6837](https://github.com/openupm/openupm-cli/commit/6ad6837ec143f5b60f88e6b7e821b55b332c74b5))
+
 ## [4.5.1](https://github.com/openupm/openupm-cli/compare/4.5.0...4.5.1) (2025-02-27)
 
 
