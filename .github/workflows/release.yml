@@ -1,6 +1,6 @@
 name: Release
 
-on: 
+on:
   workflow_run:
     workflows: Run tests
     branches: master
@@ -9,20 +9,40 @@ on:
 
 jobs:
   release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - name: npm install
-        run: npm install
+      - uses: actions/checkout@v5
+      - name: set node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Use npm with trusted publishing support
+        run: npm install -g npm@11.13.0
+      - name: Show release tool versions
+        run: |
+          node --version
+          npm --version
+          npm config get registry
+      - name: npm ci
+        run: npm ci
       - name: Build
         run: npm run build
       - name: Release
-        uses: cycjimmy/semantic-release-action@v3
+        uses: cycjimmy/semantic-release-action@v6.0.0
         with:
           extra_plugins: |
+            @semantic-release/npm@13.1.5
             @semantic-release/changelog
             @semantic-release/git
-          branch: master
+          branches: master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DEBUG: semantic-release:*,@semantic-release/npm:*
+          NPM_CONFIG_LOGLEVEL: verbose
