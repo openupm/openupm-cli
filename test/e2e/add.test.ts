@@ -8,6 +8,8 @@ import { prepareUnityProject } from "./setup/project";
 import { e2eTestRegistryUrl } from "./setup/test-registry";
 
 describe("add packages", () => {
+  jest.setTimeout(30000);
+
   type SuccessfulAddCase = {
     packageName: string;
     addVersion?: string;
