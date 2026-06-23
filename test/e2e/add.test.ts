@@ -299,12 +299,13 @@ describe("add packages", () => {
     await testSuccessfulAdd(
       [
         {
-          packageName: "org.khronos.unitygltf",
-          expectedVersion: "2.12.0",
-          addVersion: "2.12.0",
+          packageName: "com.builtin.package",
+          expectedVersion: "1.0.0",
+          addVersion: "1.0.0",
         },
       ],
-      ["org.khronos.unitygltf"]
+      ["com.builtin.package"],
+      e2eTestRegistryUrl
     );
   });
 

@@ -1,0 +1,7 @@
+{
+  "name": "com.builtin.package",
+  "version": "1.0.0",
+  "dependencies": {
+    "com.unity.modules.imageconversion": "1.0.0"
+  }
+}
