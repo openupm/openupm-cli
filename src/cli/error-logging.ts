@@ -1,5 +1,4 @@
 import { EOL } from "node:os";
-import { Logger } from "npmlog";
 import {
   CompatibilityCheckFailedError,
   PackageIncompatibleError,
@@ -34,6 +33,7 @@ import {
 } from "../domain/special-paths";
 import { NoSystemUserProfilePath } from "../domain/upm-config";
 import { RegistryAuthenticationError } from "../io/common-errors";
+import type { Logger } from "./logger";
 import { ResultCodes } from "./result-codes";
 
 function errorMessageFor(error: ResolvePackumentVersionError): string {
@@ -150,8 +150,7 @@ export function logError(log: Logger, error: unknown) {
   const fixSuggestion = tryMakeFixSuggestionFor(error);
   if (fixSuggestion !== null) log.notice("", fixSuggestion);
 
-  const isLoggingVerbose = log.level === "verbose" || log.level === "silly";
-  if (!isLoggingVerbose)
+  if (log.level !== "verbose")
     log.notice("", "Run with --verbose to get more information.");
 }
 

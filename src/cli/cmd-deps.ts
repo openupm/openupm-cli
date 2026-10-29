@@ -1,6 +1,5 @@
 import { Argument, Command, Option } from "@commander-js/extra-typings";
 import chalk from "chalk";
-import { Logger } from "npmlog";
 import os from "os";
 import { fetchLatestPackumentVersionUsing } from "../app/get-latest-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
@@ -21,6 +20,7 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { stringifyDependencyGraph } from "./dependency-logging";
 import { withErrorLogger } from "./error-logging";
+import type { Logger } from "./logger";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { ResultCodes } from "./result-codes";

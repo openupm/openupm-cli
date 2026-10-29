@@ -257,8 +257,6 @@ export async function addDependenciesUsing(
     packageName: DomainName,
     requestedVersion: Exclude<VersionReference, PackageUrl>
   ): Promise<[SemanticVersion, RegistryUrl]> {
-    let versionToAdd = requestedVersion;
-
     let totalResolveResult: Result<
       ResolvedPackumentVersion,
       ResolvePackumentVersionError
@@ -283,14 +281,14 @@ export async function addDependenciesUsing(
 
     const packumentVersion = totalResolveResult.value.packumentVersion;
     const source = totalResolveResult.value.source;
-    versionToAdd = packumentVersion.version;
+    const versionToAdd = packumentVersion.version;
 
     // Only do compatibility check when we have a editor version to check against
     if (editorVersion !== null) {
       let targetEditorVersion: EditorVersion | null;
       try {
         targetEditorVersion = tryGetTargetEditorVersionFor(packumentVersion);
-      } catch (error) {
+      } catch {
         if (!force) {
           const packageSpec = makePackageSpec(packageName, versionToAdd);
           await debugLog(

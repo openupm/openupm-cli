@@ -1,5 +1,4 @@
 import { Command, Option } from "@commander-js/extra-typings";
-import { Logger } from "npmlog";
 import { loginUsing } from "../app/login";
 import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
@@ -8,6 +7,7 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile, WriteTextFile } from "../io/fs";
 import type { GetAuthToken } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
+import type { Logger } from "./logger";
 import { systemUserOpt } from "./opt-system-user";
 import {
   promptEmail,

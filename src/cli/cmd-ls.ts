@@ -1,5 +1,4 @@
 import { Command } from "@commander-js/extra-typings";
-import { Logger } from "npmlog";
 import { loadProjectManifestUsing } from "../app/get-dependencies";
 import { partialApply } from "../domain/fp-utils";
 import type { DebugLog } from "../domain/logging";
@@ -7,6 +6,7 @@ import { makePackageSpec } from "../domain/package-spec";
 import { recordEntries } from "../domain/record-utils";
 import type { ReadTextFile } from "../io/fs";
 import { withErrorLogger } from "./error-logging";
+import type { Logger } from "./logger";
 import { workDirOpt } from "./opt-wd";
 
 /**

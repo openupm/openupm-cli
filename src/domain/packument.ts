@@ -213,7 +213,6 @@ export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion
 ): Result<UnityPackumentVersion, VersionNotFoundError>;
-// eslint-disable-next-line jsdoc/require-jsdoc
 export function tryResolvePackumentVersion(
   packument: UnityPackument,
   requestedVersion: ResolvableVersion

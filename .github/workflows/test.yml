@@ -41,9 +41,9 @@ jobs:
     strategy:
       matrix:
         node:
-          - "18.x" # Oldest supported lts
-          - "20.x" # Newest lts
-          - "22.x" # Latest
+          - "20.x" # Oldest supported
+          - "22.x"
+          - "24.x" # Newest lts
     name: E2E Tests
     steps:
       - name: Checkout 🛎️

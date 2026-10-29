@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import npmlog from "npmlog";
 import updateNotifier from "update-notifier";
 import pkg from "../package.json";
 import { makeOpenupmCli } from "./cli";
+import { makeStreamLogger } from "./cli/logger";
 import type { DebugLog } from "./domain/logging";
 import {
   getAllRegistryPackumentsUsing,
@@ -14,7 +14,16 @@ import {
 
 // Composition root
 
-const log = npmlog;
+// Terminal output is asynchronous on Windows, so it could get cut off when we
+// call process.exit right after logging.
+for (const stream of [process.stdout, process.stderr]) {
+  const handle = (
+    stream as { _handle?: { setBlocking?: (blocking: boolean) => void } }
+  )._handle;
+  if (stream.isTTY) handle?.setBlocking?.(true);
+}
+
+const log = makeStreamLogger();
 
 const debugLogToConsole: DebugLog = async function (message, context) {
   const contextMessage =

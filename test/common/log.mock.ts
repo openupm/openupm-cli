@@ -1,8 +1,15 @@
-import { Logger } from "npmlog";
+import type { Logger } from "../../src/cli/logger";
 
 /**
  * Creates mock logger.
  */
-export function makeMockLogger() {
-  return jest.mocked(jest.createMockFromModule<Logger>("npmlog"));
+export function makeMockLogger(): jest.Mocked<Logger> {
+  return {
+    level: "notice",
+    verbose: jest.fn(),
+    notice: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    disableColor: jest.fn(),
+  };
 }

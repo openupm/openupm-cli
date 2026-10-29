@@ -1,5 +1,4 @@
 import { Command } from "@commander-js/extra-typings";
-import { Logger } from "npmlog";
 import * as os from "os";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { searchPackagesUsing } from "../app/search-packages";
@@ -10,6 +9,7 @@ import { getUserUpmConfigPathFor } from "../domain/upm-config";
 import type { ReadTextFile } from "../io/fs";
 import type { GetAllRegistryPackuments, SearchRegistry } from "../io/registry";
 import { withErrorLogger } from "./error-logging";
+import type { Logger } from "./logger";
 import { primaryRegistryUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { formatAsTable } from "./output-formatting";

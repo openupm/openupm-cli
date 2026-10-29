@@ -8,6 +8,12 @@ import {
 } from "../../../src/io/fs";
 import { makeNodeError } from "./node-error.mock";
 
+// jest types the readdir mock with its last overload, which returns entries
+// with buffer names, while the code under test only reads string names.
+function makeDirent(name: string, isDirectory: boolean) {
+  return { name, isDirectory: () => isDirectory } as Dirent as never;
+}
+
 describe("fs io", () => {
   describe("directory io", () => {
     describe("get directories", () => {
@@ -27,10 +33,7 @@ describe("fs io", () => {
       it("should get names of directories", async () => {
         jest
           .spyOn(fs, "readdir")
-          .mockResolvedValue([
-            { name: "a", isDirectory: () => true } as Dirent,
-            { name: "b", isDirectory: () => true } as Dirent,
-          ]);
+          .mockResolvedValue([makeDirent("a", true), makeDirent("b", true)]);
         const { getDirectoriesIn } = makeDependencies();
 
         const actual = await getDirectoriesIn("/good/path/");
@@ -42,8 +45,8 @@ describe("fs io", () => {
         jest
           .spyOn(fs, "readdir")
           .mockResolvedValue([
-            { name: "a", isDirectory: () => true } as Dirent,
-            { name: "b.txt", isDirectory: () => false } as Dirent,
+            makeDirent("a", true),
+            makeDirent("b.txt", false),
           ]);
         const { getDirectoriesIn } = makeDependencies();
 

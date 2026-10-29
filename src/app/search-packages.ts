@@ -1,10 +1,7 @@
 import { assertIsError } from "../domain/error-type-guards";
 import { DebugLog } from "../domain/logging";
 import { Registry } from "../domain/registry";
-import {
-  GetAllRegistryPackuments,
-  type SearchRegistry,
-} from "../io/registry";
+import { GetAllRegistryPackuments, type SearchRegistry } from "../io/registry";
 import { type SearchedPackument } from "../domain/packument";
 
 /**
@@ -33,7 +30,7 @@ export async function searchPackagesUsing(
     assertIsError(error);
     await debugLog("Searching using search endpoint failed", error);
     // search old search
-    onUseAllFallback && onUseAllFallback();
+    onUseAllFallback?.();
     const allPackuments = await getAllRegistryPackuments(registry);
     const klc = keyword.toLowerCase();
     return allPackuments.filter((packument) =>

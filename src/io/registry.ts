@@ -14,7 +14,6 @@ import {
 } from "./common-errors";
 
 type AllPackuments = Readonly<{
-  // eslint-disable-next-line jsdoc/require-jsdoc
   _updated: number;
   [name: DomainName]: SearchedPackument;
 }>;
@@ -55,14 +54,12 @@ export function getAllRegistryPackumentsUsing(
  * Function for getting the authentication token for a npm reigstry.
  * @param registryUrl The url of the registry for which to get the token.
  * @param username The username for which to get the token.
- * @param email The email with which to get the token.
  * @param password The password for witch to get the token.
  * @returns The authentication token.
  */
 export type GetAuthToken = (
   registryUrl: RegistryUrl,
   username: string,
-  email: string,
   password: string
 ) => Promise<AuthToken>;
 
@@ -71,9 +68,9 @@ export type GetAuthToken = (
  * by authenticating the user with a remote npm registry.
  */
 export function getAuthTokenUsing(debugLog: DebugLog): GetAuthToken {
-  return async (registryUrl, username, email, password) => {
+  return async (registryUrl, username, password) => {
     try {
-      const result = await loginCouch(username, email, password, {
+      const result = await loginCouch(username, password, {
         registry: registryUrl,
       });
       return result.token;

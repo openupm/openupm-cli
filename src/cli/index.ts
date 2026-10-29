@@ -1,6 +1,5 @@
 import { createCommand, Option } from "@commander-js/extra-typings";
 import chalk from "chalk";
-import type { Logger } from "npmlog";
 import pkginfo from "pkginfo";
 import type { DebugLog } from "../domain/logging";
 import { getHomePathFromEnv } from "../domain/special-paths";
@@ -19,6 +18,7 @@ import { makeLsCmd } from "./cmd-ls";
 import { makeRemoveCmd } from "./cmd-remove";
 import { makeSearchCmd } from "./cmd-search";
 import { makeViewCmd } from "./cmd-view";
+import type { Logger } from "./logger";
 
 const verboseOpt = new Option(
   "-v, --verbose",
