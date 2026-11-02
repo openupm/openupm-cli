@@ -41,6 +41,8 @@ function errorMessageFor(error: ResolvePackumentVersionError): string {
   else return "version not found";
 }
 
+const unrecognizedErrorMessage = "A fatal error occurred.";
+
 function stringifyUnresolvedDependency(
   dependency: UnresolvedDependency
 ): string {
@@ -53,7 +55,7 @@ function stringifyUnresolvedDependency(
   );
 }
 
-function makeErrorMessageFor(error: unknown): string {
+function makeErrorMessageFor(error: unknown): string | null {
   if (error instanceof PackumentNotFoundError)
     return `Package "${error.packageName}" could not be found.`;
   if (error instanceof EditorVersionNotSupportedError)
@@ -99,7 +101,7 @@ function makeErrorMessageFor(error: unknown): string {
     return "Could not determine path of system user directory.";
   if (error instanceof NoStableError)
     return "Seems like the package you requested has no stable versions.";
-  return "A fatal error occurred.";
+  return null;
 }
 
 function tryMakeFixSuggestionFor(error: unknown): string | null {
@@ -139,20 +141,37 @@ function tryMakeFixSuggestionFor(error: unknown): string | null {
 }
 
 /**
+ * Formats an error and its causes for verbose output.
+ * @param error The error to format.
+ * @param depth The current cause depth. Used to avoid endless recursion.
+ */
+function formatError(error: unknown, depth = 0): string {
+  if (!(error instanceof Error) || depth > 3) return String(error);
+  const message = error.stack ?? error.message;
+  if (error.cause === undefined) return message;
+  return `${message}${EOL}Caused by: ${formatError(error.cause, depth + 1)}`;
+}
+
+/**
  * Prints information about an error to a logger.
  * @param log The logger to print to.
  * @param error The error.
  */
 export function logError(log: Logger, error: unknown) {
   const message = makeErrorMessageFor(error);
-  log.error("", message);
+  log.error("", message ?? unrecognizedErrorMessage);
 
   const fixSuggestion = tryMakeFixSuggestionFor(error);
   if (fixSuggestion !== null) log.notice("", fixSuggestion);
 
   const isLoggingVerbose = log.level === "verbose" || log.level === "silly";
-  if (!isLoggingVerbose)
+  if (isLoggingVerbose) {
+    // Unrecognized errors only show a generic message to users. In verbose
+    // mode the underlying cause is printed so that the error is diagnosable.
+    if (message === null) log.error("", formatError(error));
+  } else {
     log.notice("", "Run with --verbose to get more information.");
+  }
 }
 
 /**
