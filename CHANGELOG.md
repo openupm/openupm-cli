@@ -1,3 +1,10 @@
+## [4.5.3](https://github.com/openupm/openupm-cli/compare/4.5.2...4.5.3) (2026-11-02)
+
+
+### Bug Fixes
+
+* skip invalid dependency names and versions ([#431](https://github.com/openupm/openupm-cli/issues/431)) ([7dc8147](https://github.com/openupm/openupm-cli/commit/7dc8147691685a61820b78ea2ec50519506db6a6))
+
 ## [4.5.2](https://github.com/openupm/openupm-cli/compare/4.5.1...4.5.2) (2025-08-25)
 
 
