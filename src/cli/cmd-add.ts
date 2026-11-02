@@ -4,7 +4,7 @@ import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
 import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
+import { DebugLog, WarnLog } from "../domain/logging";
 import { makePackageSpec } from "../domain/package-spec";
 import { recordEntries } from "../domain/record-utils";
 import { unityRegistry } from "../domain/registry";
@@ -67,13 +67,16 @@ export function makeAddCmd(
     debugLog
   );
 
+  const warnLog: WarnLog = async (message) => log.warn("", message);
+
   const addDependencies = partialApply(
     addDependenciesUsing,
     readTextFile,
     writeTextFile,
     fetchPackument,
     checkUrlExists,
-    debugLog
+    debugLog,
+    warnLog
   );
 
   return new Command("add")

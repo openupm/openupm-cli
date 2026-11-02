@@ -10,7 +10,7 @@ import type { AddResult } from "../../../src/domain/dependency-management";
 import { DomainName } from "../../../src/domain/domain-name";
 import { makeEditorVersion } from "../../../src/domain/editor-version";
 import { partialApply } from "../../../src/domain/fp-utils";
-import { noopLogger } from "../../../src/domain/logging";
+import { noopLogger, noopWarnLog } from "../../../src/domain/logging";
 import { emptyProjectManifest } from "../../../src/domain/project-manifest";
 import { unityRegistry } from "../../../src/domain/registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
@@ -28,6 +28,7 @@ import {
 import { makeMockLogger } from "../../common/log.mock";
 import { MockFs } from "../fs.mock";
 import { mockRegistryPackuments } from "../registry.mock";
+import { mockUnityDocPages } from "../docs.mock";
 
 describe("add dependencies", () => {
   const someVersion = SemanticVersion.parse("1.0.0");
@@ -77,6 +78,26 @@ describe("add dependencies", () => {
       )
   );
 
+  const packumentWithInvalidDependency = buildPackument(
+    "com.invalid-dep.package",
+    (packument) =>
+      packument.addVersion(someVersion, (version) =>
+        version
+          .set("unity", "2022.2")
+          .addDependencyUnchecked("com.invalid.package", "1.0.0~")
+      )
+  );
+
+  const packumentWithInvalidBuiltInDependency = buildPackument(
+    "com.invalid-builtin-dep.package",
+    (packument) =>
+      packument.addVersion(someVersion, (version) =>
+        version
+          .set("unity", "2022.2")
+          .addDependencyUnchecked("com.unity.ugui", "1.0.0~")
+      )
+  );
+
   const someProjectDir = "/users/some-user/projects/SomeProject";
 
   function makeDependencies() {
@@ -96,7 +117,8 @@ describe("add dependencies", () => {
       mockFs.write,
       fetchPackument,
       fetchCheckUrlExists,
-      noopLogger
+      noopLogger,
+      noopWarnLog
     );
     return {
       addDependencies,
@@ -114,6 +136,8 @@ describe("add dependencies", () => {
     mockRegistryPackuments(someRegistryUrl, [
       somePackument,
       packumentWithBadDependency,
+      packumentWithInvalidDependency,
+      packumentWithInvalidBuiltInDependency,
       badEditorPackument,
       incompatiblePackument,
     ]);
@@ -234,6 +258,60 @@ describe("add dependencies", () => {
 
     expect(result).toEqual({
       [packumentWithBadDependency.name]: {
+        type: "added",
+        version: someVersion,
+      } satisfies AddResult,
+    });
+  });
+
+  it("should add package with invalid dependency version", async () => {
+    const { addDependencies, mockFs } = makeDependencies();
+
+    const result = await addDependencies(
+      someProjectDir,
+      null,
+      [someRegistry, unityRegistry],
+      false,
+      false,
+      [packumentWithInvalidDependency.name]
+    );
+
+    expect(result).toEqual({
+      [packumentWithInvalidDependency.name]: {
+        type: "added",
+        version: someVersion,
+      } satisfies AddResult,
+    });
+    const actual = mockFs.tryGetUnityProject(someProjectDir);
+    expect(actual).toEqual(
+      expect.objectContaining({
+        dependencies: { [packumentWithInvalidDependency.name]: someVersion },
+        scopedRegistries: [
+          {
+            name: expect.any(String),
+            url: someRegistryUrl,
+            scopes: [packumentWithInvalidDependency.name],
+          },
+        ],
+      })
+    );
+  });
+
+  it("should add package with invalid built-in dependency version", async () => {
+    mockUnityDocPages([DomainName.parse("com.unity.ugui")]);
+    const { addDependencies } = makeDependencies();
+
+    const result = await addDependencies(
+      someProjectDir,
+      null,
+      [someRegistry, unityRegistry],
+      false,
+      false,
+      [packumentWithInvalidBuiltInDependency.name]
+    );
+
+    expect(result).toEqual({
+      [packumentWithInvalidBuiltInDependency.name]: {
         type: "added",
         version: someVersion,
       } satisfies AddResult,

@@ -7,7 +7,7 @@ import {
 } from "../../../src/domain/dependency-graph";
 import { DomainName } from "../../../src/domain/domain-name";
 import { partialApply } from "../../../src/domain/fp-utils";
-import { noopLogger } from "../../../src/domain/logging";
+import { noopLogger, noopWarnLog } from "../../../src/domain/logging";
 import { VersionNotFoundError } from "../../../src/domain/packument";
 import { Registry } from "../../../src/domain/registry";
 import { unityRegistryUrl } from "../../../src/domain/registry-url";
@@ -34,7 +34,8 @@ describe("dependency resolving", () => {
   const resolveDependencies = partialApply(
     resolveDependenciesUsing,
     fetchCheckUrlExists,
-    getRegistryPackumentUsing(noopLogger)
+    getRegistryPackumentUsing(noopLogger),
+    noopWarnLog
   );
 
   afterEach(() => {
@@ -136,6 +137,54 @@ describe("dependency resolving", () => {
       source: "built-in",
       dependencies: {},
     });
+  });
+
+  it("should skip invalid dependency names and versions", async () => {
+    const invalidDependency = DomainName.parse("com.invalid.package");
+    const warnings: string[] = [];
+    const resolveWithWarnings = partialApply(
+      resolveDependenciesUsing,
+      fetchCheckUrlExists,
+      getRegistryPackumentUsing(noopLogger),
+      async (message: string) => {
+        warnings.push(message);
+      }
+    );
+
+    mockUnityDocPages([]);
+    mockRegistryPackuments(someRegistryUrl, [
+      buildPackument(somePackage, (packument) =>
+        packument.addVersion(someVersion, (version) =>
+          version
+            .addDependency(otherPackage, someVersion)
+            .addDependencyUnchecked(invalidDependency, "1.0.0~")
+            .addDependencyUnchecked("Invalid Name", "2.0.0")
+        )
+      ),
+    ]);
+    mockRegistryPackuments(unityRegistryUrl, []);
+
+    const graph = await resolveWithWarnings(
+      sources,
+      somePackage,
+      someVersion,
+      false
+    );
+
+    expect(graph[invalidDependency]).toBeUndefined();
+    expect(tryGetGraphNode(graph, somePackage, someVersion)).toEqual({
+      type: NodeType.Resolved,
+      source: someRegistryUrl,
+      dependencies: { [otherPackage]: someVersion },
+    });
+    expect(warnings).toEqual([
+      expect.stringContaining(
+        'Skipping invalid dependency "com.invalid.package": "1.0.0~"'
+      ),
+      expect.stringContaining(
+        'Skipping invalid dependency "Invalid Name": "2.0.0"'
+      ),
+    ]);
   });
 
   it("should mark dependencies when resolving shallow", async () => {

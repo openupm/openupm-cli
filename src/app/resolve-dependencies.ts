@@ -9,13 +9,16 @@ import {
 } from "../domain/dependency-graph";
 import { DomainName } from "../domain/domain-name";
 import { partialApply } from "../domain/fp-utils";
+import { type WarnLog } from "../domain/logging";
 import {
   ResolvePackumentVersionError,
   tryResolvePackumentVersion,
 } from "../domain/packument";
+import { recordEntries } from "../domain/record-utils";
 import { Registry } from "../domain/registry";
 import { RegistryUrl } from "../domain/registry-url";
 import { SemanticVersion } from "../domain/semantic-version";
+import { isZod } from "../domain/zod-utils";
 import type { GetRegistryPackument } from "../io/registry";
 import { type CheckUrlExists } from "../io/www";
 import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
@@ -24,6 +27,7 @@ import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
  * Resolves all dependencies for a package.
  * @param checkUrlExists IO function for checking whether a package exists.
  * @param getRegistryPackument IO function for fetching a registry packument.
+ * @param warnLog IO function for logging user-facing warnings.
  * @param sources Sources from which dependencies can be resolved.
  * @param packageName The name of the package.
  * @param version The version for which to search dependencies.
@@ -32,6 +36,7 @@ import { checkIsBuiltInPackageUsing } from "./built-in-package-check";
 export function resolveDependenciesUsing(
   checkUrlExists: CheckUrlExists,
   getRegistryPackument: GetRegistryPackument,
+  warnLog: WarnLog,
   sources: ReadonlyArray<Registry>,
   packageName: DomainName,
   version: SemanticVersion,
@@ -78,12 +83,18 @@ export function resolveDependenciesUsing(
       }
 
       const dependencies = packumentVersionResult.value.dependencies ?? {};
+      const validDependencies = await makeValidDependencies(
+        dependencies,
+        currentPackageName,
+        currentVersion,
+        warnLog
+      );
       graph = markRemoteResolved(
         graph,
         currentPackageName,
         currentVersion,
         source.url,
-        dependencies
+        validDependencies
       );
       if (!deep) return graph;
 
@@ -95,4 +106,39 @@ export function resolveDependenciesUsing(
   }
 
   return resolveRecursively(makeGraphFromSeed(packageName, version));
+}
+
+/**
+ * Filters out dependencies whose names or versions are invalid.
+ * Registry packuments are untrusted input, so dependency names and versions
+ * must be validated before they are used to build package specs or dependency
+ * graphs. Invalid dependencies are skipped with a warning, which matches how
+ * the Unity Package Manager handles them.
+ * @param dependencies The dependencies declared by a package version.
+ * @param packageName The name of the package that declares the dependencies.
+ * @param version The version of the package that declares the dependencies.
+ * @param warnLog IO function for logging user-facing warnings.
+ */
+async function makeValidDependencies(
+  dependencies: Readonly<Record<DomainName, SemanticVersion>>,
+  packageName: DomainName,
+  version: SemanticVersion,
+  warnLog: WarnLog
+): Promise<Record<DomainName, SemanticVersion>> {
+  const validDependencies: Record<DomainName, SemanticVersion> = {};
+  for (const [dependencyName, dependencyVersion] of recordEntries(
+    dependencies
+  )) {
+    if (
+      !isZod(dependencyName, DomainName) ||
+      !isZod(dependencyVersion, SemanticVersion)
+    ) {
+      await warnLog(
+        `Skipping invalid dependency "${dependencyName}": "${dependencyVersion}" declared by "${packageName}@${version}". Dependency names and versions must follow the Unity package naming and semantic versioning rules. Report this to the package author.`
+      );
+      continue;
+    }
+    validDependencies[dependencyName] = dependencyVersion;
+  }
+  return validDependencies;
 }
