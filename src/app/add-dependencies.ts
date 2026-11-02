@@ -18,7 +18,7 @@ import {
   compareEditorVersion,
 } from "../domain/editor-version";
 import { partialApply } from "../domain/fp-utils";
-import type { DebugLog } from "../domain/logging";
+import type { DebugLog, WarnLog } from "../domain/logging";
 import { tryGetTargetEditorVersionFor } from "../domain/package-manifest";
 import {
   type PackageSpec,
@@ -151,6 +151,7 @@ function pickMostFixable(
  * @param fetchPackument IO function for fetching remote packuments.
  * @param checkUrlExists  IO function for checking whether a URL exists.
  * @param debugLog IO function for printing debug logs.
+ * @param warnLog IO function for printing user-facing warnings.
  * @param projectDirectory The projects root directory.
  * @param editorVersion The projects editor version. Will be used to check
  * compatibility. If set to null then compatibility will not be checked.
@@ -166,6 +167,7 @@ export async function addDependenciesUsing(
   fetchPackument: GetRegistryPackument,
   checkUrlExists: CheckUrlExists,
   debugLog: DebugLog,
+  warnLog: WarnLog,
   projectDirectory: string,
   editorVersion: ReleaseVersion | null,
   sources: ReadonlyArray<Registry>,
@@ -192,7 +194,8 @@ export async function addDependenciesUsing(
   const resolveDependencies = partialApply(
     resolveDependenciesUsing,
     checkUrlExists,
-    fetchPackument
+    fetchPackument,
+    warnLog
   );
 
   async function resolveScopesFor(

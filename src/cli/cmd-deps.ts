@@ -8,7 +8,7 @@ import { queryAllRegistriesLazy } from "../app/query-registries";
 import { resolveDependenciesUsing } from "../app/resolve-dependencies";
 import { PackumentNotFoundError } from "../domain/common-errors";
 import { partialApply } from "../domain/fp-utils";
-import { DebugLog } from "../domain/logging";
+import { DebugLog, WarnLog } from "../domain/logging";
 import { makePackageSpec, splitPackageSpec } from "../domain/package-spec";
 import { PackageUrl } from "../domain/package-url";
 import { unityRegistry } from "../domain/registry";
@@ -62,10 +62,13 @@ export function makeDepsCmd(
     fetchPackument
   );
 
+  const warnLog: WarnLog = async (message) => log.warn("", message);
+
   const resolveDependencies = partialApply(
     resolveDependenciesUsing,
     checkUrlExists,
-    fetchPackument
+    fetchPackument,
+    warnLog
   );
 
   return new Command("deps")

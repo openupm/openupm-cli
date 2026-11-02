@@ -13,3 +13,15 @@ export type DebugLog = (message: string, context?: object) => Promise<void>;
  * A {@link DebugLog} which does nothing.
  */
 export const noopLogger: DebugLog = async () => {};
+
+/**
+ * Function that logs a user-facing warning. This interface is output-agnostic
+ * meaning that the logs could go to a console, file or other.
+ * @param message The message to be logged.
+ */
+export type WarnLog = (message: string) => Promise<void>;
+
+/**
+ * A {@link WarnLog} which does nothing.
+ */
+export const noopWarnLog: WarnLog = async () => {};

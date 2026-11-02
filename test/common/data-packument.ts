@@ -29,6 +29,31 @@ class UnityPackumentVersionBuilder {
   addDependency(name: string, version: string): UnityPackumentVersionBuilder {
     assert(isZod(name, DomainName), `${name} is domain name`);
     assert(isZod(version, SemanticVersion), `${version} is semantic version`);
+    return this.putDependency(name, version);
+  }
+
+  /**
+   * Add a dependency without validating its name or version. Useful for
+   * testing how malformed packuments are handled.
+   * @param name The name of the dependency.
+   * @param version The version of the dependency.
+   */
+  addDependencyUnchecked(
+    name: string,
+    version: string
+  ): UnityPackumentVersionBuilder {
+    return this.putDependency(name, version);
+  }
+
+  /**
+   * Sets a dependency on this version.
+   * @param name The name of the dependency.
+   * @param version The version of the dependency.
+   */
+  private putDependency(
+    name: string,
+    version: string
+  ): UnityPackumentVersionBuilder {
     this.version = {
       ...this.version,
       dependencies: {
