@@ -1,5 +1,4 @@
 import { Argument, Command, Option } from "@commander-js/extra-typings";
-import { Logger } from "npmlog";
 import { addDependenciesUsing } from "../app/add-dependencies";
 import { determineEditorVersionUsing } from "../app/determine-editor-version";
 import { loadRegistryAuthUsing } from "../app/get-registry-auth";
@@ -16,6 +15,7 @@ import type { GetRegistryPackument } from "../io/registry";
 import type { CheckUrlExists } from "../io/www";
 import { eachValue } from "./cli-parsing";
 import { withErrorLogger } from "./error-logging";
+import type { Logger } from "./logger";
 import { primaryRegistriesUrlOpt } from "./opt-registry";
 import { systemUserOpt } from "./opt-system-user";
 import { upstreamOpt } from "./opt-upstream";

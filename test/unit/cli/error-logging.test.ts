@@ -1,14 +1,13 @@
-import { Logger } from "npmlog";
 import { logError } from "../../../src/cli/error-logging";
+import type { LogLevel } from "../../../src/cli/logger";
 import { PackumentNotFoundError } from "../../../src/domain/common-errors";
 import { DomainName } from "../../../src/domain/domain-name";
+import { makeMockLogger } from "../../common/log.mock";
 
-function makeLogger(level: string) {
-  return {
-    level,
-    error: jest.fn(),
-    notice: jest.fn(),
-  } as unknown as Logger;
+function makeLogger(level: LogLevel) {
+  const log = makeMockLogger();
+  log.level = level;
+  return log;
 }
 
 describe("error logging", () => {

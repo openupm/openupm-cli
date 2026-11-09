@@ -56,7 +56,7 @@ export async function loginUsing(
   }
 
   // npm login
-  const token = await getAuthToken(registry, username, email, password);
+  const token = await getAuthToken(registry, username, password);
   await debugLog(`npm login successful`);
 
   const auth: AuthOptions = { token, email, alwaysAuth };
