@@ -1,4 +1,5 @@
-import type { AuthOptions } from "npm-registry-fetch";
+import nock from "nock";
+import npmFetch, { type AuthOptions } from "npm-registry-fetch";
 import { makeNpmFetchOptions, Registry } from "../../../src/domain/registry";
 import { someRegistryUrl } from "../../common/data-registry";
 
@@ -39,14 +40,10 @@ describe("npm registry", () => {
 
       const options = makeNpmFetchOptions(registry);
 
-      expect(options.username).not.toBeDefined();
-      expect(options.password).not.toBeDefined();
-      expect(options.email).not.toBeDefined();
-      expect(options.token).toEqual(auth.token);
-      expect(options.alwaysAuth).toEqual(auth.alwaysAuth);
+      expect(options.forceAuth).toEqual(auth);
     });
 
-    it("should use basic auth info", () => {
+    it("should use basic auth info with base64 encoded password", () => {
       const auth: AuthOptions = {
         username: "user",
         password: "pass",
@@ -60,11 +57,43 @@ describe("npm registry", () => {
 
       const options = makeNpmFetchOptions(registry);
 
-      expect(options.username).toEqual(auth.username);
-      expect(options.password).toEqual(auth.password);
-      expect(options.email).toEqual(auth.email);
-      expect(options.token).not.toBeDefined();
-      expect(options.alwaysAuth).toEqual(auth.alwaysAuth);
+      expect(options.forceAuth).toEqual({ ...auth, password: "cGFzcw==" });
+    });
+
+    it("should send token as bearer authorization header", async () => {
+      const registry: Registry = {
+        url: someRegistryUrl,
+        auth: { token: "Some token" },
+      };
+      nock(someRegistryUrl)
+        .get("/some.package")
+        .matchHeader("authorization", "Bearer Some token")
+        .reply(200, {});
+
+      await npmFetch.json(
+        `${someRegistryUrl}/some.package`,
+        makeNpmFetchOptions(registry)
+      );
+
+      expect(nock.isDone()).toBeTruthy();
+    });
+
+    it("should send basic authorization header", async () => {
+      const registry: Registry = {
+        url: someRegistryUrl,
+        auth: { username: "user", password: "pass" },
+      };
+      nock(someRegistryUrl)
+        .get("/some.package")
+        .matchHeader("authorization", "Basic dXNlcjpwYXNz")
+        .reply(200, {});
+
+      await npmFetch.json(
+        `${someRegistryUrl}/some.package`,
+        makeNpmFetchOptions(registry)
+      );
+
+      expect(nock.isDone()).toBeTruthy();
     });
   });
 });
