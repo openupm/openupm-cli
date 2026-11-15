@@ -133,7 +133,7 @@ export function getRegistryPackumentUsing(
   return async (registry, name) => {
     const url = `${registry.url}/${name}`;
     try {
-      const json = await npmFetch.json(url);
+      const json = await npmFetch.json(url, makeNpmFetchOptions(registry));
       // TODO: Validate object
       return json as UnityPackument;
     } catch (error) {

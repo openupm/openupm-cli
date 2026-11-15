@@ -5,8 +5,11 @@ import {
   HttpErrorLike,
   RegistryAuthenticationError,
 } from "../../../src/io/common-errors";
+import { DomainName } from "../../../src/domain/domain-name";
+import type { Registry } from "../../../src/domain/registry";
 import {
   getAllRegistryPackumentsUsing,
+  getRegistryPackumentUsing,
   searchRegistryUsing,
 } from "../../../src/io/registry";
 import { someRegistry } from "../../common/data-registry";
@@ -102,6 +105,24 @@ describe("registry io", () => {
       const actual = await npmApiSearch(someRegistry, "wow");
 
       expect(actual).toEqual(expected);
+    });
+  });
+
+  describe("fetch packument", () => {
+    it("should use registry auth", async () => {
+      const registry: Registry = {
+        ...someRegistry,
+        auth: { token: "Some token" },
+      };
+      jest.mocked(npmFetch.json).mockResolvedValue({ name: "some.package" });
+      const getRegistryPackument = getRegistryPackumentUsing(noopLogger);
+
+      await getRegistryPackument(registry, DomainName.parse("some.package"));
+
+      expect(npmFetch.json).toHaveBeenCalledWith(
+        `${registry.url}/some.package`,
+        expect.objectContaining({ forceAuth: registry.auth })
+      );
     });
   });
 });
